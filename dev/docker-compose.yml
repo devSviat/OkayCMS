@@ -48,7 +48,7 @@ services:
       - ./../1DB_changes/okay_clean.sql:/docker-entrypoint-initdb.d/init.sql
       - ./config/mysql/startup.sh:/always-initdb.d/startup.sh:ro
       - ./config/mysql/entrypoint.sh:/custom-entrypoint.sh:ro
-    entrypoint: /custom-entrypoint.sh
+    # entrypoint: /custom-entrypoint.sh
     command: ["mysqld"]
 
 networks:
