@@ -265,14 +265,14 @@
         background: #1dc116;
         padding: 2px 8px;
         border-radius: 5px;
-        font-size: 12px;
+        font-size: 14px;
         margin: 0px 3px;
         vertical-align: middle;
     }
     .es-discount i {
         background: rgb(246, 80, 80);
         padding: 3px 5px;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 600;
         color: #fff;
         border-radius: 4px;
@@ -304,7 +304,7 @@
         border: 1px solid #dbdbdb;
     }
     .es-comment-date{
-        font-size: 12px;
+        font-size: 14px;
         font-style: italic;
         color: #7e7e7e;
     }

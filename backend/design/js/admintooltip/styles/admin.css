@@ -15,7 +15,7 @@
     color: #fff; }
 .admTools .tool-descr {
     color: #8d8c8c;
-    font-size: 12px; }
+    font-size: 14px; }
 .admTools .tool-title {
     background-color: #484848;
     border-bottom: 1px solid #6d6d6d;
@@ -218,7 +218,7 @@
     display: none;
     position: absolute;
     padding: 7px;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.2;
     background-color: rgba(34, 34, 34,0.9);
     color: rgb(255, 255, 255);

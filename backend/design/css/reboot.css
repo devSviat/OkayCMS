@@ -382,13 +382,13 @@ blockquote {
 }
 
 a {
-    color: #20a8d8;
+    color: #2F6F23;
     text-decoration: none;
 }
 
 a:focus,
 a:hover {
-    color: #167495;
+    color: #000;
 }
 
 a:focus {

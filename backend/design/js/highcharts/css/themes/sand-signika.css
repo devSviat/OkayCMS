@@ -41,7 +41,7 @@
   /* #1072 */
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   font-family: "Signika", Arial, Helvetica, sans-serif;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .highcharts-root {
@@ -119,7 +119,7 @@
 .highcharts-axis-labels {
   fill: #666666;
   cursor: default;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .highcharts-grid-line {
@@ -890,7 +890,7 @@ text.highcharts-drilldown-data-label,
 /* No-data module */
 .highcharts-no-data text {
   font-weight: bold;
-  font-size: 12px;
+  font-size: 14px;
   fill: #666666;
 }
 

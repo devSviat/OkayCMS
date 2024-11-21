@@ -21,9 +21,9 @@ select.selectpicker {
   transition: all 0.12s ease;
   -webkit-box-shadow: none;
   box-shadow: none;
-  border-radius: 4px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
+  border-radius: 8px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
   -webkit-transition: background 0.2s linear 0s;
   transition: background 0.2s linear 0s;
   height: 35px;
@@ -160,7 +160,7 @@ select.selectpicker {
   border: 0;
   padding: 0;
   margin: 0;
-  border-radius: 0;
+  border-radius: 8px;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
@@ -172,7 +172,7 @@ select.selectpicker {
 }
 .bootstrap-select.btn-group .dropdown-menu li.selected,
 .bootstrap-select.btn-group .dropdown-menu li.disabled {
-  background: #ddd;
+  background: #f0f2eead;
   opacity: 0.5;
 }
 .bootstrap-select.btn-group .dropdown-menu li.selected a,
@@ -293,7 +293,7 @@ select.selectpicker {
 .bs-searchbox,
 .bs-actionsbox,
 .bs-donebutton {
-  padding: 4px 8px;
+  padding: 8px 8px;
 }
 .bs-actionsbox {
   width: 100%;
@@ -321,6 +321,7 @@ select.selectpicker {
   margin-bottom: 0;
   width: 100%;
   float: none;
+  border-radius: 4px;
 }
 /*# sourceMappingURL=bootstrap-select.css.map */
 
@@ -351,7 +352,7 @@ select.selectpicker {
 }
 
 .dropdown-menu {
-  box-shadow: 5px 5px rgba(102, 102, 102, 0.1);
+  box-shadow: 0 5px 15px 0 hsla(0,0%,0%,.08);
   left: 0;
   min-width: 175px;
   position: absolute;
@@ -364,7 +365,8 @@ select.selectpicker {
   background-color: #fff;
   margin: 10px 0 0;
   border: 1px solid #eee;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  border-radius: 10px;
+  font-family: "Manrope", Arial, Helvetica Neue, Helvetica, sans-serif;
 }
 
 .dropdown-hoverable:hover .dropdown-menu {
@@ -395,8 +397,8 @@ select.selectpicker {
 .dropdown-menu > li:hover > a {
   text-decoration: none;
   background-image: none;
-  background-color: #f6f6f6;
-  color: #555;
+  background-color: #f0f2ee;
+  color: #000;
   filter: none;
 }
 

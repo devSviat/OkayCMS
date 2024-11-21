@@ -1,4 +1,4 @@
-<link href="backend/design/js/admintooltip/styles/admin.css" type="text/css" rel="stylesheet">
+{* <link href="backend/design/js/admintooltip/styles/admin.css" type="text/css" rel="stylesheet">
 
 <div class="admTools">
     <a href="javascript:void(0);" class="openTools"></a>
@@ -13,4 +13,4 @@
 
 <a title="{$btr->admintooltip_go_to_admin}" href="backend/" class="top_admin_bookmark"></a>
 
-<script src="backend/design/js/admintooltip/admintooltip.js"{if $scripts_defer == true} defer{/if}></script>
+<script src="backend/design/js/admintooltip/admintooltip.js"{if $scripts_defer == true} defer{/if}></script> *}

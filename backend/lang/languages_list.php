@@ -30,3 +30,4 @@ $langs['se'] = (object)array('name' => 'Swedish',       'label' => 'se', 'href_l
 $langs['tr'] = (object)array('name' => 'Turkish',       'label' => 'tr', 'href_lang' => 'tr');
 $langs['ua'] = (object)array('name' => 'Ukrainian',     'label' => 'ua', 'href_lang' => 'uk');
 $langs['uz'] = (object)array('name' => 'Uzbek',         'label' => 'uz', 'href_lang' => 'uz');
+$langs['ar'] = (object)array('name' => 'Arabic',        'label' => 'ar', 'href_lang' => 'ar');

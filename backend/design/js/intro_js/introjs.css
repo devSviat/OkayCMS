@@ -212,7 +212,7 @@ tr.introjs-showElement > th {
 .introjs-tooltiptext .required{
     display: block;
     margin: 15px 0 -10px;
-    font-size: 12px;
+    font-size: 14px;
     color:rgb(71, 71, 71);
     font-weight: 600;
     font-style: italic;
@@ -220,7 +220,7 @@ tr.introjs-showElement > th {
 .introjs-tooltiptext .example_text{
      display: block;
      margin: 15px 0 -10px;
-     font-size: 12px;
+     font-size: 14px;
      color:rgb(71, 71, 71);
      font-weight: 600;
      font-style: italic;

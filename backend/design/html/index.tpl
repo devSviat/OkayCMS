@@ -5,7 +5,7 @@
     <META HTTP-EQUIV="Pragma" CONTENT="no-cache"/>
     <META HTTP-EQUIV="Expires" CONTENT="-1"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <title>{$meta_title|escape} | OkayCMS v.{$config->version|escape}</title>
+    <title>{$meta_title|escape} | Hiltrade v.{$config->version|escape}</title>
 
     {literal}
     <script>
@@ -66,32 +66,20 @@
 
     {$ok_head}
 
-    <link rel="icon" href="design/images/favicon.png" type="image/x-icon" />
+    <link rel="icon" type="image/x-icon" href="design/images/favicon.svg"/>
+    <link rel="shortcut icon" type="image/x-icon" href="design/images/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="design/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="design/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="design/images/favicon-16x16.png">
+    <link rel="mask-icon" href="design/images/safari-pinned-tab.svg" color="#2e6f23">
 
     {if in_array($smarty.get.controller, array("OrdersAdmin", "PostAdmin", "ReportStatsAdmin", "CouponsAdmin", "CategoryStatsAdmin"))}
         {js file="jquery/datepicker/jquery.ui.datepicker-{$manager->lang|escape}.js" admin=true}
         {js file="jquery/datepicker/jquery.datepicker.extension.range.min.js" admin=true}
     {/if}
 
-    {if $settings->gather_enabled}
-        {literal}
-        <!-- Google Tag Manager -->
-        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-                    })(window,document,'script','dataLayer','GTM-P6T2LJP');
-        </script>
-        <!-- End Google Tag Manager -->
-        {/literal}
-    {/if}
 </head>
 <body class="navbar-fixed {if $manager->menu_status && $is_mobile === false && $is_tablet === false}menu-pin{/if}">
-    <!-- Google Tag Manager (noscript) -->
-    {if $settings->gather_enabled}
-        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6T2LJP" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    {/if}
-    <!-- End Google Tag Manager (noscript) -->
     <header class="navbar">
         <div class="container-fluid">
             <div id="mobile_menu" class="fn_mobile_menu hidden-xl-up  text_white">
@@ -99,9 +87,9 @@
             </div>
             <div class="admin_switches">
                 <div class="box_adswitch">
-                    <a class="btn_admin" href="{url_generator route='main' absolute=1}">
+                    <a class="btn_admin" href="{url_generator route="main" absolute=1}">
                     {include file='svg_icon.tpl' svgId='icon_desktop'}
-                    <span class="hidden-md-down">{$btr->index_go_to_site|escape}</span>
+                    <span class="">{$btr->index_go_to_site|escape}</span>
                     </a>
                 </div>
             </div>
@@ -143,7 +131,7 @@
                             <span class="menu_hamburger"></span>
                         </span>
                     <a href="index.php?controller={$manager_main_controller}" class="logo_box">
-                        <img src="design/images/logo_title.png" alt="OkayCMS"/>
+                        <img src="design/images/logo_title.svg" alt="Hiltrade"/>
                     </a>
                 </div>
                 <div class="admin_exit hidden-sm-down hint-bottom-right-t-info-s-small-mobile  hint-anim" data-hint="{$btr->index_exit|escape}">
@@ -154,6 +142,7 @@
                 </div>
                 <div class="admin_name hint-bottom-middle-t-info-s-small-mobile  hint-anim" data-hint="{$manager->login|escape}">
                     <a href="index.php?controller=ManagerAdmin&id={$manager->id}">
+                        {*<span class="">{$manager->login|escape}</span>*}
                         {include file='svg_icon.tpl' svgId='user2_icon'}
                         <span class="hidden-md-up">{$manager->login|escape}</span>
                     </a>
@@ -162,7 +151,7 @@
                 <div class="admin_notification">
                     <div class="notification_inner">
                         <span class="notification_title" href="">
-                            <span class="quickview_hidden hidden-md-up">{$btr->index_notifications|escape}</span>
+                            {*<span class="quickview_hidden">{$btr->index_notifications|escape}</span>*}
                             {include file='svg_icon.tpl' svgId='notify'}
                             {if $all_counter}
                                 <span class="counter">{$all_counter}</span>
@@ -255,11 +244,23 @@
                         </div>
                     </div>
                 </div>
+                {* Full Screen *}
+                <div class="admin_name hidden-sm-down ">
+                    <a id="full_screen_on" class="fullscreen-button hint-bottom-right-t-info-s-small-mobile hint-anim" data-hint="{$btr->full_screen_on|escape}">
+                        {*<span class="">{$btr->full_screen|escape}</span>*}
+                        {include file='svg_icon.tpl' svgId='full_screen_on' class="full-screen-icon visible"}
+                    </a>
+
+                    <a id="full_screen_off" class="fullscreen-button hint-bottom-right-t-info-s-small-mobile hint-anim hidden" data-hint="{$btr->full_screen_off|escape}">
+                        {*<span class="">{$btr->full_screen|escape}</span>*}
+                        {include file='svg_icon.tpl' svgId='full_screen_off' class="full-screen-icon"}
+                    </a>
+                </div>
                 {*Техподдержка*}
-                <div class="admin_techsupport">
+                {* <div class="admin_techsupport">
                     <div class="techsupport_inner">
                         <a {if $support_info->public_key} data-hint="{$support_info->balance|balance}"{else} data-hint="Not active" {/if}  class="hint-bottom-middle-t-info-s-small-mobile  hint-anim"  href="index.php?controller=SupportAdmin">
-                            <span class="quickview_hidden hidden-lg-down">{$btr->index_support|escape}</span>
+                            <span class="quickview_hidden">{$btr->index_support|escape}</span>
                             {include file='svg_icon.tpl' svgId='techsupport'}
                             {if $support_info->public_key}
                             <span class="counter">{$support_info->new_messages|escape}</span>
@@ -273,7 +274,7 @@
                             {/if}
                         </div>
                     </div>
-                </div>
+                </div> *}
                 <div class="admin_languages" >
                     <div class="languages_inner">
                         <span class="languages_title hidden-md-up">{$btr->general_languages|escape}</span>
@@ -295,7 +296,7 @@
             <a href="javascript:;" id="fix_logo" class="hidden-lg-down"></a>
 
             <a href="index.php?controller={$manager_main_controller}" class="logo_box">
-                <img src="design/images/logo_title.png" alt="OkayCMS"/>
+                <img src="design/images/logo_title.svg" alt="Hiltrade"/>
             </a>
             {if $is_mobile === false && $is_tablet === false}
                 <span class="fn_switch_menu menu_switch fn_ajax_action {if $manager->menu_status}fn_active_class{/if} hint-left-middle-t-white-s-small-mobile  hint-anim" data-controller="managers" data-action="menu_status" data-id="{$manager->id}" data-hint="{$btr->catalog_fixation}">
@@ -408,10 +409,10 @@
                 </div>
                 <footer id="footer" class="">
                     <div class="col-md-12 font_12 text_white">
-                        <a href="https://okay-cms.com">OkayCMS</a> &copy; {$smarty.now|date_format:"%Y"} v.{$config->version|escape} | {$btr->index_logged|escape}
+                        <a href="https://hiltradeshop.ae">Hiltrade</a> &copy; {$smarty.now|date_format:"%Y"} v.{$config->version|escape} | {$btr->index_logged|escape}
                         <a href="index.php?controller=ManagerAdmin&id={$manager->id}">{$manager->login|escape}</a>
                         (<a href="{$rootUrl}?logout">{$btr->index_exit|escape}</a>)
-                        <div class="float-md-right">
+                        {* <div class="float-md-right">
                             <a href='index.php?controller=LicenseAdmin' class="text_white">{$btr->license_text|escape} </a>
                             ,
                             {if $support_info->public_key}
@@ -421,7 +422,7 @@
                                     <span class="text_warning">{$btr->index_support_not_active|escape}</span>
                                 </a>
                             {/if}
-                        </div>
+                        </div> *}
                     </div>
                 </footer>
              </div>

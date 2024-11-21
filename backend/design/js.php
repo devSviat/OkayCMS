@@ -22,4 +22,5 @@ return [
     (new Js('intro_js/intro_okay.js')),
     (new Js('toastr.min.js')),
     (new Js('Sortable.js')),
+    (new Js('hiltrade.js'))->setPosition('footer'),
 ];

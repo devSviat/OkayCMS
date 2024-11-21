@@ -1663,3 +1663,5 @@ $lang['modules_license_important'] = 'Важно!';
 $lang['modules_license_info_text'] = 'Мы не нашли информацию о покупке этого модуля для вашего домена. Обратитесь в тех. поддержку';
 $lang['index_btn_email_info'] = 'ВАЖНО';
 $lang['index_btn_email_info_hint'] = 'Для получения верификации продуктов, обязательно к заполнению поле E-mail, указанный при покупки продукта';
+$lang['full_screen_on'] = 'Полноэкранный режим';
+$lang['full_screen_off'] = 'В режиме окна';

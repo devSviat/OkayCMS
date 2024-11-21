@@ -89,7 +89,7 @@ $indicator-negative-line: #F21313;
     z-index: 0; /* #1072 */
     -webkit-tap-highlight-color: rgba(0,0,0,0);
     font-family: $font-family;
-    font-size: 12px;
+    font-size: 14px;
 }
 .highcharts-root {
     display: block;
@@ -758,7 +758,7 @@ text.highcharts-drilldown-data-label,
 /* No-data module */
 .highcharts-no-data text {
     font-weight: bold;
-    font-size: 12px;
+    font-size: 14px;
     fill: $neutral-color-60;
 }
 

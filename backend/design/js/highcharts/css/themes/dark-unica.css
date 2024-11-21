@@ -72,7 +72,7 @@
   /* #1072 */
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   font-family: "Unica One", Arial, Helvetica, sans-serif;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .highcharts-root {
@@ -921,7 +921,7 @@ text.highcharts-drilldown-data-label,
 /* No-data module */
 .highcharts-no-data text {
   font-weight: bold;
-  font-size: 12px;
+  font-size: 14px;
   fill: #E0E0E3;
 }
 
