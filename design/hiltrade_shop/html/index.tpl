@@ -157,45 +157,61 @@
     <footer class="footer">
         <div class="container">
             <div class="f_row flex-column flex-md-row justify-content-md-between align-items-start">
+                {* Main menu *}
+                <div class="f_col-lg">
+                    {* <div class="footer__title d-flex align-items-center justify-content-between">
+                        <span data-language="index_about_store">{$lang->index_about_store}</span>
+                        <span class="fn_switch_parent footer__title_arrow hidden-lg-up">{include file="svg.tpl" svgId="arrow_right"}</span>
+                    </div> *}
+                    <div class="footer__content footer__menu footer__hidden">
+                        {$menu_footer}
+                    </div>
+
+                    {* Subscribing *}
+                    {* <div class="footer__title footer__title d-flex align-items-center justify-content-between">
+                            <span data-language="subscribe_heading">{$lang->subscribe_heading}</span>
+                            <span class="fn_switch_parent footer__title_arrow hidden-lg-up">{include file="svg.tpl" svgId="arrow_right"}</span>
+                    </div> *}
+                    <div id="subscribe_container" class="footer__content footer__hidden">
+                        <form class="fn_subscribe_form fn_validate_subscribe" method="post">
+                            <div class="subscribe_form__group">
+                                <div class="d-flex align-items-center ">
+                                    <div class="form__group form__group--subscribe">
+                                        <input type="hidden" name="subscribe" value="1"/>
+                                        <input class="form__input form__input_subscribe" aria-label="subscribe" type="email" name="subscribe_email" value="" data-format="email" placeholder="{$lang->form_email}"/>
+                                    </div>
+                                    <button class="form__button form__button--subscribe" type="submit"><span data-language="subscribe_button">{$lang->subscribe_button}</span></button>
+                                </div>
+                                <div class="fn_subscribe_success subscribe_success hidden">
+                                    <span data-language="subscribe_sent">{$lang->index_subscribe_sent}</span>
+                                </div>
+                                
+                                <div class="fn_subscribe_error subscribe_error hidden">
+                                    <span class="fn_error_text"></span>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="subscribe__title">
+                            <span data-language="subscribe_promotext">{$lang->subscribe_promotext}</span>
+                        </div>
+                    </div>
+                </div>  
                 {* Footer contacts *}
                 <div class="f_col-lg">
-                    <div class="footer__title d-flex align-items-center justify-content-between">
-                        <span data-language="index_contacts">{$lang->index_contacts}</span>
+                    {* <div class="footer__title d-flex align-items-center justify-content-between">
+                        <span data-language="index_about_store">{$lang->index_about_store}</span>
                         <span class="fn_switch_parent footer__title_arrow hidden-lg-up">{include file="svg.tpl" svgId="arrow_right"}</span>
+                    </div> *}
+                    <div class="footer__content footer__menu footer__hidden">
+                        {$menu_footer2}
                     </div>
-                    <div class="footer__content footer__hidden">
-                        {if $settings->site_phones}
-                            {foreach $settings->site_phones as $phone}
-                                <div class="footer__contact_item">
-                                    <a class="d-flex align-items-start phone" href="tel:{preg_replace('~[^0-9\+]~', '', $phone)}">
-                                        {include file="svg.tpl" svgId="phone_icon"}
-                                        <span>{$phone|escape}</span>
-                                    </a>
-                                </div>
-                            {/foreach}
-                        {/if}
-                        {if $settings->site_email}
-                            <div class="footer__contact_item">
-                                <a class="d-flex align-items-start email " href="mailto:{$settings->site_email|escape}">
-                                    {include file="svg.tpl" svgId="email_icon"}
-                                    <span>{$settings->site_email|escape}</span>
-                                </a>
-                            </div>
-                        {/if}
-                        {* {if $settings->site_working_hours}
-                            <div class="footer__contact_item">
-                                <div class="d-flex align-items-start open_hours">
-                                    {include file="svg.tpl" svgId="time_icon"}
-                                    {$settings->site_working_hours}
-                                </div>
-                            </div>
-                        {/if} *}
+
                         {* Social buttons *}
                         {if $site_social}
-                            <div class="footer__title d-flex align-items-center justify-content-between">
+                            {* <div class="footer__title d-flex align-items-center justify-content-between">
                                 <span data-language="index_in_networks">{$lang->index_in_networks}</span>
                                 <span class="fn_switch_parent footer__title_arrow hidden-lg-up">{include file="svg.tpl" svgId="arrow_right"}</span>
-                            </div>
+                            </div> *}
                             <div class="footer__content footer__social social footer__hidden">
                                 {foreach $site_social as $social}
                                     <a class="social__link {$social.domain|escape}" rel="noreferrer" aria-label="{$social_domain}" href="{if !preg_match('~^https?://.*$~', $social.url)}https://{/if}{$social.url|escape}" target="_blank" title="{$social.domain|escape}">
@@ -204,33 +220,9 @@
                                 {/foreach}
                             </div>
                         {/if}
-                    </div>
+                    {* </div> *}
                 </div>
-                {* working_hours *}
-                {if $settings->site_working_hours}
-                        <div class="f_col-lg">
-                            <div class="footer__title d-flex align-items-center justify-content-between">
-                            <span data-language="index_about_store">{$lang->site_working_hours}</span>
-                                <span class="fn_switch_parent footer__title_arrow hidden-lg-up">{include file="svg.tpl" svgId="arrow_right"}</span>
-                            </div>
-                            <div class="footer__content footer__menu footer__hidden">
-                                <div class="footer_table">
-                                    {$settings->site_working_hours}
-                                </div>
-                            </div>
-                        </div>
-                {/if}
                 
-                {* Main menu *}
-                <div class="f_col-lg">
-                    <div class="footer__title d-flex align-items-center justify-content-between">
-                        <span data-language="index_about_store">{$lang->index_about_store}</span>
-                        <span class="fn_switch_parent footer__title_arrow hidden-lg-up">{include file="svg.tpl" svgId="arrow_right"}</span>
-                    </div>
-                    <div class="footer__content footer__menu footer__hidden">
-                        {$menu_footer}
-                    </div>
-                </div>  
                 {* Categories menu *}
                 {* <div class="f_col-lg">
                     <div class="footer__title footer__title d-flex align-items-center justify-content-between">
@@ -253,40 +245,40 @@
                     </div>
                 </div> *}
 
-                {* Subscribing *}
+                
                 <div class="f_col-lg">
-                    <div class="footer__title footer__title d-flex align-items-center justify-content-between">
-                        <span data-language="subscribe_heading">{$lang->subscribe_heading}</span>
-                        <span class="fn_switch_parent footer__title_arrow hidden-lg-up">{include file="svg.tpl" svgId="arrow_right"}</span>
-                    </div>
-                    <div id="subscribe_container" class="footer__content footer__hidden">
-                        <form class="fn_subscribe_form fn_validate_subscribe" method="post">
-                            <div class="subscribe_form__group">
-                                 <div class="d-flex align-items-center ">
-                                    <div class="form__group form__group--subscribe">
-                                        <input type="hidden" name="subscribe" value="1"/>
-                                        <input class="form__input form__input_subscribe" aria-label="subscribe" type="email" name="subscribe_email" value="" data-format="email" placeholder="{$lang->form_email}"/>
+                    {* working_hours *}
+                    {if $settings->site_working_hours}
+                        <div class="footer__title d-flex align-items-center justify-content-between">
+                            <span data-language="index_about_store">{$lang->site_working_hours}</span>
+                            <span class="fn_switch_parent footer__title_arrow hidden-lg-up">{include file="svg.tpl" svgId="arrow_right"}</span>
+                        </div>
+                            <div class="footer__content footer__menu footer__hidden">
+                                <div class="footer_table">
+                                    {* {$settings->site_working_hours} *}
+                                    <div class="footer_table">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <div><b>Open - </b></div>
+                                                    </td>
+                                                    <td>
+                                                        <div>Closes 8:00 PM</div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <button class="form__button form__button--subscribe" type="submit"><span data-language="subscribe_button">{$lang->subscribe_button}</span></button>
-                                </div>
-                                <div class="fn_subscribe_success subscribe_success hidden">
-                                    <span data-language="subscribe_sent">{$lang->index_subscribe_sent}</span>
-                                </div>
-                                
-                                <div class="fn_subscribe_error subscribe_error hidden">
-                                     <span class="fn_error_text"></span>
                                 </div>
                             </div>
-                        </form>
-                        <div class="subscribe__title">
-                            <span data-language="subscribe_promotext">{$lang->subscribe_promotext}</span>
-                        </div>
-                    </div>
+                    {/if}
+
                     {* Payments *}
-                    <div class="footer__title footer__title-2 d-flex align-items-center justify-content-between mt-2">
-                        <span data-language="subscribe_heading">{$lang->payment_type}</span>
+                    {* <div class="footer__title d-flex align-items-center justify-content-between mt-2">
+                        <span data-language="payment_heading">{$lang->payment_type}</span>
                         <span class="fn_switch_parent footer__title_arrow hidden-lg-up">{include file="svg.tpl" svgId="arrow_right"}</span>
-                    </div>
+                    </div> *}
                     <div class="footer__payments payments">
                         <ul class="payments__list d-flex justify-content-md-start align-items-center">
                             {foreach $payment_methods as $payment_method}

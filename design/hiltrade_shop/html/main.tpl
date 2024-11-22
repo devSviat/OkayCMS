@@ -6,9 +6,9 @@
     <div class="main-products main-products__featured container">
         <div class="block block--border">
             <div class="block__header block__header--promo">
-                <div class="block__title">
+                {* <div class="block__title">
                     <span data-language="main_recommended_products">{$lang->main_recommended_products}</span>
-                </div>
+                </div> *}
                 <div class="block__header_button">
                     <a class="block__more d-flex align-items-center" href="{url_generator route='products' filtersUrl=['filter' => ['featured']]}">
                         <span data-language="main_look_all">{$lang->main_look_all}</span>{include file="svg.tpl" svgId="arrow_right2"}
@@ -35,9 +35,9 @@
     <div class="main-products main-products__new container">
         <div class="block block--border">
             <div class="block__header">
-                <div class="block__title">
+                {* <div class="block__title">
                     <span data-language="main_new_products">{$lang->main_new_products}</span>
-                </div>
+                </div> *}
             </div>
             <div class="block__body">
                 <div class="fn_products_slide products_list row no_gutters swiper-container">
@@ -54,7 +54,7 @@
 {/if}
 
 {* Discount products *}
-{get_discounted_products var=discounted_products limit=4}
+{* {get_discounted_products var=discounted_products limit=4}
 {if $discounted_products}
     <div class="main-products main-products__sale container">
         <div class="block block--border">
@@ -80,7 +80,7 @@
             </div>
         </div>
     </div>
-{/if}
+{/if} *}
 
 {if $description}
     <div class="container section_about_&_brands">

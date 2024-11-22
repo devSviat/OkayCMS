@@ -928,7 +928,7 @@ a.button--blick:hover:after,
 .form__title {
   cursor: pointer;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
   user-select: none;
   padding: 0 15px 0 15px;
   color: var(--okay-body-text);
@@ -978,7 +978,7 @@ textarea,
   line-height: 1;
   position: relative;
   border-radius: 18px;
-  padding: 5px 15px;
+  padding: 5px 10px;
   width: auto;
   margin: 0;
   font-size: 14px;
@@ -1030,7 +1030,7 @@ input::-webkit-input-placeholder {
   white-space: nowrap;
   text-overflow: ellipsis;
   color: rgb(122, 122, 122);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   transition: all 0.1s linear 0s;
   line-height: 1;
@@ -1087,9 +1087,9 @@ input::-webkit-input-placeholder {
   -ms-flex-align: center;
   align-items: center;
   -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
+  -webkit-justify-content: center;
   -ms-flex-pack: justify;
-  justify-content: space-between;
+  justify-content: center;
   -webkit-flex-wrap: wrap;
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
@@ -1185,9 +1185,9 @@ input::-webkit-input-placeholder {
 .form__button {
   display: block;
   color: var(--okay-button-second-text);
-  background-color: var(--okay-button-second-color);
+  background-color: #2e6f23;
   border: 1px solid;
-  border-color: var(--okay-button-second-color);
+  border-color: #2e6f23;
   text-align: center;
   white-space: nowrap;
   border-radius: 18px;
@@ -1197,7 +1197,7 @@ input::-webkit-input-placeholder {
   cursor: pointer;
   user-select: none;
   padding: 0 20px;
-  font-size: 12px;
+  font-size: 16px;
   font-family: inherit;
   text-transform: uppercase;
   text-decoration: none;
@@ -1560,6 +1560,25 @@ select {
   margin-bottom: 10px;
 }
 .menu_group--footer .menu_group__link {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 400;
+  font-size: 16px;
+  position: relative;
+  cursor: pointer;
+}
+.menu_group--footer2 .menu_group__list {
+  display: block;
+  padding: 0;
+  list-style: none;
+  margin: 0;
+}
+.menu_group--footer2 .menu_group__item {
+  position: relative;
+  padding: 0;
+  margin-bottom: 10px;
+}
+.menu_group--footer2 .menu_group__link {
   text-decoration: none;
   color: #fff;
   font-weight: 400;

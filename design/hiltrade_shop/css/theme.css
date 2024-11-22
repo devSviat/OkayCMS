@@ -3612,28 +3612,29 @@ a.filter__catalog_link svg {
   height: 40px;
 }
 
+.main-products.main-products__featured.container {
+  margin-top: 38px;
+}
+
 /***** #Footer  **********************************************************************/
 footer {
   background: var(--okay-second-company);
   color: var(--okay-second-company-text);
   -ms-flex-negative: 0;
   margin-top: 0;
-  padding: 50px 0 0;
+  padding: 36px 0 0;
 }
 .footer--short {
   padding: 0;
 }
 .footer__title {
-  font-size: 20px;
+  font-size: 17px;
   line-height: 1.2;
   font-weight: 500;
   color: var(--okay-second-company-text);
   margin-bottom: 16px;
   position: relative;
   padding-bottom: 5px;
-}
-.footer__title-2{
-  margin-top: 128px;
 }
 .footer__title:before {
   position: absolute;
@@ -3673,7 +3674,7 @@ footer {
 }
 .footer__content {
   color: var(--okay-second-company-text);
-  margin-bottom: 20px;
+  margin-bottom: 32px;
 }
 .footer__contact_item {
   position: relative;
@@ -3801,12 +3802,17 @@ footer {
 } */
 .subscribe_form__group {
   position: relative;
+  max-width: 276px;
+  margin-left: -10px;
 }
 .subscribe__title {
   color: var(--okay-second-company-text);
   font-weight: 400;
-  font-size: 14px;
+  font-size: 12px;
   margin: 0 0 8px;
+}
+#subscribe_container {
+  margin-bottom: 0;
 }
 .form__button--subscribe {
   border-radius: 12px;
@@ -3854,7 +3860,8 @@ footer {
   transition: all 400ms;
 }
 .footer__payments {
-  text-align: right;
+  text-align: left;
+  padding-top: 52px;
 }
 .payments__list {
   position: relative;
@@ -3893,7 +3900,7 @@ footer {
 }
 .footer__copyright {
   background: var(--okay-second-company);
-  padding: 15px 0;
+  padding: 0 0 15px 0;
   color: var(--okay-second-company-text);
 }
 .footer__copyright span {

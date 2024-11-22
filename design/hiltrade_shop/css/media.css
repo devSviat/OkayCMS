@@ -164,6 +164,10 @@
     color: rgba(255,255,255,.5);
     text-decoration: none;
   }
+  .menu_group--footer2 .menu_group__link:hover {
+    color: rgba(255,255,255,.5);
+    text-decoration: none;
+  }
   .header-contact__inner:hover {
     background: #fff;
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.3);
