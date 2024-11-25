@@ -1,0 +1,13 @@
+.data_processing_box_container {
+    padding-top: 10px;
+}
+
+.data_processing_box {
+    padding: 0 0 12px 0;
+    width: 100%;
+    text-align: left;
+}
+
+.data_processing_box__checkbox {
+    border-radius: 0;
+}
