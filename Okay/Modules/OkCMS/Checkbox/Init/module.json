@@ -1,0 +1,25 @@
+{
+  "userName": "Sviatoslav",
+  "userEmail": "taylerdfury@gmail.com",
+  "Okay": "4.4.0",
+  "version": "1.0.1",
+  "moduleName": "Интеграция с checkbox",
+  "vendor": {
+    "email": "info@simplashop.com",
+    "site": "https://simplashop.com"
+  },
+  "modifications": {
+    "backend": [
+      {
+        "file": "index.tpl",
+        "changes": [
+          {
+            "find": "<div class=\"admin_switches\">",
+            "childrenFind": "box_adswitch",
+            "append": "checkbox_action_buttons.tpl"
+          }
+        ]
+      }
+    ]
+  }
+}

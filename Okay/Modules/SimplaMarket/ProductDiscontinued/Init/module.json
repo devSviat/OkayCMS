@@ -1,0 +1,51 @@
+{
+  "userName": "Sviatoslav",
+  "userEmail": "taylerdfury@gmail.com",
+  "Okay": "4.4.0",
+  "version": "1.1.7",
+  "moduleName": "Снят с производства",
+  "vendor": {
+    "email": "my@simplamarket.com",
+    "site": "https://simplamarket.com"
+  },
+  "modifications": {
+    "front": [
+      {
+        "file": "product.tpl",
+        "changes": [
+          {
+            "find": "<form class=\"fn_variants\" action=\"{url_generator route=\"cart\"}\">",
+            "prepend": "{if ($product->discontinued == '0')}",
+            "append": "{/if}"
+          },
+          {
+            "find": "<div class=\"details_boxed__available\">",
+            "prepend": "{if ($product->discontinued == '0')}",
+            "append": " {else}<div class=\"available__in_stock\"> {$lang->product_discontinued_label} </div>{/if}"
+          }
+        ]
+      },
+      {
+        "file": "product_list.tpl",
+        "changes": [
+          {
+            "find": "<button class=\"product_preview__button product_preview__button--buy button--blick fa fa-shopping-cart fn_is_stock",
+            "appendBefore": "{if ($product->discontinued == '0')}"
+          },
+          {
+            "find": "{if $controller != \"ComparisonController\"}",
+            "appendAfter": "{else}<div class=\"available__in_stock\"> {$lang->product_discontinued_label} </div>{/if}"
+          },
+          {
+            "find": "<button class=\"product_preview__button product_preview__button--pre_order fn_is_preorder{if $product->variant->stock > 0} hidden-xs-up{/if}\" type=\"submit\" data-language=\"pre_order\">",
+            "appendBefore": "{if ($product->discontinued == '0')}"
+          },
+          {
+            "find": "<button class=\"product_preview__button product_preview__button--pre_order fn_is_preorder{if $product->variant->stock > 0} hidden-xs-up{/if}\" type=\"submit\" data-language=\"pre_order\">",
+            "appendAfter": "{/if}"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,4 +1,6 @@
 {
+  "userName": "Sviatoslav",
+  "userEmail": "taylerdfury@gmail.com",
   "Okay": "4.4.0",
   "version": "1.0.8",
   "moduleName": "Галочка в корзине \"Мне не нужно перезванивать\"",
@@ -13,6 +15,15 @@
         "changes": [
           {
             "find": "{if $order->note}",
+            "appendAfter": "<div class=\"font_12 text_500 mb-q\"><span style=\"color:red\">{if $order->do_not_call_back == 1}{$btr->do_not_callback_user}{/if}</span></div>"
+          }
+        ]
+      },
+      {
+        "file": "order.tpl",
+        "changes": [
+          {
+            "like": "<input name=\"phone",
             "appendAfter": "<div class=\"font_12 text_500 mb-q\"><span style=\"color:red\">{if $order->do_not_call_back == 1}{$btr->do_not_callback_user}{/if}</span></div>"
           }
         ]

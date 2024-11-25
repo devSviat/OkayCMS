@@ -1,0 +1,24 @@
+{
+  "userName": "Sviatoslav",
+  "userEmail": "taylerdfury@gmail.com",
+  "Okay": "4.3.4",
+  "version": "1.2.3",
+  "moduleName": "Поиск по характеристикам и описанию ",
+  "vendor": {
+    "email": "my@simplamarket.com",
+    "site": "https://simplamarket.com"
+  },
+  "modifications": {
+    "front": [
+      {
+        "file": "index.tpl",
+        "changes": [
+          {
+            "find": "<input class=\"fn_search",
+            "replace": "<input class=\"fn_enhanced_search search__input\" type=\"text\" name=\"keyword\" value=\"{$keyword|escape}\" aria-label=\"search\" data-language=\"index_search\" placeholder=\"{$lang->index_search}\"/>"
+          }
+        ]
+      }
+    ]
+  }
+}
