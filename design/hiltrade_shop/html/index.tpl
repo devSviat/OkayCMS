@@ -23,25 +23,25 @@
     <header class="header">
         {if $is_mobile == false || $is_tablet == true}
         <div class="header__top hidden-md-down">
-            <div class="container">
-                <div class="f_row align-items-center flex-nowrap justify-content-between">
+            {* <div class="container"> *}
+                {* <div class="f_row align-items-center flex-nowrap justify-content-between"> *}
                     {* Account *}
-                    <div id="account" class="d-flex align-items-center f_col">
+                    {* <div id="account" class="d-flex align-items-center f_col">
                         {include file="user_informer.tpl"}
-                    </div>
-                    <div class="d-flex align-items-center f_col justify-content-end">
+                    </div> *}
+                    {* <div class="d-flex align-items-center f_col justify-content-end"> *}
                         {* Callback *}
-                        <a class="fn_callback callback d-inline-flex align-items-center" href="#fn_callback" data-language="index_back_call">
+                        {* <a class="fn_callback callback d-inline-flex align-items-center" href="#fn_callback" data-language="index_back_call">
                             {include file="svg.tpl" svgId="support_icon"}
                             <span>{$lang->index_back_call}</span>
-                        </a>
+                        </a> *}
                         {* Language & Currency *}
-                        <div class="switcher d-flex align-items-center">
+                        {* <div class="switcher d-flex align-items-center">
                             {include file="switcher.tpl"}
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        </div> *}
+                    {* </div> *}
+                {* </div> *}
+            {* </div> *}
         </div>
         {/if}
         <div class="header__bottom">
@@ -70,32 +70,44 @@
                         {/if}
                     </div>
                         {* Catalog heading *}
-                        <div class="fn_catalog_switch button--blick catalog_button d-lg-flex hidden-md-down ">
+                        {* <div class="fn_catalog_switch button--blick catalog_button d-lg-flex hidden-md-down ">
                             <div class="catalog_button__heading d-flex align-items-center ">
                                 <i class="catalog_icon">
                                 {include file="svg.tpl" svgId="catalog_btn"}</i>
                                 <span class="" data-language="index_categories">{$lang->index_categories}</span>
-                                {* {if $controller != 'MainController' || empty($global_banners)} *}
-                                    <span class="catalog_button__arrow">{include file="svg.tpl" svgId="arrow_right"}</span>
-                                {* {/if} *}
+                                <span class="catalog_button__arrow">{include file="svg.tpl" svgId="arrow_right"}</span>
                             </div>
-                         </div>
+                         </div> *}
+
+                        {* Categories menu *}
+                        {if $is_mobile == false || $is_tablet == true}
+                            <nav class="header_informers desktop_categories d-flex">
+                                {include file="desktop_categories.tpl"}
+                            </nav>
+                        {/if}
+
                         {* Search form *}
                         <form id="fn_search" class="fn_search_mob search d-md-flex" action="{url_generator route='products'}">
                             <input class="fn_search search__input" type="text" name="keyword" value="{$keyword|escape}" aria-label="search" data-language="index_search" placeholder="{$lang->index_search}"/>
                             <button class="search__button d-flex align-items-center justify-content-center" aria-label="search" type="submit"></button>
                         </form>
+
+                        
                         <div class="header_informers d-flex align-items-center">
                             {* Mobile search toggle *}
                             <div class="fn_search_toggle header_informers__item d-flex align-items-center justify-content-center hidden-md-up">{include file="svg.tpl" svgId="search_icon"}</div>
                             {* Main menu *}
-                            <div class="header__menu d-flex flex-wrap">
+                            {* <div class="header__menu d-flex flex-wrap">
                             {$menu_header}
-                            </div>
+                            </div> *}
+                            {* Lang switcher *}
+                            {* <div id="lang_switcher" class="header_informers__item d-flex align-items-center justify-content-center">{include file="lang_switcher.tpl"}</div> *}
+                            {* Account informer *}
+                            <div id="account" class="header_informers__item d-flex align-items-center justify-content-center">{include file="account_info.tpl"}</div>
                             {* Wishlist informer *}
                             <div id="wishlist" class="header_informers__item d-flex align-items-center justify-content-center">{include file="wishlist_informer.tpl"}</div>
                             {* Comparison informer *}
-                            <div id="comparison" class="header_informers__item d-flex align-items-center justify-content-center">{include "comparison_informer.tpl"}</div>
+                            {* <div id="comparison" class="header_informers__item d-flex align-items-center justify-content-center">{include "comparison_informer.tpl"}</div> *}
                             {* Cart informer*}
                             <div id="cart_informer" class="header_informers__item d-flex align-items-center justify-content-center">{include file='cart_informer.tpl'}</div>
                         </div>
@@ -311,7 +323,7 @@
                     <div class="copyright">
                         <div class="copyrigh_text">
                             <span>© {$smarty.now|date_format:"%Y"}</span>
-                            <span data-language="index_copyright">Hil Trade. All rights reserved</span>
+                            <span data-language="index_copyright">Hil Trade. All rights reserved.</span>
                         </div>
                     </div>
                 </div>

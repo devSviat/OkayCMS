@@ -639,7 +639,7 @@ blockquote cite:before {
 .block__description ol li {
   font-weight: 500;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .boxed {
@@ -928,7 +928,7 @@ a.button--blick:hover:after,
 .form__title {
   cursor: pointer;
   font-weight: 600;
-  font-size: 18px;
+  font-size: 16px;
   user-select: none;
   padding: 0 15px 0 15px;
   color: var(--okay-body-text);
@@ -1454,7 +1454,7 @@ select {
   -ms-flex-positive: 1;
   flex-grow: 1;
   max-width: 100%;
-  font-size: 15px;
+  font-size: 17px;
   justify-content: flex-end;
 }
 .menu_group--header {

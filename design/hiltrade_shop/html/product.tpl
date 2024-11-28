@@ -13,7 +13,7 @@
     </div> *}
 
     <div class="fn_transfer f_row flex-column flex-lg-row align-items-lg-stretch">
-        <div class="block product-page__gallery f_col f_col-lg-7 f_col-xl-7">
+        <div class="block product-page__gallery f_col f_col-lg-8 f_col-xl-8">
             <div class="block--boxed block--border boxed--stretch d-md-flex justify-content-between">
                 {if $product->images}
                     {* Main product image *}
@@ -93,7 +93,7 @@
             </div>
         </div>
 
-        <div class="block product-page__details f_col f_col-lg-5 f_col-xl-5">
+        <div class="block product-page__details f_col f_col-lg-4 f_col-xl-4">
             <div class="block--border boxed--stretch details_boxed">
                 {* The product name *}
                 <div class="details_boxed__item">
@@ -265,6 +265,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="d-flex align-items-center price-details">Price inclusive of VAT</div> 
 
                                     <div class="d-flex align-items-center details_boxed__buttons">
                                         {if !$settings->is_preorder}
@@ -307,15 +308,14 @@
                                                     data-language="product_add_favorite">
                                                     {include file="svg.tpl" svgId="heart"}
                                                 </a>
-                                            {/if}
+                                            {/if} 
 
                                             {* Comparison *}
-                                            {if is_array($comparison->ids) && in_array($product->id, $comparison->ids)}
+                                            {* {if is_array($comparison->ids) && in_array($product->id, $comparison->ids)}
                                                 <a class="fn_comparison product-page__compare selected" href="#"
                                                     data-id="{$product->id}" title="{$lang->remove_comparison}"
                                                     data-result-text="{$lang->product_add_comparison}"
                                                     data-language="product_remove_comparison">
-                                                    {* <i class="fa fa-balance-scale"></i> *}
                                                     {include file="svg.tpl" svgId="comparison_scale"}
                                                 </a>
                                             {else}
@@ -323,13 +323,13 @@
                                                     title="{$lang->product_add_comparison}"
                                                     data-result-text="{$lang->remove_comparison}"
                                                     data-language="product_add_comparison">
-                                                    {* <i class="fa fa-balance-scale"></i> *}
                                                     {include file="svg.tpl" svgId="comparison_scale"}
                                                 </a>
-                                            {/if}
+                                            {/if} *}
                                         </div>
                                     </div>
                                 </div>
+                                <div class="delivery_to">Delivery: <span class="delivery_country">Dubai</span></div>
                             </form>
                         </div>
 

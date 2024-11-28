@@ -107,7 +107,7 @@
                     {fast_order_btn product=$product}
                         
                     {* Comparison *}
-                    {if $controller != "ComparisonController"}
+                    {* {if $controller != "ComparisonController"}
                         {if is_array($comparison->ids) && in_array($product->id, $comparison->ids)}
                             <a class="fn_comparison comparison_button selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->add_comparison}">
                             {include file="svg.tpl" svgId="comparison_scale"}
@@ -123,7 +123,7 @@
                         <a href="#" class="fn_comparison selected comparison_button remove_link" title="{$lang->remove_comparison}" data-id="{$product->id}">
                         {include file="svg.tpl" svgId="x-mark"}
                         </a>
-                    {/if}
+                    {/if} *}
 
                 </div>
                 {* Product variants *}
