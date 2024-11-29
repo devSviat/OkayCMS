@@ -1,15 +1,38 @@
 <!-- The main page template -->
 
+{* All products *}
+{get_all_products var=all_products}
+{if $all_products}
+    <div class="main-products main-products__new container">
+        <div class="block block--border">
+            <div class="block__header">
+                {* <div class="block__title">
+                    <span data-language="main_new_products">{$lang->main_new_products}</span>
+                </div> *}
+            </div>
+            <div class="block__body">
+                <div class="fn_categories products_list row">
+                    {* <div class="swiper-wrapper"> *}
+                        {foreach $all_products as $product}
+                            <div class="product_item col-xs-6 col-sm-4 col-md-4 col-lg-4 col-xl-3">{include "product_list.tpl"}</div>
+                        {/foreach}
+                    {* </div> *}
+                </div>
+            </div>
+         </div>
+    </div>
+{/if}
+
 {* Featured products *}
-{get_featured_products var=featured_products limit=4}
+{* {get_featured_products var=featured_products limit=4}
 {if $featured_products}
     <div class="main-products main-products__featured container">
         <div class="block block--border">
-            <div class="block__header block__header--promo">
+            <div class="block__header block__header--promo"> *}
                 {* <div class="block__title">
                     <span data-language="main_recommended_products">{$lang->main_recommended_products}</span>
                 </div> *}
-                <div class="block__header_button">
+                {* <div class="block__header_button">
                     <a class="block__more d-flex align-items-center" href="{url_generator route='products' filtersUrl=['filter' => ['featured']]}">
                         <span data-language="main_look_all">{$lang->main_look_all}</span>{include file="svg.tpl" svgId="arrow_right2"}
                     </a>
@@ -27,18 +50,18 @@
             </div>
         </div>
     </div>
-{/if}
+{/if} *}
 
 {* New products *}
-{get_new_products var=new_products limit=4}
+{* {get_new_products var=new_products limit=4}
 {if $new_products}
     <div class="main-products main-products__new container">
         <div class="block block--border">
-            <div class="block__header">
+            <div class="block__header"> *}
                 {* <div class="block__title">
                     <span data-language="main_new_products">{$lang->main_new_products}</span>
                 </div> *}
-            </div>
+            {* </div>
             <div class="block__body">
                 <div class="fn_products_slide products_list row no_gutters swiper-container">
                     <div class="swiper-wrapper">
@@ -51,7 +74,7 @@
             </div>
          </div>
     </div>
-{/if}
+{/if} *}
 
 {* Discount products *}
 {* {get_discounted_products var=discounted_products limit=4}
