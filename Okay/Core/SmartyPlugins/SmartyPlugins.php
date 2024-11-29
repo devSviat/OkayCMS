@@ -60,6 +60,13 @@ $plugins = [
             new SR(BrowsedProducts::class),
         ],
     ],
+    Plugins\GetAllProducts::class => [
+        'class' => Plugins\GetAllProducts::class,
+        'arguments' => [
+            new SR(EntityFactory::class),
+            new SR(ProductsHelper::class),
+        ],
+    ],
     Plugins\GetNewProducts::class => [
         'class' => Plugins\GetNewProducts::class,
         'arguments' => [
