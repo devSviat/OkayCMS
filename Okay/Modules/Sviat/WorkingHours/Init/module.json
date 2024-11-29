@@ -1,0 +1,21 @@
+{
+  "Okay": "4.5.0",
+  "version": "1.0.0",
+  "vendor": {
+    "site": "https://github.com/devSviat"
+  },
+  "modifications": {
+    "front": [
+      {
+        "file": "index.tpl",
+        "changes": [
+          {
+            "find": "{if $settings->site_working_hours}",
+            "remove": true,
+            "appendBefore": "{get_working_hours}"
+          }
+        ]
+      }
+    ]
+  }
+}

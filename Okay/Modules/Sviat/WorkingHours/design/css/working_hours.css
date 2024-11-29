@@ -1,0 +1,27 @@
+.working-hours {
+    font-family: Arial, sans-serif;
+}
+
+.working-hours table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.working-hours th, .working-hours td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.working-hours th {
+    background-color: #f4f4f4;
+}
+
+.footer_time {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 400 !important;
+    font-size: 16px;
+    position: relative;
+    cursor: pointer;
+  }
