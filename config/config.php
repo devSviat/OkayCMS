@@ -12,7 +12,7 @@ db_user = root
 db_password = "root"
 
 ;Имя базы
-db_name = okay
+db_name = hiltradeshop
 
 ;Драйвер базы данных
 db_driver = mysql
@@ -31,7 +31,7 @@ db_sql_mode = "ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
 ;db_timezone = +04:00
 
 [modules]
-marketplace_url = https://modules.okay-cms.com/
+marketplace_url = #
 
 [php]
 error_reporting = E_ALL
@@ -70,13 +70,13 @@ preload_footer_js = false
 
 [images]
 ;Указываем какую библиотеку использовать для нарезки изображений. Варианты: Gregwar, Imagick или GD. Это имя класса адаптера
-resize_adapter = Gregwar
+resize_adapter = GD
 
 ;Директория общих изображений дизайна (лого, фавикон...)
 design_images = files/images/
 
 ;Файл изображения с водяным знаком
-watermark_file = backend/files/watermark/watermark.png
+watermark_file = 
 
 ;Промо изображения
 special_images_dir = files/special/
