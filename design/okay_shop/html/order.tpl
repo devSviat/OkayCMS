@@ -29,7 +29,7 @@
                                                     <source type="image/webp" data-srcset="{$purchase->product->image->filename|resize:70:70|webp}">
                                                 {/if}
                                                 <source data-srcset="{$purchase->product->image->filename|resize:70:70}">
-                                                <img class="lazy" data-src="{$purchase->product->image->filename|resize:70:70}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$purchase->product->name|escape}" title="{$purchase->product->name|escape}"/>
+                                                <img class="lazy" data-src="{$purchase->product->image->filename|resize:70:70}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$purchase->product->name|escape}" title="{$purchase->product->name|escape}"/>
                                             </picture>
                                             {else}
                                                 <div class="purchase__no_image d-flex align-items-start">
@@ -210,7 +210,7 @@
                                                                             <source type="image/webp" srcset="{$payment_method->image|resize:80:30:false:$config->resized_payments_dir|webp}">
                                                                         {/if}
                                                                         <source srcset="{$payment_method->image|resize:80:30:false:$config->resized_payments_dir}">
-                                                                        <img class="lazy" data-src="{$payment_method->image|resize:80:30:false:$config->resized_payments_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$purchase->product->name|escape}" title="{$purchase->product->name|escape}"/>
+                                                                        <img class="lazy" data-src="{$payment_method->image|resize:80:30:false:$config->resized_payments_dir}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$purchase->product->name|escape}" title="{$purchase->product->name|escape}"/>
                                                                     </picture>
                                                                 </div>
                                                             {/if}

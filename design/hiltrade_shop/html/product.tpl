@@ -73,7 +73,7 @@
                                             {/if}
                                             <source data-srcset="{$image->filename|resize:60:60}">
                                             <img class="lazy" data-src="{$image->filename|resize:60:60}"
-                                                src="{$rootUrl}/design/{get_theme}/images/xloading.gif"
+                                                src="{$rootUrl}/design/{get_theme}/images/loading.svg"
                                                 alt="{$product->name|escape}" title="{$product->name|escape}" />
                                         </picture>
                                     </div>

@@ -14,7 +14,7 @@
                             <source type="image/webp" data-srcset="{$author->image|resize:320:500:false:$config->resized_authors_dir|webp}">
                         {/if}
                         <source data-srcset="{$author->image|resize:320:500:false:$config->resized_authors_dir}">
-                        <img class="lazy" data-src="{$author->image|resize:320:500:false:$config->resized_authors_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$author->name|escape}" title="{$author->name|escape}"/>
+                        <img class="lazy" data-src="{$author->image|resize:320:500:false:$config->resized_authors_dir}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$author->name|escape}" title="{$author->name|escape}"/>
                     </picture>
                 </a>
                 {else}

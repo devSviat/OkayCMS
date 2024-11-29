@@ -128,7 +128,7 @@
                                                             <source type="image/webp" data-srcset="{$b->image|resize:100:50:false:$config->resized_brands_dir|webp}">
                                                         {/if}
                                                         <source data-srcset="{$b->image|resize:100:50:false:$config->resized_brands_dir}">
-                                                        <img class="main_brands_img lazy" data-src="{$b->image|resize:100:50:false:$config->resized_brands_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$b->name|escape}" title="{$b->name|escape}"/>
+                                                        <img class="main_brands_img lazy" data-src="{$b->image|resize:100:50:false:$config->resized_brands_dir}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$b->name|escape}" title="{$b->name|escape}"/>
                                                     </picture>
                                                 </div>
                                             {else}

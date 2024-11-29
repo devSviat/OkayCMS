@@ -228,7 +228,7 @@
                                                                         <source type="image/webp" data-srcset="{$purchase->product->image->filename|resize:70:70|webp}">
                                                                     {/if}
                                                                     <source data-srcset="{$purchase->product->image->filename|resize:70:70}">
-                                                                    <img class="lazy" data-src="{$purchase->product->image->filename|resize:70:70}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$purchase->product->name|escape}" title="{$purchase->product->name|escape}"/>
+                                                                    <img class="lazy" data-src="{$purchase->product->image->filename|resize:70:70}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$purchase->product->name|escape}" title="{$purchase->product->name|escape}"/>
                                                                 </picture>
                                                                 {else}
                                                                     <div class="purchase__no_image d-flex align-items-start">

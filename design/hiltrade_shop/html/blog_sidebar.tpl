@@ -29,7 +29,7 @@
                                                     <source type="image/webp" data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir|webp}">
                                                 {/if}
                                                 <source data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}">
-                                                <img class="lazy" data-src="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$c->name|escape}" title="{$c->name|escape}"/>
+                                                <img class="lazy" data-src="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$c->name|escape}" title="{$c->name|escape}"/>
                                             </picture>
                                         {else}
                                             <span class="blog_catalog__no_image d-flex align-items-center justify-content-center" title="{$c->name|escape}">
@@ -50,7 +50,7 @@
                                                 <source type="image/webp" data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir|webp}">
                                             {/if}
                                             <source data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}">
-                                            <img class="lazy" data-src="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$c->name|escape}" title="{$c->name|escape}"/>
+                                            <img class="lazy" data-src="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$c->name|escape}" title="{$c->name|escape}"/>
                                         </picture>
                                         {else}
                                             <span class="blog_catalog__no_image d-flex align-items-center justify-content-center" title="{$c->name|escape}">
@@ -106,7 +106,7 @@
                                 <source type="image/webp" data-srcset="{$product->image->filename|resize:60:60|webp}">
                             {/if}
                             <source data-srcset="{$product->image->filename|resize:60:60}">
-                            <img class="lazy" data-src="{$product->image->filename|resize:60:60}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$product->name|escape}" title="{$product->name|escape}"/>
+                            <img class="lazy" data-src="{$product->image->filename|resize:60:60}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$product->name|escape}" title="{$product->name|escape}"/>
                         </picture>
                         {else}
                         <div class="sidebar_card__no_image d-flex align-items-center justify-content-center" title="{$product->name|escape}">

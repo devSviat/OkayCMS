@@ -17,7 +17,7 @@
                                     <source type="image/webp" data-srcset="{$browsed_product->image->filename|resize:90:90|webp}">
                                 {/if}
                                 <source data-srcset="{$browsed_product->image->filename|resize:90:90}">
-                                <img class="lazy" data-src="{$browsed_product->image->filename|resize:90:90}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$browsed_product->name|escape}" title="{$browsed_product->name|escape}"/>
+                                <img class="lazy" data-src="{$browsed_product->image->filename|resize:90:90}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$browsed_product->name|escape}" title="{$browsed_product->name|escape}"/>
                             </picture>
                         {else}
                             <div class="browsed__no_image d-flex align-items-center justify-content-center" title="{$browsed_product->name|escape}">

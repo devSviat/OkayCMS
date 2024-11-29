@@ -301,7 +301,7 @@
                                             <source type="image/webp" data-srcset="{$payment_method->image|resize:80:30:false:$config->resized_payments_dir|webp}">
                                         {/if}
                                         <source data-srcset="{$payment_method->image|resize:80:30:false:$config->resized_payments_dir}">
-                                        <img class="lazy" data-src="{$payment_method->image|resize:80:30:false:$config->resized_payments_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$payment_method->name|escape}" title="{$payment_method->name|escape}"/>
+                                        <img class="lazy" data-src="{$payment_method->image|resize:80:30:false:$config->resized_payments_dir}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$payment_method->name|escape}" title="{$payment_method->name|escape}"/>
                                     </picture>
                                 </li>
                             {/foreach}
@@ -329,6 +329,8 @@
                 </div>
             </div>
         </div>
+
+        <a href="https://wa.me/971568745155" class="whatsapp" target="_blank"> <i class="fa fa-whatsapp whatsapp-icon"></i></a>
     </footer>
     {/if}
 

@@ -5,13 +5,13 @@
                 {if $post->image}
                     <picture>
                         {if $settings->support_webp}
-                            <source class="lazy" type="image/webp" data-srcset="{$post->image|resize:340:240:false:$config->resized_blog_dir:center:center|webp}" media="(max-width: 440px)" srcset="{$rootUrl}/design/{get_theme}/images/xloading.gif">
-                            <source class="lazy" type="image/webp" data-srcset="{$post->image|resize:380:240:false:$config->resized_blog_dir:center:center|webp}" srcset="{$rootUrl}/design/{get_theme}/images/xloading.gif">
+                            <source class="lazy" type="image/webp" data-srcset="{$post->image|resize:340:240:false:$config->resized_blog_dir:center:center|webp}" media="(max-width: 440px)" srcset="{$rootUrl}/design/{get_theme}/images/loading.svg">
+                            <source class="lazy" type="image/webp" data-srcset="{$post->image|resize:380:240:false:$config->resized_blog_dir:center:center|webp}" srcset="{$rootUrl}/design/{get_theme}/images/loading.svg">
                         {/if}
-                        <source class="lazy" data-srcset="{$post->image|resize:340:240:false:$config->resized_blog_dir:center:center}" media="(max-width: 440px)" srcset="{$rootUrl}/design/{get_theme}/images/xloading.gif">
-                        <source class="lazy" data-srcset="{$post->image|resize:380:240:false:$config->resized_blog_dir:center:center}" srcset="{$rootUrl}/design/{get_theme}/images/xloading.gif">
+                        <source class="lazy" data-srcset="{$post->image|resize:340:240:false:$config->resized_blog_dir:center:center}" media="(max-width: 440px)" srcset="{$rootUrl}/design/{get_theme}/images/loading.svg">
+                        <source class="lazy" data-srcset="{$post->image|resize:380:240:false:$config->resized_blog_dir:center:center}" srcset="{$rootUrl}/design/{get_theme}/images/loading.svg">
                             
-                        <img class="lazy" data-src="{$post->image|resize:380:240:false:$config->resized_blog_dir:center:center}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$post->name|escape}" title="{$post->name|escape}"/>
+                        <img class="lazy" data-src="{$post->image|resize:380:240:false:$config->resized_blog_dir:center:center}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$post->name|escape}" title="{$post->name|escape}"/>
                     </picture>
                 {else}
                     <div class="article__no_image d-flex align-items-start">
@@ -63,7 +63,7 @@
                             <source type="image/webp" data-srcset="{$post->author->image|resize:24:24:false:$config->resized_authors_dir:center:center|webp}">
                         {/if}
                         <source data-srcset="{$post->author->image|resize:24:24:false:$config->resized_authors_dir:center:center}">
-                        <img class="lazy" data-src="{$post->author->image|resize:24:24:false:$config->resized_authors_dir:center:center}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$post->author->name|escape}" title="{$post->author->name|escape}"/>
+                        <img class="lazy" data-src="{$post->author->image|resize:24:24:false:$config->resized_authors_dir:center:center}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$post->author->name|escape}" title="{$post->author->name|escape}"/>
                     </picture>
                     {else}
                         {include file="svg.tpl" svgId="avatar_icon"}

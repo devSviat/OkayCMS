@@ -11,7 +11,7 @@
                                     <source type="image/webp" data-srcset="{$product->image->filename|resize:600:800|webp}" >
                                 {/if}
                                 <source data-srcset="{$product->image->filename|resize:600:800}">
-                                <img class="fn_img preview_img lazy" data-src="{$product->image->filename|resize:600:800}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$product->name|escape}" title="{$product->name|escape}"/>
+                                <img class="fn_img preview_img lazy" data-src="{$product->image->filename|resize:600:800}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$product->name|escape}" title="{$product->name|escape}"/>
                             {else}
                                 {if $settings->support_webp}
                                     <source type="image/webp" data-srcset="{$product->image->filename|resize:180:150|webp}" media="(max-width: 440px)" >
@@ -20,7 +20,7 @@
                                 <source data-srcset="{$product->image->filename|resize:180:150}" media="(max-width: 440px)">
                                 <source data-srcset="{$product->image->filename|resize:300:150}">
                                     
-                                <img class="fn_img preview_img lazy" data-src="{$product->image->filename|resize:300:150}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$product->name|escape}" title="{$product->name|escape}"/>
+                                <img class="fn_img preview_img lazy" data-src="{$product->image->filename|resize:300:150}" src="{$rootUrl}/design/{get_theme}/images/loading.svg" alt="{$product->name|escape}" title="{$product->name|escape}"/>
                             {/if}
                         </picture>
                     {else}
