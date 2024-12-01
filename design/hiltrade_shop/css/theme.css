@@ -824,11 +824,18 @@ h1.header_product__title {
 }
 .user_container,
 .post_container,
-.blog_container,
-.products_container {
+.blog_container {
   margin-left: 300px;
   width: calc(100% - 300px);
 }
+/* .user_container,
+.post_container,
+.blog_container,
+.products_container 
+{
+  margin-left: 300px;
+  width: calc(100% - 300px);
+} */
 .blog_container--left,
 .post_container--left {
   /* margin-right: 300px; */
@@ -839,7 +846,7 @@ h1.header_product__title {
   /* background: var(--okay-boxed-color); */
   /* border: 1px solid #dbdbdb; */
   /* border-radius: 18px; */
-  padding: 0 15px;
+  /* padding: 0 15px; */
   margin-bottom: 25px;
   /* box-shadow: rgba(0, 0, 0, 0.1) 0px 0.3rem 1.525rem -0.375rem; */
 }

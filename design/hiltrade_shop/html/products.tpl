@@ -2,7 +2,7 @@
 
 <div class="clearfix">
     {* Sidebar with filters *}
-    <div class="fn_mobile_toogle sidebar d-lg-flex flex-lg-column">
+    {* <div class="fn_mobile_toogle sidebar d-lg-flex flex-lg-column">
         <div class="fn_mobile_toogle sidebar__header sidebar__boxed hidden-lg-up">
             <div class="fn_switch_mobile_filter sidebar__header--close">
                 {include file="svg.tpl" svgId="remove_icon"}
@@ -38,21 +38,21 @@
         <div class="fn_features">
             {if !$settings->deferred_load_features}
                 {include file='features.tpl'}
-            {else}
+            {else} *}
                 {* Deferred load features *}
-                <div class='fn_skeleton_load'>
+                {* <div class='fn_skeleton_load'>
                     {section name=foo start=1 loop=7 step=1}
                         <div class='skeleton_load__item skeleton_load__item--{$smarty.section.foo.index}'></div>
                     {/section}
                 </div>
             {/if}
-        </div>
+        </div> *}
 
         {* Browsed products *}
-        <div class="browsed products">
+        {* <div class="browsed products">
             {include file='browsed_products.tpl'}
         </div>
-    </div>
+    </div> *}
 
     <div class="products_container d-flex flex-column">
         <div class="products_container__boxed">
