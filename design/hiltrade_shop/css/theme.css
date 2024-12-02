@@ -3644,7 +3644,7 @@ footer {
   line-height: 1.2;
   font-weight: 500;
   color: var(--okay-second-company-text);
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   position: relative;
   padding-bottom: 5px;
 }
