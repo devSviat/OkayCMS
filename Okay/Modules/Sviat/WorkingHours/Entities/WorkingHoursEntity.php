@@ -36,6 +36,17 @@ class WorkingHoursEntity extends Entity
     }
 
     /**
+     * Отримати всі записи робочих годин.
+     *
+     * @return array|null
+     */
+    public function getAllWorkingHours()
+    {
+        return $this->find([]);
+    }
+
+
+    /**
      * Отримати графік роботи на сьогодні.
      *
      * @param string $day Поточний день

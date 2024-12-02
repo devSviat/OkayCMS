@@ -32,6 +32,23 @@ class GetWorkingHoursPlugin extends Func
         $currentTime = date('H:i');
 
         $todayHours = $this->workingHoursEntity->getTodayWorkingHours($currentDay);
+        $allWorkingHours = $this->workingHoursEntity->getAllWorkingHours();
+        $daysTranslation = [
+            'monday'    => $this->frontTranslations->getTranslation('working_hours__monday'),
+            'tuesday'   => $this->frontTranslations->getTranslation('working_hours__tuesday'),
+            'wednesday' => $this->frontTranslations->getTranslation('working_hours__wednesday'),
+            'thursday'  => $this->frontTranslations->getTranslation('working_hours__thursday'),
+            'friday'    => $this->frontTranslations->getTranslation('working_hours__friday'),
+            'saturday'  => $this->frontTranslations->getTranslation('working_hours__saturday'),
+            'sunday'    => $this->frontTranslations->getTranslation('working_hours__sunday'),
+        ];
+        // Форматуємо час в AM/PM
+        foreach ($allWorkingHours as &$day) {
+            if (!$day->closed) {
+                $day->opening_time = date('g:i A', strtotime($day->opening_time)); // Формат AM/PM
+                $day->closing_time = date('g:i A', strtotime($day->closing_time)); // Формат AM/PM
+            }
+        }
 
         // Отримуємо статус для сьогодні або наступного робочого дня
         $statusData = $todayHours ? $this->getTodayStatus($todayHours, $currentTime) : $this->getNextWorkingDayStatus($currentDay);
@@ -40,8 +57,10 @@ class GetWorkingHoursPlugin extends Func
         $this->design->assign('status', $statusData['status']);
         $this->design->assign('message', $statusData['message']);
         $this->design->assign('showClosedMessage', $statusData['showClosedMessage']);
+        $this->design->assign('allWorkingHours', $allWorkingHours);
+        $this->design->assign('daysTranslation', $daysTranslation);
 
-        error_log('Closing Soon: ' . var_export($statusData['showClosedMessage'], true));
+        // error_log('Closing Soon: ' . var_export($statusData['showClosedMessage'], true));
 
         return $this->design->fetch('working_hours.tpl');
     }
