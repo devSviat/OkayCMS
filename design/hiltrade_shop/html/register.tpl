@@ -3,26 +3,23 @@
 {* The page title *}
 {$meta_title = $lang->register_title scope=global}
 
-<div class="block">
-    {* The page heading *}
-    <div class="block__header block__header--boxed block__header--border">
-        <h1 class="block__heading"><span data-language="register_header">{$lang->register_header}</span></h1>
-    </div>
+<div class="container-less">
 
     <div class="block block--boxed block--border">
-        <div class="f_row flex-lg-row align-items-md-start">
-            <div class="form_wrap f_col-lg-7 f_col-xl-6">
+        <div>
+        <h1 class="block__heading form_h1"><span data-language="register_header">{$lang->register_header}</span></h1>
+            <div>
                 <form id="captcha_id" method="post" class="fn_validate_register form form--boxed">
                     {if $settings->captcha_type == "v3"}
                         <input type="hidden" class="fn_recaptcha_token fn_recaptchav3" name="recaptcha_token" />
                     {/if}
 
-                    <div class="form__header">
+                    {* <div class="form__header">
                         <div class="form__title">
                             {include file="svg.tpl" svgId="note_icon"}
                             <span data-language="register_write_comment">{$lang->register_write_comment}</span>
                         </div>
-                    </div>
+                    </div> *}
 
                     <div class="form__body">
                         {* Form error messages *}

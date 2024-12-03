@@ -142,10 +142,11 @@
             </div>
         {else}
             <div class="container">
-                {include file='breadcrumb.tpl'}
+                <div class="margin-b-2"></div>
                 <div class="fn_ajax_content">
                     {$content}
                 </div>
+                {include file='breadcrumb.tpl'}
             </div>
         {/if}
 

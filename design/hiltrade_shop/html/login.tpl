@@ -3,21 +3,22 @@
 {* The page title *}
 {$meta_title = $lang->login_title scope=global}
 
-<div class="block">
+<div class="container-less">
     {* The page heading *}
-    <div class="block__header block__header--boxed block__header--border">
+    {* <div class="block__header block__header--boxed block__header--border">
     	<h1 class="block__heading"><span data-language="login_enter">{$lang->login_enter}</span></h1>
-    </div>
+    </div> *}
     <div class="block block--boxed block--border">
-        <div class="f_row flex-lg-row align-items-md-start">
-            <div class="form_wrap f_col-lg-6">
+        <div>
+            <h1 class="block__heading form_h1"><span data-language="login_enter">{$lang->login_enter}</span></h1>
+            <div class="form_wrap">
                 <form method="post" class="fn_validate_login form form--boxed">
-                    <div class="form__header">
+                    {* <div class="form__header">
                         <div class="form__title">
                             {include file="svg.tpl" svgId="note_icon"}
                             <span data-language="login_title_form">{$lang->login_title_form}</span>
                         </div>
-                    </div>
+                    </div> *}
                     
                     <div class="form__body">
                         {* Form error messages *}
@@ -55,9 +56,9 @@
                     </div>
                 </form>
             </div>
-            <div class="f_col-lg-6">
+            <div>
                 <div class="block_explanation">
-                    <div class="block_explanation__header">
+                    <div class="block_explanation__header form_h1">
                         <span data-language="login_text">{$lang->login_text}</span>
                     </div>
                     <div class="block_explanation__body block__description">

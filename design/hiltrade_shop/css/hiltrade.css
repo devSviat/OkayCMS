@@ -116,7 +116,7 @@ h6,
 }
 h1,
 .h1 {
-  font-size: 28px;
+  font-size: 34px;
 }
 h2,
 .h2 {
@@ -306,16 +306,16 @@ blockquote cite:before {
   position: relative;
 }
 .block__header--boxed {
-  background-color: var(--okay-boxed-color);
+  /* background-color: var(--okay-boxed-color); */
   position: relative;
-  padding: 14px 28px;
-  margin-bottom: 15px;
+  padding: 4px 28px;
+  /* margin-bottom: 15px; */
 }
-.block__header--border {
+/* .block__header--border {
   border: 0px solid #dbdbdb;
   border-radius: 22px;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 0.3rem 1.525rem -0.375rem;
-}
+} */
 .block__main_brands {
   width: 100%;
   max-width: 100%;
@@ -1098,9 +1098,9 @@ input::-webkit-input-placeholder {
   .form__footer .captcha {
     margin-bottom: -10px;
   } */
-.form__footer {
+/* .form__footer {
   margin-bottom: -10px;
-}
+} */
 .captcha {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
