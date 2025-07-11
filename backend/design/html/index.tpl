@@ -143,7 +143,7 @@
                             <span class="menu_hamburger"></span>
                         </span>
                     <a href="index.php?controller={$manager_main_controller}" class="logo_box">
-                        <img src="design/images/logo_title.png" alt="OkayCMS"/>
+                        <img src="design/images/logo_dark.svg" alt="OkayCMS"/>
                     </a>
                 </div>
                 <div class="admin_exit hidden-sm-down hint-bottom-right-t-info-s-small-mobile  hint-anim" data-hint="{$btr->index_exit|escape}">
@@ -292,10 +292,8 @@
     <nav id="admin_catalog" class="fn_left_menu">
         <div id="mob_menu"></div>
         <div class="sidebar_header">
-            <a href="javascript:;" id="fix_logo" class="hidden-lg-down"></a>
-
             <a href="index.php?controller={$manager_main_controller}" class="logo_box">
-                <img src="design/images/logo_title.png" alt="OkayCMS"/>
+                <img src="design/images/logo_dark.svg" alt="OkayCMS"/>
             </a>
             {if $is_mobile === false && $is_tablet === false}
                 <span class="fn_switch_menu menu_switch fn_ajax_action {if $manager->menu_status}fn_active_class{/if} hint-left-middle-t-white-s-small-mobile  hint-anim" data-controller="managers" data-action="menu_status" data-id="{$manager->id}" data-hint="{$btr->catalog_fixation}">
