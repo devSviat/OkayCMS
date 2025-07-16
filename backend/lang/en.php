@@ -1683,3 +1683,4 @@ $lang['modules_license_important'] = 'Important!';
 $lang['modules_license_info_text'] = 'We did not find information about purchasing this module for your domain. Contact the tech. support';
 $lang['index_btn_email_info'] = 'IMPORTANT';
 $lang['index_btn_email_info_hint'] = 'To receive product verification, you must fill in the E-mail field specified when purchasing the product';
+$lang['button_select_file'] = 'Select a file...';
