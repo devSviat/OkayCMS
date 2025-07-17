@@ -4282,7 +4282,7 @@ label.switch_label i{
     line-height: 1.25;
     color: rgb(98, 98, 98);
     text-align: center;
-    border-radius: 4px 0 0 4px;
+    border-radius: 8px 0 0 8px;
 }
 .input-group-addon-date {
     min-width: 40px;
@@ -4335,7 +4335,7 @@ label.switch_label i{
     width: 100%;
     max-width: 100%;
     background: #fff;
-    border-radius:  0 4px 4px 0 ;
+    border-radius:  0 8px 8px 0 ;
 }
 .input-group--small .form-control {
     min-height: 30px;
@@ -7742,13 +7742,15 @@ base::-moz-progress-bar,
     position: relative;
     display: block;
     background-color: #fff;
-    border: 1px solid #cfd8dc;
+    border: 1px solid #eee;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(31, 31, 31, 0.05), 0 2px 4px -2px rgba(31, 31, 31, 0.05);
 }
 .card-block {padding: 20px;}
 .card-block img {max-width: 100%;}
 .card-block--version{
     text-align: center;
-    color: #333;
+    color: #1e578f;
     font-size: 14px;
 }
 .card-inverse .card-block--version{
@@ -7985,9 +7987,9 @@ div.tox-fullscreen {
     display: block;
 }
 .auth_heading {
-    font-weight: 700;
-    color: #262423;
-    font-size: 26px;
+    font-weight: 500;
+    color: #5c5c5c;
+    font-size: 16px;
     line-height: 1.2;
     margin-top: 0;
     margin-bottom: 10px;
@@ -9095,4 +9097,24 @@ input.error {
     color: #fff;
     background-color: #b76864;
     border-color: #b76864;
+}
+.heading-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.heading-divider::before,
+.heading-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.heading-divider::before {
+    margin-right: .75em;
+}
+
+.heading-divider::after {
+    margin-left: .75em;
 }

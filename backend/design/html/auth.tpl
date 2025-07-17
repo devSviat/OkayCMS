@@ -16,15 +16,21 @@
 <div class="container d-table">
     <div class="d-100vh-va-middle">
         <div class="row">
-            <div class="col-md-10 offset-md-1">
+            <div class="col-md-4 push-md-4">
                 <div class="card-group">
                     <div class="card p-2">
+                        <div class="auth_heading">
+                            <img style="height: 50" src="{$rootUrl}/{$config->design_images}{$settings->site_logo}?v={$settings->site_logo_version}" alt="{$settings->site_name|escape}"/>
+                            <div class="card-block text-xs-center">
+                                <div class="card-block--version">Version {$config->version|escape}</div>
+                            </div>
+                        </div>
                         <div class="">
                             {*Форма авторизации*}
                             <form method="post">
                                 <input type=hidden name="session_id" value="{$smarty.session.id}">
                                 {if $recovery_mod}
-                                    <h1 class="auth_heading">Восстановление пароля</h1>
+                                    <h1 class="auth_heading heading-divider">Восстановление пароля</h1>
                                     <p class="auth_heading_promo">на сайте {$smarty.server.HTTP_HOST}</p>
                                     <div class="input-group mb-1">
                                         <span class="input-group-addon">
@@ -48,7 +54,7 @@
                                         <button type="submit" value="login" class="auth_buttons__login btn btn_blue btn_big btn-block" tabindex="3">Войти</button>
                                     </div>
                                 {else}
-                                    <h1 class="auth_heading">Вход в панель управления</h1>
+                                    <h1 class="auth_heading heading-divider">Вход в панель управления</h1>
                                     <p class="auth_heading_promo">{$smarty.server.HTTP_HOST}</p>
 
                                     <div class="input-group mb-1">
@@ -82,7 +88,7 @@
                             <div class="col-xs-12 mt-1 p-h fn_recovery_wrap hidden px-0">
                                 <div class="fn_error" style="display: none;margin-bottom:15px;color: #bf1e1e;font-weight: 600;font-size: 15px;"></div>
                                 <div class="fn_success" style="display: none;margin-bottom:15px;color: #13bb13;font-weight: 600;font-size: 15px;">Сообщение отправлено на емейл администратору</div>
-                                <label class="fn_recovery_label">Введите email администратора для восстановления пароля</label>
+                                <label class="fn_recovery_label heading-divider">Введите email администратора для восстановления пароля</label>
                                 <div class="input-group mb-1">
                                     <span class="input-group-addon">
                                         {include file='svg_icon.tpl' svgId='email'}
@@ -92,19 +98,9 @@
 
                                 <button type="button" value="recovery" class="btn btn_border_blue fn_ajax_recover">Напомнить</button>
                             </div>
-                            <div class="mt-2 hidden-lg-up">
+                            {* <div class="mt-2 hidden-lg-up">
                                 <div class="card-block--version">OkayCMS v.{$config->version|escape}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card card-inverse okay_bg py-3 hidden-md-down" style="width:50%">
-                        <div class="card-block text-xs-center">
-                            <div>
-                                <p>
-                                    <img src="design/images/system_logo.png" alt="OkayCMS" />
-                                </p>
-                                <div class="card-block--version">Version {$config->version|escape}</div>
-                            </div>
+                            </div> *}
                         </div>
                     </div>
                 </div>
