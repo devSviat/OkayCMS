@@ -164,7 +164,7 @@
                                 <div class="fn_parent_image"></div>
                             {/if}
                             <div class="fn_upload_image dropzone_block_image {if $payment_method->image} hidden{/if}">
-                                <i class="fa fa-plus font-5xl" aria-hidden="true"></i>
+                                {include file='svg_icon.tpl' svgId='upload'}
                                 <input class="dropzone_image" name="image" type="file" />
                             </div>
                             <div class="category_image image_wrapper fn_image_wrapper fn_new_image text-xs-center hidden">

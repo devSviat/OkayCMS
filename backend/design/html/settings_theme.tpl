@@ -105,7 +105,7 @@
                                 {/if}
 
                                 <div class="fn_upload_image dropzone_block_image text-xs-center {if $settings->site_logo} hidden{/if}">
-                                    <i class="fa fa-plus font-5xl" aria-hidden="true"></i>
+                                    {include file='svg_icon.tpl' svgId='upload'}
                                     <input class="dropzone_image" name="site_logo" type="file" accept="image/*" />
                                 </div>
                                 <div class="image_wrapper fn_image_wrapper fn_new_image text-xs-center hidden">
@@ -162,7 +162,7 @@
                                 {/if}
 
                                 <div class="fn_upload_image dropzone_block_image text-xs-center {if $settings->site_favicon} hidden{/if}">
-                                    <i class="fa fa-plus font-5xl" aria-hidden="true"></i>
+                                    {include file='svg_icon.tpl' svgId='upload'}
                                     <input class="dropzone_image" name="site_favicon" type="file" accept="image/*" />
                                 </div>
                                 <div class="image_wrapper fn_image_wrapper fn_new_image text-xs-center hidden">

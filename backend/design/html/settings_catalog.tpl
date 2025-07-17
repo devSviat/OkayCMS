@@ -456,7 +456,7 @@
                                 {/if}
 
                                 <div class="fn_upload_image dropzone_block_image text-xs-center {if $config->watermark_file && is_file($config->watermark_file)} hidden{/if}">
-                                    <i class="fa fa-plus font-5xl" aria-hidden="true"></i>
+                                    {include file='svg_icon.tpl' svgId='upload'}
                                     <input class="dropzone_image" name="watermark_file" type="file" accept="image/jpeg,image/png,image/gif" />
                                 </div>
                                 <div class="banner_image fn_image_wrapper fn_new_image text-xs-center">

@@ -91,7 +91,7 @@
                         {get_design_block block="export_entity_select_block"}
                         <div class="col-md-3 col-sm-3 col-lg-3 col-sm-12 float-sm-right mt-2">
                             <button id="fn_start" type="submit" class="btn btn_small btn_blue float-md-right">
-                                {include file='svg_icon.tpl' svgId='magic'}
+                                {include file='svg_icon.tpl' svgId='export'}
                                 <span>{$btr->general_export|escape}</span>
                             </button>
                         </div>

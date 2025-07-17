@@ -204,7 +204,7 @@
                 <div class="toggle_body_wrap fn_card on ">
                     <ul class="fn_droplist_wrap product_images_list clearfix sortable" data-image="product">
                         <li class="fn_dropzone dropzone_block">
-                            <i class="fa fa-plus font-5xl" aria-hidden="true"></i>
+                            {include file='svg_icon.tpl' svgId='upload'}
                             <input type="file" name="" data-name="dropped_images[]" multiple class="dropinput fn_template">
                         </li>
                         {foreach $product_images as $image}
@@ -478,7 +478,7 @@
                 <div class="toggle_body_wrap on fn_card">
                     <ul class="fn_droplist_wrap product_images_list clearfix sortable" data-image="special">
                         <li class="fn_dropzone dropzone_block">
-                            <i class="fa fa-plus font-5xl" aria-hidden="true"></i>
+                            {include file='svg_icon.tpl' svgId='upload'}
                             <input type="file" name="" data-name="spec_dropped_images[]" multiple class="dropinput fn_template">
                         </li>
                         {if $special_images|count > 0}

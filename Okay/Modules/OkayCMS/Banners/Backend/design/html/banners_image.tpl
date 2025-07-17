@@ -141,7 +141,7 @@
                         {get_design_block block="banner_image_image"}
                     </div>
                     <div class="fn_upload_image dropzone_block_image text-xs-center {if $banners_image->image} hidden{/if}">
-                        <i class="fa fa-plus font-5xl" aria-hidden="true"></i>
+                        {include file='svg_icon.tpl' svgId='upload'}
                         <input class="dropzone_banner" name="image" type="file" />
                     </div>
                 </div>
@@ -242,7 +242,7 @@
                         {get_design_block block="banner_image_image_mobile"}
                     </div>
                     <div class="fn_upload_image dropzone_block_image text-xs-center {if $banners_image->image_mobile} hidden{/if}">
-                        <i class="fa fa-plus font-5xl" aria-hidden="true"></i>
+                        {include file='svg_icon.tpl' svgId='upload'}
                         <input class="dropzone_banner" name="image_mobile" type="file" />
                     </div>
                 </div>
