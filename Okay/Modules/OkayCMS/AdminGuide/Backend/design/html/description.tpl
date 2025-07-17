@@ -838,7 +838,7 @@
                         <div class="input_file_container">
                             <input class="input_file" id="my-file" type="file">
                             <label tabindex="0" for="my-file" class="input_file_trigger">
-                                <svg width="20" height="17" viewBox="0 0 20 17"><path fill="currentcolor" d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path></svg>
+                                {include file='svg_icon.tpl' svgId='upload'}
                                 <span>Выберите файл...</span>
                             </label>
                         </div>
@@ -851,7 +851,7 @@
     <div class="input_file_container">
         <input class="input_file" id="my-file" type="file">
         <label tabindex="0" for="my-file" class="input_file_trigger">
-            <svg width="20" height="17" viewBox="0 0 20 17"><path fill="currentcolor" d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path></svg>
+            {include file='svg_icon.tpl' svgId='upload'}
             <span>Выберите файл...</span>
         </label>
     </div>
@@ -868,7 +868,7 @@
                     </div>
                     <ul class="fn_droplist_wrap product_images_list clearfix sortable" data-image="product">
                         <li class="fn_dropzone dropzone_block">
-                            <i class="fa fa-plus font-5xl" aria-hidden="true"></i>
+                            {include file='svg_icon.tpl' svgId='upload'}
                             <input type="file" name="" data-name="dropped_images[]" multiple class="dropinput fn_template">
                         </li>
                         <li class="product_image_item hidden fn_sort_item">
@@ -893,7 +893,7 @@
                                 <textarea class="fn_code_mirror16">
 <ul class="fn_droplist_wrap product_images_list clearfix sortable" data-image="product">
     <li class="fn_dropzone dropzone_block">
-        <i class="fa fa-plus font-5xl" aria-hidden="true"></i>
+        {include file='svg_icon.tpl' svgId='upload'}
         <input type="file" name="" data-name="dropped_images[]" multiple class="dropinput fn_template">
     </li>
 
@@ -1032,10 +1032,26 @@ $(window).on("load", function() {
                 </div>
                 <div class="grid_wrapper__items">
                     <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='import'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        import
+                    </div>
+                </div>
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
                         {include file='svg_icon.tpl' svgId='print'}
                     </div>
                     <div class="grid_wrapper__code">
                         print
+                    </div>
+                </div>
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='eye'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        eye
                     </div>
                 </div>
                 <div class="grid_wrapper__items">
@@ -1094,6 +1110,22 @@ $(window).on("load", function() {
                         exchange
                     </div>
                 </div>
+                 <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='yes_icon'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        yes_icon
+                    </div>
+                </div>
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='no_icon'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        no_icon
+                    </div>
+                </div>
                 <div class="grid_wrapper__items">
                     <div class="grid_wrapper__icon">
                         {include file='svg_icon.tpl' svgId='checked'}
@@ -1140,6 +1172,14 @@ $(window).on("load", function() {
                     </div>
                     <div class="grid_wrapper__code">
                         sorts
+                    </div>
+                </div>
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='sorts2'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        sorts2
                     </div>
                 </div>
                 <div class="grid_wrapper__items">
@@ -1206,7 +1246,6 @@ $(window).on("load", function() {
                         exit
                     </div>
                 </div>
-
                 <div class="grid_wrapper__items">
                     <div class="grid_wrapper__icon">
                         {include file='svg_icon.tpl' svgId='delete'}
@@ -1215,7 +1254,6 @@ $(window).on("load", function() {
                         delete
                     </div>
                 </div>
-
                 <div class="grid_wrapper__items">
                     <div class="grid_wrapper__icon">
                         {include file='svg_icon.tpl' svgId='icon_copy'}
@@ -1232,7 +1270,6 @@ $(window).on("load", function() {
                         icon_tooltips
                     </div>
                 </div>
-
                 <div class="grid_wrapper__items">
                     <div class="grid_wrapper__icon">
                         {include file='svg_icon.tpl' svgId='logout'}
@@ -1339,6 +1376,14 @@ $(window).on("load", function() {
                 </div>
                 <div class="grid_wrapper__items">
                     <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='user2_icon'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        user2_icon
+                    </div>
+                </div>
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
                         {include file='svg_icon.tpl' svgId='pass_icon'}
                     </div>
                     <div class="grid_wrapper__code">
@@ -1385,15 +1430,52 @@ $(window).on("load", function() {
                         tag_unknown
                     </div>
                 </div>
-
-
-
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='feed_product'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        feed_product
+                    </div>
+                </div>
+                 <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='feed_features'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        feed_features
+                    </div>
+                </div>
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='feed_category'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        feed_category
+                    </div>
+                </div>
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='feed_settings'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        feed_settings
+                    </div>
+                </div>
                 <div class="grid_wrapper__items">
                     <div class="grid_wrapper__icon">
                         {include file='svg_icon.tpl' svgId='return'}
                     </div>
                     <div class="grid_wrapper__code">
                         return
+                    </div>
+                </div>
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='winner'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        winner
                     </div>
                 </div>
                 <div class="grid_wrapper__items">
@@ -1462,6 +1544,14 @@ $(window).on("load", function() {
                 </div>
                 <div class="grid_wrapper__items">
                     <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='video_icon'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        video_icon
+                    </div>
+                </div>
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
                         {include file='svg_icon.tpl' svgId='info_icon'}
                     </div>
                     <div class="grid_wrapper__code">
@@ -1490,6 +1580,22 @@ $(window).on("load", function() {
                     </div>
                     <div class="grid_wrapper__code">
                         next
+                    </div>
+                </div>
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='upload'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        backup
+                    </div>
+                </div>
+                <div class="grid_wrapper__items">
+                    <div class="grid_wrapper__icon">
+                        {include file='svg_icon.tpl' svgId='upload'}
+                    </div>
+                    <div class="grid_wrapper__code">
+                        upload
                     </div>
                 </div>
             </div>
