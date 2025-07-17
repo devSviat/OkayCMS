@@ -113,8 +113,7 @@ class Init extends AbstractInit
         $this->extendBackendMenu('left_banners', [
             'left_banners_title' => ['BannersAdmin', 'BannerAdmin'],
             'left_banners_images_title' => ['BannersImagesAdmin', 'BannersImageAdmin'],
-        ], '<svg width="20" height="20" viewBox="0 0 24 15" xmlns="http://www.w3.org/2000/svg">
-            <path d="M.918.04h22.164v14.92H.918V.04zM2.2 1.349v12.344h19.614V1.348H2.2zm1.616 5.939l3.968-3.608v7.216L3.816 7.287zm16.475 0l-4 3.636V3.651l4 3.636z" fill="currentColor" />
+        ], '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3v18"/><rect width="12" height="18" x="6" y="3" rx="2"/><path d="M22 3v18"/>
         </svg>');
         
         
