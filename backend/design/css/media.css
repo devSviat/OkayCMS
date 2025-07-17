@@ -11,7 +11,7 @@
         z-index: 1200;
         text-align: center;
         line-height: 84px;
-        background-color: #272b35;
+        background-color: #221f1f;
         padding-left: 10px;
         top: 0;
         left: 0;
@@ -24,7 +24,7 @@
         background: url(../images/logo_img.png) no-repeat center center;
         background-size: cover;
         z-index: 1200;
-        background-color: #272b35;
+        background-color: #221f1f;
     }
     body.menu-pin .page-container {padding-left: 280px;}
     body.menu-pin header.navbar {padding-left: 280px;}
@@ -137,7 +137,7 @@
         margin: 0;
         width: 12px;
         height: 12px;
-        color: rgb(217, 217, 217);
+        color: rgb(204, 204, 204);
         cursor: pointer;
         position: relative;
         top: -4px;

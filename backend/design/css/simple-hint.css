@@ -87,7 +87,7 @@
     font-size: 12px;
     line-height: 14px;
     font-weight: 600;
-    border-radius: 3px;
+    border-radius: 6px;
     padding: 5px 5px 7px;
 }
 
@@ -172,19 +172,20 @@
   opacity: 1; }
 
 [class*="hint-"][class*="-t-info"][class*="hint-bottom"]:before {
-  border-bottom-color: #2b303b; }
+  border-bottom-color: #262423; }
 
 [class*="hint-"][class*="-t-info"][class*="hint-top"]:before {
-  border-top-color: #2b303b; }
+  border-top-color: #262423; }
 
 [class*="hint-"][class*="-t-info"][class*="hint-right"]:before {
-  border-right-color: #2b303b; }
+  border-right-color: #262423; }
 
 [class*="hint-"][class*="-t-info"][class*="hint-left"]:before {
-  border-left-color: #2b303b; }
+  border-left-color: #262423; }
 
 [class*="hint-"][class*="-t-info"]:after {
-  background: #2b303b; }
+  background: #262423;
+  text-transform: none; }
 
 [class*="hint-"][class*="-t-success"][class*="hint-bottom"]:before {
   border-bottom-color: #83C510; }

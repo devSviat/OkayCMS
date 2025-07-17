@@ -21,9 +21,9 @@ select.selectpicker {
   transition: all 0.12s ease;
   -webkit-box-shadow: none;
   box-shadow: none;
-  border-radius: 4px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
+  border-radius: 8px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
   -webkit-transition: background 0.2s linear 0s;
   transition: background 0.2s linear 0s;
   height: 35px;
@@ -158,7 +158,7 @@ select.selectpicker {
   position: static;
   float: none;
   border: 0;
-  padding: 0;
+  padding: 6px;
   margin: 0;
   border-radius: 0;
   -webkit-box-shadow: none;
@@ -172,7 +172,6 @@ select.selectpicker {
 }
 .bootstrap-select.btn-group .dropdown-menu li.selected,
 .bootstrap-select.btn-group .dropdown-menu li.disabled {
-  background: #ddd;
   opacity: 0.5;
 }
 .bootstrap-select.btn-group .dropdown-menu li.selected a,
@@ -293,7 +292,7 @@ select.selectpicker {
 .bs-searchbox,
 .bs-actionsbox,
 .bs-donebutton {
-  padding: 4px 8px;
+  padding: 6px 6px 0 6px;
 }
 .bs-actionsbox {
   width: 100%;
@@ -351,7 +350,7 @@ select.selectpicker {
 }
 
 .dropdown-menu {
-  box-shadow: 5px 5px rgba(102, 102, 102, 0.1);
+  box-shadow: 0 5px 15px 0 hsla(0, 0%, 0%, .08);
   left: 0;
   min-width: 175px;
   position: absolute;
@@ -364,6 +363,7 @@ select.selectpicker {
   background-color: #fff;
   margin: 10px 0 0;
   border: 1px solid #eee;
+  border-radius: 12px;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -395,9 +395,10 @@ select.selectpicker {
 .dropdown-menu > li:hover > a {
   text-decoration: none;
   background-image: none;
-  background-color: #f6f6f6;
-  color: #555;
+  background-color: rgba(238, 238, 238, 0.8);
+  color: #333;
   filter: none;
+  border-radius: 8px;
 }
 
 dropdown-menu.bottom-up {
@@ -412,11 +413,11 @@ dropdown-menu.bottom-up {
 }
 
 .dropdown-menu > li:first-child:hover > a {
-  border-radius: 4px 4px 0 0;
+  border-radius: 8px;
 }
 
 .dropdown-menu > li:last-child:hover > a {
-  border-radius: 0 0 4px 4px;
+  border-radius: 8px;
 }
 
 .dropdown-hover:hover > .dropdown-menu {
@@ -426,7 +427,7 @@ dropdown-menu.bottom-up {
 .btn-group > .dropdown-menu,
 .dropdown-toggle > .dropdown-menu,
 .dropdown > .dropdown-menu {
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .btn-group > .dropdown-menu:before,
@@ -489,7 +490,7 @@ dropdown-menu.bottom-up {
 .dropdown-toggle.dropup > .dropdown-menu,
 .dropdown.dropup > .dropdown-menu {
   margin-top: 0;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .btn-group.dropup > .dropdown-menu:after,
