@@ -1584,7 +1584,7 @@ $(window).on("load", function() {
                 </div>
                 <div class="grid_wrapper__items">
                     <div class="grid_wrapper__icon">
-                        {include file='svg_icon.tpl' svgId='upload'}
+                        {include file='svg_icon.tpl' svgId='backup'}
                     </div>
                     <div class="grid_wrapper__code">
                         backup
