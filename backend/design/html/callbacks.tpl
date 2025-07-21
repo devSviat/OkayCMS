@@ -38,24 +38,25 @@
                     </div>
                 </div>
                 <div class="boxed_sorting toggle_body_wrap off fn_card">
-                <div class="row">
-                    <div class="col-lg-3 col-md-3 col-sm-12">
-                        <select class="selectpicker form-control" onchange="location = this.value;">
-                            <option value="{url keyword=null page=null status=null}" {if $status == null}selected{/if}>{$btr->callbacks_all|escape}</option>
-                            <option value="{url keyword=null page=null status='processed'}" {if $status == 'processed'}selected{/if}>{$btr->general_filter_processed|escape}</option>
-                            <option value="{url keyword=null page=null status='unprocessed'}" {if $status == 'unprocessed'}selected{/if}>{$btr->general_filter_unprocessed|escape}</option>
-                        </select>
-                    </div>
-                    
-                    <div class="col-lg-3 col-md-3 col-sm-12 pull-right">
-                        <div class="pull-right">
-                            <select onchange="location = this.value;" class="selectpicker form-control">
-                                <option value="{url limit=5}" {if $current_limit == 5}selected{/if}>{$btr->general_show_by|escape} 5</option>
-                                <option value="{url limit=10}" {if $current_limit == 10}selected{/if}>{$btr->general_show_by|escape} 10</option>
-                                <option value="{url limit=25}" {if $current_limit == 25}selected{/if}>{$btr->general_show_by|escape} 25</option>
-                                <option value="{url limit=50}" {if $current_limit == 50}selected{/if}>{$btr->general_show_by|escape} 50</option>
-                                <option value="{url limit=100}" {if $current_limit == 100}selected=""{/if}>{$btr->general_show_by|escape} 100</option>
+                    <div class="row">
+                        <div class="col-lg-3 col-md-3 col-sm-12">
+                            <select class="selectpicker form-control" onchange="location = this.value;">
+                                <option value="{url keyword=null page=null status=null}" {if $status == null}selected{/if}>{$btr->callbacks_all|escape}</option>
+                                <option value="{url keyword=null page=null status='processed'}" {if $status == 'processed'}selected{/if}>{$btr->general_filter_processed|escape}</option>
+                                <option value="{url keyword=null page=null status='unprocessed'}" {if $status == 'unprocessed'}selected{/if}>{$btr->general_filter_unprocessed|escape}</option>
                             </select>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-3 col-sm-12 pull-right">
+                            <div class="pull-right">
+                                <select onchange="location = this.value;" class="selectpicker form-control">
+                                    <option value="{url limit=5}" {if $current_limit == 5}selected{/if}>{$btr->general_show_by|escape} 5</option>
+                                    <option value="{url limit=10}" {if $current_limit == 10}selected{/if}>{$btr->general_show_by|escape} 10</option>
+                                    <option value="{url limit=25}" {if $current_limit == 25}selected{/if}>{$btr->general_show_by|escape} 25</option>
+                                    <option value="{url limit=50}" {if $current_limit == 50}selected{/if}>{$btr->general_show_by|escape} 50</option>
+                                    <option value="{url limit=100}" {if $current_limit == 100}selected=""{/if}>{$btr->general_show_by|escape} 100</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
