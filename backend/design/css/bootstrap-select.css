@@ -14,7 +14,7 @@ select.selectpicker {
 }
 .bootstrap-select > .dropdown-toggle {
   width: 100%;
-  background-color: RGB(252, 252, 252);
+  background-color: RGB(255, 255, 255);
   border: 1px solid RGB(228, 228, 228);
   -webkit-appearance: none;
   -webkit-transition: all 0.12s ease;
@@ -37,6 +37,9 @@ select.selectpicker {
   background-image: none;
   padding-right: 10px;
   z-index: 1;
+}
+.bootstrap-select > .dropdown-toggle:active {
+  background-color: RGB(250, 250, 250);
 }
 .bootstrap-select > .dropdown-toggle.bs-placeholder,
 .bootstrap-select > .dropdown-toggle.bs-placeholder:hover,
@@ -160,7 +163,7 @@ select.selectpicker {
   border: 0;
   padding: 6px;
   margin: 0;
-  border-radius: 0;
+  border-radius: 12px;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
