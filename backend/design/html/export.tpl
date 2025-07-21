@@ -49,7 +49,9 @@
     {*Параметры элемента*}
     <div class="boxed fn_toggle_wrap">
         <div class="row">
-            <progress id="progressbar" class="progress progress-info mt-0" style="display: none" value="0" max="100"></progress>
+            <div class="col-lg-12 col-md-12 ">
+                <progress id="progressbar" class="progress progress-info mt-0" style="display: none" value="0" max="100"></progress>
+            </div>
             <div class="col-lg-12 col-md-12 ">
                 <div id="fn_start" class="">
                     <div class="row">
