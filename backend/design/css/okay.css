@@ -168,7 +168,7 @@ body:not(.top-nav) header.navbar {
     z-index: 200;
 }
 .fn_tooltips{
-    display: true;
+    display: none;
 }
 /********************************************************* Text  */
 .text-success,
