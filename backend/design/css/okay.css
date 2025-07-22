@@ -4587,9 +4587,10 @@ label.switch_label i{
 .purchases_table{
     width: 100%;
     background-color: #fff;
-    border: 1px solid #ddd;
+    border: 1px solid #e4e4e4;
     border-bottom: none;
     height: auto;
+    box-shadow: 0px 1px 4px -1px rgba(16, 24, 40, 0.05);
 }
 .purchases_table .purchases_head{
     width: 100%;
@@ -4608,8 +4609,8 @@ label.switch_label i{
     font-family: 'Open Sans Condensed', sans-serif;
     text-transform: uppercase;
     font-size: 14px;
-    background-color: transparent;
-    border-bottom: 1px solid #ccc;
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #e4e4e4;
 }
 .purchases_table .purchases_body_items,
 .purchases_table .purchases_body{
@@ -4649,7 +4650,7 @@ label.switch_label i{
 }
 .purchases_table .purchases_body_item{
     background: #fff;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #e4e4e4;
     color: #262423;
 }
 .purchases_head .purchases_heading,
@@ -5252,8 +5253,8 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     border: 1px solid rgba(204, 204, 204, 0.2);
     padding: 0;
     background: #fff;
-    -webkit-box-shadow: 0 0 5px rgba(204, 204, 204,0.2);
-    box-shadow: 0 0 5px rgba(204, 204, 204,0.2);
+    -webkit-box-shadow: 0 4px 6px -1px rgba(136, 136, 136, 0.05), 0 2px 4px -2px rgba(136, 136, 136, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(136, 136, 136, 0.05), 0 2px 4px -2px rgba(136, 136, 136, 0.1);
     color: rgb(118, 118, 118);
     cursor: pointer;
     z-index: 200;
@@ -5286,6 +5287,9 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     -webkit-justify-content: space-between;
     -ms-flex-pack: justify;
 }
+.notification_toggle .notif_item:last-child{
+    border-bottom: none;
+}
 .notification_toggle .notif_item .l_notif{
     display: flex;
     align-items: center;
@@ -5302,7 +5306,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     text-align: center;
     height: 32px;
     border-radius: 6px;
-    line-height: 39px;
+    line-height: 38px;
 }
 .notification_toggle .notif_icon svg{
     width: 16px;
@@ -8872,7 +8876,7 @@ ul.submenu .menu_counter {
     justify-content: center;
     height: 25px;
     width: 100%;
-    border-radius: 4px;
+    border-radius: 6px;
     border: none;
     font-size: 12px;
     font-weight: 500;
