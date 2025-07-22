@@ -714,10 +714,10 @@
         right: -285px;
         top: 0;
         width: 285px;
-        background: #fff;
+        background: #262423;
         bottom: 0;
         z-index: 1000;
-        box-shadow: 0 0 9px rgba(191, 191, 191, 0.36);
+        box-shadow: 0 0 9px rgba(19, 19, 19, 0.1);
         -webkit-transition: -webkit-transform 400ms cubic-bezier(0.05, 0.74, 0.27, 0.99);
         transition: transform 400ms cubic-bezier(0.05, 0.74, 0.27, 0.99);
         -webkit-backface-visibility: hidden;
@@ -748,8 +748,8 @@
     .admin_techsupport a,
     .admin_languages .languages_title,
     .admin_exit a {
-        background: rgb(250, 250, 250);
-        color: rgb(35, 40, 48);
+        background: #262423;
+        color: #c5c5c5;
         border-bottom: 1px solid rgba(0, 0, 0, 0.07);
         border-top: 1px solid rgba(0, 0, 0, 0.07);
         text-transform: uppercase;
@@ -760,7 +760,7 @@
     .quickview_hidden{padding-top: 5px;}
     
     .admin_languages .languages_title {
-        padding: 10px 10px;
+        padding: 10px 0;
         line-height: 1.6;
         height: 40px;
         font-weight: 500;
@@ -771,7 +771,7 @@
     }
     
     .admin_languages .languages_inner {
-        padding: 0px;
+        padding: 10px;
     }
     
     .admin_languages a svg,
@@ -805,9 +805,19 @@
         transition: none;
         -webkit-transform: translateX(0%);
         -ms-transform: translateX(0%);
-        padding: 10px 15px 0px 10px;
+        padding: 8px 15px 8px 10px;
         z-index: 200;
-        
+        background: #201f1e;
+
+    }
+    .notification_toggle .notif_item {
+        border-bottom: 1px solid rgba(38, 36, 35, 0.8);
+    }
+    .notification_toggle .notif_item .l_notif {
+        color: #999;
+    }
+    .notification_toggle .notif_count {
+        color: #d1d1d1;
     }
     
     .admin_notification .counter,
@@ -827,7 +837,7 @@
     }
     
     #quickview .sidebar_header {
-        padding-left: 10px;
+        padding-left: 15px;
     }
     
     #quickview .sidebar_header .logo_box {
@@ -875,6 +885,8 @@
         max-width: 100%;
     }
     .btn_small {padding: 12px 18px;width: 100%;display: flex;justify-content: center;}
+    #fast_save_button_and_quit {margin-left: 0 !important; margin-bottom: 8px;}
+    .fast_save_button_and_quit {margin-left: 0 !important;}
 }
 /* Extra Small Devices, Phones */
 @media (min-width : 576px) {
