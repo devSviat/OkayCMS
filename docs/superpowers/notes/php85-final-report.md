@@ -65,6 +65,37 @@ Not upgraded (work on 8.5 as-is): smarty (3.1.40 — secure/clean version requir
 3. **php74 service is now vestigial.** With 7.4 dropped, the app cannot boot on php74 (composer platform_check requires ≥8.2). Consider repointing nginx to php85 / retiring php74 as a cleanup.
 4. **Not smoke-tested end-to-end:** admin login POST (CSRF/session), email send, file upload, full checkout flow. Login form, catalog, cart, search, blog, brands, sitemap, and the scheduler CLI (DB-backed) were verified at HTTP/CLI level.
 
+## Addendum — runtime deprecation sweep (debug-mode crawl)
+
+After the initial "boots on 8.5" milestone, a debug-mode crawl of the storefront
+and admin surfaced data-dependent runtime deprecations not visible to static
+analysis. All first-party occurrences were fixed and the crawl now reports
+**zero** first-party and **zero** vendor deprecations.
+
+**Dependency upgrades (approved):**
+- `smarty/smarty` 3.1.40 → 4.5.6 — implicit-nullable + dynamic-property floods + CVE-2024-35226; keeps the `\Smarty` API (Smarty 5 namespacing avoided).
+- `aura/sqlquery` 2.7.1 → 2.8.1 — fixes `preg_split()` null-limit while staying on the 2.x API (no QueryFactory interface migration; aura/sqlquery 3.0 was evaluated and rejected as too invasive for the reward).
+- `matthiasmullie/minify` 1.3.66 → 1.3.75 — drops `parent` in callables.
+
+**First-party runtime fixes:**
+- `Okay/Core/Request.php` — `(string)` cast before `preg_replace` in `get()`/`post()`.
+- `Okay/Entities/ManagersEntity.php` — guard `unserialize()`, default `menu` to `[]` (also clears the `ManagerMenu` "false to array" deprecation).
+- `Okay/Core/Design.php` — register security-allowed PHP functions as Smarty 4 modifiers (after the custom-modifier flush) to satisfy Smarty 4's "register your modifiers" requirement without `already registered` conflicts.
+- `Okay/Core/QueryFactory/SqlQuery.php` — add `resetFlags()` (forward-compat).
+- `backend/Controllers/IndexAdmin.php` — drop deprecated `curl_close()`.
+
+**Detection method (reusable):** with `debug_mode=true`, crawl pages then
+`docker logs <php85> | grep 'Deprecated:'` and split first-party (`/Okay/`,
+`/backend/`) from vendor (`/vendor/<pkg>/`). Production (`debug_mode=false`,
+`error_reporting` excludes `E_DEPRECATED`) never emitted these.
+
+**Tests added (this sweep):** `tests/Php85/DynamicPropertyComplianceTest`,
+`NullArgumentSafetyTest` (now incl. Request), `AuraSqlQueryCompatTest`. Suite: **166** green.
+
+**Known dev-only note:** on a cold Smarty cache, the first request to a complex
+template can exceed the fpm timeout (one-off 502); subsequent requests are 200.
+Pre-warm or pre-compile templates in deployment.
+
 ## PHP 8.5 Support Status
 
 **Supported and verified.** On PHP 8.5.7: storefront and admin return HTTP 200, the `./ok` CLI runs against the DB, and PHPUnit (158), PHPStan, and PHPCompatibility (testVersion 8.2-) all pass. No known blocking compatibility issues remain in first-party code.

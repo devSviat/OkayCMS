@@ -8,8 +8,8 @@ OkayCMS (fork) — PHP e-commerce platform with a modular architecture, custom D
 
 ## Stack
 
-- PHP `^7.4 || ^8.0`
-- Smarty `~3.1` (templating)
+- PHP `^8.2` (verified on 8.2–8.5)
+- Smarty `^4.5` (templating)
 - Custom DI container (`Okay\Core\OkayContainer`)
 - Custom ORM (`Okay\Core\Entity\Entity`)
 - Symfony Console (the `./ok` CLI), Aura.Sql / Aura.SqlQuery (DB layer)
@@ -28,7 +28,7 @@ php vendor/bin/phpunit --filter TplModTest   # run a single test class
 ./ok module:create                     # scaffold a new module
 ```
 
-Run CLI/PHPUnit inside the PHP container if PHP is not on the host: `cd dev && docker compose exec php74 php vendor/bin/phpunit`.
+Run CLI/PHPUnit inside the PHP container if PHP is not on the host: `cd dev && docker compose exec php85 php vendor/bin/phpunit` (the `php85` service runs PHP 8.5; the legacy `php74` service is retained but the app now requires PHP ≥ 8.2 and will not boot on it).
 
 Local env config lives in `dev/.env` (copy from `dev/.env-example`). On container creation the default DB dump `1DB_changes/okay_clean.sql` is loaded and the `admin` manager is (re)created.
 
