@@ -871,7 +871,7 @@ class FilterHelper
 
     public function parseFilterUrl($filtersUrl)
     {
-        return explode('/', $filtersUrl);
+        return explode('/', (string)$filtersUrl);
     }
 
     private function getBrand($url)
@@ -976,7 +976,7 @@ class FilterHelper
     public function getKeyword(): ?string
     {
         $keyword = $this->request->get('keyword', null, null, false);
-        if ($keyword = strip_tags($keyword)) {
+        if ($keyword = strip_tags((string)$keyword)) {
             $result = $keyword;
         } else {
             $result = null;

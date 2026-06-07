@@ -375,7 +375,7 @@ class Design
 
     public function getModuleTemplatesDir()
     {
-        return rtrim($this->moduleTemplateDir , '/');
+        return rtrim((string)$this->moduleTemplateDir , '/');
     }
 
     /*Установка директории файлов шаблона(отображения)*/
