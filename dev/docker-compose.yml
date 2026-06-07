@@ -39,13 +39,13 @@ services:
     ports:
       - '${HTTP_PORT:?err}:80'
     links:
-      - php74
+      - php85
     volumes:
       - '..:/var/www/html'
       - './config/nginx:/etc/nginx/conf.d'
       - './config/nginx/templates:/etc/nginx/templates'
     environment:
-      - FASTCGI=${APP_NAME:?err}-php
+      - FASTCGI=${APP_NAME:?err}-php85
       - VIRTUAL_HOST=${VIRTUAL_HOST:?err}
 
   mariadb:

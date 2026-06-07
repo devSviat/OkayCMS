@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5']
+    name: PHP ${{ matrix.php }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: simplexml, xmlreader, pdo, json, curl, mbstring, zip, gd, xsl
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      # PHPCompatibility statically targets testVersion 8.2- regardless of the
+      # runtime, so it is safe to run on every matrix entry.
+      - name: PHPCompatibility
+        run: vendor/bin/phpcs -q
+
+      - name: PHPUnit
+        run: vendor/bin/phpunit
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    name: PHPStan (PHP 8.5)
+    steps:
+      - uses: actions/checkout@v4
+
+      # PHPStan analysis is sensitive to the runtime PHP version and its
+      # baseline was generated on 8.5, so it runs on a single version to avoid
+      # baseline drift across the matrix.
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: simplexml, xmlreader, pdo, json, curl, mbstring, zip, gd, xsl
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --no-progress
