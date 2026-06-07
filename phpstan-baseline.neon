@@ -1,0 +1,919 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Undefined variable\: \$category$#'
+			identifier: variable.undefined
+			count: 1
+			path: Okay/Controllers/AuthorsController.php
+
+		-
+			message: '#^Variable \$category in empty\(\) is never defined\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Controllers/AuthorsController.php
+
+		-
+			message: '#^Variable \$category in empty\(\) always exists and is always falsy\.$#'
+			identifier: empty.variable
+			count: 4
+			path: Okay/Controllers/BlogController.php
+
+		-
+			message: '#^Variable \$prefix in empty\(\) is never defined\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Controllers/BlogController.php
+
+		-
+			message: '#^Function imagegif invoked with 3 parameters, 1\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: Okay/Core/Adapters/Resize/GD.php
+
+		-
+			message: '#^Variable \$items in empty\(\) always exists and is always falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Core/Cart.php
+
+		-
+			message: '#^Variable \$signs in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Core/Cart.php
+
+		-
+			message: '#^Variable \$signs in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Core/Classes/Purchase.php
+
+		-
+			message: '#^Variable \$images_ids in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Core/Comparison.php
+
+		-
+			message: '#^Method Okay\\Core\\Console\\Commands\\Module\\ModuleCreateCommand\:\:formatCamelCase\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: Okay/Core/Console/Commands/Module/ModuleCreateCommand.php
+
+		-
+			message: '#^Variable \$cropPositionX in empty\(\) always exists and is always falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Core/Image.php
+
+		-
+			message: '#^Variable \$cropPositionY in empty\(\) always exists and is always falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Core/Image.php
+
+		-
+			message: '#^Variable \$resizedDir in empty\(\) always exists and is always falsy\.$#'
+			identifier: empty.variable
+			count: 2
+			path: Okay/Core/Image.php
+
+		-
+			message: '#^Variable \$comment might not be defined\.$#'
+			identifier: variable.undefined
+			count: 10
+			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Variable \$recipients in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Method Okay\\Core\\QueryFactory\\SqlQuery\:\:getQuoteNamePrefix\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Okay/Core/QueryFactory/SqlQuery.php
+
+		-
+			message: '#^Method Okay\\Core\\QueryFactory\\SqlQuery\:\:getQuoteNameSuffix\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Okay/Core/QueryFactory/SqlQuery.php
+
+		-
+			message: '#^Variable \$argv in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Core/Request.php
+
+		-
+			message: '#^Variable \$mappedCacheUrlSlugByUrl on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: Okay/Core/Routes/AbstractRoute.php
+
+		-
+			message: '#^Call to an undefined method \$this\(Okay\\Core\\SmartyPlugins\\Plugin\)&Okay\\Core\\SmartyPlugins\\Func\:\:run\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: Okay/Core/SmartyPlugins/Plugin.php
+
+		-
+			message: '#^Variable \$parentNode in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Core/TplMod/Parser.php
+
+		-
+			message: '#^Regex pattern is invalid\: Unknown modifier ''/'' in pattern\: /\^\(\?\:https\?\://\)\?\[a\-zA\-Zа\-яА\-Я\\d\]\+\?\(\?\:\-\+\[a\-zA\-Zа\-яА\-Я\\d\]\+\?\)\*\\\.\(\?\:\[a\-zA\-Zа\-яА\-Я\\d\.\]\+\?\(\?\:\-\+\[a\-zA\-Zа\-яА\-Я\\d\]\+\?\)\*\)\+/\?\$/ui$#'
+			identifier: regexp.pattern
+			count: 1
+			path: Okay/Core/Validator.php
+
+		-
+			message: '#^Method Okay\\Entities\\AuthorsEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Okay/Entities/AuthorsEntity.php
+
+		-
+			message: '#^Method Okay\\Entities\\BrandsEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Okay/Entities/BrandsEntity.php
+
+		-
+			message: '#^Method Okay\\Entities\\FeaturesEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Okay/Entities/FeaturesEntity.php
+
+		-
+			message: '#^Variable \$ids in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Entities/FeaturesEntity.php
+
+		-
+			message: '#^Variable \$langId in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: Okay/Entities/LanguagesEntity.php
+
+		-
+			message: '#^Variable \$ordersIds in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Entities/OrdersEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Entities\\TranslationsEntity\:\:\$templateOnly\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Okay/Entities/TranslationsEntity.php
+
+		-
+			message: '#^Variable \$category in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Helpers/BlogHelper.php
+
+		-
+			message: '#^Variable \$post in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Helpers/BlogHelper.php
+
+		-
+			message: '#^Variable \$brand in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Helpers/BrandsHelper.php
+
+		-
+			message: '#^Variable \$category in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Helpers/CategoriesHelper.php
+
+		-
+			message: '#^Variable \$page in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Helpers/PagesHelper.php
+
+		-
+			message: '#^Variable \$product in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Helpers/ProductsHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Modules\\OkayCMS\\Feeds\\Helpers\\FeedsHelper\:\:\$firstLanguage\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Helpers/FeedsHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Modules\\OkayCMS\\Feeds\\Helpers\\FeedsHelper\:\:\$language\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Okay/Modules/OkayCMS/Feeds/Helpers/FeedsHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Modules\\OkayCMS\\Feeds\\Helpers\\FeedsHelper\:\:\$languages\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Helpers/FeedsHelper.php
+
+		-
+			message: '#^Method Okay\\Modules\\OkayCMS\\GoogleMerchant\\Entities\\GoogleMerchantFeedsEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Okay/Modules/OkayCMS/GoogleMerchant/Entities/GoogleMerchantFeedsEntity.php
+
+		-
+			message: '#^Method Okay\\Modules\\OkayCMS\\Hotline\\Entities\\HotlineFeedsEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Okay/Modules/OkayCMS/Hotline/Entities/HotlineFeedsEntity.php
+
+		-
+			message: '#^Variable \$featureId in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportProducts.php
+
+		-
+			message: '#^Method Okay\\Modules\\OkayCMS\\NovaposhtaCost\\Entities\\NPCitiesEntity\:\:update\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Entities/NPCitiesEntity.php
+
+		-
+			message: '#^Method Okay\\Modules\\OkayCMS\\NovaposhtaCost\\Entities\\NPWarehousesEntity\:\:update\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Entities/NPWarehousesEntity.php
+
+		-
+			message: '#^Method Okay\\Modules\\OkayCMS\\Rozetka\\Entities\\RozetkaFeedsEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Okay/Modules/OkayCMS/Rozetka/Entities/RozetkaFeedsEntity.php
+
+		-
+			message: '#^Variable \$link in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Okay/Modules/OkayCMS/RozetkaPay/Models/Gateway/Client/HttpCurl.php
+
+		-
+			message: '#^Variable \$page might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/Controllers/ImportLogAdmin.php
+
+		-
+			message: '#^Variable \$error in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: backend/Controllers/SettingsCatalogAdmin.php
+
+		-
+			message: '#^Cannot unset offset ''limit'' on array\{\}\.$#'
+			identifier: unset.offset
+			count: 1
+			path: backend/Helpers/BackendBlogHelper.php
+
+		-
+			message: '#^Undefined variable\: \$category$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/Helpers/BackendCategoryStatsHelper.php
+
+		-
+			message: '#^Variable \$category in empty\(\) is never defined\.$#'
+			identifier: empty.variable
+			count: 1
+			path: backend/Helpers/BackendCategoryStatsHelper.php
+
+		-
+			message: '#^Variable \$date_from in empty\(\) is never defined\.$#'
+			identifier: empty.variable
+			count: 1
+			path: backend/Helpers/BackendCategoryStatsHelper.php
+
+		-
+			message: '#^Variable \$date_to in empty\(\) is never defined\.$#'
+			identifier: empty.variable
+			count: 1
+			path: backend/Helpers/BackendCategoryStatsHelper.php
+
+		-
+			message: '#^Cannot unset offset ''limit'' on array\{\}\.$#'
+			identifier: unset.offset
+			count: 1
+			path: backend/Helpers/BackendDeliveriesHelper.php
+
+		-
+			message: '#^Variable \$addedFeatureValuesIds on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: backend/Helpers/BackendFeaturesValuesHelper.php
+
+		-
+			message: '#^Undefined variable\: \$itemFromCsv$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/Helpers/BackendImportHelper.php
+
+		-
+			message: '#^Variable \$itemFromCsv in empty\(\) is never defined\.$#'
+			identifier: empty.variable
+			count: 1
+			path: backend/Helpers/BackendImportHelper.php
+
+		-
+			message: '#^Cannot unset offset ''limit'' on array\{\}\.$#'
+			identifier: unset.offset
+			count: 1
+			path: backend/Helpers/BackendPaymentsHelper.php
+
+		-
+			message: '#^Variable \$imagesIds in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: backend/Helpers/BackendProductsHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Admin\\Helpers\\BackendSettingsHelper\:\:\$licenseModulesTemplates\.$#'
+			identifier: property.notFound
+			count: 3
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Variable \$menuItems might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/Requests/BackendMenuRequest.php
+
+		-
+			message: '#^Variable \$DI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: backend/ajax/export.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/export.php
+
+		-
+			message: '#^Variable \$DI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: backend/ajax/export_orders.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: backend/ajax/export_orders.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 5
+			path: backend/ajax/export_orders.php
+
+		-
+			message: '#^Variable \$DI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: backend/ajax/export_stat.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: backend/ajax/export_stat.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 5
+			path: backend/ajax/export_stat.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/export_stat.php
+
+		-
+			message: '#^Variable \$DI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: backend/ajax/export_subscribes.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/export_subscribes.php
+
+		-
+			message: '#^Variable \$managersEntity might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/export_subscribes.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/export_subscribes.php
+
+		-
+			message: '#^Variable \$DI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: backend/ajax/export_users.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/export_users.php
+
+		-
+			message: '#^Variable \$managersEntity might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/export_users.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: backend/ajax/export_users.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/get_features.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/get_features.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/get_features.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/get_features.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/get_features.php
+
+		-
+			message: '#^Variable \$DI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: backend/ajax/import.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/import.php
+
+		-
+			message: '#^Variable \$line in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: backend/ajax/import.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/import.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/import.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/import.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/lesson_done.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/lesson_done.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/lesson_done.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/lesson_done.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/market.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/market.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/market.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: backend/ajax/market.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/market.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/merge_options_autocomplete.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/merge_options_autocomplete.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/merge_options_autocomplete.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/merge_options_autocomplete.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/merge_options_autocomplete.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/options_autocomplete.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/options_autocomplete.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/options_autocomplete.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/options_autocomplete.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/options_autocomplete.php
+
+		-
+			message: '#^Variable \$config might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/save_script.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/save_script.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/save_script.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: backend/ajax/save_script.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/save_script.php
+
+		-
+			message: '#^Variable \$config might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/save_style.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/save_style.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/save_style.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: backend/ajax/save_style.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/save_style.php
+
+		-
+			message: '#^Variable \$config might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/save_template.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/save_template.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/save_template.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 5
+			path: backend/ajax/save_template.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/save_template.php
+
+		-
+			message: '#^Variable \$DI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/search_products.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/search_products.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/search_products.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/search_products.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/search_products.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/search_products.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/search_users.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/search_users.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/search_users.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/search_users.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/search_users.php
+
+		-
+			message: '#^Variable \$DI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/stat.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/stat.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/stat.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/stat.php
+
+		-
+			message: '#^Class Okay\\Entities\\BannersEntity not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: backend/ajax/update_object.php
+
+		-
+			message: '#^Class Okay\\Entities\\BannersImagesEntity not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: backend/ajax/update_object.php
+
+		-
+			message: '#^Variable \$DI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/update_object.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 27
+			path: backend/ajax/update_object.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 25
+			path: backend/ajax/update_object.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 25
+			path: backend/ajax/update_object.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 5
+			path: backend/ajax/update_object.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/update_object.php
+
+		-
+			message: '#^Variable \$DI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/update_order.php
+
+		-
+			message: '#^Variable \$entityFactory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/update_order.php
+
+		-
+			message: '#^Variable \$manager might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/update_order.php
+
+		-
+			message: '#^Variable \$managers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: backend/ajax/update_order.php
+
+		-
+			message: '#^Variable \$request might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: backend/ajax/update_order.php
+
+		-
+			message: '#^Variable \$response might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/ajax/update_order.php
+
+		-
+			message: '#^Variable \$_smarty_tpl might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/design/compiled/228fc24d2ce275155febeb28a89ab4fa1c29b733_0.file.auth.tpl.php
+
+		-
+			message: '#^Variable \$_smarty_tpl might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: backend/design/compiled/72c08d29a48c0c06b6978d10201e678c8d087de9_0.file.svg_icon.tpl.php

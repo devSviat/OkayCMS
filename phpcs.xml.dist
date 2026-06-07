@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<ruleset name="OkayCMS PHP Compatibility">
+    <description>Check PHP 8.5 compatibility (minimum supported: 8.2).</description>
+
+    <file>Okay</file>
+    <file>backend</file>
+    <file>ok</file>
+
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/compiled/*</exclude-pattern>
+    <exclude-pattern>*/cache/*</exclude-pattern>
+
+    <arg name="extensions" value="php"/>
+    <arg value="p"/>
+
+    <config name="testVersion" value="8.2-"/>
+
+    <!-- Warnings (e.g. legacy pre-8.x ini checks) stay visible but do not fail CI; only errors gate. -->
+    <config name="ignore_warnings_on_exit" value="1"/>
+
+    <rule ref="PHPCompatibility"/>
+
+    <!--
+        Out of scope for PHP 8.5 support: this sniff reports the PHP 7.0
+        change to how func_get_args() observes parameters that were modified
+        before the call. It fires pervasively on the ExtenderFacade pattern
+        (`ExtenderFacade::execute(__METHOD__, $result, func_get_args())`).
+        The behaviour has been in effect since PHP 7.0 and the codebase
+        already runs on 7.4/8.x; it is not a new 8.5 incompatibility.
+    -->
+    <rule ref="PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue">
+        <severity>0</severity>
+    </rule>
+</ruleset>

@@ -1,0 +1,13 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 1
+    paths:
+        - Okay
+        - backend
+    excludePaths:
+        - Okay/Modules/*/vendor/*
+        - backend/design/js/filemanager/*
+    bootstrapFiles:
+        - vendor/autoload.php
