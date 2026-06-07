@@ -124,7 +124,7 @@ class BannerImageLangBackupDTO implements \JsonSerializable
         $this->imageMobile = $imageMobile;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return get_object_vars($this);
     }
