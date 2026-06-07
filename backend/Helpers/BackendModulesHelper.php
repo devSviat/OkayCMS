@@ -192,7 +192,6 @@ class BackendModulesHelper
         }
         $_SESSION['modules_request_timeout_try_cnt'] = $retryCnt;
 
-        curl_close($ch);
         return $result;
     }
     
