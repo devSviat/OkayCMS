@@ -51,7 +51,7 @@ class Database
         $this->dbParams     = (object)$dbParams;
         $this->queryFactory = $queryFactory;
 
-        $this->pdo->connect();
+        $this->pdo->lazyConnect();
 
         if (!empty($this->dbParams->db_names)) {
             $sql = $this->queryFactory->newSqlQuery();

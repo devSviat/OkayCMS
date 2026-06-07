@@ -55,7 +55,7 @@ class DatabaseDeployCommand extends Command
             $name = $this->ask("Enter database NAME({$name}): ", $name);
 
             $pdo = new ExtendedPdo("{$driver}:host={$server};dbname={$name};charset={$charset}", $user, $password);
-            $pdo->connect();
+            $pdo->lazyConnect();
 
             $config->set('db_server', $server);
             $config->set('db_user', $user);
@@ -63,7 +63,7 @@ class DatabaseDeployCommand extends Command
             $config->set('db_name', $name);
         } else {
             $pdo = new ExtendedPdo("{$driver}:host={$server};dbname={$name};charset={$charset}", $user, $password);
-            $pdo->connect();
+            $pdo->lazyConnect();
         }
 
         $this->restore($pdo, $filename);

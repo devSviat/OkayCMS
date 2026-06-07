@@ -41,7 +41,7 @@
         "psr/log": "^1.1",
         "monolog/monolog": "^1.24",
         "aura/sqlquery": "^2.7",
-        "aura/sql": "^3.0",
+        "aura/sql": "^6.0",
         "haydenpierce/class-finder": "^0.3.3",
         "axy/sourcemap": "^0.1.4",
         "snowplow/referer-parser": "^0.2.0",

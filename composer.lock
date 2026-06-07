@@ -4,29 +4,30 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8157191913513ffa33e77b9d936f6ba9",
+    "content-hash": "bc5afb4e5bc7732ae90f71d92d91076e",
     "packages": [
         {
             "name": "aura/sql",
-            "version": "3.0.0",
+            "version": "6.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/auraphp/Aura.Sql.git",
-                "reference": "2be02d5dfd9fdee6df199de1a19572aa490bb744"
+                "reference": "0f4ac7a11b435a9854a28d686e7269ebe7582ec8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/auraphp/Aura.Sql/zipball/2be02d5dfd9fdee6df199de1a19572aa490bb744",
-                "reference": "2be02d5dfd9fdee6df199de1a19572aa490bb744",
+                "url": "https://api.github.com/repos/auraphp/Aura.Sql/zipball/0f4ac7a11b435a9854a28d686e7269ebe7582ec8",
+                "reference": "0f4ac7a11b435a9854a28d686e7269ebe7582ec8",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.6.0",
-                "psr/log": "^1.0"
+                "ext-pdo": "*",
+                "php": "^8.4",
+                "psr/log": "^1.0 || ^2.0 || ^3.0"
             },
             "require-dev": {
                 "pds/skeleton": "~1.0",
-                "phpunit/phpunit": "~5.0"
+                "phpunit/phpunit": "^9.5"
             },
             "type": "library",
             "autoload": {
@@ -57,7 +58,11 @@
                 "sqlserver",
                 "sqlsrv"
             ],
-            "time": "2018-06-11T12:57:42+00:00"
+            "support": {
+                "issues": "https://github.com/auraphp/Aura.Sql/issues",
+                "source": "https://github.com/auraphp/Aura.Sql/tree/6.0.1"
+            },
+            "time": "2026-01-05T05:21:45+00:00"
         },
         {
             "name": "aura/sqlquery",
