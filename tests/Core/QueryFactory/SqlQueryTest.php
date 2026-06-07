@@ -1,6 +1,6 @@
 <?php
 
-namespace Php85;
+namespace Core\QueryFactory;
 
 use Okay\Core\QueryFactory\SqlQuery;
 use Aura\SqlQuery\QueryInterface;
@@ -12,9 +12,9 @@ use ReflectionClass;
  * SqlQuery wrapper implements the full interface (otherwise it would be abstract
  * and uninstantiable) and that resetFlags() is chainable.
  */
-class AuraSqlQueryCompatTest extends TestCase
+class SqlQueryTest extends TestCase
 {
-    public function testSqlQueryImplementsQueryInterfaceFully(): void
+    public function testImplementsQueryInterfaceFully(): void
     {
         $reflection = new ReflectionClass(SqlQuery::class);
 

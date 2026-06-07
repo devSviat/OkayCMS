@@ -31,8 +31,10 @@ OkayCMS (fork) now runs on PHP 8.5. A dedicated `php85` Docker service was added
 - `backend/design/js/filemanager/UploadHandler.php` — reversed `implode()` arg order corrected.
 
 **Tests (new)**
-- `tests/Php85/ImplicitNullableComplianceTest.php` — 5 cases.
-- `tests/Php85/TentativeReturnTypeComplianceTest.php` — 5 cases.
+- Per-component compliance tests mirroring the source tree (implicit-nullable
+  compile guards for `tests/Core/MoneyTest`, `ResponseTest`, `tests/Helpers/
+  FilterHelperTest`, `CatalogHelperTest`, `CategoriesHelperTest`; tentative
+  return types for `tests/Modules/OkayCMS/Banners/BannerDtoReturnTypeTest`).
 
 **Not committed (per user)**
 - `.github/workflows/ci.yml` — PHP 8.2-8.5 matrix workflow (kept in working tree; commit deferred).
@@ -89,8 +91,13 @@ analysis. All first-party occurrences were fixed and the crawl now reports
 `/backend/`) from vendor (`/vendor/<pkg>/`). Production (`debug_mode=false`,
 `error_reporting` excludes `E_DEPRECATED`) never emitted these.
 
-**Tests added (this sweep):** `tests/Php85/DynamicPropertyComplianceTest`,
-`NullArgumentSafetyTest` (now incl. Request), `AuraSqlQueryCompatTest`. Suite: **166** green.
+**Tests added (this sweep):** dynamic-property guards (`tests/Core/
+FrontTranslationsTest`, `BackendTranslationsTest`, `tests/Entities/
+TranslationsEntityTest`, `tests/Admin/Helpers/BackendSettingsHelperTest`,
+`tests/Modules/OkayCMS/Feeds/FeedsHelperTest`), null-argument safety
+(`tests/Core/RequestTest`, `DesignTest`, `tests/Helpers/FilterHelperTest`) and
+`tests/Core/QueryFactory/SqlQueryTest`. All tests live under the component
+folder of the class they cover, matching the rest of `tests/`.
 
 **Known dev-only note:** on a cold Smarty cache, the first request to a complex
 template can exceed the fpm timeout (one-off 502); subsequent requests are 200.
