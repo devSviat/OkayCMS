@@ -7,6 +7,7 @@ namespace Okay\Core;
 use Okay\Core\Modules\Modules;
 use Psr\Log\LoggerInterface;
 
+#[\AllowDynamicProperties]
 class BackendTranslations
 {
     

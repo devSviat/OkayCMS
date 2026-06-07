@@ -169,12 +169,6 @@ parameters:
 			path: Okay/Entities/OrdersEntity.php
 
 		-
-			message: '#^Access to an undefined property Okay\\Entities\\TranslationsEntity\:\:\$templateOnly\.$#'
-			identifier: property.notFound
-			count: 2
-			path: Okay/Entities/TranslationsEntity.php
-
-		-
 			message: '#^Variable \$category in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1

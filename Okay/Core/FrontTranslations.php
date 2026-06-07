@@ -7,6 +7,7 @@ namespace Okay\Core;
 use Okay\Core\Modules\Modules;
 use Okay\Entities\TranslationsEntity;
 
+#[\AllowDynamicProperties]
 class FrontTranslations
 {
     
