@@ -372,6 +372,20 @@ class Design
                 }
             }
         }
+
+        // Smarty 4 deprecates static class access in templates unless the class is
+        // registered. Templates reference these classes by their full name.
+        $staticClasses = [
+            \Okay\Core\UserReferer\UserReferer::class,
+            \Okay\Helpers\AiRequests\AiBrandRequest::class,
+            \Okay\Helpers\AiRequests\AiCategoryRequest::class,
+            \Okay\Helpers\AiRequests\AiProductRequest::class,
+        ];
+        foreach ($staticClasses as $staticClass) {
+            if (!isset($this->smarty->registered_classes[$staticClass])) {
+                $this->smarty->registerClass($staticClass, $staticClass);
+            }
+        }
     }
 
     public function getDefaultTemplatesDir()

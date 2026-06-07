@@ -899,15 +899,3 @@ parameters:
 			identifier: variable.undefined
 			count: 2
 			path: backend/ajax/update_order.php
-
-		-
-			message: '#^Variable \$_smarty_tpl might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: backend/design/compiled/228fc24d2ce275155febeb28a89ab4fa1c29b733_0.file.auth.tpl.php
-
-		-
-			message: '#^Variable \$_smarty_tpl might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: backend/design/compiled/72c08d29a48c0c06b6978d10201e678c8d087de9_0.file.svg_icon.tpl.php
