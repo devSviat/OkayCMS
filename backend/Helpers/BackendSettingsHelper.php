@@ -83,6 +83,11 @@ class BackendSettingsHelper
      */
     private $imageCore;
 
+    /**
+     * @var LicenseModulesTemplates
+     */
+    private $licenseModulesTemplates;
+
     private $allowedImageExtensions = ['png', 'gif', 'jpg', 'jpeg', 'ico', 'svg'];
 
     public function __construct(

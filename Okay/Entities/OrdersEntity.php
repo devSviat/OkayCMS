@@ -316,11 +316,15 @@ class OrdersEntity extends Entity
         $ordersIds = [];
         $this->db->query($nextSelect);
         $id = $this->db->result('id');
-        $ordersIds[$id] = 'next';
+        if ($id !== null) {
+            $ordersIds[$id] = 'next';
+        }
 
         $this->db->query($prevSelect);
         $id = $this->db->result('id');
-        $ordersIds[$id] = 'prev';
+        if ($id !== null) {
+            $ordersIds[$id] = 'prev';
+        }
 
         $result = ['next' => null, 'prev' => null];
         if (!empty($ordersIds)) {

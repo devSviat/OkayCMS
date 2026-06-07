@@ -46,4 +46,28 @@ class DynamicPropertyComplianceTest extends TestCase
             'TranslationsEntity::$templateOnly must be a declared property (was a dynamic property).'
         );
     }
+
+    /**
+     * Constructor-injected dependencies that were assigned without a matching
+     * property declaration triggered the PHP 8.2 dynamic-property deprecation.
+     *
+     * @dataProvider declaredConstructorPropertyProvider
+     */
+    public function testConstructorDependencyIsDeclared(string $fqcn, string $property): void
+    {
+        $this->assertTrue(
+            (new ReflectionClass($fqcn))->hasProperty($property),
+            $fqcn . '::$' . $property . ' must be a declared property (was assigned as a dynamic property).'
+        );
+    }
+
+    public function declaredConstructorPropertyProvider(): array
+    {
+        return [
+            'BackendSettingsHelper::licenseModulesTemplates' => [
+                \Okay\Admin\Helpers\BackendSettingsHelper::class,
+                'licenseModulesTemplates',
+            ],
+        ];
+    }
 }
