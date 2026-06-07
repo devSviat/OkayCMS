@@ -32,7 +32,7 @@
         "ext-mbstring": "*",
         "ext-zip": "*",
         "gregwar/image": "2.*",
-        "smarty/smarty": "~3.1",
+        "smarty/smarty": "^4.5",
         "mobiledetect/mobiledetectlib": "^2.8",
         "phpmailer/phpmailer": "~6.0",
         "sabberworm/php-css-parser": "*",
