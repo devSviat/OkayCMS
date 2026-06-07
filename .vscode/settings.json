@@ -1,0 +1,12 @@
+{
+  "php.version": "8.0.30",
+  "laravel-pint.enable": false,
+  "phpunit.command": "docker compose exec -T php-fpm ${php} ${phpargs} ${phpunit} ${phpunitargs}",
+  "phpunit.php": "php",
+  "phpunit.phpunit": "vendor/bin/phpunit",
+  "phpunit.args": ["-c", "phpunit.xml"],
+  "phpunit.paths": {
+    "${workspaceFolder}": "/var/www/html"
+  },
+  "phpunit.saveBeforeTest": true
+}
