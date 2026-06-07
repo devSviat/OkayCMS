@@ -68,6 +68,18 @@ class DynamicPropertyComplianceTest extends TestCase
                 \Okay\Admin\Helpers\BackendSettingsHelper::class,
                 'licenseModulesTemplates',
             ],
+            'Feeds FeedsHelper::languages' => [
+                \Okay\Modules\OkayCMS\Feeds\Helpers\FeedsHelper::class,
+                'languages',
+            ],
+            'Feeds FeedsHelper::firstLanguage' => [
+                \Okay\Modules\OkayCMS\Feeds\Helpers\FeedsHelper::class,
+                'firstLanguage',
+            ],
+            'Feeds FeedsHelper::language' => [
+                \Okay\Modules\OkayCMS\Feeds\Helpers\FeedsHelper::class,
+                'language',
+            ],
         ];
     }
 }

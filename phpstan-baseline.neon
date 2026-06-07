@@ -199,24 +199,6 @@ parameters:
 			path: Okay/Helpers/ProductsHelper.php
 
 		-
-			message: '#^Access to an undefined property Okay\\Modules\\OkayCMS\\Feeds\\Helpers\\FeedsHelper\:\:\$firstLanguage\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Okay/Modules/OkayCMS/Feeds/Helpers/FeedsHelper.php
-
-		-
-			message: '#^Access to an undefined property Okay\\Modules\\OkayCMS\\Feeds\\Helpers\\FeedsHelper\:\:\$language\.$#'
-			identifier: property.notFound
-			count: 2
-			path: Okay/Modules/OkayCMS/Feeds/Helpers/FeedsHelper.php
-
-		-
-			message: '#^Access to an undefined property Okay\\Modules\\OkayCMS\\Feeds\\Helpers\\FeedsHelper\:\:\$languages\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Okay/Modules/OkayCMS/Feeds/Helpers/FeedsHelper.php
-
-		-
 			message: '#^Method Okay\\Modules\\OkayCMS\\GoogleMerchant\\Entities\\GoogleMerchantFeedsEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
 			identifier: return.missing
 			count: 1

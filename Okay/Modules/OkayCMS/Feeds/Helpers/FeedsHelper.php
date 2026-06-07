@@ -17,6 +17,15 @@ class FeedsHelper
 
     private $uaLang;
 
+    /** @var array */
+    public $languages;
+
+    /** @var object */
+    public $firstLanguage;
+
+    /** @var object */
+    public $language;
+
     public function __construct(
         PresetAdapterFactory $presetAdapterFactory,
         MainHelper $mainHelper
