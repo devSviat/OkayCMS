@@ -24,10 +24,10 @@ class SettingsGeneralAdmin extends IndexAdmin
         
         // Передаем название стран
         switch ($backendTranslations->getLangLabel()) {
-            case 'ua';
+            case 'ua':
                 $countries = Locale::getAllCountriesForLocale('uk');
             break;
-            case 'ru';
+            case 'ru':
                 $countries = Locale::getAllCountriesForLocale('ru');
             break;
             default:
