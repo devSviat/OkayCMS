@@ -2,13 +2,15 @@
 
 namespace Okay\Helpers;
 
+use OpenAI;
+use OpenAI\Contracts\ClientContract;
 use Okay\Core\Response;
 use Okay\Core\Settings;
-use Orhanerday\OpenAi\OpenAi;
+use Throwable;
 
 class OpenAiHelper
 {
-    private OpenAi $openAi;
+    private ClientContract $openAi;
     private Response $response;
 
     private string $model;
@@ -24,7 +26,7 @@ class OpenAiHelper
     ) {
         $this->settings = $settings;
         $this->response = $response;
-        $this->openAi = new OpenAi((string)$settings->get('open_ai_api_key'));
+        $this->openAi = OpenAI::client((string)$settings->get('open_ai_api_key'));
         $this->model = ((string)$settings->get('open_ai_model')) ?:'gpt-3.5-turbo';
         $this->maxTokens = ((int)$settings->get('open_ai_max_tokens')) ?: 1000;
         $this->temperature = ((float)$settings->get('open_ai_temperature')) ?: 1.0;
@@ -41,41 +43,31 @@ class OpenAiHelper
         }
         ignore_user_abort(true);
 
-        $this->aiChat(
-            $userMessage,
-            $assistantMessage,
-            function ($ch, $data) use ($format) {
-                $deltas = explode("\n", $data);
-                foreach ($deltas as $data2) {
-                    if (strpos($data2, 'data: ') !== 0) {
-                        continue;
-                    }
-                    $json = json_decode(substr($data2, 6));
-                    if (json_last_error() && trim($data2) != 'data: [DONE]') {
-                        continue;
-                    }
-                    if (isset($json->choices[0]->delta)) {
-                        $content = $json->choices[0]->delta->content ?? '';
-                    } elseif (isset($json->error->message)) {
-                        $content = $json->error->message;
-                    } elseif (trim($data2) == 'data: [DONE]') {
-                        $content = '';
-                    } else {
-                        $content = '';
-                    }
+        try {
+            $stream = $this->openAi->chat()->createStreamed([
+                'model' => $this->model,
+                'messages' => $this->buildMessages($userMessage, $assistantMessage),
+                'temperature' => $this->temperature,
+                'max_tokens' => $this->maxTokens,
+                'frequency_penalty' => $this->frequencyPenalty,
+                'presence_penalty' => $this->presencePenalty,
+            ]);
 
-                    if ($format && !empty(trim($content)) && strpos($content, "\n") !== false) {
-                        $content = trim($content) . '</p><p>';
-                    }
+            foreach ($stream as $response) {
+                $content = $response->choices[0]->delta->content ?? '';
 
-                    $this->response->sendStream('data: ' . $content);
-                    if (connection_aborted()) {
-                        return 0;
-                    }
+                if ($format && !empty(trim($content)) && strpos($content, "\n") !== false) {
+                    $content = trim($content) . '</p><p>';
                 }
-                return strlen($data);
+
+                $this->response->sendStream('data: ' . $content);
+                if (connection_aborted()) {
+                    break;
+                }
             }
-        );
+        } catch (Throwable $e) {
+            $this->response->sendStream('data: ' . $e->getMessage());
+        }
 
         if ($format) {
             $this->response->sendStream('data: </p>');
@@ -83,7 +75,7 @@ class OpenAiHelper
         $this->response->sendStream("event: stop\ndata: stopped\n\n");
     }
 
-    private function aiChat(string $userMessage, string $assistantMessage = '', ?callable $stream = null): ?string
+    private function buildMessages(string $userMessage, string $assistantMessage = ''): array
     {
         $messages = [
             [
@@ -103,33 +95,23 @@ class OpenAiHelper
             ];
         }
 
-        $chat = $this->openAi->chat([
-            'model' => $this->model,
-            'messages' => $messages,
-            'temperature' => $this->temperature,
-            'max_tokens' => $this->maxTokens,
-            'frequency_penalty' => $this->frequencyPenalty,
-            'presence_penalty' => $this->presencePenalty,
-            'stream' => !empty($stream),
-        ], $stream);
-
-        if (empty($stream)) {
-            $response = json_decode($chat);
-            return $response->choices[0]->message->content ?? null;
-        }
-        return null;
+        return $messages;
     }
 
     private function getModels(): ?array
     {
-        $response = $this->openAi->listModels();
-
-        $models = json_decode($response, true);
-        if (json_last_error() === JSON_ERROR_NONE && isset($models['data'])) {
-            return $models['data'];
+        try {
+            $list = $this->openAi->models()->list();
+        } catch (Throwable $e) {
+            return null;
         }
 
-        return null;
+        $models = [];
+        foreach ($list->data as $model) {
+            $models[] = ['id' => $model->id];
+        }
+
+        return $models;
     }
 
     public function getTextModels(): ?array
