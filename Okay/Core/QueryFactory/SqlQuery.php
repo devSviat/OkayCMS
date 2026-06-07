@@ -97,4 +97,10 @@ class SqlQuery implements QueryInterface
     {
         return $this->statement;
     }
+
+    public function resetFlags()
+    {
+        // This query type carries no Aura flags; nothing to reset.
+        return $this;
+    }
 }

@@ -360,6 +360,18 @@ class Design
             $this->smarty->registerPlugin('function', $tag, $callback);
             unset($this->smartyFunctions[$tag]);
         }
+
+        // Smarty 4 deprecates using a PHP function as a modifier unless it is
+        // explicitly registered. Register the security-allowed PHP functions as
+        // modifiers, skipping any already registered (e.g. custom modifiers above).
+        if (!empty($this->smarty->security_policy)) {
+            foreach ($this->allowedPhpFunctions as $phpFunction) {
+                if (function_exists($phpFunction)
+                    && !isset($this->smarty->registered_plugins['modifier'][$phpFunction])) {
+                    $this->smarty->registerPlugin('modifier', $phpFunction, $phpFunction);
+                }
+            }
+        }
     }
 
     public function getDefaultTemplatesDir()

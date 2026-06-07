@@ -176,8 +176,7 @@ class IndexAdmin
             curl_setopt($ch, CURLOPT_TIMEOUT, 10);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
             $versionData = curl_exec($ch);
-            curl_close($ch);
-            
+
             if ($versionData) {
                 $versionData = json_decode($versionData, true);
                 $_SESSION['last_version_data'] = $versionData;

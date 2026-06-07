@@ -4,6 +4,7 @@ namespace Php85;
 
 use Okay\Helpers\FilterHelper;
 use Okay\Core\Design;
+use Okay\Core\Request;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
@@ -58,6 +59,22 @@ class NullArgumentSafetyTest extends TestCase
         $design = (new ReflectionClass(Design::class))->newInstanceWithoutConstructor();
 
         $result = $this->failOnDeprecation(static fn () => $design->getModuleTemplatesDir());
+
+        $this->assertSame('', $result);
+    }
+
+    public function testRequestGetStringWithMissingParam(): void
+    {
+        unset($_GET['php85_missing_param']);
+
+        /** @var Request $request */
+        $request = (new ReflectionClass(Request::class))->newInstanceWithoutConstructor();
+
+        // A missing param yields null internally; preg_replace(null) would emit a
+        // deprecation, the (string) cast yields ''
+        $result = $this->failOnDeprecation(
+            static fn () => $request->get('php85_missing_param', 'string')
+        );
 
         $this->assertSame('', $result);
     }
