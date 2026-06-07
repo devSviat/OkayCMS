@@ -16,6 +16,22 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  php85:
+    build: ./docker/php/8.5
+    container_name: ${APP_NAME:?err}-php85
+    environment:
+      - TEST_INTERNAL_EMAIL=${TEST_INTERNAL_EMAIL:-}
+      - PRODUCTION_DOMAIN=${PRODUCTION_DOMAIN:-}
+    volumes:
+      - '..:/var/www/html'
+      - './config/php:/usr/local/etc/php'
+    links:
+      - mariadb
+    expose:
+      - 9001
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   nginx:
     build: ./docker/nginx
     container_name: ${APP_NAME:?err}-nginx
