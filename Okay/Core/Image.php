@@ -304,6 +304,7 @@ class Image
      */
     public function addResizeParams($filename, $width = 0, $height = 0, $setWatermark = false, $cropParams = []) // todo сделать protected
     {
+        $filename = (string)$filename;
         if('.' != ($dirname = pathinfo($filename,  PATHINFO_DIRNAME))) {
             $file = $dirname.'/'.pathinfo($filename, PATHINFO_FILENAME);
         } else {

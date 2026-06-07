@@ -12,6 +12,14 @@ class ResizeController extends AbstractController
     
     public function resize(Image $image, ResizeHelper $resizeHelper, $object, $filename)
     {
+        // Ответ бинарный (картинка). Нельзя допускать, чтобы PHP-deprecation
+        // (например, из GD/Gregwar resize-адаптеров или WebPConvert на PHP 8.1+)
+        // попал в поток байтов и повредил изображение. Полностью убираем
+        // deprecation из error_reporting (display_errors недостаточно: Xdebug и
+        // сторонние обработчики ошибок его игнорируют). Ошибки уровнем выше
+        // (warning/error) продолжают репортиться и логироваться.
+        ini_set('display_errors', '0');
+        error_reporting(error_reporting() & ~(E_DEPRECATED | E_USER_DEPRECATED));
 
         $filename = rawurldecode($filename);
         
