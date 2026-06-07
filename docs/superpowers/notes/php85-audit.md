@@ -25,6 +25,27 @@
 
 **To be confirmed by PHPCompatibility (Phase 7):** broad dynamic-property writes (deprecated 8.2+) on classes lacking `__set`/`#[AllowDynamicProperties]`, and any 8.5-specific deprecations not surfaced by grep.
 
+## Additional findings (Phases 7-8)
+
+| # | File / Package | Description | Severity | Resolution |
+|---|----------------|-------------|----------|------------|
+| 5 | `aura/sql` 3.0.0 (vendor) | **Boot blocker.** PHP 8.4 added a static `PDO::connect()`; `AbstractExtendedPdo extends PDO` declared `connect()` as an instance method → fatal `Cannot make static method PDO::connect() non static` on 8.4/8.5. Surfaces only on app boot (tests don't touch PDO). 3.x and 5.x still carry it; only 6.x removes it. | Critical | Upgraded `aura/sql` to `^6.0`. Constructor signature unchanged (no services.php change). Updated lazy-connect call sites `connect()` → `lazyConnect()` in `Database.php` and `DatabaseDeployCommand.php` (2x). |
+| 6 | `Okay/Modules/OkayCMS/Banners/DTO/*` (5 files) | `jsonSerialize()` lacked a return type → PHP 8.1+ tentative-return-type deprecation. Caught by PHPStan, not grep/PHPCompatibility. | Medium | Declared `: array` (covariant with the tentative `mixed`). Guard test added. |
+| 7 | `backend/design/js/filemanager/UploadHandler.php:1117` | `implode($array, $glue)` reversed arg order — deprecated 7.4, rejected on 8.x. | Medium | Swapped to `implode(', ', $array)`. |
+| 8 | PHPCompatibility `FunctionUse.ArgumentFunctionsReportCurrentValue` (148 hits) | Reports the PHP **7.0** change to `func_get_args()` observing modified params; fires pervasively on the `ExtenderFacade::execute(__METHOD__, $result, func_get_args())` pattern. Not a new 8.5 issue. | Info / out of scope | Excluded from the phpcs ruleset (documented). |
+| 9 | `backend/design/js/filemanager/include/utils.php:1043` | `@ini_get('safe_mode')` — directive removed in PHP 5.4; returns false on 8.5, code path stays correct. | Info | Left as a non-failing PHPCompatibility warning (`ignore_warnings_on_exit`). |
+
+## Vendor deprecation noise (dev/debug only)
+
+With `debug_mode=true` (dev), the storefront surfaces ~2000 implicit-nullable / tentative-return deprecations originating **inside vendor libraries** — chiefly `aura/sqlquery` 2.7.1, plus `smarty/smarty` 3.1.40 and `bramus/router` 1.6. First-party code is clean (PHPCompatibility passes). In production (`debug_mode=false`, `error_reporting` excludes `E_DEPRECATED`) these are silent and have no functional impact. Per decision, left as-is (out of "8.5-only" scope). Smarty cannot be bumped within 3.x (3.1.48 carries CVE-2024-35226; the secure/clean version is the breaking major 4.5.3+).
+
+## Phase 8 smoke results (PHP 8.5, nginx → php85)
+
+- Storefront `/`, `/catalog`, `/cart`, `/blog`, `/brands`, `/search`, `/sitemap.xml` → **HTTP 200**.
+- Admin `/backend/index.php?controller=AuthAdmin` (login form) → **HTTP 200**.
+- CLI `./ok scheduler:list` reads the DB and lists tasks → **OK** (DB connectivity + Symfony Console verified).
+- PHPUnit **158** pass, PHPStan **[OK]**, PHPCompatibility **0 errors**.
+
 ## composer outdated --direct (raw)
 
 Most packages have a major available, but "major available" ≠ "current breaks on 8.5". Compatibility assessed per-package in the dependency table below (Phase 3).
