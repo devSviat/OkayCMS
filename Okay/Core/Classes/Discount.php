@@ -8,6 +8,12 @@ use Okay\Core\Modules\Extender\ExtenderFacade;
 
 class Discount
 {
+    /** @var int */
+    public $id;
+
+    /** @var int */
+    public $position;
+
     /** @var string */
     public $sign;
 
