@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="OkayCMS PHP Compatibility">
-    <description>Check PHP 8.5 compatibility (minimum supported: 8.2).</description>
+    <description>Check PHP 8.5 compatibility (minimum supported: 8.4).</description>
 
     <file>Okay</file>
     <file>backend</file>
@@ -13,7 +13,7 @@
     <arg name="extensions" value="php"/>
     <arg value="p"/>
 
-    <config name="testVersion" value="8.2-"/>
+    <config name="testVersion" value="8.4-"/>
 
     <!-- Warnings (e.g. legacy pre-8.x ini checks) stay visible but do not fail CI; only errors gate. -->
     <config name="ignore_warnings_on_exit" value="1"/>

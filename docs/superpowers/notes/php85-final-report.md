@@ -8,7 +8,9 @@
 
 ## Summary
 
-OkayCMS (fork) now runs on PHP 8.5. A dedicated `php85` Docker service was added alongside the existing `php74`; the platform constraint was narrowed to `^8.2`; the dependency toolchain was unblocked; and all PHP 8.x source incompatibilities found via audit, static analysis, and live smoke testing were fixed with minimal, behaviour-preserving changes. The full test suite (158), PHPStan, and PHPCompatibility are green on 8.5, and the storefront, admin, and CLI boot and run on 8.5.
+OkayCMS (fork) now runs on PHP 8.5. A dedicated `php85` Docker service was added alongside the existing `php74`; the platform constraint was narrowed to `^8.4`; the dependency toolchain was unblocked; and all PHP 8.x source incompatibilities found via audit, static analysis, and live smoke testing were fixed with minimal, behaviour-preserving changes. The full test suite, PHPStan, and PHPCompatibility are green on 8.5, and the storefront, admin, and CLI boot and run on 8.5.
+
+> **Minimum PHP raised to 8.4 (was briefly `^8.2`).** `aura/sql` had to be bumped to `^6.0` to remove the instance `connect()` that fatals against PHP 8.4's new static `PDO::connect()`, and `aura/sql 6.x` itself requires `php ^8.4`. A single `composer.lock` cannot hold `aura/sql 6.x` for 8.5 and `5.x` for 8.2 at once, so 8.2/8.3 cannot be supported alongside an 8.4/8.5-safe DB layer. The CI matrix is therefore `8.4`/`8.5` and the root constraint is `^8.4`.
 
 ## Files Changed
 
@@ -17,7 +19,7 @@ OkayCMS (fork) now runs on PHP 8.5. A dedicated `php85` Docker service was added
 - `dev/docker-compose.yml` — added `php85` service alongside `php74`.
 
 **Dependency / config**
-- `composer.json` / `composer.lock` — `php` `^7.4 || ^8.0` → `^8.2`; `phpunit/phpunit` → 9.6.34 (drops `phpspec/prophecy`); `symfony/console|process|lock` → 5.4 LTS; `aura/sql` `^3.0` → `^6.0`; added dev tooling (`phpstan/phpstan`, `squizlabs/php_codesniffer ^3.7`, `phpcompatibility/php-compatibility ^9.3`, `dealerdirect/phpcodesniffer-composer-installer`); `config.allow-plugins`.
+- `composer.json` / `composer.lock` — `php` `^7.4 || ^8.0` → `^8.4`; `phpunit/phpunit` → 9.6.34 (drops `phpspec/prophecy`); `symfony/console|process|lock` → 5.4 LTS; `aura/sql` `^3.0` → `^6.0`; added dev tooling (`phpstan/phpstan`, `squizlabs/php_codesniffer ^3.7`, `phpcompatibility/php-compatibility ^9.3`, `dealerdirect/phpcodesniffer-composer-installer`); `config.allow-plugins`.
 - `phpstan.neon`, `phpstan-baseline.neon`, `phpcs.xml.dist` (new).
 
 **Source fixes (PHP 8.x compatibility)**
@@ -36,9 +38,10 @@ OkayCMS (fork) now runs on PHP 8.5. A dedicated `php85` Docker service was added
   FilterHelperTest`, `CatalogHelperTest`, `CategoriesHelperTest`; tentative
   return types for `tests/Modules/OkayCMS/Banners/BannerDtoReturnTypeTest`).
 
-**Not committed (per user)**
-- `.github/workflows/ci.yml` — PHP 8.2-8.5 matrix workflow (kept in working tree; commit deferred).
-- `dev/docker-compose.override.yml` — local helper pointing nginx → php85 for smoke testing.
+**CI / Docker (committed later)**
+- `.github/workflows/ci.yml` — PHP 8.4/8.5 matrix workflow.
+- `dev/docker-compose.yml` — nginx FastCGI default repointed to `php85`.
+- `dev/docker-compose.override.yml` — local-only helper (gitignored).
 
 ## Dependencies Updated
 
@@ -58,13 +61,13 @@ Not upgraded (work on 8.5 as-is): smarty (3.1.40 — secure/clean version requir
 
 ## CI Changes
 
-- `.github/workflows/ci.yml` authored (matrix 8.2/8.3/8.4/8.5: composer validate, install, PHPCompatibility, PHPUnit; PHPStan once on 8.5). **Commit deferred** at user request.
+- `.github/workflows/ci.yml` committed (matrix 8.4/8.5: composer validate, install, PHPCompatibility, PHPUnit; PHPStan once on 8.5). 8.2/8.3 were dropped from the matrix because `aura/sql 6.x` (needed for the 8.4 `PDO::connect()` fix) requires `php ^8.4`, so the lock cannot install below 8.4.
 
 ## Remaining Risks
 
 1. **Vendor deprecation noise in debug mode.** `aura/sqlquery` 2.7.1, `smarty` 3.1.40, `bramus/router` 1.6 emit implicit-nullable deprecations on 8.4+; visible only with `debug_mode=true`, silent in production. First-party code is clean.
 2. **Smarty security debt (pre-existing, unrelated to 8.5).** 3.1.40 is affected by CVE-2024-35226 (high). The whole `<4.5.3` line is affected. Recommend a separate task to evaluate Smarty 4.5.3+/5.x (note: 5.x moves to the `Smarty\Smarty` namespace and will require code changes).
-3. **php74 service is now vestigial.** With 7.4 dropped, the app cannot boot on php74 (composer platform_check requires ≥8.2). Consider repointing nginx to php85 / retiring php74 as a cleanup.
+3. **php74 service is now vestigial.** With 7.4 dropped, the app cannot boot on php74 (composer platform_check requires ≥8.4). nginx now defaults to php85; retiring php74 remains a cleanup option.
 4. **Not smoke-tested end-to-end:** admin login POST (CSRF/session), email send, file upload, full checkout flow. Login form, catalog, cart, search, blog, brands, sitemap, and the scheduler CLI (DB-backed) were verified at HTTP/CLI level.
 
 ## Addendum — runtime deprecation sweep (debug-mode crawl)
@@ -105,4 +108,4 @@ Pre-warm or pre-compile templates in deployment.
 
 ## PHP 8.5 Support Status
 
-**Supported and verified.** On PHP 8.5.7: storefront and admin return HTTP 200, the `./ok` CLI runs against the DB, and PHPUnit (158), PHPStan, and PHPCompatibility (testVersion 8.2-) all pass. No known blocking compatibility issues remain in first-party code.
+**Supported and verified.** On PHP 8.5.7: storefront and admin return HTTP 200, the `./ok` CLI runs against the DB, and PHPUnit, PHPStan, and PHPCompatibility (testVersion 8.4-) all pass. Supported range is 8.4–8.5. No known blocking compatibility issues remain in first-party code.
