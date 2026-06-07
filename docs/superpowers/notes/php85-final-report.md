@@ -16,7 +16,7 @@ OkayCMS (fork) now runs on PHP 8.5. A dedicated `php85` Docker service was added
 
 **Docker / env**
 - `dev/docker/php/8.5/Dockerfile` (new) — PHP 8.5-fpm image (pdo_mysql, mysqli, gd, zip, xsl, xmlwriter, Xdebug 3, Composer).
-- `dev/docker-compose.yml` — added `php85` service alongside `php74`.
+- `dev/docker-compose.yml` — `php85` service; nginx FastCGI defaults to it. The legacy `php74` service and its `dev/docker/php/7.4` image were removed (the app no longer boots on 7.4).
 
 **Dependency / config**
 - `composer.json` / `composer.lock` — `php` `^7.4 || ^8.0` → `^8.4`; `phpunit/phpunit` → 9.6.34 (drops `phpspec/prophecy`); `symfony/console|process|lock` → 5.4 LTS; `aura/sql` `^3.0` → `^6.0`; added dev tooling (`phpstan/phpstan`, `squizlabs/php_codesniffer ^3.7`, `phpcompatibility/php-compatibility ^9.3`, `dealerdirect/phpcodesniffer-composer-installer`); `config.allow-plugins`.
@@ -67,7 +67,7 @@ Not upgraded (work on 8.5 as-is): smarty (3.1.40 — secure/clean version requir
 
 1. **Vendor deprecation noise in debug mode.** `aura/sqlquery` 2.7.1, `smarty` 3.1.40, `bramus/router` 1.6 emit implicit-nullable deprecations on 8.4+; visible only with `debug_mode=true`, silent in production. First-party code is clean.
 2. **Smarty security debt (pre-existing, unrelated to 8.5).** 3.1.40 is affected by CVE-2024-35226 (high). The whole `<4.5.3` line is affected. Recommend a separate task to evaluate Smarty 4.5.3+/5.x (note: 5.x moves to the `Smarty\Smarty` namespace and will require code changes).
-3. **php74 service is now vestigial.** With 7.4 dropped, the app cannot boot on php74 (composer platform_check requires ≥8.4). nginx now defaults to php85; retiring php74 remains a cleanup option.
+3. **php74 removed.** The legacy 7.4 service and image were deleted; nginx defaults to php85. (Historical: 7.4 could not boot the app once composer platform_check required ≥8.4.)
 4. **Not smoke-tested end-to-end:** admin login POST (CSRF/session), email send, file upload, full checkout flow. Login form, catalog, cart, search, blog, brands, sitemap, and the scheduler CLI (DB-backed) were verified at HTTP/CLI level.
 
 ## Addendum — runtime deprecation sweep (debug-mode crawl)
