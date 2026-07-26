@@ -4,7 +4,15 @@
    sheet, from 992px the same element is the static left rail - the switch is
    pure CSS, so okay.js binds fn_features a single time and the ajax filter
    path is unaffected. The sheet is a descendant of .main, never of .vs-header:
-   the header opens a stacking context at z-index 200 that would cap it. *}
+   the header opens a stacking context at z-index 200 that would cap it.
+
+   The open and close buttons deliberately do NOT carry fn_switch_mobile_filter.
+   okay.js binds that class non-delegated at ready and toggles .opened on every
+   .fn_mobile_toogle, which is a second, independent open/close mechanism: it
+   desynchronises from vibeSheet's .is-open on the Escape and apply paths and
+   leaves an inverted .opened flag behind. vibeSheet owns every path here, and
+   the class is still emitted by blog.tpl, brands.tpl, post.tpl and
+   blog_sidebar.tpl for the legacy sidebars that media.css actually styles. *}
 
 <div class="vs-catalogue">
     <div class="vs-catalogue__masthead">
@@ -28,7 +36,7 @@
         <aside id="vs_filters" class="fn_mobile_toogle vs-filters vs-sheet" aria-label="{$lang->filters|escape}">
             <div class="vs-filters__bar">
                 <span class="vs-filters__heading" data-language="filters">{$lang->filters}</span>
-                <button type="button" class="fn_switch_mobile_filter vs-btn vs-btn--ghost vs-btn--icon vs-filters__close" data-vs-sheet-close aria-label="{$lang->mobile_filter_close|escape}">
+                <button type="button" class="vs-btn vs-btn--ghost vs-btn--icon vs-filters__close" data-vs-sheet-close aria-label="{$lang->mobile_filter_close|escape}">
                     {include file="svg.tpl" svgId="close"}
                 </button>
             </div>
@@ -82,7 +90,7 @@
                     {include file="products_sort.tpl"}
                 </div>
                 {* Mobile button filters *}
-                <button type="button" class="fn_switch_mobile_filter vs-btn vs-btn--secondary vs-filters__open hidden-lg-up" aria-controls="vs_filters" aria-expanded="false">
+                <button type="button" class="vs-btn vs-btn--secondary vs-filters__open hidden-lg-up" aria-controls="vs_filters" aria-expanded="false">
                     {include file="svg.tpl" svgId="filter_icon"}
                     <span data-language="filters">{$lang->filters}</span>
                 </button>

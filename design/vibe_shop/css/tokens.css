@@ -79,6 +79,11 @@
 	--vs-space-11: 5rem;
 	--vs-space-12: 6rem;
 
+/* Height of the bar that sticks: .vs-header__bar is min-height 78px from 992px
+   and .vs-header__main adds a 1px hairline, rounded up. Anything else that
+   sticks below the header offsets by this so it does not slide underneath. */
+	--vs-header-h: 80px;
+
 	--vs-radius-sm: 0.5rem;
 	--vs-radius-md: 0.75rem;
 	--vs-radius-lg: 1rem;

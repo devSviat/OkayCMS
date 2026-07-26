@@ -274,6 +274,17 @@
        lives outside the replaced region - is refreshed from the strings the
        server rendered with the new markup. Nothing is hidden until this runs:
        the grid and the count are in the HTML and visible by default. */
+
+    /* okay.js has no error branch: if the request is dropped its .fn_ajax_wait
+       node is never removed, so the loading class would stay on for the rest of
+       the session and the shopper would be left looking at a shimmer instead of
+       the products that are still in the DOM underneath. The bail is generous -
+       it must never fire on a slow request that is still alive - and it only
+       takes the skeleton off; the stale results below it stay readable and the
+       page still works through a normal link. */
+    var LOADING_BAIL_MS = 10000;
+    var loadingBail = null;
+
     function syncCatalogue() {
         var region = document.querySelector('.vs-catalogue__region');
         if (!region) return;
@@ -281,7 +292,19 @@
         var results = region.querySelector('.vs-catalogue__results');
         var loading = !!(results && results.querySelector('.fn_ajax_wait'));
         region.classList.toggle('is-loading', loading);
-        if (loading) return;
+
+        if (loadingBail) {
+            window.clearTimeout(loadingBail);
+            loadingBail = null;
+        }
+
+        if (loading) {
+            loadingBail = window.setTimeout(function () {
+                loadingBail = null;
+                region.classList.remove('is-loading');
+            }, LOADING_BAIL_MS);
+            return;
+        }
 
         var state = region.querySelector('.vs-catalogue__state');
         if (!state) return;

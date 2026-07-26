@@ -16,8 +16,12 @@
 {else}
     <div class="vs-empty">
         <p class="vs-empty__title" data-language="products_not_found">{$lang->products_not_found}</p>
-        <p class="vs-empty__note" data-language="products_not_found_note">{$lang->products_not_found_note}</p>
+        {* The note says "try changing or resetting the filters", so it belongs to
+           the same branch as the reset button. On an unfiltered empty page there
+           is no rail, no filter trigger and nothing to reset, and the note would
+           point at an action the page does not offer. *}
         {if $is_filter_page}
+            <p class="vs-empty__note" data-language="products_not_found_note">{$lang->products_not_found_note}</p>
             <form method="post">
                 <button type="submit" name="prg_seo_hide" class="fn_filter_reset vs-btn vs-btn--primary" value="{if $category}{url_generator route="category" url=$category->url absolute=1}{elseif $brand}{url_generator route="brand" url=$brand->url absolute=1}{else}{url_generator route=$route_name absolute=1}{/if}">
                     {include file="svg.tpl" svgId="reset_icon"}

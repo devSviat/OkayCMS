@@ -2368,6 +2368,11 @@ body.hc-nav-open {
 	display: none;
 }
 
+/* The overlay is opaque and inset: 0, so it hides the stale grid on its own.     */
+/* The results underneath are deliberately NOT faded as well: if a request is     */
+/* dropped and the skeleton has to be given up on (see the bail in vibe.js), what */
+/* is left has to be readable rather than a blank column.                        */
+
 .vs-catalogue__region.is-loading .vs-catalogue__skeleton {
 	position: absolute;
 	top: 0;
@@ -2381,10 +2386,6 @@ body.hc-nav-open {
 	align-content: start;
 	overflow: hidden;
 	background-color: var(--vs-canvas);
-}
-
-.vs-catalogue__region.is-loading .vs-catalogue__results {
-	opacity: 0;
 }
 
 .vs-skeleton {
@@ -2769,6 +2770,24 @@ body.hc-nav-open {
 	display: none;
 }
 
+/* Both handles are focusable divs with tabindex="0", so the 44x44 rule applies   */
+/* to them - and a price range is the primary control inside the filter sheet on  */
+/* a phone. A 44px disc on a 4px rail would read as a knob, so the hit area is    */
+/* grown instead of the visual: noUiSlider 14.6.1 binds its drag start to         */
+/* handle.children[0], i.e. .noUi-touch-area, so that is the element that has to  */
+/* be 44px. A transparent ::before on the handle would enlarge nothing - the      */
+/* pointer event would land on the handle and never reach the touch area's        */
+/* listener.                                                                      */
+
+.vs-price__slider .noUi-touch-area {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 44px;
+	height: 44px;
+	transform: translate(-50%, -50%);
+}
+
 .vs-price__slider .noUi-handle:focus-visible {
 	border-radius: var(--vs-radius-full);
 }
@@ -3045,10 +3064,38 @@ body.hc-nav-open {
 		align-items: start;
 	}
 
+/* Nothing to filter by means an empty rail, and a 260px void to the left of the  */
+/* results reads as broken alignment rather than as a missing panel. Same         */
+/* predicate as the rule that hides the sheet trigger, so the two never disagree. */
+/* The empty rail itself also steps out of the flow, or its zero-height row would */
+/* still spend a row gap above the results - unless it is carrying the browsed    */
+/* products block, which is real content and stays.                              */
+
+	.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))):not(:has(.vs-filters__browsed .browsed)) .vs-filters {
+		display: none;
+	}
+
+/* The rail sticks. 21 filter groups ship expanded and run past 2000px, so a      */
+/* shopper who has scrolled to the twentieth card is a long way from the control  */
+/* that would narrow the list - on the primary path of the primary screen. The    */
+/* groups stay expanded: collapsing them by default would trade the reach problem */
+/* for a discoverability one. Offsets clear the sticky header (--vs-header-h) and */
+/* the internal scroll is `auto`, so a short rail shows no scrollbar at all.      */
+/* align-items: start above is load-bearing: a stretched grid item fills its grid */
+/* area and then has no room left to move.                                       */
+
 	.vs-filters {
-		position: static;
+		position: sticky;
+		top: calc(var(--vs-header-h) + var(--vs-space-4));
+		left: auto;
+		right: auto;
+		bottom: auto;
 		z-index: auto;
-		max-height: none;
+		max-height: calc(100dvh - var(--vs-header-h) - var(--vs-space-7));
 		border-radius: 0;
 		background-color: transparent;
 		box-shadow: none;
@@ -3062,7 +3109,6 @@ body.hc-nav-open {
 	}
 
 	.vs-filters__scroll {
-		overflow: visible;
 		padding: 0;
 	}
 }
