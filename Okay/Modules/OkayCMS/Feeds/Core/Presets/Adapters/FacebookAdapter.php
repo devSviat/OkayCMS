@@ -57,7 +57,7 @@ class FacebookAdapter extends AbstractPresetAdapter
         }
 
         if (($value = $this->feed->settings['filter_price']['value']) !== null) {
-            $operator = $this->feed->settings['filter_price']['operator'];
+            $operator = $this->normalizeComparisonOperator($this->feed->settings['filter_price']['operator']);
 
             $sql->join('left', CurrenciesEntity::getTable().' AS cur', 'cur.id = v.currency_id')
                 ->where("(v.price*cur.rate_to/cur.rate_from) {$operator} :filter_price_value")
@@ -65,7 +65,7 @@ class FacebookAdapter extends AbstractPresetAdapter
         }
 
         if (($value = $this->feed->settings['filter_stock']['value']) !== null) {
-            $operator = $this->feed->settings['filter_stock']['operator'];
+            $operator = $this->normalizeComparisonOperator($this->feed->settings['filter_stock']['operator']);
 
             $sql->where("IF(v.stock IS NULL, IF ('{$operator}' = '<' OR '{$operator}' = '=', false, true), v.stock {$operator} :filter_stock_value)")
                 ->bindValues(['filter_stock_value' => $value]);
