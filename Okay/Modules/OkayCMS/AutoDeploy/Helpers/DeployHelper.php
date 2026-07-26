@@ -14,6 +14,9 @@ use Okay\Modules\OkayCMS\AutoDeploy\Entities\MigrationsEntity;
 
 class DeployHelper
 {
+    /** Канали збірки, які модуль уміє обслуговувати. Інших значень бути не може. */
+    const BUILD_CHANNELS = ['dev', 'production'];
+
     private $request;
     private $settings;
     private $database;
@@ -67,12 +70,35 @@ class DeployHelper
             }
         }
         
-        $dir = dirname(__DIR__);
-        exec("{$pathToPhp}php {$dir}/bin/phing.phar -f {$dir}/build.xml -Dbranch=\"{$branch}\" -Dphp_path=\"{$pathToPhp}\"", $output);
+        $command = self::buildDeployCommand(dirname(__DIR__), $pathToPhp, $branch);
+
+        exec($command, $output);
         $deployLog = date("d.m.Y H:i:s")
             . PHP_EOL
             . implode(PHP_EOL, $output);
         $this->settings->set('deploy_last_status_text', $deployLog);
+    }
+
+    /**
+     * Складання командного рядка деплою.
+     *
+     * $branch приходить із налаштування deploy_build_channel, $pathToPhp — із
+     * налаштувань модуля. Раніше обидва вставлялись у рядок як є, всередині
+     * подвійних лапок: одна лапка у значенні закривала -Dbranch="..." і все
+     * після неї шелл виконував як окрему команду.
+     *
+     * @param string $dir корінь модуля
+     * @param string $pathToPhp каталог з бінарником php (може бути порожнім)
+     * @param string $branch гілка збірки
+     * @return string
+     */
+    public static function buildDeployCommand($dir, $pathToPhp, $branch)
+    {
+        return escapeshellarg($pathToPhp . 'php')
+            . ' ' . escapeshellarg($dir . '/bin/phing.phar')
+            . ' -f ' . escapeshellarg($dir . '/build.xml')
+            . ' -Dbranch=' . escapeshellarg((string) $branch)
+            . ' -Dphp_path=' . escapeshellarg((string) $pathToPhp);
     }
 
     /**
@@ -125,15 +151,8 @@ class DeployHelper
     
     public function getBranch($channel)
     {
-        $branch = null;
-        switch ($channel) {
-            case 'dev':
-                $branch = 'dev';
-                break;
-            case 'production':
-                $branch = 'production';
-                break;
-        }
+        $branch = in_array($channel, self::BUILD_CHANNELS, true) ? $channel : null;
+
         return ExtenderFacade::execute(__METHOD__, $branch, func_get_args());
     }
 
