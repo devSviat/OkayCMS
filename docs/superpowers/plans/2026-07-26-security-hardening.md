@@ -87,6 +87,15 @@ docker compose exec php85 php vendor/bin/phpunit --filter PasswordHasherTest
 
 ---
 
+## Follow-ups (out of scope for this branch)
+
+- **Localise `backend/design/html/auth.tpl`.** The admin login template hardcodes every UI string in Russian and has no translation mechanism, unlike the rest of the backend which uses `backend/lang/{en,ru,ua}.php`. Task 5 added two error messages in Russian to match the surrounding file rather than leave the page mixed-language. Either translate the whole template or extract its strings into the lang files.
+- **`BackendSettingsHelper` does not survive a partial POST.** `updateGeneralSettings()` passes a missing `license_email` straight to `LicenseModulesTemplates::setLicenseEmail(string)`, which is a `TypeError`. Found while verifying Task 8; unrelated to CSRF and left alone.
+- **`minimum-stability: dev` makes `composer update` unsafe.** Updating guzzle alone resolved to a `7.12.x-dev` branch commit until `guzzlehttp/promises` joined the update set. Worth revisiting the stability policy.
+- **`expose_php` is on.** Responses carry `X-Powered-By: PHP/8.5.8`. Task 18 removed our own version banner but this one belongs in the production `php.ini`.
+
+---
+
 ## Phase 0 — Schema guard
 
 ### Task 0: Lock the database schema
