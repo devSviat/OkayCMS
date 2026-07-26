@@ -27,15 +27,15 @@
         </div>
 
         <div class="block__body">
-            <div class="f_row top_categories">
+            <div class="vs-cats">
                 {function name=has_main_categories}
                 {if $categories}
                     {foreach $categories as $c}
                         {if $c->visible &&  ($c->has_products || $settings->show_empty_categories)}
                         {if $c->on_main}
-                            <div class="top_categories__item f_col-6 f_col-md-4 f_col-xl-2">
-                                <a class="top_categories__preview d-flex align-items-center flex-column" href="{url_generator route='category' url=$c->url}">
-                                    <div class="top_categories__image d-flex align-items-center justify-content-center">
+                            <div class="vs-cats__item">
+                                <a class="vs-cats__link" href="{url_generator route='category' url=$c->url}">
+                                    <div class="vs-cats__image">
                                         {if $c->image}
                                             {if strtolower(pathinfo($c->image, $smarty.const.PATHINFO_EXTENSION)) == 'svg'}
                                                 {$c->image|read_svg:$config->original_categories_dir}
@@ -49,13 +49,11 @@
                                             </picture>
                                             {/if}
                                         {else}
-                                            <div class="top_categories__no_image d-flex align-items-center justify-content-center" title="{$c->name|escape}">
-                                                {include file="svg.tpl" svgId="no_image"}
-                                            </div>
+                                            {include file="svg.tpl" svgId="no_image"}
                                         {/if}
                                     </div>
-                                    <div class="top_categories__name">
-                                        {$c->name|escape}  
+                                    <div class="vs-cats__name">
+                                        {$c->name|escape}
                                     </div>
                                 </a>
                             </div>

@@ -789,13 +789,32 @@
 /* z-index and paint UNDER page content, whatever --vs-z-modal says.         */
 /* The same applies to any other positioned, z-indexed ancestor.             */
 
+/* Geometry is the bottom sheet: pinned to the bottom edge, translated out of  */
+/* sight and made inert with visibility so its controls leave the tab order    */
+/* while closed. visibility flips back instantly on open and only after the    */
+/* slide-out has finished on close, which is what the delayed 0s step does.    */
+
 .vs-sheet {
 	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
 	z-index: var(--vs-z-modal);
 	display: flex;
 	flex-direction: column;
 	max-height: 90dvh;
 	background-color: var(--vs-surface);
+	border-top-left-radius: var(--vs-radius-xl);
+	border-top-right-radius: var(--vs-radius-xl);
+	box-shadow: var(--vs-shadow-3);
+	visibility: hidden;
+	transform: translateY(100%);
+	transition: transform var(--vs-dur-3) var(--vs-ease), visibility var(--vs-dur-0) var(--vs-ease) var(--vs-dur-3);
+}
+
+.vs-sheet.is-open {
+	visibility: visible;
+	transform: translateY(0);
 	transition: transform var(--vs-dur-3) var(--vs-ease);
 }
 
@@ -980,14 +999,14 @@ body.hc-nav-open {
 	visibility: hidden;
 	opacity: 0;
 	background-color: var(--vs-scrim);
-	transition: visibility 0s var(--vs-ease) var(--vs-dur-3), opacity var(--vs-dur-3) var(--vs-ease);
+	transition: visibility var(--vs-dur-0) var(--vs-ease) var(--vs-dur-3), opacity var(--vs-dur-3) var(--vs-ease);
 }
 
 .hc-offcanvas-nav.disable-body.nav-open::after,
 .hc-offcanvas-nav .sub-level-open::after {
 	visibility: visible;
 	opacity: 1;
-	transition-delay: 0s;
+	transition-delay: var(--vs-dur-0);
 }
 
 .hc-offcanvas-nav:not(.nav-open)::after {
@@ -1005,7 +1024,7 @@ body.hc-nav-open {
 	z-index: var(--vs-z-modal);
 	height: 100%;
 	visibility: hidden;
-	transition: visibility 0s var(--vs-ease) var(--vs-dur-3), transform var(--vs-dur-3) var(--vs-ease);
+	transition: visibility var(--vs-dur-0) var(--vs-ease) var(--vs-dur-3), transform var(--vs-dur-3) var(--vs-ease);
 }
 
 .hc-offcanvas-nav.nav-levels-overlap ul li.nav-parent {
@@ -1280,7 +1299,7 @@ body.hc-nav-open {
 	flex: none;
 	width: 44px;
 	height: 44px;
-	margin-right: calc(var(--vs-space-3) * -1);
+	margin-right: calc(var(--vs-space-1) * -1);
 	border: 0;
 	border-radius: var(--vs-radius-sm);
 	background-color: transparent;
@@ -1501,11 +1520,14 @@ body.hc-nav-open {
 }
 
 /* ----------------------------------------------------------- product card */
-/* Card host. The legacy grid pins .product_item to a fixed 340px/299px height */
-/* because the old card was itself fixed-height; a content-sized card is       */
-/* clipped by it. Task 4 rebuilds .products_list properly - these three rules  */
-/* are the minimum that lets the new card breathe until then. The swiper       */
-/* containers on the home page are excluded: Swiper owns their display.        */
+/* Card host for the product lists this branch has not rebuilt yet - the home  */
+/* page swipers, related products, wishlist, comparison and the user cabinet,  */
+/* all still on `.products_list.row` + `.product_item.col-*`. The legacy grid   */
+/* pins .product_item to a fixed 340px/299px height because the old card was    */
+/* itself fixed-height, and a content-sized card is clipped by it. The          */
+/* catalogue no longer emits either class: it has a real grid (.vs-catalogue__  */
+/* grid) further down. Tasks 5 and 7 retire the rest, and this block with them. */
+/* The swiper containers are excluded: Swiper owns their display.               */
 
 .products_list:not(.swiper-container) {
 	display: flex;
@@ -1987,6 +2009,948 @@ body.hc-nav-open {
 	font-size: 17px;
 }
 
+/* ------------------------------------------------------------- breadcrumbs */
+
+.vs-crumbs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0 var(--vs-space-2);
+	margin: 0;
+	padding: var(--vs-space-1) 0 0;
+	list-style: none;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+}
+
+/* The trail is the fastest way back up a category tree on a phone, so its     */
+/* links carry a full touch target rather than a 19px line of text.            */
+
+.vs-crumbs__item {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	margin: 0;
+	min-height: 44px;
+	min-width: 0;
+}
+
+.vs-crumbs__item a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+}
+
+.vs-crumbs__item + .vs-crumbs__item::before {
+	content: "/";
+	color: var(--vs-border-strong);
+}
+
+.vs-crumbs__item span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.vs-crumbs a {
+	color: var(--vs-text-muted);
+	text-decoration: none;
+}
+
+.vs-crumbs a:hover {
+	color: var(--vs-text);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+/* ---------------------------------------------------------- catalogue page */
+/* The old page wrapped the results in a bordered white panel, so every        */
+/* bordered card sat inside a second bordered box - the nested-card shape      */
+/* PRODUCT.md rules out. The grid now sits straight on the canvas and the      */
+/* cards are the only plates on the screen.                                    */
+
+.vs-catalogue {
+	padding-bottom: var(--vs-space-8);
+}
+
+.vs-catalogue__masthead {
+	padding: var(--vs-space-5) 0 var(--vs-space-5);
+}
+
+/* One step down from the h1 default: a 44px category name competes with the   */
+/* merchandise for the top of the page, and the merchandise should win.        */
+
+.vs-catalogue__title {
+	margin: 0;
+	font-size: var(--vs-text-2xl);
+}
+
+.vs-catalogue__intro {
+	margin-top: var(--vs-space-4);
+	max-width: 70ch;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-catalogue__main {
+	min-width: 0;
+}
+
+.vs-catalogue__outro {
+	margin-top: var(--vs-space-9);
+	padding-top: var(--vs-space-6);
+	border-top: 1px solid var(--vs-hairline);
+}
+
+.vs-catalogue__outro .block__description {
+	max-width: 80ch;
+}
+
+.vs-toc {
+	margin-bottom: var(--vs-space-6);
+}
+
+.vs-toc__title {
+	margin-bottom: var(--vs-space-2);
+	color: var(--vs-heading);
+	font-weight: 600;
+}
+
+/* --------------------------------------------------------------- toolbar */
+
+.vs-catalogue__toolbar {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	padding-bottom: var(--vs-space-4);
+	border-bottom: 1px solid var(--vs-hairline);
+}
+
+/* products_sort.tpl renders nothing on an empty result set, so the rule under */
+/* the toolbar would be a line under nothing.                                  */
+
+.vs-catalogue__toolbar:not(:has(.vs-sort__group)) {
+	padding-bottom: 0;
+	border-bottom: 0;
+}
+
+.vs-sort {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.vs-sort__label {
+	flex: none;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+/* A segmented control rather than four loose links: the options are mutually  */
+/* exclusive, so they read as one control. It scrolls instead of wrapping,     */
+/* because a wrapped second row pushes the grid down on exactly the screens    */
+/* where vertical space is scarcest.                                           */
+
+.vs-sort__group {
+	display: flex;
+	align-items: center;
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow-x: auto;
+	padding: 3px;
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+	scrollbar-width: none;
+}
+
+.vs-sort__group::-webkit-scrollbar {
+	display: none;
+}
+
+.vs-sort__item {
+	flex: none;
+	margin: 0;
+}
+
+.vs-sort__btn {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	min-height: 44px;
+	padding: 0 var(--vs-space-3);
+	border: 0;
+	border-radius: var(--vs-radius-sm);
+	background-color: transparent;
+	color: var(--vs-text-muted);
+	font-family: inherit;
+	font-size: var(--vs-text-sm);
+	line-height: 1;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: background-color var(--vs-dur-1) var(--vs-ease), color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-sort__btn:hover {
+	color: var(--vs-text);
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-sort__btn:focus-visible {
+	border-radius: var(--vs-radius-sm);
+}
+
+.vs-sort__btn.active_up,
+.vs-sort__btn.active_down {
+	background-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+}
+
+.vs-sort__btn.active_up:hover,
+.vs-sort__btn.active_down:hover {
+	background-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+}
+
+/* The sprite draws both arrows; the inactive one is dimmed so the control     */
+/* also says which direction the next tap will sort in.                        */
+
+.vs-sort__btn .sorting_icon {
+	flex: none;
+	width: 10px;
+	height: 15px;
+}
+
+.vs-sort__btn .sorting_icon--left,
+.vs-sort__btn .sorting_icon--right {
+	opacity: 0.35;
+}
+
+.vs-sort__btn.active_down .sorting_icon--left,
+.vs-sort__btn.active_up .sorting_icon--right {
+	opacity: 1;
+}
+
+.vs-filters__open {
+	flex: none;
+}
+
+/* A category with nothing to filter by renders no filter groups at all, and    */
+/* opening an empty sheet is a dead end - so the trigger goes with them. The    */
+/* sibling-category group does not count: it is desktop-rail only.              */
+
+.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))) .vs-filters__open {
+	display: none;
+}
+
+/* ------------------------------------------------------- applied filters */
+/* The current filter state has to be legible from the results, not only from */
+/* inside a panel the shopper has to reopen. Each chip removes its own filter. */
+
+.vs-applied {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--vs-space-2);
+	padding-top: var(--vs-space-4);
+}
+
+.vs-applied__label {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-applied__item {
+	margin: 0;
+}
+
+.vs-applied__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	max-width: 100%;
+	min-height: 44px;
+	padding: 0 var(--vs-space-2) 0 var(--vs-space-4);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+	font-family: inherit;
+	font-size: var(--vs-text-sm);
+	cursor: pointer;
+	transition: border-color var(--vs-dur-1) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-applied__chip:hover {
+	background-color: var(--vs-surface-subtle);
+	border-color: var(--vs-border-strong);
+}
+
+.vs-applied__chip:focus-visible {
+	border-radius: var(--vs-radius-full);
+}
+
+.vs-applied__text {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.vs-applied__text i {
+	font-style: normal;
+	font-weight: 600;
+}
+
+.vs-applied__chip svg {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	color: var(--vs-text-muted);
+}
+
+.vs-applied__reset {
+	margin: 0;
+}
+
+.vs-applied__reset_btn {
+	min-height: 44px;
+	padding: 0 var(--vs-space-3);
+	border: 0;
+	border-radius: var(--vs-radius-sm);
+	background-color: transparent;
+	color: var(--vs-text-muted);
+	font-family: inherit;
+	font-size: var(--vs-text-sm);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+	cursor: pointer;
+}
+
+.vs-applied__reset_btn:hover {
+	color: var(--vs-text);
+}
+
+/* ------------------------------------------------------------ results grid */
+
+.vs-catalogue__region {
+	position: relative;
+	padding-top: var(--vs-space-5);
+}
+
+.vs-catalogue__state {
+	display: none;
+}
+
+.vs-results {
+	margin: var(--vs-space-2) 0 0;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	font-variant-numeric: tabular-nums;
+}
+
+.vs-catalogue__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+	gap: var(--vs-space-4);
+	align-items: stretch;
+}
+
+/* --------------------------------------------------------------- skeleton */
+/* The real grid is always in the markup and always visible; the skeleton is   */
+/* an overlay that vibe.js switches on while an okay.js ajax filter round-trip */
+/* is in flight, so a browser that never runs the script still ships the       */
+/* products rather than a blank page waiting for a class to be removed.        */
+
+.vs-catalogue__skeleton {
+	display: none;
+}
+
+.vs-catalogue__region.is-loading .vs-catalogue__skeleton {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+	grid-auto-rows: 300px;
+	gap: var(--vs-space-4);
+	align-content: start;
+	overflow: hidden;
+	background-color: var(--vs-canvas);
+}
+
+.vs-catalogue__region.is-loading .vs-catalogue__results {
+	opacity: 0;
+}
+
+.vs-skeleton {
+	background-color: var(--vs-surface-subtle);
+	background-image: linear-gradient(90deg, var(--vs-surface-subtle) 25%, var(--vs-n-200) 37%, var(--vs-surface-subtle) 63%);
+	background-size: 400% 100%;
+	border-radius: var(--vs-radius-md);
+	animation: vs-shimmer var(--vs-dur-loop) ease-in-out infinite;
+}
+
+.vs-skeleton--filter {
+	height: 44px;
+	margin-bottom: var(--vs-space-3);
+}
+
+@keyframes vs-shimmer {
+	0% {
+		background-position: 100% 50%;
+	}
+
+	100% {
+		background-position: 0 50%;
+	}
+}
+
+/* ------------------------------------------------------------ empty state */
+
+.vs-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--vs-space-4);
+	max-width: 46ch;
+	padding: var(--vs-space-7) var(--vs-space-6);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+}
+
+.vs-empty__title {
+	margin: 0;
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+}
+
+.vs-empty__note {
+	margin: 0;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+/* -------------------------------------------------------------- pagination */
+
+.vs-pagination {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--vs-space-2);
+	margin: var(--vs-space-7) 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.vs-pagination__item {
+	margin: 0;
+}
+
+.vs-pagination__link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0 var(--vs-space-3);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	font-variant-numeric: tabular-nums;
+	text-decoration: none;
+	transition: background-color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-pagination__link:hover {
+	border-color: var(--vs-border-strong);
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-pagination__link:focus-visible {
+	border-radius: var(--vs-radius-md);
+}
+
+.vs-pagination__item.active .vs-pagination__link {
+	background-color: var(--vs-ink);
+	border-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+	font-weight: 600;
+}
+
+/* ------------------------------------------------------------ filter panel */
+/* One markup, two presentations. Below 992px .vs-filters is the .vs-sheet     */
+/* bottom sheet; from 992px the media query at the end of this file turns the  */
+/* very same element into a static rail. Rendering it once is what keeps       */
+/* okay.js binding fn_features a single time and leaves the ajax filter path   */
+/* untouched.                                                                  */
+
+.vs-filters {
+	max-height: 88dvh;
+}
+
+.vs-filters__bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--vs-space-3);
+	flex: none;
+	padding: var(--vs-space-2) var(--vs-space-3) var(--vs-space-2) var(--vs-space-5);
+	border-bottom: 1px solid var(--vs-hairline);
+}
+
+.vs-filters__heading {
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+}
+
+.vs-filters__scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 0 var(--vs-space-5);
+}
+
+.vs-filters__foot {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	flex: none;
+	padding: var(--vs-space-3) var(--vs-space-5);
+	padding-bottom: calc(var(--vs-space-3) + env(safe-area-inset-bottom));
+	border-top: 1px solid var(--vs-hairline);
+	background-color: var(--vs-surface);
+}
+
+.vs-filters__apply {
+	flex: 1 1 auto;
+}
+
+.vs-filters__reset {
+	flex: none;
+}
+
+.vs-filters__reset svg {
+	width: 16px;
+	height: 16px;
+	color: var(--vs-text-muted);
+}
+
+/* ------------------------------------------------------------ filter group */
+
+.vs-filter-group {
+	border-bottom: 1px solid var(--vs-hairline);
+}
+
+.vs-filter-group:last-child {
+	border-bottom: 0;
+}
+
+.vs-filter-group__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--vs-space-3);
+	width: 100%;
+	min-height: 52px;
+	padding: 0;
+	border: 0;
+	background-color: transparent;
+	color: var(--vs-heading);
+	font-family: inherit;
+	font-size: var(--vs-text-base);
+	font-weight: 600;
+	text-align: left;
+	cursor: pointer;
+}
+
+/* The group body ships expanded, so the chevron ships pointing up. okay.js    */
+/* adds .active on the first click, which is the collapsed state - the arrow   */
+/* then points down at the content it would reveal.                           */
+
+.vs-filter-group__chevron {
+	display: inline-flex;
+	flex: none;
+	color: var(--vs-text-muted);
+	transform: rotate(180deg);
+	transition: transform var(--vs-dur-2) var(--vs-ease);
+}
+
+.vs-filter-group__chevron svg {
+	width: 16px;
+	height: 16px;
+}
+
+.vs-filter-group__head.active .vs-filter-group__chevron {
+	transform: rotate(0deg);
+}
+
+.vs-filter-group__body {
+	padding-bottom: var(--vs-space-4);
+}
+
+.vs-filter__list {
+	margin: 0 calc(var(--vs-space-2) * -1);
+}
+
+.vs-filter__item {
+	margin: 0;
+}
+
+.vs-filter__item form {
+	margin: 0;
+}
+
+.vs-filter__option {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	width: 100%;
+	min-height: 44px;
+	padding: 0 var(--vs-space-2);
+	border: 0;
+	border-radius: var(--vs-radius-sm);
+	background-color: transparent;
+	color: var(--vs-text);
+	font-family: inherit;
+	font-size: var(--vs-text-sm);
+	text-align: left;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-filter__option:hover {
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-filter__option:focus-visible {
+	border-radius: var(--vs-radius-sm);
+}
+
+.vs-filter__box {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 20px;
+	height: 20px;
+	border: 1px solid var(--vs-border-strong);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-surface);
+	color: transparent;
+	transition: background-color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease), color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-filter__box svg {
+	width: 14px;
+	height: 14px;
+}
+
+.vs-filter__box .checkmark-path {
+	stroke: currentColor;
+	stroke-width: 2.4;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.vs-filter__option.checked .vs-filter__box {
+	background-color: var(--vs-ink);
+	border-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+}
+
+.vs-filter__option.checked .vs-filter__label {
+	font-weight: 600;
+}
+
+.vs-filter__label {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.vs-filter__item.closed {
+	display: none;
+}
+
+.vs-filter-group__body.opened .vs-filter__item.closed {
+	display: block;
+}
+
+.vs-filter__more {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 var(--vs-space-2);
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+/* ------------------------------------------------------------ price filter */
+
+.vs-price {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+}
+
+.vs-price__input {
+	width: 100%;
+	min-width: 0;
+	padding: 0 var(--vs-space-3);
+	font-size: var(--vs-text-sm);
+	font-variant-numeric: tabular-nums;
+}
+
+.vs-price__field {
+	flex: 1 1 0;
+	min-width: 0;
+}
+
+.vs-price__sep,
+.vs-price__currency {
+	flex: none;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-price__slider {
+	margin: var(--vs-space-6) var(--vs-space-3) var(--vs-space-2);
+}
+
+/* noUiSlider skin. The markup is generated by the library and cannot be       */
+/* renamed; okay.js binds the handles by id, so only presentation is ours.     */
+
+.vs-price__slider.noUi-target {
+	height: 4px;
+	border: 0;
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-n-200);
+	box-shadow: none;
+}
+
+.vs-price__slider .noUi-connects {
+	border-radius: var(--vs-radius-full);
+}
+
+.vs-price__slider .noUi-connect {
+	background-color: var(--vs-ink);
+}
+
+.vs-price__slider .noUi-handle {
+	top: -10px;
+	right: -12px;
+	width: 24px;
+	height: 24px;
+	border: 1px solid var(--vs-border-strong);
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface);
+	box-shadow: var(--vs-shadow-1);
+	cursor: grab;
+}
+
+.vs-price__slider .noUi-handle::before,
+.vs-price__slider .noUi-handle::after {
+	display: none;
+}
+
+.vs-price__slider .noUi-handle:focus-visible {
+	border-radius: var(--vs-radius-full);
+}
+
+.vs-price__slider .noUi-active {
+	box-shadow: var(--vs-shadow-2);
+	cursor: grabbing;
+}
+
+/* --------------------------------------------------------- category filter */
+
+.vs-filter-cats__item {
+	margin: 0;
+}
+
+.vs-filter-cats__link {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	min-height: 44px;
+	padding: 0 var(--vs-space-2);
+	border-radius: var(--vs-radius-sm);
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	text-decoration: none;
+	transition: background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-filter-cats__link:hover {
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-filter-cats__link.is-current {
+	font-weight: 600;
+}
+
+.vs-filter-cats__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 24px;
+	height: 24px;
+	color: var(--vs-border-strong);
+}
+
+.vs-filter-cats__icon img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.vs-filter-cats__icon svg {
+	width: 20px;
+	height: 20px;
+}
+
+.vs-filter-cats__name {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.vs-filter-cats__link > svg {
+	flex: none;
+	width: 14px;
+	height: 14px;
+	margin-left: auto;
+	color: var(--vs-text-muted);
+}
+
+/* ------------------------------------------------------- browsed products */
+/* Rendered by browsed_products.tpl, which this task does not own; only the    */
+/* container and a handful of its inherited classes are re-skinned here.       */
+
+/* The rule and the spacing hang off the inner block, not the wrapper: browsed */
+/* products render nothing at all for a first-time visitor, and a wrapper with */
+/* its own border would leave a stray hairline under an empty rail.            */
+
+.vs-filters__browsed .sidebar__boxed {
+	padding: var(--vs-space-5) 0 0;
+	margin: var(--vs-space-5) 0 0;
+	border-top: 1px solid var(--vs-hairline);
+	background-color: transparent;
+	box-shadow: none;
+	border-radius: 0;
+}
+
+.vs-filters__browsed .sidebar_heading {
+	min-height: 44px;
+	color: var(--vs-heading);
+	font-family: inherit;
+	font-size: var(--vs-text-base);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.vs-filters__browsed .browsed__content {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: var(--vs-space-2);
+	margin: 0;
+}
+
+.vs-filters__browsed .browsed__item {
+	max-width: none;
+	flex: none;
+	padding: 0;
+	margin: 0;
+}
+
+.vs-filters__browsed .browsed__link {
+	aspect-ratio: 1 / 1;
+	padding: var(--vs-space-2);
+	overflow: hidden;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-plate);
+}
+
+.vs-filters__browsed .browsed__link img {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+/* ------------------------------------------------------- popular categories */
+
+.vs-cats {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	gap: var(--vs-space-3);
+}
+
+.vs-cats__item {
+	margin: 0;
+}
+
+.vs-cats__link {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--vs-space-3);
+	height: 100%;
+	padding: var(--vs-space-4) var(--vs-space-3);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+	text-align: center;
+	text-decoration: none;
+	transition: border-color var(--vs-dur-2) var(--vs-ease), box-shadow var(--vs-dur-2) var(--vs-ease);
+}
+
+.vs-cats__link:hover {
+	border-color: var(--vs-border);
+	box-shadow: var(--vs-shadow-2);
+}
+
+.vs-cats__image {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 72px;
+	height: 72px;
+	color: var(--vs-border-strong);
+}
+
+.vs-cats__image img,
+.vs-cats__image svg {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+.vs-cats__name {
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
+	line-height: var(--vs-leading-body);
+}
+
 /* --------------------------------------------------------------- ≥ 576 px */
 
 @media (min-width: 576px) {
@@ -2003,6 +2967,22 @@ body.hc-nav-open {
 	.vs-footer__baseline {
 		flex-direction: row;
 		justify-content: space-between;
+	}
+
+	.vs-catalogue__grid {
+		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+		gap: var(--vs-space-6);
+	}
+
+	.vs-catalogue__region.is-loading .vs-catalogue__skeleton {
+		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+		grid-auto-rows: 380px;
+		gap: var(--vs-space-6);
+	}
+
+	.vs-cats {
+		grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+		gap: var(--vs-space-4);
 	}
 }
 
@@ -2053,6 +3033,38 @@ body.hc-nav-open {
 	.vs-footer__contact {
 		min-height: 36px;
 	}
+
+/* From here the filter panel stops being a sheet and becomes the left rail.  */
+/* Same element, same markup, no second copy - so fn_features stays bound     */
+/* once and the ajax filter path does not notice the breakpoint.              */
+
+	.vs-catalogue__layout {
+		display: grid;
+		grid-template-columns: 260px minmax(0, 1fr);
+		gap: var(--vs-space-7);
+		align-items: start;
+	}
+
+	.vs-filters {
+		position: static;
+		z-index: auto;
+		max-height: none;
+		border-radius: 0;
+		background-color: transparent;
+		box-shadow: none;
+		visibility: visible;
+		transform: none;
+	}
+
+	.vs-filters__bar,
+	.vs-filters__foot {
+		display: none;
+	}
+
+	.vs-filters__scroll {
+		overflow: visible;
+		padding: 0;
+	}
 }
 
 /* --------------------------------------------------------------- ≤ 991 px */
@@ -2061,6 +3073,14 @@ body.hc-nav-open {
 	.vs-header {
 		position: sticky;
 		top: 0;
+	}
+
+	.vs-catalogue__masthead {
+		padding: var(--vs-space-4) 0;
+	}
+
+	.vs-filters__browsed {
+		display: none;
 	}
 }
 

@@ -2345,42 +2345,6 @@ select {
   top: auto;
   right: 28px;
 }
-#fn_slider_price.noUi-target {
-  position: relative;
-  height: 4px;
-  background: #e1e8ed;
-  margin: 24px 10px 24px;
-  border-radius: 2px;
-  border: none;
-  font-family: inherit;
-  color: inherit;
-}
-#fn_slider_price.noUi-target .noUi-handle {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  margin-left: -12px;
-  top: -7px;
-  border-radius: 4px;
-  border: 3px solid #e1e8ed;
-  background-color: #fff;
-  border-color: var(--okay-basic-company);
-  cursor: pointer;
-  box-shadow: none;
-  transition: background-color 0.2s;
-}
-#fn_slider_price.noUi-target .noUi-handle::after,
-#fn_slider_price.noUi-target .noUi-handle::before {
-  content: none;
-}
-#fn_slider_price.noUi-target .noUi-connect,
-#fn_slider_price.noUi-target .noUi-handle:hover {
-  background-color: var(--okay-basic-company);
-}
-#fn_slider_price.noUi-horizontal .noUi-handle {
-  right: -10px;
-}
-
 /***** #Loader amimation ********************************************************/
 @-webkit-keyframes rotate-animation {
   0% {

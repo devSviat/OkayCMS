@@ -29,6 +29,16 @@
         return id ? document.getElementById(id) : document.querySelector('.vs-sheet__backdrop');
     }
 
+    /* Any control pointed at the sheet with aria-controls announces its state,
+       whichever of the close paths - button, backdrop or Escape - was used. */
+    function announce(sheet, open) {
+        if (!sheet.id) return;
+        var triggers = document.querySelectorAll('[aria-controls="' + sheet.id + '"]');
+        for (var i = 0; i < triggers.length; i++) {
+            triggers[i].setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+    }
+
     window.vibeSheet = {
         open: function (sheet) {
             if (!sheet) return;
@@ -38,6 +48,7 @@
             var backdrop = backdropFor(sheet);
             if (backdrop) backdrop.classList.add('is-open');
             document.body.style.overflow = 'hidden';
+            announce(sheet, true);
             var focusable = sheet.querySelector(FOCUSABLE);
             if (focusable) focusable.focus();
         },
@@ -47,6 +58,7 @@
             var backdrop = backdropFor(sheet);
             if (backdrop) backdrop.classList.remove('is-open');
             document.body.style.overflow = '';
+            announce(sheet, false);
             if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
             lastFocused = null;
         }
@@ -223,6 +235,84 @@
             syncCard(select);
         });
     }
+
+    /* --------------------------------------------------------- catalogue */
+
+    /* The filter panel is the shared .vs-sheet primitive - focus trap, scroll
+       lock, Escape and focus restore all come from window.vibeSheet above.
+       Only the trigger is bound here. Closing is handled by the generic
+       [data-vs-sheet-close] and backdrop listeners. */
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        if (!event.target.closest('.vs-filters__open')) return;
+        window.vibeSheet.open(document.querySelector('.vs-filters.vs-sheet'));
+    });
+
+    /* Resizing past the rail breakpoint turns the sheet back into a static
+       column. Leaving it "open" would keep the body scroll lock on with no
+       visible overlay to explain it. */
+    var railQuery = window.matchMedia ? window.matchMedia('(min-width: 992px)') : null;
+
+    function closeFiltersOnRail() {
+        if (!railQuery || !railQuery.matches) return;
+        var open = document.querySelector('.vs-filters.vs-sheet.is-open');
+        if (open) window.vibeSheet.close(open);
+    }
+
+    if (railQuery) {
+        if (railQuery.addEventListener) {
+            railQuery.addEventListener('change', closeFiltersOnRail);
+        } else if (railQuery.addListener) {
+            railQuery.addListener(closeFiltersOnRail);
+        }
+    }
+
+    /* okay.js replaces the contents of #fn_products_content on every ajax
+       filter round-trip, and marks the trip in flight by appending its own
+       .fn_ajax_wait node to the same element. Both are observed here so the
+       skeleton is switched on by a class of ours and the result count - which
+       lives outside the replaced region - is refreshed from the strings the
+       server rendered with the new markup. Nothing is hidden until this runs:
+       the grid and the count are in the HTML and visible by default. */
+    function syncCatalogue() {
+        var region = document.querySelector('.vs-catalogue__region');
+        if (!region) return;
+
+        var results = region.querySelector('.vs-catalogue__results');
+        var loading = !!(results && results.querySelector('.fn_ajax_wait'));
+        region.classList.toggle('is-loading', loading);
+        if (loading) return;
+
+        var state = region.querySelector('.vs-catalogue__state');
+        if (!state) return;
+        writeAll('.vs-results__value', state.getAttribute('data-vs-count'));
+        writeAll('.vs-filters__apply_label', state.getAttribute('data-vs-apply'));
+    }
+
+    function writeAll(selector, text) {
+        if (text === null) return;
+        var nodes = document.querySelectorAll(selector);
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].textContent = text;
+        }
+    }
+
+    var productsRegion = document.getElementById('fn_products_content');
+    if (productsRegion && window.MutationObserver) {
+        new MutationObserver(syncCatalogue).observe(productsRegion, { childList: true });
+    }
+
+    /* okay.js collapses a filter group by class only, so the state the group
+       header announces is mirrored here. Scoped to headers that already carry
+       the attribute, so no other .fn_switch consumer is touched. */
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var head = event.target.closest('.fn_switch');
+        if (!head || !head.hasAttribute('aria-expanded')) return;
+        window.setTimeout(function () {
+            head.setAttribute('aria-expanded', head.classList.contains('active') ? 'false' : 'true');
+        }, 0);
+    });
 
     document.addEventListener('keydown', function (event) {
         if (event.key !== 'Escape' && event.key !== 'Esc' && event.key !== 'Tab') return;

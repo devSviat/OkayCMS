@@ -1,107 +1,127 @@
 <!-- The Categories page -->
 
-<div class="clearfix">
-    {* Sidebar with filters *}
-    <div class="fn_mobile_toogle sidebar d-lg-flex flex-lg-column">
-        <div class="fn_mobile_toogle sidebar__header sidebar__boxed hidden-lg-up">
-            <div class="fn_switch_mobile_filter sidebar__header--close">
-                {include file="svg.tpl" svgId="remove_icon"}
-                <span data-language="mobile_filter_close">{$lang->mobile_filter_close}</span>
+{* The filter panel is rendered ONCE. Below 992px it is the .vs-sheet bottom
+   sheet, from 992px the same element is the static left rail - the switch is
+   pure CSS, so okay.js binds fn_features a single time and the ajax filter
+   path is unaffected. The sheet is a descendant of .main, never of .vs-header:
+   the header opens a stacking context at z-index 200 that would cap it. *}
+
+<div class="vs-catalogue">
+    <div class="vs-catalogue__masthead">
+        <h1 class="vs-catalogue__title"{if $category} data-category="{$category->id}"{/if}{if $brand} data-brand="{$brand->id}"{/if}>{$h1|escape}</h1>
+
+        {* Result count. Server-rendered so it is right without JavaScript;
+           vibe.js only refreshes it after an okay.js ajax filter round-trip. *}
+        <p class="vs-results">
+            <span class="vs-results__value">{$total_products_num|default:0} {$total_products_num|default:0|plural:$lang->products_count_plural1:$lang->products_count_plural2:$lang->products_count_plural3}</span>
+        </p>
+
+        {if !empty($annotation)}
+            <div class="fn_readmore vs-catalogue__intro">
+                <div class="block__description">{$annotation}</div>
             </div>
-            {if $category}
-                <div class="sidebar__header--reset">
-                    <form method="post">
-                        <button type="submit" name="prg_seo_hide" class="fn_filter_reset mobile_filter__reset" value="{url_generator route="category" url=$category->url absolute=1}">
-                            {include file="svg.tpl" svgId="reset_icon"}
-                            <span>{$lang->mobile_filter_reset}</span>
-                        </button>
-                    </form>
-                </div>
-            {elseif $brand}
-                <div class="sidebar__header--reset">
-                    <form method="post">
-                        <button type="submit" name="prg_seo_hide" class="fn_filter_reset mobile_filter__reset" value="{url_generator route="brand" url=$brand->url absolute=1}">
-                            {include file="svg.tpl" svgId="reset_icon"}
-                            <span>{$lang->mobile_filter_reset}</span>
-                        </button>
-                    </form>
-                </div>
-            {/if}
-        </div>
-
-        <div class="fn_selected_features">
-            {if !$settings->deferred_load_features}
-                {include file='selected_features.tpl'}
-            {/if}
-        </div>
-
-        <div class="fn_features">
-            {if !$settings->deferred_load_features}
-                {include file='features.tpl'}
-            {else}
-                {* Deferred load features *}
-                <div class='fn_skeleton_load'>
-                    {section name=foo start=1 loop=7 step=1}
-                        <div class='skeleton_load__item skeleton_load__item--{$smarty.section.foo.index}'></div>
-                    {/section}
-                </div>
-            {/if}
-        </div>
-
-        {* Browsed products *}
-        <div class="browsed products">
-            {include file='browsed_products.tpl'}
-        </div>
+        {/if}
     </div>
 
-    <div class="products_container d-flex flex-column">
-        <div class="products_container__boxed">
-            <h1 class="h1"{if $category} data-category="{$category->id}"{/if}{if $brand} data-brand="{$brand->id}"{/if}>{$h1|escape}</h1>
+    <div class="vs-catalogue__layout">
+        {* Filters: bottom sheet on phones, left rail from 992px *}
+        <aside id="vs_filters" class="fn_mobile_toogle vs-filters vs-sheet" aria-label="{$lang->filters|escape}">
+            <div class="vs-filters__bar">
+                <span class="vs-filters__heading" data-language="filters">{$lang->filters}</span>
+                <button type="button" class="fn_switch_mobile_filter vs-btn vs-btn--ghost vs-btn--icon vs-filters__close" data-vs-sheet-close aria-label="{$lang->mobile_filter_close|escape}">
+                    {include file="svg.tpl" svgId="close"}
+                </button>
+            </div>
 
-            {if !empty($annotation)}
-                <div class="boxed boxed--big">
-                    <div class="">
-                        <div class="fn_readmore">
-                            <div class="block__description">
-                                {$annotation}
-                            </div>
+            <div class="vs-filters__scroll">
+                <div class="fn_features">
+                    {if !$settings->deferred_load_features}
+                        {include file='features.tpl'}
+                    {else}
+                        {* Deferred load features *}
+                        <div class='fn_skeleton_load'>
+                            {section name=foo start=1 loop=7 step=1}
+                                <div class='vs-skeleton vs-skeleton--filter'></div>
+                            {/section}
                         </div>
-                    </div>
+                    {/if}
                 </div>
-            {/if}
 
-            {if $products}
-                <div class="products_container__sort d-flex align-items-center justify-content-between">
-                    {* Product Sorting *}
-                    <div class="fn_products_sort">
-                        {include file="products_sort.tpl"}
-                    </div>
-                    {* Mobile button filters *}
-                    <div class="fn_switch_mobile_filter switch_mobile_filter hidden-lg-up">
-                        {include file="svg.tpl" svgId="filter_icon"}
-                        <span data-language="filters">{$lang->filters}</span>
-                    </div>
+                {* Browsed products *}
+                <div class="vs-filters__browsed">
+                    {include file='browsed_products.tpl'}
                 </div>
-            {/if}
+            </div>
 
-            {* Product list *}
-            <div id="fn_products_content" class="fn_categories products_list row">
-                {include file="products_content.tpl"}
+            <div class="vs-filters__foot">
+                {if $category}
+                    <form method="post">
+                        <button type="submit" name="prg_seo_hide" class="fn_filter_reset vs-btn vs-btn--secondary vs-filters__reset" value="{url_generator route="category" url=$category->url absolute=1}">
+                            {include file="svg.tpl" svgId="reset_icon"}
+                            <span>{$lang->mobile_filter_reset}</span>
+                        </button>
+                    </form>
+                {elseif $brand}
+                    <form method="post">
+                        <button type="submit" name="prg_seo_hide" class="fn_filter_reset vs-btn vs-btn--secondary vs-filters__reset" value="{url_generator route="brand" url=$brand->url absolute=1}">
+                            {include file="svg.tpl" svgId="reset_icon"}
+                            <span>{$lang->mobile_filter_reset}</span>
+                        </button>
+                    </form>
+                {/if}
+                <button type="button" class="vs-btn vs-btn--primary vs-filters__apply" data-vs-sheet-close>
+                    <span class="vs-filters__apply_label">{$lang->products_show} {$total_products_num|default:0} {$total_products_num|default:0|plural:$lang->products_count_plural1:$lang->products_count_plural2:$lang->products_count_plural3}</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="vs-catalogue__main">
+            <div class="vs-catalogue__toolbar">
+                {* Product Sorting *}
+                <div class="fn_products_sort vs-sort">
+                    {include file="products_sort.tpl"}
+                </div>
+                {* Mobile button filters *}
+                <button type="button" class="fn_switch_mobile_filter vs-btn vs-btn--secondary vs-filters__open hidden-lg-up" aria-controls="vs_filters" aria-expanded="false">
+                    {include file="svg.tpl" svgId="filter_icon"}
+                    <span data-language="filters">{$lang->filters}</span>
+                </button>
+            </div>
+
+            {* Applied filters, as removable chips above the grid *}
+            <div class="fn_selected_features">
+                {if !$settings->deferred_load_features}
+                    {include file='selected_features.tpl'}
+                {/if}
+            </div>
+
+            <div class="vs-catalogue__region">
+                {* Product list *}
+                <div id="fn_products_content" class="fn_categories vs-catalogue__results">
+                    {include file="products_content.tpl"}
+                </div>
+                {* Loading state. Never hides the list on its own - vibe.js adds
+                   .is-loading to the region while an ajax filter is in flight. *}
+                <div class="vs-catalogue__skeleton" aria-hidden="true">
+                    {section name=skel start=1 loop=9 step=1}
+                        <div class="vs-skeleton"></div>
+                    {/section}
+                </div>
             </div>
 
             {if $products}
                 {* Friendly URLs Pagination *}
-                <div class="fn_pagination products_pagination">
+                <div class="fn_pagination">
                     {include file='chpu_pagination.tpl'}
                 </div>
             {/if}
 
             {if $description}
-                <div class="boxed boxed--big">
+                <div class="vs-catalogue__outro">
                     {* Table contents *}
                     {if !empty($table_of_content)}
-                        <div class="post__table_contents">
-                            <div class="post__table_contents_title">{$lang->blog_table_contents}</div>
+                        <div class="vs-toc">
+                            <div class="vs-toc__title">{$lang->blog_table_contents}</div>
                             <ol>
                                 {foreach $table_of_content as $content_item}
                                     <li style="margin-left: {$content_item.header_level*15-15}px">
@@ -111,11 +131,11 @@
                             </ol>
                         </div>
                     {/if}
-                    <div class="">
-                        <div class="block__description">{$description}</div>
-                    </div>
+                    <div class="block__description">{$description}</div>
                 </div>
             {/if}
         </div>
     </div>
 </div>
+
+<div class="vs-sheet__backdrop"></div>

@@ -89,9 +89,11 @@
 	--vs-shadow-2: 0 2px 4px rgb(23 23 26 / .05), 0 8px 16px -4px rgb(23 23 26 / .08);
 	--vs-shadow-3: 0 4px 8px rgb(23 23 26 / .06), 0 16px 32px -8px rgb(23 23 26 / .14);
 
+	--vs-dur-0: 0s;
 	--vs-dur-1: 120ms;
 	--vs-dur-2: 200ms;
 	--vs-dur-3: 320ms;
+	--vs-dur-loop: 1.4s;
 	--vs-ease: cubic-bezier(.2, .7, .3, 1);
 
 	--vs-z-dropdown: 100;
