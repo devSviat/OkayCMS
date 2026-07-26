@@ -131,12 +131,20 @@ design/vibe_shop/
   css.php, js.php       registration order updated
 ```
 
-Final `css.php` order — tokens and base first so components can override them, `theme.css` last
-so it beats whatever remains of the legacy sheets:
+`css.php` order during the migration. `base.css` sits **after** the legacy sheets, not before:
+`okay.css` styles bare `body`, `h1`–`h4` and `a` at the same specificity as `base.css`, so an
+earlier `base.css` loses every one of those declarations and the new typography silently never
+applies. `theme.css` stays last so components beat both.
 
 ```
-tokens.css, base.css, grid.css, [okay.css, media.css, mobile_menu.css — legacy, shrinking],
-select2.min.css, vendor.css, theme.css
+tokens.css, grid.css, [okay.css, media.css, mobile_menu.css — legacy, shrinking],
+select2.min.css, base.css, theme.css
+```
+
+Final order after the Task 8 teardown:
+
+```
+tokens.css, grid.css, vendor.css, select2.min.css, base.css, theme.css
 ```
 
 ---
@@ -477,19 +485,26 @@ C1/C2/C3 do not apply to it.
 ```php
 return [
     (new Css('tokens.css')),
-    (new Css('base.css')),
     (new Css('grid.css')),
     (new Css('okay.css')),
     (new Css('media.css')),
     (new Css('mobile_menu.css')),
     (new Css('select2.min.css')),
+    (new Css('base.css')),
     (new Css('theme.css')),
 ];
 ```
 
-`theme.css` moves last so the new component layer wins over whatever is still left in the
-legacy sheets. `okay.css`, `media.css` and `mobile_menu.css` are removed from this list in
-Task 8.
+Order matters in both directions here:
+
+- `base.css` must come **after** `okay.css`. Both style bare `body`, `h1`–`h4` and `a` at
+  identical specificity, so an earlier `base.css` loses and the Inter/15px/1.55 typography
+  silently never applies — the page keeps rendering Montserrat 14px/1.4 and everything looks
+  like the task did nothing.
+- `theme.css` stays last so the new component layer wins over whatever is still left in the
+  legacy sheets.
+
+`okay.css`, `media.css` and `mobile_menu.css` are removed from this list in Task 8.
 
 - [ ] **Step 9: Verify in the browser**
 
@@ -1378,13 +1393,17 @@ dropped rather than restyled — fix before continuing.
 ```php
 return [
     (new Css('tokens.css')),
-    (new Css('base.css')),
     (new Css('grid.css')),
     (new Css('vendor.css')),
     (new Css('select2.min.css')),
+    (new Css('base.css')),
     (new Css('theme.css')),
 ];
 ```
+
+`base.css` keeps its position after the vendor sheets for the same reason it sat after
+`okay.css`: vendor CSS carries bare-element rules that would otherwise beat the typographic
+base.
 
 - [ ] **Step 4: Re-point the colours still hard-coded in `grid.css`**
 
