@@ -2,6 +2,8 @@
 
 namespace Okay\Core;
 
+use Psr\Log\LoggerInterface;
+
 class Recaptcha
 {
 
@@ -9,13 +11,17 @@ class Recaptcha
 
     private $request;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     private $secret_key;
     private $url = 'https://www.google.com/recaptcha/api/siteverify';
 
-    public function __construct(Settings $settings, Request $request)
+    public function __construct(Settings $settings, Request $request, LoggerInterface $logger)
     {
         $this->settings = $settings;
         $this->request  = $request;
+        $this->logger   = $logger;
         
         switch ($this->settings->captcha_type) {
             case 'invisible':
@@ -33,12 +39,22 @@ class Recaptcha
     public function check()
     {
         $response = $this->request();
-        // В случае инвалидных ключей пропускаем пользователя
-        if (isset($response['error-codes']) && reset($response['error-codes']) == 'invalid-input-secret') {
-            return true; // TODO add to events list
+
+        if (!is_array($response)) {
+            $this->logger->warning('Recaptcha: unreadable API response');
+            return false;
         }
-        
-        if ($response['success'] == false) {
+
+        if (isset($response['error-codes'])
+            && in_array('invalid-input-secret', (array)$response['error-codes'], true)
+        ) {
+            // Раніше тут стояв return true, і одна помилка в ключі беззвучно
+            // вимикала капчу на всьому сайті.
+            $this->logger->error('Recaptcha: invalid secret key, check the captcha settings');
+            return false;
+        }
+
+        if (empty($response['success'])) {
             return false;
         }
         
@@ -69,7 +85,9 @@ class Recaptcha
         return $min_score <= $score;
     }
     
-    private function request()
+    // protected, щоб рішення капчі можна було перевірити тестом
+    // без реального звернення до Google.
+    protected function request()
     {
         $curl = curl_init($this->url);
 

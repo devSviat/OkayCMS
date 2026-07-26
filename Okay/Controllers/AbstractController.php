@@ -14,6 +14,7 @@ use Okay\Core\Design;
 use Okay\Core\EntityFactory;
 use Okay\Core\Request;
 use Okay\Core\Response;
+use Okay\Core\Security\CustomerCsrfToken;
 use Okay\Core\Settings;
 use Okay\Helpers\MainHelper;
 use Okay\Helpers\MetadataHelpers\MetadataInterface;
@@ -136,7 +137,44 @@ class AbstractController
 
         $mainHelper->configureTemplateDirProcedure();
 
+        // Токен для форм вітрини: шаблони друкують його як
+        // <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
+        $this->design->assign('customer_csrf_token', CustomerCsrfToken::get());
+
         $commonHelper->rootPostProcedure();
+    }
+
+    /**
+     * Токен для форм вітрини.
+     *
+     * @return string
+     */
+    protected function customerCsrfToken()
+    {
+        return CustomerCsrfToken::get();
+    }
+
+    /**
+     * Пропускає лише POST із коректним токеном.
+     * Мутуючі ендпоінти вітрини зобов'язані викликати цей метод першим.
+     *
+     * @return void
+     */
+    protected function requireCustomerCsrf()
+    {
+        if (!$this->request->method('post')) {
+            $this->response->setStatusCode(405);
+            $this->response->setContent('Method Not Allowed', RESPONSE_TEXT);
+            $this->response->sendContent();
+            exit;
+        }
+
+        if (!CustomerCsrfToken::check($this->request->post('customer_csrf_token'))) {
+            $this->response->setStatusCode(403);
+            $this->response->setContent('Forbidden', RESPONSE_TEXT);
+            $this->response->sendContent();
+            exit;
+        }
     }
     
     /*

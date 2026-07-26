@@ -187,7 +187,7 @@ class Init extends AbstractInit
             function (Design $design) {
                 if ($delivery = $design->getVar('delivery')) {
                     if (!is_array($delivery->settings)) {
-                        $delivery->settings = unserialize($delivery->settings);
+                        $delivery->settings = unserialize($delivery->settings, ['allowed_classes' => false]);
                         $design->assign('delivery', $delivery);
                     }
                 }
@@ -200,7 +200,7 @@ class Init extends AbstractInit
             function (Design $design) {
                 if ($delivery = $design->getVar('delivery')) {
                     if (!is_array($delivery->settings)) {
-                        $delivery->settings = unserialize($delivery->settings);
+                        $delivery->settings = unserialize($delivery->settings, ['allowed_classes' => false]);
                         $design->assign('delivery', $delivery);
                     }
                 }

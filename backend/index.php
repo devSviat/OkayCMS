@@ -36,13 +36,13 @@ $config = $DI->get(Config::class);
 
 // Засекаем время
 $time_start = microtime(true);
-if(!empty($_SERVER['HTTP_USER_AGENT'])){
-    session_name(md5($_SERVER['HTTP_USER_AGENT']));
-}
 ini_set('session.gc_maxlifetime', 86400); // 86400 = 24 часа
-ini_set('session.cookie_lifetime', 0); // 0 - пока браузер не закрыт
-session_start();
-$_SESSION['id'] = session_id();
+// cookie_lifetime задається в SessionNames::cookieParams()
+\Okay\Core\Security\SessionNames::startBackend();
+
+// Шаблони друкують це значення як {$smarty.session.id} у полі session_id.
+// Тепер це окремий CSRF-токен, а не ідентифікатор сесії.
+$_SESSION['id'] = \Okay\Core\Security\AdminCsrfToken::get();
 
 if ($config->get('debug_mode') == true) {
     ini_set('display_errors', 'on');
@@ -197,6 +197,16 @@ if (($controllerParams = $module->getBackendControllerParams($backendControllerN
     }
 }
 
+// CSRF-перевірка виконується до виклику контролера: раніше вона стояла в самому
+// кінці файлу, вже після того як контролер відпрацював і мутація сталася.
+// AuthAdmin виключено: форма входу рендериться до появи сесії менеджера.
+if ($backendControllerName !== 'AuthAdmin' && !$request->checkSession()) {
+    $response->setStatusCode(403);
+    $response->setContent('Session expired', RESPONSE_TEXT);
+    $response->sendContent();
+    exit;
+}
+
 $backend = new $controllerName($manager, $backendControllerName, $methodName);
 
 $access = call_user_func_array([$backend, 'onInit'], getMethodParams($backend, 'onInit'));
@@ -229,12 +239,6 @@ function getMethodParams($controllerName, $methodName)
     }
 
     return $methodParams;
-}
-
-// Проверка сессии для защиты от xss
-if (!$request->checkSession()) {
-    unset($_POST);
-    trigger_error('Session expired', E_USER_WARNING);
 }
 
 $response->sendContent();

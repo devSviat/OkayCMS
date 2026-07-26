@@ -66,7 +66,7 @@ class OrdersHelper
         $delivery = null;
         if ($order->delivery_id) {
             $delivery = $deliveriesEntity->get((int)$order->delivery_id);
-            $delivery->settings = unserialize($delivery->settings);
+            $delivery->settings = unserialize($delivery->settings, ['allowed_classes' => false]);
         }
 
         return ExtenderFacade::execute(__METHOD__, $delivery, func_get_args());
@@ -80,7 +80,7 @@ class OrdersHelper
 
         if ($order->payment_method_id) {
             $paymentMethod = $paymentsEntity->get((int)$order->payment_method_id);
-            $paymentMethod->settings = unserialize($paymentMethod->settings);
+            $paymentMethod->settings = unserialize($paymentMethod->settings, ['allowed_classes' => false]);
         }
 
         return ExtenderFacade::execute(__METHOD__, $paymentMethod, func_get_args());
@@ -97,7 +97,7 @@ class OrdersHelper
         ]);
 
         foreach ($paymentMethods as $paymentMethod) {
-            $paymentMethod->settings = unserialize($paymentMethod->settings);
+            $paymentMethod->settings = unserialize($paymentMethod->settings, ['allowed_classes' => false]);
         }
 
         return ExtenderFacade::execute(__METHOD__, $paymentMethods, func_get_args());

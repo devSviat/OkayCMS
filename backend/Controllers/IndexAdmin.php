@@ -3,6 +3,8 @@
 
 namespace Okay\Admin\Controllers;
 
+use Okay\Core\Security\SessionNames;
+
 
 use Okay\Admin\Helpers\BackendMainHelper;
 use Okay\Core\Config;
@@ -275,7 +277,13 @@ class IndexAdmin
 
         // Запоминаем логин менеджера для работы темы под админом
         if (!empty($this->manager->login)) {
-            setcookie('admin_login', $this->manager->login, time() + 60 * 60 * 24 * 3, '/');
+            setcookie('admin_login', $this->manager->login, [
+                'expires'  => time() + 60 * 60 * 24 * 3,
+                'path'     => '/',
+                'secure'   => SessionNames::isHttps(),
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
         }
 
         if (isset($_SESSION['show_learn'])) {

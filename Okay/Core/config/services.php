@@ -47,6 +47,8 @@ use Okay\Core\Modules\Extender\ExtenderFacade;
 use Okay\Core\UserReferer\UserReferer;
 use Snowplow\RefererParser\Parser;
 use Okay\Core\TplMod\Parser as TplParser;
+use Okay\Core\Security\AdminRecoveryToken;
+use Okay\Core\Security\RecoveryToken;
 
 $services = [
     BRouter::class => [
@@ -124,8 +126,6 @@ $services = [
         'class' => Response::class,
         'arguments' => [
             new SR(Adapters\Response\AdapterManager::class),
-            new PR('config.version'),
-            new SR(LicenseModulesTemplates::class),
         ],
     ],
     Languages::class => [
@@ -303,10 +303,20 @@ $services = [
         'arguments' => [
             new SR(Settings::class),
             new SR(Request::class),
+            new SR(LoggerInterface::class),
         ],
     ],
     Managers::class => [
         'class' => Managers::class,
+    ],
+    AdminRecoveryToken::class => [
+        'class' => AdminRecoveryToken::class,
+        'arguments' => [
+            new SR(Config::class),
+        ],
+    ],
+    RecoveryToken::class => [
+        'class' => RecoveryToken::class,
     ],
     Translit::class => [
         'class' => Translit::class,

@@ -6,6 +6,8 @@ namespace Okay\Controllers;
 
 use Okay\Core\Notify;
 use Okay\Core\Response;
+use Okay\Core\Security\RecoveryToken;
+use Okay\Core\Security\SessionNames;
 use Okay\Entities\OrdersEntity;
 use Okay\Entities\OrderStatusEntity;
 use Okay\Entities\UsersEntity;
@@ -18,7 +20,11 @@ use Okay\Requests\UserRequest;
 
 class UserController extends AbstractController
 {
-    
+
+    /** Підтверджений стан скидання пароля, живе між редиректом і формою */
+    const RECOVERY_SESSION_KEY = 'password_recovery_state';
+
+
     public function render(
         UsersEntity $usersEntity,
         ValidateHelper $validateHelper,
@@ -170,59 +176,101 @@ class UserController extends AbstractController
         return;
     }
     
-    public function passwordRemind(UsersEntity $usersEntity, Notify $notify, UserHelper $userHelper, $code = '')
+    public function passwordRemind(UsersEntity $usersEntity, Notify $notify, UserHelper $userHelper, RecoveryToken $recoveryToken, $code = '')
     {
-        
+        // Перехід за посиланням відновлення більше не авторизує користувача.
+        // Він лише підтверджує токен і відкриває форму нового пароля.
         if (!empty($code)) {
+            if ($recoveryToken->isValidFormat($code)) {
+                $user = $usersEntity->findOne([
+                    'remind_code' => $recoveryToken->digest($code),
+                    'limit'       => 1,
+                ]);
 
-            // Выбераем пользователя из базы
-            $users = $usersEntity->find(['remind_code'=>$code, 'limit'=>1]); // todo переделать когда будут методы getByField()
-            if (empty($users)) {
-                return false;
+                if (!empty($user) && date('Y-m-d H:i:s') <= $user->remind_expire) {
+                    $_SESSION[self::RECOVERY_SESSION_KEY] = [
+                        'user_id' => (int)$user->id,
+                        'digest'  => $user->remind_code,
+                        'expires' => $user->remind_expire,
+                    ];
+
+                    // Прибираємо токен з адресного рядка, щоб він не витік
+                    // через Referer або історію браузера.
+                    $this->response->redirectTo(Router::generateUrl('password_remind', [], true));
+                }
             }
 
-            $user = reset($users);
-
-            $usersEntity->update($user->id, ['remind_code'=>null, 'remind_expire'=>null]);
-            if (date('Y-m-d H:i:s') > $user->remind_expire) {
-                return false;
-            }
-
-            // Залогиниваемся под пользователем и переходим в кабинет для изменения пароля
-            $_SESSION['user_id'] = $user->id;
-            
-            $userHelper->mergeCart();
-            $userHelper->mergeWishlist();
-            $userHelper->mergeComparison();
-            $userHelper->mergeBrowsedProducts();
-            
-            $this->response->redirectTo(Router::generateUrl('user', [], true));
+            $this->design->assign('recovery_expired', true);
+            $this->design->assign('noindex_follow', true);
+            $this->design->assign('canonical', Router::generateUrl('password_remind', [], true));
+            $this->response->setContent('password_remind.tpl');
+            return;
         }
-        
-        // Если запостили email
+
+        $state = isset($_SESSION[self::RECOVERY_SESSION_KEY]) ? $_SESSION[self::RECOVERY_SESSION_KEY] : null;
+
+        // Встановлення нового пароля за підтвердженим токеном
+        if (!empty($state) && $this->request->method('post') && $this->request->post('reset_password')) {
+            $newPassword = (string)$this->request->post('new_password');
+            $newPasswordCheck = (string)$this->request->post('new_password_check');
+
+            $user = $usersEntity->get((int)$state['user_id']);
+
+            if (empty($user) || $user->remind_code !== $state['digest'] || date('Y-m-d H:i:s') > $state['expires']) {
+                unset($_SESSION[self::RECOVERY_SESSION_KEY]);
+                $this->design->assign('recovery_expired', true);
+            } elseif (trim($newPassword) === '') {
+                $this->design->assign('recovery_mode', true);
+                $this->design->assign('error', 'password_empty');
+            } elseif ($newPassword !== $newPasswordCheck) {
+                $this->design->assign('recovery_mode', true);
+                $this->design->assign('error', 'password_wrong');
+            } else {
+                // Токен гаситься до підвищення привілеїв, тому повторний
+                // перехід за тим самим посиланням уже нічого не дає.
+                $usersEntity->update((int)$user->id, ['remind_code' => null, 'remind_expire' => null]);
+                $usersEntity->update((int)$user->id, ['password' => $newPassword]);
+                unset($_SESSION[self::RECOVERY_SESSION_KEY]);
+
+                SessionNames::regenerate();
+                $_SESSION['user_id'] = (int)$user->id;
+
+                $userHelper->mergeCart();
+                $userHelper->mergeWishlist();
+                $userHelper->mergeComparison();
+                $userHelper->mergeBrowsedProducts();
+
+                $this->response->redirectTo(Router::generateUrl('user', [], true));
+            }
+        } elseif (!empty($state)) {
+            $this->design->assign('recovery_mode', true);
+        }
+
+        // Якщо запостили email
         if ($this->request->method('post') && $this->request->post('email')) {
             $email = $this->request->post('email');
-            $this->design->assign('email', $email);
-            
-            // Выбираем пользователя из базы
+
             $user = $usersEntity->get($email);
             if (!empty($user->id)) {
-                // Генерируем секретный код и запишем в базу с датой до которой он будет активен (+5 минут от текущей)
-                $code = md5(uniqid($this->config->salt, true));
-                
-                $usersEntity->update($user->id, ['remind_code'=>$code, 'remind_expire'=>date('Y-m-d H:i:s', time()+300)]);
+                $token = $recoveryToken->create();
 
-                // Отправляем письмо пользователю для восстановления пароля
-                $notify->emailPasswordRemind($user->id, $code);
-                $this->design->assign('email_sent', true);
-            } else {
-                $this->design->assign('error', 'user_not_found');
+                // У базі лежить лише digest: сам токен є тільки в листі.
+                $usersEntity->update($user->id, [
+                    'remind_code'   => $recoveryToken->digest($token),
+                    'remind_expire' => $recoveryToken->expiresAt(),
+                ]);
+
+                $notify->emailPasswordRemind($user->id, $token);
             }
+
+            // Відповідь однакова для наявної й неіснуючої адреси,
+            // інакше форма працює як оракул наявності акаунта.
+            $this->design->assign('email_sent', true);
         }
 
         $this->design->assign('noindex_follow', true);
         $this->design->assign('canonical', Router::generateUrl('password_remind', [], true));
-        
+
         $this->response->setContent('password_remind.tpl');
     }
  

@@ -85,7 +85,7 @@ class BackendExtender implements ExtensionInterface
             $warehousesDeliveries = [];
             foreach ($deliveriesEntity->find() as $delivery) {
                 if ($delivery->module_id == $moduleId) {
-                    $deliverySettings = unserialize($delivery->settings);
+                    $deliverySettings = unserialize($delivery->settings, ['allowed_classes' => false]);
                     if ($deliverySettings['service_type'] == 'DoorsDoors'
                         || $deliverySettings['service_type'] == 'WarehouseDoors') {
                         $doorsDeliveries[] = $delivery->id;

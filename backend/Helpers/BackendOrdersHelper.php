@@ -308,7 +308,7 @@ class BackendOrdersHelper
         if (!empty($order->delivery_id)) {
             $delivery = $this->deliveriesEntity->get($order->delivery_id);
             if (!empty($delivery->settings) && is_string($delivery->settings)) {
-                $delivery->settings = unserialize($delivery->settings);
+                $delivery->settings = unserialize($delivery->settings, ['allowed_classes' => false]);
             }
         }
         return ExtenderFacade::execute(__METHOD__, $delivery, func_get_args());

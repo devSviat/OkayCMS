@@ -20,6 +20,8 @@ class FeedbackController extends AbstractController {
     ) {
 
         if (($feedback = $commonRequest->postFeedback()) !== null) {
+            $this->requireCustomerCsrf();
+
             if ($error = $validateHelper->getFeedbackValidateError($feedback)) {
                 $this->design->assign('error', $error);
             } else {

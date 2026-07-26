@@ -1,3 +1,10 @@
+/* CSRF-токен вітрини. Куку okay_csrf виставляє сервер і спеціально
+   не httponly: її читають мутуючі ajax-запити нижче. */
+function okayCsrfToken() {
+  var match = document.cookie.match(/(?:^|;\s*)okay_csrf=([0-9a-f]{64})/);
+  return match ? match[1] : "";
+}
+
 /* Начальное кол-во для смены в карточке и корзине */
 okay.amount = 1;
 
@@ -22,10 +29,12 @@ $(document).on("submit", ".fn_variants", function (e) {
   /* ajax запрос */
   $.ajax({
     url: okay.router["cart_ajax"],
+    type: "post",
     data: {
       action: "add_citem",
       variant_id: variant,
       amount: amount,
+      customer_csrf_token: okayCsrfToken(),
     },
     dataType: "json",
     success: function (data) {
@@ -148,7 +157,7 @@ $(document).on("submit", ".fn_subscribe_form", function (e) {
 
   $.ajax({
     url: okay.router["ajax_subscribe"],
-    data: formData,
+    data: formData + "&customer_csrf_token=" + encodeURIComponent(okayCsrfToken()),
     type: "post",
     dataType: "json",
     success: function (data) {
@@ -176,7 +185,7 @@ $(document).on("submit", ".fn_subscribe_form_blog", function (e) {
 
   $.ajax({
     url: okay.router["ajax_subscribe"],
-    data: formData,
+    data: formData + "&customer_csrf_token=" + encodeURIComponent(okayCsrfToken()),
     type: "post",
     dataType: "json",
     success: function (data) {
@@ -202,7 +211,12 @@ $(document).on("click", ".fn_comparison", function (e) {
   /* ajax запрос */
   $.ajax({
     url: okay.router["comparison_ajax"],
-    data: { product: product, action: action },
+    type: "post",
+    data: {
+      product: product,
+      action: action,
+      customer_csrf_token: okayCsrfToken(),
+    },
     dataType: "json",
     success: function (data) {
       $("#comparison").html(data.template);
@@ -249,7 +263,12 @@ $(document).on("click", ".fn_wishlist", function (e) {
   /* ajax запрос */
   $.ajax({
     url: okay.router["wishlist_ajax"],
-    data: { id: $(this).data("id"), action: action },
+    type: "post",
+    data: {
+      id: $(this).data("id"),
+      action: action,
+      customer_csrf_token: okayCsrfToken(),
+    },
     dataType: "json",
     success: function (data) {
       $("#wishlist").html(data.wishlist_informer);
@@ -1016,10 +1035,12 @@ function ajax_change_amount(object, variant_id) {
   /* ajax запрос */
   $.ajax({
     url: okay.router["cart_ajax"],
+    type: "post",
     data: {
       action: "update_citem",
       variant_id: variant_id,
       amount: amount,
+      customer_csrf_token: okayCsrfToken(),
     },
     dataType: "json",
     success: function (data) {
@@ -1077,9 +1098,11 @@ function ajax_coupon() {
   /* ajax запрос */
   $.ajax({
     url: okay.router["cart_ajax"],
+    type: "post",
     data: {
       coupon_code: coupon_code,
       action: "coupon_apply",
+      customer_csrf_token: okayCsrfToken(),
     },
     dataType: "json",
     success: function (data) {
@@ -1129,9 +1152,11 @@ function ajax_remove(variant_id) {
   /* ajax запрос */
   $.ajax({
     url: okay.router["cart_ajax"],
+    type: "post",
     data: {
       action: "remove_citem",
       variant_id: variant_id,
+      customer_csrf_token: okayCsrfToken(),
     },
     dataType: "json",
     success: function (data) {

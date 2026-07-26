@@ -299,7 +299,7 @@ class BannersBackupHelper
                     $bannerBackupDTO->setPage($pages[$pageId]->url);
                 }
             }
-            $settings = unserialize($banner->settings);
+            $settings = unserialize($banner->settings, ['allowed_classes' => [BannerSettingsDTO::class, BannerImageSettingsDTO::class]]);
             if ($settings instanceof BannerSettingsDTO) {
                 $bannerBackupDTO->setSettings($settings);
             }
@@ -309,7 +309,7 @@ class BannersBackupHelper
         $bannerImageBackupDTOList = [];
         foreach ($this->bannersImagesEntity->find(['banner_id' => array_keys($banners)]) as $bi) {
             $bannerImageBackupDTO = new BannerImageBackupDTO();
-            $settings = unserialize($bi->settings);
+            $settings = unserialize($bi->settings, ['allowed_classes' => [BannerSettingsDTO::class, BannerImageSettingsDTO::class]]);
             if ($settings instanceof BannerImageSettingsDTO) {
                 $bannerImageBackupDTO->setSettings($settings);
             }

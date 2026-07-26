@@ -18,6 +18,7 @@ use Okay\Core\Modules\Module;
 use Okay\Core\Phone;
 use Okay\Core\Request;
 use Okay\Core\Response;
+use Okay\Core\Security\SafeRedirect;
 use Okay\Core\Router;
 use Okay\Core\ServiceLocator;
 use Okay\Core\Settings;
@@ -463,8 +464,11 @@ class MainHelper
         $request = $this->SL->getService(Request::class);
 
         if ($prgSeoHide = $request->post("prg_seo_hide")) {
-            Response::redirectTo($prgSeoHide);
-            exit;
+            // Адреса приходить із POST, тому вести з поточного домену не можна.
+            if (SafeRedirect::isSameOrigin($prgSeoHide, Request::getDomainWithProtocol())) {
+                Response::redirectTo($prgSeoHide);
+                exit;
+            }
         }
         return ExtenderFacade::execute(__METHOD__, null, func_get_args());
     }

@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/include/okay_access.php';
+
 try {
     if (!isset($config)) {
         $config = include 'config/config.php';
@@ -64,37 +66,9 @@ try {
         $messages = trans("Upload_error_messages");
     }
 
-    // make sure the length is limited to avoid DOS attacks
-    if (isset($_POST['url']) && strlen($_POST['url']) < 2000) {
-        $url = $_POST['url'];
-        $urlPattern = '/^(https?:\/\/)?([\da-z\.-]+\.[a-z\.]{2,6}|[\d\.]+)([\/?=&#]{1}[\da-z\.-]+)*[\/\?]?$/i';
-
-        if (preg_match($urlPattern, $url)) {
-            $temp = tempnam('/tmp','RF');
-
-            $ch = curl_init($url);
-            $fp = fopen($temp, 'wb');
-            curl_setopt($ch, CURLOPT_FILE, $fp);
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-            curl_exec($ch);
-            if (curl_errno($ch)) {
-                curl_close($ch);
-                throw new Exception('Invalid URL');
-            }
-            curl_close($ch);
-            fclose($fp);
-
-            $_FILES['files'] = array(
-                'name' => array(basename($_POST['url'])),
-                'tmp_name' => array($temp),
-                'size' => array(filesize($temp)),
-                'type' => null
-            );
-        } else {
-            throw new Exception('Is not a valid URL.');
-        }
-    }
-
+    // Завантаження за довільним URL видалено: воно перетворювало адмінський
+    // файловий менеджер на SSRF-примітив (curl на будь-яку адресу, видиму
+    // серверу, включно з внутрішньою мережею та метаданими хмари).
 
     if ($config['mime_extension_rename']) {
         $info = pathinfo($_FILES['files']['name'][0]);

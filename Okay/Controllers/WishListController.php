@@ -26,8 +26,10 @@ class WishListController extends AbstractController
         WishListHelper $wishListHelper
     ) {
 
-        $productId = $this->request->get('id', 'integer');
-        $action = $this->request->get('action');
+        $this->requireCustomerCsrf();
+
+        $productId = $this->request->post('id', 'integer');
+        $action = $this->request->post('action');
         if ($action == 'delete') {
             $wishList->deleteItem($productId);
         } else {

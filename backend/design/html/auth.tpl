@@ -31,37 +31,41 @@
                                 <input type=hidden name="session_id" value="{$smarty.session.id}">
                                 {if $recovery_mod}
                                     <h1 class="auth_heading heading-divider">Восстановление пароля</h1>
-                                    <p class="auth_heading_promo">на сайте {$smarty.server.HTTP_HOST}</p>
+                                    <p class="auth_heading_promo">на сайте {$smarty.server.HTTP_HOST|escape}</p>
+                                    <input type="hidden" name="code" value="{$recovery_code|escape}">
                                     <div class="input-group mb-1">
                                         <span class="input-group-addon">
-                                            {include file='svg_icon.tpl' svgId='user_icon'}
+                                            {include file='svg_icon.tpl' svgId='pass_icon'}
                                         </span>
-                                        <input name="new_login" value="" type="text" class="form-control" autofocus="" tabindex="1" placeholder="Введите логин">
+                                        <input type="password" name="new_password" value="" autocomplete="new-password" autofocus="" tabindex="1" class="form-control" placeholder="Введите пароль">
                                     </div>
                                     <div class="input-group mb-1">
                                         <span class="input-group-addon">
                                             {include file='svg_icon.tpl' svgId='pass_icon'}
                                         </span>
-                                        <input type="password" name="new_password" value="" tabindex="2" class="form-control" placeholder="Введите пароль">
+                                        <input type="password" name="new_password_check" value="" autocomplete="new-password" tabindex="2" class="form-control" placeholder="Повторите пароль">
                                     </div>
-                                    <div class="input-group mb-1">
-                                        <span class="input-group-addon">
-                                            {include file='svg_icon.tpl' svgId='pass_icon'}
-                                        </span>
-                                        <input type="password" name="new_password_check" value="" tabindex="3" class="form-control" placeholder="Повторите пароль">
-                                    </div>
+                                    {if $error_message}
+                                        <div class="mb-1 error_box" role="alert">
+                                            {if $error_message == 'password_empty'}
+                                                Введите новый пароль.
+                                            {elseif $error_message == 'password_wrong'}
+                                                Пароли не совпадают.
+                                            {/if}
+                                        </div>
+                                    {/if}
                                     <div class="auth_buttons">
-                                        <button type="submit" value="login" class="auth_buttons__login btn btn_blue btn_big btn-block" tabindex="3">Войти</button>
+                                        <button type="submit" value="login" class="auth_buttons__login btn btn_blue btn_big btn-block" tabindex="3">Сохранить пароль</button>
                                     </div>
                                 {else}
                                     <h1 class="auth_heading heading-divider">Вход в панель управления</h1>
-                                    <p class="auth_heading_promo">{$smarty.server.HTTP_HOST}</p>
+                                    <p class="auth_heading_promo">{$smarty.server.HTTP_HOST|escape}</p>
 
                                     <div class="input-group mb-1">
                                         <span class="input-group-addon">
                                             {include file='svg_icon.tpl' svgId='user_icon'}
                                         </span>
-                                        <input name="login" value="{$login}" type="text" class="form-control" autofocus="" tabindex="1" placeholder="Введите логин">
+                                        <input name="login" value="{$login|escape}" type="text" class="form-control" autofocus="" tabindex="1" placeholder="Введите логин">
                                     </div>
                                     <div class="input-group mb-1">
                                         <span class="input-group-addon">
@@ -137,9 +141,6 @@
                         switch (data.error) {
                             case 'wrong_email':
                                 $(".fn_error").text('Введите корректный E-mail');
-                                break;
-                            case 'not_admin_email':
-                                $(".fn_error").text('Указанный E-mail не принадлежит админу сайта');
                                 break;
                         }
                         $(".fn_error").show();

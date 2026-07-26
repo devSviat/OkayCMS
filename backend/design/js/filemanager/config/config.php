@@ -5,12 +5,7 @@ use Okay\Core\Request;
 require_once(dirname(__DIR__, 5) . '/vendor/autoload.php');
 
 $version = "9.14.0";
-if (session_status() === PHP_SESSION_NONE) {
-    if (!empty($_SERVER['HTTP_USER_AGENT'])) {
-        session_name(md5($_SERVER['HTTP_USER_AGENT']));
-    }
-    session_start();
-}
+\Okay\Core\Security\SessionNames::startBackend();
 mb_internal_encoding('UTF-8');
 mb_http_output('UTF-8');
 mb_language('uni');
@@ -504,7 +499,7 @@ $config = array(
     /*******************
     * URL upload
     *******************/
-    'url_upload'                             => true,
+    'url_upload'                              => false,
 
 
     //************************************

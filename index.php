@@ -15,10 +15,7 @@ ini_set('display_errors', 'off');
 
 require_once('vendor/autoload.php');
 
-if (!empty($_SERVER['HTTP_USER_AGENT'])) {
-    session_name(md5($_SERVER['HTTP_USER_AGENT']));
-}
-session_start();
+\Okay\Core\Security\SessionNames::startFrontend();
 
 /** @var OkayContainer $DI */
 $DI = include 'Okay/Core/config/container.php';
@@ -61,7 +58,13 @@ try {
         unset($_SESSION['modules_request_timeout']);
         unset($_SESSION['support_request_timeout']);
         unset($_SESSION['last_version_data']);
-        setcookie('admin_login', '', time()-100, '/');
+        setcookie('admin_login', '', [
+            'expires'  => time() - 100,
+            'path'     => '/',
+            'secure'   => \Okay\Core\Security\SessionNames::isHttps(),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
         
         $response->redirectTo($request->getRootUrl());
     }

@@ -101,4 +101,22 @@ abstract class AbstractBackendPresetAdapter implements BackendPresetAdapterInter
 
         $this->inheritedExtender(__FUNCTION__, null, func_get_args());
     }
+
+    /**
+     * Оператор порівняння потрапляє у SQL-фрагмент, тому допускається
+     * лише з білого списку. Будь-яке інше значення трактується як '='.
+     *
+     * @param mixed $operator
+     * @return string
+     */
+    protected function normalizeComparisonOperator($operator)
+    {
+        $operator = is_string($operator) ? trim($operator) : '';
+
+        if (in_array($operator, ['<', '>', '='], true)) {
+            return $operator;
+        }
+
+        return '=';
+    }
 }

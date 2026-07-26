@@ -7,6 +7,8 @@ namespace Okay\Admin\Controllers;
 use Okay\Core\Response;
 use Okay\Core\Managers;
 use Okay\Core\Notify;
+use Okay\Core\Security\AdminRecoveryToken;
+use Okay\Core\Security\SessionNames;
 use Okay\Core\Validator;
 use Okay\Entities\LessonsEntity;
 use Okay\Entities\ManagersEntity;
@@ -20,7 +22,8 @@ class AuthAdmin extends IndexAdmin
         LessonsEntity $lessonsEntity,
         Notify $notify,
         Response $response,
-        Validator $validator
+        Validator $validator,
+        AdminRecoveryToken $recoveryToken
     ) {
         /*Восстановление пароля администратора*/
         $recoveryEmail = $this->request->get('recovery_email');
@@ -28,13 +31,22 @@ class AuthAdmin extends IndexAdmin
             $result = new \stdClass();
             if (!$validator->isEmail($recoveryEmail, true)) {
                 $result->error = 'wrong_email';
-            } elseif (!($managerToRecovery = $managersEntity->findOne(['email' => $recoveryEmail]))) {
-                $result->error = 'not_admin_email';
             } else {
-                $code = $this->config->token(mt_rand(1, mt_getrandmax()) . mt_rand(1, mt_getrandmax()) . mt_rand(1, mt_getrandmax()));
-                $_SESSION['admin_password_recovery_code'] = $code;
-                $notify->emailPasswordRecoveryAdmin($managerToRecovery->email, $code);
-                
+                $managerToRecovery = $managersEntity->findOne(['email' => $recoveryEmail]);
+
+                if (!empty($managerToRecovery)) {
+                    // Токен підписаний поточним хешем пароля менеджера, тому
+                    // стає недійсним одразу після зміни пароля.
+                    $code = $recoveryToken->create(
+                        (int)$managerToRecovery->id,
+                        (string)$managerToRecovery->password
+                    );
+                    $notify->emailPasswordRecoveryAdmin($managerToRecovery->email, $code);
+                }
+
+                // Відповідь однакова незалежно від того, чи існує такий
+                // менеджер: інакше форма працює як оракул для перелічення
+                // адміністраторів сайту.
                 $result->send = true;
             }
             $this->response->setContent(json_encode($result), RESPONSE_JSON);
@@ -42,20 +54,39 @@ class AuthAdmin extends IndexAdmin
             exit;
         }
 
-        if (isset($_SESSION['admin_password_recovery_code']) && $_SESSION['admin_password_recovery_code'] == $this->request->get('code')){
-            $this->design->assign("recovery_mod",true);
+        // Код приходить у GET за посиланням з листа й переноситься через POST
+        // прихованим полем, щоб надсилання форми лишилось у режимі відновлення.
+        $code = (string)($this->request->get('code') ?: $this->request->post('code'));
+        $managerIdFromCode = $code === '' ? null : $recoveryToken->unverifiedManagerId($code);
+        $managerToRecovery = $managerIdFromCode === null ? null : $managersEntity->get($managerIdFromCode);
+        $recoveryIsValid = !empty($managerToRecovery)
+            && $recoveryToken->managerId($code, (string)$managerToRecovery->password) !== null;
+
+        if ($recoveryIsValid) {
+            $this->design->assign('recovery_mod', true);
+            $this->design->assign('recovery_code', $code);
+
             if ($this->request->method('post')){
-                $new_login = $this->request->post('new_login');
                 $new_password = $this->request->post('new_password');
                 $new_password_check = $this->request->post('new_password_check');
 
-                if ($new_password == $new_password_check) {
-                    $manager = $managersEntity->get($new_login);
-                    if (!$managersEntity->update($manager->id, ['password' => $new_password, 'cnt_try' => 0, 'last_try' => null])) {
-                        $managersEntity->add(['login' => $new_login, 'password' => $new_password]);
-                        $manager = $managersEntity->get($new_login);
-                    }
-                    unset($_SESSION['admin_password_recovery_code']);
+                if (trim($new_password) === '') {
+                    $this->design->assign('error_message', 'password_empty');
+                } elseif ($new_password !== $new_password_check) {
+                    $this->design->assign('error_message', 'password_wrong');
+                } else {
+                    // Менеджер береться з токена, а не з POST: інакше власник
+                    // будь-якого валідного коду міг змінити пароль кому завгодно.
+                    $manager = $managerToRecovery;
+
+                    // ManagersEntity::update() хешує пароль сам.
+                    $managersEntity->update((int)$manager->id, [
+                        'password' => $new_password,
+                        'cnt_try'  => 0,
+                        'last_try' => null,
+                    ]);
+
+                    SessionNames::regenerate();
                     $_SESSION['admin'] = $manager->login;
 
                     $allManagers = $managersEntity->order('id ASC')->find();
@@ -64,7 +95,7 @@ class AuthAdmin extends IndexAdmin
                     if ($lessonsEntity->count(['not_done' => 1]) > 0 && $firstManager->id === $manager->id) {
                         $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=LearningAdmin');
                     }
-                    $response->redirectTo($this->request->getBasePathWithDomain() . '/backend/index.php');
+                    $response->redirectTo($this->request->getRootUrl() . '/backend/index.php');
                 }
             }
 
@@ -90,7 +121,16 @@ class AuthAdmin extends IndexAdmin
                     $this->design->assign('error_message', 'limit_try');
                 } elseif ($managers->checkPassword($pass, $manager->password)) {
                     /*Входим в админку*/
+                    SessionNames::regenerate();
                     $_SESSION['admin'] = $manager->login;
+
+                    // Старий формат хеша (APR1/MD5) замінюємо на актуальний.
+                    // ManagersEntity::update() хешує пароль сам, тому
+                    // передаємо його у відкритому вигляді.
+                    if ($managers->needsPasswordRehash($manager->password)) {
+                        $managersEntity->update((int)$manager->id, ['password' => $pass]);
+                    }
+
                     $managersEntity->update((int)$manager->id, ['cnt_try'=>0, 'last_try'=>null]);
                     $managersEntity->updateLastActivityDate($manager->id);
                     $loginRedirectResource = (!empty($_SESSION['before_auth_url']) ? $_SESSION['before_auth_url'] : $this->request->getBasePathWithDomain() . '/backend/index.php');

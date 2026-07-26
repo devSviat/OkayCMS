@@ -9,7 +9,9 @@ use Okay\Core\EntityFactory;
 use Okay\Core\Languages;
 use Okay\Core\Modules\Extender\ExtenderFacade;
 use Okay\Core\Notify;
+use Okay\Core\Request;
 use Okay\Core\Response;
+use Okay\Core\Security\SafeRedirect;
 use Okay\Entities\BlogEntity;
 use Okay\Entities\CommentsEntity;
 use Okay\Entities\ProductsEntity;
@@ -203,7 +205,13 @@ class CommentsHelper implements GetListInterface
                 
                 ExtenderFacade::execute(__METHOD__, $commentId, func_get_args());
                 
-                Response::redirectTo($_SERVER['REQUEST_URI'].'#comment_'.$commentId);
+                // REQUEST_URI приходить із рядка запиту: "GET //evil.com"
+                // дає protocol-relative редирект на чужий хост.
+                $backUrl = $_SERVER['REQUEST_URI'] . '#comment_' . $commentId;
+                if (!SafeRedirect::isSameOrigin($backUrl, Request::getDomainWithProtocol())) {
+                    $backUrl = Request::getRootUrl();
+                }
+                Response::redirectTo($backUrl);
             }
         }
     }

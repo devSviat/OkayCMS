@@ -46,11 +46,11 @@ class BackendPriceUaAdapter extends AbstractBackendPresetAdapter
             'guarantee_shop' => $postSettings['guarantee_shop'],
             'price_change' => $postSettings['price_change'],
             'filter_price' => [
-                'operator' => $postSettings['filter_price']['operator'],
+                'operator' => $this->normalizeComparisonOperator($postSettings['filter_price']['operator']),
                 'value' => $postSettings['filter_price']['value'] === '' ? null : (float) str_replace(',', '.', $postSettings['filter_price']['value']),
             ],
             'filter_stock' => [
-                'operator' => $postSettings['filter_stock']['operator'],
+                'operator' => $this->normalizeComparisonOperator($postSettings['filter_stock']['operator']),
                 'value' => $postSettings['filter_stock']['value'] === '' ? null : (float) str_replace(',', '.', $postSettings['filter_stock']['value']),
             ],
         ];

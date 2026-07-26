@@ -49,9 +49,12 @@
                             </div>
                         </div>
                         {* Remove button *}
-                        <a class="purchase__remove" href="{url_generator route="cart_remove_item" variantId=$purchase->variant->id}" onclick="ajax_remove({$purchase->variant->id});return false;" title="{$lang->cart_remove}">
-                            {include file='svg.tpl' svgId='remove_icon'}
-                        </a>
+                        <form class="purchase__remove_form" method="post" action="{url_generator route="cart_remove_item" variantId=$purchase->variant->id}">
+                            <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
+                            <button type="submit" class="purchase__remove" onclick="ajax_remove({$purchase->variant->id});return false;" title="{$lang->cart_remove}">
+                                {include file='svg.tpl' svgId='remove_icon'}
+                            </button>
+                        </form>
                     </div>
                 </div>
             {/foreach}

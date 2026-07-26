@@ -3,6 +3,8 @@
 
 namespace Okay\Core;
 
+use Okay\Core\Security\SessionNames;
+
 
 use Okay\Core\Classes\Discount;
 use Okay\Core\Classes\Purchase;
@@ -173,13 +175,26 @@ class Cart
     {
         if (!empty($items)) {
             $_COOKIE['shopping_cart'] = json_encode($items);
-            setcookie('shopping_cart', $_COOKIE['shopping_cart'], time() + 30 * 24 * 3600, '/');   //  на месяц
+            // на місяць
+            setcookie('shopping_cart', $_COOKIE['shopping_cart'], [
+                'expires'  => time() + 30 * 24 * 3600,
+                'path'     => '/',
+                'secure'   => SessionNames::isHttps(),
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
         } else if (empty($items)) {
             //  And delete the cookie variable when we empty the trash
             if (isset($_COOKIE['shopping_cart'])) {
                 unset($_COOKIE['shopping_cart']);
             }
-            setcookie('shopping_cart', '', time()-3600, '/');
+            setcookie('shopping_cart', '', [
+                'expires'  => time() - 3600,
+                'path'     => '/',
+                'secure'   => SessionNames::isHttps(),
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
         }
 
         ExtenderFacade::execute(__METHOD__, $this, func_get_args());
@@ -318,7 +333,13 @@ class Cart
         //  delete the cookie variable when we empty the trash
         if (isset($_COOKIE['shopping_cart'])) {
             unset($_COOKIE['shopping_cart']);
-            setcookie('shopping_cart', '', time()-3600, '/');
+            setcookie('shopping_cart', '', [
+                'expires'  => time() - 3600,
+                'path'     => '/',
+                'secure'   => SessionNames::isHttps(),
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
         }
 
         $this->purchases = [];

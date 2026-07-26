@@ -1,28 +1,8 @@
 <?php
 
-use Okay\Core\EntityFactory;
-use Okay\Entities\ManagersEntity;
-
-if(!empty($_SERVER['HTTP_USER_AGENT'])){
-    session_name(md5($_SERVER['HTTP_USER_AGENT']));
-}
-session_start();
-chdir('../../../..');
-
-require_once('vendor/autoload.php');
-
-$DI = include 'Okay/Core/config/container.php';
-
-/** @var EntityFactory $entityFactory */
-$entityFactory = $DI->get(EntityFactory::class);
-
-/** @var ManagersEntity $managersEntity */
-$managersEntity = $entityFactory->get(ManagersEntity::class);
-
-if (empty($_SESSION['admin']) || !$managersEntity->get($_SESSION['admin'])) {
-    die;
-}
-chdir('backend/design/js/filemanager/');
+// Перевірка авторизованого менеджера винесена в okay_access.php: одна
+// реалізація на всі точки входу файлового менеджера.
+require_once __DIR__ . '/include/okay_access.php';
 
 $time = time();
 
@@ -84,7 +64,13 @@ if ($subdir == "") {
     }
 }
 //remember last position
-setcookie('last_position', $subdir, time() + (86400 * 7));
+setcookie('last_position', $subdir, [
+    'expires'  => time() + (86400 * 7),
+    'path'     => '/',
+    'secure'   => \Okay\Core\Security\SessionNames::isHttps(),
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
 
 if ($subdir == "/") { $subdir = ""; }
 

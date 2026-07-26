@@ -3,6 +3,8 @@
 
 namespace Okay\Core;
 
+use Okay\Core\Security\SessionNames;
+
 
 use Okay\Entities\UserWishlistItemsEntity;
 use Okay\Entities\VariantsEntity;
@@ -113,7 +115,13 @@ class WishList
     public function save()
     {
         if (!empty($_COOKIE['wishlist'])) {
-            setcookie('wishlist', $_COOKIE['wishlist'], time() + 30 * 24 * 3600, '/');
+            setcookie('wishlist', $_COOKIE['wishlist'], [
+                'expires'  => time() + 30 * 24 * 3600,
+                'path'     => '/',
+                'secure'   => SessionNames::isHttps(),
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
         }
     }
     
@@ -131,7 +139,13 @@ class WishList
         }
         
         unset($_COOKIE['wishlist']);
-        setcookie('wishlist', '', time()-3600, '/');
+        setcookie('wishlist', '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'secure'   => SessionNames::isHttps(),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
 
         ExtenderFacade::execute(__METHOD__, null, func_get_args());
     }

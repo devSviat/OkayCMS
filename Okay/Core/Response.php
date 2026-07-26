@@ -5,6 +5,7 @@ namespace Okay\Core;
 
 
 use Okay\Core\Adapters\Response\AdapterManager;
+use Okay\Core\Security\SecurityHeaders;
 use Okay\Core\Modules\LicenseModulesTemplates;
 
 class Response
@@ -79,11 +80,18 @@ class Response
         521 => 'Web Server Is Down',
     ];
     
-    public function __construct(AdapterManager $adapterManager, string $version)
+    public function __construct(AdapterManager $adapterManager)
     {
         $this->adapterManager = $adapterManager;
         $this->type = RESPONSE_HTML;
-        $this->addHeader('X-Powered-CMS: OkayCMS ' . $version);
+
+        // Точну версію не публікуємо: вона перетворює банер на готову
+        // ціль для сканерів.
+        $this->addHeader('X-Powered-CMS: OkayCMS');
+
+        foreach (SecurityHeaders::defaults() as $header) {
+            $this->addHeader($header);
+        }
     }
     
     /**

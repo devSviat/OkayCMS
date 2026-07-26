@@ -40,7 +40,7 @@ class ManagersEntity extends Entity
         foreach ($managers as $m) {
             $managerCore->setManagerPermissions($m);
             if (!empty($m->menu)) {
-                $m->menu = unserialize($m->menu);
+                $m->menu = unserialize($m->menu, ['allowed_classes' => false]);
             } else {
                 $m->menu = array();
             }
@@ -53,7 +53,7 @@ class ManagersEntity extends Entity
     {
         $managerCore = $this->serviceLocator->getService(\Okay\Core\Managers::class);
         if ($manager = parent::get($id)) {
-            $manager->menu = !empty($manager->menu) ? unserialize($manager->menu) : [];
+            $manager->menu = !empty($manager->menu) ? unserialize($manager->menu, ['allowed_classes' => false]) : [];
 
             $managerCore->setManagerPermissions($manager);
             return ExtenderFacade::execute([static::class, __FUNCTION__], $manager, func_get_args());
@@ -72,7 +72,7 @@ class ManagersEntity extends Entity
         $manager = (object)$manager;
         if (!empty($manager->password)) {
             // захешировать пароль
-            $manager->password = $managersCore->cryptApr1Md5($manager->password);
+            $manager->password = $managersCore->hashPassword($manager->password);
         }
 
         if (!empty($manager->menu) && is_array($manager->menu)) {
@@ -100,7 +100,7 @@ class ManagersEntity extends Entity
         $manager = (object)$manager;
         if (!empty($manager->password)) {
             // захешировать пароль
-            $manager->password = $managersCore->cryptApr1Md5($manager->password);
+            $manager->password = $managersCore->hashPassword($manager->password);
         }
 
         if (!empty($manager->menu) && is_array($manager->menu)) {

@@ -94,7 +94,7 @@ class BannersHelper
         }
 
         if (!empty($banner->settings)) {
-            $banner->settings = unserialize($banner->settings);
+            $banner->settings = unserialize($banner->settings, ['allowed_classes' => [BannerSettingsDTO::class, BannerImageSettingsDTO::class]]);
         } else {
             $banner->settings = new BannerSettingsDTO();
         }
@@ -148,7 +148,7 @@ class BannersHelper
                     if (isset($banners[$bannersImage->banner_id])) {
 
                         if (!empty($bannersImage->settings)) {
-                            $bannersImage->settings = unserialize($bannersImage->settings);
+                            $bannersImage->settings = unserialize($bannersImage->settings, ['allowed_classes' => [BannerSettingsDTO::class, BannerImageSettingsDTO::class]]);
                         } else {
                             $bannersImage->settings = new BannerImageSettingsDTO();
                         }

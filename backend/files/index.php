@@ -2,17 +2,17 @@
 
 use Okay\Core\Response;
 use Okay\Core\EntityFactory;
+use Okay\Core\Security\BackendFileDownloadPolicy;
+use Okay\Core\Security\Filemanager\PathResolver;
+use Okay\Core\Security\SessionNames;
 use Okay\Entities\ManagersEntity;
 use Okay\Core\Modules\Modules;
-
-if(!empty($_SERVER['HTTP_USER_AGENT'])){
-    session_name(md5($_SERVER['HTTP_USER_AGENT']));
-}
-session_start();
 
 chdir('../..');
 
 require_once('vendor/autoload.php');
+
+SessionNames::startBackend();
 
 $DI = include 'Okay/Core/config/container.php';
 
@@ -30,22 +30,33 @@ $entityFactory = $DI->get(EntityFactory::class);
 
 /** @var ManagersEntity $managersEntity */
 $managersEntity = $entityFactory->get(ManagersEntity::class);
-$manager = $managersEntity->get($_SESSION['admin']);
+$manager = empty($_SESSION['admin']) ? null : $managersEntity->get($_SESSION['admin']);
 
 if (empty($manager)) {
     exit();
 }
 
-$file = $_GET['file'];
-$file = preg_replace("/[^A-Za-z0-9_]+/", "", $file);
-$folder = $_GET['folder'];
-$ext = $_GET['ext'];
-if (empty($file) || empty($folder) || empty($ext)) {
+$file   = isset($_GET['file']) && is_string($_GET['file']) ? $_GET['file'] : '';
+$folder = isset($_GET['folder']) && is_string($_GET['folder']) ? $_GET['folder'] : '';
+$ext    = isset($_GET['ext']) && is_string($_GET['ext']) ? $_GET['ext'] : '';
+
+// Раніше фільтрувалось лише ім'я файлу, а folder і ext приходили з GET
+// як є — folder виводив за межі backend/files/.
+$requiredPermission = (new BackendFileDownloadPolicy())->permissionFor($folder, $file, $ext);
+
+if ($requiredPermission === null) {
     exit();
 }
 
-$file = __DIR__.'/'.$folder.'/'.$file.'.'.$ext;
-if (!file_exists($file)) {
+// Завантаження прив'язане до конкретного права, а не просто до наявності сесії.
+if (empty($manager->permissions) || !in_array($requiredPermission, (array)$manager->permissions, true)) {
+    exit();
+}
+
+$ext = strtolower($ext);
+$file = (new PathResolver(__DIR__))->resolve($folder . '/' . $file . '.' . $ext);
+
+if ($file === null || !is_file($file)) {
     exit();
 }
 

@@ -5,7 +5,9 @@ namespace Okay\Admin\Controllers;
 
 
 use Okay\Core\TemplateConfig\FrontTemplateConfig;
+use Okay\Core\Request;
 use Okay\Core\Response;
+use Okay\Core\Security\SafeRedirect;
 
 class ImagesAdmin extends IndexAdmin
 {
@@ -52,7 +54,11 @@ class ImagesAdmin extends IndexAdmin
             }
             
             if (!isset($message_error)) {
-                $response->redirectTo($_SERVER['REQUEST_URI']);
+                $backUrl = $_SERVER['REQUEST_URI'];
+                if (!SafeRedirect::isSameOrigin($backUrl, Request::getDomainWithProtocol())) {
+                    $backUrl = Request::getRootUrl();
+                }
+                $response->redirectTo($backUrl);
                 exit();
             } else {
                 $this->design->assign('message_error', $message_error);
