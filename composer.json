@@ -25,6 +25,7 @@
     "require": {
         "php": "^8.4",
         "ext-SimpleXML": "*",
+        "ext-dom": "*",
         "ext-XMLReader": "*",
         "ext-pdo": "*",
         "ext-json": "*",
