@@ -29,6 +29,24 @@ Explicit quality requirements carried through every screen:
 - WCAG AA contrast and full keyboard operability
 - deliberate micro-interactions and complete component states
 
+The theme is universal: it is installed by arbitrary shops and must hold up with three products
+or thirty thousand, and with photography of uneven quality. That rules out any design that
+depends on curated imagery or on a fixed catalogue shape.
+
+**Anti-references** — all four rejected explicitly, and each has a named failure mode to guard
+against:
+
+| Rejected | Failure mode to avoid |
+| --- | --- |
+| Marketplace clutter (Amazon, Rozetka) | banner walls, red price tags everywhere, three stacked nav bars, noise substituting for hierarchy — what the theme looks like today |
+| Default Bootstrap | blue buttons, grey boxes, stock radii; a template belonging to nobody |
+| Generated-design defaults, 2026 | cream canvas, gradient text, glass cards, tracked-uppercase eyebrow over every section, endless identical card grids |
+| Cold SaaS minimalism | dashboard sterility, air instead of merchandise, product stops being the hero |
+
+The last two pull in opposite directions, which is the real constraint: restraint without
+sterility. Warmth is carried by typographic contrast, spacing rhythm and tactile feedback —
+never by a beige background.
+
 ## 3. Compatibility contracts
 
 These are the boundaries the redesign must not cross. Everything not listed here is
@@ -123,35 +141,52 @@ The organising idea is that three roles currently blur into one another and must
 in a storefront, **red belongs to discounts**, **green to availability**, and the **call to
 action can be neither** — otherwise promotions and buy buttons compete for the same attention.
 
-Neutrals carry a warm tint rather than a pure grey. Product photography sits better on a warm
-canvas, and it moves the theme away from reading as a framework default.
+The colour strategy is **restrained**: a monochrome chrome carrying the whole interface, with
+chromatic colour reserved for two semantic events. Two rejected alternatives, recorded so they
+are not re-proposed:
+
+- *A warm-tinted neutral canvas* (`#fbfaf9` and its band — light, warm, low chroma) was the
+  first draft. It is the saturated cream/sand/paper default of current generated design and
+  reads as exactly the anti-reference the project rejects. Neutrals are therefore **true
+  neutral at chroma 0**, tinted neither warm nor cool.
+- *An indigo call-to-action* was the second draft. "E-commerce that isn't marketplace-red"
+  resolves to a violet-blue accent by reflex; avoiding the first cliché landed on the second.
+  It also fights the shop owner: `--okay-basic-company` is theirs to set, and an opinionated
+  indigo competes with whatever brand colour they choose.
+
+The call to action is therefore **near-black**. It holds against any product photograph,
+leaves the owner's brand colour as the only opinionated hue on the page, and makes the rose
+discount badge the loudest chromatic event in the catalogue — which is what should be loudest.
 
 ```
---vs-n-0:   #ffffff      --vs-n-500: #7c756e
---vs-n-25:  #fbfaf9      --vs-n-600: #5f5952
---vs-n-50:  #f5f3f1      --vs-n-700: #4a4540
---vs-n-100: #ebe8e5      --vs-n-800: #2e2b28
---vs-n-200: #dcd8d4      --vs-n-900: #1c1a18
---vs-n-300: #c2bcb6      --vs-n-950: #121110
---vs-n-400: #a09991
+--vs-n-0:   #ffffff      --vs-n-500: #6b6b71   muted text, 4.9:1 on canvas
+--vs-n-25:  #fafafa      --vs-n-600: #5c5c62
+--vs-n-50:  #f5f5f6      --vs-n-700: #45454a
+--vs-n-100: #ededee      --vs-n-800: #2b2b2f   CTA hover
+--vs-n-200: #e0e0e2      --vs-n-900: #1c1c20   body text, 15.7:1 on canvas
+--vs-n-300: #cbcbce      --vs-n-950: #17171a   ink chrome, CTA
+--vs-n-400: #a5a5aa
 
---vs-accent-50:  #eeebff    CTA / brand (indigo)
---vs-accent-100: #ddd7ff
---vs-accent-400: #6f5bf8
---vs-accent-500: #4f39f6    6.5:1 on white
---vs-accent-600: #4127e0
---vs-accent-700: #351fb8
+--vs-sale-500: #e11d48      discount badge fill, white text on it 4.7:1
+--vs-sale-600: #be1739      discount *text*, 5.7:1 on canvas
+--vs-sale-50:  #fff1f4
 
---vs-sale-50:  #fff1f4      discount / urgency (rose)
---vs-sale-500: #e11d48      4.7:1 on white
---vs-sale-600: #be1739
+--vs-ok-600:   #047857      in stock, 5.1:1 on canvas
+--vs-ok-50:    #ecfdf5
 
---vs-ok-50:  #ecfdf5        in stock / success (emerald)
---vs-ok-600: #047857        5.6:1 on white
-
---vs-warn-50:  #fffbeb      low stock / warning (amber)
---vs-warn-600: #b45309
+--vs-warn-600: #b45309      low stock, 4.6:1 on canvas
+--vs-warn-50:  #fffbeb
 ```
+
+Note the split between `--vs-sale-500` and `--vs-sale-600`: the brighter rose clears AA as a
+badge fill with white text but falls to 4.34:1 as text on the canvas. Discount *text* uses the
+600.
+
+Focus is a two-tone ring — `0 0 0 2px var(--vs-canvas), 0 0 0 4px var(--vs-ink)` — so it stays
+visible on light surfaces and on the dark header alike, without a second focus token.
+
+Because the chrome is monochrome, links are distinguished by an offset underline rather than
+by colour alone. That also satisfies the "colour is not the only carrier of meaning" rule.
 
 Semantic layer — the only names components are allowed to use:
 
@@ -179,7 +214,7 @@ Bridge to the admin contract (§3.3), declared in `tokens.css`:
 | `--okay-button-color`           | `--vs-cta`                     |
 | `--okay-button-color-hover`     | `--vs-cta-hover`               |
 | `--okay-button-text`            | `--vs-cta-text`                |
-| `--okay-basic-company`          | accent / links / focus         |
+| `--okay-basic-company`          | owner's brand accent — active states, link hover |
 | `--okay-second-company`         | `--vs-ink`                     |
 | `--okay-second-company-text`    | text on ink                    |
 | `--okay-bg`                     | `--vs-canvas`                  |
@@ -190,16 +225,21 @@ Bridge to the admin contract (§3.3), declared in `tokens.css`:
 New `theme-settings.css` values (names unchanged):
 
 ```
---okay-button-color: #4f39f6         --okay-boxed-color: #ffffff
---okay-button-text: #ffffff          --okay-boxed-text: #1c1a18
---okay-button-color-hover: #4127e0   --okay-button-second-color: #1c1a18
---okay-button-text-hover: #ffffff    --okay-button-second-text: #ffffff
---okay-basic-company: #4f39f6        --okay-border-color: #dcd8d4
---okay-second-company: #121110       --okay-bg: #fbfaf9
---okay-basic-company-text: #ffffff   --okay-body-text: #1c1a18
---okay-second-company-text: #fbfaf9  --okay-body-heading: #1c1a18
---okay-shadow-color: 0 2px 4px rgba(16,20,24,.05), 0 8px 16px -4px rgba(16,20,24,.08)
+--okay-button-color: #17171a         --okay-boxed-color: #ffffff
+--okay-button-text: #ffffff          --okay-boxed-text: #1c1c20
+--okay-button-color-hover: #2b2b2f   --okay-button-second-color: #ffffff
+--okay-button-text-hover: #ffffff    --okay-button-second-text: #1c1c20
+--okay-basic-company: #17171a        --okay-border-color: #dcdcde
+--okay-second-company: #17171a       --okay-bg: #f5f5f6
+--okay-basic-company-text: #ffffff   --okay-body-text: #1c1c20
+--okay-second-company-text: #f5f5f6  --okay-body-heading: #1c1c20
+--okay-shadow-color: 0 2px 4px rgba(23,23,26,.05), 0 8px 16px -4px rgba(23,23,26,.08)
 ```
+
+`--okay-basic-company` ships as ink so the theme is monochrome out of the box. A shop that sets
+its own brand colour in the admin gets it applied to accents without any part of the design
+fighting it. `--okay-button-second-color` flips from the old dark fill to a white surface: the
+secondary button becomes an outline control.
 
 Contrast figures above are design intent. Every foreground/background pair actually shipped is
 verified with a contrast checker during implementation (§10), not estimated by eye.
@@ -245,9 +285,9 @@ are no longer referenced.
 --vs-radius-xl:   1.5rem      sheets, modals
 --vs-radius-full: 999px       pills, avatars
 
---vs-shadow-1: 0 1px 2px rgb(16 20 24 / .06), 0 1px 3px rgb(16 20 24 / .04)
---vs-shadow-2: 0 2px 4px rgb(16 20 24 / .05), 0 8px 16px -4px rgb(16 20 24 / .08)
---vs-shadow-3: 0 4px 8px rgb(16 20 24 / .06), 0 16px 32px -8px rgb(16 20 24 / .14)
+--vs-shadow-1: 0 1px 2px rgb(23 23 26 / .06), 0 1px 3px rgb(23 23 26 / .04)
+--vs-shadow-2: 0 2px 4px rgb(23 23 26 / .05), 0 8px 16px -4px rgb(23 23 26 / .08)
+--vs-shadow-3: 0 4px 8px rgb(23 23 26 / .06), 0 16px 32px -8px rgb(23 23 26 / .14)
 
 --vs-dur-1: 120ms   colour, opacity
 --vs-dur-2: 200ms   transform, reveal
