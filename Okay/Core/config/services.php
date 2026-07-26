@@ -47,6 +47,8 @@ use Okay\Core\Modules\Extender\ExtenderFacade;
 use Okay\Core\UserReferer\UserReferer;
 use Snowplow\RefererParser\Parser;
 use Okay\Core\TplMod\Parser as TplParser;
+use Okay\Core\Security\AdminRecoveryToken;
+use Okay\Core\Security\RecoveryToken;
 
 $services = [
     BRouter::class => [
@@ -307,6 +309,15 @@ $services = [
     ],
     Managers::class => [
         'class' => Managers::class,
+    ],
+    AdminRecoveryToken::class => [
+        'class' => AdminRecoveryToken::class,
+        'arguments' => [
+            new SR(Config::class),
+        ],
+    ],
+    RecoveryToken::class => [
+        'class' => RecoveryToken::class,
     ],
     Translit::class => [
         'class' => Translit::class,
