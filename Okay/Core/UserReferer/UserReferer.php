@@ -3,6 +3,8 @@
 
 namespace Okay\Core\UserReferer;
 
+use Okay\Core\Security\SessionNames;
+
 
 use Okay\Core\Request;
 use Snowplow\RefererParser\Config\JsonConfigReader;
@@ -75,7 +77,13 @@ class UserReferer
     private function saveUserReferer(array $referer)
     {
         self::$userReferer = $referer;
-        setcookie('userReferer', base64_encode(json_encode($referer)), time()+60*60*24*3, '/', '', false, false);
+        setcookie('userReferer', base64_encode(json_encode($referer)), [
+            'expires'  => time() + 60 * 60 * 24 * 3,
+            'path'     => '/',
+            'secure'   => SessionNames::isHttps(),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
     }
     
     public function isInternalUrl($url)

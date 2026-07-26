@@ -58,7 +58,13 @@ try {
         unset($_SESSION['modules_request_timeout']);
         unset($_SESSION['support_request_timeout']);
         unset($_SESSION['last_version_data']);
-        setcookie('admin_login', '', time()-100, '/');
+        setcookie('admin_login', '', [
+            'expires'  => time() - 100,
+            'path'     => '/',
+            'secure'   => \Okay\Core\Security\SessionNames::isHttps(),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
         
         $response->redirectTo($request->getRootUrl());
     }

@@ -3,6 +3,8 @@
 
 namespace Okay\Core;
 
+use Okay\Core\Security\SessionNames;
+
 
 use Okay\Entities\FeaturesValuesEntity;
 use Okay\Entities\FeaturesEntity;
@@ -239,7 +241,13 @@ class Comparison
     public function save()
     {
         if (!empty($_COOKIE['comparison'])) {
-            setcookie('comparison', $_COOKIE['comparison'], time() + 30 * 24 * 3600, '/');
+            setcookie('comparison', $_COOKIE['comparison'], [
+                'expires'  => time() + 30 * 24 * 3600,
+                'path'     => '/',
+                'secure'   => SessionNames::isHttps(),
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
         }
     }
     
@@ -257,7 +265,13 @@ class Comparison
         }
         
         unset($_COOKIE['comparison']);
-        setcookie('comparison', '', time()-3600, '/');
+        setcookie('comparison', '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'secure'   => SessionNames::isHttps(),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
 
         ExtenderFacade::execute(__METHOD__, null, func_get_args());
     }

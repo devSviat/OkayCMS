@@ -3,6 +3,8 @@
 
 namespace Okay\Core;
 
+use Okay\Core\Security\SessionNames;
+
 
 use Okay\Entities\UserBrowsedProductsEntity;
 use Okay\Helpers\MainHelper;
@@ -90,7 +92,13 @@ class BrowsedProducts
     public function save()
     {
         if (!empty($_COOKIE['browsed_products'])) {
-            setcookie('browsed_products', $_COOKIE['browsed_products'], time() + 60 * 60 * 24 * 30, '/');
+            setcookie('browsed_products', $_COOKIE['browsed_products'], [
+                'expires'  => time() + 60 * 60 * 24 * 30,
+                'path'     => '/',
+                'secure'   => SessionNames::isHttps(),
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
         }
     }
     

@@ -64,7 +64,13 @@ if ($subdir == "") {
     }
 }
 //remember last position
-setcookie('last_position', $subdir, time() + (86400 * 7));
+setcookie('last_position', $subdir, [
+    'expires'  => time() + (86400 * 7),
+    'path'     => '/',
+    'secure'   => \Okay\Core\Security\SessionNames::isHttps(),
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
 
 if ($subdir == "/") { $subdir = ""; }
 

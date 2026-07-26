@@ -291,7 +291,13 @@ class UserHelper
         }
 
         if ($onlyToLocal === true) {
-            setcookie("browsed_products", '', time()-3600, "/");
+            setcookie('browsed_products', '', [
+                'expires'  => time() - 3600,
+                'path'     => '/',
+                'secure'   => SessionNames::isHttps(),
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
             $_COOKIE['browsed_products'] = '';
         }
         
