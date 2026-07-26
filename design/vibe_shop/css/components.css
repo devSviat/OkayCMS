@@ -1,0 +1,12 @@
+/**
+* vibe_shop component layer.
+* This file is the new component styling built on top of tokens.css and
+* base.css, registered last so it wins over the legacy sheets (grid.css,
+* okay.css, theme.css, select2.min.css, media.css, mobile_menu.css) that are
+* retired in Task 8.
+*
+* Task 2 onward fills this in, one component at a time. Do not add rules to
+* theme.css instead - it stays frozen in its original relative order until
+* Task 8 removes it, because media.css and mobile_menu.css depend on
+* following it in the cascade for their responsive overrides to win.
+*/

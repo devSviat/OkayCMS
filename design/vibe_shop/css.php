@@ -19,4 +19,5 @@ return [
     (new Css('media.css')),
     (new Css('mobile_menu.css')),
     (new Css('base.css')),
+    (new Css('components.css')),
 ];
