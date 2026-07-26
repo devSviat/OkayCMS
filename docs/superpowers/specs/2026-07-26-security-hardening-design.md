@@ -86,7 +86,9 @@ One class lives outside `Okay\Core\Security\` because it is module-specific: `Ok
 
 ### Key decision: no database changes at all
 
-This is a hard constraint on the whole iteration, not just a preference about tables. No `ALTER TABLE`, no `CREATE TABLE`, no new column, no index change, no file added to `1DB_changes/`, no module `update_x_y_z()` method. A guard test enforces it and the final verification pass diffs the live schema against a baseline.
+This is a hard constraint on the whole iteration, not just a preference about tables. No `ALTER TABLE`, no `CREATE TABLE`, no new column, no index change, no file added to `1DB_changes/`. A guard test enforces it and the final verification pass diffs the live schema against a baseline.
+
+Module `update_x_y_z()` upgrade methods are not restricted — they are the architecture's normal migration mechanism. This iteration simply has no reason to add one, and the live-schema diff is what would catch it if any code did change the database.
 
 Every value written fits a column that already exists, verified against the running database:
 
@@ -179,7 +181,7 @@ The admin guard in `Request::checkSession()` stops using `session_id()` as the t
 
 | Test | Covers |
 | ---- | ------ |
-| `NoDatabaseChangeTest` | No migration file added, no DDL in new code, no new module upgrade method |
+| `NoDatabaseChangeTest` | No migration file added to `1DB_changes/`, no DDL in new security code |
 | `PasswordHasherTest` | Argon2id/bcrypt round-trip, each legacy branch, malformed hashes rejected without warnings, `needsRehash()` for legacy formats |
 | `ManagerPasswordTest` | `Managers` delegates to the hasher; malformed stored hash returns false without warnings |
 | `CustomerPasswordTest` | `UsersEntity` no longer matches hashes in SQL and rehashes legacy formats |
