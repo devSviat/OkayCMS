@@ -29,6 +29,48 @@ class PathResolver
         return $this->root;
     }
 
+    /**
+     * Проверка значения из запроса без обращения к файловой системе.
+     *
+     * Нужна как единый отсев на входе процедурных точек файлового
+     * менеджера: там путь склеивается с конфигом больше чем в двадцати
+     * местах, и переписывать каждое опаснее, чем отклонить запрос целиком.
+     *
+     * @param mixed $value
+     * @return bool
+     */
+    public static function isSafeRelativePath($value)
+    {
+        if ($value === null || $value === '') {
+            return true;
+        }
+
+        if (!is_string($value)) {
+            return false;
+        }
+
+        if (strpos($value, "\0") !== false || strpos($value, '\\') !== false) {
+            return false;
+        }
+
+        // Любой сегмент ".." выводит за пределы корня.
+        foreach (explode('/', $value) as $segment) {
+            if ($segment === '..') {
+                return false;
+            }
+        }
+
+        if ($value[0] === '/') {
+            return false;
+        }
+
+        if (preg_match('~^[a-zA-Z][a-zA-Z0-9+.-]*:~', $value)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function resolve($relativePath)
     {
         if (!is_string($relativePath)) {

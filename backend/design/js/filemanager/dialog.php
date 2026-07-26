@@ -1,26 +1,8 @@
 <?php
 
-use Okay\Core\EntityFactory;
-use Okay\Entities\ManagersEntity;
-
-chdir('../../../..');
-
-require_once('vendor/autoload.php');
-
-\Okay\Core\Security\SessionNames::startBackend();
-
-$DI = include 'Okay/Core/config/container.php';
-
-/** @var EntityFactory $entityFactory */
-$entityFactory = $DI->get(EntityFactory::class);
-
-/** @var ManagersEntity $managersEntity */
-$managersEntity = $entityFactory->get(ManagersEntity::class);
-
-if (empty($_SESSION['admin']) || !$managersEntity->get($_SESSION['admin'])) {
-    die;
-}
-chdir('backend/design/js/filemanager/');
+// Проверка авторизованного менеджера вынесена в okay_access.php: одна
+// реализация на все точки входа файлового менеджера.
+require_once __DIR__ . '/include/okay_access.php';
 
 $time = time();
 

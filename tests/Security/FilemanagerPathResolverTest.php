@@ -72,6 +72,48 @@ class FilemanagerPathResolverTest extends TestCase
         $this->assertSame(realpath($this->root), $resolver->root());
     }
 
+    /**
+     * @dataProvider safeRequestPathProvider
+     */
+    public function testSafeRequestPathsPass($value)
+    {
+        $this->assertTrue(PathResolver::isSafeRelativePath($value), var_export($value, true));
+    }
+
+    public function safeRequestPathProvider()
+    {
+        return [
+            'empty'      => [''],
+            'null'       => [null],
+            'file'       => ['picture.jpg'],
+            'subfolder'  => ['catalog/2026/picture.jpg'],
+            'trailing'   => ['catalog/'],
+            'dots inside'=> ['my.photo.2026.jpg'],
+        ];
+    }
+
+    /**
+     * @dataProvider unsafeRequestPathProvider
+     */
+    public function testUnsafeRequestPathsAreRejected($value)
+    {
+        $this->assertFalse(PathResolver::isSafeRelativePath($value), var_export($value, true));
+    }
+
+    public function unsafeRequestPathProvider()
+    {
+        return [
+            'traversal'      => ['../etc/passwd'],
+            'nested up'      => ['catalog/../../etc'],
+            'bare up'        => ['..'],
+            'absolute'       => ['/etc/passwd'],
+            'backslash'      => ['catalog\\..\\etc'],
+            'scheme'         => ['php://input'],
+            'nul'            => ["catalog/pic.jpg\0.php"],
+            'array'          => [['x']],
+        ];
+    }
+
     public function testMissingRootIsRejected()
     {
         $this->expectException(\InvalidArgumentException::class);

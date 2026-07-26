@@ -1154,6 +1154,19 @@ class UploadHandler
             }
             $file_size = $this->get_file_size($file_path, $append_file);
             if ($file_size === $file->size) {
+                // SVG исполняется браузером как документ, поэтому переписываем
+                // его по белому списку до того, как файл станет доступен.
+                if (strtolower((string)pathinfo($file_path, PATHINFO_EXTENSION)) === 'svg') {
+                    $sanitizer = new \Okay\Core\Security\SvgSanitizer();
+                    if (!$sanitizer->sanitizeFile($file_path)) {
+                        @unlink($file_path);
+                        $file->error = 'Invalid SVG file';
+                        $this->set_additional_file_properties($file);
+                        return $file;
+                    }
+                    $file->size = $this->get_file_size($file_path);
+                }
+
                 $file->url = $this->get_download_url($file->name);
                 if ($this->is_valid_image_file($file_path)) {
                     $this->handle_image_file($file_path, $file);

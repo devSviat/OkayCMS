@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/include/okay_access.php';
+
 $config = include 'config/config.php';
 
 include 'include/utils.php';
