@@ -4,7 +4,7 @@
 
 **Goal:** Rebuild `design/vibe_shop` as a clear, fast, quiet conversion-first OkayCMS storefront theme — monochrome chrome, semantic colour, mobile-first, WCAG AA — without breaking any JavaScript, form, admin or module contract.
 
-**Architecture:** A new token layer (`tokens.css`) bridges the admin-editable `--okay-*` variables into a semantic scale that every component consumes. `base.css` carries the reset and typography; `theme.css` is rewritten as the component layer and loads last so it wins over the legacy sheets. The legacy sheets (`okay.css`, `media.css`, `mobile_menu.css`) are emptied progressively and torn down only in Task 8, once every component they carried has been reimplemented — so the site is never in a half-styled state.
+**Architecture:** A new token layer (`tokens.css`) bridges the admin-editable `--okay-*` variables into a semantic scale that every component consumes. `base.css` carries the reset and typography, and `components.css` is a brand-new file holding the component layer. Both load **after** every legacy sheet, so they win without any specificity tricks. The four legacy sheets (`okay.css`, `theme.css`, `media.css`, `mobile_menu.css`) keep their original relative order untouched, shrink progressively as components are reimplemented, and are deleted in Task 8 — so the site is never half-styled and no legacy interdependency is disturbed on the way.
 
 **Tech Stack:** Smarty 4 templates, plain CSS with custom properties, vanilla JS + jQuery 3.4 (`okay.js` untouched), Swiper, noUiSlider, select2. No build step — OkayCMS concatenates and caches CSS itself.
 
@@ -100,7 +100,7 @@ grep -n 'var(--okay-' design/vibe_shop/css/*.css | grep -v '^design/vibe_shop/cs
 grep -nE 'var\(--okay-[a-z-]+ *,' design/vibe_shop/css/tokens.css       # MUST be empty (C2, no fallbacks)
 
 # 3. no raw values leaked into components (C10)
-grep -nE '#[0-9a-fA-F]{3,8}\b' design/vibe_shop/css/theme.css design/vibe_shop/css/base.css   # MUST be empty
+grep -nE '#[0-9a-fA-F]{3,8}\b' design/vibe_shop/css/components.css design/vibe_shop/css/base.css   # MUST be empty
 ```
 
 Then in the browser, via chrome-devtools MCP: `navigate_page` to the task's pages,
@@ -116,12 +116,13 @@ design/vibe_shop/
   css/
     tokens.css          NEW   design tokens + the --okay-* bridge. Only file with raw values.
     base.css            NEW   reset, typography, focus ring, link and form baseline
-    theme.css           REWRITTEN   component layer; loads last
+    components.css      NEW   the component layer; loads dead last
     vendor.css          NEW (Task 8)   noUiSlider, swiper, loader, lazyload, readmore
     grid.css            KEPT  utilities (C8)
-    okay.css            SHRINKS to nothing across Tasks 2-7, deleted in Task 8
-    media.css           SHRINKS to nothing across Tasks 2-7, deleted in Task 8
-    mobile_menu.css     folded into theme.css in Task 2, deleted in Task 8
+    okay.css            LEGACY, shrinks across Tasks 2-7, deleted in Task 8
+    theme.css           LEGACY, shrinks across Tasks 2-7, deleted in Task 8
+    media.css           LEGACY, shrinks across Tasks 2-7, deleted in Task 8
+    mobile_menu.css     LEGACY, folded into components.css in Task 2, deleted in Task 8
     theme-settings.css  17 unchanged names, new values (Task 1)
   js/
     vibe.js             NEW   bottom sheet, sticky buy bar, quantity steppers, touch fallbacks
@@ -131,20 +132,32 @@ design/vibe_shop/
   css.php, js.php       registration order updated
 ```
 
-`css.php` order during the migration. `base.css` sits **after** the legacy sheets, not before:
-`okay.css` styles bare `body`, `h1`–`h4` and `a` at the same specificity as `base.css`, so an
-earlier `base.css` loses every one of those declarations and the new typography silently never
-applies. `theme.css` stays last so components beat both.
+`css.php` order during the migration — the new files go last, the legacy block is not reordered
+internally:
 
 ```
-tokens.css, grid.css, [okay.css, media.css, mobile_menu.css — legacy, shrinking],
-select2.min.css, base.css, theme.css
+tokens.css,
+  grid.css, okay.css, theme.css, select2.min.css, media.css, mobile_menu.css,   <- legacy, untouched
+base.css, components.css                                                        <- ours, appended
 ```
 
-Final order after the Task 8 teardown:
+Two rules produced this, and both were learned by breaking them:
+
+- **`base.css` must come after `okay.css`.** Both style bare `body`, `h1`–`h4` and `a` at
+  identical specificity, so an earlier `base.css` loses and the Inter/15px/1.55 typography
+  silently never applies — the page keeps rendering Montserrat 14px/1.4 and the whole task looks
+  like it did nothing.
+- **The legacy sheets keep their original relative order.** `media.css` and `mobile_menu.css`
+  contain mobile overrides that depend on coming *after* the old `theme.css`; moving `theme.css`
+  past them resurrects unconditional desktop rules (`.main_banner` was the one that surfaced) and
+  breaks mobile layout. This is why the new component layer is a **separate file** rather than a
+  rewritten `theme.css`: one file cannot be both the legacy sheet that must stay early and the
+  new layer that must come last.
+
+Final order after the Task 8 teardown, once the legacy block is gone:
 
 ```
-tokens.css, grid.css, vendor.css, select2.min.css, base.css, theme.css
+tokens.css, grid.css, vendor.css, select2.min.css, base.css, components.css
 ```
 
 ---
@@ -482,29 +495,40 @@ C1/C2/C3 do not apply to it.
 
 - [ ] **Step 8: Update `css.php` registration order**
 
+Also create `design/vibe_shop/css/components.css` as an empty placeholder — Task 2 starts filling
+it. Do **not** rewrite the existing `theme.css`; it stays a legacy sheet until Task 8.
+
 ```php
 return [
     (new Css('tokens.css')),
     (new Css('grid.css')),
     (new Css('okay.css')),
+    (new Css('theme.css')),
+    (new Css('select2.min.css')),
     (new Css('media.css')),
     (new Css('mobile_menu.css')),
-    (new Css('select2.min.css')),
     (new Css('base.css')),
-    (new Css('theme.css')),
+    (new Css('components.css')),
 ];
 ```
 
-Order matters in both directions here:
+The rule is simple: **the entire original order is preserved untouched, and the two new files are
+appended.** `tokens.css` leads because it only declares custom properties and must be defined
+before anything reads them.
 
-- `base.css` must come **after** `okay.css`. Both style bare `body`, `h1`–`h4` and `a` at
+Two failures taught this, both worth stating so nobody re-derives them:
+
+- **`base.css` must come after `okay.css`.** Both style bare `body`, `h1`–`h4` and `a` at
   identical specificity, so an earlier `base.css` loses and the Inter/15px/1.55 typography
   silently never applies — the page keeps rendering Montserrat 14px/1.4 and everything looks
   like the task did nothing.
-- `theme.css` stays last so the new component layer wins over whatever is still left in the
-  legacy sheets.
+- **The legacy block must not be reordered internally.** `media.css` and `mobile_menu.css` hold
+  mobile overrides that depend on coming after the old `theme.css`; moving `theme.css` past them
+  resurrects unconditional desktop rules and breaks mobile layout. `.main_banner` surfaces first,
+  but it is unlikely to be the only one. `grid.css` stays early for the same reason — legacy
+  sheets may deliberately override its utilities.
 
-`okay.css`, `media.css` and `mobile_menu.css` are removed from this list in Task 8.
+`okay.css`, `theme.css`, `media.css` and `mobile_menu.css` are removed from this list in Task 8.
 
 - [ ] **Step 9: Verify in the browser**
 
@@ -546,10 +570,10 @@ git commit -m "feat(vibe_shop): add design token layer, Inter, and typographic b
   `switcher.tpl`, `user_informer.tpl`, `cart_informer.tpl`, `wishlist_informer.tpl`,
   `comparison_informer.tpl`
 - Modify: `design/vibe_shop/html/svg.tpl` (add `chevron`, `compare`, `heart`, `close` symbols)
-- Modify: `design/vibe_shop/css/theme.css` (start the rewrite here)
+- Modify: `design/vibe_shop/css/components.css` (start the rewrite here)
 - Create: `design/vibe_shop/js/vibe.js`
 - Modify: `design/vibe_shop/js.php`
-- Delete from: `design/vibe_shop/css/okay.css`, `media.css`, `mobile_menu.css` — only the rules
+- Delete from: `design/vibe_shop/css/okay.css`, `theme.css`, `media.css`, `mobile_menu.css` — only the rules
   this task replaces
 
 **Interfaces:**
@@ -591,7 +615,7 @@ grep -rn "fa fa-\|fa-[a-z]" design/vibe_shop/html/*.tpl | grep -v svg.tpl
 Expected: no output. Leave the fancybox `<link>` at `head.tpl:52` in place — it styles the
 gallery lightbox and the comparison image viewer, and the local copy is an empty file.
 
-- [ ] **Step 2: Build the button primitives in `theme.css`**
+- [ ] **Step 2: Build the button primitives in `components.css`**
 
 Every later task depends on these. 44px minimum height satisfies the touch-target rule.
 
@@ -674,7 +698,7 @@ buttons.
 
 One sticky bar at 375px: menu toggle, logo, search toggle, cart. The mobile menu panel gets the
 sheet treatment shared with catalogue filters in Task 4 — build it here as `.vs-sheet` in
-`theme.css`, since this is where it is first needed:
+`components.css`, since this is where it is first needed:
 
 ```css
 .vs-sheet {
@@ -703,7 +727,7 @@ sheet treatment shared with catalogue filters in Task 4 — build it here as `.v
 }
 ```
 
-Move whatever of `mobile_menu.css` is still needed into `theme.css` and empty that file.
+Move whatever of `mobile_menu.css` is still needed into `components.css` and empty that file.
 `mobile_menu.js` stays registered and untouched.
 
 - [ ] **Step 4b: Create `js/vibe.js` with the shared sheet behaviour**
@@ -788,8 +812,8 @@ git commit -m "feat(vibe_shop): rebuild header, navigation and footer; drop font
 
 **Files:**
 - Modify: `design/vibe_shop/html/product_list.tpl` (full rewrite of the markup)
-- Modify: `design/vibe_shop/css/theme.css`
-- Delete from: `okay.css`, `media.css` — the `.product_preview*` rules
+- Modify: `design/vibe_shop/css/components.css`
+- Delete from: `okay.css`, `theme.css`, `media.css` — the `.product_preview*` rules
 
 **Interfaces:**
 - Consumes: `.vs-btn*` from Task 2, all tokens from Task 1.
@@ -965,7 +989,7 @@ git commit -m "feat(vibe_shop): rebuild the product card"
 - Modify: `design/vibe_shop/html/products.tpl`, `products_content.tpl`, `features.tpl`,
   `products_sort.tpl`, `selected_features.tpl`, `pagination.tpl`, `chpu_pagination.tpl`,
   `top_categories.tpl`, `breadcrumb.tpl`
-- Modify: `design/vibe_shop/js/vibe.js`, `design/vibe_shop/css/theme.css`
+- Modify: `design/vibe_shop/js/vibe.js`, `design/vibe_shop/css/components.css`
 
 **Interfaces:**
 - Consumes: `.vs-card` (Task 3), `.vs-btn*` (Task 2), `.vs-sheet` and `window.vibeSheet`
@@ -1074,7 +1098,7 @@ git commit -m "feat(vibe_shop): rebuild catalogue grid, filters and sorting"
 - Modify: `design/vibe_shop/html/product.tpl` (644 lines — the largest template)
 - Modify: `design/vibe_shop/html/browsed_products.tpl`, `selected_features.tpl`,
   `user_comments.tpl`
-- Modify: `design/vibe_shop/js/vibe.js`, `design/vibe_shop/css/theme.css`
+- Modify: `design/vibe_shop/js/vibe.js`, `design/vibe_shop/css/components.css`
 
 **Interfaces:**
 - Consumes: `.vs-btn*`, `.vs-badge`, `.vs-stock`, `.vs-chip`, `window.vibeSheet`.
@@ -1186,7 +1210,7 @@ git commit -m "feat(vibe_shop): rebuild the product page with a sticky buy box"
 **Files:**
 - Modify: `design/vibe_shop/html/cart.tpl`, `cart_purchases.tpl`, `cart_deliveries.tpl`,
   `cart_coupon.tpl`, `cart_informer.tpl`, `pop_up_cart.tpl`, `order.tpl`
-- Modify: `design/vibe_shop/css/theme.css`
+- Modify: `design/vibe_shop/css/components.css`
 
 **Interfaces:**
 - Consumes: `.vs-btn*`, `.vs-stock`, the quantity stepper from Task 5.
@@ -1290,7 +1314,7 @@ git commit -m "feat(vibe_shop): rebuild cart and checkout"
   `wishlist.tpl`, `comparison.tpl`, `brands.tpl`, `brands_content.tpl`, `page.tpl`,
   `page_404.tpl`, `login.tpl`, `register.tpl`, `password_remind.tpl`, `feedback.tpl`,
   `callback.tpl`, `main.tpl`, `tech.tpl`
-- Modify: `design/vibe_shop/css/theme.css`
+- Modify: `design/vibe_shop/css/components.css`
 
 **Interfaces:**
 - Consumes: everything produced by Tasks 2–6.
@@ -1361,7 +1385,7 @@ git commit -m "feat(vibe_shop): restyle blog, account and secondary pages"
 
 **Files:**
 - Create: `design/vibe_shop/css/vendor.css`
-- Delete: `design/vibe_shop/css/okay.css`, `media.css`, `mobile_menu.css`,
+- Delete: `design/vibe_shop/css/okay.css`, `theme.css`, `media.css`, `mobile_menu.css`,
   `font-awesome.min.css`, `jquery.fancybox.min.css`
 - Modify: `design/vibe_shop/css.php`
 
@@ -1381,7 +1405,7 @@ loader), leaving structural geometry alone.
 ```bash
 for c in button boxed block block__title tabs accordion popup table; do
   printf '%s: ' "$c"
-  grep -c "\.$c\b" design/vibe_shop/css/theme.css
+  grep -c "\.$c\b" design/vibe_shop/css/components.css
 done
 ```
 
@@ -1390,6 +1414,10 @@ dropped rather than restyled — fix before continuing.
 
 - [ ] **Step 3: Delete the legacy sheets and update `css.php`**
 
+Delete `okay.css`, `theme.css`, `media.css`, `mobile_menu.css`, `font-awesome.min.css` and
+`jquery.fancybox.min.css`. The legacy ordering constraint disappears with them, which is why this
+teardown is last.
+
 ```php
 return [
     (new Css('tokens.css')),
@@ -1397,7 +1425,7 @@ return [
     (new Css('vendor.css')),
     (new Css('select2.min.css')),
     (new Css('base.css')),
-    (new Css('theme.css')),
+    (new Css('components.css')),
 ];
 ```
 
@@ -1417,7 +1445,7 @@ installed and active, then walk every page in scope again at both widths with th
 running. A module template rendering `.boxed` or `.button` must still look right.
 
 ```bash
-grep -c . design/vibe_shop/css/theme.css
+grep -c . design/vibe_shop/css/components.css
 ls -l design/vibe_shop/css/
 ```
 
@@ -1433,7 +1461,7 @@ git commit -m "refactor(vibe_shop): retire legacy stylesheets, extract vendor CS
 ## Task 9: Accessibility, motion and state pass
 
 **Files:**
-- Modify: `design/vibe_shop/css/theme.css`, `base.css`, `js/vibe.js`, templates as needed
+- Modify: `design/vibe_shop/css/components.css`, `base.css`, `js/vibe.js`, templates as needed
 - Modify: `config/config.local.php:56` (revert)
 
 - [ ] **Step 1: Contrast audit**
