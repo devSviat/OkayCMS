@@ -430,10 +430,13 @@ textarea {
 
 Replace lines 5–50 (the four Montserrat preloads and their four `@font-face` blocks) with one
 Inter preload plus Montserrat SemiBold, and drop the Montserrat Regular/Medium faces — body
-text is Inter now, so those two files stop being referenced. Also delete the two `cdnjs`
-`<link>` tags at `head.tpl:52-53`: font-awesome is replaced by the theme's own SVG sprite in
-Task 2, and fancybox's CSS is unused (`jquery.fancybox.min.css` is 0 bytes and commented out of
-`css.php`).
+text is Inter now, so those two files stop being referenced.
+
+Leave both `cdnjs` `<link>` tags at `head.tpl:52-53` alone in this task. The font-awesome link
+is removed in Task 2, in the same step that replaces the icons it serves — removing it here
+would leave every `fa fa-*` glyph blank until Task 2 lands. The fancybox link stays permanently:
+the local `jquery.fancybox.min.css` is 0 bytes and commented out of `css.php`, so the CDN copy
+is the one actually styling the gallery lightbox and the comparison image viewer.
 
 ```smarty
     {* Include fonts *}
@@ -562,6 +565,16 @@ the existing `{if $svgId == "..."}` pattern, then replace each `<i class="fa fa-
 Keep every `fn_*` and `data-*` attribute on the elements being changed (C5, C6). The wishlist
 and comparison toggles in `product_list.tpl` carry `fn_wishlist` / `fn_comparison` plus
 `data-id` and `data-result-text` — those move onto the new markup unchanged.
+
+Once no `fa fa-*` class remains anywhere in `design/vibe_shop/html/`, delete the font-awesome
+`<link>` at `head.tpl:53`. Verify before deleting:
+
+```bash
+grep -rn "fa fa-\|fa-[a-z]" design/vibe_shop/html/*.tpl | grep -v svg.tpl
+```
+
+Expected: no output. Leave the fancybox `<link>` at `head.tpl:52` in place — it styles the
+gallery lightbox and the comparison image viewer, and the local copy is an empty file.
 
 - [ ] **Step 2: Build the button primitives in `theme.css`**
 
