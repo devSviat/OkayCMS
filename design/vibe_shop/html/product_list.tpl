@@ -96,7 +96,9 @@
             </div>
 
             {if $product->annotation && $controller != "MainController"}
-                <div class="vs-card__annotation">{$product->annotation|strip_tags}</div>
+                {* strip_tags leaves entities behind ("Цвет:&nbsp;Белый"), so escape must not
+                   double-encode them - it still escapes a bare < or & *}
+                <div class="vs-card__annotation">{$product->annotation|strip_tags|escape:'html':'UTF-8':false}</div>
             {/if}
 
             <div class="vs-card__price">

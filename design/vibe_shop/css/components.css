@@ -1548,13 +1548,21 @@ body.hc-nav-open {
 
 /* A fixed ratio keeps rows from jumping as photography loads, and `contain` on */
 /* a plate is what makes uneven shop photography line up on a common baseline.  */
+/* The plate is carried by its hairline and its radius, not by its fill. Shop   */
+/* photography is overwhelmingly shot on a white sweep (387 of the 434 demo     */
+/* originals), so any fill darker than white turns those into a box inside a    */
+/* box. Erasing that seam by treating the photograph instead - a blend mode -   */
+/* does not generalise: it inverts the artifact on the 47 images that are not   */
+/* shot on white, and it crushes white subjects into the plate. Treat the       */
+/* plate, never the photograph.                                                 */
 
 .vs-card__media {
 	position: relative;
 	display: block;
 	aspect-ratio: 4 / 5;
 	overflow: hidden;
-	background-color: var(--vs-surface-subtle);
+	background-color: var(--vs-plate);
+	border: 1px solid var(--vs-hairline);
 	border-radius: var(--vs-radius-md);
 }
 
@@ -1574,19 +1582,18 @@ body.hc-nav-open {
 	height: 100%;
 }
 
-/* multiply is what lets catalogue photography shot on a white sweep sit on the */
-/* plate without its white rectangle showing as a box inside a box. On a plate  */
-/* this light it darkens nothing that is not already white.                     */
+/* Scoped to the media link, not to .vs-card__media: the shop owner's `special` */
+/* sticker is an <img> inside .vs-card__badges, which is also a child of the    */
+/* media box. It is uploaded artwork the theme must not resize or transform.    */
 
-.vs-card__media img {
+.vs-card__media-link img {
 	width: 100%;
 	height: 100%;
 	object-fit: contain;
-	mix-blend-mode: multiply;
 	transition: transform var(--vs-dur-3) var(--vs-ease);
 }
 
-.vs-card:hover .vs-card__media img {
+.vs-card:hover .vs-card__media-link img {
 	transform: scale(1.03);
 }
 
@@ -2084,6 +2091,20 @@ body.hc-nav-open {
 
 	.vs-card__media-link {
 		padding: var(--vs-space-3);
+	}
+
+/* On a 375px screen the plate is ~157x196 and two permanently-visible 44px    */
+/* discs eat nearly half its height. The product is the hero, so only the      */
+/* wishlist keeps its place on the image. Comparison is the lower-value action */
+/* on a phone and steps off - except when it is already picked, so removing    */
+/* stays reachable and the comparison page's own remove control survives.      */
+
+	.vs-card__compare {
+		display: none;
+	}
+
+	.vs-card__compare.selected {
+		display: inline-flex;
 	}
 
 	.vs-card__cta {
