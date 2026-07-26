@@ -24,7 +24,7 @@ Commands:
 cd dev && docker compose up -d
 docker compose exec php85 composer install
 docker compose exec php85 php vendor/bin/phpunit
-docker compose exec php85 php vendor/bin/phpunit --testsuite Security
+docker compose exec php85 php vendor/bin/phpunit tests/Security
 ```
 
 ## Confirmed Defects
@@ -69,9 +69,11 @@ New namespace `Okay\Core\Security\`. Each class has one responsibility, a narrow
 | Class | Responsibility |
 | ----- | -------------- |
 | `CustomerCsrfToken` | Storefront CSRF token: `get()`, `check()`, `rotate()`. Backed by session state with a SameSite cookie fallback so the token survives a session-namespace change. |
-| `SessionNames` | `okay_sid` / `okay_admin_sid` constants, `regenerate()`, `configureCookieParams()`. |
-| `RecoveryToken` | Opaque token generation, `digest()`, TTL handling, `isValidFormat()`. Shared by manager and customer recovery. |
-| `SafeRedirect` | `isSameOrigin(string $url): bool` — rejects protocol-relative `//`, backslashes, scheme URLs and foreign hosts, after `rawurldecode()`. |
+| `SessionNames` | `okay_sid` / `okay_admin_sid` constants, `startFrontend()`, `startBackend()`, `regenerate()`, `cookieParams()`, `isHttps()`. |
+| `AdminCsrfToken` | Backend CSRF token held in `$_SESSION['id']`, so the ~30 admin templates that already print `{$smarty.session.id}` need no edit while the value stops being the session id. |
+| `RecoveryToken` | Customer recovery: opaque token generation, `digest()`, TTL handling, `isValidFormat()`. |
+| `AdminRecoveryToken` | Manager recovery: stateless token carrying manager id and expiry, signed with an HMAC bound to the current password hash. |
+| `SafeRedirect` | `isSameOrigin(?string $url, string $baseUrl): bool` — rejects protocol-relative `//`, backslashes, control characters, userinfo tricks, non-HTTP schemes and foreign hosts, after double `rawurldecode()`. |
 | `PasswordHasher` | `hash()` (Argon2id, bcrypt fallback), `verify()` with legacy branches, `needsRehash()`. |
 | `SecurityHeaders` | Baseline response headers. |
 | `SvgSanitizer` | Element/attribute allowlist over `DOMDocument`; strips scripts, event handlers and dangerous URL schemes. |
@@ -79,9 +81,15 @@ New namespace `Okay\Core\Security\`. Each class has one responsibility, a narrow
 | `Filemanager\AccessGuard` | Authenticated-manager + permission check for every filemanager entrypoint. |
 | `BackendFileDownloadPolicy` | Maps folder + file + extension to the permission required to download it. |
 
+One class lives outside `Okay\Core\Security\` because it is module-specific: `Okay\Modules\OkayCMS\RozetkaPay\Core\CallbackSignature` signs and verifies the callback URL that authenticates inbound RozetkaPay notifications.
+
 ### Key decision: no new database tables
 
-Recovery moves from "token in `remind_code`, trusted on sight" to "digest in `remind_code`, exchanged for a reset state". The digest reuses the existing `remind_code` column and `remind_expire` TTL. This closes the defect without a schema migration, so existing installations upgrade by deploying code only.
+Customer recovery moves from "token in `remind_code`, trusted on sight" to "digest in `remind_code`, exchanged for a reset state". The digest reuses the existing `remind_code` column and `remind_expire` TTL. Because `ok_users.remind_code` is `varchar(32)`, the stored digest is `sha256` of the token truncated to 32 hex characters — 128 bits, which is ample for the preimage resistance this lookup needs, and it avoids an `ALTER TABLE`.
+
+`ok_managers` has no recovery columns at all, so manager recovery uses a stateless signed token instead: manager id and expiry, authenticated by an HMAC keyed with the config salt and bound to the manager's *current* password hash. The token therefore self-invalidates the moment the password changes, giving one-time use with no storage.
+
+Both flows upgrade by deploying code only — no schema migration.
 
 Password migration is likewise in-place: legacy hashes stay valid for verification and are transparently rehashed to Argon2id on the next successful login. No forced reset, no schema change (the `password` column already holds a variable-length hash).
 
@@ -158,19 +166,29 @@ The admin guard in `Request::checkSession()` stops using `session_id()` as the t
 | Test | Covers |
 | ---- | ------ |
 | `PasswordHasherTest` | Argon2id/bcrypt round-trip, each legacy branch, malformed hashes rejected without warnings, `needsRehash()` for legacy formats |
-| `RecoveryTokenTest` | Opaque token, digest inequality, format validation, TTL expiry |
-| `SafeRedirectTest` | Same-origin allowed; `//host`, backslash, `javascript:`, encoded and foreign-host variants rejected |
+| `ManagerPasswordTest` | `Managers` delegates to the hasher; malformed stored hash returns false without warnings |
+| `CustomerPasswordTest` | `UsersEntity` no longer matches hashes in SQL and rehashes legacy formats |
+| `RecoveryTokenTest` | Customer digest and TTL; manager token identity, password-hash binding, expiry, tampering |
+| `AdminRecoveryFlowTest` | Recovery bound to the token, no manager creation, empty password rejected before login, no enumeration |
+| `CustomerRecoveryFlowTest` | Recovery link does not authenticate, digest stored, token consumed before elevation, no enumeration |
+| `SessionNamesTest` | Namespaces differ, cookie params hardened, no entrypoint derives the name from the User-Agent |
+| `AdminCsrfTest` | Token is not the session id, fails closed, rotates, guard runs before dispatch |
 | `CustomerCsrfTokenTest` | Token is not the session id, fails closed on null/wrong, rotates, survives session reset via cookie |
-| `SvgSanitizerTest` | Scripts, `on*` handlers and `javascript:` hrefs stripped; benign shapes and paths preserved; unparsable input rejected |
+| `StorefrontCsrfGuardTest` | Every mutation controller invokes the guard; theme forms carry the token |
 | `FilemanagerPathResolverTest` | Traversal, absolute, scheme and NUL-byte paths rejected; legitimate nested paths resolved |
-| `FilemanagerAccessTest` | Each of the 5 entrypoints requires the access guard |
+| `SvgSanitizerTest` | Scripts, `on*` handlers and `javascript:` hrefs stripped; benign shapes preserved; unparsable input rejected |
+| `FilemanagerAccessTest` | Each of the 5 entrypoints requires the guard; remote upload gone; SVG sanitized |
 | `BackendFileDownloadPolicyTest` | Known exports map to permissions; unknown folder/file/extension denied |
 | `FeedFilterOperatorTest` | Allowlist is exactly `<`, `>`, `=`; all 14 adapters normalize |
-| `AdminAuthTemplateEscapingTest` | `auth.tpl` escapes host and login values |
+| `SafeRedirectTest` | Same-origin allowed; `//host`, backslash, `javascript:`, encoded and foreign-host variants rejected |
+| `UnserializeHardeningTest` | No call site deserializes without `allowed_classes`; 1C filenames resolved |
 | `SecurityHeadersTest` | Baseline headers present; version stripped from `X-Powered-CMS` |
-| `RecaptchaFailClosedTest` | `invalid-input-secret` yields a failed check |
-| `PaymentCallbackSignatureTest` | WayForPay rejects a missing signature; RozetkaPay rejects a bad callback HMAC |
-| `RecoveryFlowTest` | Recovery link does not authenticate; token consumed before elevation; empty password rejected |
+| `CookieAttributesTest` | Every `setcookie()` uses the options form with `httponly` and `samesite` |
+| `RecaptchaFailClosedTest` | `invalid-input-secret` yields a failed check and is logged |
+| `AdminAuthTemplateEscapingTest` | `auth.tpl` escapes host and login values |
+| `WayForPayCallbackTest` | Signature mandatory, verified before payment, no `array_key_exists()` on an object |
+| `RozetkaPayCallbackTest` | Callback URL signed and verified before payment; payment-method check fixed |
+| `UpgradeNotesTest` | Upgrade notes cover every breaking change |
 
 Regression guard: the existing 176 tests must remain green after every phase.
 
