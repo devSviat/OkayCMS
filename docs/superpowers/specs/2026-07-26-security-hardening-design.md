@@ -63,6 +63,11 @@ Severity reflects exploitability against a default installation.
 
 LiqPay and Fondy verify their callback signatures correctly and need no change.
 
+> **Update during execution:** defects 17 and 18 were dropped from scope. Neither
+> payment module is in use, so the maintainer chose not to change them. Both stay
+> documented here and in `docs/UPGRADE-security.md` as known-open, so enabling
+> either module is an informed decision rather than a surprise.
+
 ## Architecture
 
 New namespace `Okay\Core\Security\`. Each class has one responsibility, a narrow public surface, and no dependency on request globals beyond what it is given — so each is unit-testable in isolation.

@@ -4854,7 +4854,37 @@ git commit -m "fix(security): fail closed on recaptcha misconfiguration and esca
 
 ---
 
-## Phase G — Payment callbacks
+## Phase G — Payment callbacks — SKIPPED
+
+**Not implemented. Decided during execution: neither payment module is in use.**
+
+Defects 17 and 18 stay open by choice, not by oversight. Both are recorded in
+`docs/UPGRADE-security.md` so anyone who does enable these modules knows what
+they are switching on:
+
+- **17, WayForPay.** `CallbackController.php:81` reads
+  `if (!empty($data->merchantSignature) && $data->merchantSignature != $sign)`,
+  so omitting the field skips verification entirely and an unauthenticated POST
+  with a correct order id and amount marks the order paid. Line 74 additionally
+  calls `array_key_exists()` on a `stdClass`, a `TypeError` on PHP 8, so a
+  genuinely signed callback fatals before the comparison is even reached. This
+  was implemented and verified end to end during execution — a forged callback
+  was refused with 400 while a correctly signed one was accepted — then reverted
+  in full at the maintainer's request.
+- **18, RozetkaPay.** The callback performs no authentication at all; the only
+  barrier is a matching `$data->id`. Line 58 also uses `&&` where `||` is meant,
+  so a payment method belonging to another module passes the check.
+
+One line in `WayForPay/Controllers/CallbackController.php` is deliberately kept:
+the `unserialize(..., ['allowed_classes' => false])` from Task 17. It belongs to
+the codebase-wide sweep, not to this phase, and `UnserializeHardeningTest` scans
+the whole `Okay/` tree — removing it fails that test.
+
+The original tasks are kept below for whoever picks this up.
+
+---
+
+## Phase G (original tasks, not executed)
 
 ### Task 21: WayForPay signature becomes mandatory
 
