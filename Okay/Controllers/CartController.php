@@ -161,9 +161,11 @@ class CartController extends AbstractController
         PaymentsHelper   $paymentsHelper,
         CartHelper       $cartHelper
     ) {
-        $action     = $request->get('action');
-        $variantId  = $request->get('variant_id', 'integer');
-        $amount     = $request->get('amount', 'integer');
+        $this->requireCustomerCsrf();
+
+        $action     = $request->post('action');
+        $variantId  = $request->post('variant_id', 'integer');
+        $amount     = $request->post('amount', 'integer');
         
         switch ($action) {
             case 'update_citem':
@@ -221,12 +223,16 @@ class CartController extends AbstractController
 
     public function removeItem(Cart $cart, $variantId)
     {
+        $this->requireCustomerCsrf();
+
         $cart->deleteItem($variantId);
         $this->response->redirectTo(Router::generateUrl('cart', [], true));
     }
 
     public function addItem(Cart $cart, $variantId)
     {
+        $this->requireCustomerCsrf();
+
         $cart->addItem($variantId);
         $this->response->redirectTo(Router::generateUrl('cart', [], true));
     }

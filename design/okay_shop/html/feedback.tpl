@@ -35,6 +35,7 @@
                 {else}
                 {* Feedback form *}
                 <form id="captcha_id" method="post" class="fn_validate_feedback form form--boxed">
+                    <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                     {if $settings->captcha_type == "v3"}
                         <input type="hidden" class="fn_recaptcha_token fn_recaptchav3" name="recaptcha_token" />
                     {/if}

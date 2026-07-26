@@ -5,7 +5,9 @@ namespace Okay\Controllers;
 
 
 use Okay\Core\EntityFactory;
+use Okay\Core\Request;
 use Okay\Core\Response;
+use Okay\Core\Security\CustomerCsrfToken;
 use Okay\Entities\SubscribesEntity;
 use Okay\Helpers\ValidateHelper;
 use Okay\Requests\CommonRequest;
@@ -17,10 +19,13 @@ class SubscribeController
         CommonRequest $commonRequest,
         ValidateHelper $validateHelper,
         EntityFactory $entityFactory,
-        Response $response
+        Response $response,
+        Request $request
     ) {
-        
+        // Контроллер не наследует AbstractController, поэтому проверяем
+        // токен напрямую.
         if (($subscribe = $commonRequest->postSubscribe()) !== null) {
+            $this->requireCustomerCsrf($request, $response);
 
             /** @var SubscribesEntity $subscribesEntity */
             $subscribesEntity = $entityFactory->get(SubscribesEntity::class);
@@ -47,5 +52,29 @@ class SubscribeController
 
         $response->setContent(json_encode($result), RESPONSE_JSON);
     }
-    
+
+    /**
+     * Пропускает только POST с корректным токеном витрины.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @return void
+     */
+    private function requireCustomerCsrf(Request $request, Response $response)
+    {
+        if (!$request->method('post')) {
+            $response->setStatusCode(405);
+            $response->setContent('Method Not Allowed', RESPONSE_TEXT);
+            $response->sendContent();
+            exit;
+        }
+
+        if (!CustomerCsrfToken::check($request->post('customer_csrf_token'))) {
+            $response->setStatusCode(403);
+            $response->setContent('Forbidden', RESPONSE_TEXT);
+            $response->sendContent();
+            exit;
+        }
+    }
+
 }

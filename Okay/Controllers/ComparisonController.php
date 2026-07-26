@@ -20,8 +20,10 @@ class ComparisonController extends AbstractController
     public function ajaxUpdate(Comparison $comparison, ComparisonHelper $comparisonHelper)
     {
 
-        $productId = $this->request->get('product', 'integer');
-        $action = $this->request->get('action');
+        $this->requireCustomerCsrf();
+
+        $productId = $this->request->post('product', 'integer');
+        $action = $this->request->post('action');
         if ($action == 'add') {
             $comparison->addItem($productId);
         } elseif($action == 'delete') {
