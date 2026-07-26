@@ -36,3 +36,6 @@ design/*/lang/local.*.php
 .phpunit.result.cache
 robots.txt
 dev/docker-compose.override.yml
+
+# Claude Code local settings
+.claude/settings.local.json
