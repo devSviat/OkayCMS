@@ -127,6 +127,103 @@
         item.classList.add('is-open');
     });
 
+    /* ------------------------------------------------------- product card */
+
+    var LOW_STOCK_FALLBACK = 5;
+
+    /* Availability line. okay.js only knows the two states it can express with
+       hidden-xs-up on .fn_is_stock / .fn_not_preorder, so the three-state dot
+       is maintained here. The copy comes from data-* on the element itself so
+       it stays translated by the template, not hard-coded in JS. */
+    function applyStock(card, stock) {
+        var el = card.querySelector('.vs-stock');
+        if (!el) return;
+        var label = el.querySelector('.vs-stock__label');
+        var lowAt = parseInt(el.getAttribute('data-low-at'), 10);
+        if (isNaN(lowAt)) lowAt = LOW_STOCK_FALLBACK;
+
+        el.classList.remove('vs-stock--in', 'vs-stock--low', 'vs-stock--out');
+
+        /* NaN (a variant with no stock figure at all) deliberately falls through
+           to "in stock" - that is how okay.js reads the same attribute, and the
+           two must not disagree about the same variant. */
+        if (stock < 1) {
+            /* Out of stock is stated once, by the .vs-card__unavailable slot
+               okay.js reveals; repeating it here would say it twice. */
+            el.classList.add('vs-stock--out', 'hidden-xs-up');
+            if (label) label.textContent = el.getAttribute('data-out') || '';
+            return;
+        }
+
+        el.classList.remove('hidden-xs-up');
+        if (stock <= lowAt) {
+            el.classList.add('vs-stock--low');
+            if (label) label.textContent = el.getAttribute('data-low') || '';
+        } else {
+            el.classList.add('vs-stock--in');
+            if (label) label.textContent = el.getAttribute('data-in') || '';
+        }
+    }
+
+    /* okay.js writes data-discount verbatim, and that attribute is a frozen
+       contract carrying two decimals ("-33.79 %"). The badge shows whole
+       percent instead. Only the card badge is touched: the product page keeps
+       its own markup inside .fn_discount_label. */
+    function normaliseDiscount(card) {
+        var badge = card.querySelector('.fn_discount_label');
+        if (!badge || !badge.classList.contains('vs-badge')) return;
+        var match = badge.textContent.replace(/ /g, ' ').match(/-?\d+(?:[.,]\d+)?/);
+        if (!match) return;
+        var value = parseFloat(match[0].replace(',', '.'));
+        if (isNaN(value)) return;
+        badge.textContent = Math.round(value) + ' %';
+    }
+
+    function syncCard(select) {
+        var card = select.closest ? select.closest('.vs-card') : null;
+        if (!card) return;
+        var option = select.options[select.selectedIndex];
+        var chips = card.querySelectorAll('.vs-chip');
+        for (var i = 0; i < chips.length; i++) {
+            var on = chips[i].getAttribute('data-variant-id') === select.value;
+            chips[i].classList.toggle('vs-chip--selected', on);
+            chips[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+        applyStock(card, option ? parseInt(option.getAttribute('data-stock'), 10) : NaN);
+        normaliseDiscount(card);
+    }
+
+    /* A chip is a shortcut for the <select>, which stays the value the form
+       submits. Dispatching a real change event is what makes okay.js's existing
+       handler recalculate price, old price, SKU, stock and the discount badge. */
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var chip = event.target.closest('.vs-chip');
+        if (!chip) return;
+        var form = chip.closest('form');
+        var select = form ? form.querySelector('select[name="variant"]') : null;
+        if (!select) return;
+        event.preventDefault();
+        if (select.value === chip.getAttribute('data-variant-id')) return;
+        select.value = chip.getAttribute('data-variant-id');
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    /* Registered after okay.js so its handler has already rewritten the card.
+       select2 fires its change through jQuery, which never reaches a native
+       listener, so jQuery is used whenever it is present. */
+    if (window.jQuery) {
+        window.jQuery(document).on('change', '.fn_variant', function () {
+            syncCard(this);
+        });
+    } else {
+        document.addEventListener('change', function (event) {
+            var select = event.target;
+            if (!select || !select.classList || !select.classList.contains('fn_variant')) return;
+            syncCard(select);
+        });
+    }
+
     document.addEventListener('keydown', function (event) {
         if (event.key !== 'Escape' && event.key !== 'Esc' && event.key !== 'Tab') return;
 

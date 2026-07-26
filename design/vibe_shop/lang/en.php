@@ -204,6 +204,7 @@ $lang['product_add_favorite'] = 'Favorite';
 $lang['available'] = 'Availability';
 $lang['product_out_of_stock'] = 'Out of stock';
 $lang['product_in_stock'] = 'In stock';
+$lang['product_low_stock'] = 'Low stock';
 $lang['product_quantity'] = 'Quantity';
 $lang['product_pre_order'] = 'Pre-order';
 $lang['product_add_cart'] = 'Add to Cart';

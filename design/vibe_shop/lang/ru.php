@@ -204,6 +204,7 @@ $lang['product_add_favorite'] = 'В избранное';
 $lang['available'] = 'Наличие';
 $lang['product_out_of_stock'] = 'Нет на складе';
 $lang['product_in_stock'] = 'Есть в наличии';
+$lang['product_low_stock'] = 'Заканчивается';
 $lang['product_quantity'] = 'Количество';
 $lang['product_pre_order'] = 'Предзаказ';
 $lang['product_add_cart'] = 'Добавить в корзину';

@@ -233,32 +233,6 @@
   .fn_products_slide .product_item {
     width: 264px;
   }
-  .product_item:not(.no_hover):hover .product_preview {
-    background: #fff;
-    border-color: transparent;
-    border-radius: 4px;
-    -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
-    -moz-box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
-    z-index: 3;
-  }
-  .product_preview__name:hover {
-    overflow: visible;
-    z-index: 2;
-  }
-  .product_preview__name a:hover {
-    color: var(--okay-basic-company);
-  }
-  .product_preview__button--pre_order:hover {
-    background: rgb(127, 127, 127);
-    border-color: rgb(127, 127, 127);
-    color: #fff;
-  }
-  .product_preview__button--pre_order:hover {
-    background: rgb(127, 127, 127);
-    border-color: rgb(127, 127, 127);
-    color: #fff;
-  }
   .form__button--border:active,
   .form__button--border:hover,
   .form__button--border:focus {
@@ -271,28 +245,6 @@
     background: #7f7f7f;
     border-color: #7f7f7f;
     color: #fff;
-  }
-  .product_preview__button:not(.button--blick):hover {
-    opacity: 0.8;
-  }
-  .product_item:hover .product_preview__button .product_preview__button_text {
-    visibility: visible;
-    overflow: visible;
-    opacity: 1;
-    width: auto;
-  }
-  .product_preview__buttons .comparison_button:hover,
-  .product_preview__buttons .fast_order_button:hover {
-    color: var(--okay-button-color);
-    border-color: var(--okay-button-color);
-    opacity: 1;
-  }
-  .product_preview__center .wishlist_button:hover {
-    opacity: 1;
-  }
-  .product_item:not(.no_hover):hover .product_preview__annotation,
-  .product_item:not(.no_hover):hover .product_preview__variants {
-    display: block;
   }
   .article__button:hover {
     color: var(--okay-button-color);
@@ -587,40 +539,6 @@
     padding-bottom: 20px;
     margin-bottom: 20px;
   }
-  .product_preview {
-    box-shadow: none;
-    min-height: 300px;
-    border-left: none !important;
-  }
-  .product_preview__top {
-    display: none;
-  }
-  .product_preview__image {
-    height: 150px;
-    margin-bottom: 10px;
-  }
-  .product_preview__image a,
-  .product_preview__image picture {
-    height: 150px;
-  }
-  .product_preview__name {
-    height: 34px;
-  }
-  .product_preview__prices {
-    margin-top: 5px;
-  }
-  .product_preview__bottom {
-    margin: 5px 0 0;
-  }
-  .product_preview__prices .price {
-    font-size: 16px;
-    font-weight: 600;
-  }
-  .product_preview__prices .old_price {
-    margin: 0 5px 0 0;
-    font-size: 13px;
-    font-weight: 400;
-  }
   .categories_nav {
     display: none !important;
   }
@@ -854,12 +772,6 @@
     -webkit-justify-content: center;
     -ms-flex-pack: center;
     justify-content: center;
-  }
-  .product_preview__button--buy .product_preview__button_text {
-    display: none;
-  }
-  .product_preview__buttons .product_preview__button:before {
-    font-size: 20px;
   }
   .product-page__images {
     min-height: 1px;
@@ -1153,17 +1065,6 @@
     z-index: 1;
     background: #fff;
   }
-  .product_preview__button--pre_order {
-    padding: 0;
-    line-height: 1px;
-  }
-  .product_preview__button--pre_order .product_preview__button_text {
-    padding: 0px 5px;
-    font-size: 10px;
-    font-weight: 500;
-    line-height: 1;
-    display: block;
-  }
   body,
   .boxed__description {
     font-size: 13px;
@@ -1337,9 +1238,6 @@
     min-width: 35px;
     height: 24px;
   }
-  .product_preview__prices {
-    margin-top: 10px;
-  }
   .product-page__button {
     font-size: 12px;
   }
@@ -1352,21 +1250,10 @@
   .scroll_products .scroll_products__item {
     width: 160px;
   }
-  .product_preview {
-    padding: 10px 10px 10px;
-  }
-  .product_preview__prices .price .currency {
-    font-size: 10px;
-    font-weight: 500;
-  }
   .block_explanation__header {
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 10px;
-  }
-  .product_preview__buttons .comparison_button,
-  .product_preview__buttons .fast_order_button {
-    margin-left: 3px;
   }
   .header_informers__link i.fa-balance-scale:before {
     font-size: 24px;
@@ -1390,12 +1277,6 @@
     -webkit-justify-content: center;
     -ms-flex-pack: center;
     justify-content: center;
-  }
-  .product_preview__out_stock {
-    white-space: normal;
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.1;
   }
   .menu_switcher__heading svg {
     height: 20px;

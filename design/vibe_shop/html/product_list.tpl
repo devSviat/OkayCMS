@@ -1,137 +1,151 @@
-<!-- Product preview -->
-<div class="product_preview fn_product">
-    <div class="fn_transfer clearfix">
-        <div class="product_preview__center">
-            <div class="d-flex product_preview__image">
-                <a class="d-flex align-items-center justify-content-center" aria-label="{$product->name|escape}" href="{if $controller=='Comparison'}{$product->image->filename|resize:800:600:w}{else}{url_generator route='product' url=$product->url}{/if}" {if $controller=='Comparison'}data-fancybox="group" data-caption="{$product->name|escape}"{/if}>
-                    {if $product->image->filename}
-                        <picture>
-                            {if $settings->increased_image_size}
-                                {if $settings->support_webp}
-                                    <source type="image/webp" data-srcset="{$product->image->filename|resize:600:800|webp}" >
-                                {/if}
-                                <source data-srcset="{$product->image->filename|resize:600:800}">
-                                <img class="fn_img preview_img lazy" data-src="{$product->image->filename|resize:600:800}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$product->name|escape}" title="{$product->name|escape}"/>
-                            {else}
-                                {if $settings->support_webp}
-                                    <source type="image/webp" data-srcset="{$product->image->filename|resize:180:150|webp}" media="(max-width: 440px)" >
-                                    <source type="image/webp" data-srcset="{$product->image->filename|resize:300:150|webp}" >
-                                {/if}
-                                <source data-srcset="{$product->image->filename|resize:180:150}" media="(max-width: 440px)">
-                                <source data-srcset="{$product->image->filename|resize:300:150}">
-                                    
-                                <img class="fn_img preview_img lazy" data-src="{$product->image->filename|resize:300:150}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$product->name|escape}" title="{$product->name|escape}"/>
+{* Product card. fn_* hooks and every <option> data-* are a JavaScript contract (okay.js) *}
+{* Chips are only worth it for short labels - "Червоний", "XL", "128 Gb". A shop
+   whose variants read "16 дюймов - 155-166 см" would get four stacked 44px rows
+   and a card twice as tall as its neighbours, so those fall back to the dropdown. *}
+{assign var="vsVariantCount" value=$product->variants|count}
+{assign var="vsChipLen" value=0}
+{assign var="vsChipNamed" value=true}
+{foreach $product->variants as $v}
+    {if !$v->name}{assign var="vsChipNamed" value=false}
+    {elseif $v->name|count_characters > $vsChipLen}{assign var="vsChipLen" value=$v->name|count_characters}{/if}
+{/foreach}
+{assign var="vsChips" value=($vsVariantCount > 1 && $vsVariantCount <= 4 && $vsChipNamed && $vsChipLen <= 12)}
+<article class="vs-card fn_product">
+    <div class="fn_transfer vs-card__inner">
+        <div class="vs-card__media">
+            <a class="vs-card__media-link" aria-label="{$product->name|escape}" href="{if $controller=='Comparison'}{$product->image->filename|resize:800:600:w}{else}{url_generator route='product' url=$product->url}{/if}" {if $controller=='Comparison'}data-fancybox="group" data-caption="{$product->name|escape}"{/if}>
+                {if $product->image->filename}
+                    <picture>
+                        {if $settings->increased_image_size}
+                            {if $settings->support_webp}
+                                <source type="image/webp" data-srcset="{$product->image->filename|resize:600:800|webp}" >
                             {/if}
-                        </picture>
-                    {else}
-                        <div class="fn_img product_preview__no_image d-flex align-items-center justify-content-center" title="{$product->name|escape}">
-                            {include file="svg.tpl" svgId="no_image"}
-                        </div>
-                    {/if}
+                            <source data-srcset="{$product->image->filename|resize:600:800}">
+                            <img class="fn_img lazy" data-src="{$product->image->filename|resize:600:800}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$product->name|escape}" title="{$product->name|escape}"/>
+                        {else}
+                            {if $settings->support_webp}
+                                <source type="image/webp" data-srcset="{$product->image->filename|resize:180:150|webp}" media="(max-width: 440px)" >
+                                <source type="image/webp" data-srcset="{$product->image->filename|resize:300:150|webp}" >
+                            {/if}
+                            <source data-srcset="{$product->image->filename|resize:180:150}" media="(max-width: 440px)">
+                            <source data-srcset="{$product->image->filename|resize:300:150}">
 
-                    {if $product->featured || $product->special || ($product->variant->price>0 && $product->variant->compare_price>0 && $product->variant->compare_price>$product->variant->price)}
-                    <div class="stickers">
-                        {if $product->featured}
-                        <span class="sticker sticker--hit" data-language="product_sticker_hit">{$lang->product_sticker_hit}</span>
+                            <img class="fn_img lazy" data-src="{$product->image->filename|resize:300:150}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$product->name|escape}" title="{$product->name|escape}"/>
                         {/if}
-                        <span class="fn_discount_label {if $product->variant->price>0 && $product->variant->compare_price>0 && $product->variant->compare_price>$product->variant->price}{else} hidden{/if}">
-                            <span class="sticker sticker--discount">
-                                {if $product->variant->price>0 && $product->variant->compare_price>0 && $product->variant->compare_price>$product->variant->price}
-                                {round((($product->variant->price-$product->variant->compare_price)/$product->variant->compare_price)*100, 2)}&nbsp;%
-                                {/if}
-                            </span>
-                        </span>
-                        {if $product->special}
-                            <span class="sticker sticker--special">
-                                <img class="sticker__image" src='files/special/{$product->special}' alt='{$product->special|escape}' title="{$product->special|escape}"/>
-                            </span>
-                        {/if}
-                    </div>
-                    {/if}
-                </a>
+                    </picture>
+                {else}
+                    <span class="fn_img vs-card__no_image" title="{$product->name|escape}">
+                        {include file="svg.tpl" svgId="no_image"}
+                    </span>
+                {/if}
+            </a>
 
-                {* Wishlist *}
+            {* Badges. The discount badge is always in the DOM: okay.js reveals it by
+               removing hidden-xs-up when a discounted variant is chosen. *}
+            <div class="vs-card__badges">
+                {if $product->featured}
+                    <span class="vs-badge vs-badge--hit" data-language="product_sticker_hit">{$lang->product_sticker_hit}</span>
+                {/if}
+                <span class="fn_discount_label vs-badge vs-badge--sale{if !($product->variant->price>0 && $product->variant->compare_price>0 && $product->variant->compare_price>$product->variant->price)} hidden-xs-up{/if}">{if $product->variant->price>0 && $product->variant->compare_price>0 && $product->variant->compare_price>$product->variant->price}{round((($product->variant->price-$product->variant->compare_price)/$product->variant->compare_price)*100)}&nbsp;%{/if}</span>
+                {if $product->special}
+                    <span class="vs-badge vs-badge--special">
+                        <img src='files/special/{$product->special}' alt='{$product->special|escape}' title="{$product->special|escape}"/>
+                    </span>
+                {/if}
+            </div>
+
+            {* Wishlist and comparison. Revealed on hover, permanently visible under
+               (hover: none) - see components.css *}
+            <div class="vs-card__tools">
                 {if $controller != "WishListController"}
                     {if is_array($wishlist->ids) && in_array($product->id, $wishlist->ids)}
-                        <a href="#" data-id="{$product->id}" class="fn_wishlist wishlist_button fa fa-heart selected" title="{$lang->remove_favorite}" data-result-text="{$lang->add_favorite}"></a>
+                        <a href="#" data-id="{$product->id}" class="fn_wishlist vs-btn vs-btn--icon vs-card__tool vs-card__wish selected" title="{$lang->remove_favorite}" data-result-text="{$lang->add_favorite}">
+                            <span class="vs-card__wish_off">{include file="svg.tpl" svgId="heart"}</span>
+                            <span class="vs-card__wish_on">{include file="svg.tpl" svgId="heart_filled"}</span>
+                        </a>
                     {else}
-                        <a href="#" data-id="{$product->id}" class="fn_wishlist fa fa-heart-o wishlist_button" title="{$lang->add_favorite}" data-result-text="{$lang->remove_favorite}"></a>
+                        <a href="#" data-id="{$product->id}" class="fn_wishlist vs-btn vs-btn--icon vs-card__tool vs-card__wish" title="{$lang->add_favorite}" data-result-text="{$lang->remove_favorite}">
+                            <span class="vs-card__wish_off">{include file="svg.tpl" svgId="heart"}</span>
+                            <span class="vs-card__wish_on">{include file="svg.tpl" svgId="heart_filled"}</span>
+                        </a>
                     {/if}
-                {/if}
-                {if $controller == "WishListController"}
-                    <a href="#" class="fn_wishlist selected fa fa-times wishlist_button__remove" title="{$lang->remove_favorite}" data-id="{$product->id}"></a>
+                {else}
+                    <a href="#" data-id="{$product->id}" class="fn_wishlist vs-btn vs-btn--icon vs-card__tool vs-card__wish vs-card__wish--remove selected" title="{$lang->remove_favorite}">
+                        {include file="svg.tpl" svgId="close"}
+                    </a>
                 {/if}
 
-             </div>
-            <div class="product_preview__name">
-                {* Product name *}
-                <a class="product_preview__name_link" data-product="{$product->id}" href="{url_generator route="product" url=$product->url}">
-                    {$product->name|escape}
-                    <div class="product_preview__sku {if !$product->variant->sku} hidden{/if}">
-                        <span data-language="product_sku">{$lang->product_sku}:</span>
-                        <span class="fn_sku sku__nubmer">{$product->variant->sku|escape}</span>
-                    </div>
-                </a>
-            </div>
-            <div class="d-flex align-items-center product_preview__prices">
-                <div class="old_price {if !$product->variant->compare_price} hidden-xs-up{/if}">
-                    <span class="fn_old_price">{$product->variant->compare_price|convert}</span> <span class="currency">{$currency->sign|escape}</span>
-                </div>
-                <div class="price {if $product->variant->compare_price} price--red{/if}">
-                    <span class="fn_price">{$product->variant->price|convert}</span> <span class="currency">{$currency->sign|escape}</span>
-                </div>
+                {if $controller != "ComparisonController"}
+                    {if is_array($comparison->ids) && in_array($product->id, $comparison->ids)}
+                        <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->add_comparison}">{include file="svg.tpl" svgId="compare"}</a>
+                    {else}
+                        <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare" href="#" data-id="{$product->id}" title="{$lang->add_comparison}" data-result-text="{$lang->remove_comparison}">{include file="svg.tpl" svgId="compare"}</a>
+                    {/if}
+                {else}
+                    <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}">{include file="svg.tpl" svgId="close"}</a>
+                {/if}
             </div>
         </div>
-        <div class="product_preview__bottom">
-            <form class="fn_variants preview_form" action="{url_generator route="cart"}">
-                <div class="d-flex align-items-center justify-content-between product_preview__buttons">
-                    {if !$settings->is_preorder}
-                            {* Out of stock *}
-                            <p class="fn_not_preorder d-flex align-items-center product_preview__out_stock {if $product->variant->stock > 0} hidden-xs-up{/if}">
-                                <span data-language="out_of_stock">{$lang->out_of_stock}</span>
-                            </p>
-                    {else}
-                        {* Pre-order *}
-                        <button class="product_preview__button product_preview__button--pre_order fn_is_preorder{if $product->variant->stock > 0} hidden-xs-up{/if}" type="submit" data-language="pre_order">
-                            <span class="product_preview__button_text">{$lang->pre_order}</span>
-                        </button>
-                    {/if}
-                    {* Submit cart button *}
-                    <button class="product_preview__button product_preview__button--buy button--blick fa fa-shopping-cart fn_is_stock{if $product->variant->stock < 1} hidden-xs-up{/if}" type="submit">
-                        <span class="product_preview__button_text" data-language="add_to_cart">{$lang->add_to_cart}</span>
-                    </button>
 
-                    {fast_order_btn product=$product}
-                        
-                    {* Comparison *}
-                    {if $controller != "ComparisonController"}
-                        {if is_array($comparison->ids) && in_array($product->id, $comparison->ids)}
-                            <a class="fn_comparison comparison_button fa fa-balance-scale selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->add_comparison}"></a>
-                        {else}
-                            <a class="fn_comparison fa fa-balance-scale comparison_button" href="#" data-id="{$product->id}" title="{$lang->add_comparison}" data-result-text="{$lang->remove_comparison}"></a>
-                        {/if}
-                    {/if}
+        <div class="vs-card__body">
+            <a class="vs-card__name" data-product="{$product->id}" href="{url_generator route="product" url=$product->url}">{$product->name|escape}</a>
 
-                    {if $controller == "ComparisonController"}
-                        <a href="#" class="fn_comparison selected fa fa-times comparison_button remove_link" title="{$lang->remove_comparison}" data-id="{$product->id}"></a>
-                    {/if}
+            <div class="vs-card__sku{if !$product->variant->sku} hidden-xs-up{/if}">
+                <span data-language="product_sku">{$lang->product_sku}:</span>
+                <span class="fn_sku">{$product->variant->sku|escape}</span>
+            </div>
 
-                </div>
-                {* Product variants *}
-                <div class="product_preview__variants {if $product->variants|count == 1}hidden{/if}">
-                    <select name="variant" class="fn_variant  variant_select {if $product->variants|count == 1}hidden{else}fn_select2{/if}">
+            {if $product->annotation && $controller != "MainController"}
+                <div class="vs-card__annotation">{$product->annotation|strip_tags}</div>
+            {/if}
+
+            <div class="vs-card__price">
+                <span class="vs-card__price_current{if $product->variant->compare_price} price--red{/if}"><span class="fn_price">{$product->variant->price|convert}</span>&nbsp;<span class="vs-card__currency">{$currency->sign|escape}</span></span>
+                <span class="vs-card__price_old{if !$product->variant->compare_price} hidden-xs-up{/if}"><span class="fn_old_price">{$product->variant->compare_price|convert}</span>&nbsp;<span class="vs-card__currency">{$currency->sign|escape}</span></span>
+            </div>
+
+            {* Availability. vibe.js rewrites the class and the label from these
+               data-* strings when a variant changes, so the copy stays localised. *}
+            <p class="vs-stock{if $product->variant->stock < 1} vs-stock--out hidden-xs-up{elseif $product->variant->stock <= 5} vs-stock--low{else} vs-stock--in{/if}" data-low-at="5" data-in="{$lang->product_in_stock|escape}" data-low="{$lang->product_low_stock|escape}" data-out="{$lang->out_of_stock|escape}">
+                <span class="vs-stock__label">{if $product->variant->stock < 1}{$lang->out_of_stock}{elseif $product->variant->stock <= 5}{$lang->product_low_stock}{else}{$lang->product_in_stock}{/if}</span>
+            </p>
+
+            <form class="fn_variants vs-card__form" action="{url_generator route="cart"}">
+                {* Variants: chips up to four, select2 beyond. The <select> stays in the
+                   DOM either way - it is the value the form submits. *}
+                {if $vsChips}
+                    <div class="vs-chips" role="group" aria-label="{$lang->product_variant|escape}">
+                        {foreach $product->variants as $v}
+                            <button type="button" class="vs-chip{if $v@first} vs-chip--selected{/if}" aria-pressed="{if $v@first}true{else}false{/if}" data-variant-id="{$v->id}">{$v->name|escape}</button>
+                        {/foreach}
+                    </div>
+                {/if}
+                <div class="vs-card__variants{if $vsChips || $vsVariantCount <= 1} hidden{/if}">
+                    <select name="variant" class="fn_variant vs-card__select{if $vsVariantCount > 1 && !$vsChips} fn_select2{/if}">
                         {foreach $product->variants as $v}
                             <option value="{$v->id}" data-price="{$v->price|convert}" data-stock="{$v->stock}"{if $v->compare_price > 0} data-cprice="{$v->compare_price|convert}"{if $v->compare_price>$v->price && $v->price>0} data-discount="{round((($v->price-$v->compare_price)/$v->compare_price)*100, 2)}&nbsp;%"{/if}{/if}{if $v->sku} data-sku="{$v->sku|escape}"{/if}>{if $v->name}{$v->name|escape}{else}{$product->name|escape}{/if}</option>
                         {/foreach}
                     </select>
                     <div class="dropDownSelect2"></div>
                 </div>
-            </form>
-            {if $product->annotation && $controller != "MainController"}
-                <div class="product_preview__annotation">
-                    {$product->annotation}
+
+                <div class="vs-card__actions">
+                    {if !$settings->is_preorder}
+                        {* Out of stock *}
+                        <p class="fn_not_preorder vs-card__unavailable{if $product->variant->stock > 0} hidden-xs-up{/if}">
+                            <span data-language="out_of_stock">{$lang->out_of_stock}</span>
+                        </p>
+                    {else}
+                        {* Pre-order *}
+                        <button class="fn_is_preorder vs-btn vs-btn--secondary vs-card__cta{if $product->variant->stock > 0} hidden-xs-up{/if}" type="submit" data-language="pre_order">{$lang->pre_order}</button>
+                    {/if}
+
+                    {* Submit cart button *}
+                    <button class="fn_is_stock vs-btn vs-btn--primary vs-card__cta{if $product->variant->stock < 1} hidden-xs-up{/if}" type="submit" data-language="add_to_cart">{$lang->add_to_cart}</button>
+
+                    {fast_order_btn product=$product}
                 </div>
-            {/if}
+            </form>
         </div>
     </div>
-</div>
+</article>

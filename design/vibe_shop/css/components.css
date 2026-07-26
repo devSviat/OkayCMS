@@ -1500,6 +1500,486 @@ body.hc-nav-open {
 	height: 22px;
 }
 
+/* ----------------------------------------------------------- product card */
+/* Card host. The legacy grid pins .product_item to a fixed 340px/299px height */
+/* because the old card was itself fixed-height; a content-sized card is       */
+/* clipped by it. Task 4 rebuilds .products_list properly - these three rules  */
+/* are the minimum that lets the new card breathe until then. The swiper       */
+/* containers on the home page are excluded: Swiper owns their display.        */
+
+.products_list:not(.swiper-container) {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: stretch;
+}
+
+.product_item {
+	display: flex;
+	height: auto;
+	margin-bottom: var(--vs-space-4);
+}
+
+.product_item.swiper-slide {
+	height: auto;
+}
+
+.vs-card {
+	position: relative;
+	display: flex;
+	width: 100%;
+	padding: var(--vs-space-3);
+	background-color: var(--vs-surface);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	transition: border-color var(--vs-dur-2) var(--vs-ease), box-shadow var(--vs-dur-2) var(--vs-ease);
+}
+
+.vs-card:hover {
+	border-color: var(--vs-border);
+	box-shadow: var(--vs-shadow-2);
+}
+
+.vs-card__inner {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	min-width: 0;
+}
+
+/* A fixed ratio keeps rows from jumping as photography loads, and `contain` on */
+/* a plate is what makes uneven shop photography line up on a common baseline.  */
+
+.vs-card__media {
+	position: relative;
+	display: block;
+	aspect-ratio: 4 / 5;
+	overflow: hidden;
+	background-color: var(--vs-surface-subtle);
+	border-radius: var(--vs-radius-md);
+}
+
+.vs-card__media-link {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--vs-space-4);
+	text-decoration: none;
+}
+
+.vs-card__media picture {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/* multiply is what lets catalogue photography shot on a white sweep sit on the */
+/* plate without its white rectangle showing as a box inside a box. On a plate  */
+/* this light it darkens nothing that is not already white.                     */
+
+.vs-card__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	mix-blend-mode: multiply;
+	transition: transform var(--vs-dur-3) var(--vs-ease);
+}
+
+.vs-card:hover .vs-card__media img {
+	transform: scale(1.03);
+}
+
+.vs-card__no_image {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	color: var(--vs-border-strong);
+}
+
+.vs-card__no_image svg {
+	width: 56px;
+	height: 56px;
+}
+
+/* Badges. Rose is the only colour allowed here - it means "discount" and       */
+/* nothing else, which is what lets a single badge register on a full grid.     */
+
+.vs-card__badges {
+	position: absolute;
+	top: var(--vs-space-2);
+	left: var(--vs-space-2);
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--vs-space-1);
+	max-width: calc(100% - 60px);
+	pointer-events: none;
+}
+
+.vs-badge {
+	display: inline-flex;
+	align-items: center;
+	max-width: 100%;
+	min-height: 22px;
+	padding: 0 var(--vs-space-2);
+	overflow: hidden;
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-surface);
+	box-shadow: var(--vs-shadow-1);
+	color: var(--vs-text);
+	font-size: var(--vs-text-xs);
+	font-weight: 600;
+	line-height: 1;
+	white-space: nowrap;
+}
+
+.vs-badge--sale {
+	background-color: var(--vs-sale-500);
+	color: var(--vs-n-0);
+}
+
+.vs-badge--special {
+	min-height: 0;
+	padding: 0;
+	background-color: transparent;
+	box-shadow: none;
+}
+
+.vs-badge--special img {
+	display: block;
+	width: auto;
+	max-height: 36px;
+}
+
+/* Wishlist and comparison. Revealed on hover on pointer devices, permanently   */
+/* visible under (hover: none) - without that branch they are unreachable on a  */
+/* phone, and the phone is the design target. A picked control reads as a       */
+/* filled ink disc, so state never rests on colour alone.                       */
+
+.vs-card__tools {
+	position: absolute;
+	top: var(--vs-space-2);
+	right: var(--vs-space-2);
+	display: flex;
+	flex-direction: column;
+	gap: var(--vs-space-1);
+}
+
+.vs-card__tool {
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface);
+	box-shadow: var(--vs-shadow-1);
+	color: var(--vs-text);
+	opacity: 0;
+	transition: opacity var(--vs-dur-2) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease), color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-card:hover .vs-card__tool,
+.vs-card__tool:focus-visible,
+.vs-card__tool.selected {
+	opacity: 1;
+}
+
+.vs-card__tool:focus-visible {
+	border-radius: var(--vs-radius-full);
+}
+
+.vs-card__tool:hover {
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-card__tool.selected {
+	background-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+}
+
+.vs-card__tool.selected:hover {
+	background-color: var(--vs-ink);
+}
+
+.vs-card__wish_off,
+.vs-card__wish_on {
+	display: inline-flex;
+}
+
+.vs-card__wish_on {
+	display: none;
+}
+
+.vs-card__wish.selected .vs-card__wish_off {
+	display: none;
+}
+
+.vs-card__wish.selected .vs-card__wish_on {
+	display: inline-flex;
+}
+
+.vs-card__body {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	padding-top: var(--vs-space-3);
+}
+
+/* min-height reserves both lines so a single-line title does not shorten the   */
+/* card and break the alignment of the row it sits in.                          */
+
+.vs-card__name {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	min-height: calc(2em * var(--vs-leading-body));
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
+	line-height: var(--vs-leading-body);
+	text-decoration: none;
+}
+
+.vs-card__name:hover {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.vs-card__sku {
+	margin-top: var(--vs-space-1);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+}
+
+.vs-card__annotation {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	margin-top: var(--vs-space-2);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+	line-height: var(--vs-leading-body);
+}
+
+/* Tabular figures: without them the digits change width when okay.js rewrites  */
+/* a price on variant change and the whole row twitches.                        */
+
+.vs-card__price {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: var(--vs-space-2);
+	margin-top: var(--vs-space-3);
+	font-variant-numeric: tabular-nums;
+}
+
+.vs-card__price_current {
+	color: var(--vs-text);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+	letter-spacing: -0.01em;
+}
+
+/* --sale is the BEM name Tasks 4/5 use; .price--red is the same state as       */
+/* toggled live by okay.js on .fn_price's parent. They must stay identical.     */
+
+.vs-card__price_current--sale,
+.vs-card__price_current.price--red {
+	color: var(--vs-sale-600);
+}
+
+.vs-card__price_old {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	text-decoration: line-through;
+}
+
+.vs-card__currency {
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
+}
+
+/* Dot plus label, never the dot alone: colour must not be the only carrier.    */
+
+.vs-stock {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	margin: var(--vs-space-2) 0 0;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+}
+
+.vs-stock::before {
+	content: "";
+	flex: none;
+	width: 6px;
+	height: 6px;
+	border-radius: var(--vs-radius-full);
+	background-color: currentColor;
+}
+
+.vs-stock--in {
+	color: var(--vs-ok-600);
+}
+
+.vs-stock--low {
+	color: var(--vs-warn-600);
+}
+
+.vs-stock--out {
+	color: var(--vs-text-muted);
+}
+
+.vs-card__form {
+	margin: 0;
+	padding-top: var(--vs-space-4);
+	margin-top: auto;
+}
+
+/* Variant chips: one tap instead of open-dropdown-then-choose. The <select>    */
+/* stays in the DOM as the form value carrier and vibe.js keeps the two in      */
+/* sync, so okay.js recalculates price, old price, SKU, stock and discount.     */
+
+.vs-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--vs-space-1);
+	margin-bottom: var(--vs-space-3);
+}
+
+.vs-chip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 100%;
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0 var(--vs-space-3);
+	overflow: hidden;
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+	font-family: inherit;
+	font-size: var(--vs-text-xs);
+	line-height: 1;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: background-color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease), color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-chip:hover {
+	border-color: var(--vs-border-strong);
+}
+
+.vs-chip--selected {
+	background-color: var(--vs-ink);
+	border-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+}
+
+.vs-card__variants {
+	position: relative;
+	margin-bottom: var(--vs-space-3);
+}
+
+.vs-card__select {
+	width: 100%;
+	min-height: 44px;
+	padding: 0 var(--vs-space-3);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+}
+
+/* Beyond four variants the select2 widget is the control, so it has to reach   */
+/* the same 44px touch target and the same shape as everything else on the card. */
+
+.vs-card__variants .select2-container {
+	width: 100%;
+	max-width: 100%;
+}
+
+.vs-card__variants .select2-container .select2-selection--single {
+	height: 44px;
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+}
+
+.vs-card__variants .select2-container .select2-selection__rendered {
+	padding-left: var(--vs-space-3);
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	line-height: 42px;
+}
+
+.vs-card__variants .select2-container .select2-selection__arrow {
+	height: 42px;
+}
+
+.vs-card__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--vs-space-2);
+}
+
+.vs-card__cta {
+	flex: 1 1 120px;
+	padding: 0 var(--vs-space-3);
+}
+
+/* Availability, not a button: no hover, no pointer, no affordance to press.    */
+
+.vs-card__unavailable {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 1 1 120px;
+	min-height: 44px;
+	margin: 0;
+	padding: 0 var(--vs-space-3);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	text-align: center;
+}
+
+/* The fast-order button is rendered by the FastOrder module and cannot be      */
+/* edited from here; it still carries a font-awesome glyph in ::before, so its  */
+/* label is folded away rather than removed. Task 8 revisits it with the sprite. */
+
+.vs-card__actions .fast_order_button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 44px;
+	min-height: 44px;
+	overflow: hidden;
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+	font-size: 0;
+	text-decoration: none;
+	transition: border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-card__actions .fast_order_button:hover {
+	border-color: var(--vs-border-strong);
+}
+
+.vs-card__actions .fast_order_button::before {
+	font-size: 17px;
+}
+
 /* --------------------------------------------------------------- ≥ 576 px */
 
 @media (min-width: 576px) {
@@ -1595,6 +2075,29 @@ body.hc-nav-open {
 	}
 }
 
+/* --------------------------------------------------------------- ≤ 575 px */
+
+@media (max-width: 575px) {
+	.vs-card {
+		padding: var(--vs-space-2);
+	}
+
+	.vs-card__media-link {
+		padding: var(--vs-space-3);
+	}
+
+	.vs-card__cta {
+		flex: 1 1 60px;
+		padding: 0 var(--vs-space-2);
+	}
+
+	.vs-card__unavailable {
+		flex: 1 1 60px;
+		padding: 0 var(--vs-space-2);
+		font-size: var(--vs-text-xs);
+	}
+}
+
 /* ---------------------------------------------- touch: no hover available */
 
 @media (hover: none) {
@@ -1604,5 +2107,9 @@ body.hc-nav-open {
 
 	.vs-nav li.is-open > ul {
 		display: block;
+	}
+
+	.vs-card__tool {
+		opacity: 1;
 	}
 }
