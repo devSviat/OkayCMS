@@ -624,6 +624,10 @@
 }
 
 /* ---------------------------------------------------- catalogue mega menu */
+/* One pane, not a two-pane fly-out: every root category and its children    */
+/* are laid out in balanced columns, so the drop-down is full the moment it  */
+/* opens and its height is its content's height - it can never render as an  */
+/* empty plane waiting for a hover, and every link is one tap away.          */
 
 .vs-catalog {
 	position: absolute;
@@ -632,7 +636,9 @@
 	right: var(--vs-space-2);
 	z-index: var(--vs-z-dropdown);
 	display: none;
-	overflow: hidden;
+	max-height: 70vh;
+	overflow-y: auto;
+	padding: var(--vs-space-6) var(--vs-space-7);
 	background-color: var(--vs-surface);
 	border: 1px solid var(--vs-hairline);
 	border-radius: var(--vs-radius-lg);
@@ -640,39 +646,46 @@
 }
 
 .vs-catalog__list {
-	width: 320px;
-	min-height: 320px;
-	max-height: 70vh;
-	overflow-y: auto;
+	columns: 250px;
+	column-gap: var(--vs-space-7);
 	margin: 0;
-	padding: var(--vs-space-3);
+	padding: 0;
 	list-style: none;
 }
 
 .vs-catalog__item {
-	position: static;
 	margin: 0;
+}
+
+/* Keep a root category and its children in one column. */
+
+.vs-catalog__item--1 {
+	-webkit-column-break-inside: avoid;
+	break-inside: avoid;
+	padding-bottom: var(--vs-space-5);
 }
 
 .vs-catalog__link {
 	display: flex;
 	align-items: center;
 	gap: var(--vs-space-3);
+	min-height: 44px;
 	color: var(--vs-text);
 	text-decoration: none;
 	transition: background-color var(--vs-dur-1) var(--vs-ease), color var(--vs-dur-1) var(--vs-ease);
 }
 
 .vs-catalog__link--1 {
-	min-height: 44px;
-	padding: 0 var(--vs-space-3);
+	margin-left: calc(var(--vs-space-2) * -1);
+	padding: 0 var(--vs-space-2);
 	border-radius: var(--vs-radius-sm);
+	font-family: var(--vs-font-display);
 	font-size: var(--vs-text-base);
+	font-weight: 600;
+	color: var(--vs-heading);
 }
 
-.vs-catalog__item:hover > .vs-catalog__link--1,
-.vs-catalog__item:focus-within > .vs-catalog__link--1,
-.vs-catalog__item.is-open > .vs-catalog__link--1,
+.vs-catalog__link--1:hover,
 .vs-catalog__link--1.is-current {
 	background-color: var(--vs-surface-subtle);
 }
@@ -698,80 +711,43 @@
 	white-space: nowrap;
 }
 
-.vs-catalog__chevron {
-	display: inline-flex;
-	margin-left: auto;
-	color: var(--vs-text-muted);
-	transform: rotate(-90deg);
-}
-
-.vs-catalog__chevron svg {
-	width: 16px;
-	height: 16px;
-}
-
-.vs-catalog__panel {
-	position: absolute;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 320px;
-	display: none;
-	overflow-y: auto;
-	padding: var(--vs-space-6) var(--vs-space-7);
-	border-left: 1px solid var(--vs-hairline);
-	background-color: var(--vs-surface);
-}
-
-.vs-catalog__item:hover > .vs-catalog__panel,
-.vs-catalog__item:focus-within > .vs-catalog__panel,
-.vs-catalog__item.is-open > .vs-catalog__panel {
-	display: block;
-}
-
-.vs-catalog__cols {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-	gap: var(--vs-space-6) var(--vs-space-7);
-	align-content: start;
+.vs-catalog__sub {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-.vs-catalog__cols > .vs-catalog__item {
-	display: block;
-	margin: 0;
-}
-
 .vs-catalog__link--2 {
-	padding: var(--vs-space-1) 0;
-	font-family: var(--vs-font-display);
-	font-size: var(--vs-text-base);
-	font-weight: 600;
-	color: var(--vs-heading);
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
 }
 
-.vs-catalog__link--2:hover {
-	text-decoration: underline;
-	text-underline-offset: 0.2em;
-}
+/* The hairline ties a leaf list to its parent, so the 44px rows read as one */
+/* group instead of floating apart.                                          */
 
 .vs-catalog__leaf {
-	margin: var(--vs-space-1) 0 0;
-	padding: 0;
+	margin: 0 0 0 var(--vs-space-2);
+	padding-left: var(--vs-space-4);
+	border-left: 1px solid var(--vs-hairline);
 	list-style: none;
 }
 
 .vs-catalog__link--3 {
-	min-height: 34px;
-	padding: var(--vs-space-1) 0;
 	font-size: var(--vs-text-sm);
 	color: var(--vs-text-muted);
 }
 
+.vs-catalog__link--2:hover,
 .vs-catalog__link--3:hover {
-	color: var(--vs-text);
+	color: var(--vs-heading);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.vs-catalog__link--2.is-current,
+.vs-catalog__link--3.is-current {
+	color: var(--vs-heading);
+	font-weight: 600;
 }
 
 .hover_scroll {
@@ -806,6 +782,12 @@
 }
 
 /* ------------------------------------------------------- sheet primitives */
+/* WARNING for Tasks 4-5 and anyone else reusing .vs-sheet: put the sheet    */
+/* and its backdrop as direct children of <body>, never inside .vs-header.   */
+/* .vs-header sets position: relative + z-index: var(--vs-z-sticky), which   */
+/* opens a stacking context: a nested sheet would be clamped to the header's */
+/* z-index and paint UNDER page content, whatever --vs-z-modal says.         */
+/* The same applies to any other positioned, z-indexed ancestor.             */
 
 .vs-sheet {
 	position: fixed;
@@ -1620,12 +1602,7 @@ body.hc-nav-open {
 		display: none;
 	}
 
-	.vs-catalog__item:hover > .vs-catalog__panel {
-		display: none;
-	}
-
-	.vs-nav li.is-open > ul,
-	.vs-catalog__item.is-open > .vs-catalog__panel {
+	.vs-nav li.is-open > ul {
 		display: block;
 	}
 }

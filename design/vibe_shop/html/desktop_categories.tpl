@@ -4,14 +4,14 @@
         {if $level == 1}
             <ul class="fn_category_scroll vs-catalog__list">
         {elseif $level == 2}
-            <ul class="vs-catalog__cols">
+            <ul class="vs-catalog__sub">
         {else}
             <ul class="vs-catalog__leaf">
         {/if}
         {foreach $categories as $c}
             {if $c->visible && ($c->has_products || $settings->show_empty_categories)}
                 {$hasChild = ($c->subcategories && $c->count_children_visible && $level < 3)}
-                <li class="vs-catalog__item{if $hasChild && $level == 1} vs-has-children{/if}">
+                <li class="vs-catalog__item vs-catalog__item--{$level}">
                     <a class="vs-catalog__link vs-catalog__link--{$level}{if $category->id == $c->id} is-current{/if}" href="{url_generator route='category' url=$c->url}" data-category="{$c->id}">
                         {if $level == 1 && $c->image}
                             {if strtolower(pathinfo($c->image, $smarty.const.PATHINFO_EXTENSION)) == 'svg'}
@@ -21,14 +21,9 @@
                             {/if}
                         {/if}
                         <span class="vs-catalog__name">{$c->name|escape}</span>
-                        {if $hasChild && $level == 1}
-                            <span class="vs-catalog__chevron">{include file='svg.tpl' svgId='chevron'}</span>
-                        {/if}
                     </a>
                     {if $hasChild}
-                        {if $level == 1}<div class="vs-catalog__panel">{/if}
                         {categories_tree3 categories=$c->subcategories level=$level + 1}
-                        {if $level == 1}</div>{/if}
                     {/if}
                 </li>
             {/if}
