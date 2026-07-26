@@ -305,6 +305,7 @@ $services = [
         'arguments' => [
             new SR(Settings::class),
             new SR(Request::class),
+            new SR(LoggerInterface::class),
         ],
     ],
     Managers::class => [

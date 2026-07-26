@@ -59,13 +59,13 @@
                                     </div>
                                 {else}
                                     <h1 class="auth_heading heading-divider">Вход в панель управления</h1>
-                                    <p class="auth_heading_promo">{$smarty.server.HTTP_HOST}</p>
+                                    <p class="auth_heading_promo">{$smarty.server.HTTP_HOST|escape}</p>
 
                                     <div class="input-group mb-1">
                                         <span class="input-group-addon">
                                             {include file='svg_icon.tpl' svgId='user_icon'}
                                         </span>
-                                        <input name="login" value="{$login}" type="text" class="form-control" autofocus="" tabindex="1" placeholder="Введите логин">
+                                        <input name="login" value="{$login|escape}" type="text" class="form-control" autofocus="" tabindex="1" placeholder="Введите логин">
                                     </div>
                                     <div class="input-group mb-1">
                                         <span class="input-group-addon">
