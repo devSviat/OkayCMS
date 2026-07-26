@@ -72,7 +72,7 @@ class ManagersEntity extends Entity
         $manager = (object)$manager;
         if (!empty($manager->password)) {
             // захешировать пароль
-            $manager->password = $managersCore->cryptApr1Md5($manager->password);
+            $manager->password = $managersCore->hashPassword($manager->password);
         }
 
         if (!empty($manager->menu) && is_array($manager->menu)) {
@@ -100,7 +100,7 @@ class ManagersEntity extends Entity
         $manager = (object)$manager;
         if (!empty($manager->password)) {
             // захешировать пароль
-            $manager->password = $managersCore->cryptApr1Md5($manager->password);
+            $manager->password = $managersCore->hashPassword($manager->password);
         }
 
         if (!empty($manager->menu) && is_array($manager->menu)) {

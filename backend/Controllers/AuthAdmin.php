@@ -91,6 +91,14 @@ class AuthAdmin extends IndexAdmin
                 } elseif ($managers->checkPassword($pass, $manager->password)) {
                     /*Входим в админку*/
                     $_SESSION['admin'] = $manager->login;
+
+                    // Старый формат хеша (APR1/MD5) заменяем на актуальный.
+                    // ManagersEntity::update() хеширует пароль сам, поэтому
+                    // передаём его в открытом виде.
+                    if ($managers->needsPasswordRehash($manager->password)) {
+                        $managersEntity->update((int)$manager->id, ['password' => $pass]);
+                    }
+
                     $managersEntity->update((int)$manager->id, ['cnt_try'=>0, 'last_try'=>null]);
                     $managersEntity->updateLastActivityDate($manager->id);
                     $loginRedirectResource = (!empty($_SESSION['before_auth_url']) ? $_SESSION['before_auth_url'] : $this->request->getBasePathWithDomain() . '/backend/index.php');
