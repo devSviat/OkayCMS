@@ -6,6 +6,7 @@ namespace Okay\Admin\Controllers;
 
 use Okay\Core\Modules\LicenseModulesTemplates;
 use Okay\Entities\ManagersEntity;
+use Okay\Core\Security\SafeFileName;
 
 class ThemeAdmin extends IndexAdmin
 {
@@ -31,7 +32,14 @@ class ThemeAdmin extends IndexAdmin
             $new_names = $this->request->post('new_name');
             if (is_array($old_names)) {
                 foreach ($old_names as $i=>$old_name) {
-                    $new_name = preg_replace("/[^a-zA-Z0-9\-_]/", "", $new_names[$i]);
+                    $new_name = SafeFileName::themeName($new_names[$i]);
+
+                    // $old_name склеювався з themes_dir без жодної перевірки, тому
+                    // "../.." виводив rename() за межі design/.
+                    $old_name = SafeFileName::themeName($old_name);
+                    if ($old_name === '' || $new_name === '') {
+                        continue;
+                    }
 
                     if (is_writable($this->themes_dir) && is_dir($this->themes_dir.$old_name) && !is_file($this->themes_dir.$new_name)&& !is_dir($this->themes_dir.$new_name)) {
                         rename($this->themes_dir.$old_name, $this->themes_dir.$new_name);
@@ -47,7 +55,14 @@ class ThemeAdmin extends IndexAdmin
             }
 
             $action = $this->request->post('action');
-            $action_theme  = $this->request->post('theme');
+            // Значення йде в dirDelete($themes_dir . $action_theme) — рекурсивне
+            // видалення. Без фільтра "../.." стирало каталоги поза design/.
+            $action_theme  = SafeFileName::themeName($this->request->post('theme'));
+
+            // Порожнє ім'я дало б dirDelete('design/') — тобто знесло б усі теми.
+            if ($action_theme === '') {
+                $action = null;
+            }
 
             switch ($action) {
                 case 'set_main_theme': {

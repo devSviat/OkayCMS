@@ -23,57 +23,67 @@ class CallbackController extends AbstractController
         
         $data = json_decode(file_get_contents("php://input"));
 
-        if (empty($data->external_id)) {
+        if (!is_object($data) || empty($data->external_id) || !is_scalar($data->external_id)) {
             $this->response->setContent("Wrong data")->setStatusCode(400);
             $this->response->sendContent();
             exit;
         }
 
-        $orderId = $data->external_id;
+        $orderId = (string) $data->external_id;
         $order = $ordersEntity->get((int) $orderId);
         if (empty($order)) {
             $postfix = \Okay\Modules\OkayCMS\RozetkaPay\Models\Gateway\CreatePayment::POSTFIX_FOR_TEST;
             $orderId = str_replace($postfix, '', $orderId);
             $order = $ordersEntity->get((int) $orderId);
             if(empty($order)) {
-                $logger->warning("RozetkaPay notice: 'Order not found'. Order №{$orderId}");
+                // Значення з запиту — приводимо до int, щоб воно не потрапило в лог як є.
+                $logger->warning("RozetkaPay notice: 'Order not found'. Order №" . (int) $orderId);
                 $this->response->setContent("Order not found")->setStatusCode(400);
                 $this->response->sendContent();
                 exit;
             }
         }
 
-        $createDetails = $this->getPaymentDetails((int)$orderId, $queryFactory, OrdersEntity::getTable());
+        $orderId = (int) $order->id;
 
-        if(!empty($createDetails)
-            && !isset($createDetails->details)
-            && !isset($createDetails->details->amount)
-        ) {
+        $createDetails = $this->getPaymentDetails($orderId, $queryFactory, OrdersEntity::getTable());
+
+        // Прив'язка колбека до конкретного платежу тримається виключно на $createDetails->id.
+        // Без нього порівняння нижче зводилось до "null !== null", тому вимагаємо його явно.
+        if (empty($createDetails) || !is_object($createDetails) || !isset($createDetails->id)) {
+            $logger->warning("RozetkaPay notice: 'Wrong CreatePayment data in order entity'. Order №{$orderId}");
             $this->response->setContent("Wrong CreatePayment data in order entity")->setStatusCode(400);
             $this->response->sendContent();
             exit;
         }
 
         $method = $paymentsEntity->get((int) $order->payment_method_id);
-        if (empty($method) && $method->module !== "OkayCMS/RozetkaPay") {
+        if (empty($method) || $method->module !== "OkayCMS/RozetkaPay") {
             $logger->warning("RozetkaPay notice: 'Invalid payment method'. Order №{$orderId}");
             $this->response->setContent("Invalid payment method")->setStatusCode(400);
             $this->response->sendContent();
             exit;
         }
 
-        $amount = $data->details->amount;
-        $w4pAmount = round($amount, 2);
-        $orderAmount = $money->convert($order->total_price, $method->currency_id, false, false, 2);
-        if ($orderAmount != $w4pAmount) {
+        if (!isset($data->id) || !is_scalar($data->id) || !hash_equals((string) $createDetails->id, (string) $data->id)) {
+            $logger->warning("RozetkaPay notice: 'Invalid request id'. Order №{$orderId}");
+            $this->response->setContent("Invalid request id")->setStatusCode(400);
+            $this->response->sendContent();
+            exit;
+        }
+
+        if (!isset($data->details->amount) || !is_numeric($data->details->amount)) {
             $logger->warning("RozetkaPay notice: 'Invalid total order price'. Order №{$orderId}");
             $this->response->setContent("Invalid total order price")->setStatusCode(400);
             $this->response->sendContent();
             exit;
         }
 
-        if($data->id !== $createDetails->id) {
-            $logger->warning("RozetkaPay notice: 'Invalid request id'. Order №{$orderId}");
+        $amount = $data->details->amount;
+        $w4pAmount = round((float) $amount, 2);
+        $orderAmount = $money->convert($order->total_price, $method->currency_id, false, false, 2);
+        if ($orderAmount != $w4pAmount) {
+            $logger->warning("RozetkaPay notice: 'Invalid total order price'. Order №{$orderId}");
             $this->response->setContent("Invalid total order price")->setStatusCode(400);
             $this->response->sendContent();
             exit;
@@ -107,6 +117,10 @@ class CallbackController extends AbstractController
             ->where('id=:id')
             ->bindValue('id', $id)
             ->results('payment_details');
+
+        if (empty($data[0])) {
+            return null;
+        }
 
         return json_decode($data[0]);
     }

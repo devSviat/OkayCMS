@@ -17,7 +17,9 @@ class HttpCurl implements ClientInterface
         CURLOPT_CONNECTTIMEOUT => 60,
         CURLOPT_USERAGENT => 'rozetkapay-php-sdk',
         CURLOPT_SSL_VERIFYHOST => 2,
-        CURLOPT_SSL_VERIFYPEER => 0,
+        // Ключ мерчанта йде в заголовку Authorization: без перевірки сертифіката
+        // будь-який MITM на шляху до api.rozetkapay.com читає його відкритим текстом.
+        CURLOPT_SSL_VERIFYPEER => 2,
         CURLOPT_TIMEOUT => 60
     ];
 

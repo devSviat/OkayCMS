@@ -39,7 +39,15 @@ class AutoDeployAdmin extends IndexAdmin
     
     public function saveChannel()
     {
-        $this->settings->set('deploy_build_channel', $this->request->post('channel'));
+        // Значення осідає в налаштуваннях і звідти йде в командний рядок deploy'я,
+        // тому приймаємо тільки канали, які модуль реально вміє збирати.
+        $channel = $this->request->post('channel');
+        if (!in_array($channel, DeployHelper::BUILD_CHANNELS, true)) {
+            $this->response->setContent(false, RESPONSE_JSON);
+            return;
+        }
+
+        $this->settings->set('deploy_build_channel', $channel);
         $this->response->setContent(true, RESPONSE_JSON);
     }
     
@@ -51,9 +59,11 @@ class AutoDeployAdmin extends IndexAdmin
     
     public function updateProject(DeployHelper $deployHelper)
     {
-        $channel = $this->settings->get('deploy_build_channel');
-        if ($this->request->post('update') && $channel) {
-            $deployHelper->updateProject($channel);
+        // Через getBranch(), а не напряму з налаштувань: значення могло осісти там
+        // до того, як saveChannel() почав його перевіряти.
+        $branch = $deployHelper->getBranch($this->settings->get('deploy_build_channel'));
+        if ($this->request->post('update') && $branch) {
+            $deployHelper->updateProject($branch);
         }
         Response::redirectTo(Request::getDomainWithProtocol() . $this->request->url(['controller' => 'OkayCMS.AutoDeploy.AutoDeployAdmin']));
     }

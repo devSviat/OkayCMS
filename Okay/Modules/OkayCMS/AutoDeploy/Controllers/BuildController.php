@@ -18,8 +18,10 @@ class BuildController
         if (empty($currentBuildKey)) {
             $settings->set('deploy_last_status_text', "Empty deploy build key. Deploy is stopped!");
             return false;
-        } elseif ($buildKey != $currentBuildKey) {
-            $settings->set('deploy_last_status_text', "Build key \"{$buildKey}\" is wrong. Deploy is stopped!");
+        } elseif (!is_string($buildKey) || !hash_equals((string) $currentBuildKey, $buildKey)) {
+            // Було нестроге !=, яке для двох "числових" рядків (0e...) дає рівність,
+            // і до того ж порівнювало ключ не за сталий час.
+            $settings->set('deploy_last_status_text', "Build key is wrong. Deploy is stopped!");
             return false;
         }
 
