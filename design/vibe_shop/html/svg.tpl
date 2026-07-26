@@ -738,4 +738,77 @@ c-6.096,0-11.056-4.96-11.056-11.056c0-6.112,4.96-11.08,11.056-11.08c6.104,0,11.0
 C259.193,245.402,254.225,250.362,248.129,250.362z"/>
     </svg>
 {/if}
+{* --- vibe_shop chrome set: 24x24, stroked, optically matched --- *}
+{if $svgId == "chevron"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M5 9l7 7 7-7"/>
+    </svg>
+{/if}
+{if $svgId == "close"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M6 6l12 12M18 6L6 18"/>
+    </svg>
+{/if}
+{if $svgId == "heart"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M12 20.3l-1.3-1.2C5.6 14.4 2.5 11.6 2.5 8.1 2.5 5.3 4.7 3.1 7.5 3.1c1.6 0 3.1.7 4.1 1.9l0.4 0.5 0.4-0.5c1-1.2 2.5-1.9 4.1-1.9 2.8 0 5 2.2 5 5 0 3.5-3.1 6.3-8.2 11z"/>
+    </svg>
+{/if}
+{if $svgId == "heart_filled"}
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M12 20.3l-1.3-1.2C5.6 14.4 2.5 11.6 2.5 8.1 2.5 5.3 4.7 3.1 7.5 3.1c1.6 0 3.1.7 4.1 1.9l0.4 0.5 0.4-0.5c1-1.2 2.5-1.9 4.1-1.9 2.8 0 5 2.2 5 5 0 3.5-3.1 6.3-8.2 11z"/>
+    </svg>
+{/if}
+{if $svgId == "compare"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M6 20V11M12 20V4M18 20v-6"/>
+    </svg>
+{/if}
+{if $svgId == "search"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <circle cx="11" cy="11" r="6.5"/>
+        <path d="M20 20l-4.3-4.3"/>
+    </svg>
+{/if}
+{if $svgId == "burger"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+    </svg>
+{/if}
+{if $svgId == "cart"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M2.5 3.5h2.2l2.3 11.2h10.4l2.1-8.2H6.2"/>
+        <circle cx="9" cy="19.5" r="1.6"/>
+        <circle cx="17" cy="19.5" r="1.6"/>
+    </svg>
+{/if}
+{if $svgId == "user"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="8" r="3.8"/>
+        <path d="M4.5 20.2c1.2-3.6 4-5.4 7.5-5.4s6.3 1.8 7.5 5.4"/>
+    </svg>
+{/if}
+{if $svgId == "phone"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M8.4 3.6l2 3.6-2 1.8c.9 2.2 2.4 3.7 4.6 4.6l1.8-2 3.6 2-.6 3.3c-.2.8-.9 1.4-1.8 1.3C10.2 17.7 6.3 13.8 4.8 7c-.2-.9.4-1.7 1.3-1.8z"/>
+    </svg>
+{/if}
+{if $svgId == "mail"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <rect x="2.8" y="5" width="18.4" height="14" rx="2"/>
+        <path d="M3.5 6.5L12 13l8.5-6.5"/>
+    </svg>
+{/if}
+{if $svgId == "clock"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 6.8V12l3.4 2.2"/>
+    </svg>
+{/if}
+{if $svgId == "headset"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M4 15v-3a8 8 0 0 1 16 0v3"/>
+        <path d="M4 14h2.2v5H5.6A1.6 1.6 0 0 1 4 17.4zM20 14h-2.2v5h.6A1.6 1.6 0 0 0 20 17.4z"/>
+    </svg>
+{/if}
 {/strip}

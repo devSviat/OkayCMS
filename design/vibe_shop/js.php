@@ -21,6 +21,7 @@ return [
     (new Js('readmore.min.js'))->setPosition('footer'),
     (new Js('mobile_menu.js'))->setPosition('footer'),
     (new Js('sticky.min.js'))->setPosition('footer'),
+    (new Js('vibe.js'))->setPosition('footer'),
     //(new Js('jquery.autocomplete-min.js'))->setPosition('footer'),
     //(new Js('jquery.validate.min.js'))->setPosition('footer'),
 ];

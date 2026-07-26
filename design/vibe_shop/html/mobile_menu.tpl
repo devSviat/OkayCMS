@@ -9,14 +9,14 @@
         </div>
         <div class="d-flex align-items-center f_col">
             {if $user}
-                <a class="account__link d-inline-flex align-items-center icon icon-perm-identity" href="{url_generator route="user"}">
-                <span class="account__text" data-language="index_account">{$lang->index_account} </span>
-                {$user->name|escape}
-            </a>
+                <a class="account__link" href="{url_generator route="user"}">
+                    {include file="svg.tpl" svgId="user"}
+                    <span>{$user->name|escape}</span>
+                </a>
             {else}
-                <a class="account__link d-inline-flex align-items-center icon icon-perm-identity" href="{url_generator route='login'}"  title="{$lang->index_login}">
-                <span class="account__text" data-language="index_account">{$lang->index_account} </span>
-                <span class="account__login" data-language="index_login">{$lang->index_login}</span>
+                <a class="account__link" rel="nofollow" href="{url_generator route='login'}"  title="{$lang->index_login}">
+                    {include file="svg.tpl" svgId="user"}
+                    <span class="account__login" data-language="index_login">{$lang->index_login}</span>
                 </a>
             {/if}
         </div>
@@ -71,6 +71,18 @@
         {/if}
         {/function}
         {categories_tree4 categories=$categories level=1}
+    </li>
+    <li>
+        <a href="{url_generator route='wishlist'}">
+            {include file="svg.tpl" svgId="heart"}
+            <span data-language="wishlist_header">{$lang->wishlist_header}</span>
+        </a>
+    </li>
+    <li>
+        <a href="{url_generator route='comparison'}">
+            {include file="svg.tpl" svgId="compare"}
+            <span data-language="comparison_header">{$lang->comparison_header}</span>
+        </a>
     </li>
 </ul>
 
@@ -134,9 +146,10 @@
 
 {if $settings->site_phones}
 {foreach $settings->site_phones as $phone}
-<ul>
+<ul class="contact-nav">
     <li>
-        <a class="phone icon icon-phone-callback" href="tel:{preg_replace('~[^0-9\+]~', '', $phone)}">
+        <a class="phone" href="tel:{preg_replace('~[^0-9\+]~', '', $phone)}">
+            {include file="svg.tpl" svgId="phone"}
             <span>{$phone|escape}</span>
         </a>
     </li>
@@ -145,9 +158,10 @@
 {/foreach}
 {/if}
 {if $settings->site_email}
-<ul>
+<ul class="contact-nav">
     <li>
-        <a class="email icon icon-mail-outline" href="mailto:{$settings->site_email|escape}">
+        <a class="email" href="mailto:{$settings->site_email|escape}">
+            {include file="svg.tpl" svgId="mail"}
             <span>{$settings->site_email|escape}</span>
         </a>
     </li>
@@ -156,16 +170,13 @@
 
 
 
-<ul class="bottom-nav social">
-    {*Домен некоторых соц. сетей не соответствует стилям font-awesome, для них сделаны эти алиасы*}
-    {$social_aliases.ok = 'odnoklassniki'}
-
+<ul class="bottom-nav">
     {foreach $settings->site_social_links as $social_link}
     {$social_domain = preg_replace('~(https?://)?(www\.)?([^\.]+)?\..*~', '$3', $social_link)}
-    {if isset($social_aliases.$social_domain) || $social_domain}
-    <li class="">
-        <a class="{if isset($social_aliases.$social_domain)}{$social_aliases.$social_domain}{else}{$social_domain}{/if}" href="{if !preg_match('~^https?://.*$~', $social_link)}https://{/if}{$social_link|escape}" target="_blank" title="{$social_domain}">
-            <i class="fa fa-{if isset($social_aliases.$social_domain)}{$social_aliases.$social_domain}{else}{$social_domain}{/if}"></i>
+    {if $social_domain}
+    <li>
+        <a href="{if !preg_match('~^https?://.*$~', $social_link)}https://{/if}{$social_link|escape}" target="_blank" rel="noreferrer" title="{$social_domain|escape}">
+            <span>{$social_domain|escape}</span>
         </a>
     </li>
     {/if}

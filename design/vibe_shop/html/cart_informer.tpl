@@ -1,15 +1,11 @@
 <!-- Cart informer (given by Ajax) -->
-{* If you want to display the total price- uncomment the code*}
 {if $cart->isEmpty === false}
-    <a href="{url_generator route='cart'}" class="header_informers__link d-flex align-items-center">
-        <i class="d-flex align-items-center fa fa-shopping-cart"></i>
-        <span class="cart_counter">{$cart->total_products}</span>
-        {*<span class="cart_total">{($cart->total_price)|convert} {$currency->sign|escape}</span>*}
+    <a href="{url_generator route='cart'}" class="vs-informer vs-informer--cart" title="{$lang->cart_header|escape}" aria-label="{$lang->cart_header|escape}">
+        {include file="svg.tpl" svgId="cart"}
+        <span class="vs-informer__count cart_counter vs-tabular">{$cart->total_products}</span>
     </a>
 {else}
-    <div class="header_informers__link d-flex align-items-center">
-        <i class="d-flex align-items-center fa fa-shopping-cart"></i>
-        <span class="cart_counter">{$cart->total_products}</span>
-        {*<span class="cart_total">{($cart->total_price)|convert} {$currency->sign|escape}</span>*}
+    <div class="vs-informer vs-informer--cart vs-informer--idle" title="{$lang->cart_header|escape}">
+        {include file="svg.tpl" svgId="cart"}
     </div>
 {/if}
