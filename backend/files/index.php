@@ -2,6 +2,9 @@
 
 use Okay\Core\Response;
 use Okay\Core\EntityFactory;
+use Okay\Core\Security\BackendFileDownloadPolicy;
+use Okay\Core\Security\Filemanager\PathResolver;
+use Okay\Core\Security\SessionNames;
 use Okay\Entities\ManagersEntity;
 use Okay\Core\Modules\Modules;
 
@@ -9,7 +12,7 @@ chdir('../..');
 
 require_once('vendor/autoload.php');
 
-\Okay\Core\Security\SessionNames::startBackend();
+SessionNames::startBackend();
 
 $DI = include 'Okay/Core/config/container.php';
 
@@ -27,22 +30,33 @@ $entityFactory = $DI->get(EntityFactory::class);
 
 /** @var ManagersEntity $managersEntity */
 $managersEntity = $entityFactory->get(ManagersEntity::class);
-$manager = $managersEntity->get($_SESSION['admin']);
+$manager = empty($_SESSION['admin']) ? null : $managersEntity->get($_SESSION['admin']);
 
 if (empty($manager)) {
     exit();
 }
 
-$file = $_GET['file'];
-$file = preg_replace("/[^A-Za-z0-9_]+/", "", $file);
-$folder = $_GET['folder'];
-$ext = $_GET['ext'];
-if (empty($file) || empty($folder) || empty($ext)) {
+$file   = isset($_GET['file']) && is_string($_GET['file']) ? $_GET['file'] : '';
+$folder = isset($_GET['folder']) && is_string($_GET['folder']) ? $_GET['folder'] : '';
+$ext    = isset($_GET['ext']) && is_string($_GET['ext']) ? $_GET['ext'] : '';
+
+// Раньше фильтровалось только имя файла, а folder и ext приходили из GET
+// как есть — folder выводил за пределы backend/files/.
+$requiredPermission = (new BackendFileDownloadPolicy())->permissionFor($folder, $file, $ext);
+
+if ($requiredPermission === null) {
     exit();
 }
 
-$file = __DIR__.'/'.$folder.'/'.$file.'.'.$ext;
-if (!file_exists($file)) {
+// Скачивание привязано к конкретному праву, а не просто к наличию сессии.
+if (empty($manager->permissions) || !in_array($requiredPermission, (array)$manager->permissions, true)) {
+    exit();
+}
+
+$ext = strtolower($ext);
+$file = (new PathResolver(__DIR__))->resolve($folder . '/' . $file . '.' . $ext);
+
+if ($file === null || !is_file($file)) {
     exit();
 }
 
