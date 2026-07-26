@@ -94,18 +94,37 @@ nested cards. See `PRODUCT.md` → Anti-references.
 grep -oh "fn_[a-z_0-9]*" design/vibe_shop/html/*.tpl | sort -u > /tmp/vibe-fn-now.txt
 comm -23 /tmp/vibe-fn-baseline.txt /tmp/vibe-fn-now.txt   # MUST be empty
 
-# 2. compiler landmines (C1, C2)
-grep -nE '[^ \t].*;.*/\*' design/vibe_shop/css/*.css                    # MUST be empty (C1)
-grep -n 'var(--okay-' design/vibe_shop/css/*.css | grep -v '^design/vibe_shop/css/tokens.css'   # MUST be empty (C2)
+# 2. compiler landmines (C1, C2) — checked only in the files we author.
+#    The legacy sheets already satisfy C2 and would produce ~250 false hits.
+OURS="design/vibe_shop/css/tokens.css design/vibe_shop/css/base.css design/vibe_shop/css/components.css"
+grep -nE '[^ \t].*;.*/\*' $OURS                                         # MUST be empty (C1)
+grep -n 'var(--okay-' $OURS | grep -v 'tokens.css:'                     # MUST be empty (C2)
 grep -nE 'var\(--okay-[a-z-]+ *,' design/vibe_shop/css/tokens.css       # MUST be empty (C2, no fallbacks)
 
 # 3. no raw values leaked into components (C10)
 grep -nE '#[0-9a-fA-F]{3,8}\b' design/vibe_shop/css/components.css design/vibe_shop/css/base.css   # MUST be empty
 ```
 
-Then in the browser, via chrome-devtools MCP: `navigate_page` to the task's pages,
-`resize_page` to 375×812 and 1440×900, `take_screenshot` at both, and `list_console_messages`
-to confirm no new errors.
+From Task 8 onward add `design/vibe_shop/css/vendor.css` to `$OURS`. Legacy sheets are exempt
+from C1/C2 review while they exist — they already comply, and they are deleted in Task 8.
+
+Then in the browser. **Do not use the chrome-devtools MCP tools** — they are broken on this
+machine (the server looks for Chrome at `/opt/google/chrome/chrome`, which does not exist here;
+Chrome is installed as a flatpak). A subagent that tries them concludes "no browser available"
+and silently degrades the task to guesswork, which for design work is worthless.
+
+Use the project's own driver instead:
+
+```bash
+node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs \
+  --url http://localhost/ --width 1440 --height 900 --out /tmp/desktop.png \
+  --eval "JSON.stringify({bg: getComputedStyle(document.body).backgroundColor})"
+```
+
+Flags: `--url --width --height --out --full --eval --wait`. It prints JSON with HTTP status,
+console messages, page errors and the eval result, and writes a PNG you can Read. Run every page
+in the task's scope at **375×812 and 1440×900**, look at the screenshots, and confirm
+`consoleErrorCount` is 0 and `pageErrors` is empty at both.
 
 ---
 
@@ -532,7 +551,7 @@ Two failures taught this, both worth stating so nobody re-derives them:
 
 - [ ] **Step 9: Verify in the browser**
 
-Run the whole verification loop from Global Constraints. Then, via chrome-devtools:
+Run the whole verification loop from Global Constraints, including the browser driver.
 `navigate_page` to `http://localhost/`, `resize_page` 1440×900 and 375×812, `take_screenshot`
 at both, `list_console_messages`.
 
