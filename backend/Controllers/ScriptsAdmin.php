@@ -4,6 +4,7 @@
 namespace Okay\Admin\Controllers;
 
 
+use Okay\Core\Security\SafeFileName;
 use Okay\Core\TemplateConfig\FrontTemplateConfig;
 
 class ScriptsAdmin extends IndexAdmin
@@ -27,7 +28,9 @@ class ScriptsAdmin extends IndexAdmin
         }
 
         // Текущий скрипт
-        $script_file = $this->request->get('file');
+        // Перевірялось лише розширення, тому "../../../../other/app.js"
+        // читало .js з будь-якого місця на диску.
+        $script_file = SafeFileName::basename($this->request->get('file'));
 
         if (!empty($script_file) && pathinfo($script_file, PATHINFO_EXTENSION) != 'js') {
             exit();

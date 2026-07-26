@@ -4,6 +4,7 @@
 namespace Okay\Admin\Controllers;
 
 
+use Okay\Core\Security\SafeFileName;
 use Okay\Core\TemplateConfig\FrontTemplateConfig;
 
 class TemplatesAdmin extends IndexAdmin
@@ -35,12 +36,18 @@ class TemplatesAdmin extends IndexAdmin
         }
 
         // Текущий шаблон
+        // Перевірялось лише розширення, тому "../../../../other/theme.tpl"
+        // читало .tpl з будь-якого місця на диску. Порожнє значення лишаємо
+        // null, щоб нижче спрацював вибір першого шаблона зі списку.
         $templateFile = $this->request->get('file');
-        
+        if ($templateFile !== null) {
+            $templateFile = SafeFileName::basename($templateFile);
+        }
+
         if (!empty($templateFile) && pathinfo($templateFile, PATHINFO_EXTENSION) != 'tpl') {
             exit();
         }
-        
+
         if (!isset($templateFile)){
             $templateFile = reset($templates);
         }

@@ -8,10 +8,11 @@ use Okay\Core\TemplateConfig\FrontTemplateConfig;
 use Okay\Core\Request;
 use Okay\Core\Response;
 use Okay\Core\Security\SafeRedirect;
+use Okay\Core\Security\SafeFileName;
 
 class ImagesAdmin extends IndexAdmin
 {
-    
+
     public function fetch(FrontTemplateConfig $frontTemplateConfig, Response $response)
     {
         $currentTheme = $frontTemplateConfig->getTheme();
@@ -28,7 +29,15 @@ class ImagesAdmin extends IndexAdmin
                 foreach($old_names as $i=>$old_name){
                     $new_name = $new_names[$i];
                     $new_name = trim(pathinfo($new_name, PATHINFO_FILENAME).'.'.pathinfo($old_name, PATHINFO_EXTENSION), '.');
-                    
+
+                    // Обидва імені склеювались з images_dir без перевірки, тому
+                    // "a/../../../file" виводило rename() за межі теми.
+                    $old_name = SafeFileName::basename($old_name);
+                    $new_name = SafeFileName::basename($new_name);
+                    if ($old_name === '' || $new_name === '') {
+                        continue;
+                    }
+
                     if(is_writable($images_dir) && is_file($images_dir.$old_name) && !is_file($images_dir.$new_name)) {
                         rename($images_dir.$old_name, $images_dir.$new_name);
                     } elseif(is_file($images_dir.$new_name) && $new_name!=$old_name) {
@@ -37,17 +46,23 @@ class ImagesAdmin extends IndexAdmin
                 }
             }
             
-            $delete_image = trim($this->request->post('delete_image'), '.');
-            
+            // trim(..., '.') знімав лише крайні крапки, тож "a/../../config/config.php"
+            // проходив як є і unlink() стирав будь-який файл на диску.
+            $delete_image = SafeFileName::basename($this->request->post('delete_image'));
+
             if (!empty($delete_image)) {
                 @unlink($images_dir.$delete_image);
             }
-            
+
             // Загрузка изображений
             if ($images = $this->request->files('upload_images')) {
                 for($i=0; $i<count($images['name']); $i++) {
-                    $name = trim($images['name'][$i], '.');
-                    if(in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), $allowed_extentions)) {
+                    // Ім'я приходить від клієнта: без basename() шлях у ньому
+                    // виносив move_uploaded_file() за межі каталогу теми.
+                    $name = SafeFileName::basename($images['name'][$i]);
+                    if($name !== ''
+                        && in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), $allowed_extentions)
+                    ) {
                         move_uploaded_file($images['tmp_name'][$i], $images_dir.$name);
                     }
                 }
