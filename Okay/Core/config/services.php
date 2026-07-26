@@ -126,8 +126,6 @@ $services = [
         'class' => Response::class,
         'arguments' => [
             new SR(Adapters\Response\AdapterManager::class),
-            new PR('config.version'),
-            new SR(LicenseModulesTemplates::class),
         ],
     ],
     Languages::class => [

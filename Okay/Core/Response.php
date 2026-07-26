@@ -80,13 +80,13 @@ class Response
         521 => 'Web Server Is Down',
     ];
     
-    public function __construct(AdapterManager $adapterManager, string $version)
+    public function __construct(AdapterManager $adapterManager)
     {
         $this->adapterManager = $adapterManager;
         $this->type = RESPONSE_HTML;
 
         // Точну версію не публікуємо: вона перетворює банер на готову
-        // ціль для сканерів. Параметр залишено заради сумісності DI.
+        // ціль для сканерів.
         $this->addHeader('X-Powered-CMS: OkayCMS');
 
         foreach (SecurityHeaders::defaults() as $header) {
