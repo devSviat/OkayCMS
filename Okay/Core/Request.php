@@ -3,6 +3,8 @@
 
 namespace Okay\Core;
 
+use Okay\Core\Security\AdminCsrfToken;
+
 
 class Request
 {
@@ -374,12 +376,19 @@ class Request
      */
     public function checkSession()
     {
-        if (!empty($_POST)) {
-            if (empty($_POST['session_id']) || $_POST['session_id'] != session_id()) {
-                unset($_POST);
-                return false;
-            }
+        if (empty($_POST)) {
+            return true;
         }
+
+        $token = isset($_POST['session_id']) ? $_POST['session_id'] : null;
+
+        if (!AdminCsrfToken::check($token)) {
+            // Именно [] , а не unset(): раньше суперглобал удалялся целиком и
+            // код ниже читал его как неопределённую переменную.
+            $_POST = [];
+            return false;
+        }
+
         return true;
     }
     
