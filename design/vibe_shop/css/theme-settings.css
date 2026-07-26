@@ -4,21 +4,21 @@
 */
 
 :root {
-	--okay-button-color: #c5530c;
-	--okay-button-text: #fff;
-	--okay-button-color-hover: #c5530c;
-	--okay-button-text-hover: #fff;
-	--okay-basic-company: #00afee;
-	--okay-second-company: #232f3e;
-	--okay-basic-company-text: #fff;
-	--okay-second-company-text: #fff;
-	--okay-bg: #f2f2f2;
-	--okay-body-text: #222;
-	--okay-body-heading: #222;
-	--okay-boxed-color: #fff;
-	--okay-boxed-text: #222;
-	--okay-button-second-color: #222;
-	--okay-button-second-text: #fff;
-	--okay-shadow-color: 0 2px 5px rgba(0, 0, 0, .3);
-	--okay-border-color: #dbdbdb;
+	--okay-button-color: #17171a;
+	--okay-button-text: #ffffff;
+	--okay-button-color-hover: #2b2b2f;
+	--okay-button-text-hover: #ffffff;
+	--okay-basic-company: #17171a;
+	--okay-second-company: #17171a;
+	--okay-basic-company-text: #ffffff;
+	--okay-second-company-text: #f5f5f6;
+	--okay-bg: #f5f5f6;
+	--okay-body-text: #1c1c20;
+	--okay-body-heading: #1c1c20;
+	--okay-boxed-color: #ffffff;
+	--okay-boxed-text: #1c1c20;
+	--okay-button-second-color: #ffffff;
+	--okay-button-second-text: #1c1c20;
+	--okay-shadow-color: 0 2px 4px rgba(23,23,26,.05), 0 8px 16px -4px rgba(23,23,26,.08);
+	--okay-border-color: #dcdcde;
 }
