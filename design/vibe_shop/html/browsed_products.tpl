@@ -4,7 +4,7 @@
     <div class="sidebar__boxed browsed">
         <div class="fn_switch sidebar_heading d-flex align-items-center justify-content-between">
             <span data-language="features_browsed">{$lang->features_browsed}</span>
-            <span class="d-flex align-items-center sidebar_heading_arrow icon fa fa-chevron-down"></span>
+            <span class="sidebar_heading_arrow">{include file="svg.tpl" svgId="chevron"}</span>
         </div>
 
         <div class="browsed__content f_row">

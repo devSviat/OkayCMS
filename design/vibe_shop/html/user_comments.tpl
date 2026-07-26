@@ -9,9 +9,9 @@
                     <div class="comment__inner">
                         <div class="comment__icon">
                             {if $level > 0}
-                                {include file="svg.tpl" svgId="comment-admin_icon"}
+                                {include file="svg.tpl" svgId="headset"}
                             {else}
-                                {include file="svg.tpl" svgId="comment-user_icon"}
+                                {include file="svg.tpl" svgId="user"}
                             {/if}
                         </div>
                         <div class="comment__boxed">
@@ -26,7 +26,7 @@
                                 </div>
                                 {* Comment date *}
                                 <div class="comment__date">
-                                    <span>{$comment->date|date}, {$comment->date|time}</span>
+                                    <span>{$comment->date|date} {$comment->date|time}</span>
                                 </div>
                             </div>
 
@@ -52,14 +52,8 @@
         {comments_tree comments=$user_comments}
     </div>
 {else}
-    <div class="boxed_no_comments">
-        <div class="boxed_no_comments__icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 20 19.805">
-                <path fill="#D1D6D8" d="M4,19.8V16H2a2,2,0,0,1-2-2V2A2,2,0,0,1,2,0H18a2,2,0,0,1,2,2V14a2,2,0,0,1-2,2H10.087L4,19.8H4ZM2,14H6v2.2L9.513,14H18V2H2Zm3-3V9h7v2ZM5,7V5h9V7Z"></path>
-            </svg>
-        </div>
-        <div class="boxed_no_comments__title">
-            <span data-language="product_no_comments">{$lang->product_no_comments}</span>
-        </div>
+    <div class="vs-empty vs-empty--inline">
+        <span class="vs-empty__icon">{include file="svg.tpl" svgId="comment_icon"}</span>
+        <p class="vs-empty__note" data-language="product_no_comments">{$lang->product_no_comments}</p>
     </div>
 {/if}

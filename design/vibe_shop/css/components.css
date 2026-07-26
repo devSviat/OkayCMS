@@ -2351,7 +2351,11 @@ body.hc-nav-open {
 	font-variant-numeric: tabular-nums;
 }
 
-.vs-catalogue__grid {
+/* .vs-related__grid is the product page's trailing "you may also like" block. */
+/* It is the same grid with a different name rather than a second primitive.   */
+
+.vs-catalogue__grid,
+.vs-related__grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 	gap: var(--vs-space-4);
@@ -2437,6 +2441,16 @@ body.hc-nav-open {
 	margin: 0;
 	color: var(--vs-text-muted);
 	font-size: var(--vs-text-sm);
+}
+
+.vs-empty__icon {
+	display: inline-flex;
+	color: var(--vs-border-strong);
+}
+
+.vs-empty__icon svg {
+	width: 32px;
+	height: 32px;
 }
 
 /* -------------------------------------------------------------- pagination */
@@ -2886,6 +2900,26 @@ body.hc-nav-open {
 	cursor: pointer;
 }
 
+/* The block ships expanded, so the chevron ships pointing up; okay.js's        */
+/* fn_switch adds .active on the first click, which is the collapsed state.     */
+
+.vs-filters__browsed .sidebar_heading_arrow {
+	display: inline-flex;
+	flex: none;
+	color: var(--vs-text-muted);
+	transform: rotate(180deg);
+	transition: transform var(--vs-dur-2) var(--vs-ease);
+}
+
+.vs-filters__browsed .sidebar_heading_arrow svg {
+	width: 16px;
+	height: 16px;
+}
+
+.vs-filters__browsed .sidebar_heading.active .sidebar_heading_arrow {
+	transform: rotate(0deg);
+}
+
 .vs-filters__browsed .browsed__content {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2970,6 +3004,1151 @@ body.hc-nav-open {
 	line-height: var(--vs-leading-body);
 }
 
+/* ------------------------------------------------------------ product page */
+/* Mobile first, and this page is where that matters most: gallery, then the   */
+/* buy box, then the detail accordion. From 992px the same markup becomes two  */
+/* columns with the buy box sticky - see the ≥ 992 px block at the end.        */
+
+.vs-pdp {
+	padding-bottom: var(--vs-space-8);
+}
+
+/* Related products bring their own top rhythm, so the page does not spend both */
+/* and leave a 130px hole between the pager and the next heading.              */
+
+.vs-pdp:has(+ .vs-section) {
+	padding-bottom: 0;
+}
+
+.vs-pdp__masthead {
+	padding: var(--vs-space-4) 0 var(--vs-space-5);
+}
+
+/* One step down from the h1 default. A 44px product name competes with the    */
+/* photograph for the top of the page and the photograph has to win.           */
+
+.vs-pdp__title {
+	margin: 0;
+	font-size: var(--vs-text-2xl);
+}
+
+.vs-pdp__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--vs-space-2) var(--vs-space-5);
+	margin-top: var(--vs-space-3);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-pdp__sku {
+	font-variant-numeric: tabular-nums;
+}
+
+.vs-pdp__rating {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+}
+
+/* The rater widget positions its vote count absolutely at left: 100% + 8px,   */
+/* which in a flex meta row lands on top of the next item. It flows inline     */
+/* here instead, and the gap does the spacing.                                 */
+
+.vs-pdp__rating .product__rating {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+}
+
+.vs-pdp__rating .rating_text {
+	position: static;
+	left: auto;
+	top: auto;
+	color: inherit;
+	font-size: var(--vs-text-xs);
+}
+
+.vs-pdp__reviews {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	color: var(--vs-text);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.vs-pdp__brand {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	min-height: 44px;
+	color: var(--vs-text);
+	text-decoration: none;
+}
+
+.vs-pdp__brand:hover {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.vs-pdp__brand_img {
+	width: auto;
+	max-width: 100px;
+	max-height: 32px;
+	object-fit: contain;
+}
+
+/* ----------------------------------------------------------------- gallery */
+/* gallery-top, gallery-thumbs and every swiper-* class are okay.js's Swiper   */
+/* bindings and cannot be renamed; the thumb strip is vertical because okay.js */
+/* configures it that way, so it can only be a column beside the stage. Below  */
+/* 768px it is hidden (hidden-sm-down) and the stage is swiped instead.        */
+
+.vs-pdp__gallery {
+	min-width: 0;
+}
+
+.vs-gallery__frame {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--vs-space-3);
+}
+
+/* Same plate treatment as the card: a fixed ratio so the page does not jump   */
+/* as photography loads, `contain` so uneven shop photography lines up, and a  */
+/* white fill because most product shots are already on a white sweep.         */
+
+.vs-gallery__stage {
+	position: relative;
+	flex: 1 1 auto;
+	min-width: 0;
+	aspect-ratio: 1 / 1;
+	overflow: hidden;
+	background-color: var(--vs-plate);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+}
+
+.vs-gallery__main {
+	height: 100%;
+}
+
+.vs-gallery__main .swiper-wrapper {
+	height: 100%;
+}
+
+.vs-gallery__slide {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	padding: var(--vs-space-5);
+	text-decoration: none;
+}
+
+.vs-gallery__slide picture {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.vs-gallery__slide img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+/* Swiper's own arrows are a dark translucent slab from okay.css. They become  */
+/* the same plate-on-photograph control the rest of the theme uses, and they   */
+/* reach 44px so they are usable with a thumb. The glyph is drawn with two     */
+/* borders rather than the swiper-icons font, so nothing here depends on a     */
+/* sheet Task 8 deletes.                                                       */
+
+.vs-gallery__nav {
+	top: 50%;
+	width: 44px;
+	height: 44px;
+	margin-top: -22px;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-full);
+	background: var(--vs-surface);
+	box-shadow: var(--vs-shadow-1);
+	color: var(--vs-text);
+	transition: background-color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-gallery__nav:hover {
+	background: var(--vs-surface);
+	border-color: var(--vs-border-strong);
+}
+
+.vs-gallery__nav::after {
+	content: "";
+	width: 9px;
+	height: 9px;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	font-size: 0;
+}
+
+.swiper-button-next.vs-gallery__nav {
+	right: var(--vs-space-3);
+}
+
+.swiper-button-next.vs-gallery__nav::after {
+	transform: translateX(-1px) rotate(-45deg);
+}
+
+.swiper-button-prev.vs-gallery__nav {
+	left: var(--vs-space-3);
+}
+
+.swiper-button-prev.vs-gallery__nav::after {
+	transform: translateX(1px) rotate(135deg);
+}
+
+.vs-gallery__badges {
+	position: absolute;
+	top: var(--vs-space-3);
+	left: var(--vs-space-3);
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--vs-space-1);
+	max-width: calc(100% - var(--vs-space-9));
+	pointer-events: none;
+}
+
+/* The one badge Task 3 left without a rule. "Top seller" is shop copy, not a  */
+/* price event, so it is ink on the plate and never rose - rose is a discount. */
+
+.vs-badge--hit {
+	background-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+}
+
+/* Swiper derives the slide height from the container height, so the strip needs */
+/* a deterministic one: left to stretch, it and the square stage would size each */
+/* other in a loop and the stage would stop being square (measured at 991px:     */
+/* 897 wide by 2537 tall). okay.js pins the strip to 3 slides below 992px and 5  */
+/* above it, so the height is chosen to make each slot square: 3x68 + 2x10 here, */
+/* 5x76 + 4x10 in the >= 992 block, matching Swiper's spaceBetween of 10.        */
+
+.vs-gallery__thumbs {
+	flex: none;
+	width: 68px;
+	height: 224px;
+}
+
+.vs-gallery__thumb {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	padding: var(--vs-space-1);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-plate);
+	cursor: pointer;
+	transition: border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-gallery__thumb:hover {
+	border-color: var(--vs-border-strong);
+}
+
+.vs-gallery__thumb.swiper-slide-thumb-active {
+	border-color: var(--vs-ink);
+}
+
+.vs-gallery__thumb picture {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.vs-gallery__thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.vs-gallery__thumbs .swiper-scrollbar {
+	background-color: var(--vs-n-100);
+}
+
+.vs-gallery__thumbs .swiper-scrollbar-drag {
+	background-color: var(--vs-border-strong);
+}
+
+.vs-gallery__no_image {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	color: var(--vs-border-strong);
+}
+
+.vs-gallery__no_image svg {
+	width: 88px;
+	height: 88px;
+}
+
+/* ----------------------------------------------------------------- buy box */
+
+.vs-buybox {
+	padding-top: var(--vs-space-6);
+}
+
+.vs-buybox__form {
+	margin: 0;
+}
+
+.vs-buybox__block {
+	margin-bottom: var(--vs-space-4);
+}
+
+.vs-buybox__label {
+	display: block;
+	margin-bottom: var(--vs-space-2);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-buybox__variants {
+	position: relative;
+	margin-bottom: var(--vs-space-4);
+}
+
+.vs-buybox__select {
+	width: 100%;
+	min-height: 44px;
+	padding: 0 var(--vs-space-3);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-buybox__variants .select2-container {
+	width: 100%;
+	max-width: 100%;
+}
+
+.vs-buybox__variants .select2-container .select2-selection--single {
+	height: 44px;
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+}
+
+.vs-buybox__variants .select2-container .select2-selection__rendered {
+	padding-left: var(--vs-space-3);
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	line-height: 42px;
+}
+
+.vs-buybox__variants .select2-container .select2-selection__arrow {
+	height: 42px;
+}
+
+.vs-buybox__offer {
+	margin-bottom: var(--vs-space-5);
+}
+
+.vs-buybox__prices {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: var(--vs-space-2) var(--vs-space-3);
+	font-variant-numeric: tabular-nums;
+}
+
+/* The price is the second thing the shopper looks for after the photograph,   */
+/* so it gets display type and the tightest tracking on the page. Tabular      */
+/* figures keep the row from twitching when okay.js rewrites it.               */
+
+.vs-buybox__price {
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-2xl);
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	line-height: var(--vs-leading-tight);
+}
+
+/* --sale is the BEM name; price--red is the same state as toggled live by     */
+/* okay.js on the parent of .fn_price. They must stay identical.               */
+
+.vs-buybox__price--sale,
+.vs-buybox__price.price--red {
+	color: var(--vs-sale-600);
+}
+
+.vs-buybox__old {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-base);
+	text-decoration: line-through;
+}
+
+.vs-buybox__currency {
+	font-size: var(--vs-text-base);
+	font-weight: 500;
+}
+
+.vs-buybox__prices .vs-badge {
+	align-self: center;
+}
+
+.vs-buybox .vs-stock {
+	margin: var(--vs-space-3) 0 0;
+	font-size: var(--vs-text-sm);
+}
+
+.vs-buybox__buy {
+	display: flex;
+	align-items: flex-end;
+	flex-wrap: wrap;
+	gap: var(--vs-space-3);
+	margin-top: var(--vs-space-5);
+}
+
+.vs-buybox__qty {
+	flex: none;
+}
+
+.vs-buybox__submit {
+	flex: 1 1 160px;
+	min-height: 52px;
+	font-size: var(--vs-text-base);
+}
+
+.vs-buybox__unavailable {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 1 1 160px;
+	max-width: none;
+	min-height: 52px;
+	margin: 0;
+	padding: 0 var(--vs-space-4);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	text-align: center;
+}
+
+/* ----------------------------------------------------------------- stepper */
+/* The input is the form value carrier okay.js and the cart both read, so it   */
+/* is wrapped, never replaced. The buttons are real buttons: okay.js's own     */
+/* handler is bound to `.fn_product_amount span`, so it does not fire for      */
+/* them, and vibe.js hands the arithmetic back to okay.js's amount_change      */
+/* instead of reimplementing the clamp.                                        */
+
+.vs-stepper {
+	display: inline-flex;
+	align-items: center;
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+	overflow: hidden;
+}
+
+.vs-stepper__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 44px;
+	min-height: 50px;
+	padding: 0;
+	border: 0;
+	background-color: transparent;
+	color: var(--vs-text);
+	font-family: inherit;
+	font-size: var(--vs-text-lg);
+	line-height: 1;
+	cursor: pointer;
+	transition: background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-stepper__btn:hover {
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-stepper__btn:focus-visible {
+	border-radius: var(--vs-radius-sm);
+}
+
+.vs-stepper__input {
+	width: 44px;
+	min-height: 50px;
+	padding: 0;
+	border: 0;
+	border-left: 1px solid var(--vs-hairline);
+	border-right: 1px solid var(--vs-hairline);
+	background-color: transparent;
+	color: var(--vs-text);
+	font-size: var(--vs-text-base);
+	font-variant-numeric: tabular-nums;
+	font-weight: 500;
+	text-align: center;
+}
+
+.vs-stepper__input:focus-visible {
+	border-radius: 0;
+}
+
+/* -------------------------------------------------------- secondary actions */
+/* Fast order, wishlist and comparison. Never the same weight as the CTA: they */
+/* are icon buttons on a hairline, and a picked one reads as a filled ink disc */
+/* so state is never carried by colour alone.                                  */
+
+.vs-buybox__aside {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	margin-top: var(--vs-space-4);
+}
+
+.vs-buybox__tool {
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+	transition: background-color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease), color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-buybox__tool:hover {
+	border-color: var(--vs-border-strong);
+}
+
+.vs-buybox__tool:focus-visible {
+	border-radius: var(--vs-radius-full);
+}
+
+.vs-buybox__tool.selected {
+	background-color: var(--vs-ink);
+	border-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+}
+
+.vs-buybox__wish_off,
+.vs-buybox__wish_on {
+	display: inline-flex;
+}
+
+.vs-buybox__wish_on {
+	display: none;
+}
+
+.vs-buybox__wish.selected .vs-buybox__wish_off {
+	display: none;
+}
+
+.vs-buybox__wish.selected .vs-buybox__wish_on {
+	display: inline-flex;
+}
+
+/* The fast-order button is rendered by the FastOrder module and cannot be      */
+/* edited from here; it still carries a font-awesome glyph in ::before, so its  */
+/* label is folded away rather than removed. Task 8 revisits it with the sprite. */
+
+.vs-buybox__aside .fast_order_button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 44px;
+	min-height: 44px;
+	overflow: hidden;
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+	font-size: 0;
+	text-decoration: none;
+	transition: border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-buybox__aside .fast_order_button:hover {
+	border-color: var(--vs-border-strong);
+}
+
+.vs-buybox__aside .fast_order_button::before {
+	font-size: 17px;
+}
+
+/* --------------------------------------------------- delivery / payment rows */
+
+.vs-disclosures {
+	margin-top: var(--vs-space-6);
+	border-top: 1px solid var(--vs-hairline);
+}
+
+.vs-disclosure-row {
+	border-bottom: 1px solid var(--vs-hairline);
+}
+
+.vs-disclosure-row__head {
+	margin: 0;
+}
+
+.vs-disclosure-row__btn {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--vs-space-3);
+	width: 100%;
+	min-height: 52px;
+	padding: 0;
+	border: 0;
+	background-color: transparent;
+	color: var(--vs-heading);
+	font-family: inherit;
+	font-size: var(--vs-text-base);
+	font-weight: 600;
+	text-align: left;
+	cursor: pointer;
+}
+
+.vs-disclosure-row__chevron {
+	display: inline-flex;
+	flex: none;
+	color: var(--vs-text-muted);
+	transition: transform var(--vs-dur-2) var(--vs-ease);
+}
+
+.vs-disclosure-row__chevron svg {
+	width: 18px;
+	height: 18px;
+}
+
+.vs-disclosure-row__head.active .vs-disclosure-row__chevron {
+	transform: rotate(180deg);
+}
+
+.vs-disclosure-row__body {
+	display: none;
+	padding-bottom: var(--vs-space-4);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-disclosure-row__body ul,
+.vs-disclosure-row__body ol {
+	margin: 0;
+	padding-left: var(--vs-space-5);
+}
+
+.vs-disclosure-row__body li {
+	margin-bottom: var(--vs-space-1);
+}
+
+.vs-disclosure-row__body p:last-child {
+	margin-bottom: 0;
+}
+
+/* ------------------------------------------------------------------- share */
+/* jssocials-theme-flat.css is registered after this file and paints a brand   */
+/* colour per network - five more hues on a page whose whole argument is that  */
+/* rose and emerald mean something. Its selectors are two classes deep, so     */
+/* three are needed here to win without !important and without a load-order    */
+/* change that would be undone the next time the theme sheet moves.            */
+
+.vs-share {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--vs-space-2) var(--vs-space-3);
+	margin-top: var(--vs-space-6);
+}
+
+.vs-share__label {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-share__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--vs-space-2);
+}
+
+.vs-share .jssocials-shares {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--vs-space-2);
+	margin: 0;
+}
+
+.vs-share .jssocials-share {
+	margin: 0;
+}
+
+.vs-share .jssocials-share .jssocials-share-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-full);
+	background: var(--vs-surface);
+	color: var(--vs-text);
+	transition: border-color var(--vs-dur-1) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-share .jssocials-share .jssocials-share-link:hover {
+	border-color: var(--vs-border-strong);
+	background: var(--vs-surface-subtle);
+	color: var(--vs-text);
+}
+
+.vs-share .jssocials-share .jssocials-share-logo {
+	font-size: 17px;
+}
+
+/* -------------------------------------------------------------- sticky buy */
+/* Phones only, and the single most valuable affordance on this page: once the */
+/* inline buy row scrolls away the price and the CTA follow the shopper down.  */
+/* The button carries form="vs_buy_form", so it submits the very same          */
+/* .fn_variants form and introduces no second cart path. Hidden with           */
+/* visibility as well as transform, so its controls leave the tab order while  */
+/* the bar is off-screen.                                                      */
+
+.vs-sticky-buy {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: var(--vs-z-sticky);
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	padding: var(--vs-space-3) var(--vs-space-4);
+	padding-bottom: calc(var(--vs-space-3) + env(safe-area-inset-bottom));
+	background-color: var(--vs-surface);
+	border-top: 1px solid var(--vs-border);
+	box-shadow: var(--vs-shadow-3);
+	visibility: hidden;
+	transform: translateY(100%);
+	transition: transform var(--vs-dur-3) var(--vs-ease), visibility var(--vs-dur-0) var(--vs-ease) var(--vs-dur-3);
+}
+
+.vs-sticky-buy.is-visible {
+	visibility: visible;
+	transform: translateY(0);
+	transition: transform var(--vs-dur-3) var(--vs-ease);
+}
+
+.vs-sticky-buy__info {
+	display: flex;
+	flex-direction: column;
+	flex: none;
+	min-width: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.vs-sticky-buy__price {
+	color: var(--vs-heading);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	white-space: nowrap;
+}
+
+.vs-sticky-buy__price.price--red {
+	color: var(--vs-sale-600);
+}
+
+.vs-sticky-buy__old {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+	text-decoration: line-through;
+	white-space: nowrap;
+}
+
+.vs-sticky-buy__info .vs-buybox__currency {
+	font-size: var(--vs-text-sm);
+}
+
+.vs-sticky-buy__cta {
+	flex: 1 1 auto;
+	min-height: 48px;
+}
+
+.vs-sticky-buy .vs-buybox__unavailable {
+	min-height: 48px;
+}
+
+/* ------------------------------------------------- description / spec / tabs */
+/* One markup, two presentations, one state machine. fn_accordion (okay.js) is */
+/* already an exclusive disclosure - one panel open, clicking the open one is  */
+/* a no-op - which is exactly tab semantics. Below 992px it reads as a stacked */
+/* accordion; from 992px CSS grid lifts the same headers into a single row and */
+/* drops the panels underneath. okay.js's own tab script is deliberately NOT   */
+/* used: it writes an inline display:none on hidden panels at every width, and */
+/* an inline style can only be overridden with !important.                      */
+
+.vs-tabs {
+	margin-top: var(--vs-space-8);
+	border-top: 1px solid var(--vs-hairline);
+}
+
+.vs-tabs__item {
+	border-bottom: 1px solid var(--vs-hairline);
+}
+
+.vs-tabs__head {
+	margin: 0;
+	font-family: inherit;
+	font-size: var(--vs-text-base);
+	letter-spacing: normal;
+}
+
+.vs-tabs__btn {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--vs-space-3);
+	width: 100%;
+	min-height: 56px;
+	padding: 0;
+	border: 0;
+	background-color: transparent;
+	color: var(--vs-heading);
+	font-family: inherit;
+	font-size: var(--vs-text-base);
+	font-weight: 600;
+	text-align: left;
+	cursor: pointer;
+}
+
+.vs-tabs__chevron {
+	display: inline-flex;
+	flex: none;
+	color: var(--vs-text-muted);
+	transition: transform var(--vs-dur-2) var(--vs-ease);
+}
+
+.vs-tabs__chevron svg {
+	width: 18px;
+	height: 18px;
+}
+
+.vs-tabs__head.active .vs-tabs__chevron {
+	transform: rotate(180deg);
+}
+
+.vs-tabs__panel {
+	display: none;
+	padding-bottom: var(--vs-space-6);
+}
+
+.vs-prose {
+	max-width: 74ch;
+}
+
+.vs-prose p:last-child {
+	margin-bottom: 0;
+}
+
+/* ------------------------------------------------------------------- specs */
+/* The named risk on this page is a spec sheet - a wall of grey rows. Two      */
+/* columns from 768px, a hairline only between rows, the name muted and the    */
+/* value in body ink: the eye reads pairs, not a table.                        */
+
+.vs-specs {
+	display: grid;
+	gap: 0 var(--vs-space-8);
+	margin: 0;
+}
+
+.vs-specs__row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--vs-space-4);
+	min-height: 44px;
+	padding: var(--vs-space-2) 0;
+	border-bottom: 1px solid var(--vs-hairline);
+}
+
+.vs-specs__name {
+	flex: 0 1 auto;
+	display: inline-flex;
+	align-items: baseline;
+	gap: var(--vs-space-2);
+	margin: 0;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-specs__value {
+	flex: 0 1 auto;
+	margin: 0;
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
+	text-align: right;
+}
+
+/* The stock theme drew this hint as a lightgreen inline-styled box - a fourth */
+/* colour for a tooltip. It is a muted marker carrying the same title text.    */
+
+.vs-specs__hint {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 16px;
+	height: 16px;
+	border: 1px solid var(--vs-border-strong);
+	border-radius: var(--vs-radius-full);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+	font-style: italic;
+	line-height: 1;
+	cursor: help;
+}
+
+/* ----------------------------------------------------------------- reviews */
+
+.vs-reviews {
+	display: grid;
+	gap: var(--vs-space-7);
+	align-items: start;
+}
+
+.vs-reviews__list {
+	min-width: 0;
+}
+
+.vs-empty--inline {
+	max-width: none;
+	padding: var(--vs-space-5);
+}
+
+/* .comment__* is shared with the blog post page and the user cabinet, so this */
+/* is deliberately not scoped to the product page - one comment presentation   */
+/* everywhere. Tasks 6 and 7 inherit it rather than writing a second one.      */
+
+.comment__item {
+	margin-bottom: var(--vs-space-4);
+}
+
+.comment__inner {
+	display: flex;
+	gap: var(--vs-space-3);
+}
+
+.comment__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 36px;
+	height: 36px;
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface-subtle);
+	color: var(--vs-text-muted);
+}
+
+.comment__icon svg {
+	width: 20px;
+	height: 20px;
+}
+
+.comment__boxed {
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: var(--vs-space-4);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+}
+
+.comment__header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--vs-space-2) var(--vs-space-3);
+	margin-bottom: var(--vs-space-2);
+}
+
+.comment__author {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--vs-space-2);
+}
+
+.comment__name {
+	color: var(--vs-heading);
+	font-weight: 600;
+}
+
+.comment__status,
+.comment__date {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+}
+
+.comment__body {
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	line-height: var(--vs-leading-body);
+}
+
+/* A shop reply, not another shopper: indented and on the subtle plate so the  */
+/* thread reads without relying on the icon alone.                             */
+
+.admin_note {
+	margin-left: var(--vs-space-6);
+}
+
+.admin_note > .comment__inner > .comment__boxed {
+	background-color: var(--vs-surface-subtle);
+	border-color: transparent;
+}
+
+/* -------------------------------------------------------------------- form */
+/* Real labels above the field. The stock theme floated a fake placeholder     */
+/* that okay.js toggled a .filled class on - it left the field with no         */
+/* accessible name at all until it had focus.                                  */
+
+.vs-form {
+	margin: 0;
+	padding: var(--vs-space-5);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+}
+
+.vs-form__title {
+	margin-bottom: var(--vs-space-4);
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+}
+
+.vs-form__row {
+	margin-bottom: var(--vs-space-4);
+}
+
+.vs-form__label {
+	display: block;
+	margin-bottom: var(--vs-space-2);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-form__input,
+.vs-form__textarea {
+	display: block;
+	width: 100%;
+}
+
+.vs-form__textarea {
+	min-height: 96px;
+	padding: var(--vs-space-3) var(--vs-space-4);
+	line-height: var(--vs-leading-body);
+	resize: vertical;
+}
+
+/* jquery.validate appends label.error after the field it rejected. */
+
+.vs-form label.error {
+	display: block;
+	margin-top: var(--vs-space-2);
+	color: var(--vs-sale-600);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-form__submit {
+	width: 100%;
+}
+
+/* ------------------------------------------------------------- prev / next */
+
+.vs-pager {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--vs-space-3);
+	margin-top: var(--vs-space-7);
+}
+
+.vs-pager__link {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	flex: 1 1 260px;
+	min-width: 0;
+	min-height: 56px;
+	padding: 0 var(--vs-space-4);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	text-decoration: none;
+	transition: border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-pager__link:hover {
+	border-color: var(--vs-border-strong);
+}
+
+.vs-pager__link span {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.vs-pager__link svg {
+	flex: none;
+	width: 18px;
+	height: 18px;
+	color: var(--vs-text-muted);
+}
+
+.vs-pager__link--prev svg {
+	transform: rotate(90deg);
+}
+
+.vs-pager__link--next {
+	justify-content: flex-end;
+	text-align: right;
+}
+
+.vs-pager__link--next svg {
+	transform: rotate(-90deg);
+}
+
+/* ------------------------------------------------------------------ section */
+/* Shared heading for the trailing blocks - related products, related posts.   */
+
+.vs-section {
+	padding-top: var(--vs-space-9);
+}
+
+.vs-section__title {
+	margin: 0 0 var(--vs-space-5);
+	font-size: var(--vs-text-xl);
+}
+
 /* --------------------------------------------------------------- ≥ 576 px */
 
 @media (min-width: 576px) {
@@ -2988,9 +4167,14 @@ body.hc-nav-open {
 		justify-content: space-between;
 	}
 
-	.vs-catalogue__grid {
+	.vs-catalogue__grid,
+	.vs-related__grid {
 		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 		gap: var(--vs-space-6);
+	}
+
+	.vs-specs {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
 	.vs-catalogue__region.is-loading .vs-catalogue__skeleton {
@@ -3111,6 +4295,125 @@ body.hc-nav-open {
 	.vs-filters__scroll {
 		padding: 0;
 	}
+
+/* Product page: gallery left, buy box right and sticky through the fold. The  */
+/* sticky offset clears the JS-sticky header bar (--vs-header-h) exactly as    */
+/* the filter rail does, and align-items: start is load-bearing - a stretched  */
+/* grid item fills its area and then has nowhere left to move.                 */
+
+	.vs-pdp__masthead {
+		padding: var(--vs-space-6) 0;
+	}
+
+	.vs-pdp__layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 380px;
+		gap: var(--vs-space-9);
+		align-items: start;
+	}
+
+	.vs-pdp__gallery {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+/* The buy box spans both rows and is stretched to the full height of that area, */
+/* so the pinned wrapper inside it has the whole detail section to travel        */
+/* through: the shopper reading the specification still has the price and the    */
+/* CTA on screen. Sticking .vs-buybox itself does not work - stretched, it is as */
+/* tall as its own area and has nowhere to slide; content-sized, it runs out of  */
+/* travel a few hundred pixels in and the price scrolls off the top.             */
+
+	.vs-buybox {
+		grid-column: 2;
+		grid-row: 1 / span 2;
+		align-self: stretch;
+		padding-top: 0;
+	}
+
+	.vs-buybox__pin {
+		position: sticky;
+		top: calc(var(--vs-header-h) + var(--vs-space-4));
+	}
+
+/* The stage is capped rather than left to fill a 1352px container: an 830px    */
+/* square photograph pushes the whole detail section off the screen and reads   */
+/* as a banner, not as merchandise. The slack falls into the gutter between the */
+/* gallery and the buy box, which is where air belongs on this page.            */
+
+	.vs-gallery__frame {
+		max-width: 680px;
+		gap: var(--vs-space-4);
+	}
+
+	.vs-gallery__thumbs {
+		width: 76px;
+		height: 420px;
+	}
+
+/* Tab set. Every head is lifted into grid row 1 by an explicit column so the  */
+/* placement cannot drift, and the panels share row 2 - only one of them is    */
+/* ever displayed, because fn_accordion keeps exactly one open. The item boxes */
+/* are display: contents so their heads and panels become grid items directly. */
+
+	.vs-tabs {
+		grid-column: 1;
+		grid-row: 2;
+		display: grid;
+		grid-template-columns: repeat(3, max-content) minmax(0, 1fr);
+		column-gap: var(--vs-space-6);
+		margin-top: 0;
+		border-top: 0;
+	}
+
+	.vs-tabs__item {
+		display: contents;
+	}
+
+	.vs-tabs__head {
+		grid-row: 1;
+		border-bottom: 2px solid transparent;
+	}
+
+	.vs-tabs__item:nth-child(1) .vs-tabs__head {
+		grid-column: 1;
+	}
+
+	.vs-tabs__item:nth-child(2) .vs-tabs__head {
+		grid-column: 2;
+	}
+
+	.vs-tabs__item:nth-child(3) .vs-tabs__head {
+		grid-column: 3;
+	}
+
+	.vs-tabs__head.active {
+		border-bottom-color: var(--vs-ink);
+	}
+
+	.vs-tabs__btn {
+		min-height: 48px;
+		color: var(--vs-text-muted);
+	}
+
+	.vs-tabs__head.active .vs-tabs__btn {
+		color: var(--vs-heading);
+	}
+
+	.vs-tabs__chevron {
+		display: none;
+	}
+
+	.vs-tabs__panel {
+		grid-row: 2;
+		grid-column: 1 / -1;
+		padding-top: var(--vs-space-7);
+		padding-bottom: 0;
+	}
+
+	.vs-reviews {
+		grid-template-columns: minmax(0, 1fr) 380px;
+	}
 }
 
 /* --------------------------------------------------------------- ≤ 991 px */
@@ -3126,6 +4429,36 @@ body.hc-nav-open {
 	}
 
 	.vs-filters__browsed {
+		display: none;
+	}
+
+/* Single column below 992px, so an uncapped square stage is as wide as the page: */
+/* at 991px that is an 897px-tall photograph and the price is nowhere near the     */
+/* fold. Capped and centred instead - phones are narrower than the cap and are     */
+/* untouched by it.                                                               */
+
+	.vs-gallery__frame {
+		max-width: 480px;
+		margin: 0 auto;
+	}
+
+/* The sticky bar owns the bottom edge below 992px, so the page reserves room   */
+/* for it - otherwise the last row of content is unreachable behind it. The     */
+/* clearance goes on whatever block ends the page, which is the related         */
+/* products section when there is one and the product itself when there is not. */
+
+	.vs-pdp:last-child,
+	.vs-section:last-child {
+		padding-bottom: var(--vs-space-11);
+	}
+}
+
+/* From 992px the buy box is on screen the whole way down, so the bar has        */
+/* nothing left to add. Declared outside the ≤ 991 block so it also wins if the  */
+/* bar ever renders on a page without the mobile rules.                         */
+
+@media (min-width: 992px) {
+	.vs-sticky-buy {
 		display: none;
 	}
 }

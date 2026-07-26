@@ -179,8 +179,9 @@
 
     /* okay.js writes data-discount verbatim, and that attribute is a frozen
        contract carrying two decimals ("-33.79 %"). The badge shows whole
-       percent instead. Only the card badge is touched: the product page keeps
-       its own markup inside .fn_discount_label. */
+       percent instead. Applies to any host whose .fn_discount_label is one of
+       our badges - the card and the product page gallery both are; a theme that
+       still renders okay.js's own .sticker markup is left alone. */
     function normaliseDiscount(card) {
         var badge = card.querySelector('.fn_discount_label');
         if (!badge || !badge.classList.contains('vs-badge')) return;
@@ -221,20 +222,128 @@
         select.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
+    /* ------------------------------------------------------- product page */
+
+    /* The product page keeps the same three-state availability line as the
+       card, but here both states are stated: okay.js swaps hidden-xs-up between
+       .fn_in_stock and .fn_not_stock, so "out of stock" has its own visible
+       line and only the amber "low stock" grade is left to add. */
+    function syncPdp(select) {
+        var pdp = select.closest ? select.closest('.vs-pdp') : null;
+        if (!pdp) return;
+        var option = select.options[select.selectedIndex];
+        var stock = option ? parseInt(option.getAttribute('data-stock'), 10) : NaN;
+
+        var chips = pdp.querySelectorAll('.vs-chip');
+        for (var i = 0; i < chips.length; i++) {
+            var on = chips[i].getAttribute('data-variant-id') === select.value;
+            chips[i].classList.toggle('vs-chip--selected', on);
+            chips[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+
+        var line = pdp.querySelector('.fn_in_stock.vs-stock');
+        if (line) {
+            var lowAt = parseInt(line.getAttribute('data-low-at'), 10);
+            if (isNaN(lowAt)) lowAt = LOW_STOCK_FALLBACK;
+            var low = !isNaN(stock) && stock > 0 && stock <= lowAt;
+            line.classList.toggle('vs-stock--low', low);
+            line.classList.toggle('vs-stock--in', !low);
+            var label = line.querySelector('.vs-stock__label');
+            var copy = line.getAttribute(low ? 'data-low' : 'data-in');
+            if (label && copy) label.textContent = copy;
+        }
+
+        normaliseDiscount(pdp);
+    }
+
     /* Registered after okay.js so its handler has already rewritten the card.
        select2 fires its change through jQuery, which never reaches a native
        listener, so jQuery is used whenever it is present. */
+    function syncVariant(select) {
+        syncCard(select);
+        syncPdp(select);
+    }
+
     if (window.jQuery) {
         window.jQuery(document).on('change', '.fn_variant', function () {
-            syncCard(this);
+            syncVariant(this);
         });
     } else {
         document.addEventListener('change', function (event) {
             var select = event.target;
             if (!select || !select.classList || !select.classList.contains('fn_variant')) return;
-            syncCard(select);
+            syncVariant(select);
         });
     }
+
+    /* Quantity stepper. The <input name="amount"> is the value the cart posts
+       and is never replaced - the buttons only write to it. okay.js binds its
+       own handler to `.fn_product_amount span`, which real <button>s do not
+       match, so the arithmetic is handed straight back to okay.js's
+       amount_change: it clamps to data-max, keeps okay.amount in step for the
+       variant-change handler and fires the change event the cart page's ajax
+       listener is waiting for. A second clamp here would be a second, and
+       eventually divergent, definition of the maximum. */
+    function stepAmount(input, action) {
+        if (window.jQuery && typeof window.amount_change === 'function') {
+            window.amount_change(window.jQuery(input), action);
+            return;
+        }
+        var max = parseFloat(input.getAttribute('data-max'));
+        var current = parseFloat(input.value);
+        if (isNaN(current)) current = 1;
+        var next = current + (action === 'plus' ? 1 : -1);
+        if (!isNaN(max)) next = Math.min(max, next);
+        input.value = Math.max(1, next);
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var btn = event.target.closest('.vs-stepper__btn');
+        if (!btn) return;
+        var wrap = btn.closest('.fn_product_amount');
+        var input = wrap ? wrap.querySelector('input[name="amount"]') : null;
+        if (!input) return;
+        var step = parseInt(btn.getAttribute('data-vs-step'), 10);
+        if (isNaN(step) || step === 0) return;
+        stepAmount(input, step > 0 ? 'plus' : 'minus');
+    });
+
+    /* Nothing in okay.js clamps a hand-typed quantity: amount_change has a
+       "keyup" branch but no caller for it on this page, so a typed 999 would be
+       posted as is and the order quietly cut back later. Clamped once, on
+       change, and never re-dispatched - the value is only corrected. */
+    document.addEventListener('change', function (event) {
+        var input = event.target;
+        if (!input || !input.classList || !input.classList.contains('vs-stepper__input')) return;
+        var max = parseFloat(input.getAttribute('data-max'));
+        if (window.jQuery) {
+            var live = window.jQuery(input).data('max');
+            if (live !== null && live !== undefined) max = parseFloat(live);
+        }
+        var value = parseInt(input.value, 10);
+        if (isNaN(value) || value < 1) value = 1;
+        if (!isNaN(max) && max > 0 && value > max) value = max;
+        if (String(value) !== input.value) input.value = String(value);
+    });
+
+    /* Sticky mobile buy bar. Revealed once the inline buy row leaves the
+       viewport, hidden again when it comes back. The row is observed rather
+       than the button inside it: okay.js hides the add-to-cart button with
+       hidden-xs-up whenever the chosen variant is out of stock, and a
+       display:none element never intersects anything - the bar would latch on
+       and stay for the rest of the visit. */
+    (function () {
+        var inline = document.querySelector('.vs-buybox__submit');
+        var bar = document.querySelector('.vs-sticky-buy');
+        if (!inline || !bar || !('IntersectionObserver' in window)) return;
+        var target = inline.closest('.vs-buybox__buy') || inline;
+
+        new IntersectionObserver(function (entries) {
+            bar.classList.toggle('is-visible', !entries[0].isIntersecting);
+        }, { threshold: 0 }).observe(target);
+    }());
 
     /* --------------------------------------------------------- catalogue */
 
