@@ -9,6 +9,7 @@
 - ONLY security work. No dependency modernization (Smarty 5, Symfony 8, Intervention Image, etc.) — those are a separate iteration with a different risk profile.
 - Breaking changes ARE allowed where a defect cannot otherwise be closed, but each one must ship with a documented migration path.
 - Every boundary gets test coverage under `tests/Security/`. The existing 176-test suite must stay green.
+- No database changes: no schema migration, no new column, no new file in `1DB_changes/`. Enforced by a guard test.
 - No `strict_types` sweep, no business-logic refactoring beyond what a fix requires.
 - Small logical commits, grouped by phase.
 - PHPUnit stays at 9.6 — use docblock annotations, not PHP 8 attributes.
@@ -83,7 +84,20 @@ New namespace `Okay\Core\Security\`. Each class has one responsibility, a narrow
 
 One class lives outside `Okay\Core\Security\` because it is module-specific: `Okay\Modules\OkayCMS\RozetkaPay\Core\CallbackSignature` signs and verifies the callback URL that authenticates inbound RozetkaPay notifications.
 
-### Key decision: no new database tables
+### Key decision: no database changes at all
+
+This is a hard constraint on the whole iteration, not just a preference about tables. No `ALTER TABLE`, no `CREATE TABLE`, no new column, no index change, no file added to `1DB_changes/`, no module `update_x_y_z()` method. A guard test enforces it and the final verification pass diffs the live schema against a baseline.
+
+Every value written fits a column that already exists, verified against the running database:
+
+| Column | Type | Largest value written | Fits |
+| ------ | ---- | --------------------- | ---- |
+| `ok_managers.password` | `varchar(255)` | Argon2id hash, 97 chars | yes |
+| `ok_users.password` | `varchar(255)` | Argon2id hash, 97 chars | yes |
+| `ok_users.remind_code` | `varchar(32)` | truncated sha256 digest, exactly 32 chars | yes |
+| `ok_orders.payment_details` | `mediumtext` | callback JSON, shape unchanged | yes |
+
+That constraint is what shapes the two recovery designs below.
 
 Customer recovery moves from "token in `remind_code`, trusted on sight" to "digest in `remind_code`, exchanged for a reset state". The digest reuses the existing `remind_code` column and `remind_expire` TTL. Because `ok_users.remind_code` is `varchar(32)`, the stored digest is `sha256` of the token truncated to 32 hex characters — 128 bits, which is ample for the preimage resistance this lookup needs, and it avoids an `ALTER TABLE`.
 
@@ -165,6 +179,7 @@ The admin guard in `Request::checkSession()` stops using `session_id()` as the t
 
 | Test | Covers |
 | ---- | ------ |
+| `NoDatabaseChangeTest` | No migration file added, no DDL in new code, no new module upgrade method |
 | `PasswordHasherTest` | Argon2id/bcrypt round-trip, each legacy branch, malformed hashes rejected without warnings, `needsRehash()` for legacy formats |
 | `ManagerPasswordTest` | `Managers` delegates to the hasher; malformed stored hash returns false without warnings |
 | `CustomerPasswordTest` | `UsersEntity` no longer matches hashes in SQL and rehashes legacy formats |

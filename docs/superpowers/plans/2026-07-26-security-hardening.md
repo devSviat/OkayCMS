@@ -14,7 +14,16 @@
 - No `strict_types` declarations added to existing files. New files in `Okay/Core/Security/` also omit it, to match the surrounding codebase.
 - PHPUnit is 9.6 — use `/** @dataProvider */` docblock annotations, never PHP 8 attributes.
 - `phpunit.xml` sets `convertDeprecationsToExceptions`, `convertNoticesToExceptions` and `convertWarningsToExceptions` to `true`. Any PHP warning raised during a test fails that test. This is deliberate — several tasks rely on it.
-- No `ALTER TABLE`, no new tables, no new columns. `ok_users.remind_code` is `varchar(32)`; `ok_managers` has no recovery columns.
+- **No database changes of any kind.** No `ALTER TABLE`, no `CREATE TABLE`, no new columns, no index changes, no new file in `1DB_changes/`, no module `update_x_y_z()` migration. This is a hard requirement, not a preference — Task 0 installs a guard test that fails the build if anything drifts, and Task 24 diffs the live schema against a baseline. Every value the plan writes fits a column that already exists:
+
+  | Column | Type | Largest value written | Fits |
+  | ------ | ---- | --------------------- | ---- |
+  | `ok_managers.password` | `varchar(255)` | Argon2id hash, 97 chars | yes |
+  | `ok_users.password` | `varchar(255)` | Argon2id hash, 97 chars | yes |
+  | `ok_users.remind_code` | `varchar(32)` | truncated sha256 digest, exactly 32 chars | yes |
+  | `ok_orders.payment_details` | `mediumtext` | callback JSON, unchanged in shape | yes |
+
+  Manager recovery stores nothing at all — its token is stateless and signed. If any task appears to need a schema change, stop and report it rather than writing a migration.
 - Helper and request methods must keep returning through `ExtenderFacade::execute(__METHOD__, $result, func_get_args())`.
 - Never write raw SQL for CRUD — use the `Entity` base class.
 - The existing suite (176 tests) must stay green after every task.
@@ -57,7 +66,7 @@ docker compose exec php85 php vendor/bin/phpunit --filter PasswordHasherTest
 | ---- | -------------- |
 | `backend/design/js/filemanager/include/okay_access.php` | Procedural bootstrap that invokes `AccessGuard` |
 | `docs/UPGRADE-security.md` | Migration notes for theme and module authors |
-| `tests/Security/*.php` | 24 test classes, one per boundary |
+| `tests/Security/*.php` | 25 test classes, one per boundary |
 
 **Modified — the significant ones**
 
@@ -75,6 +84,174 @@ docker compose exec php85 php vendor/bin/phpunit --filter PasswordHasherTest
 | Feeds: 2 base adapters + 14 concrete adapters | Operator allowlist |
 | `backend/files/index.php` | Policy + path resolver |
 | 12 `setcookie()` call sites | Options-array form |
+
+---
+
+## Phase 0 — Schema guard
+
+### Task 0: Lock the database schema
+
+**Files:**
+- Create: `tests/Security/NoDatabaseChangeTest.php`
+- Create: `dev/schema-baseline.txt` (generated, committed)
+
+**Interfaces:**
+- Consumes: nothing.
+- Produces: a failing test the moment any task introduces a migration, a DDL statement, or a new file in `1DB_changes/`.
+
+**Why this comes first.** Every later task writes to columns that already exist, and none of them needs a schema change. That is easy to say and easy to violate under pressure — a task that hits a length limit or a missing column is exactly where someone reaches for an `ALTER TABLE`. This guard makes that impossible to do quietly.
+
+- [ ] **Step 1: Capture the baseline**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+ls 1DB_changes/ | sort > dev/schema-baseline.txt
+wc -l dev/schema-baseline.txt
+```
+Expected: 53 lines (`okay_clean.sql` plus 52 `update_*.sql` files). If the count differs, use the real number in the test below.
+
+- [ ] **Step 2: Write the failing test**
+
+Create `tests/Security/NoDatabaseChangeTest.php`:
+
+```php
+<?php
+
+namespace Security;
+
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Эта итерация не меняет схему БД. Тест держит это свойство:
+ * любая новая миграция или DDL в новом коде роняет сборку.
+ */
+class NoDatabaseChangeTest extends TestCase
+{
+    public function testNoMigrationFileWasAdded()
+    {
+        $root = dirname(__DIR__, 2);
+
+        $baseline = file($root . '/dev/schema-baseline.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $this->assertIsArray($baseline);
+
+        $current = scandir($root . '/1DB_changes');
+        $current = array_values(array_diff($current, ['.', '..']));
+        sort($current);
+        sort($baseline);
+
+        $this->assertSame($baseline, $current, 'A file was added to or removed from 1DB_changes/');
+    }
+
+    /**
+     * @dataProvider ddlKeywordProvider
+     */
+    public function testSecurityCodeContainsNoDdl($keyword)
+    {
+        $root = dirname(__DIR__, 2);
+        $offenders = [];
+
+        foreach ($this->phpFiles($root . '/Okay/Core/Security') as $file) {
+            $source = file_get_contents($file);
+            if ($source !== false && stripos($source, $keyword) !== false) {
+                $offenders[] = str_replace($root . '/', '', $file);
+            }
+        }
+
+        $this->assertSame([], $offenders, $keyword . ' found in Okay/Core/Security');
+    }
+
+    public function ddlKeywordProvider()
+    {
+        return [
+            'alter table'  => ['ALTER TABLE'],
+            'create table' => ['CREATE TABLE'],
+            'drop table'   => ['DROP TABLE'],
+            'add column'   => ['ADD COLUMN'],
+        ];
+    }
+
+    public function testNoModuleGainedAnUpgradeMethod()
+    {
+        $root = dirname(__DIR__, 2);
+        $offenders = [];
+
+        foreach ($this->phpFiles($root . '/Okay/Modules') as $file) {
+            if (basename($file) !== 'Init.php') {
+                continue;
+            }
+
+            $source = file_get_contents($file);
+            if ($source === false) {
+                continue;
+            }
+
+            if (preg_match('/function\s+update_\d+_\d+_\d+/', $source)) {
+                $offenders[] = str_replace($root . '/', '', $file);
+            }
+        }
+
+        // Ни один модуль в этой ветке не должен получить новый update_x_y_z().
+        // Если список непустой — сверьтесь с git: метод существовал до начала работ?
+        $this->assertSame([], $offenders);
+    }
+
+    private function phpFiles($dir)
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                yield $file->getPathname();
+            }
+        }
+    }
+}
+```
+
+- [ ] **Step 3: Run it against the untouched tree**
+
+Run: `cd dev && docker compose exec php85 php vendor/bin/phpunit --filter NoDatabaseChangeTest`
+
+Expected: the first two tests PASS. `testNoModuleGainedAnUpgradeMethod` will FAIL if modules already ship `update_x_y_z()` methods — that is pre-existing, not a violation. Check what it reports:
+
+```bash
+grep -rln "function update_[0-9]" Okay/Modules/ | head
+```
+
+If the list is non-empty, record those files in the test as an allowlist:
+
+```php
+        $preExisting = [
+            // Заполнить реальными путями из grep выше.
+        ];
+
+        $this->assertSame($preExisting, $offenders);
+    }
+```
+
+The point is not that no module ever had a migration — it is that this branch adds none.
+
+- [ ] **Step 4: Confirm the live schema matches the seed**
+
+```bash
+cd dev && docker compose exec -T mariadb mysqldump -uroot -proot --no-data --skip-comments okay > /tmp/schema-before.sql
+wc -l /tmp/schema-before.sql
+```
+
+Keep `/tmp/schema-before.sql` for Task 24 Step 8b. If the container is recreated in the meantime, regenerate it from a clean database before comparing.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add tests/Security/NoDatabaseChangeTest.php dev/schema-baseline.txt
+git commit -m "test(security): guard against database schema changes"
+```
 
 ---
 
@@ -3847,7 +4024,7 @@ Expected: PASS, 16 tests.
 In the admin panel, open a feed preset, set a price filter to `>` with a value, save, and open the generated feed URL. Confirm the XML renders and the filter is applied. Then check the stored setting:
 
 ```bash
-cd dev && docker compose exec -T mariadb mysql -uroot -proot okay -e "SELECT id, LEFT(settings, 200) FROM ok_feeds LIMIT 3;"
+cd dev && docker compose exec -T mariadb mysql -uroot -proot okay -e "SELECT id, LEFT(settings, 200) FROM ok_okay_cms__feeds__feeds LIMIT 3;"
 ```
 
 - [ ] **Step 9: Run the full suite and commit**
@@ -5255,7 +5432,7 @@ Expected: 0 failures, 0 errors. Record the final test count and compare it again
 ```bash
 cd dev && docker compose exec php85 php vendor/bin/phpunit tests/Security
 ```
-Expected: 24 test classes, 0 failures.
+Expected: 25 test classes, 0 failures.
 
 - [ ] **Step 3: Run static analysis**
 
@@ -5294,7 +5471,21 @@ curl -s -I -H "Host: okaycms.loc" http://127.0.0.1/ | grep -iE "x-frame|x-conten
 ```
 Expected: three security headers, a version-free `X-Powered-CMS`, and `okay_sid` with `HttpOnly; SameSite=Lax`.
 
-- [ ] **Step 8: Confirm every defect is closed**
+- [ ] **Step 8: Confirm the schema never moved**
+
+```bash
+cd dev && docker compose exec -T mariadb mysqldump -uroot -proot --no-data --skip-comments okay > /tmp/schema-after.sql
+diff /tmp/schema-before.sql /tmp/schema-after.sql && echo "schema unchanged"
+```
+Expected: `schema unchanged`. Any difference means a task wrote DDL and must be reverted — this iteration ships no migration.
+
+```bash
+cd dev && docker compose exec php85 php vendor/bin/phpunit --filter NoDatabaseChangeTest
+git status --short 1DB_changes/
+```
+Expected: the guard passes and `1DB_changes/` is untouched.
+
+- [ ] **Step 9: Confirm every defect is closed**
 
 Walk the defect table in `docs/superpowers/specs/2026-07-26-security-hardening-design.md` from 1 to 19 and check off each one against the task that fixed it:
 
@@ -5322,7 +5513,7 @@ Walk the defect table in `docs/superpowers/specs/2026-07-26-security-hardening-d
 
 Any row without a green test is unfinished work, not a documentation gap.
 
-- [ ] **Step 9: Final commit**
+- [ ] **Step 10: Final commit**
 
 ```bash
 cd /home/sviat/projects/OkayCMS
