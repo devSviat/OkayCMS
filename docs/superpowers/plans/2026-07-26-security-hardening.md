@@ -200,11 +200,11 @@ Module `update_x_y_z()` methods are deliberately NOT guarded here — they are t
 
 ```bash
 cd dev && docker compose exec -T mariadb mysqldump -uroot -proot --no-data --skip-comments okay \
-  > "$SCRATCH/schema-before.sql"
+  | sed -E 's/ AUTO_INCREMENT=[0-9]+//' > "$SCRATCH/schema-before.sql"
 wc -l "$SCRATCH/schema-before.sql"
 ```
 
-`$SCRATCH` is this session's scratchpad directory. Keep the dump for Task 24 Step 8. If the container is recreated in the meantime, regenerate it from a clean database before comparing.
+`$SCRATCH` is this session's scratchpad directory. The `sed` strips `AUTO_INCREMENT=` counters, which move whenever a row is inserted during manual verification and would otherwise read as a schema change. Keep the dump for Task 24 Step 8. If the container is recreated in the meantime, regenerate it from a clean database before comparing.
 
 - [ ] **Step 5: Commit**
 
@@ -5435,7 +5435,7 @@ Expected: three security headers, a version-free `X-Powered-CMS`, and `okay_sid`
 
 ```bash
 cd dev && docker compose exec -T mariadb mysqldump -uroot -proot --no-data --skip-comments okay \
-  > "$SCRATCH/schema-after.sql"
+  | sed -E 's/ AUTO_INCREMENT=[0-9]+//' > "$SCRATCH/schema-after.sql"
 diff "$SCRATCH/schema-before.sql" "$SCRATCH/schema-after.sql" && echo "schema unchanged"
 ```
 Expected: `schema unchanged`. Any difference means a task wrote DDL and must be reverted — this iteration ships no migration.

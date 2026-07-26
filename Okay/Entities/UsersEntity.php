@@ -6,9 +6,13 @@ namespace Okay\Entities;
 
 use Okay\Core\Entity\Entity;
 use Okay\Core\Modules\Extender\ExtenderFacade;
+use Okay\Core\Security\PasswordHasher;
 
 class UsersEntity extends Entity
 {
+
+    /** @var PasswordHasher|null */
+    private $passwordHasher;
 
     protected static $fields = [
         'id',
@@ -78,7 +82,7 @@ class UsersEntity extends Entity
     {
         $user = (array)$user;
         if (isset($user['password'])) {
-            $user['password'] = md5($this->salt . $user['password'] . md5($user['password']));
+            $user['password'] = $this->passwordHasher()->hash($user['password']);
         }
         
         $count = $this->count(['email'=>$user['email']]);
@@ -94,7 +98,7 @@ class UsersEntity extends Entity
     {
         $user = (array)$user;
         if (isset($user['password'])) {
-            $user['password'] = md5($this->salt . $user['password'] . md5($user['password']));
+            $user['password'] = $this->passwordHasher()->hash($user['password']);
         }
         
         return parent::update($id, $user);
@@ -123,18 +127,46 @@ class UsersEntity extends Entity
      */
     public function checkPassword($email, $password)
     {
-        $encPassword = md5($this->salt . $password . md5($password));
-        $userId = $this->cols(['id'])->findOne([
+        // Пароль больше не сравнивается в SQL: у современных хешей своя соль
+        // в каждой строке, поэтому находим пользователя по email и проверяем
+        // хеш в PHP.
+        $user = $this->cols(['id', 'password'])->findOne([
             'email' => $email,
-            'password' => $encPassword,
             'limit' => 1,
         ]);
-        if (!empty($userId)) {
-            $userId = (int)$userId;
-            return ExtenderFacade::execute([static::class, __FUNCTION__], $userId, func_get_args());
+
+        if (empty($user) || !$this->passwordHasher()->verify($password, $user->password, $this->salt)) {
+            return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
         }
 
-        return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
+        $userId = (int)$user->id;
+
+        if ($this->passwordHasher()->needsRehash($user->password)) {
+            $this->updatePasswordHash($userId, $this->passwordHasher()->hash($password));
+        }
+
+        return ExtenderFacade::execute([static::class, __FUNCTION__], $userId, func_get_args());
+    }
+
+    /**
+     * Записывает готовый хеш, минуя повторное хеширование в update().
+     *
+     * @param int $userId
+     * @param string $hash
+     * @return void
+     */
+    public function updatePasswordHash($userId, $hash)
+    {
+        parent::update((int)$userId, ['password' => $hash]);
+    }
+
+    private function passwordHasher()
+    {
+        if ($this->passwordHasher === null) {
+            $this->passwordHasher = new PasswordHasher();
+        }
+
+        return $this->passwordHasher;
     }
 
     public function generatePass($passLen = 6) {
