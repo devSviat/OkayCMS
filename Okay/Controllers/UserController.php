@@ -7,6 +7,7 @@ namespace Okay\Controllers;
 use Okay\Core\Notify;
 use Okay\Core\Response;
 use Okay\Core\Security\RecoveryToken;
+use Okay\Core\Security\SessionNames;
 use Okay\Entities\OrdersEntity;
 use Okay\Entities\OrderStatusEntity;
 use Okay\Entities\UsersEntity;
@@ -231,7 +232,7 @@ class UserController extends AbstractController
                 $usersEntity->update((int)$user->id, ['password' => $newPassword]);
                 unset($_SESSION[self::RECOVERY_SESSION_KEY]);
 
-                session_regenerate_id(true);
+                SessionNames::regenerate();
                 $_SESSION['user_id'] = (int)$user->id;
 
                 $userHelper->mergeCart();

@@ -1,13 +1,4 @@
 <?php
-if(!empty($_SERVER['HTTP_USER_AGENT'])){
-    session_name(md5($_SERVER['HTTP_USER_AGENT']));
-}
-
-//ini_set('display_errors', 'on');
-//error_reporting(E_ALL);
-
-session_start();
-chdir(dirname(dirname(__DIR__)));
 
 use Okay\Core\Request;
 use Okay\Core\Response;
@@ -18,8 +9,18 @@ use Okay\Entities\ManagersEntity;
 use Okay\Core\EntityFactory;
 use Okay\Core\Modules\Modules;
 use Okay\Core\BackendTranslations;
+use Okay\Core\Security\SessionNames;
 
+//ini_set('display_errors', 'on');
+//error_reporting(E_ALL);
+
+chdir(dirname(dirname(__DIR__)));
+
+// Автозагрузчик нужен раньше старта сессии: имя задаёт SessionNames.
 require_once('vendor/autoload.php');
+
+SessionNames::startBackend();
+
 $DI = include 'Okay/Core/config/container.php';
 
 /** @var Config $config */

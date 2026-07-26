@@ -234,10 +234,7 @@ class UploadHandler
     }
 
     protected function get_user_id() {
-        if(!empty($_SERVER['HTTP_USER_AGENT'])){
-            @session_name(md5($_SERVER['HTTP_USER_AGENT']));
-        }
-        @session_start();
+        \Okay\Core\Security\SessionNames::startBackend();
         return session_id();
     }
 

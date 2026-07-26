@@ -8,6 +8,7 @@ use Okay\Core\Response;
 use Okay\Core\Managers;
 use Okay\Core\Notify;
 use Okay\Core\Security\AdminRecoveryToken;
+use Okay\Core\Security\SessionNames;
 use Okay\Core\Validator;
 use Okay\Entities\LessonsEntity;
 use Okay\Entities\ManagersEntity;
@@ -85,7 +86,7 @@ class AuthAdmin extends IndexAdmin
                         'last_try' => null,
                     ]);
 
-                    session_regenerate_id(true);
+                    SessionNames::regenerate();
                     $_SESSION['admin'] = $manager->login;
 
                     $allManagers = $managersEntity->order('id ASC')->find();
@@ -120,6 +121,7 @@ class AuthAdmin extends IndexAdmin
                     $this->design->assign('error_message', 'limit_try');
                 } elseif ($managers->checkPassword($pass, $manager->password)) {
                     /*Входим в админку*/
+                    SessionNames::regenerate();
                     $_SESSION['admin'] = $manager->login;
 
                     // Старый формат хеша (APR1/MD5) заменяем на актуальный.

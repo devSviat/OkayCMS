@@ -9,6 +9,7 @@ use Okay\Core\Cart;
 use Okay\Core\Comparison;
 use Okay\Core\EntityFactory;
 use Okay\Core\Modules\Extender\ExtenderFacade;
+use Okay\Core\Security\SessionNames;
 use Okay\Core\WishList;
 use Okay\Entities\DeliveriesEntity;
 use Okay\Entities\PaymentsEntity;
@@ -74,6 +75,7 @@ class UserHelper
         /** @var UsersEntity $usersEntity */
         $usersEntity = $this->entityFactory->get(UsersEntity::class);
         if ($userId = $usersEntity->checkPassword($email, $password)) {
+            SessionNames::regenerate();
             $_SESSION['user_id'] = $userId;
             $usersEntity->update($userId, ['last_ip'=>$_SERVER['REMOTE_ADDR']]);
             
@@ -89,6 +91,7 @@ class UserHelper
     public function logout()
     {
         unset($_SESSION['user_id']);
+        SessionNames::regenerate();
         return ExtenderFacade::execute(__METHOD__, null, func_get_args());
     }
     
@@ -99,6 +102,7 @@ class UserHelper
 
         $user->last_ip  = $_SERVER['REMOTE_ADDR'];
         if ($userId = $usersEntity->add($user)) {
+            SessionNames::regenerate();
             $_SESSION['user_id'] = $userId;
             
             $this->mergeCart();

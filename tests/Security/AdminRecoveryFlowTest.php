@@ -51,7 +51,7 @@ class AdminRecoveryFlowTest extends TestCase
     {
         $source = $this->source();
 
-        $regenerate = strpos($source, 'session_regenerate_id(true);');
+        $regenerate = strpos($source, 'SessionNames::regenerate();');
         $login = strpos($source, "\$_SESSION['admin'] = \$manager->login;");
 
         $this->assertIsInt($regenerate);

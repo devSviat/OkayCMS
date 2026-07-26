@@ -15,10 +15,7 @@ ini_set('display_errors', 'off');
 
 require_once('vendor/autoload.php');
 
-if (!empty($_SERVER['HTTP_USER_AGENT'])) {
-    session_name(md5($_SERVER['HTTP_USER_AGENT']));
-}
-session_start();
+\Okay\Core\Security\SessionNames::startFrontend();
 
 /** @var OkayContainer $DI */
 $DI = include 'Okay/Core/config/container.php';

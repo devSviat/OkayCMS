@@ -3,13 +3,11 @@
 use Okay\Core\EntityFactory;
 use Okay\Entities\ManagersEntity;
 
-if(!empty($_SERVER['HTTP_USER_AGENT'])){
-    session_name(md5($_SERVER['HTTP_USER_AGENT']));
-}
-session_start();
 chdir('../../../..');
 
 require_once('vendor/autoload.php');
+
+\Okay\Core\Security\SessionNames::startBackend();
 
 $DI = include 'Okay/Core/config/container.php';
 
