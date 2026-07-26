@@ -119,7 +119,7 @@ class DeliveriesHelper
             $delivery->payment_methods_ids = array_intersect(array_keys($paymentMethods), $deliveriesEntity->getDeliveryPayments($delivery->id));
             
             if (!empty($delivery->settings) && is_string($delivery->settings)) {
-                $delivery->settings = unserialize($delivery->settings);
+                $delivery->settings = unserialize($delivery->settings, ['allowed_classes' => false]);
             }
         }
         

@@ -3,6 +3,7 @@
 
 namespace Okay\Modules\OkayCMS\Banners\Extenders;
 
+use Okay\Modules\OkayCMS\Banners\DTO\BannerImageSettingsDTO;
 
 use Okay\Core\Design;
 use Okay\Core\EntityFactory;
@@ -77,7 +78,7 @@ class FrontExtender implements ExtensionInterface
         if (!empty($banners)) {
             foreach ($banners as $banner) {
                 if (!empty($banner->settings)) {
-                    $banner->settings = unserialize($banner->settings);
+                    $banner->settings = unserialize($banner->settings, ['allowed_classes' => [BannerSettingsDTO::class, BannerImageSettingsDTO::class]]);
                 } else {
                     $banner->settings = new BannerSettingsDTO();
                 }

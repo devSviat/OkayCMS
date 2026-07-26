@@ -3,6 +3,7 @@
 
 namespace Okay\Modules\OkayCMS\Banners\Helpers;
 
+use Okay\Modules\OkayCMS\Banners\DTO\BannerSettingsDTO;
 
 use Okay\Core\Config;
 use Okay\Core\Database;
@@ -117,7 +118,7 @@ class BannersImagesHelper
         $bannerImage = $this->bannersImagesEntity->get($id) ?? new \stdClass();
         
         if (!empty($bannerImage->settings)) {
-            $bannerImage->settings = unserialize($bannerImage->settings);
+            $bannerImage->settings = unserialize($bannerImage->settings, ['allowed_classes' => [BannerSettingsDTO::class, BannerImageSettingsDTO::class]]);
         } else {
             $bannerImage->settings = new BannerImageSettingsDTO();
         }

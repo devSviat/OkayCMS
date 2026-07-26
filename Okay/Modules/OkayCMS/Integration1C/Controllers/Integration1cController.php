@@ -5,6 +5,7 @@ namespace Okay\Modules\OkayCMS\Integration1C\Controllers;
 
 
 use Okay\Controllers\AbstractController;
+use Okay\Core\Security\Filemanager\PathResolver;
 use Okay\Modules\OkayCMS\Integration1C\Integration\Export\ExportFactory\ExportFactory;
 use Okay\Modules\OkayCMS\Integration1C\Integration\Import\AbstractImport;
 use Okay\Modules\OkayCMS\Integration1C\Integration\Import\ImportFactory\ImportFactory;
@@ -29,6 +30,19 @@ class Integration1cController extends AbstractController
             return;
         }
         
+        // filename приходит из запроса и уходит в путь на диске.
+        // getFullPath() вырезает "../" одним проходом, что обходится
+        // последовательностью вида "....//".
+        $requestedFilename = $this->request->get('filename');
+        if ($requestedFilename !== null && $requestedFilename !== ''
+            && !PathResolver::isSafeRelativePath($requestedFilename)
+        ) {
+            $this->response->setContent("error filename\n");
+            $this->response->setStatusCode(400);
+            $this->response->sendContent();
+            return;
+        }
+
         if ($this->request->get('mode') == 'checkauth') {
             $this->response->setContent("success\n");
             $this->response->setContent(session_name()."\n");

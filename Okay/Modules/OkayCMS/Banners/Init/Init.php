@@ -184,7 +184,7 @@ class Init extends AbstractInit
         $bannersImages = $bannersImagesEntity->noLimit()->find();
 
         foreach ($banners as $banner) {
-            $settings = unserialize($banner->settings);
+            $settings = unserialize($banner->settings, ['allowed_classes' => [BannerSettingsDTO::class, BannerImageSettingsDTO::class]]);
             if (is_array($settings)) {
                 $bannerSettingsDTO = new BannerSettingsDTO();
                 $bannerSettingsDTO->setAsSlider((bool)($settings['as_slider'] ?? true));
@@ -201,7 +201,7 @@ class Init extends AbstractInit
         }
 
         foreach ($bannersImages as $bannerImage) {
-            $settings = unserialize($bannerImage->settings);
+            $settings = unserialize($bannerImage->settings, ['allowed_classes' => [BannerSettingsDTO::class, BannerImageSettingsDTO::class]]);
             if (is_array($settings)) {
                 $bannerImageSettingsDTO = new BannerImageSettingsDTO();
                 $bannerImageSettingsDTO->setDesktopWidth((int)($settings['desktop']['w'] ?? BannerImageSettingsDTO::DEFAULT_DESKTOP_W));

@@ -229,7 +229,13 @@ class Integration1C
     
     public function getFullPath($filename)
     {
-        return $this->dir . preg_replace('~\.\./~', '', $filename);
+        // Одного прохода preg_replace недостаточно: "....//" после замены
+        // снова даёт "../". Небезопасное имя не превращаем в путь вообще.
+        if (!\Okay\Core\Security\Filemanager\PathResolver::isSafeRelativePath($filename)) {
+            return '';
+        }
+
+        return $this->dir . $filename;
     }
     
     public function validateFile($xml_file)

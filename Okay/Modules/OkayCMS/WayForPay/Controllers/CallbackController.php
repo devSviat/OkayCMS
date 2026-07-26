@@ -67,7 +67,7 @@ class CallbackController extends AbstractController
             exit;
         }
 
-        $settings = unserialize($method->settings);
+        $settings = unserialize($method->settings, ['allowed_classes' => false]);
 
         $sign = array();
         foreach ($keysForSignature as $dataKey) {

@@ -132,7 +132,7 @@ class DeliveriesEntity extends Entity
         $result = $this->db->result('settings');
         $settings = [];
         if (!empty($result)) {
-            $settings = unserialize($result);
+            $settings = unserialize($result, ['allowed_classes' => false]);
         }
 
         return ExtenderFacade::execute([static::class, __FUNCTION__], $settings, func_get_args());

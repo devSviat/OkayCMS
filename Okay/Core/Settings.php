@@ -127,7 +127,7 @@ class Settings
         set_error_handler(function () use (&$success) {
             $success = false;
         });
-        $original = unserialize($value);
+        $original = unserialize($value, ['allowed_classes' => false]);
         restore_error_handler();
         return $success ? $original : $default;
     }

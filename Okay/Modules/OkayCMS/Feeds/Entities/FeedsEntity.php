@@ -42,24 +42,24 @@ class FeedsEntity extends Entity
         if (!$field) {
             if (in_array('categories_settings', $resultFields)) {
                 foreach ($results as $result) {
-                    $result->categories_settings = unserialize($result->categories_settings);
+                    $result->categories_settings = unserialize($result->categories_settings, ['allowed_classes' => false]);
                 }
             }
 
             if (in_array('features_settings', $resultFields)) {
                 foreach ($results as $result) {
-                    $result->features_settings = unserialize($result->features_settings);
+                    $result->features_settings = unserialize($result->features_settings, ['allowed_classes' => false]);
                 }
             }
 
             if (in_array('features_settings', $resultFields)) {
                 foreach ($results as $result) {
-                    $result->settings = unserialize($result->settings);
+                    $result->settings = unserialize($result->settings, ['allowed_classes' => false]);
                 }
             }
         } elseif ($field === 'categories_settings' || $field === 'features_settings' || $field === 'settings') {
             foreach ($results as &$result) {
-                $result = unserialize($result);
+                $result = unserialize($result, ['allowed_classes' => false]);
             }
         }
 

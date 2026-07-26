@@ -41,7 +41,7 @@ class LicenseStorage
             return null;
         }
 
-        $licenseDTO = @unserialize($licenseContent);
+        $licenseDTO = @unserialize($licenseContent, ['allowed_classes' => [LicenseDTO::class]]);
 
         if (!is_object($licenseDTO)) {
             return null;
