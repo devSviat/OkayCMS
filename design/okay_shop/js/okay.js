@@ -1,5 +1,5 @@
-/* CSRF-токен витрины. Кука okay_csrf выставляется сервером и специально
-   не httponly: её читают мутирующие ajax-запросы ниже. */
+/* CSRF-токен вітрини. Куку okay_csrf виставляє сервер і спеціально
+   не httponly: її читають мутуючі ajax-запити нижче. */
 function okayCsrfToken() {
   var match = document.cookie.match(/(?:^|;\s*)okay_csrf=([0-9a-f]{64})/);
   return match ? match[1] : "";

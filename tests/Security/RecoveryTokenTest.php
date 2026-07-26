@@ -16,7 +16,7 @@ class RecoveryTokenTest extends TestCase
         $digest = $token->digest($plain);
 
         $this->assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $plain);
-        // Ровно 32 символа: столько вмещает ok_users.remind_code
+        // Рівно 32 символи: стільки вміщає ok_users.remind_code
         $this->assertMatchesRegularExpression('/^[0-9a-f]{32}$/', $digest);
         $this->assertNotSame($plain, $digest);
         $this->assertSame($digest, $token->digest($plain));
@@ -92,7 +92,7 @@ class RecoveryTokenTest extends TestCase
         $token = new AdminRecoveryToken($this->config());
         $code = $token->create(15, 'current-password-hash', 1000);
 
-        // Подменяем полезную нагрузку на другого менеджера: подпись не сойдётся
+        // Підміняємо корисне навантаження на іншого менеджера: підпис не зійдеться
         $forged = $this->encode('16:' . (1000 + AdminRecoveryToken::TTL)) . '.' . explode('.', $code)[1];
 
         $this->assertSame(16, $token->unverifiedManagerId($forged));

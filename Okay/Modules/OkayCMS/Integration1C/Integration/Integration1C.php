@@ -229,8 +229,8 @@ class Integration1C
     
     public function getFullPath($filename)
     {
-        // Одного прохода preg_replace недостаточно: "....//" после замены
-        // снова даёт "../". Небезопасное имя не превращаем в путь вообще.
+        // Одного проходу preg_replace недостатньо: "....//" після заміни
+        // знову дає "../". Небезпечне ім'я не перетворюємо на шлях узагалі.
         if (!\Okay\Core\Security\Filemanager\PathResolver::isSafeRelativePath($filename)) {
             return '';
         }

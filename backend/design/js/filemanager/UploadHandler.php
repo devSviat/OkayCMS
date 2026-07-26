@@ -1154,8 +1154,8 @@ class UploadHandler
             }
             $file_size = $this->get_file_size($file_path, $append_file);
             if ($file_size === $file->size) {
-                // SVG исполняется браузером как документ, поэтому переписываем
-                // его по белому списку до того, как файл станет доступен.
+                // SVG виконується браузером як документ, тому переписуємо
+                // його за білим списком до того, як файл стане доступним.
                 if (strtolower((string)pathinfo($file_path, PATHINFO_EXTENSION)) === 'svg') {
                     $sanitizer = new \Okay\Core\Security\SvgSanitizer();
                     if (!$sanitizer->sanitizeFile($file_path)) {

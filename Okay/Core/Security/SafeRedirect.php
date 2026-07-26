@@ -3,9 +3,9 @@
 namespace Okay\Core\Security;
 
 /**
- * Проверка того, что редирект остаётся в пределах текущего origin.
+ * Перевірка того, що редирект лишається в межах поточного origin.
  *
- * Используется везде, где адрес перехода приходит из запроса.
+ * Використовується скрізь, де адреса переходу приходить із запиту.
  */
 class SafeRedirect
 {
@@ -15,7 +15,7 @@ class SafeRedirect
             return false;
         }
 
-        // Двойное декодирование, чтобы %2f%2f и %252f%252f не проскочили как //.
+        // Подвійне декодування, щоб %2f%2f і %252f%252f не проскочили як //.
         $decoded = rawurldecode(rawurldecode($url));
 
         if (preg_match('/[\x00-\x1f\x7f]/', $decoded)) {
@@ -43,8 +43,8 @@ class SafeRedirect
             return false;
         }
 
-        // Учётные данные в URL используются, чтобы замаскировать чужой хост:
-        // http://shop.example@evil.com/ ведёт на evil.com.
+        // Облікові дані в URL використовують, щоб замаскувати чужий хост:
+        // http://shop.example@evil.com/ веде на evil.com.
         if (isset($parsed['user']) || isset($parsed['pass'])) {
             return false;
         }

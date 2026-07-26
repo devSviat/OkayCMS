@@ -103,8 +103,8 @@ abstract class AbstractBackendPresetAdapter implements BackendPresetAdapterInter
     }
 
     /**
-     * Оператор сравнения попадает в SQL-фрагмент, поэтому допускается
-     * только из белого списка. Любое другое значение трактуется как '='.
+     * Оператор порівняння потрапляє у SQL-фрагмент, тому допускається
+     * лише з білого списку. Будь-яке інше значення трактується як '='.
      *
      * @param mixed $operator
      * @return string

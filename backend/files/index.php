@@ -40,15 +40,15 @@ $file   = isset($_GET['file']) && is_string($_GET['file']) ? $_GET['file'] : '';
 $folder = isset($_GET['folder']) && is_string($_GET['folder']) ? $_GET['folder'] : '';
 $ext    = isset($_GET['ext']) && is_string($_GET['ext']) ? $_GET['ext'] : '';
 
-// Раньше фильтровалось только имя файла, а folder и ext приходили из GET
-// как есть — folder выводил за пределы backend/files/.
+// Раніше фільтрувалось лише ім'я файлу, а folder і ext приходили з GET
+// як є — folder виводив за межі backend/files/.
 $requiredPermission = (new BackendFileDownloadPolicy())->permissionFor($folder, $file, $ext);
 
 if ($requiredPermission === null) {
     exit();
 }
 
-// Скачивание привязано к конкретному праву, а не просто к наличию сессии.
+// Завантаження прив'язане до конкретного права, а не просто до наявності сесії.
 if (empty($manager->permissions) || !in_array($requiredPermission, (array)$manager->permissions, true)) {
     exit();
 }

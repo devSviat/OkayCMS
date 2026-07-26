@@ -35,8 +35,8 @@ class AuthAdmin extends IndexAdmin
                 $managerToRecovery = $managersEntity->findOne(['email' => $recoveryEmail]);
 
                 if (!empty($managerToRecovery)) {
-                    // Токен подписан текущим хешем пароля менеджера, поэтому
-                    // становится недействительным сразу после смены пароля.
+                    // Токен підписаний поточним хешем пароля менеджера, тому
+                    // стає недійсним одразу після зміни пароля.
                     $code = $recoveryToken->create(
                         (int)$managerToRecovery->id,
                         (string)$managerToRecovery->password
@@ -44,9 +44,9 @@ class AuthAdmin extends IndexAdmin
                     $notify->emailPasswordRecoveryAdmin($managerToRecovery->email, $code);
                 }
 
-                // Ответ одинаков независимо от того, существует ли такой
-                // менеджер: иначе форма работает как оракул для перечисления
-                // администраторов сайта.
+                // Відповідь однакова незалежно від того, чи існує такий
+                // менеджер: інакше форма працює як оракул для перелічення
+                // адміністраторів сайту.
                 $result->send = true;
             }
             $this->response->setContent(json_encode($result), RESPONSE_JSON);
@@ -54,8 +54,8 @@ class AuthAdmin extends IndexAdmin
             exit;
         }
 
-        // Код приходит в GET по ссылке из письма и переносится через POST
-        // скрытым полем, чтобы отправка формы осталась в режиме восстановления.
+        // Код приходить у GET за посиланням з листа й переноситься через POST
+        // прихованим полем, щоб надсилання форми лишилось у режимі відновлення.
         $code = (string)($this->request->get('code') ?: $this->request->post('code'));
         $managerIdFromCode = $code === '' ? null : $recoveryToken->unverifiedManagerId($code);
         $managerToRecovery = $managerIdFromCode === null ? null : $managersEntity->get($managerIdFromCode);
@@ -75,11 +75,11 @@ class AuthAdmin extends IndexAdmin
                 } elseif ($new_password !== $new_password_check) {
                     $this->design->assign('error_message', 'password_wrong');
                 } else {
-                    // Менеджер берётся из токена, а не из POST: иначе владелец
-                    // любого валидного кода мог сменить пароль кому угодно.
+                    // Менеджер береться з токена, а не з POST: інакше власник
+                    // будь-якого валідного коду міг змінити пароль кому завгодно.
                     $manager = $managerToRecovery;
 
-                    // ManagersEntity::update() хеширует пароль сам.
+                    // ManagersEntity::update() хешує пароль сам.
                     $managersEntity->update((int)$manager->id, [
                         'password' => $new_password,
                         'cnt_try'  => 0,
@@ -124,9 +124,9 @@ class AuthAdmin extends IndexAdmin
                     SessionNames::regenerate();
                     $_SESSION['admin'] = $manager->login;
 
-                    // Старый формат хеша (APR1/MD5) заменяем на актуальный.
-                    // ManagersEntity::update() хеширует пароль сам, поэтому
-                    // передаём его в открытом виде.
+                    // Старий формат хеша (APR1/MD5) замінюємо на актуальний.
+                    // ManagersEntity::update() хешує пароль сам, тому
+                    // передаємо його у відкритому вигляді.
                     if ($managers->needsPasswordRehash($manager->password)) {
                         $managersEntity->update((int)$manager->id, ['password' => $pass]);
                     }

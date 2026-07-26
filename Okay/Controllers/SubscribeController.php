@@ -22,8 +22,8 @@ class SubscribeController
         Response $response,
         Request $request
     ) {
-        // Контроллер не наследует AbstractController, поэтому проверяем
-        // токен напрямую.
+        // Контролер не успадковує AbstractController, тому перевіряємо
+        // токен напряму.
         if (($subscribe = $commonRequest->postSubscribe()) !== null) {
             $this->requireCustomerCsrf($request, $response);
 
@@ -54,7 +54,7 @@ class SubscribeController
     }
 
     /**
-     * Пропускает только POST с корректным токеном витрины.
+     * Пропускає лише POST із коректним токеном вітрини.
      *
      * @param Request $request
      * @param Response $response

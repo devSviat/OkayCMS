@@ -15,7 +15,7 @@
                 <span data-language="password_remind_expired">{$lang->password_remind_expired}</span>
             </div>
         {elseif $recovery_mode}
-            {* Ввод нового пароля по подтверждённой ссылке восстановления *}
+            {* Введення нового пароля за підтвердженим посиланням відновлення *}
             <div class="f_row flex-lg-row align-items-md-start">
 
             </div>
@@ -58,7 +58,7 @@
                 </form>
             </div>
         {elseif $email_sent}
-            {* Ответ не зависит от того, существует ли аккаунт *}
+            {* Відповідь не залежить від того, чи існує акаунт *}
             <div>
                 <span data-language="password_remind_letter_sent_generic">{$lang->password_remind_letter_sent_generic}</span>
             </div>

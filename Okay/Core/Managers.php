@@ -283,13 +283,13 @@ class Managers
         return $this->passwordHasher()->verify($password, $crypt_pass);
     }
 
-    /*Хеширование нового пароля*/
+    /*Хешування нового пароля*/
     public function hashPassword($password)
     {
         return $this->passwordHasher()->hash($password);
     }
 
-    /*Нужно ли перехешировать сохранённый пароль*/
+    /*Чи треба перехешувати збережений пароль*/
     public function needsPasswordRehash($crypt_pass)
     {
         return $this->passwordHasher()->needsRehash($crypt_pass);
@@ -304,7 +304,7 @@ class Managers
         return $this->passwordHasher;
     }
 
-    /*Шифрование пароля. Оставлено для проверки существующих APR1-хешей.*/
+    /*Шифрування пароля. Залишено для перевірки наявних APR1-хешів.*/
     public function cryptApr1Md5($plainpasswd, $salt = '')
     {
         return $this->passwordHasher()->cryptApr1Md5($plainpasswd, $salt);

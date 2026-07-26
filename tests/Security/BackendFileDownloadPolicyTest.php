@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 class BackendFileDownloadPolicyTest extends TestCase
 {
     /**
-     * Цели ровно те, что переписывает nginx (dev/config/nginx/okay.conf).
+     * Цілі рівно ті, що переписує nginx (dev/config/nginx/okay.conf).
      *
      * @dataProvider knownTargetProvider
      */
@@ -78,10 +78,10 @@ class BackendFileDownloadPolicyTest extends TestCase
         $this->assertStringContainsString('PathResolver', $source);
         $this->assertStringContainsString('permissionFor(', $source);
 
-        // Права проверяются, а не просто наличие менеджера
+        // Права перевіряються, а не просто наявність менеджера
         $this->assertStringContainsString('in_array($requiredPermission', $source);
 
-        // $_SESSION['admin'] больше не читается без проверки на существование
+        // $_SESSION['admin'] більше не читається без перевірки на існування
         $this->assertStringContainsString("empty(\$_SESSION['admin']) ? null :", $source);
     }
 }

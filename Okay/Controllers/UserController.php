@@ -21,7 +21,7 @@ use Okay\Requests\UserRequest;
 class UserController extends AbstractController
 {
 
-    /** Подтверждённое состояние сброса пароля, живёт между редиректом и формой */
+    /** Підтверджений стан скидання пароля, живе між редиректом і формою */
     const RECOVERY_SESSION_KEY = 'password_recovery_state';
 
 
@@ -178,8 +178,8 @@ class UserController extends AbstractController
     
     public function passwordRemind(UsersEntity $usersEntity, Notify $notify, UserHelper $userHelper, RecoveryToken $recoveryToken, $code = '')
     {
-        // Переход по ссылке восстановления больше не авторизует пользователя.
-        // Он лишь подтверждает токен и открывает форму нового пароля.
+        // Перехід за посиланням відновлення більше не авторизує користувача.
+        // Він лише підтверджує токен і відкриває форму нового пароля.
         if (!empty($code)) {
             if ($recoveryToken->isValidFormat($code)) {
                 $user = $usersEntity->findOne([
@@ -194,8 +194,8 @@ class UserController extends AbstractController
                         'expires' => $user->remind_expire,
                     ];
 
-                    // Убираем токен из адресной строки, чтобы он не утёк
-                    // через Referer или историю браузера.
+                    // Прибираємо токен з адресного рядка, щоб він не витік
+                    // через Referer або історію браузера.
                     $this->response->redirectTo(Router::generateUrl('password_remind', [], true));
                 }
             }
@@ -209,7 +209,7 @@ class UserController extends AbstractController
 
         $state = isset($_SESSION[self::RECOVERY_SESSION_KEY]) ? $_SESSION[self::RECOVERY_SESSION_KEY] : null;
 
-        // Установка нового пароля по подтверждённому токену
+        // Встановлення нового пароля за підтвердженим токеном
         if (!empty($state) && $this->request->method('post') && $this->request->post('reset_password')) {
             $newPassword = (string)$this->request->post('new_password');
             $newPasswordCheck = (string)$this->request->post('new_password_check');
@@ -226,8 +226,8 @@ class UserController extends AbstractController
                 $this->design->assign('recovery_mode', true);
                 $this->design->assign('error', 'password_wrong');
             } else {
-                // Токен гасится до повышения привилегий, поэтому повторный
-                // переход по той же ссылке уже ничего не даёт.
+                // Токен гаситься до підвищення привілеїв, тому повторний
+                // перехід за тим самим посиланням уже нічого не дає.
                 $usersEntity->update((int)$user->id, ['remind_code' => null, 'remind_expire' => null]);
                 $usersEntity->update((int)$user->id, ['password' => $newPassword]);
                 unset($_SESSION[self::RECOVERY_SESSION_KEY]);
@@ -246,7 +246,7 @@ class UserController extends AbstractController
             $this->design->assign('recovery_mode', true);
         }
 
-        // Если запостили email
+        // Якщо запостили email
         if ($this->request->method('post') && $this->request->post('email')) {
             $email = $this->request->post('email');
 
@@ -254,7 +254,7 @@ class UserController extends AbstractController
             if (!empty($user->id)) {
                 $token = $recoveryToken->create();
 
-                // В базе лежит только digest: сам токен есть лишь в письме.
+                // У базі лежить лише digest: сам токен є тільки в листі.
                 $usersEntity->update($user->id, [
                     'remind_code'   => $recoveryToken->digest($token),
                     'remind_expire' => $recoveryToken->expiresAt(),
@@ -263,8 +263,8 @@ class UserController extends AbstractController
                 $notify->emailPasswordRemind($user->id, $token);
             }
 
-            // Ответ одинаков для существующего и несуществующего адреса,
-            // иначе форма работает как оракул наличия аккаунта.
+            // Відповідь однакова для наявної й неіснуючої адреси,
+            // інакше форма працює як оракул наявності акаунта.
             $this->design->assign('email_sent', true);
         }
 

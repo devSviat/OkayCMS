@@ -464,7 +464,7 @@ class MainHelper
         $request = $this->SL->getService(Request::class);
 
         if ($prgSeoHide = $request->post("prg_seo_hide")) {
-            // Адрес приходит из POST, поэтому уводить с текущего домена нельзя.
+            // Адреса приходить із POST, тому вести з поточного домену не можна.
             if (SafeRedirect::isSameOrigin($prgSeoHide, Request::getDomainWithProtocol())) {
                 Response::redirectTo($prgSeoHide);
                 exit;

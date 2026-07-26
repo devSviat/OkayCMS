@@ -78,7 +78,7 @@ class StorefrontCsrfGuardTest extends TestCase
 
         $this->assertStringContainsString('function okayCsrfToken', $js);
 
-        // Каждый мутирующий вызов должен быть POST и нести токен
+        // Кожен мутуючий виклик має бути POST і нести токен
         $this->assertSame(8, substr_count($js, 'customer_csrf_token'), 'token missing on some ajax call');
         $this->assertSame(0, substr_count($js, 'okay.router["cart_ajax"],' . "\n" . '    data: {' . "\n" . '      action'), 'cart ajax still sends a bare GET');
     }

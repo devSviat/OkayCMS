@@ -12,7 +12,7 @@ class RefundAdmin extends IndexAdmin
 {
     public function fetch()
     {
-        // Referer полностью подконтролен отправителю запроса.
+        // Referer повністю підконтрольний відправнику запиту.
         $backUrl = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
         if (!SafeRedirect::isSameOrigin($backUrl, Request::getDomainWithProtocol())) {
             $backUrl = Request::getRootUrl() . '/backend/index.php';

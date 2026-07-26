@@ -205,8 +205,8 @@ class CommentsHelper implements GetListInterface
                 
                 ExtenderFacade::execute(__METHOD__, $commentId, func_get_args());
                 
-                // REQUEST_URI приходит из строки запроса: "GET //evil.com"
-                // даёт protocol-relative редирект на чужой хост.
+                // REQUEST_URI приходить із рядка запиту: "GET //evil.com"
+                // дає protocol-relative редирект на чужий хост.
                 $backUrl = $_SERVER['REQUEST_URI'] . '#comment_' . $commentId;
                 if (!SafeRedirect::isSameOrigin($backUrl, Request::getDomainWithProtocol())) {
                     $backUrl = Request::getRootUrl();

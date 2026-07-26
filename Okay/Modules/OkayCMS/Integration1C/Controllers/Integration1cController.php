@@ -30,9 +30,9 @@ class Integration1cController extends AbstractController
             return;
         }
         
-        // filename приходит из запроса и уходит в путь на диске.
-        // getFullPath() вырезает "../" одним проходом, что обходится
-        // последовательностью вида "....//".
+        // filename приходить із запиту й іде у шлях на диску.
+        // getFullPath() вирізає "../" одним проходом, що обходиться
+        // послідовністю виду "....//".
         $requestedFilename = $this->request->get('filename');
         if ($requestedFilename !== null && $requestedFilename !== ''
             && !PathResolver::isSafeRelativePath($requestedFilename)

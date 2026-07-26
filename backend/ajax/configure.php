@@ -16,7 +16,7 @@ use Okay\Core\Security\SessionNames;
 
 chdir(dirname(dirname(__DIR__)));
 
-// Автозагрузчик нужен раньше старта сессии: имя задаёт SessionNames.
+// Автозавантажувач потрібен раніше за старт сесії: ім'я задає SessionNames.
 require_once('vendor/autoload.php');
 
 SessionNames::startBackend();

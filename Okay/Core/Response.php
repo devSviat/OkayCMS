@@ -85,8 +85,8 @@ class Response
         $this->adapterManager = $adapterManager;
         $this->type = RESPONSE_HTML;
 
-        // Точную версию не публикуем: она превращает баннер в готовую
-        // цель для сканеров. Параметр оставлен ради совместимости DI.
+        // Точну версію не публікуємо: вона перетворює банер на готову
+        // ціль для сканерів. Параметр залишено заради сумісності DI.
         $this->addHeader('X-Powered-CMS: OkayCMS');
 
         foreach (SecurityHeaders::defaults() as $header) {

@@ -67,7 +67,7 @@ class FeedFilterOperatorTest extends TestCase
                 continue;
             }
 
-            // Каждое чтение ['operator'] должно быть обёрнуто нормализатором
+            // Кожне читання ['operator'] має бути загорнуте нормалізатором
             if (preg_match_all("/\\['operator'\\]/", $source, $m, PREG_OFFSET_CAPTURE)) {
                 foreach ($m[0] as $hit) {
                     $lineStart = strrpos(substr($source, 0, $hit[1]), "\n");

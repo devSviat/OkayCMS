@@ -38,8 +38,8 @@ class CustomerCsrfTokenTest extends TestCase
     {
         $token = CustomerCsrfToken::get();
 
-        // Смена имени сессии на деплое обнуляет серверное состояние,
-        // но уже отрендеренная форма должна остаться рабочей.
+        // Зміна імені сесії на деплої обнуляє серверний стан,
+        // але вже відрендерена форма має лишитись робочою.
         $_SESSION = [];
 
         $this->assertTrue(CustomerCsrfToken::check($token));

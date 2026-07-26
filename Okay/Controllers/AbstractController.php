@@ -137,7 +137,7 @@ class AbstractController
 
         $mainHelper->configureTemplateDirProcedure();
 
-        // Токен для форм витрины: шаблоны печатают его как
+        // Токен для форм вітрини: шаблони друкують його як
         // <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
         $this->design->assign('customer_csrf_token', CustomerCsrfToken::get());
 
@@ -145,7 +145,7 @@ class AbstractController
     }
 
     /**
-     * Токен для форм витрины.
+     * Токен для форм вітрини.
      *
      * @return string
      */
@@ -155,8 +155,8 @@ class AbstractController
     }
 
     /**
-     * Пропускает только POST с корректным токеном.
-     * Мутирующие эндпоинты витрины обязаны вызывать этот метод первым.
+     * Пропускає лише POST із коректним токеном.
+     * Мутуючі ендпоінти вітрини зобов'язані викликати цей метод першим.
      *
      * @return void
      */

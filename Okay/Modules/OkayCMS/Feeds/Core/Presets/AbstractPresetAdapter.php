@@ -488,8 +488,8 @@ abstract class AbstractPresetAdapter implements PresetAdapterInterface
     abstract protected function getItem(object $product, bool $addVariantUrl = false): array;
 
     /**
-     * Оператор сравнения попадает в SQL-фрагмент, поэтому допускается
-     * только из белого списка. Любое другое значение трактуется как '='.
+     * Оператор порівняння потрапляє у SQL-фрагмент, тому допускається
+     * лише з білого списку. Будь-яке інше значення трактується як '='.
      *
      * @param mixed $operator
      * @return string

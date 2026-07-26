@@ -127,9 +127,9 @@ class UsersEntity extends Entity
      */
     public function checkPassword($email, $password)
     {
-        // Пароль больше не сравнивается в SQL: у современных хешей своя соль
-        // в каждой строке, поэтому находим пользователя по email и проверяем
-        // хеш в PHP.
+        // Пароль більше не порівнюється в SQL: у сучасних хешів своя сіль
+        // у кожному рядку, тому знаходимо користувача за email і перевіряємо
+        // хеш у PHP.
         $user = $this->cols(['id', 'password'])->findOne([
             'email' => $email,
             'limit' => 1,
@@ -149,7 +149,7 @@ class UsersEntity extends Entity
     }
 
     /**
-     * Записывает готовый хеш, минуя повторное хеширование в update().
+     * Записує готовий хеш, оминаючи повторне хешування в update().
      *
      * @param int $userId
      * @param string $hash

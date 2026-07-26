@@ -18,8 +18,8 @@ class UnserializeHardeningTest extends TestCase
                     continue;
                 }
 
-                // Только вызовы глобальной функции: объявления и вызовы
-                // собственных методов-обёрток ($this->unserialize) не считаются.
+                // Лише виклики глобальної функції: оголошення та виклики
+                // власних методів-обгорток ($this->unserialize) не рахуються.
                 if (!preg_match_all(
                     '/(?<![\w>:$])(?<!function )unserialize\s*\(/',
                     $source,
@@ -49,7 +49,7 @@ class UnserializeHardeningTest extends TestCase
         );
         $this->assertIsString($source);
 
-        // Здесь объект нужен по делу, поэтому список классов, а не false
+        // Тут об'єкт потрібен по суті, тому список класів, а не false
         $this->assertStringContainsString("'allowed_classes' => [LicenseDTO::class]", $source);
     }
 
