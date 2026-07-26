@@ -5,6 +5,7 @@ namespace Okay\Core;
 
 
 use Okay\Core\Adapters\Response\AdapterManager;
+use Okay\Core\Security\SecurityHeaders;
 use Okay\Core\Modules\LicenseModulesTemplates;
 
 class Response
@@ -83,7 +84,14 @@ class Response
     {
         $this->adapterManager = $adapterManager;
         $this->type = RESPONSE_HTML;
-        $this->addHeader('X-Powered-CMS: OkayCMS ' . $version);
+
+        // Точную версию не публикуем: она превращает баннер в готовую
+        // цель для сканеров. Параметр оставлен ради совместимости DI.
+        $this->addHeader('X-Powered-CMS: OkayCMS');
+
+        foreach (SecurityHeaders::defaults() as $header) {
+            $this->addHeader($header);
+        }
     }
     
     /**
