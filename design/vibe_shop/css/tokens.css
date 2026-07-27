@@ -80,10 +80,12 @@
 	--vs-space-11: 5rem;
 	--vs-space-12: 6rem;
 
-/* Height of the bar that sticks: .vs-header__bar is min-height 78px from 992px
-   and .vs-header__main adds a 1px hairline, rounded up. Anything else that
-   sticks below the header offsets by this so it does not slide underneath. */
-	--vs-header-h: 80px;
+/* Height of the bar that sticks, measured not estimated: from 992px
+   .vs-header__bar is 86px (a 46px logo cap plus 20px of air per side, which is
+   also its min-height floor) and .vs-header__main adds a 1px hairline. Anything
+   else that sticks below the header offsets by this so it does not slide
+   underneath. Keep it in step with .vs-header__bar in the >=992px block. */
+	--vs-header-h: 87px;
 
 	--vs-radius-sm: 0.5rem;
 	--vs-radius-md: 0.75rem;

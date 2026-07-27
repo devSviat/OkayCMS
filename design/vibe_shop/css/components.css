@@ -188,12 +188,19 @@ body.other_page .main {
 	position: relative;
 }
 
+/* The bar's height is min-height PLUS its own padding, never a fixed height:    */
+/* the hairline is drawn on the parent, so anything that makes the parent        */
+/* shorter than this box draws the line through the logo instead of under it.    */
+/* The padding is the guarantee - whatever the shop owner uploads as a logo, and */
+/* whatever a module drops into the informer row, keeps this much air below it.  */
+
 .vs-header__bar {
 	position: relative;
 	display: flex;
 	align-items: center;
 	gap: var(--vs-space-3);
 	min-height: 60px;
+	padding: var(--vs-space-2) 0;
 }
 
 .vs-header .vs-header__bar .vs-header__burger {
@@ -292,18 +299,21 @@ body.other_page .main {
 
 /* ------------------------------------------------------------ utility bar */
 
-/* 56px, not 44: every control in this bar is a 44px pill, so a 44px bar makes  */
-/* every hover background run edge to edge and the row reads as a stack of      */
-/* boxes rather than a line of links. 6px of canvas above and below is enough   */
-/* to let each pill be seen as a separate object without turning the utility    */
-/* strip into a second navigation bar.                                          */
+/* This strip and everything in it is hidden below 992px, so it is only ever    */
+/* driven by a mouse and the theme's 44x44 touch floor does not apply. The      */
+/* pills are 32px tall - visibly shorter than a touch target, comfortably past  */
+/* the 24x24 WCAG 2.5.8 AA floor, and still tall enough that the wide hover     */
+/* background reads as a deliberate pill rather than shrink-wrapped text.       */
+/* The bar is the pill plus 6px of canvas above and below: any less and every   */
+/* hover background runs edge to edge and the row reads as a stack of boxes     */
+/* rather than as a line of links.                                             */
 
 .vs-utility {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: var(--vs-space-5);
-	min-height: 56px;
+	min-height: 44px;
 	font-size: var(--vs-text-sm);
 }
 
@@ -318,7 +328,7 @@ body.other_page .main {
 	display: inline-flex;
 	align-items: center;
 	gap: var(--vs-space-2);
-	min-height: 44px;
+	min-height: 32px;
 	padding: 0 var(--vs-space-2);
 	border-radius: var(--vs-radius-sm);
 	color: var(--vs-text);
@@ -381,7 +391,7 @@ body.other_page .main {
 	display: inline-flex;
 	align-items: center;
 	gap: var(--vs-space-1);
-	min-height: 44px;
+	min-height: 32px;
 	padding: 0 var(--vs-space-4);
 	border-radius: var(--vs-radius-sm);
 	color: var(--vs-text);
@@ -471,7 +481,7 @@ body.other_page .main {
 	display: inline-flex;
 	align-items: center;
 	gap: var(--vs-space-1);
-	min-height: 44px;
+	min-height: 32px;
 	padding: 0 var(--vs-space-2);
 	border: 0;
 	border-radius: var(--vs-radius-sm);
@@ -4313,9 +4323,15 @@ body.hc-nav-open {
 /* --------------------------------------------------------------- ≥ 992 px */
 
 @media (min-width: 992px) {
+/* 86 = 20px of air + the 46px logo cap + 20px of air. min-height and padding    */
+/* agree on purpose: the padding keeps the air under a short logo from being     */
+/* eaten, the floor keeps the bar the same height whatever the owner uploads,    */
+/* and --vs-header-h (86 + the 1px hairline) can therefore stay a constant.      */
+
 	.vs-header__bar {
 		gap: var(--vs-space-5);
-		min-height: 78px;
+		min-height: 86px;
+		padding: var(--vs-space-5) 0;
 	}
 
 	.vs-logo img,

@@ -65,8 +65,7 @@ header {
   color: var(--okay-body-text);
   padding: 10px 0;
 }
-.header__bottom,
-.fn_header__sticky {
+.header__bottom {
   background: var(--okay-second-company);
   color: var(--okay-second-company-text);
   padding: 0;
