@@ -1,60 +1,49 @@
 <!-- Coupon -->
 {if $coupon_request}
-    <div class="coupon">
-        <div class="fn_switch coupon__title" data-language="cart_coupon">{$lang->cart_coupon}</div>
+    {* No disclosure here on purpose: the stock theme hung .fn_switch on the
+       title, which slide-toggles whatever element happens to follow it - the
+       error message when there was one, the field when there was not. One
+       fewer tap on the money path, and the field is always where it was. *}
+    <div class="vs-coupon">
+        <label class="vs-coupon__label" for="vs_coupon_code" data-language="cart_coupon">{$lang->cart_coupon}</label>
+
         {* Coupon error messages *}
         {if $coupon_error}
-            <div class="message_error">
+            <p class="vs-note vs-note--error">
                 {if $coupon_error == 'invalid'}
                     {$lang->cart_coupon_error}
                 {elseif $coupon_error == 'empty'}
                     {$lang->cart_empty_coupon_error}
                 {/if}
-            </div>
+            </p>
         {/if}
 
         {if $cart->coupon->min_order_price > 0}
-            <div class="message_success">
+            <p class="vs-note vs-note--ok">
                 {$lang->cart_coupon} {$cart->coupon->code|escape} {$lang->cart_coupon_min} {$cart->coupon->min_order_price|convert} {$currency->sign|escape}
-            </div>
+            </p>
         {/if}
 
-        <div class="d-flex align-items-center coupon__group">
-            <div class="form__group form__group--coupon {if !$coupon_error}filled{/if}">
-                <input class="fn_coupon form__input form__input--coupon form__placeholder--focus" type="text" name="coupon_code" value="{$cart->coupon->code|escape}">
-                <span class="form__placeholder">{$lang->cart_coupon}</span>
-            </div>
-            <input class="form__button form__button--coupon fn_sub_coupon" type="button" value="{$lang->cart_purchases_coupon_apply}">
+        <div class="vs-coupon__row">
+            <input id="vs_coupon_code" class="fn_coupon vs-field vs-coupon__input" type="text" name="coupon_code" autocomplete="off" value="{$cart->coupon->code|escape}">
+            <button class="fn_sub_coupon vs-btn vs-btn--secondary vs-coupon__submit" type="button">{$lang->cart_purchases_coupon_apply}</button>
         </div>
     </div>
+
     {if !empty($cart->discounts)}
         {foreach $cart->discounts as $discount}
-            <div class="purchase_detail__item">
-                <div class="purchase_detail__column_name">
-                    <div class="purchase_detail__name">{$discount->name}</div>
-                </div>
-                <div class="purchase_detail__column_value">
-                    <div class="purchase_detail__price">
-                        <i>{$discount->percentDiscount|string_format:"%.2f"} %</i>
-                        &minus; {$discount->absoluteDiscount|convert} <span class="currency">{$currency->sign|escape}</span>
-                    </div>
-                </div>
+            <div class="vs-summary__row vs-summary__row--discount">
+                <span class="vs-summary__label">{$discount->name}</span>
+                <span class="vs-summary__value vs-tabular">{$discount->percentDiscount|string_format:"%.2f"} % &minus;{$discount->absoluteDiscount|convert} <span class="currency">{$currency->sign|escape}</span></span>
             </div>
         {/foreach}
     {/if}
 
     {if !empty($cart->total_purchases_discounts)}
         {foreach $cart->total_purchases_discounts as $purchase_discount}
-            <div class="purchase_detail__item total_purchases_discount__item">
-                <div class="purchase_detail__column_name">
-                    <div class="purchase_detail__name">{$purchase_discount->name}</div>
-                </div>
-                <div class="purchase_detail__column_value">
-                    <div class="purchase_detail__price">
-                        <i>{$purchase_discount->percentDiscount|string_format:"%.2f"} %</i>
-                        &minus; {$purchase_discount->absoluteDiscount|convert} <span class="currency">{$currency->sign|escape}</span>
-                    </div>
-                </div>
+            <div class="vs-summary__row vs-summary__row--discount total_purchases_discount__item">
+                <span class="vs-summary__label">{$purchase_discount->name}</span>
+                <span class="vs-summary__value vs-tabular">{$purchase_discount->percentDiscount|string_format:"%.2f"} % &minus;{$purchase_discount->absoluteDiscount|convert} <span class="currency">{$currency->sign|escape}</span></span>
             </div>
         {/foreach}
     {/if}

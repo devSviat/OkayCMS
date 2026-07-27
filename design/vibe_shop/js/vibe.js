@@ -303,7 +303,10 @@
         var btn = event.target.closest('.vs-stepper__btn');
         if (!btn) return;
         var wrap = btn.closest('.fn_product_amount');
-        var input = wrap ? wrap.querySelector('input[name="amount"]') : null;
+        /* The product page posts name="amount"; the cart and the pop-up cart
+           post name="amounts[<variantId>]". Match the stepper's own input class
+           first so both pages resolve with one selector. */
+        var input = wrap ? wrap.querySelector('.vs-stepper__input, input[name="amount"]') : null;
         if (!input) return;
         var step = parseInt(btn.getAttribute('data-vs-step'), 10);
         if (isNaN(step) || step === 0) return;
@@ -313,7 +316,12 @@
     /* Nothing in okay.js clamps a hand-typed quantity: amount_change has a
        "keyup" branch but no caller for it on this page, so a typed 999 would be
        posted as is and the order quietly cut back later. Clamped once, on
-       change, and never re-dispatched - the value is only corrected. */
+       change, and never re-dispatched - the value is only corrected.
+
+       The ceiling is the same one amount_change uses: with pre-order enabled a
+       shopper may legitimately order past the stock figure, and the wrapper
+       carries fn_is_preorder in exactly that case, so clamping to data-max
+       there would refuse orders the shop accepts. */
     document.addEventListener('change', function (event) {
         var input = event.target;
         if (!input || !input.classList || !input.classList.contains('vs-stepper__input')) return;
@@ -321,6 +329,14 @@
         if (window.jQuery) {
             var live = window.jQuery(input).data('max');
             if (live !== null && live !== undefined) max = parseFloat(live);
+        }
+        /* `okay` is declared with const in common_js, so it is a global
+           lexical binding and never a property of window - window.okay is
+           undefined here and the bare identifier is the only way to read it. */
+        var wrap = input.closest ? input.closest('.fn_product_amount') : null;
+        if (wrap && wrap.classList.contains('fn_is_preorder') && typeof okay !== 'undefined'
+            && !isNaN(parseFloat(okay.max_order_amount))) {
+            max = parseFloat(okay.max_order_amount);
         }
         var value = parseInt(input.value, 10);
         if (isNaN(value) || value < 1) value = 1;

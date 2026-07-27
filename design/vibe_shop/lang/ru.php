@@ -85,6 +85,7 @@ $lang['form_enter_captcha'] = 'Введите капчу';
 $lang['cart_button'] = 'Оформить заказ';
 $lang['cart_checkout'] = 'Применить';
 $lang['cart_empty'] = 'Корзина пуста';
+$lang['cart_empty_note'] = 'Добавьте товары из каталога, чтобы оформить заказ.';
 $lang['cart_delivery'] = 'Способы доставки';
 $lang['cart_free'] = 'бесплатно';
 $lang['cart_payment'] = 'Способы оплаты';

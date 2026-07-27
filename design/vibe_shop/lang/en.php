@@ -85,6 +85,7 @@ $lang['form_enter_captcha'] = 'Enter Captcha';
 $lang['cart_button'] = 'Make an order';
 $lang['cart_checkout'] = 'To apply';
 $lang['cart_empty'] = 'Cart is empty';
+$lang['cart_empty_note'] = 'Add something from the catalogue to place an order.';
 $lang['cart_delivery'] = 'Shipping methods';
 $lang['cart_free'] = 'free';
 $lang['cart_payment'] = 'Payment methods';

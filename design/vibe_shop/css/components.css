@@ -4573,3 +4573,1027 @@ body.hc-nav-open {
 		opacity: 1;
 	}
 }
+
+/* --------------------------------------------------------------- checkout */
+/* index.tpl renders no site header for CartController - a deliberate         */
+/* distraction-free checkout - and this page carries its own thin bar instead. */
+/* The bar does not stick: it is chrome, and on a phone the total and the      */
+/* submit button are worth more vertical space than a permanent logo.          */
+
+.vs-checkout {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.vs-checkout__bar {
+	flex: none;
+	border-bottom: 1px solid var(--vs-hairline);
+	background-color: var(--vs-surface);
+}
+
+.vs-checkout__bar-inner {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	min-height: 64px;
+}
+
+.vs-checkout__logo {
+	display: block;
+	flex: 0 1 auto;
+	min-width: 0;
+	line-height: 0;
+}
+
+.vs-checkout__logo img,
+.vs-checkout__logo svg {
+	max-width: 100%;
+	max-height: 32px;
+}
+
+.vs-checkout__back {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	min-height: 44px;
+	margin-left: auto;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.vs-checkout__back:hover {
+	color: var(--vs-heading);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.vs-checkout__back svg {
+	flex: none;
+	width: 18px;
+	height: 18px;
+	transform: rotate(90deg);
+}
+
+.vs-checkout__phone {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--vs-space-2);
+	flex: none;
+	min-width: 44px;
+	min-height: 44px;
+	color: var(--vs-heading);
+	font-size: var(--vs-text-sm);
+	font-weight: 600;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.vs-checkout__phone svg {
+	flex: none;
+	width: 20px;
+	height: 20px;
+}
+
+/* The number itself only appears once there is room for it beside the back    */
+/* link; below that the icon alone is the call affordance and title carries    */
+/* the number.                                                                 */
+
+.vs-checkout__phone-text {
+	display: none;
+}
+
+.vs-checkout__body {
+	flex: 1 0 auto;
+	padding: var(--vs-space-6) 0 var(--vs-space-9);
+}
+
+.vs-checkout__title {
+	margin: 0 0 var(--vs-space-5);
+	font-size: var(--vs-text-2xl);
+}
+
+.vs-checkout__intro {
+	max-width: 70ch;
+	margin-bottom: var(--vs-space-5);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-checkout__foot {
+	flex: none;
+	padding: var(--vs-space-5) 0;
+	border-top: 1px solid var(--vs-hairline);
+}
+
+/* ------------------------------------------------------------ cart layout */
+
+.vs-cart {
+	display: grid;
+	gap: var(--vs-space-5);
+	align-items: start;
+	margin: 0;
+}
+
+.vs-cart__main {
+	display: grid;
+	gap: var(--vs-space-5);
+	min-width: 0;
+}
+
+.vs-panel {
+	min-width: 0;
+	padding: var(--vs-space-5);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+}
+
+.vs-panel__title {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	margin: 0 0 var(--vs-space-4);
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+}
+
+.vs-panel__title svg {
+	flex: none;
+	width: 20px;
+	height: 20px;
+	color: var(--vs-text-muted);
+}
+
+.vs-panel__note {
+	margin-top: 0;
+	margin-bottom: var(--vs-space-4);
+}
+
+.vs-fields {
+	display: grid;
+	gap: var(--vs-space-4);
+}
+
+.vs-fields .vs-form__row {
+	margin-bottom: 0;
+}
+
+/* jquery.validate drops label.error in beside the field it rejected, and the  */
+/* DeliveryFields module registers its own rules against the same form.        */
+
+.vs-panel label.error,
+.vs-summary label.error {
+	display: block;
+	min-height: 0;
+	margin: var(--vs-space-2) 0 0;
+	color: var(--vs-sale-600);
+	font-size: var(--vs-text-sm);
+	font-weight: 400;
+}
+
+/* -------------------------------------------------------------- cart lines */
+/* Two rows on a phone - media, description and remove on the first, quantity  */
+/* and line total on the second - collapsing to a single row from 768px. The   */
+/* pop-up cart and the order summary keep the two-row form at every width      */
+/* because neither is ever wider than about 510px.                             */
+
+.vs-cart__lines {
+	display: flex;
+	flex-direction: column;
+}
+
+/* The quantity and the line total share one full-width area on the second row */
+/* rather than taking a column each. Sized as columns their widest member - the */
+/* total - sets the track for the whole line, and at 375px that leaves the      */
+/* product name about 120px, which is not enough to tell two variants of the    */
+/* same product apart.                                                          */
+
+.vs-cart__line {
+	display: grid;
+	grid-template-columns: 72px minmax(0, 1fr) 44px;
+	grid-template-areas: "thumb info remove" "qty qty qty";
+	align-items: start;
+	gap: var(--vs-space-3);
+	padding: var(--vs-space-4) 0;
+	border-top: 1px solid var(--vs-hairline);
+}
+
+.vs-cart__line:first-child {
+	padding-top: 0;
+	border-top: 0;
+}
+
+.vs-cart__line:last-child {
+	padding-bottom: 0;
+}
+
+.vs-cart__thumb {
+	grid-area: thumb;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 1 / 1;
+	overflow: hidden;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-plate);
+}
+
+.vs-cart__thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.vs-cart__thumb-empty {
+	display: inline-flex;
+	color: var(--vs-border-strong);
+}
+
+.vs-cart__thumb-empty svg {
+	width: 22px;
+	height: 22px;
+}
+
+.vs-cart__info {
+	grid-area: info;
+	min-width: 0;
+}
+
+.vs-cart__name {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	overflow: hidden;
+	color: var(--vs-heading);
+	font-size: var(--vs-text-base);
+	font-weight: 500;
+	line-height: var(--vs-leading-tight);
+	text-decoration: none;
+}
+
+.vs-cart__name:hover {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.vs-cart__variant {
+	margin-top: var(--vs-space-1);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-cart__unit {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--vs-space-1);
+	margin-top: var(--vs-space-2);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-cart__unit--cut {
+	color: var(--vs-sale-600);
+}
+
+.vs-cart__discount-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	min-height: 44px;
+	margin: calc(-1 * var(--vs-space-3));
+	padding: var(--vs-space-3);
+	color: var(--vs-sale-600);
+}
+
+.vs-cart__discount-link svg {
+	width: 18px;
+	height: 18px;
+}
+
+.vs-cart__qty {
+	grid-area: qty;
+	justify-self: start;
+	align-self: center;
+}
+
+.vs-cart__qty-static {
+	grid-area: qty;
+	justify-self: start;
+	align-self: center;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-cart__linetotal {
+	grid-area: qty;
+	justify-self: end;
+	align-self: center;
+	color: var(--vs-heading);
+	font-size: var(--vs-text-base);
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.vs-cart__remove {
+	grid-area: remove;
+	justify-self: end;
+	color: var(--vs-text-muted);
+}
+
+.vs-cart__remove:hover {
+	color: var(--vs-heading);
+}
+
+.vs-cart__remove svg {
+	width: 18px;
+	height: 18px;
+}
+
+/* The order summary and the pop-up cart are narrow columns, never the full    */
+/* page, so their lines keep the two-row form and a smaller thumbnail.          */
+
+.vs-cart__line--static,
+.vs-cart__line--compact {
+	grid-template-columns: 56px minmax(0, 1fr) 44px;
+	gap: var(--vs-space-3);
+}
+
+.vs-cart__line--static {
+	grid-template-areas: "thumb info info" "qty qty qty";
+}
+
+/* --------------------------------------------------- purchase discount card */
+/* Opened by fancybox from the rose tag next to a discounted unit price. The    */
+/* legacy .popup class is deliberately not carried over - okay.css forces its    */
+/* padding, width and text-align with !important, which this layer may not      */
+/* answer.                                                                      */
+
+.vs-discounts {
+	padding: var(--vs-space-5);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+	text-align: left;
+}
+
+.vs-discounts__title {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	margin-bottom: var(--vs-space-3);
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+}
+
+.vs-discounts__title svg {
+	flex: none;
+	width: 20px;
+	height: 20px;
+	color: var(--vs-sale-600);
+}
+
+.vs-discounts__item {
+	padding: var(--vs-space-3) 0;
+	border-top: 1px solid var(--vs-hairline);
+}
+
+.vs-discounts__name {
+	margin-bottom: var(--vs-space-2);
+	color: var(--vs-heading);
+	font-weight: 600;
+}
+
+.vs-discounts__row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--vs-space-4);
+	padding: var(--vs-space-1) 0;
+	font-size: var(--vs-text-sm);
+}
+
+.vs-discounts__label {
+	color: var(--vs-text-muted);
+}
+
+.vs-discounts__row--cut {
+	color: var(--vs-sale-600);
+}
+
+.vs-discounts__row--total {
+	color: var(--vs-heading);
+	font-weight: 600;
+}
+
+/* ----------------------------------------------------------- order summary */
+/* The total and the one action that matters. Sticky from 992px so neither     */
+/* ever leaves the screen while the delivery and payment choices are made.     */
+
+.vs-summary {
+	align-self: start;
+	min-width: 0;
+	padding: var(--vs-space-5);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+}
+
+.vs-summary__title {
+	margin: 0 0 var(--vs-space-4);
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+}
+
+.vs-summary__row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--vs-space-4);
+	padding: var(--vs-space-2) 0;
+	font-size: var(--vs-text-sm);
+}
+
+.vs-summary__label {
+	min-width: 0;
+	color: var(--vs-text-muted);
+}
+
+.vs-summary__value {
+	flex: none;
+	color: var(--vs-text);
+	text-align: right;
+}
+
+.vs-summary__row--discount .vs-summary__value {
+	color: var(--vs-sale-600);
+}
+
+.vs-summary__free {
+	color: var(--vs-ok-600);
+	font-weight: 600;
+}
+
+.vs-summary__row--total {
+	margin-top: var(--vs-space-2);
+	padding-top: var(--vs-space-4);
+	border-top: 1px solid var(--vs-hairline);
+}
+
+.vs-summary__row--total .vs-summary__label {
+	color: var(--vs-heading);
+	font-size: var(--vs-text-base);
+	font-weight: 600;
+}
+
+.vs-summary__grand {
+	flex: none;
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-xl);
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	white-space: nowrap;
+}
+
+/* recaptcha v2 renders a fixed 304px widget, which is wider than the padded    */
+/* inside of the 340px summary column at the narrowest desktop width.           */
+
+.vs-summary__captcha {
+	margin-top: var(--vs-space-4);
+	overflow-x: auto;
+}
+
+.vs-summary__submit {
+	width: 100%;
+	min-height: 52px;
+	margin-top: var(--vs-space-5);
+	font-size: var(--vs-text-base);
+}
+
+/* ------------------------------------------------------------------ coupon */
+
+.vs-coupon {
+	margin-bottom: var(--vs-space-2);
+	padding-bottom: var(--vs-space-4);
+	border-bottom: 1px solid var(--vs-hairline);
+}
+
+.vs-coupon__label {
+	display: block;
+	margin: 0 0 var(--vs-space-2);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-coupon .vs-note {
+	margin-top: 0;
+	margin-bottom: var(--vs-space-2);
+}
+
+.vs-coupon__row {
+	display: flex;
+	gap: var(--vs-space-2);
+}
+
+.vs-coupon__input {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.vs-coupon__submit {
+	flex: none;
+	padding: 0 var(--vs-space-4);
+}
+
+/* ------------------------------------------------------- delivery / payment */
+/* One tap target per option. The radio stays in the markup and stays a real    */
+/* focusable control - the card is the <label> around it, so keyboard and       */
+/* screen-reader behaviour is unchanged. The picked state is expressed twice on  */
+/* purpose: :has() for browsers that have it, and the .active class okay.js and */
+/* common_js already toggle on the same label for those that do not.            */
+
+.vs-options {
+	display: grid;
+	gap: var(--vs-space-3);
+}
+
+.vs-option {
+	min-width: 0;
+}
+
+.vs-option-card {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--vs-space-3);
+	min-height: 60px;
+	margin: 0;
+	padding: var(--vs-space-4);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+	font-size: var(--vs-text-base);
+	cursor: pointer;
+	transition: border-color var(--vs-dur-1) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-option-card:hover {
+	border-color: var(--vs-border-strong);
+}
+
+.vs-option-card.active,
+.vs-option-card:has(input:checked) {
+	border-color: var(--vs-accent);
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-option-card__radio {
+	flex: none;
+	width: 20px;
+	height: 20px;
+	margin: 2px 0 0;
+	padding: 0;
+	-webkit-appearance: none;
+	appearance: none;
+	border: 1px solid var(--vs-border-strong);
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface);
+	cursor: pointer;
+	transition: border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-option-card__radio:checked {
+	border-color: var(--vs-accent);
+	background-image: radial-gradient(circle at center, var(--vs-accent) 0 5px, transparent 5px);
+}
+
+.vs-option-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--vs-space-1);
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.vs-option-card__name {
+	color: var(--vs-heading);
+	font-size: var(--vs-text-base);
+	font-weight: 500;
+	line-height: var(--vs-leading-tight);
+}
+
+.vs-option-card__price {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	line-height: var(--vs-leading-body);
+}
+
+.vs-option-card__logo {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex: none;
+	width: 56px;
+	height: 28px;
+	overflow: hidden;
+}
+
+/* The cap is in px, not a percentage: lazyload leaves xloading.gif in place    */
+/* until the image scrolls in, and a percentage max-height against the auto     */
+/* height of <picture> computes to none - the spinner then renders at its own   */
+/* size and bursts the row.                                                     */
+
+.vs-option-card__logo img {
+	width: auto;
+	height: auto;
+	max-width: 56px;
+	max-height: 28px;
+	object-fit: contain;
+}
+
+/* Only the picked option opens its extra block. okay.js disables the module    */
+/* inputs of every other delivery, so showing them all would offer fields that  */
+/* cannot be filled in - and the shopper would not be told why.                 */
+
+/* Indented to the option's text column - 16px of card padding, the 20px radio */
+/* and the 12px gap - so the block reads as belonging to the option above it   */
+/* rather than to the list.                                                    */
+
+.vs-option__extra {
+	display: none;
+	padding: var(--vs-space-4) var(--vs-space-4) var(--vs-space-2) 48px;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-option-card.active + .vs-option__extra,
+.vs-option:has(input:checked) .vs-option__extra {
+	display: block;
+}
+
+.vs-option__extra > *:last-child {
+	margin-bottom: 0;
+}
+
+.vs-option__extra .form__group:last-child {
+	margin-bottom: 0;
+}
+
+/* Payment and delivery modules render their own markup in here and this layer  */
+/* does not own it. These rules only lift the stock form controls to the same    */
+/* height, radius and border as the rest of the page.                            */
+
+.vs-option__extra .form__input,
+.vs-option__extra .form__input_captcha {
+	height: 44px;
+	border-color: var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	font-size: var(--vs-text-base);
+}
+
+.vs-option__extra .form__textarea {
+	min-height: 88px;
+	border-color: var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	font-size: var(--vs-text-base);
+}
+
+.vs-option__extra .form__group {
+	margin-bottom: var(--vs-space-4);
+}
+
+.vs-option__extra label {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	min-height: 44px;
+	margin: 0;
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	cursor: pointer;
+}
+
+.vs-option__extra label.error {
+	display: block;
+	min-height: 0;
+	margin-top: var(--vs-space-1);
+	color: var(--vs-sale-600);
+	font-size: var(--vs-text-xs);
+}
+
+/* ---------------------------------------------------------------- pop-up cart */
+
+.vs-popcart {
+	padding: var(--vs-space-5);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+	text-align: left;
+}
+
+.vs-popcart__head {
+	margin-bottom: var(--vs-space-3);
+}
+
+.vs-popcart__title {
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+}
+
+.vs-popcart__lines {
+	max-height: 46vh;
+	overflow-y: auto;
+}
+
+.vs-popcart__foot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--vs-space-3);
+	margin-top: var(--vs-space-4);
+	padding-top: var(--vs-space-4);
+	border-top: 1px solid var(--vs-hairline);
+}
+
+.vs-popcart__total {
+	display: flex;
+	align-items: baseline;
+	gap: var(--vs-space-2);
+}
+
+.vs-popcart__total-label {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-popcart__total-value {
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-xl);
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.vs-popcart__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--vs-space-2);
+	flex: 1 1 240px;
+	justify-content: flex-end;
+}
+
+/* Both actions fill their row once they wrap, so a stacked pair does not read */
+/* as two ragged buttons. fancybox already pads its content element by 44px on */
+/* every side, which is a quarter of a 375px screen - hence the smaller inner  */
+/* padding on narrow viewports below.                                          */
+
+.vs-popcart__actions .vs-btn {
+	flex: 1 1 auto;
+}
+
+/* --------------------------------------------------------------- order page */
+
+.vs-order__hero {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--vs-space-3);
+	margin-bottom: var(--vs-space-6);
+	padding: var(--vs-space-6);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+}
+
+.vs-order__hero-icon {
+	display: inline-flex;
+	color: var(--vs-ok-600);
+}
+
+.vs-order__hero-icon svg {
+	width: 28px;
+	height: 28px;
+}
+
+.vs-order__hero-title {
+	margin: 0;
+	font-size: var(--vs-text-2xl);
+}
+
+.vs-order__number {
+	color: var(--vs-text-muted);
+}
+
+.vs-order__hero-note {
+	margin: 0;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-order__details {
+	display: grid;
+	grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+	gap: var(--vs-space-2) var(--vs-space-5);
+	margin: 0;
+	font-size: var(--vs-text-sm);
+}
+
+.vs-order__details dt {
+	color: var(--vs-text-muted);
+}
+
+.vs-order__details dd {
+	margin: 0;
+	color: var(--vs-text);
+}
+
+.vs-order__pay {
+	width: 100%;
+	min-height: 52px;
+	margin-top: var(--vs-space-5);
+}
+
+.vs-order__payment-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--vs-space-3);
+}
+
+.vs-order__payment-label {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-order__payment-name {
+	color: var(--vs-heading);
+	font-weight: 600;
+}
+
+.vs-order__payment-change {
+	padding: 0 var(--vs-space-3);
+	font-size: var(--vs-text-sm);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.vs-order__payment-note {
+	margin-top: var(--vs-space-3);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-order__payment-form {
+	margin-top: var(--vs-space-4);
+}
+
+/* The payment module owns everything inside here - LiqPay renders an          */
+/* <input type="submit" class="button">, WayForPay its own - so this only      */
+/* raises whatever submit control arrives to the weight of the page's own CTA. */
+/* Without it the one action left on this page reads as unstyled body text.    */
+
+.vs-order__payment-form input[type="submit"],
+.vs-order__payment-form button,
+.vs-order__payment-form .button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 52px;
+	padding: 0 var(--vs-space-6);
+	border: 1px solid transparent;
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-cta);
+	color: var(--vs-cta-text);
+	font-family: inherit;
+	font-size: var(--vs-text-base);
+	font-weight: 500;
+	line-height: 1;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-order__payment-form input[type="submit"]:hover,
+.vs-order__payment-form button:hover,
+.vs-order__payment-form .button:hover {
+	background-color: var(--vs-cta-hover);
+}
+
+/* ------------------------------------------------------- empty state, centred */
+/* The catalogue's empty state is left-aligned on purpose (its rail column       */
+/* collapses beside it). A cart, a wishlist or an empty search has nothing        */
+/* beside it, so the centred variant is the one those pages use.                  */
+
+.vs-empty--center {
+	align-items: center;
+	max-width: 46ch;
+	margin: var(--vs-space-6) auto;
+	padding: var(--vs-space-10) var(--vs-space-6);
+	text-align: center;
+}
+
+.vs-empty--center .vs-empty__note {
+	margin: 0;
+}
+
+/* Inside the pop-up cart the surrounding panel is already the card. */
+
+.vs-popcart .vs-empty {
+	max-width: none;
+	margin: 0;
+	padding: var(--vs-space-8) var(--vs-space-4);
+	border: 0;
+	background-color: transparent;
+}
+
+/* --------------------------------------------------- checkout ≥ 576 px */
+
+@media (min-width: 576px) {
+	.vs-fields {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.vs-form__row--wide {
+		grid-column: 1 / -1;
+	}
+}
+
+/* --------------------------------------------------- checkout ≥ 768 px */
+
+@media (min-width: 768px) {
+	.vs-checkout__phone-text {
+		display: inline;
+	}
+
+	.vs-cart__line:not(.vs-cart__line--compact):not(.vs-cart__line--static) {
+		grid-template-columns: 88px minmax(0, 1fr) auto auto 44px;
+		grid-template-areas: "thumb info qty total remove";
+		align-items: center;
+		gap: var(--vs-space-4);
+	}
+
+	.vs-cart__line:not(.vs-cart__line--compact):not(.vs-cart__line--static) .vs-cart__linetotal {
+		grid-area: total;
+	}
+
+	.vs-panel {
+		padding: var(--vs-space-6);
+	}
+}
+
+/* --------------------------------------------------- checkout ≥ 992 px */
+
+@media (min-width: 992px) {
+	.vs-cart {
+		grid-template-columns: minmax(0, 1fr) 340px;
+		gap: var(--vs-space-8);
+	}
+
+/* There is no header on the cart page to clear, so the offset is a plain gap  */
+/* rather than a derived header height. The order page does have one, and its  */
+/* summary offsets past it.                                                    */
+
+	.vs-summary {
+		position: sticky;
+		top: var(--vs-space-6);
+	}
+
+	.vs-order .vs-summary {
+		top: calc(var(--vs-header-h) + var(--vs-space-4));
+	}
+
+	.vs-checkout__body {
+		padding: var(--vs-space-8) 0 var(--vs-space-10);
+	}
+}
+
+/* --------------------------------------------------- checkout ≤ 575 px */
+
+@media (max-width: 575px) {
+	.vs-popcart {
+		padding: var(--vs-space-3);
+	}
+
+	.vs-panel {
+		padding: var(--vs-space-4);
+	}
+
+	.vs-summary {
+		padding: var(--vs-space-4);
+	}
+}
