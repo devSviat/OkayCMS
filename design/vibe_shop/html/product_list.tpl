@@ -1,23 +1,11 @@
 {* Product card. fn_* hooks and every <option> data-* are a JavaScript contract (okay.js) *}
-{* Chips are only worth it for short labels - "Червоний", "XL", "128 Gb". A shop
-   whose variants read "16 дюймов - 155-166 см" would get four stacked 44px rows
-   and a card twice as tall as its neighbours, so those fall back to the dropdown. *}
-{* $product->variants is NULL, not [], for a product with no variant: attachVariants
-   only ever assigns the key, it never initialises it. Counting NULL is a fatal in
-   PHP 8, and this card is rendered for every product in the catalogue, on the home
-   page swipers and in the wishlist - one variant-less product takes the whole
-   listing down with a 500. (The related-products block on the product page cannot
-   reach it: RelatedProductsHelper hard-codes in_stock => true, which requires at
-   least one variant. The catalogue does not.) *}
-{assign var="vsVariantCount" value=0}
-{if !empty($product->variants)}{assign var="vsVariantCount" value=$product->variants|count}{/if}
-{assign var="vsChipLen" value=0}
-{assign var="vsChipNamed" value=true}
-{foreach $product->variants as $v}
-    {if !$v->name}{assign var="vsChipNamed" value=false}
-    {elseif $v->name|count_characters > $vsChipLen}{assign var="vsChipLen" value=$v->name|count_characters}{/if}
-{/foreach}
-{assign var="vsChips" value=($vsVariantCount > 1 && $vsVariantCount <= 4 && $vsChipNamed && $vsChipLen <= 12)}
+{* The card carries NO visible variant control. Choosing a variant is the product
+   page's job - the catalogue's job is to get the shopper there. The <select> below
+   stays in the DOM because it is the value this form posts and because okay.js's
+   .fn_variant handler is what recalculates price, old price, SKU and stock; it is
+   simply never shown and never handed to select2. Consequence, accepted
+   deliberately: "В кошик" from a card adds the FIRST variant of a multi-variant
+   product. *}
 <article class="vs-card fn_product">
     <div class="fn_transfer vs-card__inner">
         <div class="vs-card__media">
@@ -93,6 +81,18 @@
                     <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}">{include file="svg.tpl" svgId="close"}</a>
                 {/if}
             </div>
+
+            {* The short annotation is a hover reveal over the foot of the plate, not a
+               line in the card body: in the body it cost every card two permanent lines
+               of small grey type for a fragment of a sentence, and revealing it in flow
+               would resize the whole grid row under the pointer. It is aria-hidden and
+               display:none under (hover: none) on purpose - it is a truncated copy of
+               text the product page states in full, so nothing lives only here.
+               strip_tags leaves entities behind ("Цвет:&nbsp;Белый"), so escape must not
+               double-encode them - it still escapes a bare < or & *}
+            {if $product->annotation && $controller != "MainController"}
+                <div class="vs-card__annotation" aria-hidden="true">{$product->annotation|strip_tags|escape:'html':'UTF-8':false}</div>
+            {/if}
         </div>
 
         <div class="vs-card__body">
@@ -102,12 +102,6 @@
                 <span data-language="product_sku">{$lang->product_sku}:</span>
                 <span class="fn_sku">{$product->variant->sku|escape}</span>
             </div>
-
-            {if $product->annotation && $controller != "MainController"}
-                {* strip_tags leaves entities behind ("Цвет:&nbsp;Белый"), so escape must not
-                   double-encode them - it still escapes a bare < or & *}
-                <div class="vs-card__annotation">{$product->annotation|strip_tags|escape:'html':'UTF-8':false}</div>
-            {/if}
 
             <div class="vs-card__price">
                 <span class="vs-card__price_current{if $product->variant->compare_price} price--red{/if}"><span class="fn_price">{$product->variant->price|convert}</span>&nbsp;<span class="vs-card__currency">{$currency->sign|escape}</span></span>
@@ -121,22 +115,15 @@
             </p>
 
             <form class="fn_variants vs-card__form" action="{url_generator route="cart"}">
-                {* Variants: chips up to four, select2 beyond. The <select> stays in the
-                   DOM either way - it is the value the form submits. *}
-                {if $vsChips}
-                    <div class="vs-chips" role="group" aria-label="{$lang->product_variant|escape}">
-                        {foreach $product->variants as $v}
-                            <button type="button" class="vs-chip{if $v@first} vs-chip--selected{/if}" aria-pressed="{if $v@first}true{else}false{/if}" data-variant-id="{$v->id}">{$v->name|escape}</button>
-                        {/foreach}
-                    </div>
-                {/if}
-                <div class="vs-card__variants{if $vsChips || $vsVariantCount <= 1} hidden{/if}">
-                    <select name="variant" class="fn_variant vs-card__select{if $vsVariantCount > 1 && !$vsChips} fn_select2{/if}">
+                {* Value carrier only: always hidden, never given fn_select2. okay.js
+                   reads it on submit with $(this).find("select[name=variant]").val(),
+                   which does not care that the element is display:none. *}
+                <div class="vs-card__variants hidden">
+                    <select name="variant" class="fn_variant">
                         {foreach $product->variants as $v}
                             <option value="{$v->id}" data-price="{$v->price|convert}" data-stock="{$v->stock}"{if $v->compare_price > 0} data-cprice="{$v->compare_price|convert}"{if $v->compare_price>$v->price && $v->price>0} data-discount="{round((($v->price-$v->compare_price)/$v->compare_price)*100, 2)}&nbsp;%"{/if}{/if}{if $v->sku} data-sku="{$v->sku|escape}"{/if}>{if $v->name}{$v->name|escape}{else}{$product->name|escape}{/if}</option>
                         {/foreach}
                     </select>
-                    <div class="dropDownSelect2"></div>
                 </div>
 
                 <div class="vs-card__actions">

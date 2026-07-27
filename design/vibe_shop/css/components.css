@@ -145,6 +145,17 @@ body:not(.cart_page) .main {
 	padding-top: var(--vs-space-5);
 }
 
+/* index.tpl labels the body main_page / cart_page / other_page, so the three    */
+/* cases are addressable without a per-controller rule. An interior page needs   */
+/* more air than the home page even though the header above it is identical:     */
+/* the home page's first element is a full-width banner plate, a mass big        */
+/* enough to be read as a new region on its own, whereas an interior page opens  */
+/* with a 13px breadcrumb, and 20px above that reads as no gap at all.           */
+
+body.other_page .main {
+	padding-top: var(--vs-space-7);
+}
+
 /* ------------------------------------------------------------ header shell */
 
 .vs-header {
@@ -281,12 +292,18 @@ body:not(.cart_page) .main {
 
 /* ------------------------------------------------------------ utility bar */
 
+/* 56px, not 44: every control in this bar is a 44px pill, so a 44px bar makes  */
+/* every hover background run edge to edge and the row reads as a stack of      */
+/* boxes rather than a line of links. 6px of canvas above and below is enough   */
+/* to let each pill be seen as a separate object without turning the utility    */
+/* strip into a second navigation bar.                                          */
+
 .vs-utility {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: var(--vs-space-5);
-	min-height: 44px;
+	min-height: 56px;
 	font-size: var(--vs-text-sm);
 }
 
@@ -365,7 +382,7 @@ body:not(.cart_page) .main {
 	align-items: center;
 	gap: var(--vs-space-1);
 	min-height: 44px;
-	padding: 0 var(--vs-space-3);
+	padding: 0 var(--vs-space-4);
 	border-radius: var(--vs-radius-sm);
 	color: var(--vs-text);
 	font-size: var(--vs-text-sm);
@@ -383,8 +400,8 @@ body:not(.cart_page) .main {
 }
 
 .vs-nav > ul > li:first-child > a:hover {
-	padding-left: var(--vs-space-3);
-	margin-left: calc(var(--vs-space-3) * -1);
+	padding-left: var(--vs-space-4);
+	margin-left: calc(var(--vs-space-4) * -1);
 }
 
 .vs-menu__chevron {
@@ -409,7 +426,7 @@ body:not(.cart_page) .main {
 	z-index: var(--vs-z-dropdown);
 	display: none;
 	min-width: 210px;
-	padding: var(--vs-space-2);
+	padding: var(--vs-space-1-5);
 	background-color: var(--vs-surface);
 	border: 1px solid var(--vs-hairline);
 	border-radius: var(--vs-radius-md);
@@ -430,8 +447,11 @@ body:not(.cart_page) .main {
 	border-radius: var(--vs-radius-sm);
 }
 
+/* The third level lines its first row up with the row that opened it, so the   */
+/* offset has to track the panel's own padding rather than a fixed step.        */
+
 .vs-nav ul ul ul {
-	top: calc(var(--vs-space-2) * -1);
+	top: calc(var(--vs-space-1-5) * -1);
 	left: 100%;
 }
 
@@ -1590,21 +1610,25 @@ body.hc-nav-open {
 
 /* A fixed ratio keeps rows from jumping as photography loads, and `contain` on */
 /* a plate is what makes uneven shop photography line up on a common baseline.  */
-/* The plate is carried by its hairline and its radius, not by its fill. Shop   */
-/* photography is overwhelmingly shot on a white sweep (387 of the 434 demo     */
-/* originals), so any fill darker than white turns those into a box inside a    */
-/* box. Erasing that seam by treating the photograph instead - a blend mode -   */
-/* does not generalise: it inverts the artifact on the 47 images that are not   */
-/* shot on white, and it crushes white subjects into the plate. Treat the       */
-/* plate, never the photograph.                                                 */
+/* Square, not 4/5: the demo catalogue is packed-shot product photography that  */
+/* is itself square or landscape, so a portrait box spent a fifth of every card */
+/* on empty plate above and below the goods and pushed the price below the      */
+/* fold on a phone. A square box is also the ratio that changes least when the  */
+/* grid reflows from two columns to five.                                        */
+/*                                                                              */
+/* No border. The plate is white on a white card, so the hairline drew a box    */
+/* inside a box on every card in the grid and, on the ~90% of shop photography  */
+/* shot on a white sweep, boxed the sweep rather than the product. What bounds  */
+/* the media now is the card's own border and the gap to the title - the plate  */
+/* fill and the radius stay so a dark or full-bleed photograph is still clipped */
+/* to the same shape. Treat the plate, never the photograph.                    */
 
 .vs-card__media {
 	position: relative;
 	display: block;
-	aspect-ratio: 4 / 5;
+	aspect-ratio: 1 / 1;
 	overflow: hidden;
 	background-color: var(--vs-plate);
-	border: 1px solid var(--vs-hairline);
 	border-radius: var(--vs-radius-md);
 }
 
@@ -1800,15 +1824,45 @@ body.hc-nav-open {
 	font-size: var(--vs-text-xs);
 }
 
+/* The short annotation. Off by default and off for good on a touch device -    */
+/* a hover-only affordance is unreachable there, so nothing may live only in    */
+/* it, and this text is a truncated copy of what the product page states in     */
+/* full. On a pointer device it slides up over the foot of the plate rather     */
+/* than taking a place in the card body: in flow it cost every card two         */
+/* permanent lines of small grey type, and revealing it in flow would resize    */
+/* the whole grid row under the pointer.                                        */
+
 .vs-card__annotation {
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-	margin-top: var(--vs-space-2);
-	color: var(--vs-text-muted);
-	font-size: var(--vs-text-xs);
-	line-height: var(--vs-leading-body);
+	display: none;
+}
+
+@media (hover: hover) {
+	.vs-card__annotation {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		z-index: 1;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		padding: var(--vs-space-3);
+		background-color: var(--vs-surface);
+		border-top: 1px solid var(--vs-hairline);
+		color: var(--vs-text-muted);
+		font-size: var(--vs-text-xs);
+		line-height: var(--vs-leading-body);
+		opacity: 0;
+		transform: translateY(100%);
+		transition: opacity var(--vs-dur-2) var(--vs-ease), transform var(--vs-dur-2) var(--vs-ease);
+		pointer-events: none;
+	}
+
+	.vs-card:hover .vs-card__annotation {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 /* Tabular figures: without them the digits change width when okay.js rewrites  */
@@ -1887,9 +1941,12 @@ body.hc-nav-open {
 	margin-top: auto;
 }
 
-/* Variant chips: one tap instead of open-dropdown-then-choose. The <select>    */
-/* stays in the DOM as the form value carrier and vibe.js keeps the two in      */
-/* sync, so okay.js recalculates price, old price, SKU, stock and discount.     */
+/* Variant chips: one tap instead of open-dropdown-then-choose. They live on    */
+/* the PRODUCT PAGE only - the card deliberately shows no variant control, so   */
+/* the catalogue stays a scanning surface and the choice is made where the      */
+/* photography, the description and the stock line can back it up. The <select> */
+/* stays in the DOM on both and vibe.js keeps the two in sync, so okay.js       */
+/* recalculates price, old price, SKU, stock and discount.                      */
 
 .vs-chips {
 	display: flex;
@@ -1929,47 +1986,9 @@ body.hc-nav-open {
 	color: var(--vs-ink-text);
 }
 
-.vs-card__variants {
-	position: relative;
-	margin-bottom: var(--vs-space-3);
-}
-
-.vs-card__select {
-	width: 100%;
-	min-height: 44px;
-	padding: 0 var(--vs-space-3);
-	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-md);
-	background-color: var(--vs-surface);
-	color: var(--vs-text);
-	font-size: var(--vs-text-sm);
-}
-
-/* Beyond four variants the select2 widget is the control, so it has to reach   */
-/* the same 44px touch target and the same shape as everything else on the card. */
-
-.vs-card__variants .select2-container {
-	width: 100%;
-	max-width: 100%;
-}
-
-.vs-card__variants .select2-container .select2-selection--single {
-	height: 44px;
-	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-md);
-	background-color: var(--vs-surface);
-}
-
-.vs-card__variants .select2-container .select2-selection__rendered {
-	padding-left: var(--vs-space-3);
-	color: var(--vs-text);
-	font-size: var(--vs-text-sm);
-	line-height: 42px;
-}
-
-.vs-card__variants .select2-container .select2-selection__arrow {
-	height: 42px;
-}
+/* .vs-card__variants carries the hidden <select> and nothing else. It is never */
+/* shown, so it has no appearance of its own; grid.css's .hidden supplies the   */
+/* display: none and nothing here may set display and outrank it.               */
 
 .vs-card__actions {
 	display: flex;
@@ -2179,7 +2198,7 @@ body.hc-nav-open {
 	flex: 0 1 auto;
 	min-width: 0;
 	overflow-x: auto;
-	padding: 3px;
+	padding: var(--vs-space-1);
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-surface);
@@ -2195,22 +2214,43 @@ body.hc-nav-open {
 	margin: 0;
 }
 
+/* The pill is 36px, the touch target is 44px. Sorting is a secondary control - */
+/* the shopper came for the products, not for the sort order - and a 52px slab  */
+/* of solid ink at the top of the grid was reading louder than the first row of */
+/* merchandise. The ::before restores the full 44px hit height around a pill    */
+/* painted smaller, so the control loses weight without losing reach; it is     */
+/* inert (no background, no pointer-events change) and sits under the label.    */
+/* 36 + the group's 4px padding top and bottom is exactly 44: the group scrolls */
+/* horizontally, and overflow-x: auto clips the y axis too, so a taller ::before */
+/* would simply be cut off there rather than extending the target.               */
+
 .vs-sort__btn {
+	position: relative;
 	display: inline-flex;
 	align-items: center;
 	gap: var(--vs-space-2);
-	min-height: 44px;
+	min-height: 36px;
 	padding: 0 var(--vs-space-3);
 	border: 0;
 	border-radius: var(--vs-radius-sm);
 	background-color: transparent;
 	color: var(--vs-text-muted);
 	font-family: inherit;
-	font-size: var(--vs-text-sm);
+	font-size: var(--vs-text-xs);
 	line-height: 1;
 	white-space: nowrap;
 	cursor: pointer;
 	transition: background-color var(--vs-dur-1) var(--vs-ease), color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-sort__btn::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 0;
+	width: 100%;
+	height: 44px;
+	transform: translateY(-50%);
 }
 
 .vs-sort__btn:hover {
@@ -4216,7 +4256,7 @@ body.hc-nav-open {
 	.vs-catalogue__grid,
 	.vs-related__grid {
 		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-		gap: var(--vs-space-6);
+		gap: var(--vs-space-4);
 	}
 
 	.vs-specs {
@@ -4226,7 +4266,7 @@ body.hc-nav-open {
 	.vs-catalogue__region.is-loading .vs-catalogue__skeleton {
 		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 		grid-auto-rows: 380px;
-		gap: var(--vs-space-6);
+		gap: var(--vs-space-4);
 	}
 
 	.vs-cats {
@@ -6191,8 +6231,18 @@ body.hc-nav-open {
 /* editorial split, article cards. No tracked-uppercase kicker above any of      */
 /* them - the heading is the heading.                                            */
 
+/* overflow-x: clip, not hidden: the rail below pulls itself out by half a      */
+/* gutter on each side and .vs-home__section zeroes .container's own horizontal */
+/* padding, so under 1366px that half-gutter is real page overflow - 383px of   */
+/* document in a 375px viewport, measured. What is being clipped is the empty   */
+/* padding inside the first and last slide, never a card. `clip` rather than    */
+/* `hidden` so the vertical axis stays visible and a card's hover shadow is not */
+/* cut off at the section edge.                                                 */
+
 .vs-home__section {
 	padding: var(--vs-space-8) 0 0;
+	overflow-x: clip;
+	overflow-y: visible;
 }
 
 .vs-home__section--tight {
@@ -6255,8 +6305,27 @@ body.hc-nav-open {
 	padding-top: var(--vs-space-8);
 }
 
+/* okay.js constructs the rail Swiper with no spaceBetween and that call is not */
+/* ours to change, so the gutter is put inside the slide instead and Swiper's   */
+/* own width arithmetic is left untouched. It is a margin on the card and not   */
+/* padding on the slide because media.css still ships                            */
+/* `.product_item { padding: 0 !important }` below 992px, which no selector      */
+/* here may outrank - the card is the first box in the slide that legacy sheet  */
+/* does not reach. The rail is then pulled out by the same half-gutter on both  */
+/* sides so the first and last card line up with the section title instead of   */
+/* sitting 8px inside it.                                                        */
+
 .vs-home__rail {
 	min-width: 0;
+	width: auto;
+	margin-left: calc(var(--vs-space-2) * -1);
+	margin-right: calc(var(--vs-space-2) * -1);
+}
+
+.vs-home__rail .vs-card {
+	width: auto;
+	margin-left: var(--vs-space-2);
+	margin-right: var(--vs-space-2);
 }
 
 .vs-home__split {
