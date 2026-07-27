@@ -2,6 +2,14 @@
     {* Full base address *}
     <base href="{$base}/">
 
+    {* Marks the document as scripted before the stylesheets are parsed, so any
+       rule that hides content a script is responsible for revealing can be gated
+       on it and still apply on the very first paint - no flash, and a graceful
+       fully-expanded rendering when JavaScript is off. Currently read by the
+       filter-group collapse in components.css. Inline and one statement long on
+       purpose: an external file would land after the CSS. *}
+    <script>document.documentElement.className += ' js';</script>
+
     {* Include fonts *}
     <link href="{$rootUrl}/design/{$settings->theme}/fonts/inter/InterVariable.woff2" rel="preload" as="font" crossorigin="anonymous" type="font/woff2">
     <link href="{$rootUrl}/design/{$settings->theme}/fonts/montserrat/Montserrat-SemiBold.woff2" rel="preload" as="font" crossorigin="anonymous" type="font/woff2">

@@ -1,6 +1,19 @@
 {* Filter panel body. Every group is a fn_switch header immediately followed by
    its body - okay.js collapses a group with $(this).next().slideToggle(), so
-   the two must stay adjacent siblings. Groups ship expanded. *}
+   the two must stay adjacent siblings.
+
+   Collapse state ships from here. `active` on the head is okay.js's own name for
+   "collapsed"; components.css turns it into display:none on the next sibling, so
+   the first click on a collapsed head expands it through exactly the handler that
+   drives every later toggle. Two groups ship open - the category tree and price,
+   the two a shopper reaches for first - and every other group ships collapsed
+   UNLESS one of its own values is currently applied. A collapsed group hiding an
+   applied filter is a trap, so an applied filter always wins.
+
+   Rendering all groups open cost 8000px of scroll on a 29-group catalogue; the
+   heads alone are a list the shopper can read at a glance. okay.js replaces this
+   whole block after every ajax filter round-trip, so the "applied filters stay
+   open" rule re-evaluates on each one without any client-side bookkeeping. *}
 
 {if $catalog_categories}
     <div class="vs-filter-group vs-filter-group--cats hidden-md-down">
@@ -82,8 +95,9 @@
 
     {* Other filters *}
     {if $catalog_other_filters}
+        {$grp_open = (bool)$selected_catalog_other_filters}
         <div class="vs-filter-group">
-            <button type="button" class="fn_switch vs-filter-group__head" aria-expanded="true">
+            <button type="button" class="fn_switch vs-filter-group__head{if !$grp_open} active{/if}" aria-expanded="{if $grp_open}true{else}false{/if}">
                 <span data-language="features_other_filter">{$lang->features_other_filter}</span>
                 <span class="vs-filter-group__chevron">{include file="svg.tpl" svgId="chevron"}</span>
             </button>
@@ -137,8 +151,9 @@
 
     {* Brand filter *}
     {if $catalog_brands}
+        {$grp_open = (bool)($brand->id || $selected_catalog_brands_ids)}
         <div class="vs-filter-group">
-            <button type="button" class="fn_switch vs-filter-group__head" aria-expanded="true">
+            <button type="button" class="fn_switch vs-filter-group__head{if !$grp_open} active{/if}" aria-expanded="{if $grp_open}true{else}false{/if}">
                 <span data-language="features_manufacturer">{$lang->features_manufacturer}</span>
                 <span class="vs-filter-group__chevron">{include file="svg.tpl" svgId="chevron"}</span>
             </button>
@@ -197,8 +212,9 @@
     {* Features filter *}
     {if $catalog_features}
         {foreach $catalog_features as $key=>$f}
+            {$grp_open = (bool)($selected_catalog_features[$f->id]|default:false)}
             <div class="vs-filter-group">
-                <button type="button" class="fn_switch vs-filter-group__head" aria-expanded="true">
+                <button type="button" class="fn_switch vs-filter-group__head{if !$grp_open} active{/if}" aria-expanded="{if $grp_open}true{else}false{/if}">
                     <span data-feature="{$f->id}">{$f->name|escape}</span>
                     <span class="vs-filter-group__chevron">{include file="svg.tpl" svgId="chevron"}</span>
                 </button>
