@@ -178,7 +178,7 @@
                         <span data-language="index_contacts">{$lang->index_contacts}</span>
                         <button type="button" class="fn_switch_parent vs-footer__toggle hidden-lg-up" aria-label="{$lang->index_contacts|escape}">{include file="svg.tpl" svgId="chevron"}</button>
                     </h2>
-                    <div class="vs-footer__body vs-footer__contacts">
+                    <div class="vs-footer__body">
                         {if $settings->site_phones}
                             {foreach $settings->site_phones as $phone}
                                 <a class="vs-footer__contact" href="tel:{preg_replace('~[^0-9\+]~', '', $phone)}">
@@ -196,7 +196,15 @@
                         {if $settings->site_working_hours}
                             <div class="vs-footer__contact vs-footer__contact--static">
                                 {include file="svg.tpl" svgId="clock"}
-                                <span>{$settings->site_working_hours}</span>
+                                {* A <div>, not a <span>: site_working_hours is a
+                                   rich-text setting and ships as "<div>Режим
+                                   роботи...<br><strong>...</strong></div>" in this
+                                   install, so the span wrapped block-level content.
+                                   The parent is display:flex, which blockifies
+                                   either tag, so nothing moves - but an admin who
+                                   writes a <p> or a second <div> in that field now
+                                   gets valid markup and can style it as a block. *}
+                                <div>{$settings->site_working_hours}</div>
                             </div>
                         {/if}
                         <a class="fn_callback vs-btn vs-btn--secondary vs-footer__callback" href="#fn_callback" data-language="index_back_call">
@@ -237,7 +245,7 @@
                     </div>
                 </section>
                 {* Subscribing *}
-                <section class="vs-footer__col vs-footer__col--wide">
+                <section class="vs-footer__col">
                     <h2 class="vs-footer__title">
                         <span data-language="subscribe_heading">{$lang->subscribe_heading}</span>
                         <button type="button" class="fn_switch_parent vs-footer__toggle hidden-lg-up" aria-label="{$lang->subscribe_heading|escape}">{include file="svg.tpl" svgId="chevron"}</button>

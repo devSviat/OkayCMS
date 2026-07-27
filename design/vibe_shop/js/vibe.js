@@ -165,6 +165,24 @@
         if (!event.target.closest('.vs-disclosure')) closeDisclosures(null);
     });
 
+    /* Dismiss the catalogue mega-menu the only way okay.js offers - by clicking
+       its own trigger - and mirror aria-expanded. Called from the outside-click
+       listener below, from the Escape handler, and from the reviews-anchor
+       handler, which stops propagation in the capture phase and so never
+       reaches the listener below.
+
+       Returns whether it actually closed anything, so a caller that also wants
+       to move focus can tell an open menu from an absent one. */
+    function closeCatalogMenu() {
+        var catalog = document.querySelector('.vs-catalog');
+        var catalogTrigger = document.querySelector('.vs-catalog-btn');
+        if (!catalog || !catalogTrigger) return false;
+        if (catalog.offsetParent === null) return false;
+        catalogTrigger.click();
+        catalogTrigger.setAttribute('aria-expanded', 'false');
+        return true;
+    }
+
     /* The catalogue drop-down is opened by okay.js and has no outside-click
        close of its own; clicking the trigger again is what closes it.
        okay.js also only toggles a class, so aria-expanded is mirrored here. */
@@ -179,8 +197,7 @@
         }
         if (catalog.offsetParent === null) return;
         if (event.target.closest('.vs-catalog')) return;
-        catalogTrigger.click();
-        catalogTrigger.setAttribute('aria-expanded', 'false');
+        closeCatalogMenu();
     });
 
     /* Touch fallback: the first tap on a parent item opens its submenu instead
@@ -610,9 +627,21 @@
     }
 
     /* asTabs = true gives the tab pattern. The item box and the <h2> sit between
-       the tablist and the tab, which ARIA does not allow, so both are marked
-       presentational; below 992px they are left alone and the <h2> keeps its
-       heading semantics, which is the correct accordion pattern. */
+       the tablist and the tab, which ARIA does not allow through DOM ancestry -
+       so the tablist claims its tabs with aria-owns instead, which is the
+       relationship ARIA provides for exactly this shape.
+
+       The <h2> keeps its heading semantics at every width. It was marked
+       role="presentation" from Task 9 until the final review, on the reasoning
+       that a heading does not matter when only one panel's content is present.
+       That misreads what a heading is for: it is how a screen-reader user FINDS
+       a section, not how they enter a hidden one. Measured at 1440 before this
+       change: zero headings existed for Опис, Характеристики and Відгуки, so
+       heading navigation skipped the entire lower half of the product page.
+
+       The item box keeps role="presentation" - it is a bare <div> with no
+       implicit role, and presentation on it says nothing about its descendants,
+       which keep their own roles. */
     function applyAria(host, asTabs) {
         var parts = accordionParts(host);
         if (!parts.length) return;
@@ -625,7 +654,10 @@
         } else {
             host.removeAttribute('role');
             host.removeAttribute('aria-label');
+            host.removeAttribute('aria-owns');
         }
+
+        var owned = [];
 
         for (var i = 0; i < parts.length; i++) {
             var p = parts[i];
@@ -633,10 +665,11 @@
             ensureId(p.btn, 'vs_tab_');
             ensureId(p.panel, 'vs_panel_');
             p.btn.setAttribute('aria-controls', p.panel.id);
+            p.head.removeAttribute('role');
 
             if (asTabs) {
+                owned.push(p.btn.id);
                 p.item.setAttribute('role', 'presentation');
-                p.head.setAttribute('role', 'presentation');
                 p.btn.setAttribute('role', 'tab');
                 p.btn.setAttribute('aria-selected', on ? 'true' : 'false');
                 p.btn.setAttribute('tabindex', on ? '0' : '-1');
@@ -646,7 +679,6 @@
                 p.panel.setAttribute('tabindex', '0');
             } else {
                 p.item.removeAttribute('role');
-                p.head.removeAttribute('role');
                 p.btn.removeAttribute('role');
                 p.btn.removeAttribute('aria-selected');
                 p.btn.removeAttribute('tabindex');
@@ -656,6 +688,8 @@
                 p.panel.removeAttribute('tabindex');
             }
         }
+
+        if (asTabs) host.setAttribute('aria-owns', owned.join(' '));
     }
 
     function tabHost() {
@@ -790,6 +824,29 @@
             if (box.top > 1) continue;
             if (box.bottom > covered) covered = box.bottom;
         }
+        /* Nothing is pinned yet at scrollY 0 on desktop: sticky.min.js only
+           takes .fn_header__sticky out of the flow once the page moves, so the
+           loop above measures 0 and the first destination lands one header
+           height too deep - 1018 instead of 931 on the product page, putting
+           the "Відгуки" heading behind the bar. The settle-and-correct pass
+           repaired that, but `abandon` is armed for wheel/touchstart/
+           pointerdown/keydown, so any input during the ~1.2s animation cancels
+           the correction and the shopper is left with the wrong destination.
+
+           Measuring the bar that is *about* to pin removes the need for a
+           correction at all. sticky.min.js activates an element when
+           data-sticky-for < viewport width (see its stickyFor comparison), and
+           data-sticky-wrap keeps a placeholder of the same height in the flow,
+           so what the pinned bar will cover is exactly its height now. */
+        if (!covered) {
+            var pending = document.querySelector('.fn_header__sticky[data-sticky-for]');
+            if (pending) {
+                var stickyFor = parseInt(pending.getAttribute('data-sticky-for'), 10);
+                if (!isNaN(stickyFor) && stickyFor < window.innerWidth) {
+                    covered = pending.getBoundingClientRect().height;
+                }
+            }
+        }
         return covered + ANCHOR_GAP;
     }
 
@@ -899,9 +956,18 @@
            where the header language and currency dropdowns are closed: click
            the reviews link with one open and it stayed open, floating over the
            page all the way down. They are closed explicitly here rather than
-           by weakening the guard. */
+           by weakening the guard.
+
+           The catalogue mega-menu is closed for the same reason and was missed
+           the first time: its outside-click close is a separate bubble listener
+           and stopPropagation kills that one too. Measured before this line:
+           open the menu on the product page, click the reviews link, and the
+           page arrived at scrollY 931 with a 1350x598 menu still covering the
+           whole content area, dismissable only by clicking the header button
+           again. */
         event.stopPropagation();
         closeDisclosures(null);
+        closeCatalogMenu();
         openPanel(panel);
         scrollToPanel(panel);
     }, true);
@@ -991,6 +1057,13 @@
             loadingBail = window.setTimeout(function () {
                 loadingBail = null;
                 region.classList.remove('is-loading');
+                /* Both halves of the state come off together. Taking the
+                   shimmer away and leaving aria-busy="true" behind told a
+                   screen-reader user the region was still updating for the
+                   rest of the session while a sighted user was already reading
+                   the grid. Measured at t=11.3s before this line:
+                   {loading: false, busy: "true"}. */
+                region.setAttribute('aria-busy', 'false');
             }, LOADING_BAIL_MS);
             return;
         }
@@ -1119,11 +1192,9 @@
 
         if (event.key === 'Tab') return;
 
-        var catalog = document.querySelector('.vs-catalog');
-        var catalogTrigger = document.querySelector('.vs-catalog-btn');
-        if (catalog && catalogTrigger && catalog.offsetParent !== null) {
-            catalogTrigger.click();
-            catalogTrigger.focus();
+        if (closeCatalogMenu()) {
+            var catalogTrigger = document.querySelector('.vs-catalog-btn');
+            if (catalogTrigger) catalogTrigger.focus();
             return;
         }
 

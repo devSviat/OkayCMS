@@ -15,6 +15,11 @@
     </div>
 {else}
     <div class="vs-empty">
+        {* The icon that the other eight empty states all carry. It was the only
+           one without one - the left alignment here is deliberate (the rail
+           column collapses on an empty result set, so a centred block would sit
+           off-centre in the page), but the missing glyph was not. *}
+        <span class="vs-empty__icon">{include file="svg.tpl" svgId="search"}</span>
         <p class="vs-empty__title" data-language="products_not_found">{$lang->products_not_found}</p>
         {* The note says "try changing or resetting the filters", so it belongs to
            the same branch as the reset button. On an unfiltered empty page there

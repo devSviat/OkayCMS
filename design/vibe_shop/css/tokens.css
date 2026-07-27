@@ -8,6 +8,18 @@
 * variable map, so the admin panel would overwrite both themes at once.
 */
 
+/* The ramp is only as long as the theme uses. --vs-n-600, -700, -800, -900 and
+* -950 and --vs-warn-50 were declared through Tasks 1-9 and never referenced by
+* a single rule - counted across every authored sheet, zero var() consumers
+* each - so they are gone. The darks they held are still in the theme; they
+* arrive through theme-settings.css as --okay-second-company and
+* --okay-button-color, which is where an owner can actually change them.
+*
+* --vs-n-50 has no consumer either, and stays: it is the value --okay-bg ships
+* with, and the grey note below quotes it as one of the four backgrounds
+* --vs-border was measured against. Deleting it would leave that measurement
+* referring to a name the file no longer defines. */
+
 :root {
 	--vs-n-0: #ffffff;
 	--vs-n-25: #fafafa;
@@ -17,18 +29,12 @@
 	--vs-n-300: #cbcbce;
 	--vs-n-400: #a5a5aa;
 	--vs-n-500: #6b6b71;
-	--vs-n-600: #5c5c62;
-	--vs-n-700: #45454a;
-	--vs-n-800: #2b2b2f;
-	--vs-n-900: #1c1c20;
-	--vs-n-950: #17171a;
 
 	--vs-sale-50: #fff1f4;
 	--vs-sale-500: #e11d48;
 	--vs-sale-600: #be1739;
 	--vs-ok-50: #ecfdf5;
 	--vs-ok-600: #047857;
-	--vs-warn-50: #fffbeb;
 	--vs-warn-600: #b45309;
 
 /* Which of these the shop owner can actually change, verified against the code
@@ -39,12 +45,19 @@
 * okay-button-text-hover, okay-basic-company, okay-second-company,
 * okay-basic-company-text, okay-second-company-text, okay-bg.
 *
-* The other six variables in theme-settings.css - okay-boxed-color,
+* theme-settings.css declares seventeen, so the other EIGHT - okay-boxed-color,
 * okay-boxed-text, okay-button-second-color, okay-button-second-text,
-* okay-shadow-color and okay-border-color - have no translation key and so no
-* form control. They are editable only by hand. CssConfig::updateCssVariables()
+* okay-shadow-color, okay-border-color, okay-body-text and okay-body-heading -
+* have no translation key and so no form control. This comment said "six" and
+* omitted the last two until the final review, which is the pair that matters
+* most: they are mapped onto --vs-text and --vs-heading four lines below, i.e.
+* every word on every page. An owner reading Settings -> Design and seeing no
+* body-colour control is seeing the truth - the theme's text colour is not
+* reachable from the admin panel at all.
+*
+* They are editable only by hand. CssConfig::updateCssVariables()
 * re-renders theme-settings.css from its own parse and assigns only the rules the
-* form posted, so a save from the design screen leaves all six exactly as they
+* form posted, so a save from the design screen leaves all eight exactly as they
 * are. That is what holds --vs-border at its 3:1 value; see the grey note below. */
 
 	--vs-canvas: var(--okay-bg);
@@ -62,9 +75,15 @@
 	--vs-cta-2: var(--okay-button-second-color);
 	--vs-cta-2-text: var(--okay-button-second-text);
 
-	--vs-surface-subtle: #ededee;
-	--vs-plate: #ffffff;
-	--vs-hairline: #e0e0e2;
+/* Aliases, not repeats. Each of these five carried the literal a second (and
+* for #6b6b71 a third) time until the final fix wave, so the same colour was
+* written under two names and a change to the ramp silently moved only one of
+* them. The semantic name still says what the value is for; the ramp says what
+* the value is. */
+
+	--vs-surface-subtle: var(--vs-n-100);
+	--vs-plate: var(--vs-n-0);
+	--vs-hairline: var(--vs-n-200);
 
 /* Three greys, three jobs, and only one of them is free to be pretty.
 *
@@ -95,9 +114,9 @@
 * resting underline colour of a link. They are decorative or redundant to
 * adjacent text, so they keep their exact Task 1-8 rendering. */
 
-	--vs-border-strong: #6b6b71;
-	--vs-glyph: #a5a5aa;
-	--vs-text-muted: #6b6b71;
+	--vs-border-strong: var(--vs-n-500);
+	--vs-glyph: var(--vs-n-400);
+	--vs-text-muted: var(--vs-n-500);
 	--vs-scrim: rgb(23 23 26 / .44);
 
 	--vs-font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;

@@ -155,7 +155,7 @@
                             <span data-language="cart_title">{$lang->cart_title}</span>
                         </h2>
 
-                        <div id="fn_cart_coupon">
+                        <div id="fn_cart_coupon" class="vs-summary__coupon">
                             {include file="cart_coupon.tpl"}
                         </div>
 
@@ -164,7 +164,7 @@
                             <span id="fn_total_purchases_price" class="vs-summary__value vs-tabular">{$cart->total_price|convert} {$currency->sign|escape}</span>
                         </div>
 
-                        <div id="fn_total_delivery_price_block" class="vs-summary__row">
+                        <div id="fn_total_delivery_price_block" class="vs-summary__row vs-summary__row--delivery">
                             <span class="vs-summary__label" data-language="cart_discount">
                                 <span data-language="cart_delivery_order_price">{$lang->cart_delivery_order_price}</span>
                                 <span id="fn_total_separate_delivery"{if !$active_delivery->separate_payment || $active_delivery->is_free_delivery === true} style="display: none;"{/if}> ({$lang->cart_paid_separate})</span>

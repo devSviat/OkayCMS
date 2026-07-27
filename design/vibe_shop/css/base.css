@@ -78,8 +78,16 @@ a {
 	transition: text-decoration-color var(--vs-dur-1) var(--vs-ease);
 }
 
+/* Link hover is one of the two jobs spec 5.1 gives the owner's brand colour.   */
+/* It is the underline that takes the accent, never the text: the underline is  */
+/* decoration, so it carries no contrast floor and stays safe at every value    */
+/* --okay-basic-company can be set to, while the words keep --vs-text. Out of   */
+/* the box the accent ships as ink, so this renders as the near-black it was.   */
+/* The only link in the theme on an ink plate is .vs-skip, which sets           */
+/* text-decoration: none and so has no underline to colour.                     */
+
 a:hover {
-	text-decoration-color: currentColor;
+	text-decoration-color: var(--vs-accent);
 }
 
 img {
@@ -142,10 +150,20 @@ hr {
 	background-color: var(--vs-hairline);
 }
 
+/* The ring is an outline, not a box-shadow, and that is the whole point.       */
+/* It was built from box-shadow until the final review: base.css loads before   */
+/* components.css, so every later rule of equal specificity that declared       */
+/* box-shadow - for elevation, which is what this theme uses box-shadow for -   */
+/* silently deleted the ring while leaving outline: none in force. Measured on  */
+/* /all-products: 72 .vs-card__tool elements focused with outline none AND      */
+/* box-shadow none, i.e. no focus indicator at all. outline cannot collide      */
+/* with elevation because nothing else in the theme declares it, and modern     */
+/* engines follow the element's own border-radius, so the radius restatement    */
+/* that used to force ~15 controls to change shape under focus is gone too.     */
+
 :focus-visible {
-	outline: none;
-	box-shadow: 0 0 0 2px var(--vs-canvas), 0 0 0 4px var(--vs-ink);
-	border-radius: var(--vs-radius-sm);
+	outline: 2px solid var(--vs-ink);
+	outline-offset: 2px;
 }
 
 button,

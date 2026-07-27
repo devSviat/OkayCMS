@@ -180,10 +180,6 @@
 	transform: scale(0.98);
 }
 
-.vs-btn:focus-visible {
-	border-radius: var(--vs-radius-md);
-}
-
 .vs-btn[disabled] {
 	opacity: 0.5;
 	cursor: not-allowed;
@@ -475,10 +471,6 @@ body.other_page .main {
 	background-color: var(--vs-surface-subtle);
 }
 
-.vs-informer:focus-visible {
-	border-radius: var(--vs-radius-md);
-}
-
 .vs-informer svg {
 	width: 22px;
 	height: 22px;
@@ -564,12 +556,6 @@ body.other_page .main {
 
 .vs-utility__phone {
 	font-weight: 500;
-}
-
-.vs-utility__note {
-	padding: 0 var(--vs-space-2);
-	color: var(--vs-text-muted);
-	white-space: nowrap;
 }
 
 .vs-utility__account {
@@ -838,10 +824,6 @@ body.other_page .main {
 	border-color: var(--vs-ink);
 }
 
-.vs-search__input:focus-visible {
-	border-radius: var(--vs-radius-sm);
-}
-
 .vs-search__submit {
 	position: absolute;
 	top: 3px;
@@ -926,7 +908,7 @@ body.other_page .main {
 /* the OkayCMS_NovaposhtaCost city field in the cart. They share the class      */
 /* names and share nothing else - a product row is thumbnail + link + price,    */
 /* a city row is one bare <div> of text. Everything from here to the plain-text */
-/* reset is common ground; the product skin below it is scoped to #fn_search.   */
+/* reset is common ground; the product skin below it is scoped to .vs-search.   */
 /*                                                                             */
 /* 44px is the theme's control height - the field the panel hangs off, the      */
 /* select2 rows in the same delivery block, every label in .vs-option__extra -  */
@@ -967,12 +949,16 @@ body.other_page .main {
 /* target, and tall enough that a 35x35 product photo is not the tightest       */
 /* thing in the header.                                                         */
 
-#fn_search .autocomplete-suggestion {
+.vs-search .autocomplete-suggestion {
 	min-height: 56px;
 }
 
-/* okay.js hands this autocomplete `appendTo: "#fn_search"`, so the whole panel */
-/* lives inside the header form and nothing else on the page can match. That is */
+/* okay.js hands this autocomplete `appendTo: "#fn_search"` and .vs-search is  */
+/* the same element's theme class, so the whole panel lives inside the header  */
+/* form and nothing else on the page can match. The scope is the class and not */
+/* the id: a JS hook is never load-bearing for presentation here, which is C5's */
+/* point even though C5 names only classes. Same reason for .vs-summary__coupon */
+/* and .vs-summary__row--delivery on the cart. That is                          */
 /* the scope, rather than :has(img), because okay.js emits an empty <div></div> */
 /* for a product with no photo: :has(img) would silently drop the plate on      */
 /* exactly those rows and step their names out of line with the rest. It also   */
@@ -982,7 +968,7 @@ body.other_page .main {
 /* flex-basis again answered okay.css's width:50px !important, this time to pin */
 /* the cell at 40px rather than to release it.                                  */
 
-#fn_search .autocomplete-suggestion > div {
+.vs-search .autocomplete-suggestion > div {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -999,13 +985,13 @@ body.other_page .main {
 /* takes surface-subtle, and a thumbnail that dissolved into its own row on     */
 /* selection would lose the one element that identifies the product.            */
 
-#fn_search .autocomplete-suggestion > div img {
+.vs-search .autocomplete-suggestion > div img {
 	max-width: 100%;
 	max-height: 100%;
 	object-fit: contain;
 }
 
-#fn_search .autocomplete-suggestion > a {
+.vs-search .autocomplete-suggestion > a {
 	display: block;
 	flex: 1 1 auto;
 	min-width: 0;
@@ -1022,7 +1008,7 @@ body.other_page .main {
 /* figures and left at its natural width - not stretched to a right-hand column */
 /* half a panel away from the name it belongs to.                               */
 
-#fn_search .autocomplete-suggestion > span {
+.vs-search .autocomplete-suggestion > span {
 	flex: none;
 	padding: 0;
 	border: 0;
@@ -2358,10 +2344,6 @@ body.hc-nav-open {
 	background-color: var(--vs-surface-subtle);
 }
 
-.vs-card__tool:focus-visible {
-	border-radius: var(--vs-radius-full);
-}
-
 .vs-card__tool.selected {
 	color: var(--vs-ink-text);
 }
@@ -2481,10 +2463,12 @@ body.hc-nav-open {
 	letter-spacing: -0.01em;
 }
 
-/* --sale is the BEM name Tasks 4/5 use; .price--red is the same state as       */
-/* toggled live by okay.js on .fn_price's parent. They must stay identical.     */
+/* .price--red is the state okay.js toggles live on .fn_price's parent, and     */
+/* the only one of the two names that anything emits. The BEM alias             */
+/* .vs-card__price_current--sale sat beside it from Task 4 until the final      */
+/* review and was never rendered by any template, module or piece of WYSIWYG    */
+/* content in the database - it went with the other dead rules.                 */
 
-.vs-card__price_current--sale,
 .vs-card__price_current.price--red {
 	color: var(--vs-sale-600);
 }
@@ -2794,18 +2778,37 @@ body.hc-nav-open {
 }
 
 /* A segmented control rather than four loose links: the options are mutually  */
-/* exclusive, so they read as one control. It scrolls instead of wrapping,     */
-/* because a wrapped second row pushes the grid down on exactly the screens    */
-/* where vertical space is scarcest.                                           */
+/* exclusive, so they read as one control.                                     */
+/*                                                                             */
+/* It wrapped instead of scrolling from the final review on. Task 4 chose to   */
+/* scroll on the argument that a second row pushes the grid down where         */
+/* vertical space is scarcest; the argument is right about the cost and wrong  */
+/* about the alternative. Measured at 375: clientWidth 234, scrollWidth 401 -  */
+/* 167px hidden, "назвою" and "рейтингом" entirely off-screen, the visible     */
+/* edge cut mid-word under the Фільтр button, and with overlay scrollbars      */
+/* nothing on screen said the strip moved at all. Two of four sort options     */
+/* simply did not exist for a phone shopper. 50px of layout is the cheaper     */
+/* loss.                                                                       */
+/*                                                                             */
+/* flex-wrap is adaptive, so no breakpoint is needed: from 992px the four      */
+/* pills fit on one line and it never engages. overflow-x stays as the last    */
+/* resort for a locale whose labels are too long to fit even one per row - it  */
+/* is what keeps that case out of the page's own horizontal scroll.            */
+/*                                                                             */
+/* row-gap is 12px and not the 6px column gap on purpose: .vs-sort__btn's      */
+/* 44px ::before target overhangs its 36px pill by 4px top and bottom, so two  */
+/* stacked rows 6px apart would have overlapping hit areas.                    */
 
 .vs-sort__group {
 	display: flex;
 	align-items: center;
+	flex-wrap: wrap;
 	flex: 0 1 auto;
 	min-width: 0;
 	overflow-x: auto;
 	padding: var(--vs-space-1);
 	gap: var(--vs-space-1-5);
+	row-gap: var(--vs-space-3);
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-surface);
@@ -2865,20 +2868,22 @@ body.hc-nav-open {
 	background-color: var(--vs-surface-subtle);
 }
 
-.vs-sort__btn:focus-visible {
-	border-radius: var(--vs-radius-sm);
-}
+/* Accent, not ink: this is the active state of a control, which is the first  */
+/* of the two jobs spec 5.1 gives --okay-basic-company. The fill and the label */
+/* are the owner's pair - --okay-basic-company and --okay-basic-company-text   */
+/* are set together in Settings -> Design - so the label stays legible at any  */
+/* brand colour without the theme guessing a foreground for it.                */
 
 .vs-sort__btn.active_up,
 .vs-sort__btn.active_down {
-	background-color: var(--vs-ink);
-	color: var(--vs-ink-text);
+	background-color: var(--vs-accent);
+	color: var(--vs-accent-text);
 }
 
 .vs-sort__btn.active_up:hover,
 .vs-sort__btn.active_down:hover {
-	background-color: var(--vs-ink);
-	color: var(--vs-ink-text);
+	background-color: var(--vs-accent);
+	color: var(--vs-accent-text);
 }
 
 /* The sprite draws both arrows; the inactive one is dimmed so the control     */
@@ -2940,23 +2945,26 @@ body.hc-nav-open {
 	max-width: 100%;
 	min-height: 44px;
 	padding: 0 var(--vs-space-2) 0 var(--vs-space-4);
-	border: 1px solid var(--vs-border);
+	border: 1px solid var(--vs-accent);
 	border-radius: var(--vs-radius-full);
 	background-color: var(--vs-surface);
 	color: var(--vs-text);
 	font-family: inherit;
 	font-size: var(--vs-text-sm);
 	cursor: pointer;
-	transition: border-color var(--vs-dur-1) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease);
+	transition: background-color var(--vs-dur-1) var(--vs-ease);
 }
+
+/* An applied filter is an active state, so the ring is the owner's accent -   */
+/* spec 5.1 again. It is the border and not the fill: the chip's label is a    */
+/* feature name and its value, prose that has to stay at --vs-text, and a      */
+/* border has no contrast floor to breach at whatever the brand colour is.     */
+/* Hover moves the fill instead of the border, which the border used to do -   */
+/* --vs-border-strong on hover would now read as the accent being replaced by  */
+/* grey, i.e. the state going backwards.                                       */
 
 .vs-applied__chip:hover {
 	background-color: var(--vs-surface-subtle);
-	border-color: var(--vs-border-strong);
-}
-
-.vs-applied__chip:focus-visible {
-	border-radius: var(--vs-radius-full);
 }
 
 .vs-applied__text {
@@ -3158,14 +3166,10 @@ body.hc-nav-open {
 	background-color: var(--vs-surface-subtle);
 }
 
-.vs-pagination__link:focus-visible {
-	border-radius: var(--vs-radius-md);
-}
-
 .vs-pagination__item.active .vs-pagination__link {
-	background-color: var(--vs-ink);
-	border-color: var(--vs-ink);
-	color: var(--vs-ink-text);
+	background-color: var(--vs-accent);
+	border-color: var(--vs-accent);
+	color: var(--vs-accent-text);
 	font-weight: 600;
 }
 
@@ -3346,10 +3350,6 @@ body.hc-nav-open {
 	background-color: var(--vs-surface-subtle);
 }
 
-.vs-filter__option:focus-visible {
-	border-radius: var(--vs-radius-sm);
-}
-
 .vs-filter__box {
 	display: inline-flex;
 	align-items: center;
@@ -3503,16 +3503,24 @@ body.hc-nav-open {
 	transform: translate(-50%, -50%);
 }
 
-.vs-price__slider .noUi-handle:focus-visible {
-	border-radius: var(--vs-radius-full);
-}
-
 .vs-price__slider .noUi-active {
 	box-shadow: var(--vs-shadow-2);
 	cursor: grabbing;
 }
 
 /* --------------------------------------------------------- category filter */
+
+/* features.tpl and blog_sidebar.tpl both emit .vs-filter-cats--sub on every    */
+/* nesting level past the first, and until the final review nothing in this     */
+/* sheet matched it: measured on /blog, the level-2 list started at x 1116,     */
+/* the same x as its parent, so the tree rendered as one flat list and a        */
+/* subcategory was indistinguishable from a sibling of its own parent. The      */
+/* step is 24px, the width of .vs-filter-cats__icon, so a child's glyph lines   */
+/* up with where its parent's label begins.                                     */
+
+.vs-filter-cats--sub {
+	padding-left: var(--vs-space-6);
+}
 
 .vs-filter-cats__item {
 	margin: 0;
@@ -3535,7 +3543,17 @@ body.hc-nav-open {
 	background-color: var(--vs-surface-subtle);
 }
 
+/* The active nav item, spec 5.1's third accent surface. The category rail is  */
+/* the theme's real navigation - it is what marks where the shopper is on a    */
+/* catalogue page and, through blog_sidebar.tpl, on the blog. Filled with the  */
+/* owner's pair rather than tinted text, for the same reason as the sort       */
+/* segment: the pair is set together in the admin, so it cannot be made        */
+/* illegible from the design screen. The weight stays, so the state survives   */
+/* an accent that happens to sit close to the surface colour.                  */
+
 .vs-filter-cats__link.is-current {
+	background-color: var(--vs-accent);
+	color: var(--vs-accent-text);
 	font-weight: 600;
 }
 
@@ -3547,6 +3565,14 @@ body.hc-nav-open {
 	width: 24px;
 	height: 24px;
 	color: var(--vs-glyph);
+}
+
+/* --vs-glyph is a grey chosen against the light rail. On the accent fill of   */
+/* the current item it is whatever the owner's brand happens to make of it, so */
+/* the glyph takes the label's colour instead.                                 */
+
+.vs-filter-cats__link.is-current .vs-filter-cats__icon {
+	color: inherit;
 }
 
 .vs-filter-cats__icon img {
@@ -3963,8 +3989,15 @@ body.hc-nav-open {
 	border-color: var(--vs-border-strong);
 }
 
+/* Two pixels of accent rather than one of ink. The width is the point: the    */
+/* accent is the owner's to set and could arrive pale, and a thumbnail strip   */
+/* whose only "you are looking at this one" signal is a 1px hairline in an     */
+/* unknown colour is a state carried by colour alone. Doubling the border      */
+/* makes the weight change readable even when the hue is not.                  */
+
 .vs-gallery__thumb.swiper-slide-thumb-active {
-	border-color: var(--vs-ink);
+	border-width: 2px;
+	border-color: var(--vs-accent);
 }
 
 .vs-gallery__thumb picture {
@@ -4086,10 +4119,10 @@ body.hc-nav-open {
 	line-height: var(--vs-leading-tight);
 }
 
-/* --sale is the BEM name; price--red is the same state as toggled live by     */
-/* okay.js on the parent of .fn_price. They must stay identical.               */
+/* .price--red is the state okay.js toggles live on the parent of .fn_price.   */
+/* Its BEM alias .vs-buybox__price--sale had no emitter and was removed with    */
+/* the other dead rules in the final fix wave.                                  */
 
-.vs-buybox__price--sale,
 .vs-buybox__price.price--red {
 	color: var(--vs-sale-600);
 }
@@ -4186,10 +4219,6 @@ body.hc-nav-open {
 	background-color: var(--vs-surface-subtle);
 }
 
-.vs-stepper__btn:focus-visible {
-	border-radius: var(--vs-radius-sm);
-}
-
 .vs-stepper__input {
 	width: 44px;
 	min-height: 50px;
@@ -4205,8 +4234,17 @@ body.hc-nav-open {
 	text-align: center;
 }
 
+/* The only place in the theme where the focus ring has to be drawn inwards.   */
+/* .vs-stepper clips to overflow: hidden so its children stay inside the       */
+/* rounded shell, and both children are flush with that shell - measured with  */
+/* the default outline-offset: 2px, three of the ring's four sides were cut    */
+/* away and only the inner edge survived. A negative offset puts the whole     */
+/* ring inside the button, where nothing clips it. The old box-shadow ring was */
+/* cut the same way; this is the first version of it that is actually visible. */
+
+.vs-stepper__btn:focus-visible,
 .vs-stepper__input:focus-visible {
-	border-radius: 0;
+	outline-offset: -2px;
 }
 
 /* -------------------------------------------------------- secondary actions */
@@ -4231,10 +4269,6 @@ body.hc-nav-open {
 
 .vs-buybox__tool:hover {
 	border-color: var(--vs-border-strong);
-}
-
-.vs-buybox__tool:focus-visible {
-	border-radius: var(--vs-radius-full);
 }
 
 .vs-buybox__tool.selected {
@@ -4869,8 +4903,15 @@ body.hc-nav-open {
 	color: var(--vs-text-muted);
 }
 
+/* The shared "chevron" glyph is a V pointing down (svg.tpl's M5 9l7 7 7-7), so */
+/* a quarter turn aims it sideways - and the two rotations were the wrong way  */
+/* round until the final review. CSS rotate() is clockwise, so the previous    */
+/* link was rendering matrix(0,-1,1,0), a right-pointing arrow, and the next   */
+/* link matrix(0,1,-1,0), a left-pointing one: a shopper clicking the arrow    */
+/* that pointed forward went back a product. Same pager on post.tpl.           */
+
 .vs-pager__link--prev svg {
-	transform: rotate(-90deg);
+	transform: rotate(90deg);
 }
 
 .vs-pager__link--next {
@@ -4879,7 +4920,7 @@ body.hc-nav-open {
 }
 
 .vs-pager__link--next svg {
-	transform: rotate(90deg);
+	transform: rotate(-90deg);
 }
 
 /* ------------------------------------------------------------------ section */
@@ -4958,6 +4999,12 @@ body.hc-nav-open {
 		gap: var(--vs-space-2);
 		margin-left: var(--vs-space-2);
 	}
+
+	/* The fourth track is the wide one and the subscribe column is the fourth  */
+	/* child, so the widening is positional. index.tpl also carried a           */
+	/* .vs-footer__col--wide marker on that section until the final review;     */
+	/* nothing ever matched it, and a class that names a width without setting  */
+	/* one is worse than no class, so it is gone rather than duplicated here.   */
 
 	.vs-footer__grid {
 		grid-template-columns: repeat(3, minmax(0, 1fr)) 1.5fr;
@@ -5818,7 +5865,8 @@ body.hc-nav-open {
 	font-size: var(--vs-text-base);
 }
 
-/* Summary order on the cart page. #fn_cart_coupon is one AJAX-replaced         */
+/* Summary order on the cart page. .vs-summary__coupon (the element okay.js     */
+/* also knows as #fn_cart_coupon) is one AJAX-replaced                          */
 /* container (okay.js rewrites its innerHTML wholesale) holding BOTH the coupon */
 /* field and the cart-level discount rows, so the two cannot be placed          */
 /* separately in the markup. The container is display:contents and the rows     */
@@ -5832,7 +5880,7 @@ body.hc-nav-open {
 	flex-direction: column;
 }
 
-.vs-checkout #fn_cart_coupon {
+.vs-checkout .vs-summary__coupon {
 	display: contents;
 }
 
@@ -5840,7 +5888,7 @@ body.hc-nav-open {
 	order: 1;
 }
 
-.vs-checkout #fn_total_delivery_price_block {
+.vs-checkout .vs-summary__row--delivery {
 	order: 2;
 }
 
@@ -9397,9 +9445,13 @@ img.lazy:not(.loaded) {
 /* unstyled <input>. .button--blick is the module's glare-sweep hook: the class */
 /* is honoured, the sweep is not - a 0.75s white diagonal across a CTA is not   */
 /* a motion this theme makes.                                                   */
+/*                                                                              */
+/* .btn_order, .button--second, .button--small and .button--big were carried    */
+/* over with it in Task 8 and are gone: grepped across every .tpl in the repo,  */
+/* every installed module and the description columns of the live database,     */
+/* each has zero emitters. .button and .button--blick both do, so both stay.    */
 
-.button,
-.btn_order {
+.button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -9423,36 +9475,11 @@ img.lazy:not(.loaded) {
 	transition: background-color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease);
 }
 
-.button:hover,
-.btn_order:hover {
+.button:hover {
 	border-color: var(--vs-cta-hover);
 	background-color: var(--vs-cta-hover);
 	color: var(--vs-cta-text);
 	text-decoration: none;
-}
-
-.button--second {
-	border-color: var(--vs-border);
-	background-color: var(--vs-cta-2);
-	color: var(--vs-cta-2-text);
-}
-
-.button--second:hover {
-	border-color: var(--vs-ink);
-	background-color: var(--vs-cta-2);
-	color: var(--vs-heading);
-}
-
-.button--small {
-	min-height: 36px;
-	padding: 0 var(--vs-space-4);
-	font-size: var(--vs-text-xs);
-}
-
-.button--big {
-	min-height: 52px;
-	padding: 0 var(--vs-space-6);
-	font-size: var(--vs-text-base);
 }
 
 .button--blick {
@@ -9517,10 +9544,6 @@ img.lazy:not(.loaded) {
 .form__group {
 	position: relative;
 	margin-bottom: var(--vs-space-3);
-}
-
-.form__group--last {
-	margin-bottom: 0;
 }
 
 .form__input,

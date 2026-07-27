@@ -25,6 +25,20 @@
     {$vs_tab = $active_tab}
 {/if}
 
+{* The page heading, first in the document and spoken rather than drawn.
+
+   /user and /user/orders shipped with 24 <h2> and no <h1> at all: a screen
+   reader jumping by heading landed on "Контактні дані", a section of the page
+   and not the page, with nothing having said where it was. Every other page in
+   the theme has exactly one <h1>.
+
+   Screen-reader-only rather than visible, following main.tpl and page_404.tpl:
+   the account layout is a three-column card grid that starts at the top of the
+   content area with no title slot, and the breadcrumb already carries the same
+   words for a sighted user. $h1 is not set on this route - the string is the
+   one the breadcrumb and <title> use. *}
+<h1 class="vs-sr-only">{$lang->user_title|escape}</h1>
+
 <div class="vs-account">
     <div class="tabs tabs--user vs-account__layout">
         <aside class="vs-account__rail">

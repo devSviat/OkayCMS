@@ -164,7 +164,7 @@
                 <span data-language="cart_purchase_title">{$lang->cart_purchase_title}</span>
             </h2>
 
-            <div class="vs-cart__lines vs-cart__lines--static">
+            <div class="vs-cart__lines">
                 {foreach $purchases as $purchase}
                     <article class="vs-cart__line vs-cart__line--static">
                         {* Product image *}
