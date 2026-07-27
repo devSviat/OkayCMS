@@ -1,14 +1,14 @@
 /**
 * vibe_shop component layer.
 * This file is the new component styling built on top of tokens.css and
-* base.css, registered last so it wins over the legacy sheets (grid.css,
-* okay.css, theme.css, select2.min.css, media.css, mobile_menu.css) that are
-* retired in Task 8.
+* base.css, and it is registered last of the six served sheets (tokens.css,
+* grid.css, vendor.css, select2.css, base.css, components.css) so it wins over
+* all of them on source order at equal specificity.
 *
-* Task 2 onward fills this in, one component at a time. Do not add rules to
-* theme.css instead - it stays frozen in its original relative order until
-* Task 8 removes it, because media.css and mobile_menu.css depend on
-* following it in the cascade for their responsive overrides to win.
+* The legacy sheets this theme shipped with - okay.css, theme.css, media.css
+* and mobile_menu.css - were deleted in Task 8. Nothing in this file may lean
+* on them any more; where a comment below names one it is describing what a
+* rule replaced, in the past tense, not a live ordering constraint.
 *
 * House rules for this file, enforced by the compiler:
 * - every declaration lives on one physical line (lines are concatenated
@@ -16,7 +16,134 @@
 * - a selector may only break after a comma
 * - comments occupy whole lines
 * - no raw colour, shadow, radius, duration or font stack; tokens only
+*
+* Two sections carry the generic class names module templates render:
+* - LEGACY GENERIC DEFAULTS, immediately below, holds the ones this file also
+*   refines on the SAME element under a .vs-* name. They have to come first so
+*   the .vs-* rule wins on source order at equal specificity.
+* - LEGACY CLASS CONTRACT, at the end of the file, holds the rest.
 */
+
+/* ============================================================================ */
+/* LEGACY GENERIC DEFAULTS                                                      */
+/* ============================================================================ */
+
+/* Read the LEGACY CLASS CONTRACT header at the end of this file first - it     */
+/* explains why these generic names are styled at all. What separates the two   */
+/* sections is only the cascade: every name here is ALSO carried by an element  */
+/* that this theme styles under a .vs-* name of the same specificity, so a      */
+/* generic block at the end of the file would silently outrank the theme's own  */
+/* rule on the properties the two have in common. Placed here, the .vs-* rule   */
+/* is later and wins, and a bare instance from a module template still gets a   */
+/* complete look.                                                               */
+
+/* ------------------------------------------------ swiper navigation default */
+
+/* The Banners module builds its own Swiper and renders bare .swiper-button-*   */
+/* and .swiper-pagination with no theme class on them. vendor.css carries only  */
+/* their placement, so without this they are 30x60 invisible boxes - which is   */
+/* exactly what the homepage slider had once the legacy sheets came out. Same   */
+/* plate and same border-drawn chevron as .vs-gallery__nav, so every arrow pair */
+/* in the theme matches. The theme's two instances (.vs-gallery__nav and        */
+/* .vs-compare__nav) restate every one of these properties further down and     */
+/* therefore own their own look completely.                                     */
+
+.swiper-button-prev,
+.swiper-button-next {
+	width: 44px;
+	height: 44px;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-full);
+	background: var(--vs-surface);
+	box-shadow: var(--vs-shadow-1);
+	color: var(--vs-heading);
+	transition: border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+	border-color: var(--vs-border-strong);
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+	content: "";
+	width: 9px;
+	height: 9px;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	font-size: 0;
+}
+
+.swiper-button-next::after {
+	transform: translateX(-1px) rotate(-45deg);
+}
+
+.swiper-button-prev::after {
+	transform: translateX(1px) rotate(135deg);
+}
+
+/* ------------------------------------------------------------ generic tabs */
+
+/* .tabs / .tabs__navigation / .tabs__link / .tabs__content is okay.js's tab    */
+/* contract - the script at okay.js:718 finds the switcher and the panel host   */
+/* by these names alone. This theme's one instance is the account page, where   */
+/* user.tpl pairs every one of them with a .vs-account__* class that owns the   */
+/* rail-and-panel presentation; a module template that emits the bare names on  */
+/* their own gets the horizontal strip below instead of an unstyled stack.      */
+/*                                                                              */
+/* .tabs__link needs no reset on the account page: the theme styles that anchor */
+/* at .vs-account .vs-account__nav .vs-account__nav_link, three classes deep,   */
+/* so it outranks this by specificity rather than by order.                     */
+
+.tabs {
+	display: block;
+	margin-bottom: var(--vs-space-5);
+}
+
+/* column-gap rather than gap on purpose: the account rail is a column flex,    */
+/* where a column-gap is inert, so the strip's spacing cannot leak into it.     */
+
+.tabs__navigation {
+	display: flex;
+	flex-wrap: wrap;
+	column-gap: var(--vs-space-1);
+	border-bottom: 1px solid var(--vs-hairline);
+	background-color: transparent;
+}
+
+.tabs__link {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	min-height: 44px;
+	margin-bottom: -1px;
+	padding: 0 var(--vs-space-4);
+	border-bottom: 2px solid transparent;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.tabs__link:hover {
+	color: var(--vs-heading);
+	text-decoration: none;
+}
+
+.tabs__link.selected {
+	border-bottom-color: var(--vs-ink);
+	color: var(--vs-heading);
+	font-weight: 600;
+	cursor: default;
+}
+
+.tabs__content {
+	padding-top: var(--vs-space-5);
+}
 
 /* ---------------------------------------------------------------- buttons */
 
@@ -158,7 +285,22 @@
 }
 
 /* -------------------------------------------------------------- page shell */
-/* index.tpl's single content wrapper. Page content used to start on the exact */
+
+/* index.tpl puts `d-flex flex-column` on <body>, so .main is a flex item and   */
+/* the footer is the one after it. okay.css supplied the growth that keeps the  */
+/* footer at the bottom of a short page; Task 8 deleted the sheet, so it is     */
+/* restated here rather than left to be rediscovered the first time anything    */
+/* gives <body> a min-height. `position: relative` comes with it: .main was the */
+/* containing block every absolutely positioned descendant resolved against     */
+/* while Tasks 1-7 were built and reviewed.                                     */
+
+.main {
+	position: relative;
+	width: 100%;
+	flex: 1 0 auto;
+}
+
+/* Page content used to start on the exact                                     */
 /* pixel the header ended (measured at 1440: header bottom 124, .main top 124) */
 /* so the homepage banner butted straight against the chrome and read as part  */
 /* of it. Only the catalogue looked right, and only because the breadcrumb     */
@@ -690,13 +832,15 @@ body.other_page .main {
 /* row arrives as a bare <div><img></div><a>name</a><span>price</span> and is   */
 /* laid out from here.                                                          */
 /*                                                                             */
-/* Everything below has to outrank css/okay.css, which registers earlier in     */
-/* css.php and builds the same widget as an HTML table: display:table on the    */
-/* panel, table-row on the rows, table-cell plus 1px rgb(219 219 219) cell      */
-/* borders on the three children, and an rgb(233 233 233) band on the selected */
-/* row at .autocomplete-suggestions .autocomplete-selected, two classes, which  */
-/* is why the old one-class rule here never won and that band survived. Same    */
-/* specificity, later source, no !important.                                    */
+/* Everything below was written to outrank css/okay.css, which registered       */
+/* earlier in css.php until Task 8 deleted it and built the same widget as an   */
+/* HTML table: display:table on the panel, table-row on the rows, table-cell    */
+/* plus 1px rgb(219 219 219) cell borders on the three children, and an         */
+/* rgb(233 233 233) band on the selected row at .autocomplete-suggestions       */
+/* .autocomplete-selected, two classes, which is why the old one-class rule     */
+/* here never won and that band survived. Same specificity, later source, no    */
+/* !important. The overrides are kept: they are what the widget's own look is   */
+/* made of now, not merely a counterweight to a sheet that is gone.             */
 
 .autocomplete-suggestions {
 	display: block;
@@ -752,9 +896,9 @@ body.other_page .main {
 	cursor: pointer;
 }
 
-/* okay.css styles `.autocomplete-suggestion div` as a product thumbnail cell   */
+/* okay.css styled `.autocomplete-suggestion div` as a product thumbnail cell   */
 /* - width:50px !important, display:table-cell, hairlines on two sides - and it */
-/* cannot tell a thumbnail from a city name. Undoing it here is what stops a    */
+/* could not tell a thumbnail from a city name. Undoing it here is what stops a */
 /* city being clipped to a 50px box. flex:1 1 0% is the part that beats the     */
 /* !important without a second one: a definite flex-basis means the flex item   */
 /* never consults width for its main size, so the row is free to fill the       */
@@ -786,7 +930,7 @@ body.other_page .main {
 /* keeps every assumption about row shape on our side of the fence - the module */
 /* may render whatever it likes in a suggestion and none of this reaches it.    */
 /*                                                                             */
-/* flex-basis again answers okay.css's width:50px !important, this time to pin  */
+/* flex-basis again answered okay.css's width:50px !important, this time to pin */
 /* the cell at 40px rather than to release it.                                  */
 
 #fn_search .autocomplete-suggestion > div {
@@ -840,7 +984,7 @@ body.other_page .main {
 	white-space: nowrap;
 }
 
-/* formatResult wraps the typed substring in <strong>. okay.css paints it in    */
+/* formatResult wraps the typed substring in <strong>. okay.css painted it in   */
 /* --okay-basic-company, a fourth hue in a theme that allows two; weight is     */
 /* enough to show where the match landed.                                       */
 
@@ -852,7 +996,7 @@ body.other_page .main {
 /* One state class for two inputs: the library adds .autocomplete-selected on   */
 /* mouseover and on arrow keys alike, so the row under the cursor and the row   */
 /* under the caret are always the same treatment - .vs-switcher__link's, not    */
-/* the browser's blue or okay.css's grey.                                       */
+/* the browser's blue, and not the grey okay.css used to paint.                 */
 
 .autocomplete-suggestions .autocomplete-selected {
 	background-color: var(--vs-surface-subtle);
@@ -1227,7 +1371,8 @@ body.other_page .main {
 }
 
 /* --------------------------------------- off-canvas mobile navigation skin */
-/* Structural rules ported from mobile_menu.css, which this replaces.        */
+/* Structural rules ported from mobile_menu.css, which this replaced and     */
+/* which Task 8 deleted.                                                     */
 /* The markup is generated at runtime by mobile_menu.js (hc-offcanvas-nav)   */
 /* and cannot be renamed; only the presentation is ours.                     */
 
@@ -3667,11 +3812,13 @@ body.hc-nav-open {
 	object-fit: contain;
 }
 
-/* Swiper's own arrows are a dark translucent slab from okay.css. They become  */
-/* the same plate-on-photograph control the rest of the theme uses, and they   */
-/* reach 44px so they are usable with a thumb. The glyph is drawn with two     */
-/* borders rather than the swiper-icons font, so nothing here depends on a     */
-/* sheet Task 8 deletes.                                                       */
+/* Swiper's own arrows were a dark translucent slab in okay.css. They are the  */
+/* same plate-on-photograph control the rest of the theme uses, and they reach */
+/* 44px so they are usable with a thumb. The glyph is drawn with two borders   */
+/* rather than the swiper-icons font, so nothing here depends on a sheet that  */
+/* no longer exists. Every property below is also declared by the generic      */
+/* .swiper-button-* default at the top of this file; stating them again here   */
+/* is what makes this instance own its look, and this rule is the later one.   */
 
 .vs-gallery__nav {
 	top: 50%;
@@ -4143,9 +4290,11 @@ body.hc-nav-open {
 }
 
 /* Visible by default, collapsed by vibe.js - never the other way round. okay.css */
-/* hides every .accordion__content, so with scripting off the delivery and payment */
-/* copy would be unreachable; this rule takes it back and the script does the      */
-/* hiding, which is the only order in which a no-JS render still carries content.  */
+/* hid every .accordion__content, so with scripting off the delivery and payment   */
+/* copy would have been unreachable; this rule takes it back and the script does   */
+/* the hiding, which is the only order in which a no-JS render still carries       */
+/* content. The bare .accordion__content restated at the end of this file          */
+/* deliberately carries no display rule for the same reason.                       */
 
 .vs-disclosure-row__body {
 	display: block;
@@ -5456,9 +5605,10 @@ body.hc-nav-open {
 
 /* --------------------------------------------------- purchase discount card */
 /* Opened by fancybox from the rose tag next to a discounted unit price. The    */
-/* legacy .popup class is deliberately not carried over - okay.css forces its    */
-/* padding, width and text-align with !important, which this layer may not      */
-/* answer.                                                                      */
+/* legacy .popup class is deliberately not carried over - okay.css forced its   */
+/* padding, width and text-align with !important, which this layer could not     */
+/* answer, and the generic .popup restated at the end of this file is sized for */
+/* the module form it exists for rather than for this card.                      */
 
 .vs-discounts {
 	padding: var(--vs-space-5);
@@ -5686,11 +5836,11 @@ body.hc-nav-open {
 /* common_js already toggle on the same label for those that do not.            */
 
 /* The list gap is 8px and not 12px, and .vs-option's own margin is zeroed on    */
-/* purpose: theme.css still ships `.payment_method__item, .delivery__item        */
+/* purpose: theme.css shipped `.payment_method__item, .delivery__item            */
 /* { margin-bottom: 20px }`, which stacked on top of the grid gap and made the   */
-/* real distance between two option cards 32px. The margin has to die here       */
-/* rather than in theme.css because theme.css is the legacy sheet Task 8 removes */
-/* wholesale - this layer must already be correct without it.                     */
+/* real distance between two option cards 32px. The margin was zeroed here       */
+/* rather than in theme.css because theme.css was the legacy sheet Task 8        */
+/* removed wholesale - this layer had to be correct without it, and is.          */
 
 .vs-options {
 	display: grid;
@@ -6547,9 +6697,10 @@ body.hc-nav-open {
 	padding-right: 0;
 }
 
-/* okay.js binds a.fn_user_orders_switch, so this stays an <a>. theme.css paints */
-/* that class with a 10x10 plus/minus data URI; the sprite chevron replaces it,  */
-/* so the legacy background is switched off rather than left showing through.    */
+/* okay.js binds a.fn_user_orders_switch, so this stays an <a>. theme.css painted */
+/* that class with a 10x10 plus/minus data URI; the sprite chevron replaced it,   */
+/* and the background is still switched off explicitly because the <a> is a link  */
+/* the theme does not want a UA or module default painting behind.                */
 
 .vs-table__toggle {
 	display: flex;
@@ -6765,8 +6916,10 @@ body.hc-nav-open {
 
 /* -------------------------------------------------------------- modal form */
 /* The callback form and its confirmation, opened by fancybox. The legacy       */
-/* .popup class is deliberately not carried: okay.css forces its padding, width */
-/* and text-align with !important, which this layer may not answer.             */
+/* .popup class is deliberately not carried: okay.css forced its padding, width */
+/* and text-align with !important, which this layer could not answer, and the   */
+/* generic .popup restated at the end of this file is sized for the FastOrder   */
+/* form rather than for this one.                                               */
 
 .vs-modal-form {
 	width: 460px;
@@ -6889,12 +7042,12 @@ body.hc-nav-open {
 /* okay.js constructs the rail Swiper with no spaceBetween and that call is not */
 /* ours to change, so the gutter is put inside the slide instead and Swiper's   */
 /* own width arithmetic is left untouched. It is a margin on the card and not   */
-/* padding on the slide because media.css still ships                            */
+/* padding on the slide because media.css shipped                                */
 /* `.product_item { padding: 0 !important }` below 992px, which no selector      */
-/* here may outrank - the card is the first box in the slide that legacy sheet  */
-/* does not reach. The rail is then pulled out by the same half-gutter on both  */
-/* sides so the first and last card line up with the section title instead of   */
-/* sitting 8px inside it.                                                        */
+/* here could outrank - the card was the first box in the slide that legacy     */
+/* sheet did not reach. The rail is then pulled out by the same half-gutter on  */
+/* both sides so the first and last card line up with the section title rather  */
+/* than sitting 8px inside it.                                                   */
 
 .vs-home__rail {
 	min-width: 0;
@@ -7588,10 +7741,10 @@ body.hc-nav-open {
 	margin-top: var(--vs-space-7);
 }
 
-/* This is a <footer> element and theme.css still carries a bare `footer` rule  */
-/* that paints the site footer's ink background. Both are reset explicitly so   */
-/* the article foot does not inherit a black band, and so it keeps working      */
-/* after that sheet is deleted.                                                 */
+/* This is a <footer> element and theme.css carried a bare `footer` rule that   */
+/* painted the site footer's ink background onto it. Both are still reset       */
+/* explicitly: no sheet paints bare <footer> any more, but this element is a    */
+/* light card inside an article and stating its surface is what makes it one.   */
 
 .vs-post__foot {
 	margin-top: var(--vs-space-8);
@@ -8024,15 +8177,24 @@ body.hc-nav-open {
 /* ---------------------------------------------------------------- account */
 /* Below 768px every .tab is visible and each one is a fn_switch accordion;      */
 /* from 768px okay.js's .tabs script shows one at a time and the rail is the     */
-/* switcher. Both presentations are declared here so the legacy sheets that      */
-/* currently supply them can be deleted in task 8.                               */
+/* switcher. Both presentations are declared here, which is what let the legacy  */
+/* sheets that used to supply them be deleted in Task 8. The generic .tabs*      */
+/* defaults at the top of this file cover the same contract for a module         */
+/* template that renders it without the .vs-account__* names.                    */
 
 .vs-account {
 	padding-bottom: var(--vs-space-9);
 }
 
+/* The three .vs-account__* rules that follow sit on elements that also carry a */
+/* generic .tabs / .tabs__navigation / .tabs__content class, so each of them    */
+/* restates the box properties LEGACY GENERIC DEFAULTS gives the generic strip. */
+/* Without those resets the account page would inherit the strip's rhythm and   */
+/* its underline on top of the rail-and-panel layout it actually wants.          */
+
 .vs-account__layout {
 	padding-top: var(--vs-space-5);
+	margin-bottom: 0;
 	min-width: 0;
 }
 
@@ -8077,15 +8239,19 @@ body.hc-nav-open {
 	white-space: nowrap;
 }
 
-/* okay.css styles .tabs__navigation--user .tabs__link at 0,3,0 - height, the  */
-/* hairline, the padding and, on .selected, the shop's brand colour, which in   */
-/* this shop is near-black and therefore invisible on the picked row. Every     */
-/* rule here matches that weight so the later sheet wins on order.              */
+/* The rail is a vertical list of links, not the horizontal strip the generic   */
+/* .tabs__navigation draws, so the strip's underline is removed here. The link  */
+/* rules below are three classes deep on purpose: the legacy sheet styled       */
+/* .tabs__navigation--user .tabs__link at 0,3,0 - height, hairline, padding and */
+/* a .selected colour that is near-black in this shop and therefore invisible   */
+/* on the picked row - and the weight was matched so the restatement wins on    */
+/* order. It now also outranks the generic .tabs__link by specificity.          */
 
 .vs-account__nav {
 	display: flex;
 	flex-direction: column;
 	padding: var(--vs-space-2) 0;
+	border-bottom: 0;
 	background-color: transparent;
 }
 
@@ -8151,8 +8317,10 @@ body.hc-nav-open {
 	height: 18px;
 }
 
-/* theme.css gives .user_container margin-left: 300px and width: calc(100% -   */
-/* 300px) for the old float layout. Inside the grid that is a second offset.    */
+/* theme.css gave .user_container margin-left: 300px and width: calc(100% -    */
+/* 300px) for the old float layout, which inside the grid was a second offset.  */
+/* Both are still stated so the panel column measures itself off the grid       */
+/* track and nothing else.                                                      */
 
 .vs-account__main {
 	min-width: 0;
@@ -8161,6 +8329,7 @@ body.hc-nav-open {
 }
 
 .vs-account__panels {
+	padding-top: 0;
 	min-width: 0;
 }
 
@@ -8431,7 +8600,7 @@ body.hc-nav-open {
 }
 
 /* ----------------------------------------------------------- main banner */
-/* Replaces theme.css's hardcoded 400px height. The slides in a banner group    */
+/* Replaced theme.css's hardcoded 400px height. The slides in a banner group    */
 /* are whatever the shop uploaded - here 1067x400 next to 400x350 - and swiper  */
 /* sizes its wrapper from the tallest, so a fixed height left 361px of void     */
 /* under the short ones at 375px. A ratio box plus object-fit: cover means      */
@@ -8675,8 +8844,8 @@ body.hc-nav-open {
 
 /* --------------------------------------------------- secondary ≤ 767 px */
 /* The account accordion. Every panel is shown, the head is the toggle, and     */
-/* only the first body starts open - the same behaviour the legacy sheets give  */
-/* it today, restated here so they can be removed.                              */
+/* only the first body starts open - the same behaviour the legacy sheets gave  */
+/* it, restated here before they were removed in Task 8.                        */
 
 @media (max-width: 767px) {
 
@@ -8710,8 +8879,9 @@ body.hc-nav-open {
 
 /* Which section starts open follows the route, not the document order:         */
 /* /user/orders on a phone must not land on a collapsed order list. The         */
-/* four-class weight is deliberate - media.css opens `.tab:first-child          */
-/* .mobile_tab__content` at 0,4,0 and would otherwise always win.               */
+/* four-class weight was matched to media.css, which opened `.tab:first-child   */
+/* .mobile_tab__content` at 0,4,0 and would otherwise always have won. It is    */
+/* kept because it is also what outranks the generic .tabs* defaults.           */
 
 	.vs-account .vs-account__panels .vs-account__panel--open .vs-account__panel_body {
 		display: block;
@@ -8871,54 +9041,20 @@ img.lazy:not(.loaded) {
 /* guessing. Where the legacy look conflicted with this theme it was restated   */
 /* on tokens rather than reproduced: no nested white cards (C11), no cyan       */
 /* gradient on the toasts, no font-awesome glyphs, no button glare sweep.       */
+/*                                                                              */
+/* Not every generic name lives here. The ones this file ALSO refines under a   */
+/* .vs-* name on the same element - .swiper-button-* and the .tabs* family -    */
+/* are in LEGACY GENERIC DEFAULTS at the top of the file instead, because a     */
+/* block here would be the later rule and would quietly outrank the theme.      */
+/* Add a name here only if no .vs-* rule in this file touches the same element. */
 
-/* ------------------------------------------------ swiper navigation default */
-
-/* The Banners module builds its own Swiper and renders bare .swiper-button-*   */
-/* and .swiper-pagination with no theme class on them. vendor.css carries only  */
-/* their placement, so without this they are 30x60 invisible boxes - which is   */
-/* exactly what the homepage slider had after the sheets came out. Same plate   */
-/* and same border-drawn chevron as .vs-gallery__nav, so every arrow pair in    */
-/* the theme now matches; the two instances that DO carry a theme class refine  */
-/* this at a higher specificity and are unaffected.                             */
-
-.swiper-button-prev,
-.swiper-button-next {
-	width: 44px;
-	height: 44px;
-	border: 1px solid var(--vs-hairline);
-	border-radius: var(--vs-radius-full);
-	background: var(--vs-surface);
-	box-shadow: var(--vs-shadow-1);
-	color: var(--vs-heading);
-	transition: border-color var(--vs-dur-1) var(--vs-ease);
-}
-
-.swiper-button-prev:hover,
-.swiper-button-next:hover {
-	border-color: var(--vs-border-strong);
-}
-
-.swiper-button-prev::after,
-.swiper-button-next::after {
-	content: "";
-	width: 9px;
-	height: 9px;
-	border-right: 2px solid currentColor;
-	border-bottom: 2px solid currentColor;
-	font-size: 0;
-}
-
-.swiper-button-next::after {
-	transform: translateX(-1px) rotate(-45deg);
-}
-
-.swiper-button-prev::after {
-	transform: translateX(1px) rotate(135deg);
-}
+/* ------------------------------------------------------------ banner group */
 
 /* The banner group is a bare .swiper-container; theme.css zeroed its bottom    */
-/* margin and the home sections own their own rhythm.                           */
+/* margin and the home sections own their own rhythm. The arrows and bullets    */
+/* the same module renders are styled in LEGACY GENERIC DEFAULTS at the top of  */
+/* this file, because the theme refines them under .vs-gallery__nav and         */
+/* .vs-compare__nav at equal specificity and has to be the later rule.          */
 
 .banner_group {
 	margin-bottom: 0;
@@ -9007,16 +9143,34 @@ img.lazy:not(.loaded) {
 	line-height: var(--vs-leading-tight);
 }
 
+/* The --boxed and --border modifiers are the FAQ and Banners wrappers, and     */
+/* they wrap a list of elements that already have their own surfaces - so they  */
+/* stay flat, which is the whole point of dropping the card here.               */
+
 .block--boxed,
 .block__header--boxed,
-.block__body,
-.boxed {
+.block__body {
 	background-color: transparent;
 }
 
 .block--border,
 .block__header--border {
 	border: 0;
+}
+
+/* Bare .boxed is a different case and must not be swept up by the rule above.  */
+/* It is the stock markup's "this is a surface" primitive - a card in its own   */
+/* right, not a wrapper around cards - and C7 requires it to be restyled rather */
+/* than dropped. Nothing in this theme or in the sixteen installed modules      */
+/* renders it on its own today (both consumers combine it with .block*, which   */
+/* is why the flat rule above is the one that reaches them), so it is stated    */
+/* once, plainly, on the same surface tokens every other card in the theme uses.*/
+
+.boxed {
+	padding: var(--vs-space-5);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
 }
 
 /* ------------------------------------------------- WYSIWYG two-column table */

@@ -10,7 +10,9 @@
      body is .mobile_tab__content (okay.js slide-toggles $(this).next(), so the
      head and the body must stay adjacent siblings).
    The class names above are that contract and are kept verbatim; presentation
-   hangs off the .vs-account__* names beside them so the legacy sheets can go. *}
+   hangs off the .vs-account__* names beside them, which is what let the legacy
+   sheets go in Task 8. components.css still styles the bare .tabs* names for a
+   module template that renders them without a .vs-account__* class. *}
 
 {* UserHelper::defaultActiveTab() returns the current route name when the route
    is not one of the four tab routes, so on /user $active_tab is the string

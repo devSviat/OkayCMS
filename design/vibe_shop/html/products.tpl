@@ -10,9 +10,13 @@
    okay.js binds that class non-delegated at ready and toggles .opened on every
    .fn_mobile_toogle, which is a second, independent open/close mechanism: it
    desynchronises from vibeSheet's .is-open on the Escape and apply paths and
-   leaves an inverted .opened flag behind. vibeSheet owns every path here, and
-   the class is still emitted by blog.tpl, brands.tpl, post.tpl and
-   blog_sidebar.tpl for the legacy sidebars that media.css actually styles. *}
+   leaves an inverted .opened flag behind. vibeSheet owns every path here.
+   The .fn_mobile_toogle class itself stays on the aside below - it is part of
+   the fn_* contract and blog.tpl, author.tpl, brands.tpl and post.tpl carry it
+   on their rails too - but with no .fn_switch_mobile_filter trigger anywhere in
+   this theme's markup, okay.js's handler never fires. Those rails were styled
+   by media.css; since Task 8 deleted it they are styled here, by
+   components.css, under .vs-filters / .vs-sheet like this one. *}
 
 <div class="vs-catalogue">
     <div class="vs-catalogue__masthead">

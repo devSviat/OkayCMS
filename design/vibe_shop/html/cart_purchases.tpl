@@ -60,9 +60,11 @@
 
         {if $purchase->discounts}
         <div class="hidden">
-            {* .popup is deliberately not carried over: okay.css forces its
+            {* .popup is deliberately not carried over: okay.css forced its
                padding, width and text-align with !important, which this layer
-               may not answer. .popup_animated is only the fancybox entrance. *}
+               could not answer, and the generic .popup components.css restates
+               is sized for the FastOrder form. .popup_animated is only the
+               fancybox entrance, which no sheet draws any more. *}
             <div id="fn_purchase_discount_detail_{$purchase->variant->id}" class="vs-discounts popup_animated">
                 <div class="vs-discounts__title">
                     {include file="svg.tpl" svgId="sale_icon"}

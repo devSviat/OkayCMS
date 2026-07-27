@@ -568,8 +568,9 @@
 
     /* How much of the top of the viewport is covered by something pinned there.
        Both are checked because two different mechanisms pin on this theme: below
-       992px .vs-header is position: sticky from media.css, and at every width
-       sticky.min.js pulls .vs-header__main out of the flow once the page moves. */
+       992px .vs-header is position: sticky from the (max-width: 991px) block in
+       components.css, and at every width sticky.min.js pulls .vs-header__main out
+       of the flow once the page moves. */
     function anchorOffset() {
         var nodes = document.querySelectorAll('.vs-header, .vs-header__main');
         var covered = 0;
