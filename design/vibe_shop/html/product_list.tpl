@@ -2,7 +2,15 @@
 {* Chips are only worth it for short labels - "Червоний", "XL", "128 Gb". A shop
    whose variants read "16 дюймов - 155-166 см" would get four stacked 44px rows
    and a card twice as tall as its neighbours, so those fall back to the dropdown. *}
-{assign var="vsVariantCount" value=$product->variants|count}
+{* $product->variants is NULL, not [], for a product with no variant: attachVariants
+   only ever assigns the key, it never initialises it. Counting NULL is a fatal in
+   PHP 8, and this card is rendered for every product in the catalogue, on the home
+   page swipers and in the wishlist - one variant-less product takes the whole
+   listing down with a 500. (The related-products block on the product page cannot
+   reach it: RelatedProductsHelper hard-codes in_stock => true, which requires at
+   least one variant. The catalogue does not.) *}
+{assign var="vsVariantCount" value=0}
+{if !empty($product->variants)}{assign var="vsVariantCount" value=$product->variants|count}{/if}
 {assign var="vsChipLen" value=0}
 {assign var="vsChipNamed" value=true}
 {foreach $product->variants as $v}

@@ -3635,8 +3635,13 @@ body.hc-nav-open {
 	transform: rotate(180deg);
 }
 
+/* Visible by default, collapsed by vibe.js - never the other way round. okay.css */
+/* hides every .accordion__content, so with scripting off the delivery and payment */
+/* copy would be unreachable; this rule takes it back and the script does the      */
+/* hiding, which is the only order in which a no-JS render still carries content.  */
+
 .vs-disclosure-row__body {
-	display: none;
+	display: block;
 	padding-bottom: var(--vs-space-4);
 	color: var(--vs-text-muted);
 	font-size: var(--vs-text-sm);
@@ -3849,9 +3854,30 @@ body.hc-nav-open {
 	transform: rotate(180deg);
 }
 
+/* Same rule as the disclosure rows: the panels are open in the HTML and vibe.js  */
+/* collapses them once it has run. A description, a specification table and the   */
+/* reviews are the substance of this page - a headless renderer, a crawler or a   */
+/* shopper with scripting off must not be handed a product page without them.     */
+/* .is-enhanced is written by vibe.js and is what unlocks the desktop tab layout: */
+/* the tab grid stacks all three panels in one cell, which is only ever correct   */
+/* when exactly one of them is displayed, i.e. only once the script is running.   */
+
 .vs-tabs__panel {
-	display: none;
+	display: block;
 	padding-bottom: var(--vs-space-6);
+}
+
+/* Nothing collapses without the script, so the affordance that says it does is   */
+/* not drawn.                                                                     */
+
+.vs-tabs:not(.is-enhanced) .vs-tabs__chevron,
+.vs-disclosures:not(.is-enhanced) .vs-disclosure-row__chevron {
+	display: none;
+}
+
+.vs-tabs:not(.is-enhanced) .vs-tabs__btn,
+.vs-disclosures:not(.is-enhanced) .vs-disclosure-row__btn {
+	cursor: default;
 }
 
 .vs-prose {
@@ -4355,56 +4381,70 @@ body.hc-nav-open {
 /* placement cannot drift, and the panels share row 2 - only one of them is    */
 /* ever displayed, because fn_accordion keeps exactly one open. The item boxes */
 /* are display: contents so their heads and panels become grid items directly. */
+/* Gated on .is-enhanced: three panels sharing one grid cell overlap, so this  */
+/* layout is only ever correct while the script that collapses two of them is  */
+/* running. Without it the same markup stays a stacked, fully readable list.   */
 
 	.vs-tabs {
 		grid-column: 1;
 		grid-row: 2;
-		display: grid;
-		grid-template-columns: repeat(3, max-content) minmax(0, 1fr);
-		column-gap: var(--vs-space-6);
 		margin-top: 0;
 		border-top: 0;
 	}
 
-	.vs-tabs__item {
+	.vs-tabs.is-enhanced {
+		display: grid;
+		grid-template-columns: repeat(3, max-content) minmax(0, 1fr);
+		column-gap: var(--vs-space-6);
+	}
+
+	.vs-tabs.is-enhanced .vs-tabs__item {
 		display: contents;
 	}
 
-	.vs-tabs__head {
+	.vs-tabs.is-enhanced .vs-tabs__head {
 		grid-row: 1;
 		border-bottom: 2px solid transparent;
 	}
 
-	.vs-tabs__item:nth-child(1) .vs-tabs__head {
+	.vs-tabs.is-enhanced .vs-tabs__item:nth-child(1) .vs-tabs__head {
 		grid-column: 1;
 	}
 
-	.vs-tabs__item:nth-child(2) .vs-tabs__head {
+	.vs-tabs.is-enhanced .vs-tabs__item:nth-child(2) .vs-tabs__head {
 		grid-column: 2;
 	}
 
-	.vs-tabs__item:nth-child(3) .vs-tabs__head {
+	.vs-tabs.is-enhanced .vs-tabs__item:nth-child(3) .vs-tabs__head {
 		grid-column: 3;
 	}
 
-	.vs-tabs__head.active {
+	.vs-tabs.is-enhanced .vs-tabs__head.active {
 		border-bottom-color: var(--vs-ink);
 	}
 
-	.vs-tabs__btn {
+/* max-content columns size the tab to its label, and "Опис" is 38px wide - a  */
+/* 38x48 target on a 992px screen, which is a touch width. The minimum is the  */
+/* 44px rule, and the label is centred in it so a short tab does not sit off   */
+/* to one side of its own underline.                                          */
+
+	.vs-tabs.is-enhanced .vs-tabs__btn {
+		justify-content: center;
+		min-width: 44px;
 		min-height: 48px;
+		padding: 0 var(--vs-space-2);
 		color: var(--vs-text-muted);
 	}
 
-	.vs-tabs__head.active .vs-tabs__btn {
+	.vs-tabs.is-enhanced .vs-tabs__head.active .vs-tabs__btn {
 		color: var(--vs-heading);
 	}
 
-	.vs-tabs__chevron {
+	.vs-tabs.is-enhanced .vs-tabs__chevron {
 		display: none;
 	}
 
-	.vs-tabs__panel {
+	.vs-tabs.is-enhanced .vs-tabs__panel {
 		grid-row: 2;
 		grid-column: 1 / -1;
 		padding-top: var(--vs-space-7);

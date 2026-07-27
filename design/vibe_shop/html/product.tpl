@@ -17,8 +17,14 @@
      The panels are driven by fn_accordion instead, which is already an
      exclusive disclosure: one panel open, clicking the open one is a no-op.
      Desktop lays the same markup out as a tab set with CSS grid, mobile as a
-     stacked accordion. #fn_tab_comments still opens the comments panel because
-     okay.js triggers a click on it and the fn_accordion handler is delegated.
+     stacked accordion.
+     Every panel ships OPEN: nothing on this page may depend on a script having
+     run to be readable. vibe.js collapses all but one and marks the block
+     .is-enhanced, which is also what unlocks the desktop tab grid - three
+     panels sharing one grid cell only works while one of them is displayed.
+     vibe.js also owns .fn_anchor_comments: okay.js triggers a click on
+     #fn_tab_comments and then measures #comments in the same tick, before
+     slideDown has made it visible, so its scroll destination is always -110.
    - .fn_switch / .mobile_tab_navigation, the second (mobile-only) disclosure
      the old markup layered on top of the tabs. One mechanism, both widths.
 
@@ -309,7 +315,7 @@
                                 <span class="vs-disclosure-row__chevron">{include file="svg.tpl" svgId="chevron"}</span>
                             </button>
                         </div>
-                        <div class="accordion__content vs-disclosure-row__body" style="display: block;">
+                        <div id="vs_delivery" class="accordion__content vs-disclosure-row__body">
                             {$settings->product_deliveries}
                         </div>
                     </div>
@@ -320,7 +326,7 @@
                                 <span class="vs-disclosure-row__chevron">{include file="svg.tpl" svgId="chevron"}</span>
                             </button>
                         </div>
-                        <div class="accordion__content vs-disclosure-row__body">
+                        <div id="vs_payment" class="accordion__content vs-disclosure-row__body">
                             {$settings->product_payments}
                         </div>
                     </div>
@@ -343,12 +349,12 @@
             {if $description}
                 <div class="accordion__item vs-tabs__item{if $vsPanelFirst} visible{/if}">
                     <h2 class="accordion__title vs-tabs__head{if $vsPanelFirst} active{/if}">
-                        <button type="button" class="vs-tabs__btn">
+                        <button type="button" id="vs_tab_description" class="vs-tabs__btn">
                             <span data-language="product_description">{$lang->product_description}</span>
                             <span class="vs-tabs__chevron">{include file="svg.tpl" svgId="chevron"}</span>
                         </button>
                     </h2>
-                    <div id="description" class="accordion__content vs-tabs__panel"{if $vsPanelFirst} style="display: block;"{/if} itemprop="description">
+                    <div id="description" class="accordion__content vs-tabs__panel" itemprop="description">
                         <div class="block__description vs-prose">{$description}</div>
                     </div>
                 </div>
@@ -358,12 +364,12 @@
             {if $product->features}
                 <div class="accordion__item vs-tabs__item{if $vsPanelFirst} visible{/if}">
                     <h2 class="accordion__title vs-tabs__head{if $vsPanelFirst} active{/if}">
-                        <button type="button" class="vs-tabs__btn">
+                        <button type="button" id="vs_tab_features" class="vs-tabs__btn">
                             <span data-language="product_features">{$lang->product_features}</span>
                             <span class="vs-tabs__chevron">{include file="svg.tpl" svgId="chevron"}</span>
                         </button>
                     </h2>
-                    <div id="features" class="accordion__content vs-tabs__panel"{if $vsPanelFirst} style="display: block;"{/if}>
+                    <div id="features" class="accordion__content vs-tabs__panel">
                         <dl class="vs-specs">
                             {foreach $product->features as $f}
                                 <div class="vs-specs__row">
@@ -388,7 +394,7 @@
                         <span class="vs-tabs__chevron">{include file="svg.tpl" svgId="chevron"}</span>
                     </button>
                 </h2>
-                <div id="comments" class="accordion__content vs-tabs__panel"{if $vsPanelFirst} style="display: block;"{/if}>
+                <div id="comments" class="accordion__content vs-tabs__panel">
                     <div class="vs-reviews">
                         <div class="vs-reviews__list">
                             {if $comments}

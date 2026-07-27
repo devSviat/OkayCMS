@@ -345,6 +345,318 @@
         }, { threshold: 0 }).observe(target);
     }());
 
+    /* ------------------------------------------- tabs / disclosure panels */
+
+    /* The description, specification and review panels - and the delivery and
+       payment rows in the buy box - ship OPEN in the HTML. Content must never be
+       gated on a script having run: a crawler, a headless renderer or a shopper
+       with scripting off has to be able to read the specification. So the panels
+       are collapsed here rather than revealed here, and the block is marked
+       .is-enhanced, which is what lets components.css switch the desktop tab
+       grid on: three panels share one grid cell up there, which is only correct
+       while exactly one of them is displayed.
+
+       The same markup is a tab set from 992px and a stacked accordion below it,
+       so the ARIA is applied from the breakpoint listener rather than written
+       into the template: role="tab" on an accordion header would be a lie. */
+
+    var tabQuery = window.matchMedia ? window.matchMedia('(min-width: 992px)') : null;
+    var vsUid = 0;
+
+    function ensureId(el, prefix) {
+        if (!el.id) el.id = prefix + (++vsUid);
+        return el.id;
+    }
+
+    /* fn_accordion's own shape: .fn_accordion > .accordion__item >
+       (.accordion__title, .accordion__content). Items with no button are
+       skipped - the focusable control is what carries the tab semantics. */
+    function accordionParts(host) {
+        var out = [];
+        var items = host.querySelectorAll('.accordion__item');
+        for (var i = 0; i < items.length; i++) {
+            var head = items[i].querySelector('.accordion__title');
+            var panel = items[i].querySelector('.accordion__content');
+            var btn = head ? head.querySelector('button') : null;
+            if (head && panel && btn) out.push({ item: items[i], head: head, panel: panel, btn: btn });
+        }
+        return out;
+    }
+
+    function openIndex(parts) {
+        for (var i = 0; i < parts.length; i++) {
+            if (parts[i].head.classList.contains('active')) return i;
+        }
+        return -1;
+    }
+
+    /* asTabs = true gives the tab pattern. The item box and the <h2> sit between
+       the tablist and the tab, which ARIA does not allow, so both are marked
+       presentational; below 992px they are left alone and the <h2> keeps its
+       heading semantics, which is the correct accordion pattern. */
+    function applyAria(host, asTabs) {
+        var parts = accordionParts(host);
+        if (!parts.length) return;
+        var open = openIndex(parts);
+
+        if (asTabs) {
+            host.setAttribute('role', 'tablist');
+            var title = document.querySelector('.vs-pdp__title');
+            if (title) host.setAttribute('aria-label', title.textContent.trim());
+        } else {
+            host.removeAttribute('role');
+            host.removeAttribute('aria-label');
+        }
+
+        for (var i = 0; i < parts.length; i++) {
+            var p = parts[i];
+            var on = i === open || (open === -1 && i === 0);
+            ensureId(p.btn, 'vs_tab_');
+            ensureId(p.panel, 'vs_panel_');
+            p.btn.setAttribute('aria-controls', p.panel.id);
+
+            if (asTabs) {
+                p.item.setAttribute('role', 'presentation');
+                p.head.setAttribute('role', 'presentation');
+                p.btn.setAttribute('role', 'tab');
+                p.btn.setAttribute('aria-selected', on ? 'true' : 'false');
+                p.btn.setAttribute('tabindex', on ? '0' : '-1');
+                p.btn.removeAttribute('aria-expanded');
+                p.panel.setAttribute('role', 'tabpanel');
+                p.panel.setAttribute('aria-labelledby', p.btn.id);
+                p.panel.setAttribute('tabindex', '0');
+            } else {
+                p.item.removeAttribute('role');
+                p.head.removeAttribute('role');
+                p.btn.removeAttribute('role');
+                p.btn.removeAttribute('aria-selected');
+                p.btn.removeAttribute('tabindex');
+                p.btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+                p.panel.removeAttribute('role');
+                p.panel.removeAttribute('aria-labelledby');
+                p.panel.removeAttribute('tabindex');
+            }
+        }
+    }
+
+    function tabHost() {
+        return document.querySelector('.vs-tabs');
+    }
+
+    function syncPanelAria() {
+        var tabs = tabHost();
+        if (tabs) applyAria(tabs, !!(tabQuery && tabQuery.matches));
+        var rows = document.querySelectorAll('.vs-disclosures');
+        for (var i = 0; i < rows.length; i++) applyAria(rows[i], false);
+    }
+
+    /* Collapse everything but the one the template marked .active. Runs before
+       DOMContentLoaded (vibe.js is a footer script, okay.js binds on ready), so
+       okay.js's accordion handler always finds exactly one open panel and its
+       "already visible - do nothing" branch keeps working. */
+    function collapse(host) {
+        var parts = accordionParts(host);
+        if (!parts.length) return;
+        var open = openIndex(parts);
+        for (var i = 0; i < parts.length; i++) {
+            var on = i === open || (open === -1 && i === 0);
+            parts[i].head.classList.toggle('active', on);
+            parts[i].item.classList.toggle('visible', on);
+            parts[i].panel.style.display = on ? 'block' : 'none';
+        }
+        host.classList.add('is-enhanced');
+    }
+
+    (function () {
+        var hosts = document.querySelectorAll('.vs-tabs, .vs-disclosures');
+        for (var i = 0; i < hosts.length; i++) collapse(hosts[i]);
+        syncPanelAria();
+    }());
+
+    /* okay.js's accordion handler only moves the .active / .visible classes, so
+       the state those classes describe is mirrored into ARIA afterwards. When it
+       takes its early "already open" branch it returns false, which stops the
+       event before it reaches this listener - correct, because nothing changed. */
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        if (!event.target.closest('.vs-tabs__head, .vs-disclosure-row__head')) return;
+        window.setTimeout(syncPanelAria, 0);
+    });
+
+    if (tabQuery) {
+        var onTabQuery = function () {
+            syncPanelAria();
+        };
+        if (tabQuery.addEventListener) {
+            tabQuery.addEventListener('change', onTabQuery);
+        } else if (tabQuery.addListener) {
+            tabQuery.addListener(onTabQuery);
+        }
+    }
+
+    /* Roving focus across the tab strip. Automatic activation: the panels are
+       plain content, so moving focus and showing it is what a shopper means. */
+    document.addEventListener('keydown', function (event) {
+        if (!event.target.closest) return;
+        var btn = event.target.closest('.vs-tabs__btn');
+        if (!btn || btn.getAttribute('role') !== 'tab') return;
+        var host = btn.closest('.vs-tabs');
+        if (!host) return;
+        var list = host.querySelectorAll('.vs-tabs__btn');
+        var i = Array.prototype.indexOf.call(list, btn);
+        var next = -1;
+
+        if (event.key === 'ArrowRight' || event.key === 'Right') {
+            next = (i + 1) % list.length;
+        } else if (event.key === 'ArrowLeft' || event.key === 'Left') {
+            next = (i - 1 + list.length) % list.length;
+        } else if (event.key === 'Home') {
+            next = 0;
+        } else if (event.key === 'End') {
+            next = list.length - 1;
+        } else {
+            return;
+        }
+
+        event.preventDefault();
+        list[next].focus();
+        list[next].click();
+    });
+
+    /* Anchor to the reviews.
+
+       okay.js does this (okay.js:645):
+           $("#fn_tab_comments").trigger("click");
+           destination = $("[id='comments']").offset().top - 110;
+       The fn_accordion handler that click reaches only *queues* slideDown(300),
+       so at the moment of the measurement #comments is still display:none,
+       offset().top is 0, the destination is -110 and scrollTop clamps to 0: the
+       panel opens and the page never moves. The old .tabs path used fadeIn(200),
+       which sets display synchronously, which is why this only broke when the
+       panels moved onto fn_accordion.
+
+       okay.js cannot be edited, so the anchor is taken over here. The listener
+       is on the capture phase and stops propagation, so okay.js's handler - the
+       one holding the stale measurement - never runs and there is exactly one
+       scroll. The panel is opened synchronously first, so the position measured
+       below is the real one. */
+    var ANCHOR_GAP = 16;
+    var ANCHOR_TOLERANCE = 4;
+    var ANCHOR_PASSES = 3;
+    var ANCHOR_IDLE_MS = 100;
+    var ANCHOR_BAIL_MS = 1200;
+
+    /* How much of the top of the viewport is covered by something pinned there.
+       Both are checked because two different mechanisms pin on this theme: below
+       992px .vs-header is position: sticky from media.css, and at every width
+       sticky.min.js pulls .vs-header__main out of the flow once the page moves. */
+    function anchorOffset() {
+        var nodes = document.querySelectorAll('.vs-header, .vs-header__main');
+        var covered = 0;
+        for (var i = 0; i < nodes.length; i++) {
+            var position = window.getComputedStyle(nodes[i]).position;
+            if (position !== 'sticky' && position !== 'fixed') continue;
+            var box = nodes[i].getBoundingClientRect();
+            if (box.top > 1) continue;
+            if (box.bottom > covered) covered = box.bottom;
+        }
+        return covered + ANCHOR_GAP;
+    }
+
+    /* One destination is not enough on this page. sticky.min.js takes
+       .vs-header__main out of the flow the moment the page moves, so everything
+       below it shifts up by that much *while the animation is running*, and the
+       bar it pins in its place then covers the same amount of the viewport - a
+       single measurement taken at scrollY = 0 is 120px wrong by the time it
+       lands (measured: destination 1055, panel ends up at -44 with another 60
+       under the pinned bar). So the destination is re-measured once the motion
+       stops and corrected, at most twice, and the whole thing is abandoned the
+       instant the shopper touches the page themselves - being yanked back to a
+       target you have decided to leave is worse than a slightly short scroll. */
+    function scrollToPanel(panel) {
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var behavior = reduce ? 'auto' : 'smooth';
+        var passes = 0;
+        var idle = null;
+
+        function destination() {
+            var max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+            var top = panel.getBoundingClientRect().top + window.pageYOffset - anchorOffset();
+            return Math.min(max, Math.max(0, top));
+        }
+
+        function stop() {
+            window.clearTimeout(idle);
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('wheel', abandon);
+            window.removeEventListener('touchstart', abandon);
+        }
+
+        function abandon() {
+            passes = ANCHOR_PASSES;
+            stop();
+        }
+
+        function onScroll() {
+            window.clearTimeout(idle);
+            idle = window.setTimeout(settled, ANCHOR_IDLE_MS);
+        }
+
+        function settled() {
+            stop();
+            step();
+        }
+
+        function step() {
+            if (passes >= ANCHOR_PASSES) return;
+            var to = destination();
+            if (Math.abs(to - window.pageYOffset) < ANCHOR_TOLERANCE) return;
+            passes++;
+            window.addEventListener('scroll', onScroll);
+            window.addEventListener('wheel', abandon, { passive: true });
+            window.addEventListener('touchstart', abandon, { passive: true });
+            idle = window.setTimeout(settled, ANCHOR_BAIL_MS);
+            window.scrollTo({ top: to, behavior: behavior });
+        }
+
+        step();
+    }
+
+    function openPanel(panel) {
+        if (!panel.classList.contains('accordion__content')) return;
+        var host = panel.closest('.fn_accordion');
+        if (!host) {
+            panel.style.display = 'block';
+            return;
+        }
+        var parts = accordionParts(host);
+        for (var i = 0; i < parts.length; i++) {
+            var on = parts[i].panel === panel;
+            /* A slide still in flight would finish on top of us and hide the
+               panel again a fraction of a second after the scroll landed. */
+            if (window.jQuery) window.jQuery(parts[i].panel).stop(true, true);
+            parts[i].head.classList.toggle('active', on);
+            parts[i].item.classList.toggle('visible', on);
+            parts[i].panel.style.display = on ? 'block' : 'none';
+        }
+        syncPanelAria();
+    }
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var anchor = event.target.closest('.fn_anchor_comments');
+        if (!anchor) return;
+        var href = anchor.getAttribute('href') || '';
+        if (href.charAt(0) !== '#') return;
+        var panel = document.getElementById(href.slice(1));
+        if (!panel) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        openPanel(panel);
+        scrollToPanel(panel);
+    }, true);
+
     /* --------------------------------------------------------- catalogue */
 
     /* The filter panel is the shared .vs-sheet primitive - focus trap, scroll
