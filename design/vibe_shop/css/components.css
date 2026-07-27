@@ -2199,6 +2199,7 @@ body.hc-nav-open {
 	min-width: 0;
 	overflow-x: auto;
 	padding: var(--vs-space-1);
+	gap: var(--vs-space-1-5);
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-surface);
