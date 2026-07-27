@@ -131,9 +131,11 @@
             </div>
         {/if}
 
-        {* Преимущества магазина *}
+        {* Преимущества магазина.
+           The markup inside is the Banners module's, not ours - this wrapper is
+           the only hook the theme has for restyling it, so it carries the class. *}
         {if !empty($banner_shortcode_advantage)}
-            <div class="container">
+            <div class="container vs-advantages">
                 {$banner_shortcode_advantage}
             </div>
         {/if}

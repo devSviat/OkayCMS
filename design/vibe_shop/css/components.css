@@ -93,15 +93,35 @@
 
 /* ------------------------------------------------------- fields and notes */
 
+/* The field is a three-state object, not a static outline. At rest it is a      */
+/* quiet recess - one value step below the white card it sits on - inside a      */
+/* hairline; the border firms to --vs-border-strong on hover and to --vs-ink on  */
+/* focus, where the fill also goes white so the field reads as the live one. A   */
+/* heavy resting border is what made this look dated, and a heavier one is not   */
+/* the answer: the state that matters is the focused one, and it can only stand  */
+/* out if the resting state is quiet.                                            */
+/*                                                                               */
+/* --vs-space-3 and --vs-radius-sm, not --vs-space-4 and --vs-radius-md: a 12px  */
+/* radius on a 44px control is half its height and reads as a pill. 8px is the   */
+/* same radius the rows inside every dropdown panel use, so fields and menu      */
+/* rows are finally one family. The 12px inset matches .vs-buybox__select and    */
+/* .vs-price__input, which already used it.                                      */
+/*                                                                               */
+/* The resting fill is the same neutral for every shop: --vs-surface follows the */
+/* owner's boxed colour and a field must stay distinguishable FROM its card, so  */
+/* deriving one from the other would collapse whenever the owner picks a tint.   */
+/* --vs-text-muted on --vs-n-25 measures 5.07:1, clear of the 4.5:1 floor a      */
+/* placeholder has to hold.                                                      */
+
 .vs-field {
 	min-height: 44px;
-	padding: 0 var(--vs-space-4);
-	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-md);
-	background-color: var(--vs-surface);
+	padding: 0 var(--vs-space-3);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-n-25);
 	color: var(--vs-text);
 	font-size: var(--vs-text-base);
-	transition: border-color var(--vs-dur-1) var(--vs-ease);
+	transition: border-color var(--vs-dur-1) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease);
 }
 
 .vs-field::placeholder {
@@ -110,11 +130,17 @@
 
 .vs-field:hover {
 	border-color: var(--vs-border-strong);
+	background-color: var(--vs-surface);
+}
+
+.vs-field:focus {
+	border-color: var(--vs-ink);
+	background-color: var(--vs-surface);
 }
 
 .vs-field:focus-visible {
 	border-color: var(--vs-ink);
-	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
 }
 
 .vs-note {
@@ -523,7 +549,7 @@ body.other_page .main {
 	z-index: var(--vs-z-dropdown);
 	display: none;
 	min-width: 170px;
-	padding: var(--vs-space-2);
+	padding: var(--vs-space-1-5);
 	background-color: var(--vs-surface);
 	border: 1px solid var(--vs-hairline);
 	border-radius: var(--vs-radius-md);
@@ -599,9 +625,9 @@ body.other_page .main {
 .vs-search__input {
 	width: 100%;
 	height: 46px;
-	padding: 0 52px 0 var(--vs-space-4);
-	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-md);
+	padding: 0 52px 0 var(--vs-space-3);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-sm);
 	background-color: var(--vs-canvas);
 	color: var(--vs-text);
 	font-size: var(--vs-text-base);
@@ -622,7 +648,7 @@ body.other_page .main {
 }
 
 .vs-search__input:focus-visible {
-	border-radius: var(--vs-radius-md);
+	border-radius: var(--vs-radius-sm);
 }
 
 .vs-search__submit {
@@ -652,10 +678,16 @@ body.other_page .main {
 	height: 20px;
 }
 
+/* Third member of the header dropdown family (nav fly-out, locale switchers,   */
+/* search suggestions): same hairline, same radius, same 6px of outer padding    */
+/* around a list of 8px-radius rows. The catalogue mega menu is deliberately     */
+/* NOT in this family - it is a full-width pane on its own scale (24/32 padding, */
+/* radius-lg, shadow-3), not a row list.                                          */
+
 .autocomplete-suggestions {
 	z-index: var(--vs-z-dropdown);
 	overflow-y: auto;
-	padding: var(--vs-space-2);
+	padding: var(--vs-space-1-5);
 	background-color: var(--vs-surface);
 	border: 1px solid var(--vs-hairline);
 	border-radius: var(--vs-radius-md);
@@ -3433,9 +3465,9 @@ body.hc-nav-open {
 	width: 100%;
 	min-height: 44px;
 	padding: 0 var(--vs-space-3);
-	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-md);
-	background-color: var(--vs-surface);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-n-25);
 	color: var(--vs-text);
 	font-size: var(--vs-text-sm);
 }
@@ -3447,9 +3479,9 @@ body.hc-nav-open {
 
 .vs-buybox__variants .select2-container .select2-selection--single {
 	height: 44px;
-	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-md);
-	background-color: var(--vs-surface);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-n-25);
 }
 
 .vs-buybox__variants .select2-container .select2-selection__rendered {
@@ -4193,7 +4225,7 @@ body.hc-nav-open {
 
 .vs-form__textarea {
 	min-height: 96px;
-	padding: var(--vs-space-3) var(--vs-space-4);
+	padding: var(--vs-space-3);
 	line-height: var(--vs-leading-body);
 	resize: vertical;
 }
@@ -5301,13 +5333,21 @@ body.hc-nav-open {
 /* purpose: :has() for browsers that have it, and the .active class okay.js and */
 /* common_js already toggle on the same label for those that do not.            */
 
+/* The list gap is 8px and not 12px, and .vs-option's own margin is zeroed on    */
+/* purpose: theme.css still ships `.payment_method__item, .delivery__item        */
+/* { margin-bottom: 20px }`, which stacked on top of the grid gap and made the   */
+/* real distance between two option cards 32px. The margin has to die here       */
+/* rather than in theme.css because theme.css is the legacy sheet Task 8 removes */
+/* wholesale - this layer must already be correct without it.                     */
+
 .vs-options {
 	display: grid;
-	gap: var(--vs-space-3);
+	gap: var(--vs-space-2);
 }
 
 .vs-option {
 	min-width: 0;
+	margin-bottom: 0;
 }
 
 .vs-option-card {
@@ -5435,16 +5475,32 @@ body.hc-nav-open {
 .vs-option__extra .form__input,
 .vs-option__extra .form__input_captcha {
 	height: 44px;
-	border-color: var(--vs-border);
-	border-radius: var(--vs-radius-md);
+	border-color: var(--vs-hairline);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-n-25);
 	font-size: var(--vs-text-base);
+}
+
+.vs-option__extra .form__input:hover,
+.vs-option__extra .form__input:focus,
+.vs-option__extra .form__input_captcha:hover,
+.vs-option__extra .form__input_captcha:focus {
+	border-color: var(--vs-border-strong);
+	background-color: var(--vs-surface);
 }
 
 .vs-option__extra .form__textarea {
 	min-height: 88px;
-	border-color: var(--vs-border);
-	border-radius: var(--vs-radius-md);
+	border-color: var(--vs-hairline);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-n-25);
 	font-size: var(--vs-text-base);
+}
+
+.vs-option__extra .form__textarea:hover,
+.vs-option__extra .form__textarea:focus {
+	border-color: var(--vs-border-strong);
+	background-color: var(--vs-surface);
 }
 
 .vs-option__extra .form__group {
@@ -6384,7 +6440,16 @@ body.hc-nav-open {
 	margin-right: calc(var(--vs-space-2) * -1);
 }
 
+/* `flex: 1 1 0%` and not `width: auto`: .product_item is a flex container (the  */
+/* card-host block above), so an auto-width card takes its max-content size and  */
+/* then shrinks by weight. Card widths were therefore content-dependent - five   */
+/* slides of an identical 276.39px held cards of 260.39/260.39/260.39/256.67/    */
+/* 199.70px, and the gutters between them read 16/16/16/19.72px. A zero basis     */
+/* makes every card fill its own slide minus the two margins, so the gutter is    */
+/* exactly 2 x --vs-space-2 on every pair, on every rail.                         */
+
 .vs-home__rail .vs-card {
+	flex: 1 1 0%;
 	width: auto;
 	margin-left: var(--vs-space-2);
 	margin-right: var(--vs-space-2);
@@ -6404,11 +6469,173 @@ body.hc-nav-open {
 	min-width: 0;
 }
 
+/* auto-FIT, not auto-fill: this shop has four visible posts in the news        */
+/* category and the track count at 1440 is five, so auto-fill reserved a fifth   */
+/* column and the row ended in a hole. Nothing about a blog guarantees a post    */
+/* count that divides evenly, so the row is made count-agnostic instead of the   */
+/* limit being tuned: empty tracks collapse and whatever exists spreads across   */
+/* the container.                                                                */
+
 .vs-posts {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 	gap: var(--vs-space-5);
 	align-items: stretch;
+}
+
+/* The one case auto-fit cannot make look deliberate is a single post - on an    */
+/* author page with one article the lone card would stretch the full 1382px and  */
+/* its 16/10 media with it. A ceiling on the card and not on the track: a        */
+/* definite max inside the minmax() is what auto-fit divides the container by,   */
+/* so minmax(240px, 420px) yields three 420px columns at 1440 and wraps the      */
+/* fourth post onto a second row. Scoped to :only-child so two or more cards     */
+/* still share the row evenly rather than leaving a ragged tail.                 */
+
+.vs-posts > .vs-post-card:only-child {
+	max-width: 420px;
+}
+
+/* ------------------------------------------------------ shop advantages strip */
+/* The Banners module renders this block and its markup is not ours to edit, so  */
+/* the wrapper in index.tpl carries .vs-advantages and everything below reaches  */
+/* in from there. What shipped was the legacy .block--boxed panel: a 3px-radius  */
+/* square box holding four more square boxes, on a page where every other        */
+/* surface is a 16px-radius hairline card.                                        */
+/*                                                                                */
+/* One strip, not four cards. These are shop policies, not merchandise - giving   */
+/* each its own card would put a content block at the same visual weight as a     */
+/* product. A single hairline band divided by hairlines reads as one quiet        */
+/* statement and stays below the cards above it.                                  */
+/*                                                                                */
+/* The icon slot deliberately has NO tinted plate behind it: the shop owner's     */
+/* advantage images are JPEGs with a baked white background (this shop's are      */
+/* 100x100 and 600x600), and a tint would frame each one in a visible white       */
+/* square - the same artefact Task 3 hit on the product card.                     */
+/*                                                                                */
+/* Divider bookkeeping is written for any number of items, not for four: the      */
+/* owner configures how many advantage banners exist.                             */
+
+.vs-advantages {
+	margin-top: var(--vs-space-8);
+}
+
+.vs-advantages .block {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background-color: transparent;
+	box-shadow: none;
+}
+
+/* Every declaration below that looks redundant is undoing a specific one in the  */
+/* module's own banners.css: a negative row margin on the list, a 15px bottom     */
+/* margin per item, and on __preview a white fill, a #dbdbdb border, a 120px      */
+/* min-height, centred column flow and a 0 5px 15px/35% hover shadow. They are    */
+/* restated rather than left to cascade because banners.css is the module's file  */
+/* and can change under us on a module update.                                    */
+
+.vs-advantages .banner_advantages {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	margin: 0;
+	overflow: hidden;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+}
+
+.vs-advantages .banner_advantages__item {
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	border-top: 1px solid var(--vs-hairline);
+}
+
+.vs-advantages .banner_advantages__item:first-child {
+	border-top: 0;
+}
+
+/* Grid and not flex: the module emits the icon, the title and the optional      */
+/* description as three flat siblings, so a row flex would put the description   */
+/* in a third column beside the title instead of under it. Two tracks, with the  */
+/* icon spanning every row the text happens to occupy.                           */
+
+.vs-advantages .banner_advantages__preview,
+.vs-advantages .banner_advantages__item:hover .banner_advantages__preview {
+	display: grid;
+	grid-template-columns: 40px minmax(0, 1fr);
+	align-items: center;
+	align-content: center;
+	column-gap: var(--vs-space-3);
+	row-gap: var(--vs-space-1);
+	width: 100%;
+	min-height: 0;
+	height: 100%;
+	padding: var(--vs-space-4);
+	border: 0;
+	border-radius: 0;
+	background-color: transparent;
+	box-shadow: none;
+	text-align: left;
+}
+
+.vs-advantages .banner_advantages__icon {
+	grid-column: 1;
+	grid-row: 1 / -1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	align-self: center;
+	width: 40px;
+	max-width: 40px;
+	height: 40px;
+	min-height: 0;
+	margin: 0;
+	background-color: transparent;
+}
+
+.vs-advantages .banner_advantages__icon picture {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.vs-advantages .banner_advantages__icon img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.vs-advantages .banner_advantages__icon svg {
+	width: 24px;
+	height: 24px;
+	color: var(--vs-text-muted);
+}
+
+.vs-advantages .banner_advantages__title,
+.vs-advantages .banner_advantages__description {
+	grid-column: 2;
+	min-width: 0;
+	max-width: none;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	line-height: var(--vs-leading-body);
+	text-align: left;
+}
+
+.vs-advantages .banner_advantages__title {
+	font-weight: 500;
+}
+
+.vs-advantages .banner_advantages__description {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+	font-weight: 400;
+	opacity: 1;
 }
 
 /* ------------------------------------------------------------- article card */
@@ -7749,6 +7976,26 @@ body.hc-nav-open {
 		width: auto;
 		min-width: 200px;
 	}
+
+	.vs-advantages .banner_advantages {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.vs-advantages .banner_advantages__item:nth-child(-n + 2) {
+		border-top: 0;
+	}
+
+	.vs-advantages .banner_advantages__item:nth-child(n + 3) {
+		border-top: 1px solid var(--vs-hairline);
+	}
+
+	.vs-advantages .banner_advantages__item:not(:nth-child(2n + 1)) {
+		border-left: 1px solid var(--vs-hairline);
+	}
+
+	.vs-advantages .banner_advantages__item:nth-child(2n + 1) {
+		border-left: 0;
+	}
 }
 
 /* --------------------------------------------------- secondary ≥ 768 px */
@@ -7856,6 +8103,26 @@ body.hc-nav-open {
 
 	.vs-home__split--single {
 		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.vs-advantages .banner_advantages {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+
+	.vs-advantages .banner_advantages__item:nth-child(-n + 4) {
+		border-top: 0;
+	}
+
+	.vs-advantages .banner_advantages__item:nth-child(n + 5) {
+		border-top: 1px solid var(--vs-hairline);
+	}
+
+	.vs-advantages .banner_advantages__item:not(:nth-child(4n + 1)) {
+		border-left: 1px solid var(--vs-hairline);
+	}
+
+	.vs-advantages .banner_advantages__item:nth-child(4n + 1) {
+		border-left: 0;
 	}
 
 	.vs-post__title {
