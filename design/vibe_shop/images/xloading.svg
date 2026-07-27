@@ -1,44 +1,41 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" role="presentation">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" role="presentation">
 	<!--
-		Lazy load placeholder. Replaces the 84x84 animated GIF spinner.
+		Lazy load placeholder. It sits in the src of every lazy image in the
+		theme and is swapped out the moment lazyload.min.js pulls the real
+		photo in.
 
-		No glyph, no spinner, no animation: this file is referenced by roughly 25
-		img elements per catalogue page, it is swapped out the moment the real
-		image enters the viewport, and anything with a recognisable shape would
-		both skew (it stands in for 20x20, 80x30, 140x140, 380x240 and larger)
-		and compete with the photographs it stands in for. A quiet plate is the
-		whole job.
+		24 by 24 with a viewBox, and that is the whole job of this file: the
+		box gives the placeholder an intrinsic size, and components.css pairs
+		it with object-fit scale.down (spelled properly there) so the mark is
+		painted at 24 in a large slot and shrunk to fit in any slot smaller
+		than that. It is never scaled up.
 
-		Percentage width and height with no viewBox is deliberate, and it is what
-		makes one file work in every slot: an image with no intrinsic size and no
-		intrinsic ratio is stretched to whatever box CSS gives it, and object-fit
-		contain behaves as fill because there is no ratio to preserve. So the
-		placeholder is always exactly the shape of the picture that will replace
-		it, never a letterboxed band inside it.
+		An earlier revision was sized in percentages with no viewBox, which
+		left it with no intrinsic size and no intrinsic ratio, so it stretched
+		to fill whatever box it landed in: 202 square on a product card, 380 by
+		240 on a blog card. That is the complaint this file answers.
 
-		It also settles the one slot the theme does NOT size from CSS.
-		.vs-option-card__logo img is width:auto and height:auto capped at 56x28,
-		so the delivery and payment rows are sized by the image itself until the
-		logo arrives; with no intrinsic size the used size is the CSS default
-		object size (300x150) clamped by those caps, i.e. exactly 56x28. The old
-		84x84 spinner resolved to 28x28 there and jumped sideways when the real
-		logo landed.
+		The colour is a copy of the vs-n-300 token value, not a reference to
+		it: an SVG loaded through an img element is an independent document
+		and receives no custom properties from the page, so nothing in here
+		can be a token. Keep the two in step by hand. It is the lightest
+		neutral that still holds a 1.5 unit stroke against the plate and
+		canvas tokens, which is what a loading state wants. Present, and quiet
+		enough not to compete with the photographs it stands in for.
 
-		The gradient is in objectBoundingBox units, so it is identical at every
-		size and aspect ratio. Its colours cannot be tokens: an SVG loaded
-		through an img element gets no custom properties from the page. They
-		bracket the vs-surface-subtle token (#ededee), which is the mid tone.
+		A frame with a hill and a sun rather than a spinner: there is no
+		animation in this file, so a spinner arc would promise motion it
+		cannot deliver, and this glyph still reads at 20px.
 
-		Note for anyone editing this comment: XML forbids a double hyphen inside
-		a comment, so CSS custom property names cannot be written here in full.
-		A malformed comment makes the whole file unparseable and it then renders
-		as a broken image, with no error reported anywhere.
+		Note for anyone editing this comment: XML forbids a double hyphen
+		inside a comment, so CSS custom property names and some CSS keywords
+		cannot be written here in full. A malformed comment makes the whole
+		file unparseable, and it then renders as a broken image with HTTP 200
+		and no error reported anywhere.
 	-->
-	<defs>
-		<linearGradient id="vsPlaceholder" x1="0" y1="0" x2="0" y2="1">
-			<stop offset="0" stop-color="#f2f2f3"/>
-			<stop offset="1" stop-color="#e8e8ea"/>
-		</linearGradient>
-	</defs>
-	<rect width="100%" height="100%" fill="url(#vsPlaceholder)"/>
+	<g fill="none" stroke="#cbcbce" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+		<rect x="3.25" y="5.25" width="17.5" height="13.5" rx="2.75"/>
+		<path d="M4.5 17 9.25 12.25 12.75 15.75 15.75 13 19.5 16.75"/>
+	</g>
+	<circle cx="8.75" cy="9.75" r="1.35" fill="#cbcbce"/>
 </svg>

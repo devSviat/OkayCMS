@@ -1906,14 +1906,14 @@ body.hc-nav-open {
 	margin: 0;
 }
 
-/* height is fixed and width is derived, so this row is sized by the image, and */
-/* images/xloading.svg deliberately has no intrinsic ratio - width:auto against */
-/* it resolves to the CSS default object size of 300px and the placeholder row  */
-/* would be five times the width of the row it stands in for. The cap is 60px:  */
-/* index.tpl resizes these logos to 80x30, so at 22px tall a real logo is never */
-/* wider than 58.7px and the cap only ever binds on the placeholder. contain    */
-/* rather than the default fill so a logo that does exceed it letterboxes       */
-/* instead of being squashed.                                                   */
+/* height is fixed and width is derived, so this row is sized by the image.     */
+/* images/xloading.svg is intrinsically square, so while the logo is loading    */
+/* width:auto resolves to 22px and the placeholder is a 22px mark rather than   */
+/* the whole row. The cap is 60px: index.tpl resizes these logos to 80x30, so   */
+/* at 22px tall a real logo is never wider than 58.7px, which means the cap is  */
+/* a guard against an oversized upload and nothing else. contain rather than    */
+/* the default fill so a logo that does exceed it letterboxes instead of being  */
+/* squashed.                                                                    */
 
 .vs-payments__item img {
 	display: block;
@@ -5767,12 +5767,12 @@ body.hc-nav-open {
 /* The cap is in px, not a percentage: lazyload leaves the placeholder in place */
 /* until the image scrolls in, and a percentage max-height against the auto     */
 /* height of <picture> computes to none - the placeholder then renders at its   */
-/* own size and bursts the row. Width and height are auto here, so the box is   */
-/* sized by the image itself: images/xloading.svg has no intrinsic size and no  */
-/* intrinsic ratio, which resolves to the CSS default object size clamped by    */
-/* the two caps, i.e. exactly 56x28 - the whole logo box, with nothing to       */
-/* shift when the logo lands. The old 84x84 spinner resolved to 28x28 here and  */
-/* jumped sideways the moment it did.                                           */
+/* own size and bursts the row. Width and height are auto here, so this is the  */
+/* one slot the theme sizes from the image rather than from CSS: while the      */
+/* logo is loading that is images/xloading.svg's own 24x24, comfortably inside  */
+/* both caps, and once it lands the real logo takes over up to 56x28. The       */
+/* growth is leftward only, because .vs-option-card__logo is a fixed 56x28 box  */
+/* that aligns its contents to the end, so the row around it never moves.       */
 
 .vs-option-card__logo img {
 	width: auto;
@@ -8766,4 +8766,37 @@ body.hc-nav-open {
 	.vs-table td {
 		padding: var(--vs-space-2);
 	}
+}
+
+/* ============================================================================ */
+/* Lazy load placeholder                                                        */
+/* ============================================================================ */
+
+/* Every lazy image in the theme ships images/xloading.svg in its src until     */
+/* lazyload.min.js swaps the real photo in, so the placeholder state is exactly */
+/* `.lazy` without `.loaded`. That class is the right hook rather than a timer: */
+/* lazyload adds it from the image's own load event (class_loaded defaults to   */
+/* "loaded"), and a failed image gets `error` instead, so a broken photo keeps  */
+/* the placeholder rather than falling back to the full-bleed state this rule   */
+/* exists to prevent. It never lands on the <source> elements inside a          */
+/* <picture> - lazyload only attaches load listeners to IMG, IFRAME and VIDEO - */
+/* but a <source> is not rendered, so that costs nothing.                       */
+
+/* scale-down is the whole fix. The placeholder is intrinsically 24x24, and     */
+/* scale-down paints the smaller of `none` and `contain`: 24x24 in a large slot */
+/* such as a 202px product card or a 380x240 blog card, and the slot's own size */
+/* in anything under 24px, so a 20x20 category icon gets a 20x20 mark rather    */
+/* than a clipped one. Nothing is ever scaled up, and nothing overflows.        */
+
+/* The element keeps whatever size its slot already gave it, so no box changes  */
+/* shape when the photo lands, and object-position centres the mark for free -  */
+/* which shrinking the element itself would not have done, since most of these  */
+/* slots are plain blocks rather than flex or grid containers.                  */
+
+/* Typed as img.lazy, one specificity step above the per-component `img` rules  */
+/* above, so it wins on specificity rather than on source order.                */
+
+img.lazy:not(.loaded) {
+	object-fit: scale-down;
+	object-position: center;
 }
