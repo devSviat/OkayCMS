@@ -37,40 +37,15 @@
 /* is later and wins, and a bare instance from a module template still gets a   */
 /* complete look.                                                               */
 
-/* ------------------------------------------------------ bare .table default */
-
-/* .table is one of the generic names the contract reserves, and until Task 9   */
-/* the only rule set carrying it was `.block__description .table`, which the    */
-/* Banners module's advantage strip uses as a flex row and which is not a table */
-/* at all. A module template that emits a real <table class="table"> outside    */
-/* that block got nothing but the element rule in base.css: no width, no cell    */
-/* padding, no rules between rows.                                              */
-/*                                                                              */
-/* Here rather than at the end of the file for the reason the section header     */
-/* gives: user.tpl renders <table class="table vs-table">, both selectors weigh  */
-/* 0,1,0, and a .table block placed later would outrank .vs-table on every       */
-/* property the two share. Same values as .vs-table, so the pair agree wherever  */
-/* they meet.                                                                   */
-
-.table {
-	width: 100%;
-	border-collapse: collapse;
-	font-size: var(--vs-text-sm);
-}
-
-.table th {
-	padding: var(--vs-space-3);
-	border-bottom: 1px solid var(--vs-border);
-	color: var(--vs-text-muted);
-	font-weight: 500;
-	text-align: left;
-}
-
-.table td {
-	padding: var(--vs-space-3);
-	border-bottom: 1px solid var(--vs-hairline);
-	vertical-align: middle;
-}
+/* No bare `.table` block lives here, and that is deliberate. The two elements   */
+/* that carry the class in this codebase are user.tpl's                          */
+/* <table class="table vs-table">, fully styled by .vs-table, and the Banners     */
+/* advantage strip's <div class="table">, which the WYSIWYG emits as a flex row   */
+/* and which is not a table at all. A generic `.table { font-size: ... }` reaches */
+/* the second one on every property `.block__description .table` does not itself  */
+/* declare, and shrank the advantage strip by one type step. The class name is    */
+/* still carried by a real rule set - `.block__description .table` - so the       */
+/* legacy contract is met without inventing a look for an element nothing renders.*/
 
 /* ------------------------------------------------ swiper navigation default */
 
@@ -6640,10 +6615,17 @@ body.hc-nav-open {
 	margin-bottom: 0;
 }
 
+/* The underline reads --vs-glyph, the same token base.css gives every other     */
+/* link in the theme, and NOT --vs-border-strong: an underline is not a control  */
+/* boundary, so the boundary token has no business here. The two were split in   */
+/* Task 9 and this rule was the one site left pointing at the old value, which   */
+/* darkened admin-authored prose links #a5a5aa -> #6b6b71 without that being     */
+/* asked for or recorded. Hover still goes to currentColor, which is the cue.    */
+
 .vs-prose a {
 	color: var(--vs-text);
 	text-decoration: underline;
-	text-decoration-color: var(--vs-border-strong);
+	text-decoration-color: var(--vs-glyph);
 	text-underline-offset: 0.2em;
 }
 
@@ -9005,8 +8987,11 @@ body.hc-nav-open {
 /* only half of each would ever be visible - the caption has to come out of      */
 /* flow one way or the other.                                                    */
 /*                                                                               */
-/* Measured on a 375 slide (361x203): the prev/next arrows occupy y 133-193 at   */
-/* BOTH edges and the pagination dots span the full width at y 231-254. What is  */
+/* Measured on a 375 slide (361x203.1), all y slide-relative: the prev/next       */
+/* arrows are 44x44 at y 71.5-115.5 at BOTH edges, and the pagination dots span   */
+/* the full width at y 169.8-193.1. (Page-relative on the shipped homepage those  */
+/* are 152.5-196.5 and 250.8-274.1; slide-relative is the number that stays put   */
+/* when the header above the carousel changes height.) What is                    */
 /* left is a band roughly 361x70 - one clamped line - which holds less than the   */
 /* page the slide already links to and covers the photograph to say it. So the   */
 /* caption is suppressed rather than overlaid, and the headline still reaches     */
@@ -9029,6 +9014,17 @@ body.hc-nav-open {
 /* true: there is nothing to tap and nothing but the alt text left, so a sighted   */
 /* shopper on a phone gets a photograph and no words. Measured at 375 before this  */
 /* fix: innerText of that slide was the empty string.                              */
+/*                                                                                 */
+/* :has() is the first use of the selector in this theme - Chrome 105+,             */
+/* Safari 15.4+, Firefox 121+. On an older engine BOTH rules below fail to parse    */
+/* and neither the scoped suppression nor the unlinked fallback matches, so the     */
+/* caption reverts to exactly the state described three paragraphs up: the          */
+/* module's own two-child column flex, i.e. dark ink straight over the photograph.  */
+/* That is the illegible rendering Task 7.5 was written to remove, not a neutral    */
+/* one - the degradation is a step backwards on those browsers, not a no-op. It is  */
+/* accepted because the alternative is a JS class hook for a caption on two banner  */
+/* variants at one breakpoint, and because the copy is still readable as the        */
+/* image's alt text.                                                                */
 
 	.main_banner .banner_group__variant3:has(> .banner_group__link) .banner_group__content,
 	.main_banner .banner_group__variant4:has(> .banner_group__link) .banner_group__content {
@@ -9037,7 +9033,8 @@ body.hc-nav-open {
 
 /* The unlinked case. The caption comes back as an ink plate across the top of     */
 /* the slide - the top band is the only part of a 361x203 slide that is free       */
-/* (the arrows occupy y 133-193 at both edges), and an opaque plate rather than    */
+/* (the arrows occupy slide-relative y 71.5-115.5 at both edges), and an opaque   */
+/* plate rather than                                                              */
 /* --vs-scrim because a 0.44 scrim over a pale photograph composites to about      */
 /* #999 and would put the copy at 2.8:1. On --vs-ink it is 16.4:1 whatever is      */
 /* underneath. The description keeps its 3-line clamp from the base rule.          */
@@ -9940,10 +9937,20 @@ img.lazy:not(.loaded) {
 		min-height: 44px;
 	}
 
-/* hc-offcanvas-nav's own top row (account, language). The library ships them at   */
-/* 20px and okay.js builds the markup, so the height has to come from here.        */
+/* hc-offcanvas-nav's own top row. The library ships the logo link at the height   */
+/* of the mark (20px) and okay.js builds the markup, so the height has to come     */
+/* from here. The logo link is a real link to the homepage on every page but the   */
+/* homepage itself, where the template emits href="javascript:;".                  */
+/*                                                                                 */
+/* Both selectors are written `ul.top-nav` on purpose. The stripping rule that     */
+/* takes the generic nav-item chrome off these two rows is                         */
+/* `.hc-offcanvas-nav ul.top-nav .mobile__link { min-height: 0 }` at 0,3,1; a bare  */
+/* `.hc-offcanvas-nav .mobile__link` is 0,2,0 and loses to it however late it       */
+/* appears. Matching its weight and sitting later in the file is what makes the     */
+/* 44px land. .account__link already carries min-height: 44px from its own block    */
+/* above; it is repeated here so the pair is legible as one touch-target decision.  */
 
-	.hc-offcanvas-nav .mobile__link,
+	.hc-offcanvas-nav ul.top-nav .mobile__link,
 	.hc-offcanvas-nav ul.top-nav .account__link {
 		display: inline-flex;
 		align-items: center;
@@ -9952,11 +9959,19 @@ img.lazy:not(.loaded) {
 }
 
 /* The carousel dots. 30x6 of paint, and the paint is the design - so the hit     */
-/* area is grown with a transparent overlay instead, 44px tall and exactly as     */
-/* wide as the dot. Vertical only: the dots sit on a 38px pitch, so a 44px-wide   */
-/* overlay would swallow six pixels of its neighbour and hand slide 2 the taps    */
-/* meant for slide 3. At 30x44 on a 38px pitch they clear WCAG 2.5.8 by the       */
-/* spacing rule (24px circles centred on each never intersect).                   */
+/* area is grown with a transparent overlay instead, asked for at 44px tall and   */
+/* exactly as wide as the dot. Vertical only: the dots sit on a 38px pitch, so a  */
+/* 44px-wide overlay would swallow six pixels of its neighbour and hand slide 2   */
+/* the taps meant for slide 3.                                                    */
+/*                                                                                */
+/* What actually lands on the homepage banner is 30 x 41.3, not 30 x 44: the      */
+/* overlay is centred on a dot whose centre sits 19.3px above the bottom edge of  */
+/* .banner_group, which is overflow: hidden, so the lower 2.7px is clipped.       */
+/* Probed with elementFromPoint at 1px steps from the dot centre, the bullet is   */
+/* returned for dy -22 .. +19 and .main_banner for +20. Left as measured: the     */
+/* clip comes from the module's own ratio box, opening it up would let the slide  */
+/* bleed, and 30 x 41.3 on a 38px pitch still clears WCAG 2.5.8 by the spacing    */
+/* rule (24px circles centred on each dot never intersect).                       */
 
 .swiper-pagination-bullet {
 	position: relative;

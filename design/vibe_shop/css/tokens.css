@@ -31,6 +31,22 @@
 	--vs-warn-50: #fffbeb;
 	--vs-warn-600: #b45309;
 
+/* Which of these the shop owner can actually change, verified against the code
+* rather than against the names. backend/design/html/settings_theme.tpl renders a
+* swatch for an --okay-* variable ONLY when a settings_theme_<name> translation
+* exists in backend/lang/. Nine keys exist, so Settings -> Design shows nine
+* swatches: okay-button-color, okay-button-text, okay-button-color-hover,
+* okay-button-text-hover, okay-basic-company, okay-second-company,
+* okay-basic-company-text, okay-second-company-text, okay-bg.
+*
+* The other six variables in theme-settings.css - okay-boxed-color,
+* okay-boxed-text, okay-button-second-color, okay-button-second-text,
+* okay-shadow-color and okay-border-color - have no translation key and so no
+* form control. They are editable only by hand. CssConfig::updateCssVariables()
+* re-renders theme-settings.css from its own parse and assigns only the rules the
+* form posted, so a save from the design screen leaves all six exactly as they
+* are. That is what holds --vs-border at its 3:1 value; see the grey note below. */
+
 	--vs-canvas: var(--okay-bg);
 	--vs-surface: var(--okay-boxed-color);
 	--vs-border: var(--okay-border-color);
@@ -62,8 +78,9 @@
 * card, the text field. WCAG 1.4.11 asks 3:1 of it. Measured: 3.53:1 on
 * --vs-n-0, 3.39 on --vs-n-25, 3.24 on --vs-n-50, 3.02 on --vs-n-100 - which is
 * every light background this theme paints a control on. It was #dcdcde and
-* measured 1.37:1 until Task 9. The value is admin-editable through
-* theme-settings.css; anything lighter than #88888b re-breaks the floor.
+* measured 1.37:1 until Task 9. Anything lighter than #88888b re-breaks the
+* floor - and nothing in the admin panel can lower it, see the note above the
+* --okay-* map. The floor is reachable only by hand-editing theme-settings.css.
 *
 * --vs-border-strong (#6b6b71) is the same boundary under emphasis - hover, the
 * checkbox and radio ring, the slider handle. It has to stay darker than
