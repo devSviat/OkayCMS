@@ -123,7 +123,7 @@
                                             <source type="image/webp" data-srcset="{$image->filename|resize:160:160|webp}">
                                         {/if}
                                         <source data-srcset="{$image->filename|resize:160:160}">
-                                        <img class="lazy" data-src="{$image->filename|resize:160:160}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$product->name|escape}" title="{$product->name|escape}"/>
+                                        <img class="lazy" data-src="{$image->filename|resize:160:160}" src="{$rootUrl}/design/{get_theme}/images/xloading.svg" alt="{$product->name|escape}" title="{$product->name|escape}"/>
                                     </picture>
                                 </div>
                             {/foreach}

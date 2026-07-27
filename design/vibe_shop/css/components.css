@@ -684,9 +684,220 @@ body.other_page .main {
 /* NOT in this family - it is a full-width pane on its own scale (24/32 padding, */
 /* radius-lg, shadow-3), not a row list.                                          */
 
+/* The panel and the rows inside it are devbridge's own published class names   */
+/* (jquery.autocomplete-min.js is vendored and never edited); the row markup    */
+/* is assembled by okay.js's formatResult and is equally out of bounds. So each */
+/* row arrives as a bare <div><img></div><a>name</a><span>price</span> and is   */
+/* laid out from here.                                                          */
+/*                                                                             */
+/* Everything below has to outrank css/okay.css, which registers earlier in     */
+/* css.php and builds the same widget as an HTML table: display:table on the    */
+/* panel, table-row on the rows, table-cell plus 1px rgb(219 219 219) cell      */
+/* borders on the three children, and an rgb(233 233 233) band on the selected */
+/* row at .autocomplete-suggestions .autocomplete-selected, two classes, which  */
+/* is why the old one-class rule here never won and that band survived. Same    */
+/* specificity, later source, no !important.                                    */
+
 .autocomplete-suggestions {
+	display: block;
 	z-index: var(--vs-z-dropdown);
 	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: var(--vs-space-1-5);
+	background-color: var(--vs-surface);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-md);
+	box-shadow: var(--vs-shadow-2);
+	scrollbar-width: thin;
+	scrollbar-color: var(--vs-n-300) transparent;
+}
+
+/* display:table also swallowed the library's inline max-height:320px - a table */
+/* box sizes to its rows - so the panel grew to 422px for ten results and never */
+/* scrolled. As a block it honours the cap, which is why the bar below matters. */
+
+.autocomplete-suggestions::-webkit-scrollbar {
+	width: 8px;
+}
+
+.autocomplete-suggestions::-webkit-scrollbar-track {
+	background-color: transparent;
+}
+
+.autocomplete-suggestions::-webkit-scrollbar-thumb {
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-n-300);
+}
+
+/* 40px thumbnail + 8px of row padding = a 56px row: comfortably past the 44px */
+/* target, and tall enough that a 35x35 product photo is not the tightest       */
+/* thing in the header.                                                         */
+
+.autocomplete-suggestion {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	min-height: 56px;
+	padding: var(--vs-space-2);
+	border-radius: var(--vs-radius-sm);
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	line-height: var(--vs-leading-body);
+	cursor: pointer;
+}
+
+/* okay.css pins this cell with width:50px !important, and !important cannot be */
+/* answered by specificity. flex-basis can: a flex item with a definite         */
+/* flex-basis never consults width for its main size, so flex:0 0 40px settles  */
+/* it without a second !important.                                              */
+
+.autocomplete-suggestion > div {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 40px;
+	height: 40px;
+	overflow: hidden;
+	padding: 0;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-plate);
+}
+
+/* The plate is --vs-plate, not --vs-surface-subtle: the selected row already   */
+/* takes surface-subtle, and a thumbnail that dissolved into its own row on     */
+/* selection would lose the one element that identifies the product.            */
+
+.autocomplete-suggestion > div img {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+.autocomplete-suggestion > a {
+	display: block;
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	padding: 0;
+	border: 0;
+	color: var(--vs-text);
+	text-decoration: none;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+/* The price is the second thing read, so it is set in heading ink and tabular  */
+/* figures and left at its natural width - not stretched to a right-hand column */
+/* half a panel away from the name it belongs to.                               */
+
+.autocomplete-suggestion > span {
+	flex: none;
+	padding: 0;
+	border: 0;
+	color: var(--vs-heading);
+	font-size: var(--vs-text-sm);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+/* formatResult wraps the typed substring in <strong>. okay.css paints it in    */
+/* --okay-basic-company, a fourth hue in a theme that allows two; weight is     */
+/* enough to show where the match landed.                                       */
+
+.autocomplete-suggestions strong {
+	color: var(--vs-heading);
+	font-weight: 600;
+}
+
+/* One state class for two inputs: the library adds .autocomplete-selected on   */
+/* mouseover and on arrow keys alike, so the row under the cursor and the row   */
+/* under the caret are always the same treatment - .vs-switcher__link's, not    */
+/* the browser's blue or okay.css's grey.                                       */
+
+.autocomplete-suggestions .autocomplete-selected {
+	background-color: var(--vs-surface-subtle);
+}
+
+/* ---------------------------------------------------------------- select2 */
+/* select2 is vendored (css/select2.min.css) and skinned here rather than      */
+/* patched. It is the control the product page hands a multi-variant select    */
+/* to, and the control the NovaposhtaCost module builds its warehouse chooser  */
+/* from - and that module's markup is out of bounds, so this sheet is the only */
+/* place both can be brought onto the theme. Every selector below is one of    */
+/* select2's own published class names, not a guess at its internals.          */
+/*                                                                            */
+/* The open list is the fourth member of the dropdown family (nav fly-out,     */
+/* locale switchers, search suggestions): --vs-surface on a hairline, radius-md,*/
+/* shadow-2, 6px of outer padding around 8px-radius rows. The row under the     */
+/* cursor takes --vs-surface-subtle - the same treatment .vs-switcher__link and */
+/* .autocomplete-selected use - in place of select2's system blue, and          */
+/* the row that is actually selected is marked by weight, so the two states     */
+/* stay distinguishable from each other and neither rests on colour alone.      */
+/*                                                                            */
+/* The dropdown is appended to <body>, outside every theme wrapper, so these    */
+/* rules cannot be scoped to a block. That is the right answer anyway: one      */
+/* widget, one skin.                                                            */
+
+.select2-container--default .select2-selection--single {
+	height: 44px;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-n-25);
+	transition: border-color var(--vs-dur-1) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.select2-container--default .select2-selection--single:hover {
+	border-color: var(--vs-border-strong);
+	background-color: var(--vs-surface);
+}
+
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--single {
+	border-color: var(--vs-ink);
+	background-color: var(--vs-surface);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+	padding-left: var(--vs-space-3);
+	padding-right: var(--vs-space-8);
+	color: var(--vs-text);
+	font-size: var(--vs-text-base);
+	line-height: 42px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+	color: var(--vs-text-muted);
+}
+
+/* select2 draws the arrow as a CSS triangle in rgb(136 136 136). Two borders  */
+/* on a rotated square give the chevron the rest of the theme uses and take    */
+/* their hue from currentColor, so no colour is spelled out in the rule.       */
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+	top: 0;
+	right: 0;
+	width: 40px;
+	height: 42px;
+	color: var(--vs-text-muted);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+	width: 7px;
+	height: 7px;
+	margin: 0;
+	border: 0;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	transform: translate(-50%, -70%) rotate(45deg);
+}
+
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+	transform: translate(-50%, -30%) rotate(225deg);
+}
+
+.select2-container--default .select2-dropdown {
 	padding: var(--vs-space-1-5);
 	background-color: var(--vs-surface);
 	border: 1px solid var(--vs-hairline);
@@ -694,15 +905,77 @@ body.other_page .main {
 	box-shadow: var(--vs-shadow-2);
 }
 
-.autocomplete-suggestion {
-	padding: var(--vs-space-2) var(--vs-space-3);
-	border-radius: var(--vs-radius-sm);
-	font-size: var(--vs-text-sm);
-	cursor: pointer;
+.select2-container--default .select2-search--dropdown {
+	padding: 0 0 var(--vs-space-1-5);
 }
 
-.autocomplete-selected {
+.select2-container--default .select2-search--dropdown .select2-search__field {
+	min-height: 44px;
+	padding: 0 var(--vs-space-3);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-n-25);
+	color: var(--vs-text);
+	font-size: var(--vs-text-base);
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+	border-color: var(--vs-ink);
+	background-color: var(--vs-surface);
+}
+
+/* A quiet scrollbar. The warehouse list for Kyiv is 425 rows long, so this is */
+/* one of the few lists in the shop a shopper actually scrolls - the bar has   */
+/* to be legible without being the loudest thing in the panel. scrollbar-color */
+/* covers Firefox and current Chrome; the ::-webkit- rules cover the rest.     */
+
+.select2-container--default .select2-results__options {
+	max-height: 320px;
+	scrollbar-width: thin;
+	scrollbar-color: var(--vs-n-300) transparent;
+}
+
+.select2-container--default .select2-results__options::-webkit-scrollbar {
+	width: 8px;
+}
+
+.select2-container--default .select2-results__options::-webkit-scrollbar-track {
+	background-color: transparent;
+}
+
+.select2-container--default .select2-results__options::-webkit-scrollbar-thumb {
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-n-300);
+}
+
+.select2-container--default .select2-results__option {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	padding: var(--vs-space-2) var(--vs-space-3);
+	border-radius: var(--vs-radius-sm);
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	line-height: var(--vs-leading-body);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
 	background-color: var(--vs-surface-subtle);
+	color: var(--vs-text);
+}
+
+.select2-container--default .select2-results__option[aria-selected="true"] {
+	font-weight: 600;
+}
+
+.select2-container--default .select2-results__option[aria-disabled="true"] {
+	color: var(--vs-text-muted);
+}
+
+.select2-container--default .select2-results__message {
+	padding: var(--vs-space-2) var(--vs-space-3);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
 }
 
 /* ---------------------------------------------------- catalogue mega menu */
@@ -1595,10 +1868,21 @@ body.hc-nav-open {
 	margin: 0;
 }
 
+/* height is fixed and width is derived, so this row is sized by the image, and */
+/* images/xloading.svg deliberately has no intrinsic ratio - width:auto against */
+/* it resolves to the CSS default object size of 300px and the placeholder row  */
+/* would be five times the width of the row it stands in for. The cap is 60px:  */
+/* index.tpl resizes these logos to 80x30, so at 22px tall a real logo is never */
+/* wider than 58.7px and the cap only ever binds on the placeholder. contain    */
+/* rather than the default fill so a logo that does exceed it letterboxes       */
+/* instead of being squashed.                                                   */
+
 .vs-payments__item img {
 	display: block;
 	width: auto;
 	height: 22px;
+	max-width: 60px;
+	object-fit: contain;
 }
 
 /* ----------------------------------------------------------- product card */
@@ -1769,49 +2053,82 @@ body.hc-nav-open {
 	max-height: 36px;
 }
 
-/* Wishlist and comparison. Revealed on hover on pointer devices, permanently   */
-/* visible under (hover: none) - without that branch they are unreachable on a  */
-/* phone, and the phone is the design target. A picked control reads as a       */
-/* filled ink disc, so state never rests on colour alone.                       */
+/* Wishlist and comparison. One mechanism at every width and on every pointer   */
+/* type, replacing two that competed: a hover reveal on pointer devices plus a  */
+/* permanent 44px opaque disc under (hover: none), with comparison hidden below */
+/* 576px because two of those discs would not fit. Measured before the change:  */
+/* the pair covered 4048px of a 51529px media box at 1440 (7.9%, and 40.5% of   */
+/* its height) and the single surviving disc covered 1936px of 23870px at 375   */
+/* (8.1%). That opaque white plate on the photograph is what the shop owner     */
+/* objected to.                                                                 */
+/*                                                                              */
+/* The resting control is now the glyph alone - no fill, no shadow, no border - */
+/* so nothing opaque sits on the photograph and both actions are visible and    */
+/* tappable without a pointer. The backing is a 36px ::before disc that paints  */
+/* only on hover, on focus and in the picked state; the hit area stays the full */
+/* 44x44 regardless. Laid out in a row, not a column, so the pair spans one     */
+/* glyph height rather than two - which is also what lets comparison come back  */
+/* below 576px instead of being hidden there.                                   */
+/*                                                                              */
+/* The glyph carries a plate-coloured halo: the media box is a white plate, but */
+/* a square photograph fills it corner to corner, and --vs-text ink on a dark   */
+/* photograph would otherwise disappear. Over the plate the halo is invisible.  */
+/*                                                                              */
+/* A picked control still reads as a filled ink disc - a change of form, not of */
+/* hue - and the wishlist glyph swaps outline for solid on top of that.         */
 
 .vs-card__tools {
 	position: absolute;
-	top: var(--vs-space-2);
-	right: var(--vs-space-2);
+	top: var(--vs-space-1);
+	right: var(--vs-space-1);
 	display: flex;
-	flex-direction: column;
-	gap: var(--vs-space-1);
+	flex-direction: row;
 }
 
 .vs-card__tool {
+	position: relative;
 	border-radius: var(--vs-radius-full);
-	background-color: var(--vs-surface);
-	box-shadow: var(--vs-shadow-1);
+	background-color: transparent;
+	box-shadow: none;
 	color: var(--vs-text);
-	opacity: 0;
-	transition: opacity var(--vs-dur-2) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease), color var(--vs-dur-1) var(--vs-ease);
+	filter: drop-shadow(var(--vs-halo-plate));
+	transition: color var(--vs-dur-1) var(--vs-ease);
 }
 
-.vs-card:hover .vs-card__tool,
-.vs-card__tool:focus-visible,
-.vs-card__tool.selected {
-	opacity: 1;
+/* Absolutely positioned, so it would paint over the glyph if the glyph stayed  */
+/* an unpositioned in-flow child. Giving the child position: relative puts both */
+/* in the same paint step, where tree order puts the glyph on top.              */
+
+.vs-card__tool::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 36px;
+	height: 36px;
+	transform: translate(-50%, -50%);
+	border-radius: var(--vs-radius-full);
+	background-color: transparent;
+	transition: background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-card__tool > * {
+	position: relative;
+}
+
+.vs-card__tool:hover::before {
+	background-color: var(--vs-surface-subtle);
 }
 
 .vs-card__tool:focus-visible {
 	border-radius: var(--vs-radius-full);
 }
 
-.vs-card__tool:hover {
-	background-color: var(--vs-surface-subtle);
-}
-
 .vs-card__tool.selected {
-	background-color: var(--vs-ink);
 	color: var(--vs-ink-text);
 }
 
-.vs-card__tool.selected:hover {
+.vs-card__tool.selected::before {
 	background-color: var(--vs-ink);
 }
 
@@ -4686,20 +5003,6 @@ body.hc-nav-open {
 		padding: var(--vs-space-3);
 	}
 
-/* On a 375px screen the plate is ~157x196 and two permanently-visible 44px    */
-/* discs eat nearly half its height. The product is the hero, so only the      */
-/* wishlist keeps its place on the image. Comparison is the lower-value action */
-/* on a phone and steps off - except when it is already picked, so removing    */
-/* stays reachable and the comparison page's own remove control survives.      */
-
-	.vs-card__compare {
-		display: none;
-	}
-
-	.vs-card__compare.selected {
-		display: inline-flex;
-	}
-
 	.vs-card__cta {
 		flex: 1 1 60px;
 		padding: 0 var(--vs-space-2);
@@ -4721,10 +5024,6 @@ body.hc-nav-open {
 
 	.vs-nav li.is-open > ul {
 		display: block;
-	}
-
-	.vs-card__tool {
-		opacity: 1;
 	}
 }
 
@@ -5427,10 +5726,15 @@ body.hc-nav-open {
 	overflow: hidden;
 }
 
-/* The cap is in px, not a percentage: lazyload leaves xloading.gif in place    */
+/* The cap is in px, not a percentage: lazyload leaves the placeholder in place */
 /* until the image scrolls in, and a percentage max-height against the auto     */
-/* height of <picture> computes to none - the spinner then renders at its own   */
-/* size and bursts the row.                                                     */
+/* height of <picture> computes to none - the placeholder then renders at its   */
+/* own size and bursts the row. Width and height are auto here, so the box is   */
+/* sized by the image itself: images/xloading.svg has no intrinsic size and no  */
+/* intrinsic ratio, which resolves to the CSS default object size clamped by    */
+/* the two caps, i.e. exactly 56x28 - the whole logo box, with nothing to       */
+/* shift when the logo lands. The old 84x84 spinner resolved to 28x28 here and  */
+/* jumped sideways the moment it did.                                           */
 
 .vs-option-card__logo img {
 	width: auto;
@@ -5524,6 +5828,101 @@ body.hc-nav-open {
 	margin-top: var(--vs-space-1);
 	color: var(--vs-sale-600);
 	font-size: var(--vs-text-xs);
+}
+
+/* -------------------------------------------- Nova Poshta warehouse chooser */
+/* OkayCMS_NovaposhtaCost markup, built by the module's own JS after the city  */
+/* autocomplete resolves. Nothing in the module is edited: every selector here */
+/* is one of its published class names. The module ships design/css/np.css and */
+/* TemplateConfig appends it AFTER this theme's compiled bundle, so an equally */
+/* specific rule would lose on source order - each of these is scoped through  */
+/* .vs-option__extra, which outranks the module by one class and needs no      */
+/* !important.                                                                 */
+
+.vs-option__extra .np_delivery_types_heading,
+.vs-option__extra .np_delivery_types_content {
+	margin-bottom: var(--vs-space-3);
+}
+
+/* Відділення / Поштомат is the same object as the catalogue's sort control    */
+/* and is built from the same parts: a hairline group with 4px of padding      */
+/* around 36px pills, the picked pill in ink, and an inert ::before restoring  */
+/* the full 44px hit height around a pill painted smaller. Two mutually        */
+/* exclusive options are one control, not a button next to a link.             */
+
+.vs-option__extra .np_delivery_types_heading {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-1-5);
+	padding: var(--vs-space-1);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface);
+}
+
+.vs-option__extra .np_delivery_types_heading a {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 36px;
+	margin: 0;
+	padding: 0 var(--vs-space-3);
+	border: 0;
+	border-radius: var(--vs-radius-sm);
+	background-color: transparent;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+	line-height: 1;
+	white-space: nowrap;
+	text-decoration: none;
+	transition: background-color var(--vs-dur-1) var(--vs-ease), color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-option__extra .np_delivery_types_heading a::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 0;
+	width: 100%;
+	height: 44px;
+	transform: translateY(-50%);
+}
+
+/* The module underlines the idle label with a dashed border on the inner span */
+/* and swaps it for a box on the active one. Both go: the pill carries state.  */
+
+.vs-option__extra .np_delivery_types_heading a span {
+	border: 0;
+}
+
+.vs-option__extra .np_delivery_types_heading a:hover {
+	background-color: var(--vs-surface-subtle);
+	color: var(--vs-text);
+}
+
+.vs-option__extra .np_delivery_types_heading a.active {
+	border: 0;
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+}
+
+.vs-option__extra .np_delivery_types_heading a.active:hover {
+	background-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+}
+
+.vs-option__extra .np_delivery_types_heading a.active span {
+	border: 0;
+}
+
+/* The module's own estimate line, revealed by its JS once a warehouse is set. */
+
+.vs-option__extra .term_novaposhta {
+	padding: 0;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
 }
 
 /* ---------------------------------------------------------------- pop-up cart */
@@ -6530,7 +6929,7 @@ body.hc-nav-open {
 
 /* Every declaration below that looks redundant is undoing a specific one in the  */
 /* module's own banners.css: a negative row margin on the list, a 15px bottom     */
-/* margin per item, and on __preview a white fill, a #dbdbdb border, a 120px      */
+/* margin per item, and on __preview a white fill, an rgb(219 219 219) border, a  */
 /* min-height, centred column flow and a 0 5px 15px/35% hover shadow. They are    */
 /* restated rather than left to cascade because banners.css is the module's file  */
 /* and can change under us on a module update.                                    */
@@ -7187,12 +7586,22 @@ body.hc-nav-open {
 }
 
 /* ----------------------------------------------------------------- rating */
-/* The stock rating was images/rating.png in gold - a third chromatic event      */
-/* against PRODUCT.md's two (rose = discount, emerald = availability), and a     */
-/* raster dependency. Filled versus outline carries the same meaning in ink.     */
+/* The stock rating was a gold raster sprite - a third chromatic event against  */
+/* PRODUCT.md's two (rose = discount, emerald = availability), and a raster      */
+/* dependency. Filled versus outline carries the same meaning in ink.            */
 /* The geometry is load-bearing: scripts.tpl's rater reads $on.height() as its   */
 /* unit and $on.width() as the current value, and the templates emit             */
 /* width:{rating*90/5}px - so the box stays 90x18 with 18px stars.               */
+
+/* images/rating.svg is the same 18x36 sprite the raster was - solid star over   */
+/* outline star - and the row is chosen the same way, by shifting the mask up    */
+/* 18px for the empty row. Two rules therefore share one file instead of         */
+/* carrying two inline copies of the path. It is a mask rather than a            */
+/* background-image so the two colours stay tokens: an SVG behind                */
+/* background-image would bake them in, and .rating_starHover could not repaint  */
+/* the filled row. The relative url is rewritten by CssConfig::setCssVariables   */
+/* ('../' -> '../../design/vibe_shop/'), which is how the raster resolved from   */
+/* the compiled sheet in cache/css/.                                             */
 
 /* The empty row is painted by a pseudo-element, NOT by a mask on the box       */
 /* itself. A CSS mask clips the element AND its descendants as one group, so    */
@@ -7212,8 +7621,8 @@ body.hc-nav-open {
 }
 
 /* --vs-n-500 rather than --vs-n-400: an empty star is a UI component and has   */
-/* to clear 3:1. #a5a5aa measured 2.45:1 on --vs-surface and 2.25:1 on          */
-/* --vs-canvas; #6b6b71 measures 5.29:1 and 4.86:1.                             */
+/* to clear 3:1. rgb(165 165 170) measured 2.45:1 on --vs-surface and 2.25:1 on */
+/* --vs-canvas; rgb(107 107 113) measures 5.29:1 and 4.86:1.                    */
 
 .rating_starOff::before {
 	content: "";
@@ -7223,10 +7632,10 @@ body.hc-nav-open {
 	width: 90px;
 	height: 18px;
 	background-color: var(--vs-n-500);
-	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 28 28'%3E%3Cpath d='M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E") repeat-x left top;
-	-webkit-mask-size: 18px 18px;
-	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 28 28'%3E%3Cpath d='M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E") repeat-x left top;
-	mask-size: 18px 18px;
+	-webkit-mask: url("../images/rating.svg") repeat-x 0 -18px;
+	-webkit-mask-size: 18px 36px;
+	mask: url("../images/rating.svg") repeat-x 0 -18px;
+	mask-size: 18px 36px;
 }
 
 /* position: relative only so the filled row paints above the ::before stencil  */
@@ -7238,10 +7647,10 @@ body.hc-nav-open {
 	display: block;
 	height: 18px;
 	background-color: var(--vs-heading);
-	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 28 28'%3E%3Cpath d='M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z'/%3E%3C/svg%3E") repeat-x left top;
-	-webkit-mask-size: 18px 18px;
-	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 28 28'%3E%3Cpath d='M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z'/%3E%3C/svg%3E") repeat-x left top;
-	mask-size: 18px 18px;
+	-webkit-mask: url("../images/rating.svg") repeat-x 0 0;
+	-webkit-mask-size: 18px 36px;
+	mask: url("../images/rating.svg") repeat-x 0 0;
+	mask-size: 18px 36px;
 }
 
 /* Hover is a preview, not a committed value, so it reads one step back from    */

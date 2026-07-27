@@ -93,6 +93,13 @@
 	--vs-radius-xl: 1.5rem;
 	--vs-radius-full: 999px;
 
+/* A single shadow, not a list: filter: drop-shadow() takes one shadow, so
+   --vs-shadow-1 and its siblings cannot be used there. It is the plate colour
+   rather than an ink colour because its job is the opposite of a shadow's -
+   it separates a dark glyph FROM a dark photograph, and vanishes on the white
+   plate the glyph normally sits on. */
+	--vs-halo-plate: 0 0 3px var(--vs-plate);
+
 	--vs-shadow-1: 0 1px 2px rgb(23 23 26 / .06), 0 1px 3px rgb(23 23 26 / .04);
 	--vs-shadow-2: 0 2px 4px rgb(23 23 26 / .05), 0 8px 16px -4px rgb(23 23 26 / .08);
 	--vs-shadow-3: 0 4px 8px rgb(23 23 26 / .06), 0 16px 32px -8px rgb(23 23 26 / .14);

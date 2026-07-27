@@ -10,7 +10,7 @@
                                 <source type="image/webp" data-srcset="{$b->image|resize:120:100:false:$config->resized_brands_dir}.webp">
                             {/if}
                             <source data-srcset="{$b->image|resize:120:100:false:$config->resized_brands_dir}">
-                            <img class="brand_img lazy" data-src="{$b->image|resize:120:100:false:$config->resized_brands_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$b->name|escape}"/>
+                            <img class="brand_img lazy" data-src="{$b->image|resize:120:100:false:$config->resized_brands_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.svg" alt="{$b->name|escape}"/>
                         </picture>
                     {else}
                         <span class="vs-brands__name">{$b->name|escape}</span>

@@ -25,7 +25,7 @@
                                                         <source type="image/webp" data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir|webp}">
                                                     {/if}
                                                     <source data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}">
-                                                    <img class="lazy" data-src="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="" title="{$c->name|escape}"/>
+                                                    <img class="lazy" data-src="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.svg" alt="" title="{$c->name|escape}"/>
                                                 </picture>
                                             {else}
                                                 {include file="svg.tpl" svgId="description_icon"}
@@ -90,7 +90,7 @@
                                             <source type="image/webp" data-srcset="{$product->image->filename|resize:60:60|webp}">
                                         {/if}
                                         <source data-srcset="{$product->image->filename|resize:60:60}">
-                                        <img class="lazy" data-src="{$product->image->filename|resize:60:60}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt=""/>
+                                        <img class="lazy" data-src="{$product->image->filename|resize:60:60}" src="{$rootUrl}/design/{get_theme}/images/xloading.svg" alt=""/>
                                     </picture>
                                 {else}
                                     {include file="svg.tpl" svgId="no_image"}

@@ -44,7 +44,7 @@
                                                         <source type="image/webp" data-srcset="{$c->image|resize:20:20:false:$config->resized_categories_dir}.webp">
                                                     {/if}
                                                     <source data-srcset="{$c->image|resize:20:20:false:$config->resized_categories_dir}">
-                                                    <img class="lazy" data-src="{$c->image|resize:20:20:false:$config->resized_categories_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$c->name|escape}" title="{$c->name|escape}"/>
+                                                    <img class="lazy" data-src="{$c->image|resize:20:20:false:$config->resized_categories_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.svg" alt="{$c->name|escape}" title="{$c->name|escape}"/>
                                                 </picture>
                                             {else}
                                                 {include file="svg.tpl" svgId="no_image"}

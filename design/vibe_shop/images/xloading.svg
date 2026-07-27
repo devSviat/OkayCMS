@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" role="presentation">
+	<!--
+		Lazy load placeholder. Replaces the 84x84 animated GIF spinner.
+
+		No glyph, no spinner, no animation: this file is referenced by roughly 25
+		img elements per catalogue page, it is swapped out the moment the real
+		image enters the viewport, and anything with a recognisable shape would
+		both skew (it stands in for 20x20, 80x30, 140x140, 380x240 and larger)
+		and compete with the photographs it stands in for. A quiet plate is the
+		whole job.
+
+		Percentage width and height with no viewBox is deliberate, and it is what
+		makes one file work in every slot: an image with no intrinsic size and no
+		intrinsic ratio is stretched to whatever box CSS gives it, and object-fit
+		contain behaves as fill because there is no ratio to preserve. So the
+		placeholder is always exactly the shape of the picture that will replace
+		it, never a letterboxed band inside it.
+
+		It also settles the one slot the theme does NOT size from CSS.
+		.vs-option-card__logo img is width:auto and height:auto capped at 56x28,
+		so the delivery and payment rows are sized by the image itself until the
+		logo arrives; with no intrinsic size the used size is the CSS default
+		object size (300x150) clamped by those caps, i.e. exactly 56x28. The old
+		84x84 spinner resolved to 28x28 there and jumped sideways when the real
+		logo landed.
+
+		The gradient is in objectBoundingBox units, so it is identical at every
+		size and aspect ratio. Its colours cannot be tokens: an SVG loaded
+		through an img element gets no custom properties from the page. They
+		bracket the vs-surface-subtle token (#ededee), which is the mid tone.
+
+		Note for anyone editing this comment: XML forbids a double hyphen inside
+		a comment, so CSS custom property names cannot be written here in full.
+		A malformed comment makes the whole file unparseable and it then renders
+		as a broken image, with no error reported anywhere.
+	-->
+	<defs>
+		<linearGradient id="vsPlaceholder" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#f2f2f3"/>
+			<stop offset="1" stop-color="#e8e8ea"/>
+		</linearGradient>
+	</defs>
+	<rect width="100%" height="100%" fill="url(#vsPlaceholder)"/>
+</svg>

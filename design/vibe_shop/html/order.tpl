@@ -170,7 +170,7 @@
                                         <source type="image/webp" data-srcset="{$purchase->product->image->filename|resize:140:140|webp}">
                                     {/if}
                                     <source data-srcset="{$purchase->product->image->filename|resize:140:140}">
-                                    <img class="lazy" data-src="{$purchase->product->image->filename|resize:140:140}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt=""/>
+                                    <img class="lazy" data-src="{$purchase->product->image->filename|resize:140:140}" src="{$rootUrl}/design/{get_theme}/images/xloading.svg" alt=""/>
                                 </picture>
                             {else}
                                 <span class="vs-cart__thumb-empty">{include file="svg.tpl" svgId="no_image"}</span>
