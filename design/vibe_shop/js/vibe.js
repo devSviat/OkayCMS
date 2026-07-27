@@ -146,7 +146,14 @@
     /* Availability line. okay.js only knows the two states it can express with
        hidden-xs-up on .fn_is_stock / .fn_not_preorder, so the three-state dot
        is maintained here. The copy comes from data-* on the element itself so
-       it stays translated by the template, not hard-coded in JS. */
+       it stays translated by the template, not hard-coded in JS.
+
+       The line is never hidden: all three states, out of stock included, are
+       stated in words, matching the product page. This is safe because the
+       card's .vs-stock carries no fn_ class - okay.js's variant handler only
+       ever calls parent.find('.fn_*'), so it cannot reach this element and
+       hidden-xs-up on it would be ours alone. Writing it here was what made
+       .vs-stock--out unreachable (hidden-xs-up is display:none !important). */
     function applyStock(card, stock) {
         var el = card.querySelector('.vs-stock');
         if (!el) return;
@@ -155,20 +162,17 @@
         if (isNaN(lowAt)) lowAt = LOW_STOCK_FALLBACK;
 
         el.classList.remove('vs-stock--in', 'vs-stock--low', 'vs-stock--out');
+        /* Defensive: an older cached markup, or an ajax fragment rendered before
+           this fix, can still arrive with hidden-xs-up baked in. */
+        el.classList.remove('hidden-xs-up');
 
         /* NaN (a variant with no stock figure at all) deliberately falls through
            to "in stock" - that is how okay.js reads the same attribute, and the
            two must not disagree about the same variant. */
         if (stock < 1) {
-            /* Out of stock is stated once, by the .vs-card__unavailable slot
-               okay.js reveals; repeating it here would say it twice. */
-            el.classList.add('vs-stock--out', 'hidden-xs-up');
+            el.classList.add('vs-stock--out');
             if (label) label.textContent = el.getAttribute('data-out') || '';
-            return;
-        }
-
-        el.classList.remove('hidden-xs-up');
-        if (stock <= lowAt) {
+        } else if (stock <= lowAt) {
             el.classList.add('vs-stock--low');
             if (label) label.textContent = el.getAttribute('data-low') || '';
         } else {

@@ -108,9 +108,15 @@
                 <span class="vs-card__price_old{if !$product->variant->compare_price} hidden-xs-up{/if}"><span class="fn_old_price">{$product->variant->compare_price|convert}</span>&nbsp;<span class="vs-card__currency">{$currency->sign|escape}</span></span>
             </div>
 
-            {* Availability. vibe.js rewrites the class and the label from these
-               data-* strings when a variant changes, so the copy stays localised. *}
-            <p class="vs-stock{if $product->variant->stock < 1} vs-stock--out hidden-xs-up{elseif $product->variant->stock <= 5} vs-stock--low{else} vs-stock--in{/if}" data-low-at="5" data-in="{$lang->product_in_stock|escape}" data-low="{$lang->product_low_stock|escape}" data-out="{$lang->out_of_stock|escape}">
+            {* Availability, stated in all three states - out of stock included, the
+               same way the product page states it. This element carries NO fn_ class,
+               so okay.js never selects it and hidden-xs-up on it would be ours alone;
+               it is not written here at all, which is why the muted out-of-stock line
+               is reachable. okay.js keeps toggling hidden-xs-up on the fn_ elements in
+               the actions row below, untouched.
+               vibe.js rewrites the class and the label from these data-* strings when
+               a variant changes, so the copy stays localised. *}
+            <p class="vs-stock{if $product->variant->stock < 1} vs-stock--out{elseif $product->variant->stock <= 5} vs-stock--low{else} vs-stock--in{/if}" data-low-at="5" data-in="{$lang->product_in_stock|escape}" data-low="{$lang->product_low_stock|escape}" data-out="{$lang->out_of_stock|escape}">
                 <span class="vs-stock__label">{if $product->variant->stock < 1}{$lang->out_of_stock}{elseif $product->variant->stock <= 5}{$lang->product_low_stock}{else}{$lang->product_in_stock}{/if}</span>
             </p>
 

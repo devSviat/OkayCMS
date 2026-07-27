@@ -2328,8 +2328,17 @@ body.hc-nav-open {
 	color: var(--vs-warn-600);
 }
 
+/* Out of stock is the absence of a chromatic event, not a fourth hue and not an */
+/* error: muted neutral, the same grey the secondary copy uses. The dot is       */
+/* hollowed out so the state differs by SHAPE as well as by colour and by word.  */
+
 .vs-stock--out {
 	color: var(--vs-text-muted);
+}
+
+.vs-stock--out::before {
+	border: 1px solid currentColor;
+	background-color: transparent;
 }
 
 .vs-card__form {
