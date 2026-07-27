@@ -152,7 +152,19 @@
                                                         {if $order->phone}
                                                         <tr valign="top">
                                                             <td class="es-p5t es-p5b" width="180px"><span>{$lang->email_order_phone|escape}:</span></td>
-                                                            <td class="es-p5t es-p5b"><span>{$order->phone|phone}</span></td>
+                                                            {* The |phone modifier is PhoneNumberUtil::parse(), which THROWS
+                                                               ("Missing or invalid default region") on any stored number without
+                                                               a leading "+" while phone_default_region is unset - and that
+                                                               fatal happens while the order confirmation is being rendered, so
+                                                               the one message a customer must receive is the one that never
+                                                               arrives. Demo orders 3 and 4 carry exactly that shape and both
+                                                               returned HTTP 500 before this change.
+                                                               Printed raw and escaped, the same guard callback.tpl and user.tpl
+                                                               use. Deliberately NOT \Okay\Core\Phone::isValid(): a bare static
+                                                               class call in a template is a separate durability risk (Smarty 5
+                                                               removes static class access), and this is a plain-text field in an
+                                                               email, so formatting buys nothing. *}
+                                                            <td class="es-p5t es-p5b"><span>{$order->phone|escape}</span></td>
                                                         </tr>
                                                         {/if}
                                                         {if $order->comment}

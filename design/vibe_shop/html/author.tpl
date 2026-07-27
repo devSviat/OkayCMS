@@ -3,6 +3,14 @@
 <div class="vs-blog">
     <div class="vs-blog__layout">
         <div class="vs-blog__main">
+            {* The rail's only trigger below 992px - see the note in post.tpl. *}
+            <div class="vs-blog__toolbar">
+                <button type="button" class="vs-btn vs-btn--secondary vs-filters__open hidden-lg-up" data-vs-sheet-open="vs_blog_rail" aria-controls="vs_blog_rail" aria-expanded="false">
+                    {include file="svg.tpl" svgId="catalog_icon"}
+                    <span data-language="blog_catalog">{$lang->blog_catalog}</span>
+                </button>
+            </div>
+
             <header class="vs-author-hero">
                 <div class="vs-author-hero__media">
                     {if $author->image}

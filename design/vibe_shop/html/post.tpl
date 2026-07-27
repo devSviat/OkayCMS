@@ -4,6 +4,19 @@
     <div class="vs-blog__layout">
         {* Content with post *}
         <article class="vs-blog__main vs-post__main">
+            {* Below 992px the rail is a bottom sheet with no other way in - this
+               is its only trigger, and without it the blog categories and the
+               subscribe form are unreachable on a phone. Same contract as
+               blog.tpl and brands.tpl: data-vs-sheet-open names the sheet by id
+               and vibeSheet owns every open/close path, so it deliberately does
+               NOT carry fn_switch_mobile_filter. *}
+            <div class="vs-blog__toolbar">
+                <button type="button" class="vs-btn vs-btn--secondary vs-filters__open hidden-lg-up" data-vs-sheet-open="vs_blog_rail" aria-controls="vs_blog_rail" aria-expanded="false">
+                    {include file="svg.tpl" svgId="catalog_icon"}
+                    <span data-language="blog_catalog">{$lang->blog_catalog}</span>
+                </button>
+            </div>
+
             <header class="vs-post__masthead">
                 {if !empty($post->categories)}
                     <div class="vs-post__labels">

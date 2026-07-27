@@ -131,6 +131,20 @@
 	color: var(--vs-sale-600);
 }
 
+/* -------------------------------------------------------------- page shell */
+/* index.tpl's single content wrapper. Page content used to start on the exact */
+/* pixel the header ended (measured at 1440: header bottom 124, .main top 124) */
+/* so the homepage banner butted straight against the chrome and read as part  */
+/* of it. Only the catalogue looked right, and only because the breadcrumb     */
+/* happened to supply air. The spacing belongs here, once, so every page gets  */
+/* it. /cart is the one exception: it renders no site header, and its own       */
+/* full-bleed bar is meant to sit flush against the top of the viewport - a     */
+/* canvas strip above it just reads as a mis-scrolled page.                      */
+
+body:not(.cart_page) .main {
+	padding-top: var(--vs-space-5);
+}
+
 /* ------------------------------------------------------------ header shell */
 
 .vs-header {
@@ -143,9 +157,15 @@
 	border-bottom: 1px solid var(--vs-hairline);
 }
 
+/* The bar is white on a near-white canvas, so this hairline is the only thing  */
+/* that ends the chrome - and it has to hold when the first thing under it is   */
+/* another white surface (the homepage banner plate). One step darker than the  */
+/* generic --vs-hairline for that reason. It sits on __main rather than on      */
+/* .vs-header so it travels with the bar when the bar sticks.                    */
+
 .vs-header__main {
 	background-color: var(--vs-surface);
-	border-bottom: 1px solid var(--vs-hairline);
+	border-bottom: 1px solid var(--vs-n-300);
 	transition: box-shadow var(--vs-dur-2) var(--vs-ease);
 }
 
@@ -2017,7 +2037,7 @@ body.hc-nav-open {
 	align-items: center;
 	gap: 0 var(--vs-space-2);
 	margin: 0;
-	padding: var(--vs-space-1) 0 0;
+	padding: 0;
 	list-style: none;
 	color: var(--vs-text-muted);
 	font-size: var(--vs-text-xs);
@@ -6816,20 +6836,47 @@ body.hc-nav-open {
 /* unit and $on.width() as the current value, and the templates emit             */
 /* width:{rating*90/5}px - so the box stays 90x18 with 18px stars.               */
 
+/* The empty row is painted by a pseudo-element, NOT by a mask on the box       */
+/* itself. A CSS mask clips the element AND its descendants as one group, so    */
+/* an outline stencil on .rating_starOff reduced the nested solid              */
+/* .rating_starOn to the intersection - the same outline - and the filled row   */
+/* never rendered at any rating. Measured on a 4.7 product before the fix: all  */
+/* five star centres sampled rgb(245,245,246), i.e. bare page background.       */
+/* A pseudo-element is a sibling of the child in the paint tree, not an         */
+/* ancestor, so its mask stops at itself.                                       */
+
 .rating_starOff {
 	position: relative;
 	display: inline-block;
 	width: 90px;
 	height: 18px;
 	vertical-align: middle;
-	background-color: var(--vs-n-400);
+}
+
+/* --vs-n-500 rather than --vs-n-400: an empty star is a UI component and has   */
+/* to clear 3:1. #a5a5aa measured 2.45:1 on --vs-surface and 2.25:1 on          */
+/* --vs-canvas; #6b6b71 measures 5.29:1 and 4.86:1.                             */
+
+.rating_starOff::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 90px;
+	height: 18px;
+	background-color: var(--vs-n-500);
 	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 28 28'%3E%3Cpath d='M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E") repeat-x left top;
 	-webkit-mask-size: 18px 18px;
 	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 28 28'%3E%3Cpath d='M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E") repeat-x left top;
 	mask-size: 18px 18px;
 }
 
+/* position: relative only so the filled row paints above the ::before stencil  */
+/* - both are then positioned with z-index auto and tree order decides. Width   */
+/* stays untouched: scripts.tpl's rater reads $on.width() as the value.         */
+
 .rating_starOn {
+	position: relative;
 	display: block;
 	height: 18px;
 	background-color: var(--vs-heading);
@@ -7664,6 +7711,13 @@ body.hc-nav-open {
 		align-items: start;
 	}
 
+/* The toolbar carries nothing but the sheet trigger, and from here the rail is */
+/* a static column - so the row goes with it rather than leaving a stray gap.   */
+
+	.vs-blog__toolbar {
+		display: none;
+	}
+
 	.vs-home__split {
 		grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
 		gap: var(--vs-space-10);
@@ -7787,13 +7841,28 @@ body.hc-nav-open {
 	}
 
 /* Banner captions on a phone. Variants 3 and 4 stack the caption and the image */
-/* as two 100%-height flex children of one slide, so with a fixed ratio only    */
-/* half of each would ever be visible; variants 1 and 2 are image-only          */
-/* (the module hides variant 1's caption itself). Showing the photograph alone   */
-/* is what makes every slide the same height, and the whole slide is already a   */
-/* link - .banner_group__link covers it - so nothing becomes unreachable.        */
+/* as two 100%-height flex children of one slide, so inside a fixed-ratio box    */
+/* only half of each would ever be visible - the caption has to come out of      */
+/* flow one way or the other.                                                    */
+/*                                                                               */
+/* Measured on a 375 slide (361x203): the prev/next arrows occupy y 133-193 at   */
+/* BOTH edges and the pagination dots span the full width at y 231-254. What is  */
+/* left is a band roughly 361x70 - one clamped line - which holds less than the   */
+/* page the slide already links to and covers the photograph to say it. So the   */
+/* caption is suppressed rather than overlaid, and the headline still reaches     */
+/* assistive tech through .banner_group__link's aria-label.                       */
+/*                                                                               */
+/* Scoped to variants 3 and 4, and at 0,3,0. The earlier blanket                  */
+/* `.main_banner .banner_group__content` was 0,2,0 and LOST on source order to    */
+/* the module's own `.banner_group__variant3 .banner_group__content{display:flex}`*/
+/* - banners.css is emitted after components.css in the compiled bundle - so the  */
+/* caption in fact rendered in dark ink straight over the photograph while its    */
+/* 0,3,0 companion pinned the image behind it. Variant 1 the module hides itself; */
+/* variant 2's caption is the module's own designed overlay on a translucent      */
+/* plate and is legible over any photograph, so it is left alone.                 */
 
-	.main_banner .banner_group__content {
+	.main_banner .banner_group__variant3 .banner_group__content,
+	.main_banner .banner_group__variant4 .banner_group__content {
 		display: none;
 	}
 
