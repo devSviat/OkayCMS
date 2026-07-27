@@ -1652,8 +1652,14 @@ body.hc-nav-open {
 
 /* ------------------------------------------------------------------ footer */
 
+/* The top padding was theme.css's `footer { padding: 30px 0 0 }` until Task 8. */
+/* It is restated on a token because the footer's internal rhythm was signed    */
+/* off with it in place: without it the first row sits 30px closer to the rule  */
+/* than every other band on the page does to its own edge.                      */
+
 .vs-footer {
 	margin-top: var(--vs-space-9);
+	padding-top: var(--vs-space-7);
 	background-color: var(--vs-surface);
 	border-top: 1px solid var(--vs-hairline);
 }
@@ -8319,12 +8325,43 @@ body.hc-nav-open {
 	min-width: 0;
 }
 
+/* Until Task 8 these two arrows were the last consumer of Swiper's built-in    */
+/* "swiper-icons" font: okay.css put the literal strings "prev"/"next" in       */
+/* ::after and the font turned them into glyphs. vendor.css carries neither, so */
+/* the chevron is drawn from two borders here - the same construction and the   */
+/* same 9px/2px measurements as .vs-gallery__nav::after, which is why the two   */
+/* arrow pairs in this theme now match instead of being a font apart.           */
+
 .vs-compare__nav {
+	width: 44px;
+	height: 44px;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-full);
+	background: var(--vs-surface);
+	box-shadow: var(--vs-shadow-1);
 	color: var(--vs-heading);
+	transition: border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-compare__nav:hover {
+	border-color: var(--vs-border-strong);
 }
 
 .vs-compare__nav::after {
-	font-size: 20px;
+	content: "";
+	width: 9px;
+	height: 9px;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	font-size: 0;
+}
+
+.swiper-button-next.vs-compare__nav::after {
+	transform: translateX(-1px) rotate(-45deg);
+}
+
+.swiper-button-prev.vs-compare__nav::after {
+	transform: translateX(1px) rotate(135deg);
 }
 
 /* -------------------------------------------------------------------- 404 */
@@ -8808,4 +8845,697 @@ body.hc-nav-open {
 img.lazy:not(.loaded) {
 	object-fit: scale-down;
 	object-position: center;
+}
+
+/* ============================================================================ */
+/* LEGACY CLASS CONTRACT                                                        */
+/* ============================================================================ */
+
+/* Task 8 deleted okay.css, theme.css and media.css. Most of what they carried  */
+/* had already been reimplemented on .vs-* classes by Tasks 1-7, but three      */
+/* groups of rules had not, because the markup that needs them is not ours to   */
+/* rename:                                                                      */
+/*                                                                              */
+/*   1. Module templates. Banners, FAQ, FastOrder and the four payment gateways */
+/*      render .block, .boxed, .button, .form__*, .popup, .swiper-button-* and  */
+/*      friends from Okay/Modules/**, which C9 forbids this theme to edit.      */
+/*   2. Admin-authored WYSIWYG. .block__description .table / .table__row /      */
+/*      .table__cell is a two-column layout helper the editor emits; without it */
+/*      a paired article collapses into one full-bleed column.                  */
+/*   3. A handful of this theme's own elements that were still leaning on the   */
+/*      legacy sheets - the scroll-to-top button, the two add-to-list toasts    */
+/*      and the readmore collapse.                                              */
+/*                                                                              */
+/* Everything below was found by diffing the computed style of every element on */
+/* 26 pages before and after the deletion, not by reading the old sheets and    */
+/* guessing. Where the legacy look conflicted with this theme it was restated   */
+/* on tokens rather than reproduced: no nested white cards (C11), no cyan       */
+/* gradient on the toasts, no font-awesome glyphs, no button glare sweep.       */
+
+/* ------------------------------------------------ swiper navigation default */
+
+/* The Banners module builds its own Swiper and renders bare .swiper-button-*   */
+/* and .swiper-pagination with no theme class on them. vendor.css carries only  */
+/* their placement, so without this they are 30x60 invisible boxes - which is   */
+/* exactly what the homepage slider had after the sheets came out. Same plate   */
+/* and same border-drawn chevron as .vs-gallery__nav, so every arrow pair in    */
+/* the theme now matches; the two instances that DO carry a theme class refine  */
+/* this at a higher specificity and are unaffected.                             */
+
+.swiper-button-prev,
+.swiper-button-next {
+	width: 44px;
+	height: 44px;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-full);
+	background: var(--vs-surface);
+	box-shadow: var(--vs-shadow-1);
+	color: var(--vs-heading);
+	transition: border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+	border-color: var(--vs-border-strong);
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+	content: "";
+	width: 9px;
+	height: 9px;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	font-size: 0;
+}
+
+.swiper-button-next::after {
+	transform: translateX(-1px) rotate(-45deg);
+}
+
+.swiper-button-prev::after {
+	transform: translateX(1px) rotate(135deg);
+}
+
+/* The banner group is a bare .swiper-container; theme.css zeroed its bottom    */
+/* margin and the home sections own their own rhythm.                           */
+
+.banner_group {
+	margin-bottom: 0;
+}
+
+/* ---------------------------------------------------------- scroll to top */
+
+/* okay.js toggles .show on scroll and animates the jump. theme.css drew the    */
+/* glyph with a font-awesome codepoint in ::before; the CDN link is still in    */
+/* head.tpl for the module templates that need it, but nothing this theme owns  */
+/* should depend on it, so the chevron is two borders like every other one.     */
+
+.to_top {
+	position: fixed;
+	bottom: var(--vs-space-8);
+	left: 2%;
+	z-index: var(--vs-z-sticky);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface);
+	color: var(--vs-heading);
+	box-shadow: var(--vs-shadow-2);
+	opacity: 0;
+	visibility: hidden;
+	cursor: pointer;
+	transition: opacity var(--vs-dur-2) var(--vs-ease), visibility var(--vs-dur-2) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.to_top.show {
+	opacity: 1;
+	visibility: visible;
+}
+
+.to_top:hover {
+	border-color: var(--vs-border-strong);
+}
+
+/* Nudged down by 2px: an up-chevron drawn from a rotated square is optically   */
+/* low in its box because the visual mass sits under the apex.                  */
+
+.to_top::before {
+	content: "";
+	width: 10px;
+	height: 10px;
+	margin-top: 2px;
+	border-top: 2px solid currentColor;
+	border-left: 2px solid currentColor;
+	transform: rotate(45deg);
+}
+
+/* ------------------------------------------------------ module block layout */
+
+/* Rendered by the FAQ and Banners modules. Structure and rhythm only: the      */
+/* --boxed and --border modifiers deliberately do NOT draw a white card any     */
+/* more. On the FAQ page they wrapped a list of cards in another card, which is */
+/* the nested-card pattern this redesign rules out; the items keep their own    */
+/* surfaces and the wrapper is now just a group.                                */
+
+.block {
+	margin-bottom: var(--vs-space-5);
+}
+
+.block__inner {
+	max-width: 100%;
+}
+
+.block__header {
+	margin-bottom: var(--vs-space-4);
+}
+
+.block__heading,
+.block__title {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	margin-bottom: 0;
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-xl);
+	font-weight: 600;
+	line-height: var(--vs-leading-tight);
+}
+
+.block--boxed,
+.block__header--boxed,
+.block__body,
+.boxed {
+	background-color: transparent;
+}
+
+.block--border,
+.block__header--border {
+	border: 0;
+}
+
+/* ------------------------------------------------- WYSIWYG two-column table */
+
+/* The editor emits .table / .table__row / .table__cell as a flex layout - it   */
+/* is not a <table>. Without these rules a paired article stacks into one       */
+/* column of full-bleed images: /news/okaycms-30 grew from 5671px to 7729px     */
+/* with the legacy sheet removed, which is how this was found.                  */
+
+.block__description .table {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	margin-top: var(--vs-space-7);
+	overflow: hidden;
+}
+
+.block__description .table__row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: stretch;
+	justify-content: space-between;
+	width: 100%;
+	overflow: hidden;
+}
+
+.block__description .table__cell {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	width: 49%;
+	margin-bottom: var(--vs-space-7);
+	overflow: hidden;
+}
+
+.block__description .table__cell--top {
+	justify-content: flex-start;
+}
+
+.block__description .table__cell--col-3 {
+	width: 31%;
+}
+
+.block__description .table__cell img {
+	align-self: center;
+	max-width: 100%;
+	height: auto;
+}
+
+/* A pasted figure is the one place in the prose where a hairline frame earns   */
+/* its keep: it separates a screenshot with a white background from the page.   */
+
+.block__description figure {
+	margin: 0;
+	padding: var(--vs-space-2);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-md);
+}
+
+.block__description figure p,
+.block__description figure img {
+	margin: 0;
+}
+
+.block__description figure figcaption {
+	padding: var(--vs-space-1) 0 0;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+	font-style: italic;
+}
+
+@media only screen and (max-width: 991px) {
+	.block__description .table__row {
+		display: block;
+	}
+
+	.block__description .table__cell,
+	.block__description .table__cell--col-3 {
+		width: 100%;
+	}
+}
+
+/* -------------------------------------------------------- generic button */
+
+/* Rendered by the Fondy, LiqPay, RozetkaPay and WayForPay checkout forms,      */
+/* which post to the gateway from a template this theme may not edit. Sized and */
+/* coloured like .vs-btn--primary so a redirect button does not arrive as an    */
+/* unstyled <input>. .button--blick is the module's glare-sweep hook: the class */
+/* is honoured, the sweep is not - a 0.75s white diagonal across a CTA is not   */
+/* a motion this theme makes.                                                   */
+
+.button,
+.btn_order {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--vs-space-2);
+	min-height: 44px;
+	padding: 0 var(--vs-space-5);
+	border: 1px solid var(--vs-cta);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-cta);
+	color: var(--vs-cta-text);
+	font-family: inherit;
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
+	line-height: 1;
+	text-align: center;
+	text-decoration: none;
+	vertical-align: middle;
+	white-space: nowrap;
+	cursor: pointer;
+	user-select: none;
+	transition: background-color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.button:hover,
+.btn_order:hover {
+	border-color: var(--vs-cta-hover);
+	background-color: var(--vs-cta-hover);
+	color: var(--vs-cta-text);
+	text-decoration: none;
+}
+
+.button--second {
+	border-color: var(--vs-border);
+	background-color: var(--vs-cta-2);
+	color: var(--vs-cta-2-text);
+}
+
+.button--second:hover {
+	border-color: var(--vs-ink);
+	background-color: var(--vs-cta-2);
+	color: var(--vs-heading);
+}
+
+.button--small {
+	min-height: 36px;
+	padding: 0 var(--vs-space-4);
+	font-size: var(--vs-text-xs);
+}
+
+.button--big {
+	min-height: 52px;
+	padding: 0 var(--vs-space-6);
+	font-size: var(--vs-text-base);
+}
+
+.button--blick {
+	position: relative;
+	overflow: hidden;
+}
+
+/* ------------------------------------------------ generic form and popup */
+
+/* The FastOrder module's one-click order form. It is included on every page,  */
+/* hidden, and fancybox lifts it into a lightbox from the rocket button on a   */
+/* product card - so it is the one legacy form still reaching shoppers.        */
+/*                                                                             */
+/* .form__placeholder is a <span> that FOLLOWS its input in the DOM, which the */
+/* legacy sheet floated over the field and animated on focus. It is pinned      */
+/* instead: the field is tall enough to hold a caption line above the value and */
+/* the caption never moves, so it reads the same whether or not okay.js has     */
+/* toggled .filled - and a shopper filling the form never watches text slide.   */
+
+.form {
+	position: relative;
+}
+
+.form--boxed {
+	padding: var(--vs-space-5);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+}
+
+.popup {
+	width: 460px;
+	max-width: 100%;
+}
+
+.form__header {
+	margin-bottom: var(--vs-space-4);
+}
+
+.form__title,
+.h6 {
+	display: block;
+	margin: 0 0 var(--vs-space-3);
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+	line-height: var(--vs-leading-tight);
+}
+
+.h6 {
+	font-size: var(--vs-text-base);
+}
+
+.form__title svg {
+	width: 20px;
+	height: 20px;
+	margin-right: var(--vs-space-2);
+	vertical-align: middle;
+}
+
+.form__group {
+	position: relative;
+	margin-bottom: var(--vs-space-3);
+}
+
+.form__group--last {
+	margin-bottom: 0;
+}
+
+.form__input,
+.form__textarea {
+	display: block;
+	width: 100%;
+	min-height: 56px;
+	padding: 22px var(--vs-space-3) 6px;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-n-25);
+	color: var(--vs-text);
+	font-family: inherit;
+	font-size: var(--vs-text-base);
+	line-height: 1.2;
+	resize: none;
+	transition: border-color var(--vs-dur-1) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.form__textarea {
+	min-height: 96px;
+	resize: vertical;
+}
+
+.form__input:hover,
+.form__textarea:hover {
+	border-color: var(--vs-border-strong);
+	background-color: var(--vs-surface);
+}
+
+.form__input:focus,
+.form__textarea:focus {
+	border-color: var(--vs-ink);
+	background-color: var(--vs-surface);
+}
+
+.form__input.error,
+.form__textarea.error {
+	border-color: var(--vs-sale-500);
+}
+
+.form__placeholder {
+	position: absolute;
+	top: 8px;
+	left: var(--vs-space-3);
+	z-index: 1;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+	line-height: 1.2;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	pointer-events: none;
+}
+
+.form__input.error ~ .form__placeholder,
+.form__placeholder.error {
+	color: var(--vs-sale-600);
+}
+
+.form__footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--vs-space-3);
+	margin-top: var(--vs-space-5);
+}
+
+.form__button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 1 1 auto;
+	min-height: 44px;
+	padding: 0 var(--vs-space-5);
+	border: 1px solid var(--vs-cta);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-cta);
+	color: var(--vs-cta-text);
+	font-family: inherit;
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
+	line-height: 1;
+	cursor: pointer;
+	transition: background-color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.form__button:hover {
+	border-color: var(--vs-cta-hover);
+	background-color: var(--vs-cta-hover);
+}
+
+/* jquery.validate drops label.error after the field it rejected, exactly as it */
+/* does inside .vs-form.                                                        */
+
+.form label.error {
+	display: block;
+	margin-top: var(--vs-space-2);
+	color: var(--vs-sale-600);
+	font-size: var(--vs-text-sm);
+}
+
+.message_error {
+	margin-bottom: var(--vs-space-4);
+	padding: var(--vs-space-3);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-sale-50);
+	color: var(--vs-sale-600);
+	font-size: var(--vs-text-sm);
+}
+
+.captcha {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+}
+
+.form__captcha {
+	position: relative;
+	flex: 1 1 auto;
+}
+
+.form__input_captcha {
+	max-width: 140px;
+}
+
+.secret_number {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 var(--vs-space-3);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-surface-subtle);
+	color: var(--vs-heading);
+	font-size: var(--vs-text-base);
+	font-weight: 600;
+	user-select: none;
+	pointer-events: none;
+}
+
+/* ------------------------------------------------------ add-to-list toasts */
+
+/* index.tpl's two confirmations, lifted by fancybox when a product is put in   */
+/* the comparison or the wishlist. theme.css gave them a cyan-to-blue gradient  */
+/* and white text - two hues this palette does not have. A plain surface with   */
+/* the success mark carries the same message.                                    */
+
+.popup_bg {
+	width: 380px;
+	max-width: 100%;
+	padding: var(--vs-space-6);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+	color: var(--vs-text);
+}
+
+.popup_confirm__title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--vs-space-2);
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+	line-height: var(--vs-leading-tight);
+}
+
+.popup_confirm__title svg {
+	flex: none;
+	width: 24px;
+	height: 24px;
+	color: var(--vs-ok-600);
+}
+
+/* ------------------------------------------------------------- readmore */
+
+/* readmore.min.js collapses a long category, brand, blog or author            */
+/* description and injects its own toggle link after it. The plugin embeds the  */
+/* mechanism itself (overflow, height transition); only the collapsed height,   */
+/* the fade over the cut and the toggle's look are the theme's. This shop has   */
+/* no description long enough to trigger it, so it is restated from the legacy  */
+/* rules rather than measured - the fade is the one part that had to change,    */
+/* since the legacy gradient was written `linear-gradient(top, ...)`, which is  */
+/* invalid modern syntax that only rendered through the -webkit- prefix.        */
+
+.fn_readmore[data-readmore] {
+	display: block;
+	position: relative;
+	width: 100%;
+	max-height: 215px;
+	overflow: hidden;
+}
+
+.fn_readmore[aria-expanded="false"]::after {
+	content: "";
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 4em;
+	background-image: linear-gradient(to bottom, transparent, var(--vs-canvas));
+	pointer-events: none;
+}
+
+.fn_readmore + [data-readmore-toggle] {
+	display: inline-block;
+	width: auto;
+	margin-top: var(--vs-space-3);
+	text-decoration: none;
+}
+
+.fn_readmore + [data-readmore-toggle] span {
+	display: inline-flex;
+	align-items: center;
+	min-height: 40px;
+	padding: 0 var(--vs-space-5);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-md);
+	color: var(--vs-heading);
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
+	transition: border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.fn_readmore + [data-readmore-toggle]:hover span {
+	border-color: var(--vs-ink);
+}
+
+/* ---------------------------------------------------------- ajax loading */
+
+/* okay.js appends this node to #fn_products_content for the duration of a      */
+/* filter round-trip and okay.css drew a 120px double ring on it. vibe.js reads */
+/* the node as a signal and puts .is-loading on .vs-catalogue__region instead,  */
+/* which draws the skeleton - so the node itself must render nothing rather     */
+/* than a second spinner on top of the first. querySelector still finds it.     */
+
+.fn_ajax_wait {
+	display: none;
+}
+
+/* ------------------------------------------------------ navigation weight */
+
+/* okay.css's reset carried `ol li, ul li { font-weight: 500 }`. Because this   */
+/* theme builds almost everything out of lists, that one bare-element rule was  */
+/* setting a medium weight on roughly 20,000 elements per page - breadcrumbs,   */
+/* card names, filter labels, prose bullets, the lot - and every component      */
+/* written in Tasks 1-7 inherited it without ever asking for it. It is not      */
+/* restated: base.css declares the body weight as 400 and each component states */
+/* the weight it wants, so the rest of the site now renders at the weight it    */
+/* was actually written for.                                                    */
+/*                                                                              */
+/* The navigation is the exception. Its labels are small and sit next to the    */
+/* wordmark and the dark catalogue button, and at 400 they read thin against    */
+/* them; 500 is the weight the header was reviewed and signed off at. Stated    */
+/* here on the three nav components rather than on `li`, so it reaches the      */
+/* header bar, the footer menus and the off-canvas clone and nothing else.      */
+
+.vs-menu__item,
+.vs-menu__link,
+.hc-offcanvas-nav .nav-item {
+	font-weight: 500;
+}
+
+/* --------------------------------------------------------- bare accordion */
+
+/* .accordion__item / __title / __content are okay.js's disclosure contract.   */
+/* Every instance in this theme also carries a .vs-* class that owns its look   */
+/* (.vs-disclosure-row__* on the product page, .vs-tabs__* below it), so these  */
+/* rules exist for a module template that emits the bare names on their own.    */
+/*                                                                              */
+/* Deliberately no `display: none` on __content, even though okay.css had one.  */
+/* These selectors are one class deep, the same weight as .vs-tabs__panel, and  */
+/* they come later in the file - so a display rule here would win and collapse  */
+/* the product description, specification and review panels for any visitor     */
+/* without scripting. Tasks 5 and 7 made those panels open by default on        */
+/* purpose and let vibe.js do the collapsing; visibility stays the script's job. */
+
+/* The wrapper the stock markup puts around a set of items. Nothing in this     */
+/* theme or in the sixteen installed modules renders it today, but it is one of */
+/* the generic names the contract reserves, so it is styled rather than left to */
+/* fall through as an unstyled div.                                              */
+
+.accordion {
+	display: block;
+	margin-bottom: var(--vs-space-5);
+}
+
+.accordion__item {
+	position: relative;
+}
+
+.accordion__title {
+	cursor: pointer;
+	user-select: none;
+}
+
+.accordion__title.active {
+	cursor: default;
+}
+
+.accordion__content {
+	padding: var(--vs-space-2) 0;
+	text-align: left;
 }

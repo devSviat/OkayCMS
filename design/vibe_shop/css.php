@@ -13,11 +13,8 @@ use Okay\Core\TemplateConfig\Css;
 return [
     (new Css('tokens.css')),
     (new Css('grid.css')),
-    (new Css('okay.css')),
-    (new Css('theme.css')),
+    (new Css('vendor.css')),
     (new Css('select2.min.css')),
-    (new Css('media.css')),
-    (new Css('mobile_menu.css')),
     (new Css('base.css')),
     (new Css('components.css')),
 ];
