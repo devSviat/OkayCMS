@@ -3,17 +3,16 @@
 {if $page->url == '404'}
     {include file='page_404.tpl'}
 {else}
-	<div class="block">
-		{* The page heading *}
-		<div class="block__header block__header--boxed block__header--border">
-			<h1 class="block__heading">
-				<span data-page="{$page->id}">{if $page->name_h1|escape}{$page->name_h1|escape}{else}{$page->name|escape}{/if}</span>
-			</h1>
-		</div>
+    <div class="vs-page">
+        {* The page heading *}
+        <div class="vs-page__masthead">
+            <h1 class="vs-page__title">
+                <span data-page="{$page->id}">{if $page->name_h1|escape}{$page->name_h1|escape}{else}{$page->name|escape}{/if}</span>
+            </h1>
+        </div>
 
-		{* The page content *}
-		<div class="block block--boxed block--border">
-			<div class="block__description">{$description}</div>
-		</div>
+        {* The page content. Admin-authored WYSIWYG: .vs-prose assumes nothing
+           about the nesting, inline styles, table widths or image sizes. *}
+        <div class="block__description vs-prose vs-page__body">{$description}</div>
     </div>
 {/if}

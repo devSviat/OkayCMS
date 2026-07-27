@@ -1,21 +1,21 @@
 <!-- The template of page 404 -->
 
-{* The page heading *}
-{*<h1 class="h1"><span data-page="{$page->id}">{if $page->name_h1|escape}{$page->name_h1|escape}{else}{$page->name|escape}{/if}</span></h1>*}
-
-{* The page content *}
-<div class="block">
-    <div class="container">
-        <div class="not_found">
-            <div class="not_found__image">
-                {include file="svg.tpl" svgId="404_icon"}
-            </div>
-            <div class="not_found__description">
-                {$description}
-            </div>
-            <div class="not_found__menu">
-                {$menu_404}
-            </div>
+<div class="container">
+    <div class="vs-404">
+        <div class="vs-404__mark">
+            {include file="svg.tpl" svgId="404_icon"}
         </div>
+        <div class="vs-404__note">
+            {$description}
+        </div>
+        <div class="vs-404__actions">
+            <a class="vs-btn vs-btn--primary" href="{url_generator route='products'}">
+                <span data-language="index_categories">{$lang->index_categories}</span>
+            </a>
+        </div>
+        {* The 404 menu is admin-authored: an arbitrary <ul> of links. *}
+        <nav class="vs-404__menu">
+            {$menu_404}
+        </nav>
     </div>
 </div>

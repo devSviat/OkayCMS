@@ -1,145 +1,119 @@
 <!-- Blog sidebar page -->
 
-{* Mobile close menu *}
-<div class="fn_mobile_toogle sidebar__header sidebar__boxed hidden-lg-up">
-    <div class="fn_switch_mobile_filter sidebar__header--close">
-        {include file="svg.tpl" svgId="remove_icon"}
-        <span data-language="mobile_filter_close">{$lang->mobile_filter_close}</span>
-    </div>
-</div>
-
-{* blog category *}
-<div class="sidebar__boxed">
-    <div class="fn_switch sidebar_heading d-flex align-items-center justify-content-between">
+{* Blog category tree. Same primitives as the catalogue rail: a fn_switch head
+   with its body as the immediately following sibling (okay.js collapses with
+   $(this).next().slideToggle(), so the two must stay adjacent), and the
+   category rows are Task 4's .vs-filter-cats. *}
+<div class="vs-filter-group">
+    <button type="button" class="fn_switch vs-filter-group__head" aria-expanded="true">
         <span data-language="blog_catalog">{$lang->blog_catalog}</span>
-        <span class="d-flex align-items-center filter__name_arrow fa fa-chevron-down"></span>
-    </div>
-    <nav class="blog_catalog">
-        {function name=categories_article}
-            {if $categories}
-                <ul class="blog_catalog__list level_{$level}{if $level > 1} blog_catalog__list--inner{/if}">
-                    {foreach $categories as $c}
-                        {if $c->visible && ($c->has_posts || $settings->show_empty_categories)}
-                            {if $c->subcategories && $c->count_children_visible && $level < 3}
-                                <li class="blog_catalog__item parent">
-                                    <a class="blog_catalog__link {if $category->id == $c->id} selected{/if}" href="{url_generator route='blog_category' url=$c->url}" data-blog_category="{$c->id}">
-                                        {if $c->image}
-                                            <picture>
-                                                {if $settings->support_webp}
-                                                    <source type="image/webp" data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir|webp}">
-                                                {/if}
-                                                <source data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}">
-                                                <img class="lazy" data-src="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$c->name|escape}" title="{$c->name|escape}"/>
-                                            </picture>
-                                        {else}
-                                            <span class="blog_catalog__no_image d-flex align-items-center justify-content-center" title="{$c->name|escape}">
-                                                {include file="svg.tpl" svgId="no_image"}
-                                            </span>
-                                        {/if}
-                                        <span class="blog_catalog__name">{$c->name|escape}</span>
-                                    </a>
-                                    <span class="fn_switch blog_catalog__switch">{include file='svg.tpl' svgId='arrow_right3'}</span>
-                                    {categories_article categories=$c->subcategories level=$level + 1}
-                                </li>
-                            {else}
-                                <li class="blog_catalog__item">
-                                    <a class="blog_catalog__link {if $category->id == $c->id} selected{/if}" href="{url_generator route='blog_category' url=$c->url}" data-blog_category="{$c->id}">
-                                        {if $c->image}
-                                        <picture>
-                                            {if $settings->support_webp}
-                                                <source type="image/webp" data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir|webp}">
+        <span class="vs-filter-group__chevron">{include file="svg.tpl" svgId="chevron"}</span>
+    </button>
+    <div class="vs-filter-group__body">
+        <nav class="blog_catalog">
+            {function name=categories_article}
+                {if $categories}
+                    <div class="vs-filter-cats blog_catalog__list level_{$level}{if $level > 1} vs-filter-cats--sub{/if}">
+                        {foreach $categories as $c}
+                            {if $c->visible && ($c->has_posts || $settings->show_empty_categories)}
+                                <div class="vs-filter-cats__item blog_catalog__item{if $c->subcategories && $c->count_children_visible && $level < 3} parent{/if}">
+                                    <a class="vs-filter-cats__link blog_catalog__link{if $category->id == $c->id} is-current selected{/if}" href="{url_generator route='blog_category' url=$c->url}" data-blog_category="{$c->id}">
+                                        <span class="vs-filter-cats__icon">
+                                            {if $c->image}
+                                                <picture>
+                                                    {if $settings->support_webp}
+                                                        <source type="image/webp" data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir|webp}">
+                                                    {/if}
+                                                    <source data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}">
+                                                    <img class="lazy" data-src="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="" title="{$c->name|escape}"/>
+                                                </picture>
+                                            {else}
+                                                {include file="svg.tpl" svgId="description_icon"}
                                             {/if}
-                                            <source data-srcset="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}">
-                                            <img class="lazy" data-src="{$c->image|resize:20:20:false:$config->resized_blog_categories_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$c->name|escape}" title="{$c->name|escape}"/>
-                                        </picture>
-                                        {else}
-                                            <span class="blog_catalog__no_image d-flex align-items-center justify-content-center" title="{$c->name|escape}">
-                                                {include file="svg.tpl" svgId="no_image"}
-                                            </span>
+                                        </span>
+                                        <span class="vs-filter-cats__name blog_catalog__name">{$c->name|escape}</span>
+                                        {if $category->id != $c->id}
+                                            {include file="svg.tpl" svgId="arrow_right2"}
                                         {/if}
-                                        <span class="blog_catalog__name">{$c->name|escape}</span>
                                     </a>
-                                </li>
+                                    {if $c->subcategories && $c->count_children_visible && $level < 3}
+                                        {categories_article categories=$c->subcategories level=$level + 1}
+                                    {/if}
+                                </div>
                             {/if}
-                        {/if}
-                    {/foreach}
-                </ul>
-            {/if}
-        {/function}
-        {categories_article categories=$blog_categories level=1}
-    </nav>
+                        {/foreach}
+                    </div>
+                {/if}
+            {/function}
+            {categories_article categories=$blog_categories level=1}
+        </nav>
+    </div>
 </div>
 
 {* Subscribing *}
-<div class="sidebar__boxed sidebar__boxed--subscribe hidden-md-down">
-    <div class="sidebar_subscribe">
-        <div class="sidebar_subscribe__title">
-            <span data-language="subscribe_promotext">{$lang->subscribe_promotext}</span>
+<div class="vs-aside__block">
+    <p class="vs-aside__promo">
+        <span data-language="subscribe_promotext">{$lang->subscribe_promotext}</span>
+    </p>
+    <form class="fn_subscribe_form_blog fn_validate_subscribe_blog vs-subscribe" method="post">
+        <div class="vs-subscribe__row">
+            <input type="hidden" name="subscribe" value="1"/>
+            <input class="vs-field vs-subscribe__input" aria-label="{$lang->form_email|escape}" type="email" name="subscribe_email" value="" data-format="email" placeholder="{$lang->form_email}"/>
+            <button class="vs-btn vs-btn--primary" type="submit"><span data-language="subscribe_button">{$lang->subscribe_button}</span></button>
         </div>
-        <form class="sidebar_subscribe__form fn_subscribe_form_blog fn_validate_subscribe_blog" method="post">
-            <div class="sidebar_subscribe__group">
-                <input type="hidden" name="subscribe" value="1"/>
-                <input class="form__input form__input--aside_subscribe" aria-label="subscribe" type="email" name="subscribe_email" value="" data-format="email" placeholder="{$lang->form_email}"/>
-            </div>
-            <button class="button button--basic button--aside_subscribe" type="submit" title="{$lang->subscribe_button}">{include file='svg.tpl' svgId='subscribe_image'}</button>
-            <div class="fn_subscribe_success_blog subscribe_success hidden">
-                <span data-language="subscribe_sent">{$lang->index_subscribe_sent}</span>
-            </div>
-            <div class="fn_subscribe_error_blog subscribe_error hidden">
-                <span class="fn_error_text_blog"></span>
-            </div>
-        </form>
-    </div>
+        <div class="fn_subscribe_success_blog vs-note vs-note--ok hidden">
+            <span data-language="subscribe_sent">{$lang->index_subscribe_sent}</span>
+        </div>
+        <div class="fn_subscribe_error_blog vs-note vs-note--error hidden">
+            <span class="fn_error_text_blog"></span>
+        </div>
+    </form>
 </div>
 
 {if $controller != "AuthorsController" && !$post}
     {* Featured products *}
     {get_featured_products var=featured_products limit=3}
     {if $featured_products}
-    <div class="sidebar__boxed">
-        <div class="fn_switch sidebar_heading d-flex align-items-center justify-content-between">
-            <span data-language="main_recommended_products">{$lang->main_recommended_products}</span>
-            <span class="d-flex align-items-center sidebar_heading_arrow icon fa fa-chevron-down"></span>
-        </div>
-        <div class="sidebar_card f_row">
-            {foreach $featured_products as $product}
-            <div class="sidebar_card__item f_col-12">
-                <a class="d-flex align-items-center justify-content-center sidebar_card__link" href="{url_generator route='product' url=$product->url}">
-                    <div class="sidebar_card__image">
-                        {if $product->image->filename}
-                        <picture>
-                            {if $settings->support_webp}
-                                <source type="image/webp" data-srcset="{$product->image->filename|resize:60:60|webp}">
-                            {/if}
-                            <source data-srcset="{$product->image->filename|resize:60:60}">
-                            <img class="lazy" data-src="{$product->image->filename|resize:60:60}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$product->name|escape}" title="{$product->name|escape}"/>
-                        </picture>
-                        {else}
-                        <div class="sidebar_card__no_image d-flex align-items-center justify-content-center" title="{$product->name|escape}">
-                            {include file="svg.tpl" svgId="no_image"}
-                        </div>
-                        {/if}
-                    </div>
-                    <div class="sidebar_card__content">
-                        <div class="sidebar_card__title">{$product->name|escape}</div>
-                        <div class="sidebar_card__prices">
-                            <div class="d-flex align-items-center">
-                                <div class="old_price {if !$product->variant->compare_price} hidden-xs-up{/if}">
-                                    <span class="fn_old_price">{$product->variant->compare_price|convert}</span>
-                                </div>
-                                <div class="price {if $product->variant->compare_price} price--red{/if}">
-                                    <span class="fn_price">{$product->variant->price|convert}</span> <span class="currency">{$currency->sign|escape}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="vs-filter-group">
+            <button type="button" class="fn_switch vs-filter-group__head" aria-expanded="true">
+                <span data-language="main_recommended_products">{$lang->main_recommended_products}</span>
+                <span class="vs-filter-group__chevron">{include file="svg.tpl" svgId="chevron"}</span>
+            </button>
+            <div class="vs-filter-group__body">
+                <div class="vs-minicards">
+                    {foreach $featured_products as $product}
+                        <a class="vs-minicard" href="{url_generator route='product' url=$product->url}">
+                            <span class="vs-minicard__media">
+                                {if $product->image->filename}
+                                    <picture>
+                                        {if $settings->support_webp}
+                                            <source type="image/webp" data-srcset="{$product->image->filename|resize:60:60|webp}">
+                                        {/if}
+                                        <source data-srcset="{$product->image->filename|resize:60:60}">
+                                        <img class="lazy" data-src="{$product->image->filename|resize:60:60}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt=""/>
+                                    </picture>
+                                {else}
+                                    {include file="svg.tpl" svgId="no_image"}
+                                {/if}
+                            </span>
+                            <span class="vs-minicard__body">
+                                <span class="vs-minicard__name">{$product->name|escape}</span>
+                                <span class="vs-minicard__prices">
+                                    <span class="old_price vs-minicard__old vs-tabular{if !$product->variant->compare_price} hidden-xs-up{/if}">
+                                        <span class="fn_old_price">{$product->variant->compare_price|convert}</span>
+                                    </span>
+                                    <span class="price vs-minicard__price vs-tabular{if $product->variant->compare_price} price--red{/if}">
+                                        <span class="fn_price">{$product->variant->price|convert}</span> <span class="currency">{$currency->sign|escape}</span>
+                                    </span>
+                                </span>
+                            </span>
+                        </a>
+                    {/foreach}
+                </div>
+                <a class="vs-aside__more" href="{url_generator route='products' filtersUrl=['filter' => ['featured']]}">
+                    <span data-language="main_look_all">{$lang->main_look_all}</span>{include file="svg.tpl" svgId="arrow_right2"}
                 </a>
             </div>
-            {/foreach}
-            <a class="sidebar_card__more d-flex align-items-center f_col-12" href="{url_generator route='products' filtersUrl=['filter' => ['featured']]}">
-                <span data-language="main_look_all">{$lang->main_look_all}</span>{include file="svg.tpl" svgId="arrow_right2"}
-            </a>
         </div>
-    </div>
     {/if}
 {/if}

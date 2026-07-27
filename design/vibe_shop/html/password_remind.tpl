@@ -3,96 +3,87 @@
 {* The page title *}
 {$meta_title = $lang->password_remind_title scope=global}
 
-<div class="block">
-    {* The page heading *}
-    <div class="block__header block__header--boxed block__header--border">
-        <h1 class="block__heading"><span data-language="password_remind_header">{$lang->password_remind_header}</span></h1>
+<div class="vs-page vs-auth">
+    <div class="vs-page__masthead">
+        <h1 class="vs-page__title"><span data-language="password_remind_header">{$lang->password_remind_header}</span></h1>
     </div>
 
-    <div class="block block--boxed block--border">
+    <div class="vs-auth__layout vs-auth__layout--single">
         {if $recovery_expired}
-            <div class="message_error" role="alert">
-                <span data-language="password_remind_expired">{$lang->password_remind_expired}</span>
+            <div class="vs-form vs-auth__form">
+                <p class="vs-field__error" role="alert">
+                    <span data-language="password_remind_expired">{$lang->password_remind_expired}</span>
+                </p>
+                <a class="vs-btn vs-btn--secondary vs-form__submit" href="{url_generator route="password_remind"}">
+                    <span data-language="password_remind_remember">{$lang->password_remind_remember}</span>
+                </a>
             </div>
         {elseif $recovery_mode}
             {* Введення нового пароля за підтвердженим посиланням відновлення *}
-            <div class="f_row flex-lg-row align-items-md-start">
+            <form method="post" class="vs-form vs-auth__form">
+                <input type="hidden" name="reset_password" value="1">
+                <h2 class="vs-form__title" data-language="password_remind_new_password">{$lang->password_remind_new_password}</h2>
 
-            </div>
-            <div class="form_wrap f_col-lg-6">
-                <form method="post" class="form form--boxed">
-                    <input type="hidden" name="reset_password" value="1">
-                    <div class="form__header">
-                        <div class="form__title">
-                            <span class="label_block" data-language="password_remind_new_password">{$lang->password_remind_new_password}</span>
-                        </div>
-                    </div>
-                    <div class="form__body">
-                        {* Form error messages *}
-                        {if $error}
-                            <div class="message_error" role="alert">
-                                {if $error == 'password_empty'}
-                                    <span data-language="password_remind_password_empty">{$lang->password_remind_password_empty}</span>
-                                {elseif $error == 'password_wrong'}
-                                    <span data-language="password_remind_password_wrong">{$lang->password_remind_password_wrong}</span>
-                                {else}
-                                    {$error|escape}
-                                {/if}
-                            </div>
+                {* Form error messages *}
+                {if $error}
+                    <p class="vs-field__error vs-form__alert" role="alert">
+                        {if $error == 'password_empty'}
+                            <span data-language="password_remind_password_empty">{$lang->password_remind_password_empty}</span>
+                        {elseif $error == 'password_wrong'}
+                            <span data-language="password_remind_password_wrong">{$lang->password_remind_password_wrong}</span>
+                        {else}
+                            {$error|escape}
                         {/if}
-                        <div class="form__group">
-                            <input id="new_password" class="form__input form__placeholder--focus" type="password" name="new_password" autocomplete="new-password" required>
-                            <span class="form__placeholder">{$lang->password_remind_new_password}*</span>
-                        </div>
-                        <div class="form__group">
-                            <input id="new_password_check" class="form__input form__placeholder--focus" type="password" name="new_password_check" autocomplete="new-password" required>
-                            <span class="form__placeholder">{$lang->password_remind_new_password}*</span>
-                        </div>
+                    </p>
+                {/if}
+
+                <div class="vs-fields">
+                    <div class="vs-form__row">
+                        <label class="vs-form__label" for="new_password">{$lang->password_remind_new_password}*</label>
+                        <input id="new_password" class="vs-field vs-form__input" type="password" name="new_password" autocomplete="new-password" required>
                     </div>
-                    <div class="form__footer">
-                        {* Submit button *}
-                        <button type="submit" class="form__button button--blick" value="{$lang->password_remind_save}">
-                            <span data-language="password_remind_save">{$lang->password_remind_save}</span>
-                        </button>
+                    <div class="vs-form__row">
+                        <label class="vs-form__label" for="new_password_check">{$lang->password_remind_new_password}*</label>
+                        <input id="new_password_check" class="vs-field vs-form__input" type="password" name="new_password_check" autocomplete="new-password" required>
                     </div>
-                </form>
-            </div>
+                </div>
+
+                {* Submit button *}
+                <button type="submit" class="vs-btn vs-btn--primary vs-form__submit" value="{$lang->password_remind_save}">
+                    <span data-language="password_remind_save">{$lang->password_remind_save}</span>
+                </button>
+            </form>
         {elseif $email_sent}
             {* Відповідь не залежить від того, чи існує акаунт *}
-            <div>
-                <span data-language="password_remind_letter_sent_generic">{$lang->password_remind_letter_sent_generic}</span>
+            <div class="vs-form vs-auth__form">
+                <p class="vs-note vs-note--ok" role="status">
+                    <span data-language="password_remind_letter_sent_generic">{$lang->password_remind_letter_sent_generic}</span>
+                </p>
+                <a class="vs-btn vs-btn--secondary vs-form__submit" href="{url_generator route="login"}">
+                    <span data-language="login_sign_in">{$lang->login_sign_in}</span>
+                </a>
             </div>
         {else}
-        <div class="f_row flex-lg-row align-items-md-start">
+            <form method="post" class="vs-form vs-auth__form">
+                <h2 class="vs-form__title" data-language="password_remind_enter_your_email">{$lang->password_remind_enter_your_email}</h2>
 
-        </div>
-            <div class="form_wrap f_col-lg-6">
-                <form method="post" class="form form--boxed">
-                    <div class="form__header">
-                        <div class="form__title">
-                            <span class="label_block" data-language="password_remind_enter_your_email">{$lang->password_remind_enter_your_email}</span>
-                        </div>
+                {* Form error messages *}
+                {if $error}
+                    <p class="vs-field__error vs-form__alert" role="alert">{$error|escape}</p>
+                {/if}
+
+                <div class="vs-fields">
+                    <div class="vs-form__row">
+                        <label class="vs-form__label" for="password_remind">{$lang->form_email}*</label>
+                        <input id="password_remind" class="vs-field vs-form__input" type="email" name="email" value="{$request_data.email|escape}" autocomplete="email" required>
                     </div>
-                    <div class="form__body">
-                        {* Form error messages *}
-                        {if $error}
-                            <div class="message_error" role="alert">
-                                {$error|escape}
-                            </div>
-                        {/if}
-                        <div class="form__group">
-                            <input id="password_remind" class="form__input form__placeholder--focus" type="text" name="email" value="{$request_data.email|escape}" data-language="form_email" required>
-                            <span class="form__placeholder">{$lang->form_email}*</span>
-                        </div>
-                    </div>
-                    <div class="form__footer">
-                        {* Submit button *}
-                        <button type="submit" class="form__button button--blick" value="{$lang->password_remind_remember}">
-                            <span data-language="password_remind_remember">{$lang->password_remind_remember}</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                {* Submit button *}
+                <button type="submit" class="vs-btn vs-btn--primary vs-form__submit" value="{$lang->password_remind_remember}">
+                    <span data-language="password_remind_remember">{$lang->password_remind_remember}</span>
+                </button>
+            </form>
         {/if}
     </div>
 </div>

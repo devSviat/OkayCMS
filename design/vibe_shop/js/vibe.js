@@ -678,21 +678,32 @@
     /* The filter panel is the shared .vs-sheet primitive - focus trap, scroll
        lock, Escape and focus restore all come from window.vibeSheet above.
        Only the trigger is bound here. Closing is handled by the generic
-       [data-vs-sheet-close] and backdrop listeners. */
+       [data-vs-sheet-close] and backdrop listeners.
+
+       data-vs-sheet-open names the sheet by id, which is what the blog, post,
+       author and brands rails use; the bare .vs-filters__open form is kept for
+       the catalogue, where there is exactly one sheet on the page. */
     document.addEventListener('click', function (event) {
         if (!event.target.closest) return;
+        var trigger = event.target.closest('[data-vs-sheet-open]');
+        if (trigger) {
+            window.vibeSheet.open(document.getElementById(trigger.getAttribute('data-vs-sheet-open')));
+            return;
+        }
         if (!event.target.closest('.vs-filters__open')) return;
         window.vibeSheet.open(document.querySelector('.vs-filters.vs-sheet'));
     });
 
     /* Resizing past the rail breakpoint turns the sheet back into a static
        column. Leaving it "open" would keep the body scroll lock on with no
-       visible overlay to explain it. */
+       visible overlay to explain it. Every rail on the site uses the same
+       992px switch, so this closes whichever sheet is open rather than only
+       the catalogue's. */
     var railQuery = window.matchMedia ? window.matchMedia('(min-width: 992px)') : null;
 
     function closeFiltersOnRail() {
         if (!railQuery || !railQuery.matches) return;
-        var open = document.querySelector('.vs-filters.vs-sheet.is-open');
+        var open = document.querySelector('.vs-sheet.is-open');
         if (open) window.vibeSheet.close(open);
     }
 

@@ -1,33 +1,37 @@
 <!-- page title -->
 {$meta_title = $lang->wishlist_title scope=global}
 
-<div class="block">
+<div class="vs-page">
     {* Page heading *}
-    <div class="block__header block__header--boxed block__header--border">
-        <h1 class="block__heading">
+    <div class="vs-page__masthead">
+        <h1 class="vs-page__title">
             <span data-language="wishlist_header">{$lang->wishlist_header}</span>
         </h1>
     </div>
-    <div class="block__body block--boxed block--border">
-        {if $description}
-            <div class="block">
-                {$description}
-            </div>
-        {/if}
 
-        {if $wishlist->products|count}
-            <div class="fn_wishlist_page products_list row">
-                {* Список избранных товаров *}
-                {foreach $wishlist->products as $product}
-                    <div class="product_item no_hover col-xs-6 col-sm-4 col-md-3 col-xl-25">
-                        {include "product_list.tpl"}
-                    </div>
-                {/foreach}
-            </div>
-        {else}
-            <div class="block">
-                <span data-language="wishlist_empty">{$lang->wishlist_empty}</span>
-            </div>
-        {/if}
-    </div>
+    {if $description}
+        <div class="block__description vs-prose vs-page__intro">{$description}</div>
+    {/if}
+
+    {* count() on null is a fatal in PHP 8 - the collection is checked first. *}
+    {if !empty($wishlist->products)}
+        {* The card is the grid item, exactly as in products_content.tpl - no
+           .product_item wrapper and no .products_list, whose
+           :not(.swiper-container) flex rule outranks .vs-catalogue__grid and
+           would collapse the grid to one column. *}
+        <div class="fn_wishlist_page vs-catalogue__grid">
+            {* Список избранных товаров *}
+            {foreach $wishlist->products as $product}
+                {include "product_list.tpl"}
+            {/foreach}
+        </div>
+    {else}
+        <div class="vs-empty vs-empty--center">
+            <span class="vs-empty__icon">{include file="svg.tpl" svgId="heart"}</span>
+            <p class="vs-empty__title" data-language="wishlist_empty">{$lang->wishlist_empty}</p>
+            <a class="vs-btn vs-btn--primary" href="{url_generator route='products'}">
+                <span data-language="index_categories">{$lang->index_categories}</span>
+            </a>
+        </div>
+    {/if}
 </div>

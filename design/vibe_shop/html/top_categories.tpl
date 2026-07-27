@@ -18,16 +18,13 @@
 {categories_has_main categories=$categories level=1}
 
 {if $has_main_categories}
-<section class="container section_top_categories"> 
-    <div class="block block--boxed block--border">
-        <div class="block__header block__header--promo">
-            <div class="block__title">
-                <span data-language="main_popular_categories">{$lang->main_popular_categories}</span>
-            </div>
-        </div>
-
-        <div class="block__body">
-            <div class="vs-cats">
+<section class="container section_top_categories vs-home__section vs-home__section--tight">
+    <div class="vs-home__head">
+        <h2 class="vs-home__title vs-home__title--sub">
+            <span data-language="main_popular_categories">{$lang->main_popular_categories}</span>
+        </h2>
+    </div>
+    <div class="vs-cats">
                 {function name=has_main_categories}
                 {if $categories}
                     {foreach $categories as $c}
@@ -64,8 +61,6 @@
                 {/if}
             {/function}
             {has_main_categories categories=$categories level=1}
-            </div>
-        </div>
     </div>
-</section> 
+</section>
 {/if}

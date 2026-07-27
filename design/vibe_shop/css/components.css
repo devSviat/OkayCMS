@@ -4151,7 +4151,7 @@ body.hc-nav-open {
 }
 
 .vs-pager__link--prev svg {
-	transform: rotate(90deg);
+	transform: rotate(-90deg);
 }
 
 .vs-pager__link--next {
@@ -4160,7 +4160,7 @@ body.hc-nav-open {
 }
 
 .vs-pager__link--next svg {
-	transform: rotate(-90deg);
+	transform: rotate(90deg);
 }
 
 /* ------------------------------------------------------------------ section */
@@ -5650,5 +5650,2195 @@ body.hc-nav-open {
 
 	.vs-summary {
 		padding: var(--vs-space-4);
+	}
+}
+
+/* ========================================================= TASK 7: secondary */
+/* Homepage, blog, account, brands, auth forms, static pages and 404. Nothing   */
+/* below introduces a hue: rose stays the discount, emerald stays availability, */
+/* everything else is the neutral ramp and the owner's own brand token.         */
+
+/* --------------------------------------------------------------- page shell */
+/* The stock theme put every page heading inside its own bordered white card,   */
+/* which made a nested-card shape as soon as any real content followed. The     */
+/* masthead now sits straight on the canvas, exactly like .vs-catalogue.        */
+
+.vs-page {
+	padding-bottom: var(--vs-space-9);
+}
+
+.vs-page__masthead {
+	padding: var(--vs-space-5) 0;
+}
+
+.vs-page__title {
+	margin: 0;
+	font-size: var(--vs-text-2xl);
+}
+
+.vs-page__intro {
+	margin-bottom: var(--vs-space-6);
+	color: var(--vs-text-muted);
+}
+
+.vs-page__outro {
+	margin-top: var(--vs-space-9);
+	padding-top: var(--vs-space-6);
+	border-top: 1px solid var(--vs-hairline);
+}
+
+/* ---------------------------------------------------------------- vs-prose */
+/* Admin-authored WYSIWYG. The markup is not ours: arbitrary nesting, inline    */
+/* styles, pasted tables, images at any size, empty <p>s. Every rule here is    */
+/* defensive - it constrains what arrives rather than assuming a shape.         */
+
+.vs-prose {
+	max-width: 74ch;
+	color: var(--vs-text);
+	line-height: var(--vs-leading-body);
+	overflow-wrap: break-word;
+}
+
+.vs-prose > *:first-child {
+	margin-top: 0;
+}
+
+.vs-prose > *:last-child {
+	margin-bottom: 0;
+}
+
+.vs-prose p {
+	margin: 0 0 var(--vs-space-4);
+	max-width: none;
+}
+
+.vs-prose p:last-child {
+	margin-bottom: 0;
+}
+
+.vs-prose h1,
+.vs-prose h2,
+.vs-prose h3,
+.vs-prose h4,
+.vs-prose h5,
+.vs-prose h6 {
+	margin: var(--vs-space-7) 0 var(--vs-space-3);
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-weight: 600;
+	line-height: var(--vs-leading-tight);
+}
+
+.vs-prose h1 {
+	font-size: var(--vs-text-2xl);
+}
+
+.vs-prose h2 {
+	font-size: var(--vs-text-xl);
+}
+
+.vs-prose h3 {
+	font-size: var(--vs-text-lg);
+}
+
+.vs-prose h4,
+.vs-prose h5,
+.vs-prose h6 {
+	font-size: var(--vs-text-base);
+}
+
+.vs-prose ul,
+.vs-prose ol {
+	margin: 0 0 var(--vs-space-4);
+	padding-left: var(--vs-space-6);
+}
+
+.vs-prose li {
+	margin-bottom: var(--vs-space-2);
+}
+
+.vs-prose li:last-child {
+	margin-bottom: 0;
+}
+
+.vs-prose a {
+	color: var(--vs-text);
+	text-decoration: underline;
+	text-decoration-color: var(--vs-border-strong);
+	text-underline-offset: 0.2em;
+}
+
+.vs-prose a:hover {
+	text-decoration-color: currentColor;
+}
+
+/* Pasted content routinely carries width/height attributes and inline styles   */
+/* that are wider than the column. Both are answered, and figure/picture are    */
+/* included because the WYSIWYG wraps uploads in them.                          */
+
+.vs-prose img,
+.vs-prose picture,
+.vs-prose video,
+.vs-prose iframe,
+.vs-prose embed,
+.vs-prose object {
+	max-width: 100%;
+	height: auto;
+	border-radius: var(--vs-radius-md);
+}
+
+.vs-prose iframe,
+.vs-prose video {
+	display: block;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	border: 0;
+}
+
+.vs-prose figure {
+	margin: var(--vs-space-6) 0;
+}
+
+.vs-prose figcaption {
+	margin-top: var(--vs-space-2);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+/* A pasted table is the most common way admin content bursts the layout: it    */
+/* usually carries width="600" or a pixel style. The table scrolls inside its   */
+/* own box so the page body never scrolls sideways.                             */
+
+.vs-prose table {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	overflow-x: auto;
+	border-collapse: collapse;
+	margin: 0 0 var(--vs-space-5);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-prose th,
+.vs-prose td {
+	padding: var(--vs-space-3);
+	border: 1px solid var(--vs-hairline);
+	text-align: left;
+	vertical-align: top;
+}
+
+.vs-prose th {
+	background-color: var(--vs-surface-subtle);
+	color: var(--vs-heading);
+	font-weight: 600;
+}
+
+.vs-prose blockquote {
+	margin: var(--vs-space-6) 0;
+	padding: var(--vs-space-2) 0 var(--vs-space-2) var(--vs-space-5);
+	border-left: 2px solid var(--vs-border-strong);
+	color: var(--vs-text-muted);
+}
+
+.vs-prose code,
+.vs-prose kbd,
+.vs-prose samp {
+	padding: 0.1em 0.35em;
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-surface-subtle);
+	font-size: 0.9em;
+}
+
+.vs-prose pre {
+	margin: 0 0 var(--vs-space-5);
+	padding: var(--vs-space-4);
+	overflow-x: auto;
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-prose pre code {
+	padding: 0;
+	background-color: transparent;
+}
+
+.vs-prose hr {
+	margin: var(--vs-space-7) 0;
+	border: 0;
+	border-top: 1px solid var(--vs-hairline);
+}
+
+/* ------------------------------------------------------------------- table */
+/* A real data table: the order history in the account. Hairlines only, no      */
+/* zebra, numbers tabular, and the whole thing scrolls inside its wrapper       */
+/* rather than pushing the page sideways on a phone.                            */
+
+.vs-table-wrap {
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.vs-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--vs-text-sm);
+}
+
+.vs-table th {
+	padding: var(--vs-space-3) var(--vs-space-3);
+	border-bottom: 1px solid var(--vs-border);
+	color: var(--vs-text-muted);
+	font-weight: 500;
+	text-align: left;
+	white-space: nowrap;
+}
+
+.vs-table td {
+	padding: var(--vs-space-3);
+	border-bottom: 1px solid var(--vs-hairline);
+	vertical-align: middle;
+}
+
+.vs-table__toggle_head,
+.vs-table__toggle_cell {
+	width: 44px;
+	padding-left: 0;
+	padding-right: 0;
+}
+
+/* okay.js binds a.fn_user_orders_switch, so this stays an <a>. theme.css paints */
+/* that class with a 10x10 plus/minus data URI; the sprite chevron replaces it,  */
+/* so the legacy background is switched off rather than left showing through.    */
+
+.vs-table__toggle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	background-image: none;
+	color: var(--vs-text-muted);
+	text-decoration: none;
+	transition: transform var(--vs-dur-2) var(--vs-ease);
+}
+
+.vs-table__toggle svg {
+	width: 18px;
+	height: 18px;
+}
+
+.fn_user_orders_active .vs-table__toggle {
+	transform: rotate(180deg);
+	color: var(--vs-heading);
+}
+
+.vs-table__link {
+	color: var(--vs-heading);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.vs-table__link:hover {
+	text-decoration: underline;
+}
+
+.vs-table__detail {
+	display: none;
+}
+
+.vs-table__detail.fn_user_orders_show {
+	display: table-row;
+}
+
+.vs-table__detail > td {
+	padding: var(--vs-space-4) 0 var(--vs-space-6);
+	background-color: var(--vs-canvas);
+}
+
+.vs-order-lines {
+	display: flex;
+	flex-direction: column;
+	gap: var(--vs-space-2);
+	padding: 0 var(--vs-space-3);
+}
+
+.vs-order-totals {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: var(--vs-space-2) var(--vs-space-4);
+	margin: var(--vs-space-4) 0 0;
+	padding: var(--vs-space-4) var(--vs-space-3) 0;
+	border-top: 1px solid var(--vs-hairline);
+}
+
+.vs-order-totals dt {
+	color: var(--vs-text-muted);
+}
+
+.vs-order-totals dd {
+	margin: 0;
+	text-align: right;
+}
+
+.vs-order-totals__grand {
+	color: var(--vs-heading);
+	font-weight: 600;
+}
+
+/* ------------------------------------------------------------- form extras */
+/* .vs-form, .vs-form__row, .vs-form__label, .vs-field and .vs-fields already   */
+/* exist from tasks 5 and 6. Only the pieces the form pages need are added.     */
+
+.vs-field__error {
+	margin: 0 0 var(--vs-space-4);
+	color: var(--vs-sale-600);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-form__alert {
+	padding: var(--vs-space-3) var(--vs-space-4);
+	border: 1px solid var(--vs-sale-600);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-sale-50);
+}
+
+.vs-form .vs-note {
+	margin-top: 0;
+	margin-bottom: var(--vs-space-4);
+}
+
+.vs-form .vs-note--ok {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	padding: var(--vs-space-3) var(--vs-space-4);
+	border: 1px solid var(--vs-ok-600);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-ok-50);
+}
+
+.vs-form .vs-note--ok svg {
+	flex: none;
+	width: 18px;
+	height: 18px;
+}
+
+.vs-form__title svg {
+	flex: none;
+	width: 20px;
+	height: 20px;
+	color: var(--vs-text-muted);
+}
+
+.vs-form__title {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+}
+
+.vs-form__submit {
+	margin-top: var(--vs-space-5);
+}
+
+.vs-form__link {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	min-height: 44px;
+	margin-top: var(--vs-space-2);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	text-decoration: none;
+}
+
+.vs-form__link:hover {
+	color: var(--vs-heading);
+	text-decoration: underline;
+}
+
+.vs-form__link svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* jquery.validate appends label.error after the field it rejected. */
+
+.vs-fields label.error {
+	display: block;
+	margin: var(--vs-space-2) 0 0;
+	color: var(--vs-sale-600);
+	font-size: var(--vs-text-sm);
+	font-weight: 400;
+}
+
+.vs-fields .vs-field.error {
+	border-color: var(--vs-sale-600);
+}
+
+/* ------------------------------------------------------------- auth layout */
+/* Login, register, password reminder and feedback: one form column and one     */
+/* explanatory column. Not two equal cards - the form is the job.                */
+
+.vs-auth__layout {
+	display: grid;
+	gap: var(--vs-space-6);
+	align-items: start;
+}
+
+.vs-auth__form {
+	min-width: 0;
+}
+
+.vs-auth__aside {
+	min-width: 0;
+	padding: var(--vs-space-2) 0;
+}
+
+.vs-auth__aside_title {
+	margin: 0 0 var(--vs-space-4);
+	font-size: var(--vs-text-xl);
+}
+
+.vs-auth__aside_body {
+	margin-bottom: var(--vs-space-5);
+}
+
+.vs-auth__aside_cta {
+	width: 100%;
+}
+
+.vs-map {
+	margin-top: var(--vs-space-8);
+	overflow: hidden;
+	border-radius: var(--vs-radius-lg);
+	line-height: 0;
+}
+
+.vs-map iframe {
+	display: block;
+	width: 100%;
+	min-height: 320px;
+	border: 0;
+}
+
+/* -------------------------------------------------------------- modal form */
+/* The callback form and its confirmation, opened by fancybox. The legacy       */
+/* .popup class is deliberately not carried: okay.css forces its padding, width */
+/* and text-align with !important, which this layer may not answer.             */
+
+.vs-modal-form {
+	width: 460px;
+	max-width: 100%;
+}
+
+.vs-modal-note {
+	width: 420px;
+	max-width: 100%;
+	padding: var(--vs-space-7) var(--vs-space-6);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+	text-align: center;
+}
+
+.vs-modal-note__title {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--vs-space-2);
+	margin-bottom: var(--vs-space-3);
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+}
+
+.vs-modal-note__title svg {
+	flex: none;
+	width: 24px;
+	height: 24px;
+	color: var(--vs-ok-600);
+}
+
+.vs-modal-note__text {
+	margin: 0;
+	max-width: none;
+	color: var(--vs-text-muted);
+}
+
+/* ------------------------------------------------------------------ homepage */
+/* Six blocks, five shapes: rail, category tiles, rail, rail on a tinted band,   */
+/* editorial split, article cards. No tracked-uppercase kicker above any of      */
+/* them - the heading is the heading.                                            */
+
+.vs-home__section {
+	padding: var(--vs-space-8) 0 0;
+}
+
+.vs-home__section--tight {
+	padding-top: var(--vs-space-7);
+}
+
+.vs-home__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--vs-space-4);
+	margin-bottom: var(--vs-space-5);
+}
+
+.vs-home__title {
+	margin: 0;
+	font-size: var(--vs-text-2xl);
+}
+
+.vs-home__title--sub {
+	font-size: var(--vs-text-xl);
+}
+
+.vs-home__more {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	flex: none;
+	min-height: 44px;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.vs-home__more:hover {
+	color: var(--vs-heading);
+}
+
+.vs-home__more svg {
+	width: 14px;
+	height: 14px;
+	transition: transform var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-home__more:hover svg {
+	transform: translateX(2px);
+}
+
+/* A value step, not a fourth hue: the band separates the discounted rail from   */
+/* the two rails above it without colouring anything.                            */
+
+.vs-home__band {
+	margin-top: var(--vs-space-9);
+	padding-bottom: var(--vs-space-8);
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-home__band .vs-home__section {
+	padding-top: var(--vs-space-8);
+}
+
+.vs-home__rail {
+	min-width: 0;
+}
+
+.vs-home__split {
+	display: grid;
+	gap: var(--vs-space-8);
+	align-items: start;
+}
+
+.vs-home__about_body {
+	color: var(--vs-text);
+}
+
+.vs-home__brands {
+	min-width: 0;
+}
+
+.vs-posts {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: var(--vs-space-5);
+	align-items: stretch;
+}
+
+/* ------------------------------------------------------------- article card */
+/* A different shape from the product card on purpose: wide media, headline      */
+/* first, meta as a quiet row, author on a hairline foot.                        */
+
+.vs-post-card {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	overflow: hidden;
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+	transition: border-color var(--vs-dur-2) var(--vs-ease), box-shadow var(--vs-dur-2) var(--vs-ease);
+}
+
+.vs-post-card:hover {
+	border-color: var(--vs-border-strong);
+	box-shadow: var(--vs-shadow-2);
+}
+
+/* A fixed ratio, so a shop that uploads portrait photography still gets a grid  */
+/* whose rows line up. object-fit crops rather than letterboxes.                 */
+
+.vs-post-card__media {
+	position: relative;
+	aspect-ratio: 16 / 10;
+	overflow: hidden;
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-post-card__media_link {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.vs-post-card__media picture {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.vs-post-card__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform var(--vs-dur-3) var(--vs-ease);
+}
+
+.vs-post-card:hover .vs-post-card__media img {
+	transform: scale(1.03);
+}
+
+.vs-post-card__no_image {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	color: var(--vs-border-strong);
+}
+
+.vs-post-card__no_image svg {
+	width: 40px;
+	height: 40px;
+}
+
+.vs-post-card__labels {
+	position: absolute;
+	top: var(--vs-space-3);
+	left: var(--vs-space-3);
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--vs-space-2);
+	max-width: calc(100% - var(--vs-space-6));
+}
+
+.vs-post-card__label {
+	display: inline-flex;
+	align-items: center;
+	height: 24px;
+	padding: 0 var(--vs-space-3);
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface);
+	color: var(--vs-heading);
+	font-size: var(--vs-text-xs);
+	font-weight: 500;
+	text-decoration: none;
+}
+
+.vs-post-card__label:hover {
+	background-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+}
+
+.vs-post-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--vs-space-2);
+	flex: 1 1 auto;
+	padding: var(--vs-space-4) var(--vs-space-4) var(--vs-space-5);
+}
+
+.vs-post-card__title {
+	margin: 0;
+	font-size: var(--vs-text-lg);
+}
+
+.vs-post-card__link {
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	color: var(--vs-heading);
+	text-decoration: none;
+}
+
+.vs-post-card__link:hover {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.vs-post-card__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--vs-space-2) var(--vs-space-4);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+}
+
+.vs-post-card__meta_item {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-1);
+}
+
+.vs-post-card__meta_item svg {
+	width: 14px;
+	height: 14px;
+}
+
+.vs-post-card__annotation {
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	margin: 0;
+	max-width: none;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-post-card__foot {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	margin-top: auto;
+	padding: var(--vs-space-3) var(--vs-space-4);
+	border-top: 1px solid var(--vs-hairline);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-post-card__avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 24px;
+	height: 24px;
+	overflow: hidden;
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface-subtle);
+	color: var(--vs-text-muted);
+}
+
+.vs-post-card__avatar img,
+.vs-post-card__avatar svg {
+	width: 24px;
+	height: 24px;
+	object-fit: cover;
+}
+
+.vs-post-card__author {
+	min-width: 0;
+	overflow: hidden;
+	color: var(--vs-text-muted);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	text-decoration: none;
+}
+
+.vs-post-card__author:hover {
+	color: var(--vs-heading);
+	text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ blog page */
+
+.vs-blog {
+	padding-bottom: var(--vs-space-9);
+}
+
+.vs-blog__masthead {
+	padding: var(--vs-space-5) 0;
+}
+
+.vs-blog__title {
+	margin: 0;
+	font-size: var(--vs-text-2xl);
+}
+
+.vs-blog__intro {
+	margin-top: var(--vs-space-4);
+	max-width: 70ch;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-blog__layout {
+	min-width: 0;
+}
+
+.vs-blog__main {
+	min-width: 0;
+}
+
+.vs-blog__toolbar {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: var(--vs-space-4);
+}
+
+.vs-aside__block {
+	padding: var(--vs-space-5) 0;
+	border-bottom: 1px solid var(--vs-hairline);
+}
+
+.vs-aside__promo {
+	margin: 0 0 var(--vs-space-3);
+	max-width: none;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-aside__more {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	min-height: 44px;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	text-decoration: none;
+}
+
+.vs-aside__more:hover {
+	color: var(--vs-heading);
+}
+
+.vs-aside__more svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* Compact product row for the blog rail. */
+
+.vs-minicards {
+	display: flex;
+	flex-direction: column;
+	gap: var(--vs-space-2);
+}
+
+.vs-minicard {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	min-height: 44px;
+	padding: var(--vs-space-2);
+	border-radius: var(--vs-radius-md);
+	color: var(--vs-text);
+	text-decoration: none;
+	transition: background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-minicard:hover {
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-minicard__media {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 48px;
+	height: 48px;
+	overflow: hidden;
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-plate);
+	color: var(--vs-border-strong);
+}
+
+.vs-minicard__media img {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+.vs-minicard__media svg {
+	width: 24px;
+	height: 24px;
+}
+
+.vs-minicard__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--vs-space-1);
+	min-width: 0;
+}
+
+.vs-minicard__name {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	color: var(--vs-heading);
+	font-size: var(--vs-text-sm);
+	line-height: var(--vs-leading-tight);
+}
+
+.vs-minicard__prices {
+	display: flex;
+	align-items: baseline;
+	gap: var(--vs-space-2);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-minicard__old {
+	color: var(--vs-text-muted);
+	text-decoration: line-through;
+}
+
+.vs-minicard__price {
+	color: var(--vs-heading);
+	font-weight: 600;
+}
+
+.vs-minicard__price.price--red {
+	color: var(--vs-sale-600);
+}
+
+/* --------------------------------------------------------------- post page */
+
+.vs-post__masthead {
+	padding: var(--vs-space-5) 0 0;
+}
+
+.vs-post__labels {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--vs-space-2);
+	margin-bottom: var(--vs-space-4);
+}
+
+.vs-post__label {
+	display: inline-flex;
+	align-items: center;
+	height: 26px;
+	padding: 0 var(--vs-space-3);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-full);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+	text-decoration: none;
+}
+
+.vs-post__label:hover {
+	border-color: var(--vs-ink);
+	color: var(--vs-heading);
+}
+
+.vs-post__title {
+	margin: 0 0 var(--vs-space-4);
+	max-width: 24ch;
+	font-size: var(--vs-text-3xl);
+}
+
+.vs-post__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--vs-space-3) var(--vs-space-5);
+	margin-bottom: var(--vs-space-6);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-post__meta_item {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	min-height: 24px;
+	color: var(--vs-text-muted);
+	text-decoration: none;
+}
+
+.vs-post__meta_item a {
+	color: var(--vs-heading);
+	text-decoration: none;
+}
+
+.vs-post__meta_item a:hover {
+	text-decoration: underline;
+}
+
+.vs-post__meta_item svg {
+	flex: none;
+	width: 16px;
+	height: 16px;
+}
+
+.vs-post__avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 24px;
+	height: 24px;
+	overflow: hidden;
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-post__avatar img,
+.vs-post__avatar svg {
+	width: 24px;
+	height: 24px;
+	object-fit: cover;
+}
+
+/* The stock theme painted the cover as a background-image on a fixed-height     */
+/* box, so a portrait upload was cropped to a letterbox and a small one was      */
+/* upscaled. A real <img> in a ratio box crops predictably instead.              */
+
+.vs-post__cover {
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-post__cover img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.vs-post__toc {
+	margin: var(--vs-space-7) 0 0;
+	padding: var(--vs-space-5);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+}
+
+.vs-post__toc_list {
+	margin: 0;
+	padding-left: var(--vs-space-5);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-post__toc_list li {
+	margin-bottom: var(--vs-space-2);
+}
+
+.vs-post__toc_list a {
+	color: var(--vs-text);
+	text-decoration: none;
+}
+
+.vs-post__toc_list a:hover {
+	text-decoration: underline;
+}
+
+.vs-post__body {
+	margin-top: var(--vs-space-7);
+}
+
+/* This is a <footer> element and theme.css still carries a bare `footer` rule  */
+/* that paints the site footer's ink background. Both are reset explicitly so   */
+/* the article foot does not inherit a black band, and so it keeps working      */
+/* after that sheet is deleted.                                                 */
+
+.vs-post__foot {
+	margin-top: var(--vs-space-8);
+	padding: var(--vs-space-6) 0 0;
+	border-top: 1px solid var(--vs-hairline);
+	background-color: transparent;
+	color: var(--vs-text);
+}
+
+.vs-post__tags {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--vs-space-2);
+	margin-bottom: var(--vs-space-6);
+	color: var(--vs-text-muted);
+}
+
+.vs-post__tags > svg {
+	width: 16px;
+	height: 16px;
+}
+
+.vs-post__tag {
+	display: inline-flex;
+	align-items: center;
+	height: 26px;
+	padding: 0 var(--vs-space-3);
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface-subtle);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+	text-decoration: none;
+}
+
+.vs-post__tag:hover {
+	background-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+}
+
+.vs-post__rate {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--vs-space-5);
+	padding: var(--vs-space-5) 0;
+	border-top: 1px solid var(--vs-hairline);
+	border-bottom: 1px solid var(--vs-hairline);
+}
+
+.vs-post__share {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+/* ----------------------------------------------------------------- rating */
+/* The stock rating was images/rating.png in gold - a third chromatic event      */
+/* against PRODUCT.md's two (rose = discount, emerald = availability), and a     */
+/* raster dependency. Filled versus outline carries the same meaning in ink.     */
+/* The geometry is load-bearing: scripts.tpl's rater reads $on.height() as its   */
+/* unit and $on.width() as the current value, and the templates emit             */
+/* width:{rating*90/5}px - so the box stays 90x18 with 18px stars.               */
+
+.rating_starOff {
+	position: relative;
+	display: inline-block;
+	width: 90px;
+	height: 18px;
+	vertical-align: middle;
+	background-color: var(--vs-n-400);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 28 28'%3E%3Cpath d='M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E") repeat-x left top;
+	-webkit-mask-size: 18px 18px;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 28 28'%3E%3Cpath d='M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E") repeat-x left top;
+	mask-size: 18px 18px;
+}
+
+.rating_starOn {
+	display: block;
+	height: 18px;
+	background-color: var(--vs-heading);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 28 28'%3E%3Cpath d='M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z'/%3E%3C/svg%3E") repeat-x left top;
+	-webkit-mask-size: 18px 18px;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 28 28'%3E%3Cpath d='M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z'/%3E%3C/svg%3E") repeat-x left top;
+	mask-size: 18px 18px;
+}
+
+/* Hover is a preview, not a committed value, so it reads one step back from    */
+/* the ink the saved rating uses. No hue is introduced either way.               */
+
+.rating_starOn.rating_starHover {
+	background-color: var(--vs-text-muted);
+}
+
+.vs-rating {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+}
+
+.vs-rating__label {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-post__rate .rating_text {
+	position: static;
+	left: auto;
+	top: auto;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	font-weight: 400;
+}
+
+/* -------------------------------------------------------------- author card */
+
+.vs-author-card {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--vs-space-4);
+	margin-top: var(--vs-space-6);
+	padding: var(--vs-space-5);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface);
+}
+
+.vs-author-card__avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 64px;
+	height: 64px;
+	overflow: hidden;
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface-subtle);
+	color: var(--vs-text-muted);
+}
+
+.vs-author-card__avatar img,
+.vs-author-card__avatar svg {
+	width: 64px;
+	height: 64px;
+	object-fit: cover;
+}
+
+.vs-author-card__body {
+	min-width: 0;
+}
+
+.vs-author-card__name {
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+}
+
+.vs-author-card__name a {
+	text-decoration: none;
+}
+
+.vs-author-card__name a:hover {
+	text-decoration: underline;
+}
+
+.vs-author-card__position {
+	margin-top: var(--vs-space-1);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+/* The stock markup drew these with font-awesome brand glyphs in brand colours - */
+/* four more hues on a page that is allowed two. A named pill instead.           */
+
+.vs-socials {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--vs-space-2);
+	margin-top: var(--vs-space-3);
+}
+
+.vs-socials__link {
+	display: inline-flex;
+	align-items: center;
+	min-height: 32px;
+	padding: 0 var(--vs-space-3);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-full);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-xs);
+	text-decoration: none;
+	text-transform: capitalize;
+}
+
+.vs-socials__link:hover {
+	border-color: var(--vs-ink);
+	color: var(--vs-heading);
+}
+
+/* ----------------------------------------------------------------- authors */
+
+.vs-authors {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: var(--vs-space-5);
+}
+
+.vs-author {
+	display: flex;
+	flex-direction: column;
+	gap: var(--vs-space-2);
+	min-width: 0;
+	color: var(--vs-text);
+	text-decoration: none;
+}
+
+.vs-author__media {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 3 / 4;
+	overflow: hidden;
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface-subtle);
+	color: var(--vs-border-strong);
+}
+
+.vs-author__media picture {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.vs-author__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform var(--vs-dur-3) var(--vs-ease);
+}
+
+.vs-author:hover .vs-author__media img {
+	transform: scale(1.03);
+}
+
+.vs-author__no_image {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	color: var(--vs-border-strong);
+}
+
+.vs-author__no_image svg {
+	width: 40px;
+	height: 40px;
+}
+
+.vs-author__name {
+	color: var(--vs-heading);
+	font-weight: 600;
+	line-height: var(--vs-leading-tight);
+}
+
+.vs-author:hover .vs-author__name {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.vs-author__position {
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-author-hero {
+	display: grid;
+	gap: var(--vs-space-5);
+	align-items: start;
+	padding: var(--vs-space-5) 0 var(--vs-space-7);
+}
+
+.vs-author-hero__media {
+	width: 140px;
+	aspect-ratio: 3 / 4;
+	overflow: hidden;
+	border-radius: var(--vs-radius-lg);
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-author-hero__media a {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.vs-author-hero__media picture {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.vs-author-hero__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.vs-author-hero__body {
+	min-width: 0;
+}
+
+.vs-author-hero__name {
+	margin: 0;
+	font-size: var(--vs-text-2xl);
+}
+
+.vs-author-hero__position {
+	margin: var(--vs-space-2) 0 0;
+	color: var(--vs-text-muted);
+}
+
+.vs-author-hero__about {
+	margin-top: var(--vs-space-4);
+}
+
+/* ------------------------------------------------------------------ brands */
+/* A logo wall. The plate is the constant so the uneven logos - some transparent, */
+/* some on white, some tiny - all sit on the same ground.                         */
+
+.vs-brands {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	gap: var(--vs-space-4);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.vs-brands--compact {
+	grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+	gap: var(--vs-space-3);
+}
+
+.vs-brands__item {
+	min-width: 0;
+}
+
+.vs-brands__link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 3 / 2;
+	padding: var(--vs-space-4);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-md);
+	background-color: var(--vs-plate);
+	color: var(--vs-text);
+	text-decoration: none;
+	transition: border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-brands__link:hover {
+	border-color: var(--vs-border-strong);
+}
+
+.vs-brands__link picture {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+
+.vs-brands__link img {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+.vs-brands__name {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	color: var(--vs-heading);
+	font-size: var(--vs-text-sm);
+	font-weight: 600;
+	text-align: center;
+}
+
+/* ---------------------------------------------------------------- account */
+/* Below 768px every .tab is visible and each one is a fn_switch accordion;      */
+/* from 768px okay.js's .tabs script shows one at a time and the rail is the     */
+/* switcher. Both presentations are declared here so the legacy sheets that      */
+/* currently supply them can be deleted in task 8.                               */
+
+.vs-account {
+	padding-bottom: var(--vs-space-9);
+}
+
+.vs-account__layout {
+	padding-top: var(--vs-space-5);
+	min-width: 0;
+}
+
+.vs-account__rail {
+	min-width: 0;
+	margin-bottom: var(--vs-space-5);
+}
+
+.vs-account__profile {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	padding-bottom: var(--vs-space-4);
+	border-bottom: 1px solid var(--vs-hairline);
+}
+
+.vs-account__avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 44px;
+	height: 44px;
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface-subtle);
+	color: var(--vs-text-muted);
+}
+
+.vs-account__avatar svg {
+	width: 24px;
+	height: 24px;
+}
+
+.vs-account__who {
+	min-width: 0;
+	overflow: hidden;
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-size: var(--vs-text-lg);
+	font-weight: 600;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* okay.css styles .tabs__navigation--user .tabs__link at 0,3,0 - height, the  */
+/* hairline, the padding and, on .selected, the shop's brand colour, which in   */
+/* this shop is near-black and therefore invisible on the picked row. Every     */
+/* rule here matches that weight so the later sheet wins on order.              */
+
+.vs-account__nav {
+	display: flex;
+	flex-direction: column;
+	padding: var(--vs-space-2) 0;
+	background-color: transparent;
+}
+
+.vs-account .vs-account__nav .vs-account__nav_link {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	width: 100%;
+	min-height: 44px;
+	height: auto;
+	margin: 0;
+	padding: var(--vs-space-2) var(--vs-space-3);
+	border: 0;
+	border-radius: var(--vs-radius-md);
+	color: var(--vs-text);
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
+	text-decoration: none;
+	transition: background-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-account .vs-account__nav .vs-account__nav_link:hover {
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-account .vs-account__nav .vs-account__nav_link svg {
+	flex: none;
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	color: var(--vs-text-muted);
+}
+
+.vs-account .vs-account__nav .vs-account__nav_link.selected {
+	background-color: var(--vs-ink);
+	color: var(--vs-ink-text);
+	font-weight: 600;
+}
+
+.vs-account .vs-account__nav .vs-account__nav_link.selected svg {
+	color: currentColor;
+}
+
+.vs-account__logout {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+	min-height: 44px;
+	padding: 0 var(--vs-space-3);
+	border-top: 1px solid var(--vs-hairline);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	text-decoration: none;
+}
+
+.vs-account__logout:hover {
+	color: var(--vs-heading);
+}
+
+.vs-account__logout svg {
+	flex: none;
+	width: 18px;
+	height: 18px;
+}
+
+/* theme.css gives .user_container margin-left: 300px and width: calc(100% -   */
+/* 300px) for the old float layout. Inside the grid that is a second offset.    */
+
+.vs-account__main {
+	min-width: 0;
+	margin-left: 0;
+	width: auto;
+}
+
+.vs-account__panels {
+	min-width: 0;
+}
+
+.vs-account__panel_head {
+	display: none;
+}
+
+.vs-account__panel_chevron {
+	display: inline-flex;
+	flex: none;
+	color: var(--vs-text-muted);
+	transition: transform var(--vs-dur-2) var(--vs-ease);
+}
+
+.vs-account__panel_chevron svg {
+	width: 18px;
+	height: 18px;
+}
+
+.vs-account__panel_head.active .vs-account__panel_chevron {
+	transform: rotate(180deg);
+}
+
+.vs-account__cols {
+	display: grid;
+	gap: var(--vs-space-5);
+	align-items: start;
+}
+
+.vs-account__col {
+	display: grid;
+	gap: var(--vs-space-5);
+	min-width: 0;
+}
+
+.vs-account__panel_card {
+	min-width: 0;
+}
+
+.vs-account__save {
+	margin-top: var(--vs-space-5);
+	width: 100%;
+}
+
+.vs-account__pass_toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+	min-height: 44px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	cursor: pointer;
+}
+
+.vs-account__pass_toggle:hover {
+	color: var(--vs-heading);
+}
+
+.vs-account__pass_toggle svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* ------------------------------------------------------------- comparison */
+
+.vs-compare {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--vs-space-4);
+	padding-bottom: var(--vs-space-6);
+}
+
+.vs-compare__names {
+	display: none;
+}
+
+.vs-compare__controls {
+	display: flex;
+	align-items: flex-start;
+}
+
+/* okay.js's resize_comparison() forces every .fn_resize to the tallest card,   */
+/* which is how the feature rows below stay aligned across the columns. The     */
+/* card carries a bottom margin from the catalogue grid; inside a comparison    */
+/* column that margin is pure vertical drift between the label column and the   */
+/* values, so it is removed here.                                               */
+
+.vs-compare__column .product_item {
+	margin-bottom: 0;
+}
+
+.vs-compare__switch {
+	display: inline-flex;
+	gap: var(--vs-space-1);
+	padding: var(--vs-space-1);
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-compare__switch_btn {
+	display: inline-flex;
+	align-items: center;
+	min-height: 36px;
+	padding: 0 var(--vs-space-4);
+	border-radius: var(--vs-radius-full);
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	text-decoration: none;
+}
+
+.vs-compare__switch_btn.active {
+	background-color: var(--vs-surface);
+	color: var(--vs-heading);
+	font-weight: 600;
+}
+
+/* Swiper's own .swiper-container rule sets margin-left/right: auto. An auto    */
+/* inline margin cancels a grid item's default justify-self: stretch, so the    */
+/* track stops filling its column and is sized by its content instead - which   */
+/* is circular, because swiper sizes the slides from the container. Measured    */
+/* before the reset: column 1132px, track 262px, document scrollWidth 1632 at a */
+/* 1440 viewport. Width and margins are pinned so the column governs.           */
+
+.vs-compare__track {
+	min-width: 0;
+	width: 100%;
+	margin-left: 0;
+	margin-right: 0;
+	overflow: hidden;
+}
+
+.vs-compare__column {
+	min-width: 0;
+	padding-bottom: var(--vs-space-4);
+}
+
+.vs-compare__cell {
+	display: flex;
+	align-items: center;
+	padding: var(--vs-space-3);
+	border-top: 1px solid var(--vs-hairline);
+	font-size: var(--vs-text-sm);
+}
+
+.vs-compare__cell--name {
+	color: var(--vs-text-muted);
+	font-weight: 500;
+}
+
+/* Row banding. theme.css did this with .cell:nth-child(odd) and a raw grey;    */
+/* the parity is reproduced exactly so the label column and the value columns   */
+/* keep agreeing after that sheet is deleted.                                   */
+
+.vs-compare__cell:nth-child(odd) {
+	background-color: var(--vs-surface-subtle);
+}
+
+.vs-compare__value {
+	min-width: 0;
+}
+
+.vs-compare__nav {
+	color: var(--vs-heading);
+}
+
+.vs-compare__nav::after {
+	font-size: 20px;
+}
+
+/* -------------------------------------------------------------------- 404 */
+
+.vs-404 {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--vs-space-5);
+	padding: var(--vs-space-10) 0 var(--vs-space-12);
+	text-align: center;
+}
+
+.vs-404__mark {
+	color: var(--vs-border-strong);
+}
+
+.vs-404__mark svg {
+	width: 180px;
+	max-width: 60vw;
+	height: auto;
+}
+
+.vs-404__note {
+	max-width: 46ch;
+	color: var(--vs-text-muted);
+}
+
+.vs-404__note p {
+	margin: 0;
+	max-width: none;
+}
+
+.vs-404__actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--vs-space-3);
+}
+
+.vs-404__menu ul {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--vs-space-2) var(--vs-space-5);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.vs-404__menu li {
+	margin: 0;
+}
+
+.vs-404__menu a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-sm);
+	text-decoration: none;
+}
+
+.vs-404__menu a:hover {
+	color: var(--vs-heading);
+	text-decoration: underline;
+}
+
+/* ----------------------------------------------------------- main banner */
+/* Replaces theme.css's hardcoded 400px height. The slides in a banner group    */
+/* are whatever the shop uploaded - here 1067x400 next to 400x350 - and swiper  */
+/* sizes its wrapper from the tallest, so a fixed height left 361px of void     */
+/* under the short ones at 375px. A ratio box plus object-fit: cover means      */
+/* every slide is the same height whatever was uploaded.                        */
+
+.main_banner {
+	height: auto;
+}
+
+.main_banner .banner_group__item {
+	aspect-ratio: 16 / 9;
+	height: auto;
+}
+
+.main_banner .banner_group__title {
+	font-size: var(--vs-text-xl);
+	line-height: var(--vs-leading-tight);
+	margin-bottom: var(--vs-space-3);
+}
+
+.main_banner .banner_group__description {
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	margin-bottom: var(--vs-space-4);
+	font-size: var(--vs-text-sm);
+	line-height: var(--vs-leading-body);
+}
+
+/* --------------------------------------------------- secondary ≥ 576 px */
+
+@media (min-width: 576px) {
+
+	.vs-author-hero {
+		grid-template-columns: 140px minmax(0, 1fr);
+		gap: var(--vs-space-7);
+	}
+
+	.vs-account__save {
+		width: auto;
+		min-width: 200px;
+	}
+
+	.vs-auth__aside_cta {
+		width: auto;
+		min-width: 200px;
+	}
+}
+
+/* --------------------------------------------------- secondary ≥ 768 px */
+
+@media (min-width: 768px) {
+
+	.vs-page__masthead,
+	.vs-blog__masthead {
+		padding: var(--vs-space-6) 0;
+	}
+
+	.vs-auth__layout {
+		grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+		gap: var(--vs-space-8);
+	}
+
+/* Task 6 made .vs-fields a two-column grid from 576px for the checkout, where  */
+/* the pairs really are pairs (name / surname, phone / email). A form that is   */
+/* the whole job of its page - login, register, feedback, a comment, a callback */
+/* - reads better as one column, and a full-width textarea in a half-width      */
+/* track reads as a mistake. Scoped to .vs-form so the checkout and the account */
+/* panels, which wrap their fields in .vs-panel, are untouched.                 */
+
+	.vs-form > .vs-fields {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.vs-auth__layout--single {
+		grid-template-columns: minmax(0, 460px);
+	}
+
+	.vs-auth__layout--reverse {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+	}
+
+	.vs-auth__layout--reverse .vs-auth__form {
+		order: 2;
+	}
+
+	.vs-auth__aside {
+		padding-top: var(--vs-space-4);
+	}
+
+	.main_banner .banner_group__item {
+		aspect-ratio: 21 / 9;
+	}
+
+	.main_banner .banner_group__title {
+		font-size: var(--vs-text-xl);
+	}
+
+	/* From here the account page is a rail plus one visible panel, driven by   */
+	/* okay.js's .tabs script. The accordion heads step out of the way.         */
+
+	.vs-account__layout {
+		display: grid;
+		grid-template-columns: 240px minmax(0, 1fr);
+		gap: var(--vs-space-7);
+		align-items: start;
+	}
+
+	.vs-account__rail {
+		margin-bottom: 0;
+		padding: var(--vs-space-4);
+		border: 1px solid var(--vs-hairline);
+		border-radius: var(--vs-radius-lg);
+		background-color: var(--vs-surface);
+	}
+
+	.vs-account__panel {
+		display: none;
+	}
+
+	.vs-account__panel_body {
+		display: block;
+	}
+
+	.vs-account__cols {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* --------------------------------------------------- secondary ≥ 992 px */
+
+@media (min-width: 992px) {
+
+	.vs-blog__layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 280px;
+		gap: var(--vs-space-8);
+		align-items: start;
+	}
+
+	.vs-home__split {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+		gap: var(--vs-space-10);
+	}
+
+	.vs-home__split--single {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.vs-post__title {
+		font-size: var(--vs-text-3xl);
+	}
+
+	.vs-account__cols {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--vs-space-6);
+	}
+
+	/* The comparison table gets its label column back: a two-column grid with  */
+	/* the feature names pinned on the left of the swiper track.                */
+
+	.vs-compare {
+		grid-template-columns: 200px minmax(0, 1fr);
+		gap: var(--vs-space-5);
+	}
+
+	.vs-compare__names {
+		display: block;
+	}
+
+	.main_banner .banner_group__item {
+		aspect-ratio: 3 / 1;
+	}
+}
+
+/* --------------------------------------------------- secondary ≤ 991 px */
+/* The comparison label column is hidden on a phone, so each value carries its  */
+/* own row name. Without it the table is a list of bare values - "90кг.",       */
+/* "—", "160" - with nothing saying what any of them measures.                  */
+
+@media (max-width: 991px) {
+
+	.vs-compare__cell[data-label]::before {
+		content: attr(data-label);
+		flex: 0 0 45%;
+		padding-right: var(--vs-space-3);
+		overflow: hidden;
+		color: var(--vs-text-muted);
+		font-weight: 500;
+		text-overflow: ellipsis;
+	}
+}
+
+/* --------------------------------------------------- secondary ≤ 767 px */
+/* The account accordion. Every panel is shown, the head is the toggle, and     */
+/* only the first body starts open - the same behaviour the legacy sheets give  */
+/* it today, restated here so they can be removed.                              */
+
+@media (max-width: 767px) {
+
+	.vs-account__panel {
+		display: block;
+		border: 1px solid var(--vs-hairline);
+		border-radius: var(--vs-radius-lg);
+		margin-bottom: var(--vs-space-3);
+		background-color: var(--vs-surface);
+		overflow: hidden;
+	}
+
+	.vs-account__panel_head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--vs-space-3);
+		margin: 0;
+		padding: var(--vs-space-4) var(--vs-space-4);
+		min-height: 56px;
+		color: var(--vs-heading);
+		font-family: var(--vs-font-display);
+		font-size: var(--vs-text-base);
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.vs-account__panel_body {
+		padding: 0 var(--vs-space-4) var(--vs-space-5);
+	}
+
+/* Which section starts open follows the route, not the document order:         */
+/* /user/orders on a phone must not land on a collapsed order list. The         */
+/* four-class weight is deliberate - media.css opens `.tab:first-child          */
+/* .mobile_tab__content` at 0,4,0 and would otherwise always win.               */
+
+	.vs-account .vs-account__panels .vs-account__panel--open .vs-account__panel_body {
+		display: block;
+	}
+
+	.vs-account .vs-account__panels .vs-account__panel:not(.vs-account__panel--open) .vs-account__panel_body {
+		display: none;
+	}
+
+	.vs-account__panel_card {
+		padding: 0;
+		border: 0;
+		border-radius: 0;
+		background-color: transparent;
+	}
+
+	.vs-account__nav {
+		display: none;
+	}
+
+	.vs-account__logout {
+		border-top: 0;
+	}
+
+	.vs-post__rate {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--vs-space-4);
+	}
+
+/* Banner captions on a phone. Variants 3 and 4 stack the caption and the image */
+/* as two 100%-height flex children of one slide, so with a fixed ratio only    */
+/* half of each would ever be visible; variants 1 and 2 are image-only          */
+/* (the module hides variant 1's caption itself). Showing the photograph alone   */
+/* is what makes every slide the same height, and the whole slide is already a   */
+/* link - .banner_group__link covers it - so nothing becomes unreachable.        */
+
+	.main_banner .banner_group__content {
+		display: none;
+	}
+
+/* With the caption gone the image is the whole slide. It is pinned rather than */
+/* flexed: the module gives it flex-basis 50% and min-height 1px inside a       */
+/* column flex box, and against a ratio-derived height that resolves to 1px.    */
+
+	.main_banner .banner_group__variant3 .banner_group__image,
+	.main_banner .banner_group__variant4 .banner_group__image {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		max-width: none;
+	}
+}
+
+/* --------------------------------------------------- secondary ≤ 575 px */
+
+@media (max-width: 575px) {
+
+	.vs-posts {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.vs-authors {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--vs-space-4);
+	}
+
+	.vs-brands {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.vs-brands--compact {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.vs-author-card {
+		flex-direction: column;
+	}
+
+	.vs-table th,
+	.vs-table td {
+		padding: var(--vs-space-2);
 	}
 }

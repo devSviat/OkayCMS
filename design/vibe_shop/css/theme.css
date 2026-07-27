@@ -1787,20 +1787,6 @@ a.filter__catalog_link svg {
   -ms-flex-align: center;
   align-items: center;
 }
-.rating_starOff {
-  display: inline-block;
-  vertical-align: top;
-}
-.rating_starOff,
-.rating_starOn {
-  width: 90px;
-  height: 18px;
-  background: url(../images/rating.png) repeat-x left top;
-}
-.rating_starOn {
-  display: block;
-  background-position: left bottom;
-}
 .rating_text {
   vertical-align: middle;
   line-height: 18px;
@@ -3964,17 +3950,6 @@ table.order_details {
   top: -3px;
   left: 0;
   text-align: center;
-}
-.order_payment__description {
-  margin: 15px 0;
-  padding: 10px 10px;
-  border-left: 4px solid rgb(188, 188, 188);
-  background: rgb(247, 247, 247);
-  border-radius: 5px;
-  font-weight: 400;
-  font-size: 12px;
-  color: rgb(74, 74, 74);
-  line-height: 1.3;
 }
 .order_payment__title {
   color: #222;

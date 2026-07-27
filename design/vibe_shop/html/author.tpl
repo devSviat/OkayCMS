@@ -1,70 +1,84 @@
 <!-- Author page -->
-<div class="clearfix">
-    {* Sidebar with blog *}
-    <div class="fn_mobile_toogle sidebar sidebar--right position_sticky d-lg-flex flex-lg-column">
-        {include 'blog_sidebar.tpl'}
-    </div>
-    <div class="blog_container blog_container--left d-flex flex-column">
-        <div class="blog_container__boxed author_card">
-            <div class="author_card__image">
-                {if $author->image}
-                <a data-fancybox="author_image" href="{$author->image|resize:800:800:false:$config->resized_authors_dir}">
-                    <picture>
-                        {if $settings->support_webp}
-                            <source type="image/webp" data-srcset="{$author->image|resize:320:500:false:$config->resized_authors_dir|webp}">
-                        {/if}
-                        <source data-srcset="{$author->image|resize:320:500:false:$config->resized_authors_dir}">
-                        <img class="lazy" data-src="{$author->image|resize:320:500:false:$config->resized_authors_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$author->name|escape}" title="{$author->name|escape}"/>
-                    </picture>
-                </a>
-                {else}
-                <div class="author_card__no_image d-flex align-items-start">
-                    {include file="svg.tpl" svgId="comment-user_icon"}
+
+<div class="vs-blog">
+    <div class="vs-blog__layout">
+        <div class="vs-blog__main">
+            <header class="vs-author-hero">
+                <div class="vs-author-hero__media">
+                    {if $author->image}
+                        <a data-fancybox="author_image" href="{$author->image|resize:800:800:false:$config->resized_authors_dir}">
+                            <picture>
+                                {if $settings->support_webp}
+                                    <source type="image/webp" data-srcset="{$author->image|resize:320:500:false:$config->resized_authors_dir|webp}">
+                                {/if}
+                                <source data-srcset="{$author->image|resize:320:500:false:$config->resized_authors_dir}">
+                                <img class="lazy" data-src="{$author->image|resize:320:500:false:$config->resized_authors_dir}" src="{$rootUrl}/design/{get_theme}/images/xloading.gif" alt="{$author->name|escape}"/>
+                            </picture>
+                        </a>
+                    {else}
+                        <span class="vs-author__no_image">
+                            {include file="svg.tpl" svgId="comment-user_icon"}
+                        </span>
+                    {/if}
                 </div>
-                {/if}
-            </div>
-            <div class="author_card__info">
-                <h1 class="author_card__name h1">
-                    <span data-author="{$author->id}">{$h1|escape}</span>
-                </h1>
-                {if $author->position_name}
-                <div class="author_card__position">
-                    {$author->position_name|escape}
+                <div class="vs-author-hero__body">
+                    <h1 class="vs-author-hero__name">
+                        <span data-author="{$author->id}">{$h1|escape}</span>
+                    </h1>
+                    {if $author->position_name}
+                        <p class="vs-author-hero__position">{$author->position_name|escape}</p>
+                    {/if}
+                    {if is_array($author->socials)}
+                        <div class="vs-socials">
+                            {foreach $author->socials as $social}
+                                <a class="fn_social_image vs-socials__link" rel="noreferrer" href="{if !preg_match('~^https?://.*$~', $social.url)}https://{/if}{$social.url|escape}" target="_blank" title="{$social.domain|escape}">
+                                    <span>{$social.domain|escape}</span>
+                                </a>
+                            {/foreach}
+                        </div>
+                    {/if}
+                    {if $description}
+                        <div class="author_card__description vs-prose vs-author-hero__about">{$description}</div>
+                    {/if}
                 </div>
-                {/if}
-                {if is_array($author->socials)}
-                <div class="author_card__social">
-                    {foreach $author->socials as $social}
-                    <a class="fn_social_image social__link {$social.domain|escape}" rel="noreferrer" aria-label="{$social_domain}" href="{if !preg_match('~^https?://.*$~', $social.url)}https://{/if}{$social.url|escape}" target="_blank" title="{$social.domain|escape}">
-                        <i class="fa fa-{$social.domain|escape}"></i>
-                    </a>
-                    {/foreach}
-                </div>
-                {/if}
-                {if $description}
-                <div class="author_card__description">{$description}</div>
-                {/if}
-            </div>
-        </div>
-        <div class="block block--boxed block--border">
-            <div class="block__header">
-                <div class="block__title">
+            </header>
+
+            <section class="vs-section">
+                <h2 class="vs-section__title">
                     <span data-language="author_posts">{$lang->author_posts}</span>
-                </div>
-            </div>
-            <div class="block__body article">
-                <div class="article_list f_row">
-                    {foreach $posts as $post}
-                    <div class="article_item f_col-sm-6 f_col-lg-4">
-                        {include 'post_list.tpl'}
+                </h2>
+                {if !empty($posts)}
+                    <div class="vs-posts">
+                        {foreach $posts as $post}
+                            {include 'post_list.tpl'}
+                        {/foreach}
                     </div>
-                    {/foreach}
-                </div>
-            </div>
-            {* Pagination *}
-            <div class="products_pagination">
-                {include file='pagination.tpl'}
-            </div>
+                    {* Pagination *}
+                    <div class="products_pagination">
+                        {include file='pagination.tpl'}
+                    </div>
+                {else}
+                    <div class="vs-empty vs-empty--center">
+                        <span class="vs-empty__icon">{include file="svg.tpl" svgId="description_icon"}</span>
+                        <p class="vs-empty__title" data-language="products_not_found">{$lang->products_not_found}</p>
+                    </div>
+                {/if}
+            </section>
         </div>
+
+        {* Sidebar with blog *}
+        <aside id="vs_blog_rail" class="fn_mobile_toogle vs-filters vs-sheet vs-blog__aside" aria-label="{$lang->blog_catalog|escape}">
+            <div class="vs-filters__bar">
+                <span class="vs-filters__heading" data-language="blog_catalog">{$lang->blog_catalog}</span>
+                <button type="button" class="vs-btn vs-btn--ghost vs-btn--icon vs-filters__close" data-vs-sheet-close aria-label="{$lang->mobile_filter_close|escape}">
+                    {include file="svg.tpl" svgId="close"}
+                </button>
+            </div>
+            <div class="vs-filters__scroll">
+                {include 'blog_sidebar.tpl'}
+            </div>
+        </aside>
     </div>
 </div>
+
+<div class="vs-sheet__backdrop"></div>
