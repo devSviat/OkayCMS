@@ -37,6 +37,41 @@
 /* is later and wins, and a bare instance from a module template still gets a   */
 /* complete look.                                                               */
 
+/* ------------------------------------------------------ bare .table default */
+
+/* .table is one of the generic names the contract reserves, and until Task 9   */
+/* the only rule set carrying it was `.block__description .table`, which the    */
+/* Banners module's advantage strip uses as a flex row and which is not a table */
+/* at all. A module template that emits a real <table class="table"> outside    */
+/* that block got nothing but the element rule in base.css: no width, no cell    */
+/* padding, no rules between rows.                                              */
+/*                                                                              */
+/* Here rather than at the end of the file for the reason the section header     */
+/* gives: user.tpl renders <table class="table vs-table">, both selectors weigh  */
+/* 0,1,0, and a .table block placed later would outrank .vs-table on every       */
+/* property the two share. Same values as .vs-table, so the pair agree wherever  */
+/* they meet.                                                                   */
+
+.table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--vs-text-sm);
+}
+
+.table th {
+	padding: var(--vs-space-3);
+	border-bottom: 1px solid var(--vs-border);
+	color: var(--vs-text-muted);
+	font-weight: 500;
+	text-align: left;
+}
+
+.table td {
+	padding: var(--vs-space-3);
+	border-bottom: 1px solid var(--vs-hairline);
+	vertical-align: middle;
+}
+
 /* ------------------------------------------------ swiper navigation default */
 
 /* The Banners module builds its own Swiper and renders bare .swiper-button-*   */
@@ -240,10 +275,15 @@
 /* --vs-text-muted on --vs-n-25 measures 5.07:1, clear of the 4.5:1 floor a      */
 /* placeholder has to hold.                                                      */
 
+/* --vs-border, not --vs-hairline: the fill is --vs-n-25 on a --vs-n-0 card, a  */
+/* 1.04:1 step, so the outline is the only thing that says "field here" and     */
+/* WCAG 1.4.11 asks 3:1 of it. Measured on the hairline it used to carry:       */
+/* 1.32:1 against the card and 1.26:1 against its own fill.                     */
+
 .vs-field {
 	min-height: 44px;
 	padding: 0 var(--vs-space-3);
-	border: 1px solid var(--vs-hairline);
+	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-sm);
 	background-color: var(--vs-n-25);
 	color: var(--vs-text);
@@ -285,6 +325,37 @@
 }
 
 /* -------------------------------------------------------------- page shell */
+
+/* Skip link. First focusable node in the document, off-screen until it takes   */
+/* focus, then a plain ink plate pinned to the top-left. It is the only route   */
+/* past the header for a keyboard user: measured before it existed, reaching    */
+/* the first product on a category page took 34 Tab presses, all of them        */
+/* through chrome that repeats on every page.                                   */
+/*                                                                              */
+/* Not .vs-sr-only + :focus - that utility clips to 1px and un-clipping it would */
+/* need every one of its declarations restated. Off-canvas left is simpler and   */
+/* keeps the element measurable at all times.                                    */
+
+.vs-skip {
+	position: absolute;
+	top: var(--vs-space-2);
+	left: -100vw;
+	z-index: var(--vs-z-toast);
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 var(--vs-space-4);
+	background-color: var(--vs-ink);
+	border-radius: var(--vs-radius-sm);
+	color: var(--vs-ink-text);
+	font-size: var(--vs-text-sm);
+	font-weight: 500;
+	text-decoration: none;
+}
+
+.vs-skip:focus {
+	left: var(--vs-space-2);
+}
 
 /* index.tpl puts `d-flex flex-column` on <body>, so .main is a flex item and   */
 /* the footer is the one after it. okay.css supplied the growth that keeps the  */
@@ -764,11 +835,14 @@ body.other_page .main {
 	margin: 0;
 }
 
+/* Same 1.4.11 argument as .vs-field: the fill is --vs-canvas on a white header */
+/* bar, a 1.09:1 step, so the outline is the field.                             */
+
 .vs-search__input {
 	width: 100%;
 	height: 46px;
 	padding: 0 52px 0 var(--vs-space-3);
-	border: 1px solid var(--vs-hairline);
+	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-sm);
 	background-color: var(--vs-canvas);
 	color: var(--vs-text);
@@ -2184,7 +2258,7 @@ body.hc-nav-open {
 	justify-content: center;
 	width: 100%;
 	height: 100%;
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-card__no_image svg {
@@ -2639,7 +2713,7 @@ body.hc-nav-open {
 
 .vs-crumbs__item + .vs-crumbs__item::before {
 	content: "/";
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-crumbs__item span {
@@ -3063,7 +3137,7 @@ body.hc-nav-open {
 
 .vs-empty__icon {
 	display: inline-flex;
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-empty__icon svg {
@@ -3497,7 +3571,7 @@ body.hc-nav-open {
 	flex: none;
 	width: 24px;
 	height: 24px;
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-filter-cats__icon img {
@@ -3640,7 +3714,7 @@ body.hc-nav-open {
 	justify-content: center;
 	width: 72px;
 	height: 72px;
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-cats__image img,
@@ -3935,7 +4009,7 @@ body.hc-nav-open {
 }
 
 .vs-gallery__thumbs .swiper-scrollbar-drag {
-	background-color: var(--vs-border-strong);
+	background-color: var(--vs-glyph);
 }
 
 .vs-gallery__no_image {
@@ -3944,7 +4018,7 @@ body.hc-nav-open {
 	justify-content: center;
 	width: 100%;
 	height: 100%;
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-gallery__no_image svg {
@@ -4531,17 +4605,31 @@ body.hc-nav-open {
 	display: none;
 }
 
+/* The one-frame flash. Every panel is open in the HTML and vibe.js is a footer   */
+/* script, so between first paint and the moment it runs the product page draws   */
+/* all three panels plus both buy-box rows at full height and then snaps back.    */
+/* Measured at 1440 on telefon-meizu-m3-note-32-gb with the footer bundle          */
+/* blocked, which is exactly that frame: 3225px of document height without this    */
+/* rule against 1940px settled - the page collapsed 1285px under the shopper.      */
+/* With the rule the same frame measures 2045px, and the 105px left is the sticky  */
+/* buy bar, not a panel.                                                           */
+/*                                                                                */
+/* The remedy is the `js` class head.tpl writes on <html> from an inline          */
+/* statement before any stylesheet is parsed - the same hook the filter groups    */
+/* use, deliberately not a second one. Gated on it, the collapse is true from     */
+/* the first paint of a scripted page and simply absent from an unscripted one,   */
+/* where every panel must stay open. vibe.js writes an inline display on every    */
+/* panel a moment later, and an inline style outranks this, so the rule governs   */
+/* exactly the frames before the script and nothing after it.                     */
+
+.js .vs-tabs .accordion__item:not(.visible) .accordion__content,
+.js .vs-disclosures .accordion__item:not(.visible) .accordion__content {
+	display: none;
+}
+
 .vs-tabs:not(.is-enhanced) .vs-tabs__btn,
 .vs-disclosures:not(.is-enhanced) .vs-disclosure-row__btn {
 	cursor: default;
-}
-
-.vs-prose {
-	max-width: 74ch;
-}
-
-.vs-prose p:last-child {
-	margin-bottom: 0;
 }
 
 /* ------------------------------------------------------------------- specs */
@@ -5485,7 +5573,7 @@ body.hc-nav-open {
 
 .vs-cart__thumb-empty {
 	display: inline-flex;
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-cart__thumb-empty svg {
@@ -5982,7 +6070,7 @@ body.hc-nav-open {
 .vs-option__extra .form__input,
 .vs-option__extra .form__input_captcha {
 	height: 44px;
-	border-color: var(--vs-hairline);
+	border-color: var(--vs-border);
 	border-radius: var(--vs-radius-sm);
 	background-color: var(--vs-n-25);
 	font-size: var(--vs-text-base);
@@ -5998,7 +6086,7 @@ body.hc-nav-open {
 
 .vs-option__extra .form__textarea {
 	min-height: 88px;
-	border-color: var(--vs-hairline);
+	border-color: var(--vs-border);
 	border-radius: var(--vs-radius-sm);
 	background-color: var(--vs-n-25);
 	font-size: var(--vs-text-base);
@@ -6627,7 +6715,7 @@ body.hc-nav-open {
 .vs-prose blockquote {
 	margin: var(--vs-space-6) 0;
 	padding: var(--vs-space-2) 0 var(--vs-space-2) var(--vs-space-5);
-	border-left: 2px solid var(--vs-border-strong);
+	border-left: 2px solid var(--vs-glyph);
 	color: var(--vs-text-muted);
 }
 
@@ -7313,7 +7401,7 @@ body.hc-nav-open {
 	justify-content: center;
 	width: 100%;
 	height: 100%;
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-post-card__no_image svg {
@@ -7551,7 +7639,7 @@ body.hc-nav-open {
 	overflow: hidden;
 	border-radius: var(--vs-radius-sm);
 	background-color: var(--vs-plate);
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-minicard__media img {
@@ -8008,7 +8096,7 @@ body.hc-nav-open {
 	overflow: hidden;
 	border-radius: var(--vs-radius-lg);
 	background-color: var(--vs-surface-subtle);
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-author__media picture {
@@ -8034,7 +8122,7 @@ body.hc-nav-open {
 	justify-content: center;
 	width: 100%;
 	height: 100%;
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-author__no_image svg {
@@ -8545,7 +8633,7 @@ body.hc-nav-open {
 }
 
 .vs-404__mark {
-	color: var(--vs-border-strong);
+	color: var(--vs-glyph);
 }
 
 .vs-404__mark svg {
@@ -8933,9 +9021,57 @@ body.hc-nav-open {
 /* variant 2's caption is the module's own designed overlay on a translucent      */
 /* plate and is legible over any photograph, so it is left alone.                 */
 
-	.main_banner .banner_group__variant3 .banner_group__content,
-	.main_banner .banner_group__variant4 .banner_group__content {
+/* Scoped to slides that carry a link, which is the whole of the argument above:  */
+/* the headline reaches assistive tech through the link's aria-label and the      */
+/* image's alt, and the destination is one tap away. The Banners module emits no  */
+/* <a class="banner_group__link"> at all when a slide has no URL - the shipped     */
+/* data has one, variant 4 - and for that slide the paragraph above stops being    */
+/* true: there is nothing to tap and nothing but the alt text left, so a sighted   */
+/* shopper on a phone gets a photograph and no words. Measured at 375 before this  */
+/* fix: innerText of that slide was the empty string.                              */
+
+	.main_banner .banner_group__variant3:has(> .banner_group__link) .banner_group__content,
+	.main_banner .banner_group__variant4:has(> .banner_group__link) .banner_group__content {
 		display: none;
+	}
+
+/* The unlinked case. The caption comes back as an ink plate across the top of     */
+/* the slide - the top band is the only part of a 361x203 slide that is free       */
+/* (the arrows occupy y 133-193 at both edges), and an opaque plate rather than    */
+/* --vs-scrim because a 0.44 scrim over a pale photograph composites to about      */
+/* #999 and would put the copy at 2.8:1. On --vs-ink it is 16.4:1 whatever is      */
+/* underneath. The description keeps its 3-line clamp from the base rule.          */
+
+	.main_banner .banner_group__variant3:not(:has(> .banner_group__link)) .banner_group__content,
+	.main_banner .banner_group__variant4:not(:has(> .banner_group__link)) .banner_group__content {
+		position: absolute;
+		top: 0;
+		right: 0;
+		left: 0;
+		z-index: 1;
+		display: block;
+		height: auto;
+		padding: var(--vs-space-2) var(--vs-space-3);
+		background-color: var(--vs-ink);
+		color: var(--vs-ink-text);
+	}
+
+/* The band has 72px to work in: on a 375 slide the arrows start at y 72 and     */
+/* run to y 116, and copy underneath one is copy nobody can read. A 20px title,  */
+/* a single 20px line of description and 8px of padding either side come to 60.  */
+/* Measured before the clamp: 114px, i.e. 42px of the plate under the arrow.     */
+
+	.main_banner .banner_group__variant3:not(:has(> .banner_group__link)) .banner_group__title,
+	.main_banner .banner_group__variant4:not(:has(> .banner_group__link)) .banner_group__title {
+		margin-bottom: var(--vs-space-1);
+		color: var(--vs-ink-text);
+	}
+
+	.main_banner .banner_group__variant3:not(:has(> .banner_group__link)) .banner_group__description,
+	.main_banner .banner_group__variant4:not(:has(> .banner_group__link)) .banner_group__description {
+		-webkit-line-clamp: 1;
+		margin-bottom: 0;
+		color: var(--vs-ink-text);
 	}
 
 /* With the caption gone the image is the whole slide. It is pinned rather than */
@@ -9396,7 +9532,7 @@ img.lazy:not(.loaded) {
 	width: 100%;
 	min-height: 56px;
 	padding: 22px var(--vs-space-3) 6px;
-	border: 1px solid var(--vs-hairline);
+	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-sm);
 	background-color: var(--vs-n-25);
 	color: var(--vs-text);
@@ -9692,4 +9828,146 @@ img.lazy:not(.loaded) {
 .accordion__content {
 	padding: var(--vs-space-2) 0;
 	text-align: left;
+}
+
+/* ============================================================================ */
+/* TOUCH TARGETS                                                                */
+/* ============================================================================ */
+
+/* Task 9, Step 3. Everything below was measured under 44x44 at 375 and is       */
+/* raised here rather than at the component, because the component's own rule    */
+/* is the height the DESIGN wants and several of them are correct at 1440 with   */
+/* a mouse. Last block in the file, so it wins on source order at equal weight.  */
+/*                                                                              */
+/* Three things are deliberately NOT raised, and the report says so:             */
+/* - links inside .vs-prose, which are inline in a sentence (WCAG 2.5.8 exempts  */
+/*   those explicitly, and boxing them would break the line box);                */
+/* - <label for> on a text field, whose job is to focus a 44px input next to it; */
+/* - .vs-crumbs__item a, measured 34x44 because 34px is the whole width of the   */
+/*   word - there is no target to grow into without inventing padding that       */
+/*   would push the trail off a 375 screen.                                      */
+
+@media (max-width: 991px) {
+
+/* The logo link boxes: the mark itself stays 30px, the link grows around it.    */
+/* Both bars already reserve more than 44px of height, so nothing moves.         */
+
+	.vs-logo,
+	.vs-checkout__logo {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+	}
+
+/* 11x16 - the smallest target on the site. The row it sits in is 44px high      */
+/* already, so only the mark's own box changes.                                  */
+
+	.vs-copyright__mark {
+		align-items: center;
+		justify-content: center;
+		min-width: 44px;
+		min-height: 44px;
+	}
+
+/* The sort strip. 36px is a comfortable mouse target and stays that at 992px     */
+/* and up; on a phone the row is the primary way to re-order a catalogue.         */
+
+	.vs-sort__btn {
+		min-height: 44px;
+	}
+
+/* Blog chrome. Every one of these is a link with a small painted pill or a run   */
+/* of muted type; the paint is left alone and the box around it grows, so the     */
+/* meta rows gain height and nothing changes colour or shape.                     */
+
+	.vs-post-card__label,
+	.vs-post__label,
+	.vs-post__tag {
+		height: auto;
+		min-height: 44px;
+	}
+
+	.vs-post-card__author,
+	.vs-post__meta_item,
+	.vs-post__meta_item a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+	}
+
+/* The comment count is the single character "0" - 32px wide with its icon, and */
+/* the only one of these where the label genuinely cannot carry the width.      */
+
+	a.vs-post__meta_item {
+		justify-content: center;
+		min-width: 44px;
+	}
+
+/* Card titles. Two lines of 20px leading come to 40.3px, four short of the     */
+/* floor, so the box grows and the type does not move: the title sits at the    */
+/* top of a flex column and the extra pixels fall below the last line.          */
+
+	.vs-card__name,
+	.vs-post-card__link {
+		display: flex;
+		align-items: flex-start;
+		min-height: 44px;
+	}
+
+/* The cart line title clamps to three lines and measured 36px on a short one.  */
+/* -webkit-box has to stay - it is what the clamp needs - so the height comes    */
+/* from min-height rather than from becoming a flex box.                        */
+
+	.vs-cart__name {
+		min-height: 44px;
+	}
+
+/* The author card under a post: the name is the link, and the name is one line. */
+
+	.vs-author-card__name a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+	}
+
+/* The table of contents. The anchors are inline inside <li>, so a min-height on  */
+/* the anchor alone does nothing - it has to become a box first. One entry per     */
+/* row is what a table of contents looks like anyway.                             */
+
+	.vs-post__toc_list a {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+	}
+
+/* hc-offcanvas-nav's own top row (account, language). The library ships them at   */
+/* 20px and okay.js builds the markup, so the height has to come from here.        */
+
+	.hc-offcanvas-nav .mobile__link,
+	.hc-offcanvas-nav ul.top-nav .account__link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+	}
+}
+
+/* The carousel dots. 30x6 of paint, and the paint is the design - so the hit     */
+/* area is grown with a transparent overlay instead, 44px tall and exactly as     */
+/* wide as the dot. Vertical only: the dots sit on a 38px pitch, so a 44px-wide   */
+/* overlay would swallow six pixels of its neighbour and hand slide 2 the taps    */
+/* meant for slide 3. At 30x44 on a 38px pitch they clear WCAG 2.5.8 by the       */
+/* spacing rule (24px circles centred on each never intersect).                   */
+
+.swiper-pagination-bullet {
+	position: relative;
+}
+
+.swiper-pagination-bullet::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 0;
+	width: 100%;
+	height: 44px;
+	transform: translateY(-50%);
 }

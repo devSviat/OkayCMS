@@ -10,8 +10,43 @@
     var lastFocused = null;
     var FOCUSABLE = 'a[href], button:not([disabled]), input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
+    /* prefers-reduced-motion, the half the stylesheet cannot reach.
+       base.css cuts every CSS transition and animation to 0.01ms with
+       !important, which no other rule in the theme overrides. jQuery's
+       animation queue is not CSS and is untouched by it, and okay.js drives
+       seven of them: the accordion slideDown/slideUp on the product panels and
+       the filter groups, the fades on the pop-up cart and the confirmations,
+       and the 1000ms scroll animation behind the back-to-top button. Setting
+       jQuery.fx.off makes each of them jump to its end state, which is the
+       same thing the CSS block does to a transition.
+
+       Read once, not watched: jQuery.fx.off is global and okay.js reads it at
+       the moment each animation starts, so a shopper who changes the setting
+       mid-session gets the new behaviour on the next page load - the same as
+       for every other reduced-motion consumer here. */
+    if (window.jQuery && window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        window.jQuery.fx.off = true;
+    }
+
+    /* A drawn box, not merely a match. The off-canvas navigation keeps every
+       sub-level in the DOM and only translates it out of sight, so the raw
+       selector returns ~90 nodes of which a dozen are on screen - trapping on
+       the first and last of those would hand Shift+Tab to a link nobody can
+       see. Cheap enough: it runs once per Tab keypress, never in a loop. */
+    function visibleFocusables(root) {
+        var nodes = root.querySelectorAll(FOCUSABLE);
+        var out = [];
+        for (var i = 0; i < nodes.length; i++) {
+            var box = nodes[i].getBoundingClientRect();
+            if (!box.width && !box.height) continue;
+            out.push(nodes[i]);
+        }
+        return out;
+    }
+
     function trapFocus(sheet, event) {
-        var focusables = sheet.querySelectorAll(FOCUSABLE);
+        var focusables = visibleFocusables(sheet);
         if (!focusables.length) return;
         var first = focusables[0];
         var last = focusables[focusables.length - 1];
@@ -39,22 +74,49 @@
         }
     }
 
+    /* One element, two widgets. From 992px .vs-filters is a static column of the
+       page - a region, and role="dialog" on it would be a lie that also hides
+       the grid beside it from a screen reader. Below 992px the same element is
+       the sheet: modal, scroll-locking, focus-trapping. So the role is written
+       from the breakpoint rather than into the template, and only while the
+       sheet is actually open - a closed sheet is still in the tree (it is
+       translated off-screen, not display:none) and an aria-modal on it would
+       take the whole page out of the accessibility tree with nothing shown.
+       railQuery is declared with the catalogue code below; both are hoisted
+       var declarations in the same IIFE, and nothing here runs before it. */
+    function sheetIsModal() {
+        return !(railQuery && railQuery.matches);
+    }
+
+    function applySheetRole(sheet) {
+        if (!sheet) return;
+        if (sheet.classList.contains('is-open') && sheetIsModal()) {
+            sheet.setAttribute('role', 'dialog');
+            sheet.setAttribute('aria-modal', 'true');
+        } else {
+            sheet.removeAttribute('role');
+            sheet.removeAttribute('aria-modal');
+        }
+    }
+
     window.vibeSheet = {
         open: function (sheet) {
             if (!sheet) return;
             lastFocused = document.activeElement;
             sheet.classList.add('is-open');
             sheet.removeAttribute('aria-hidden');
+            applySheetRole(sheet);
             var backdrop = backdropFor(sheet);
             if (backdrop) backdrop.classList.add('is-open');
             document.body.style.overflow = 'hidden';
             announce(sheet, true);
-            var focusable = sheet.querySelector(FOCUSABLE);
+            var focusable = visibleFocusables(sheet)[0];
             if (focusable) focusable.focus();
         },
         close: function (sheet) {
             if (!sheet) return;
             sheet.classList.remove('is-open');
+            applySheetRole(sheet);
             var backdrop = backdropFor(sheet);
             if (backdrop) backdrop.classList.remove('is-open');
             document.body.style.overflow = '';
@@ -121,16 +183,31 @@
         catalogTrigger.setAttribute('aria-expanded', 'false');
     });
 
-    /* Touch fallback: on devices without hover, the first tap on a parent
-       item opens its submenu instead of following the link. */
-    var noHover = window.matchMedia ? window.matchMedia('(hover: none)') : null;
+    /* Touch fallback: the first tap on a parent item opens its submenu instead
+       of following the link.
+
+       Gated on (any-pointer: coarse), not (hover: none). A touchscreen laptop
+       has both pointers and reports hover: hover, so under the old gate this
+       handler never ran there and the submenus were reachable only by hovering
+       - i.e. not at all for someone using the screen. any-pointer asks the
+       question that actually matters: can this machine be touched.
+
+       The consequence of the wider gate is that the same machine still has a
+       mouse, and a mouse click on a parent must keep navigating rather than
+       being swallowed. So the submenu's own visibility decides: with a pointer
+       the CSS :hover rule has already displayed it by the time the click
+       lands, and the handler stands aside; with a finger there is no hover
+       state, the submenu is still display:none, and the tap opens it. */
+    var coarse = window.matchMedia ? window.matchMedia('(any-pointer: coarse)') : null;
 
     document.addEventListener('click', function (event) {
-        if (!noHover || !noHover.matches || !event.target.closest) return;
+        if (!coarse || !coarse.matches || !event.target.closest) return;
         var link = event.target.closest('.vs-has-children > a');
         if (!link) return;
         var item = link.parentNode;
         if (item.classList.contains('is-open')) return;
+        var submenu = item.querySelector('ul');
+        if (submenu && window.getComputedStyle(submenu).display !== 'none') return;
         event.preventDefault();
         var siblings = item.parentNode.children;
         for (var i = 0; i < siblings.length; i++) {
@@ -138,6 +215,76 @@
         }
         item.classList.add('is-open');
     });
+
+    /* ------------------------------------------- off-canvas mobile menu */
+
+    /* hc-offcanvas-nav builds its own <nav> at the end of <body> and moves it
+       into view with a transform. It gives it no role, never moves focus into
+       it, and leaves the page behind it fully tabbable - measured before this
+       block: opening the menu and pressing Tab eight times walked the logo,
+       the search toggle, four banner links and both carousel arrows, all of
+       them underneath the overlay, and Escape then left focus on the last of
+       those instead of on the burger.
+
+       The plugin's own open/close events fire on the source <ul>, which okay.js
+       owns; the body class it toggles is the same signal and is not okay.js's
+       to change, so that is what is watched. Everything else - the trap and
+       the Escape - reuses the machinery the filter sheet already has. */
+    var NAV_OPEN_CLASS = 'hc-nav-open';
+    var navLastFocused = null;
+
+    function offcanvasNav() {
+        return document.querySelector('.hc-offcanvas-nav');
+    }
+
+    function navTrigger() {
+        return document.querySelector('.fn_menu_switch') || document.querySelector('.hc-nav-trigger');
+    }
+
+    function offcanvasOpened() {
+        var nav = offcanvasNav();
+        if (!nav) return;
+        nav.setAttribute('role', 'dialog');
+        nav.setAttribute('aria-modal', 'true');
+        var trigger = navTrigger();
+        var label = trigger && trigger.getAttribute('aria-label');
+        if (label && !nav.getAttribute('aria-label')) nav.setAttribute('aria-label', label);
+        var active = document.activeElement;
+        navLastFocused = (active && active !== document.body) ? active : trigger;
+        var first = visibleFocusables(nav)[0];
+        if (first) first.focus();
+    }
+
+    function offcanvasClosed() {
+        var nav = offcanvasNav();
+        if (nav) {
+            nav.removeAttribute('role');
+            nav.removeAttribute('aria-modal');
+        }
+        if (navLastFocused && document.contains(navLastFocused)) navLastFocused.focus();
+        navLastFocused = null;
+    }
+
+    if (window.MutationObserver) {
+        var navWasOpen = document.body.classList.contains(NAV_OPEN_CLASS);
+        new MutationObserver(function () {
+            var isOpen = document.body.classList.contains(NAV_OPEN_CLASS);
+            if (isOpen === navWasOpen) return;
+            navWasOpen = isOpen;
+            if (!isOpen) {
+                offcanvasClosed();
+                return;
+            }
+            /* The panel is still translated off-screen on the frame the class
+               lands, and focusing a node that is off-screen makes the browser
+               scroll the page to it. One frame of slack is enough. */
+            window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(function () {
+                    if (document.body.classList.contains(NAV_OPEN_CLASS)) offcanvasOpened();
+                });
+            });
+        }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
 
     /* ------------------------------------------------------- product card */
 
@@ -260,12 +407,64 @@
         normaliseDiscount(pdp);
     }
 
+    /* ------------------------------------------------------- live region */
+
+    /* Picking a variant rewrites the price, the old price, the SKU, the
+       discount badge and the availability line - none of which is where the
+       focus is, so a screen reader said nothing at all and the shopper was
+       left to guess whether the 32Gb they chose costs the same as the 16Gb.
+
+       One polite region for the whole page, built here rather than in a
+       template: there are four templates that render a variant picker and the
+       region belongs to none of them. aria-atomic so the whole sentence is
+       re-read rather than only the word that changed, and the text is
+       assembled from what the DOM now says, so it is whatever okay.js just
+       wrote and stays translated by the server. */
+    var liveRegion = null;
+
+    function announceLive(text) {
+        if (!text) return;
+        if (!liveRegion) {
+            liveRegion = document.createElement('div');
+            liveRegion.className = 'vs-sr-only';
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            document.body.appendChild(liveRegion);
+        }
+        /* Same string twice in a row is not re-announced by most readers.
+           Clearing first makes a repeat pick speak. */
+        if (liveRegion.textContent === text) liveRegion.textContent = '';
+        liveRegion.textContent = text;
+    }
+
+    function textOf(root, selector) {
+        var el = root.querySelector(selector);
+        return el ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+    }
+
+    function announceVariant(root, select) {
+        if (!root) return;
+        var bits = [];
+        var option = select.options[select.selectedIndex];
+        if (option) bits.push(option.textContent.replace(/\s+/g, ' ').trim());
+        var price = textOf(root, '.fn_price');
+        var currency = textOf(root, '.vs-card__currency, .vs-buybox__currency');
+        if (price) bits.push(currency ? price + ' ' + currency : price);
+        var sku = textOf(root, '.fn_sku');
+        if (sku) bits.push(sku);
+        var stock = textOf(root, '.vs-stock__label');
+        if (stock) bits.push(stock);
+        announceLive(bits.join(', '));
+    }
+
     /* Registered after okay.js so its handler has already rewritten the card.
        select2 fires its change through jQuery, which never reaches a native
        listener, so jQuery is used whenever it is present. */
     function syncVariant(select) {
         syncCard(select);
         syncPdp(select);
+        var root = select.closest ? (select.closest('.vs-pdp') || select.closest('.vs-card')) : null;
+        announceVariant(root, select);
     }
 
     if (window.jQuery) {
@@ -560,6 +759,16 @@
        one holding the stale measurement - never runs and there is exactly one
        scroll. The panel is opened synchronously first, so the position measured
        below is the real one. */
+    /* The events that mean "the shopper has taken the page back". wheel and
+       touchstart covered a mouse wheel and a finger and nothing else: dragging
+       the scrollbar and pressing Page Down both moved the page while the
+       correction loop was still running, and the loop dutifully yanked it
+       back. keydown is unconditional on purpose - a keystroke during a
+       1200ms scroll is the shopper doing something, whatever the key was -
+       and pointerdown covers the scrollbar drag, a middle-click autoscroll
+       and touch on any browser that has it, which is every one that matters
+       and is why touchstart is still listed for the ones that do not. */
+    var ANCHOR_ABANDON = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
     var ANCHOR_GAP = 16;
     var ANCHOR_TOLERANCE = 4;
     var ANCHOR_PASSES = 3;
@@ -594,11 +803,19 @@
        stops and corrected, at most twice, and the whole thing is abandoned the
        instant the shopper touches the page themselves - being yanked back to a
        target you have decided to leave is worse than a slightly short scroll. */
+    /* One in-flight scroll at a time. Two clicks on the reviews link used to
+       start two independent correction loops, each re-measuring while the
+       other was still moving the page, and they fought to a stop somewhere
+       between the two destinations. The token invalidates every earlier run:
+       an old loop that wakes up finds its ticket has been reissued and stops. */
+    var anchorRun = 0;
+
     function scrollToPanel(panel) {
         var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         var behavior = reduce ? 'auto' : 'smooth';
         var passes = 0;
         var idle = null;
+        var ticket = ++anchorRun;
 
         function destination() {
             var max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
@@ -609,8 +826,9 @@
         function stop() {
             window.clearTimeout(idle);
             window.removeEventListener('scroll', onScroll);
-            window.removeEventListener('wheel', abandon);
-            window.removeEventListener('touchstart', abandon);
+            for (var i = 0; i < ANCHOR_ABANDON.length; i++) {
+                window.removeEventListener(ANCHOR_ABANDON[i], abandon);
+            }
         }
 
         function abandon() {
@@ -629,13 +847,15 @@
         }
 
         function step() {
+            if (ticket !== anchorRun) return;
             if (passes >= ANCHOR_PASSES) return;
             var to = destination();
             if (Math.abs(to - window.pageYOffset) < ANCHOR_TOLERANCE) return;
             passes++;
             window.addEventListener('scroll', onScroll);
-            window.addEventListener('wheel', abandon, { passive: true });
-            window.addEventListener('touchstart', abandon, { passive: true });
+            for (var i = 0; i < ANCHOR_ABANDON.length; i++) {
+                window.addEventListener(ANCHOR_ABANDON[i], abandon, { passive: true });
+            }
             idle = window.setTimeout(settled, ANCHOR_BAIL_MS);
             window.scrollTo({ top: to, behavior: behavior });
         }
@@ -673,7 +893,15 @@
         if (!panel) return;
 
         event.preventDefault();
+        /* Stopping the event is what keeps okay.js's stale measurement from
+           running a second, competing animation - see above. The cost is that
+           it also stops vibe.js's OWN document-level click listeners, which is
+           where the header language and currency dropdowns are closed: click
+           the reviews link with one open and it stayed open, floating over the
+           page all the way down. They are closed explicitly here rather than
+           by weakening the guard. */
         event.stopPropagation();
+        closeDisclosures(null);
         openPanel(panel);
         scrollToPanel(panel);
     }, true);
@@ -707,8 +935,12 @@
     var railQuery = window.matchMedia ? window.matchMedia('(min-width: 992px)') : null;
 
     function closeFiltersOnRail() {
-        if (!railQuery || !railQuery.matches) return;
         var open = document.querySelector('.vs-sheet.is-open');
+        if (!railQuery || !railQuery.matches) {
+            /* Crossing back down: whatever is open is a modal sheet again. */
+            applySheetRole(open);
+            return;
+        }
         if (open) window.vibeSheet.close(open);
     }
 
@@ -745,6 +977,10 @@
         var results = region.querySelector('.vs-catalogue__results');
         var loading = !!(results && results.querySelector('.fn_ajax_wait'));
         region.classList.toggle('is-loading', loading);
+        /* The skeleton is the sighted half of this state; aria-busy is the
+           other half. Without it a screen reader reads the stale grid as
+           though it were the answer to the filter that was just applied. */
+        region.setAttribute('aria-busy', loading ? 'true' : 'false');
 
         if (loadingBail) {
             window.clearTimeout(loadingBail);
@@ -776,7 +1012,27 @@
     var productsRegion = document.getElementById('fn_products_content');
     if (productsRegion && window.MutationObserver) {
         new MutationObserver(syncCatalogue).observe(productsRegion, { childList: true });
+        /* Once at rest, so aria-busy="false" is on the region from the start
+           rather than appearing only after the first filter round-trip - an
+           attribute that shows up mid-session is a change a live region user
+           may be told about. */
+        syncCatalogue();
     }
+
+    /* The attribute in the markup describes the SCRIPTED state. Task 7.5 ships
+       most filter groups collapsed, but the collapse is a CSS rule gated on
+       html.js - so with scripting off the group is drawn fully expanded while
+       the server-rendered aria-expanded still says false, and a screen-reader
+       user is told a group is closed while reading its contents. It can only
+       be corrected from here, which is the one place that only exists when the
+       rule that collapses them exists. Same reading as the click handler
+       below: .active is okay.js's word for collapsed. */
+    (function () {
+        var heads = document.querySelectorAll('.fn_switch[aria-expanded]');
+        for (var i = 0; i < heads.length; i++) {
+            heads[i].setAttribute('aria-expanded', heads[i].classList.contains('active') ? 'false' : 'true');
+        }
+    }());
 
     /* okay.js collapses a filter group by class only, so the state the group
        header announces is mirrored here. Scoped to headers that already carry
@@ -789,6 +1045,31 @@
             head.setAttribute('aria-expanded', head.classList.contains('active') ? 'false' : 'true');
         }, 0);
     });
+
+    /* ------------------------------------------------------- fancybox */
+
+    /* fancybox 3 restores focus to its $trigger, and okay.js opens every popup
+       in this theme through $.fancybox.open() / .fancybox() rather than a
+       data-fancybox attribute, so $trigger is undefined and there is nothing
+       to go back to: measured on the callback form at 1440, Escape left focus
+       on <body> and the next Tab started again from the top of the page.
+       The control that was clicked is remembered on the way in - capture
+       phase, so it is recorded even for the handlers that stop the event. */
+    var fbLastFocused = null;
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var control = event.target.closest('a[href], button, [tabindex]');
+        if (!control || control.closest('.fancybox-container')) return;
+        fbLastFocused = control;
+    }, true);
+
+    if (window.jQuery) {
+        window.jQuery(document).on('afterClose.fb', function () {
+            if (fbLastFocused && document.contains(fbLastFocused)) fbLastFocused.focus();
+            fbLastFocused = null;
+        });
+    }
 
     document.addEventListener('keydown', function (event) {
         if (event.key !== 'Escape' && event.key !== 'Esc' && event.key !== 'Tab') return;
@@ -803,17 +1084,40 @@
             return;
         }
 
-        if (event.key === 'Tab') return;
+        /* fancybox drops every keystroke while focus is in a text field - its
+           own guard against closing a dialog in the middle of typing - and the
+           first thing it does on open is focus the first input. Measured on the
+           callback form at 1440: Escape from that input did nothing at all, and
+           did nothing however many times it was pressed; Escape from the submit
+           button below it closed the popup. Tab is deliberately left alone,
+           because fancybox's own trap works. */
+        if (event.key !== 'Tab' && window.jQuery && window.jQuery.fancybox
+            && window.jQuery.fancybox.getInstance()) {
+            window.jQuery.fancybox.close();
+            return;
+        }
 
         /* Off-canvas mobile navigation (hc-offcanvas-nav, driven by okay.js
-           config in scripts.tpl) has no Escape handler of its own. */
-        if (document.body.classList.contains('hc-nav-open')) {
-            var toggle = document.querySelector('.hc-nav-trigger');
-            if (toggle) {
-                toggle.click();
-                return;
+           config in scripts.tpl) has neither a trap nor an Escape handler of
+           its own. Closing goes through the plugin's own trigger so its
+           scroll-position restore and body class both run; the observer above
+           then puts focus back on the burger. */
+        if (document.body.classList.contains(NAV_OPEN_CLASS)) {
+            var nav = offcanvasNav();
+            if (nav) {
+                if (event.key === 'Tab') {
+                    trapFocus(nav, event);
+                    return;
+                }
+                var toggle = navTrigger();
+                if (toggle) {
+                    toggle.click();
+                    return;
+                }
             }
         }
+
+        if (event.key === 'Tab') return;
 
         var catalog = document.querySelector('.vs-catalog');
         var catalogTrigger = document.querySelector('.vs-catalog-btn');

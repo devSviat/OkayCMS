@@ -1,5 +1,18 @@
 <!-- The main page template -->
 
+{* The page heading, first in the document.
+   The visible one used to be the <h1> inside the editorial split at the bottom
+   of shape 5, which put three <h2> section heads above the page's only <h1> -
+   a heading outline that starts at level 2 and drops back to 1 two thirds of
+   the way down. The visible heading keeps its place and its exact rendering
+   (.vs-home__title sets the size, so h1 and h2 draw identically there); the
+   level-1 heading moves up here where the outline expects it and is spoken,
+   not drawn - "Головна" beside the shop's name is a screen-reader landmark,
+   not a headline the design wants at the top of the page. *}
+{if $h1}
+    <h1 class="vs-sr-only">{$h1|escape}</h1>
+{/if}
+
 {* Featured products.
    Shape 1 of 5 on this page: a rail on the bare canvas with the "see all"
    affordance in the section head. The slide machinery (fn_products_slide,
@@ -86,7 +99,7 @@
         <div class="vs-home__split{if !$description || !$all_brands} vs-home__split--single{/if}">
             {if $description}
                 <div class="vs-home__about">
-                    <h1 class="vs-home__title">{$h1|escape}</h1>
+                    <h2 class="vs-home__title">{$h1|escape}</h2>
                     <div class="fn_readmore">
                         <div class="vs-prose vs-home__about_body">{$description}</div>
                     </div>

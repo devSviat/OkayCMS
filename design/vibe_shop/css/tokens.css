@@ -49,7 +49,37 @@
 	--vs-surface-subtle: #ededee;
 	--vs-plate: #ffffff;
 	--vs-hairline: #e0e0e2;
-	--vs-border-strong: #a5a5aa;
+
+/* Three greys, three jobs, and only one of them is free to be pretty.
+*
+* --vs-hairline (#e0e0e2) is decoration: the rule between two rows, the outline
+* of a card. It divides, it never identifies a control, so 1.32:1 on white is
+* allowed and deliberate.
+*
+* --vs-border (--okay-border-color, #88888b since Task 9) is the resting
+* boundary of a control that has no fill of its own to be seen by: the
+* secondary button, the chip, the pagination link, the stepper, the option
+* card, the text field. WCAG 1.4.11 asks 3:1 of it. Measured: 3.53:1 on
+* --vs-n-0, 3.39 on --vs-n-25, 3.24 on --vs-n-50, 3.02 on --vs-n-100 - which is
+* every light background this theme paints a control on. It was #dcdcde and
+* measured 1.37:1 until Task 9. The value is admin-editable through
+* theme-settings.css; anything lighter than #88888b re-breaks the floor.
+*
+* --vs-border-strong (#6b6b71) is the same boundary under emphasis - hover, the
+* checkbox and radio ring, the slider handle. It has to stay darker than
+* --vs-border or hover would read as a step backwards; it was #a5a5aa (2.45:1)
+* and so was both too light to qualify and, after --vs-border moved, lighter
+* than the state it was emphasising.
+*
+* --vs-glyph (#a5a5aa) is what --vs-border-strong used to be, kept for the
+* things that were never boundaries at all and only borrowed the value: the
+* no-image placeholder glyphs, the breadcrumb separator, the empty-state icon,
+* the 404 illustration, the gallery scrollbar, the blockquote rule and the
+* resting underline colour of a link. They are decorative or redundant to
+* adjacent text, so they keep their exact Task 1-8 rendering. */
+
+	--vs-border-strong: #6b6b71;
+	--vs-glyph: #a5a5aa;
 	--vs-text-muted: #6b6b71;
 	--vs-scrim: rgb(23 23 26 / .44);
 

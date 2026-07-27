@@ -14,6 +14,14 @@
         {/foreach}
     {/if}
 
+    {* Skip link. The first focusable node in the document - the counters above
+       are <script>, and the header below repeats 30+ tab stops on every page.
+       Points at .main, which carries the id and a -1 tabindex so the jump moves
+       focus and not only the scroll position. *}
+    <a class="vs-skip" href="#vs_main">
+        <span data-language="index_skip_to_content">{$lang->index_skip_to_content}</span>
+    </a>
+
     {if $block = {get_design_block block="front_start_body_content"} }
     <div>
         {$block}
@@ -54,7 +62,14 @@
         </div>
         {/if}
         {* Main bar: logo, catalogue, search, informers *}
-        <div class="vs-header__main {if $controller != 'MainController'}fn_header__sticky {/if}" data-margin-top="0" data-sticky-for="991" data-sticky-class="is-sticky">
+        {* data-sticky-wrap: sticky.min.js takes the bar out of the flow with
+           position:fixed and, without this, leaves nothing behind it - measured
+           at 1440, the document lost 87px and everything below the header
+           jumped up by exactly that the instant the page began to scroll. The
+           attribute makes the library wrap the bar in a placeholder span it
+           then sizes to the bar's own rectangle, so the space is kept. It is a
+           documented option of the library, not a patch to it. *}
+        <div class="vs-header__main {if $controller != 'MainController'}fn_header__sticky {/if}" data-margin-top="0" data-sticky-for="991" data-sticky-class="is-sticky" data-sticky-wrap>
             <div class="container">
                 <div class="vs-header__bar">
                     {* Mobile menu button *}
@@ -106,8 +121,12 @@
     </header>
     {/if}
 
-    {* Тело сайта *}
-    <div class="main">
+    {* Тело сайта.
+       <main> rather than <div>: the class is untouched, so every .main rule and
+       every descendant selector still matches, and the page gains the landmark
+       the skip link lands on. tabindex="-1" makes the landing programmatically
+       focusable without adding a tab stop. *}
+    <main id="vs_main" class="main" tabindex="-1">
         {* Include module banner *}
         {if !empty($global_banners)}
             <div class="container">
@@ -139,7 +158,7 @@
                 {$banner_shortcode_advantage}
             </div>
         {/if}
-    </div>
+    </main>
 
     {* Кнопка на верх *}
     <div class="fn_to_top to_top"></div>

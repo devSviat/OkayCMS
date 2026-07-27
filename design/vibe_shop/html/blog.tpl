@@ -30,7 +30,7 @@
             {if !empty($posts)}
                 <div class="vs-posts">
                     {foreach $posts as $post}
-                        {include 'post_list.tpl'}
+                        {include 'post_list.tpl' cardHeading='h2'}
                     {/foreach}
                 </div>
                 {* Pagination *}

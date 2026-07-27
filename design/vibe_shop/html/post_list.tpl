@@ -32,9 +32,15 @@
     </div>
 
     <div class="vs-post-card__body">
-        <h3 class="vs-post-card__title">
+        {* The card is included from four places at two different depths: under a
+           section <h2> on the home page, the author page and the product page,
+           and directly under the page <h1> on the blog list, where a fixed <h3>
+           skipped a level. The caller passes the level it sits at; <h3> stays
+           the default because three of the four callers want it. *}
+        {$cardHeading = $cardHeading|default:'h3'}
+        <{$cardHeading} class="vs-post-card__title">
             <a class="vs-post-card__link" href="{url_generator route='post' url=$post->url}" data-post="{$post->id}">{$post->name|escape}</a>
-        </h3>
+        </{$cardHeading}>
 
         <div class="vs-post-card__meta">
             <span class="vs-post-card__meta_item">

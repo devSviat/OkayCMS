@@ -134,8 +134,13 @@
                            class with Smarty::registerClass would mean editing
                            core. The cost is one compile-time deprecation notice
                            per template compile - the same one the Banners
-                           module's DTO constants already emit. *}
-                        <dd>{if \Okay\Core\Phone::isValid($order->phone)}{$order->phone|phone}{else}{$order->phone|escape}{/if}</dd>
+                           module's DTO constants already emit.
+                           No leading backslash: Smarty keys $registered_classes
+                           on the literal token it parsed, so a future
+                           registerClass(Phone::class) would match
+                           "Okay\Core\Phone" and never "\Okay\Core\Phone". Same
+                           class resolved today either way. *}
+                        <dd>{if Okay\Core\Phone::isValid($order->phone)}{$order->phone|phone}{else}{$order->phone|escape}{/if}</dd>
                     {/if}
 
                     {if $order->comment}
