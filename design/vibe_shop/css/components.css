@@ -729,15 +729,21 @@ body.other_page .main {
 	background-color: var(--vs-n-300);
 }
 
-/* 40px thumbnail + 8px of row padding = a 56px row: comfortably past the 44px */
-/* target, and tall enough that a 35x35 product photo is not the tightest       */
-/* thing in the header.                                                         */
+/* This library serves two inputs on this site: the header product search, and  */
+/* the OkayCMS_NovaposhtaCost city field in the cart. They share the class      */
+/* names and share nothing else - a product row is thumbnail + link + price,    */
+/* a city row is one bare <div> of text. Everything from here to the plain-text */
+/* reset is common ground; the product skin below it is scoped to #fn_search.   */
+/*                                                                             */
+/* 44px is the theme's control height - the field the panel hangs off, the      */
+/* select2 rows in the same delivery block, every label in .vs-option__extra -  */
+/* so a text-only suggestion sits at the same rhythm as its neighbours.         */
 
 .autocomplete-suggestion {
 	display: flex;
 	align-items: center;
 	gap: var(--vs-space-3);
-	min-height: 56px;
+	min-height: 44px;
 	padding: var(--vs-space-2);
 	border-radius: var(--vs-radius-sm);
 	color: var(--vs-text);
@@ -746,12 +752,44 @@ body.other_page .main {
 	cursor: pointer;
 }
 
-/* okay.css pins this cell with width:50px !important, and !important cannot be */
-/* answered by specificity. flex-basis can: a flex item with a definite         */
-/* flex-basis never consults width for its main size, so flex:0 0 40px settles  */
-/* it without a second !important.                                              */
+/* okay.css styles `.autocomplete-suggestion div` as a product thumbnail cell   */
+/* - width:50px !important, display:table-cell, hairlines on two sides - and it */
+/* cannot tell a thumbnail from a city name. Undoing it here is what stops a    */
+/* city being clipped to a 50px box. flex:1 1 0% is the part that beats the     */
+/* !important without a second one: a definite flex-basis means the flex item   */
+/* never consults width for its main size, so the row is free to fill the       */
+/* panel. Wrapping, not ellipsis: the whole complaint was a truncated name.     */
 
 .autocomplete-suggestion > div {
+	display: block;
+	flex: 1 1 0%;
+	min-width: 0;
+	padding: 0;
+	border: 0;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+/* 40px thumbnail + 8px of row padding = a 56px row: comfortably past the 44px */
+/* target, and tall enough that a 35x35 product photo is not the tightest       */
+/* thing in the header.                                                         */
+
+#fn_search .autocomplete-suggestion {
+	min-height: 56px;
+}
+
+/* okay.js hands this autocomplete `appendTo: "#fn_search"`, so the whole panel */
+/* lives inside the header form and nothing else on the page can match. That is */
+/* the scope, rather than :has(img), because okay.js emits an empty <div></div> */
+/* for a product with no photo: :has(img) would silently drop the plate on      */
+/* exactly those rows and step their names out of line with the rest. It also   */
+/* keeps every assumption about row shape on our side of the fence - the module */
+/* may render whatever it likes in a suggestion and none of this reaches it.    */
+/*                                                                             */
+/* flex-basis again answers okay.css's width:50px !important, this time to pin  */
+/* the cell at 40px rather than to release it.                                  */
+
+#fn_search .autocomplete-suggestion > div {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -768,13 +806,13 @@ body.other_page .main {
 /* takes surface-subtle, and a thumbnail that dissolved into its own row on     */
 /* selection would lose the one element that identifies the product.            */
 
-.autocomplete-suggestion > div img {
+#fn_search .autocomplete-suggestion > div img {
 	max-width: 100%;
 	max-height: 100%;
 	object-fit: contain;
 }
 
-.autocomplete-suggestion > a {
+#fn_search .autocomplete-suggestion > a {
 	display: block;
 	flex: 1 1 auto;
 	min-width: 0;
@@ -791,7 +829,7 @@ body.other_page .main {
 /* figures and left at its natural width - not stretched to a right-hand column */
 /* half a panel away from the name it belongs to.                               */
 
-.autocomplete-suggestion > span {
+#fn_search .autocomplete-suggestion > span {
 	flex: none;
 	padding: 0;
 	border: 0;
@@ -5858,6 +5896,17 @@ body.hc-nav-open {
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-surface);
+}
+
+/* Until the module's API resolves a city there are no pills, and the module    */
+/* leaves the container in the page empty rather than hidden - it only calls    */
+/* show()/hide() on it inside the warehouse callback. Painted as a group that   */
+/* is what the owner saw under the city field: a 10x10 box carrying 1px of      */
+/* --vs-border and 12px of radius, which at that size is a circle. The group is */
+/* a control only once it holds pills, so that is the condition it is drawn on. */
+
+.vs-option__extra .np_delivery_types_heading:not(:has(a)) {
+	display: none;
 }
 
 .vs-option__extra .np_delivery_types_heading a {
