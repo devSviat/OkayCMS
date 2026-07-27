@@ -59,6 +59,20 @@
                        own. *}
                     <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
 
+                    {* Implicit submission (Enter in any text field, the phone
+                       keyboard's Go key) activates the form's DEFAULT button -
+                       the first submit button in tree order. The per-line remove
+                       controls below are submit buttons with formaction, so
+                       without this one the Enter key would silently delete the
+                       first cart line. This button claims that role for
+                       "place the order" instead, and gives a keyboard user a way
+                       to submit at all. It is clipped rather than display:none
+                       or hidden, because a non-rendered button is not the
+                       default button. Out of the tab order and out of the
+                       accessibility tree: the real CTA at the end of the form is
+                       the one to reach. *}
+                    <button class="vs-checkout__default-submit" type="submit" name="checkout" value="1" tabindex="-1" aria-hidden="true"></button>
+
                     <div class="vs-cart">
                     <div class="vs-cart__main">
                         {* The list of products in the cart *}

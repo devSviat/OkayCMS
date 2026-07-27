@@ -4689,6 +4689,23 @@ body.hc-nav-open {
 	border-top: 1px solid var(--vs-hairline);
 }
 
+/* The checkout form's default button - the control implicit submission (Enter  */
+/* in a text field) activates. It has to stay rendered to hold that role, so it */
+/* is clipped rather than hidden: display:none or [hidden] would hand the role  */
+/* back to the first per-line remove button.                                    */
+
+.vs-checkout__default-submit {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	border: 0;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
 /* ------------------------------------------------------------ cart layout */
 
 .vs-cart {
@@ -5080,6 +5097,44 @@ body.hc-nav-open {
 	min-height: 52px;
 	margin-top: var(--vs-space-5);
 	font-size: var(--vs-text-base);
+}
+
+/* Summary order on the cart page. #fn_cart_coupon is one AJAX-replaced         */
+/* container (okay.js rewrites its innerHTML wholesale) holding BOTH the coupon */
+/* field and the cart-level discount rows, so the two cannot be placed          */
+/* separately in the markup. The container is display:contents and the rows     */
+/* after it are ordered explicitly, which puts a discount where a shopper reads */
+/* for it - between the order sum and the total - while the coupon field stays  */
+/* at the top of the panel. Scoped to .vs-checkout: the order page's summary    */
+/* has its own row sequence and keeps plain document order.                     */
+
+.vs-checkout .vs-summary {
+	display: flex;
+	flex-direction: column;
+}
+
+.vs-checkout #fn_cart_coupon {
+	display: contents;
+}
+
+.vs-checkout .vs-summary__row--discount {
+	order: 1;
+}
+
+.vs-checkout #fn_total_delivery_price_block {
+	order: 2;
+}
+
+.vs-checkout .vs-summary__row--total {
+	order: 3;
+}
+
+.vs-checkout .vs-summary__captcha {
+	order: 4;
+}
+
+.vs-checkout .vs-summary__submit {
+	order: 5;
 }
 
 /* ------------------------------------------------------------------ coupon */

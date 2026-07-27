@@ -118,7 +118,24 @@
 
                     {if $order->phone}
                         <dt><span data-language="order_phone">{$lang->order_phone}</span></dt>
-                        <dd>{$order->phone|phone}</dd>
+                        {* The |phone modifier is libphonenumber's parse(), which
+                           THROWS on a number it cannot read - and this shop has
+                           no phone_default_region set, so every stored number
+                           without a leading "+" throws "Missing or invalid
+                           default region" and takes the whole confirmation page
+                           down with a 500. Phone::isValid() is the same parse
+                           inside a try/catch, so it is an exact guard: when it
+                           says yes the modifier cannot throw, and when it says
+                           no the shop owner still sees the number the customer
+                           actually typed.
+                           The call is a bare static one on purpose: Smarty
+                           blocks call_user_func in templates outright (a
+                           compile error, i.e. another 500), and registering the
+                           class with Smarty::registerClass would mean editing
+                           core. The cost is one compile-time deprecation notice
+                           per template compile - the same one the Banners
+                           module's DTO constants already emit. *}
+                        <dd>{if \Okay\Core\Phone::isValid($order->phone)}{$order->phone|phone}{else}{$order->phone|escape}{/if}</dd>
                     {/if}
 
                     {if $order->comment}
