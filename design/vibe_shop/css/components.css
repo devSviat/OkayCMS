@@ -5237,7 +5237,7 @@ body.hc-nav-open {
 	.vs-pdp__layout {
 		display: grid;
 		grid-template-columns: minmax(0, 760px) minmax(0, 460px);
-		justify-content: center;
+		justify-content: space-between;
 		gap: var(--vs-space-9);
 		align-items: start;
 	}
