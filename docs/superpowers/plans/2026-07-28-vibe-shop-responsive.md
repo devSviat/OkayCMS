@@ -355,7 +355,7 @@ D=.superpowers/sdd/2026-07-28-vibe-shop-responsive
 node $D/audit.mjs /tmp green-swiper | grep -E 'home/'
 ```
 
-Expected: `phone-portrait perView=2` (unchanged), `phone-landscape perView=3`, `tablet-portrait perView=3`, `tablet-landscape perView=5`, `desktop perView=5`. And `consoleErrors: 0` — changing breakpoints re-initialises the carousels, so a Swiper error would surface here.
+Expected: `phone-portrait perView=2`, `phone-landscape perView=3`, `tablet-portrait perView=3`, `tablet-landscape perView=4`, `desktop perView=5`. Only the two middle rows move; the ladder's job is to end the 4-up run between 768 and 1199, and 1180 sits in the new `992` tier at a comfortable 295 px per card. Desktop was already 5 in the baseline — the old ladder's `1200: 5` step was never broken. And `consoleErrors: 0` — changing breakpoints re-initialises the carousels, so a Swiper error would surface here.
 
 - [ ] **Step 5: Desktop regression check**
 
@@ -370,7 +370,7 @@ print({f: (a[k][f], b[k][f]) for f in ('header','catalogueCols','docHeight','ove
 "
 ```
 
-Expected: `desktop unchanged`. `carouselPerView` is deliberately excluded — it moves from 4 to 5 at 1440 px, which is the intended `1200→5` step.
+Expected: `desktop unchanged`. `carouselPerView` is excluded from the comparison as a precaution, but it should not move either: 1440 px was already in the `1200` tier before this change.
 
 - [ ] **Step 6: Record and commit**
 
@@ -379,9 +379,9 @@ Append to `progress.md`:
 ```markdown
 ## Task 2 — Swiper ladder
 
-Duplicate `768` key removed. perView by viewport: phone-portrait 2 (unchanged),
-phone-landscape 4→3, tablet-portrait 4→3, tablet-landscape 4→5, desktop 4→5.
-0 console errors. Desktop geometry otherwise unchanged.
+Duplicate `768` key removed. perView by viewport: phone-landscape 4→3,
+tablet-portrait 4→3. phone-portrait (2), tablet-landscape (4) and desktop (5)
+unchanged. 0 console errors. Desktop geometry unchanged.
 ```
 
 ```bash
@@ -1003,7 +1003,7 @@ Every printed change must be one this plan intended. Anything unexplained is a r
 
 - [ ] **Step 3: Desktop must show only the carousel step**
 
-From the Step 2 output, the five `*/desktop` rows may differ in `carouselPerView` (4→5, Task 2) and nothing else. `header`, `catalogueCols`, `pdpCols`, `docHeight` and `overflowX` at 1440×900 must be identical to the baseline. If `docHeight` moved on desktop, a `max-height` rule is matching a viewport it should not.
+The four `*/desktop` rows must be **identical to the baseline in every field**, `carouselPerView` included — Task 2's ladder does not move 1440 px, which was already in the `1200` tier. If `docHeight` moved on desktop, a `max-height` rule is matching a viewport it should not.
 
 - [ ] **Step 4: Look at all twenty screenshots**
 
