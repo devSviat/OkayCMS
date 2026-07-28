@@ -177,6 +177,55 @@ and extend the existing `TOUCH TARGETS` block only with what landscape and table
 surface. Anything left unraised is documented in the same style and for the same kind of
 reason. This is not a re-run of the earlier pass and must not restate its rules.
 
+### Mobile menu
+
+**9. Give the mobile menu one icon rail.** Requested mid-execution by the plan owner, after
+items 1-8 were agreed. The off-canvas menu (`mobile_menu.tpl`, presented by
+`hc-offcanvas-nav`) renders every row as a `.nav-item` flex line with `padding: 12px 20px`
+and `gap: 12px`. Rows that carry a leading 20 px glyph therefore start their text at 52 px;
+rows without one start at 20 px. Measured on the rendered menu, that splits eleven rows
+into two ragged columns:
+
+| rows | leading glyph | text starts at |
+| --- | --- | --- |
+| Категорії, Вибране, Порівняння | yes | 52 px |
+| phone, email | yes | 52 px |
+| CMS pages (Блог, Акції, Бренди, Контакти) | no | 20 px |
+| currency | no | 20 px |
+| language | flag image | 52 px |
+
+Two changes:
+
+- **The currency and language switchers get the glyphs the desktop switcher already uses** —
+  `coins` and `language` from `svg.tpl`. This is not a new decision: `switcher.tpl` renders
+  glyph + `$currency->name` and glyph + `$language->name`, with no category label. The mobile
+  rows currently render "Валюта: гривні" and a flag image instead, so the two surfaces
+  disagree. Matching them is what the product register calls consistent affordances. The
+  category label survives in `aria-label`, built from the existing `mobile_menu_currency`
+  string, so nothing is lost for a screen reader and no new translation key is invented.
+- **Rows with no leading glyph reserve the rail** rather than sliding under it, giving one
+  text edge at 52 px for the whole menu.
+
+**The rail rule must key on the *first child*, not on the presence of an `<svg>`.** One CMS
+row ("Клієнтам") contains an `<svg>` — its submenu chevron, nested in a trailing
+`.vs-menu__chevron` span. A rule written as `:has(svg)` would treat that single row as
+railed and leave its four siblings unindented, making the ragged edge worse rather than
+better. `:has(> svg:first-child)` is the correct test. `:has()` is already used twenty times
+in `components.css`, so this follows the file rather than introducing a pattern.
+
+Deliberately **not** changed, and worth recording because it looks like a defect:
+
+- The currency options use `href="#"` with an inline `onclick` that navigates to
+  `/?currency_id=N`. Rewriting that as a plain link would break middle-click and keyboard
+  use less than it breaks something else — the desktop switcher deliberately submits a POST
+  form carrying `prg_seo_hide` for exactly this action, to keep `currency_id` URLs out of the
+  index. Making the mobile switcher a GET link would undo that decision. Aligning the two is
+  real work with an SEO consequence and belongs in its own item, not here.
+- Social links in `bottom-nav` render as text pills. `svg.tpl` ships no social glyphs, so
+  giving them icons would mean drawing new ones. Out of scope.
+- The CMS menu item reading "Контакты" is Russian while the rest of the menu is Ukrainian.
+  That is database content, not theme markup.
+
 ## Explicitly out of scope
 
 - Pages: `/user`, wishlist, comparison, blog and posts, brands, static pages, 404, search.
