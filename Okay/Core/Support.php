@@ -172,7 +172,6 @@ class Support
         }
         $_SESSION['support_request_timeout_try_cnt'] = $retryCnt;
 
-        curl_close($ch);
         $response = json_decode($response);
         if ($response && isset($response->balance) && $response->balance != $info->balance) {
             $supportInfoEntity->updateInfo(['balance'=>$response->balance]);

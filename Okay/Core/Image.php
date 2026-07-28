@@ -160,7 +160,6 @@ class Image
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 $file = curl_exec($ch);
                 $info = curl_getinfo($ch);
-                curl_close($ch);
                 $fileDestination = $previewDir . $resizedFile;
                 if ($pseudoWebp) {
                     $fileDestination .= '.webp';
@@ -372,7 +371,6 @@ class Image
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $file = curl_exec($ch);
         $info = curl_getinfo($ch);
-        curl_close($ch);
 
         if ($info['http_code'] === 200 && $info['size_download'] > 0) {
             $fp = fopen($localFile, 'w+');
