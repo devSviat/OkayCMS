@@ -10087,6 +10087,52 @@ img.lazy:not(.loaded) {
 	.vs-section {
 		padding-top: var(--vs-space-6);
 	}
+
+/* Width is the one thing a phone in landscape has. The 992px layout already    */
+/* knows this shape - gallery left, buy box right - so it is reused here with   */
+/* tracks that fit 844px rather than 1220px.                                    */
+
+	.vs-pdp__layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+		gap: var(--vs-space-5);
+		align-items: start;
+	}
+
+	.vs-pdp__gallery {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.vs-buybox {
+		grid-column: 2;
+		grid-row: 1 / span 2;
+	}
+
+/* The 480px cap exists because an uncapped square stage in ONE column is 897px */
+/* tall at 991px wide. In two columns the stage is half the page and that       */
+/* cannot happen, so the cap only wastes the width it was protecting.           */
+
+	.vs-gallery__frame {
+		max-width: none;
+		margin: 0;
+	}
+
+/* The bar earns its 73px - 19% of a 390px viewport - only while the real CTA   */
+/* is off screen. Beside the gallery the CTA is on screen and the bar is a      */
+/* duplicate button charging rent.                                             */
+
+	.vs-sticky-buy {
+		display: none;
+	}
+
+/* The bar owned the bottom edge, so the page reserved space for it. With the   */
+/* bar gone that clearance is a dead band at the end of the page.               */
+
+	.vs-pdp:last-child,
+	.vs-section:last-child {
+		padding-bottom: var(--vs-space-6);
+	}
 }
 
 /* ============================================================================ */
