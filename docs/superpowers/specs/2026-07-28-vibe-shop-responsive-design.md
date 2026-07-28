@@ -156,11 +156,19 @@ new layout rather than a polish of an existing one, which is outside the agreed 
 
 ### Cross-cutting
 
-**9. Tap targets.** The audit counts 16 interactive elements under 44 px on the home page at
-390 px, 11 at 844 px and 820 px. These have not been individually identified yet; some are
-certainly inline text links in the footer, where a 44 px box is not the applicable standard.
-The task is to enumerate the 16, fix the ones that are genuine controls, and record which
-were deliberately left — not to inflate every element that measures small.
+**9. Tap targets at the viewports the previous pass never measured.** `components.css`
+already ends with a finished touch-target pass — a `TOUCH TARGETS` block raising roughly
+twenty selectors to `min-height: 44px`, with three exemptions documented in place: links
+inside `.vs-prose` (WCAG 2.5.8 exempts inline links in a sentence), `<label for>` on a text
+field whose job is to focus a 44 px input beside it, and `.vs-crumbs__item a` at 34 px,
+which is the entire width of the word.
+
+That pass measured **375 px portrait only**. This spec's contribution is the viewports it
+never saw: the audit counts 11 elements under 44 px at 844×390 and at 820×1180. The task is
+to enumerate those, subtract everything already covered by the three documented exemptions,
+and extend the existing `TOUCH TARGETS` block only with what landscape and tablet genuinely
+surface. Anything left unraised is documented in the same style and for the same kind of
+reason. This is not a re-run of the earlier pass and must not restate its rules.
 
 ## Explicitly out of scope
 
