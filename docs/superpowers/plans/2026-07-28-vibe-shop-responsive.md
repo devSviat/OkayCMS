@@ -28,7 +28,7 @@
 
 | File | Responsibility |
 | --- | --- |
-| `.superpowers/sdd/2026-07-28-vibe-shop-responsive/audit.mjs` | Create. The measurement harness: one browser session, fills the cart, walks 5 pages × 5 viewports, writes a JSON report and optional screenshots. |
+| `.superpowers/sdd/2026-07-28-vibe-shop-responsive/audit.mjs` | Create. The measurement harness: one browser session, fills the cart, walks 4 pages × 5 viewports, writes a JSON report and optional screenshots. |
 | `.superpowers/sdd/2026-07-28-vibe-shop-responsive/audit-baseline.json` | Create. The before-state, captured once in Task 1 and never regenerated. |
 | `.superpowers/sdd/2026-07-28-vibe-shop-responsive/progress.md` | Create. The ledger: one block per task with the measured numbers. |
 | `design/vibe_shop/js/okay.js` | Modify `:538-557`. The `.fn_products_slide` Swiper breakpoint ladder. |
@@ -46,7 +46,7 @@ Nothing can be verified without numbers, and every later task's red-green cycle 
 - Create: `.superpowers/sdd/2026-07-28-vibe-shop-responsive/progress.md`
 
 **Interfaces:**
-- Produces: `node .superpowers/sdd/2026-07-28-vibe-shop-responsive/audit.mjs <outDir> <label> [--shots]`, writing `<outDir>/audit-<label>.json`. Report shape: `{label, consoleErrors: [], results: {"<page>/<viewport>": {vw, vh, scrollWidth, overflowX, docHeight, header, stickyBuy, hero, carouselPerView, catalogueCols, pdpCols, galleryFrameW, tiny: {}, tinyTotal}}}`. Page keys: `home`, `catalogue`, `product`, `cart`, `checkout`. Viewport keys: `phone-portrait`, `phone-landscape`, `tablet-portrait`, `tablet-landscape`, `desktop`. Every later task consumes these exact key names.
+- Produces: `node .superpowers/sdd/2026-07-28-vibe-shop-responsive/audit.mjs <outDir> <label> [--shots]`, writing `<outDir>/audit-<label>.json`. Report shape: `{label, consoleErrors: [], results: {"<page>/<viewport>": {vw, vh, scrollWidth, overflowX, docHeight, header, stickyBuy, hero, carouselPerView, catalogueCols, pdpCols, galleryFrameW, tiny: {}, tinyTotal}}}`. Page keys: `home`, `catalogue`, `product`, `cart`. There is no separate checkout page: `CartController` renders the whole checkout form (`.vs-checkout`) inline on `/cart`, and `/order` is the post-purchase confirmation keyed by order hash, which 404s without one. Viewport keys: `phone-portrait`, `phone-landscape`, `tablet-portrait`, `tablet-landscape`, `desktop`. Every later task consumes these exact key names.
 
 - [ ] **Step 1: Confirm the dev environment answers**
 
@@ -107,7 +107,6 @@ const PAGES = [
     ['catalogue', 'http://localhost/all-products'],
     ['product', 'http://localhost/products/divan-redking'],
     ['cart', 'http://localhost/cart'],
-    ['checkout', 'http://localhost/order'],
 ];
 
 // Three lines so the cart and checkout render their real layout rather than
@@ -422,10 +421,10 @@ Expected: one hit around line 10017, wrapped in `/* ===== */` banners at 10016 a
 ```bash
 cd /home/sviat/projects/OkayCMS
 D=.superpowers/sdd/2026-07-28-vibe-shop-responsive
-node $D/audit.mjs /tmp red-short | grep -E '(home|checkout)/phone-landscape'
+node $D/audit.mjs /tmp red-short | grep -E '(home|cart)/phone-landscape'
 ```
 
-Expected: `home/phone-landscape ... hero=362` — a 362 px banner under a 61 px header on a 390 px viewport, so the first screen is banner and nothing else. Note `checkout/phone-landscape docH=` too; it will be around 2700.
+Expected: `home/phone-landscape ... hero=356` — a banner as tall as the viewport under a 61 px header on a 390 px screen, so the first screen is banner and nothing else. Note `cart/phone-landscape docH=` too; it will be around 2700. `/cart` is the checkout: the contact, delivery, payment and totals panels all render on it.
 
 - [ ] **Step 3: Insert the section**
 
@@ -497,10 +496,10 @@ Insert immediately before the `/* ===== */` banner line that precedes `TOUCH TAR
 cd /home/sviat/projects/OkayCMS
 rm -f compiled/vibe_shop/*.php cache/css/*
 D=.superpowers/sdd/2026-07-28-vibe-shop-responsive
-node $D/audit.mjs /tmp green-short | grep -E '(home|checkout)/(phone-landscape|phone-portrait|tablet-portrait)'
+node $D/audit.mjs /tmp green-short | grep -E '(home|cart)/(phone-landscape|phone-portrait|tablet-portrait)'
 ```
 
-Expected: `home/phone-landscape hero=234` (was 362); `home/phone-portrait hero` unchanged at its portrait value, because 844 px of height is nowhere near the threshold; `checkout/phone-landscape docH` reduced by roughly 200-400 px from baseline. No `OVERFLOW-X`, `consoleErrors: 0`.
+Expected: `home/phone-landscape hero` at roughly 234, down from 356; `home/phone-portrait hero` unchanged at its portrait value, because 844 px of height is nowhere near the threshold; `cart/phone-landscape docH` reduced by roughly 200-400 px from baseline. No `OVERFLOW-X`, `consoleErrors: 0`.
 
 - [ ] **Step 5: Grep the diff for the three compiler traps**
 
@@ -522,7 +521,7 @@ Append to `progress.md`:
 
 New SHORT VIEWPORT section before TOUCH TARGETS, two blocks: max-height 500px,
 and max-height 500px + min-width 640px. hero 362→234 at phone-landscape,
-unchanged in portrait. checkout docHeight at phone-landscape reduced. Three
+unchanged in portrait. cart docHeight at phone-landscape reduced. Three
 compiler-trap greps clear.
 ```
 
@@ -982,7 +981,7 @@ D=.superpowers/sdd/2026-07-28-vibe-shop-responsive
 node $D/audit.mjs $D final --shots
 ```
 
-Expected: exit 0, `consoleErrors: 0`, no `OVERFLOW-X` on any of the 25 rows.
+Expected: exit 0, `consoleErrors: 0`, no `OVERFLOW-X` on any of the 20 rows.
 
 - [ ] **Step 2: Diff every number against the baseline**
 
@@ -1013,7 +1012,7 @@ cd /home/sviat/projects/OkayCMS
 ls .superpowers/sdd/2026-07-28-vibe-shop-responsive/final-*.png | wc -l
 ```
 
-Expected: 25. Open at minimum the four landscape and tablet views of home, catalogue and product. Numbers cannot catch overlap, clipped text, or a two-column grid whose columns are correct and ugly.
+Expected: 20. Open at minimum the four landscape and tablet views of home, catalogue and product. Numbers cannot catch overlap, clipped text, or a two-column grid whose columns are correct and ugly.
 
 - [ ] **Step 5: Full-file compiler-trap sweep**
 
@@ -1042,9 +1041,9 @@ Expected: empty. Like Task 1, this task ships no commit — the workspace is git
 
 ## Self-Review
 
-**Spec coverage.** Item 1 → Task 2. Item 2 → Task 3. Item 3 → Task 3. Item 4 → Task 4. Item 5 → Task 5. Item 6 → Task 6. Item 7 (cart and checkout inherit the rhythm compression) → Task 3, verified there via `checkout/phone-landscape docHeight`. Item 8 → Task 7. The spec's verification section → Task 1 (harness, baseline) and Task 8 (full matrix, desktop guard, trap sweep). The spec's open item → carried into Task 8 Step 6. No spec requirement is unassigned.
+**Spec coverage.** Item 1 → Task 2. Item 2 → Task 3. Item 3 → Task 3. Item 4 → Task 4. Item 5 → Task 5. Item 6 → Task 6. Item 7 (cart and checkout inherit the rhythm compression) → Task 3, verified there via `cart/phone-landscape docHeight` — `/cart` carries the checkout form, so one row covers both. Item 8 → Task 7. The spec's verification section → Task 1 (harness, baseline) and Task 8 (full matrix, desktop guard, trap sweep). The spec's open item → carried into Task 8 Step 6. No spec requirement is unassigned.
 
-**Type consistency.** The harness's report keys — `header`, `stickyBuy`, `hero`, `carouselPerView`, `catalogueCols`, `pdpCols`, `galleryFrameW`, `docHeight`, `tiny`, `tinyTotal`, `overflowX` — are defined in Task 1 Step 2 and every later task reads exactly those names. Page keys (`home`, `catalogue`, `product`, `cart`, `checkout`) and viewport keys (`phone-portrait`, `phone-landscape`, `tablet-portrait`, `tablet-landscape`, `desktop`) are likewise fixed in Task 1 and used verbatim in Tasks 2, 4, 5, 7 and 8.
+**Type consistency.** The harness's report keys — `header`, `stickyBuy`, `hero`, `carouselPerView`, `catalogueCols`, `pdpCols`, `galleryFrameW`, `docHeight`, `tiny`, `tinyTotal`, `overflowX` — are defined in Task 1 Step 2 and every later task reads exactly those names. Page keys (`home`, `catalogue`, `product`, `cart`) and viewport keys (`phone-portrait`, `phone-landscape`, `tablet-portrait`, `tablet-landscape`, `desktop`) are likewise fixed in Task 1 and used verbatim in Tasks 2, 4, 5, 7 and 8.
 
 **Placeholder scan.** No step says "add appropriate handling", "similar to Task N", or "write tests for the above". Every CSS step carries the actual rule, every verification step carries the actual command and the number it must print. Task 7 Step 3 is the one step that asks for judgement rather than a fixed edit; it is bounded by three named classification groups and by an explicit instruction that a no-CSS-change outcome is a legitimate result rather than a failure.
 
