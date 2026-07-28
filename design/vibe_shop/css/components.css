@@ -5566,6 +5566,18 @@ body.hc-nav-open {
 	min-width: 0;
 }
 
+/* Delivery and payment arrive from one include and share a single grid item of  */
+/* .vs-cart__main, so the gap above never reached between them. Same display and */
+/* same token, so the four checkout panels are evenly spaced whichever wrapper    */
+/* they happen to sit in. The payment block is display:none until a delivery      */
+/* method with payment options is picked, and a hidden grid item leaves no gap.   */
+
+.vs-cart__deliveries {
+	display: grid;
+	gap: var(--vs-space-5);
+	min-width: 0;
+}
+
 .vs-panel {
 	min-width: 0;
 	padding: var(--vs-space-5);

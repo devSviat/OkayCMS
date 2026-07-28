@@ -142,8 +142,11 @@
                             </div>
                         </section>
 
-                        {* Delivery and Payment *}
-                        <div id="fn_ajax_deliveries">
+                        {* Delivery and Payment. This wrapper is one grid item of
+                           .vs-cart__main, so the two panels it holds sat flush
+                           against each other while every other pair on the page
+                           was 20px apart. It carries the same gap itself now. *}
+                        <div id="fn_ajax_deliveries" class="vs-cart__deliveries">
                             {include file='cart_deliveries.tpl'}
                         </div>
                     </div>
