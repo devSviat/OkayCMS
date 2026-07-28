@@ -1561,6 +1561,47 @@ body.hc-nav-open {
 	object-fit: contain;
 }
 
+/* One text edge for the whole menu. A row with a leading 20px glyph starts its  */
+/* text at 52px (20px padding + 20px glyph + 12px gap); a row without one starts */
+/* at 20px, which split the menu into two ragged columns. Rows with no glyph     */
+/* reserve the rail instead of sliding under it.                                 */
+/*                                                                              */
+/* The test is first-child, NOT :has(svg). The CMS row "Клієнтам" contains an    */
+/* svg - its submenu chevron, nested in a trailing .vs-menu__chevron span. Keyed */
+/* on :has(svg) that one row would count as railed and its four siblings would   */
+/* not, making the edge worse than leaving it alone.                             */
+/*                                                                              */
+/* hc-offcanvas-nav also injects an empty, absolutely-positioned <label> as the  */
+/* real first child of any row it turns into a checkbox-driven submenu toggle -  */
+/* here that is "Категорії" plus both switcher rows, since they now carry a      */
+/* glyph and already had a nested <ul>. The label costs no visible space, but it */
+/* does own the DOM :first-child slot, so a bare :has(> svg:first-child) stops   */
+/* seeing the glyph on exactly those three rows and wrongly re-rails them. The   */
+/* extra :not() clauses below recognise a glyph sitting right after that label - */
+/* directly, when hc-offcanvas-nav reuses the source <a> ("Категорії"), or one   */
+/* level deeper inside the wrapper <span> it builds around a source <span> row   */
+/* (the currency and language switchers).                                       */
+/*                                                                              */
+/* .bottom-nav is excluded: its social links are pills on their own row, not     */
+/* rail items.                                                                   */
+
+.hc-offcanvas-nav .nav-content > ul:not(.bottom-nav) > li > .nav-item:not(:has(> svg:first-child)):not(:has(> img:first-child)):not(:has(> .nav-icon:first-child)):not(:has(> label:first-child + svg)):not(:has(> label:first-child + img)):not(:has(> label:first-child + .nav-icon)):not(:has(> label:first-child + span > svg:first-child)):not(:has(> label:first-child + span > img:first-child)) {
+	padding-left: calc(var(--vs-space-5) + 20px + var(--vs-space-3));
+}
+
+/* The wrapper span from the paragraph above (currency and language) keeps the   */
+/* glyph and the value text as its own two children, once removed from          */
+/* .nav-item - so .nav-item's own flex/gap never reaches them and the two sit    */
+/* with only a collapsed-whitespace gap instead of the rail's 12px. Restating    */
+/* the same flex row here on that inner span lines its text up with every other  */
+/* glyph row's 52px edge.                                                       */
+
+.hc-offcanvas-nav .nav-item > label:first-child + span:has(> svg:first-child) {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
+}
+
 .hc-offcanvas-nav .nav-icon {
 	display: inline-flex;
 	align-items: center;

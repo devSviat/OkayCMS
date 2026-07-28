@@ -91,9 +91,11 @@
 {* Currencies *}
 {if $currencies|count > 1}
 <ul class="currencies-nav">
-    <li class="">
-
-        <span class=""><span data-language="mobile_menu_currency">{$lang->mobile_menu_currency}:</span> {$currency->name}</span>
+    <li>
+        <span aria-label="{$lang->mobile_menu_currency|escape}: {$currency->name|escape}">
+            {include file="svg.tpl" svgId="coins"}
+            <span>{$currency->name|escape}</span>
+        </span>
         <ul class="">
             {foreach $currencies as $c}
             {if $c->enabled}
@@ -118,11 +120,11 @@
 {/foreach}
 {if $cnt>1}
     <ul class="language-nav">
-        <li class="">
-            {if is_file("{$config->lang_images_dir}{$language->label}.png")}
-            <img alt="{$language->current_name}" src="{("{$language->label}.png")|resize:20:20:false:$config->lang_resized_dir}" />
-            {/if}
-            <span class="">{$language->name}</span>
+        <li>
+            <span>
+                {include file="svg.tpl" svgId="language"}
+                <span>{$language->name|escape}</span>
+            </span>
             <ul class="">
                 {foreach $languages as $l}
                 {if $l->enabled}
@@ -144,27 +146,26 @@
 {/if}
 {/if}
 
-{if $settings->site_phones}
-{foreach $settings->site_phones as $phone}
+{if $settings->site_phones || $settings->site_email}
 <ul class="contact-nav">
+    {if $settings->site_phones}
+    {foreach $settings->site_phones as $phone}
     <li>
         <a class="phone" href="tel:{preg_replace('~[^0-9\+]~', '', $phone)}">
             {include file="svg.tpl" svgId="phone"}
             <span>{$phone|escape}</span>
         </a>
     </li>
-</ul>
-
-{/foreach}
-{/if}
-{if $settings->site_email}
-<ul class="contact-nav">
+    {/foreach}
+    {/if}
+    {if $settings->site_email}
     <li>
         <a class="email" href="mailto:{$settings->site_email|escape}">
             {include file="svg.tpl" svgId="mail"}
             <span>{$settings->site_email|escape}</span>
         </a>
     </li>
+    {/if}
 </ul>
 {/if}
 
