@@ -542,6 +542,9 @@ $(function () {
           360: {
             slidesPerView: 2,
           },
+          576: {
+            slidesPerView: 3,
+          },
           768: {
             slidesPerView: 3,
           },

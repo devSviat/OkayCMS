@@ -10177,7 +10177,7 @@ img.lazy:not(.loaded) {
 /* 640px keeps an iPhone SE sideways (667x375) in this layer while excluding a  */
 /* narrow window that merely happens to be short.                              */
 
-@media (max-height: 500px) and (min-width: 640px) {
+@media (max-height: 500px) and (min-width: 640px) and (max-width: 991px) {
 	.vs-section {
 		padding-top: var(--vs-space-6);
 	}
@@ -10205,7 +10205,9 @@ img.lazy:not(.loaded) {
 
 /* The 480px cap exists because an uncapped square stage in ONE column is 897px */
 /* tall at 991px wide. In two columns the stage is half the page and that       */
-/* cannot happen, so the cap only wastes the width it was protecting.           */
+/* cannot happen below 992px, where this block stops - above it the real        */
+/* desktop layout already exists, and half of 1440 is still 720px, so the cap    */
+/* has to stay in force there instead of being dropped again.                   */
 
 	.vs-gallery__frame {
 		max-width: none;

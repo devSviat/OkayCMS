@@ -92,8 +92,9 @@
 {if $currencies|count > 1}
 <ul class="currencies-nav">
     <li>
-        <span aria-label="{$lang->mobile_menu_currency|escape}: {$currency->name|escape}">
+        <span>
             {include file="svg.tpl" svgId="coins"}
+            <span class="vs-sr-only">{$lang->mobile_menu_currency|escape}: </span>
             <span>{$currency->name|escape}</span>
         </span>
         <ul class="">
