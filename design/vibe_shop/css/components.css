@@ -6099,7 +6099,7 @@ body.hc-nav-open {
 
 .vs-option-card__radio:checked {
 	border-color: var(--vs-accent);
-	background-image: radial-gradient(circle at center, var(--vs-accent) 0 5px, transparent 5px);
+	background-image: radial-gradient(circle at center, var(--vs-accent) 0 4px, transparent 5px);
 }
 
 .vs-option-card__body {
