@@ -46,6 +46,22 @@
 
             $('.fn_payments_block').show();
 
+            {* This pass decides visibility from the delivery's payment_method_ids
+               alone, so it un-hides everything the NovaposhtaCost module had
+               filtered out for the "Післяплата" checkbox. It runs again after every
+               cart AJAX - ajax_set_result() ends by triggering change on the checked
+               delivery - which is why applying a coupon or changing a quantity
+               brought the cash-on-delivery method back. Hand control back to the
+               module when it is installed; it re-picks the payment itself. *}
+            if (typeof update_np_payments === 'function') {
+                update_np_payments();
+
+                if (typeof select_first_active_payment === 'function'
+                    && $('input[name="payment_method_id"]:checked').closest('.fn_payment_method__item').is(':hidden')) {
+                    select_first_active_payment();
+                }
+            }
+
             /*если способ оплаты не активен для данной доставки, тогда выберим первый доступный*/
             if ($('input[name="payment_method_id"][value="' + current_payment_id + '"]').is(':disabled')) {
                 $(".fn_payment_method__item:visible").first().find('input[name="payment_method_id"]').prop('checked', true).trigger('click');
