@@ -263,7 +263,12 @@
                                 <div class="">
                                     <div class="heading_label" >{$btr->general_date|escape}</div>
                                     <div class="mb-1">
-                                        <input name="date" class="form-control" type="text" value="{$post->date|date}" />
+                                        {* Rendered with an explicit format rather than the site's display
+                                           format: this field is re-parsed on save, so a date-only display
+                                           format (the usual d.m.Y) silently zeroed every post's time on
+                                           each save. The stored column keeps a time, so the form has to
+                                           show one to round-trip it. *}
+                                        <input name="date" class="form-control" type="text" value="{$post->date|date:'d.m.Y H:i'}" />
                                     </div>
                                 </div>
                                 <div class="">

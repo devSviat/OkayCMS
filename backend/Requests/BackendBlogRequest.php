@@ -45,7 +45,21 @@ class BackendBlogRequest
         $post->author_id = $this->request->post('author_id', 'integer');
         $post->read_time = $this->request->post('read_time', 'integer');
         $post->name      = $this->request->post('name');
-        $post->date      = date('Y-m-d H:i:s', strtotime($this->request->post('date')));
+        // strtotime() returns false for an empty or malformed field and date()
+        // reads false as 0, so the old one-liner silently stamped every save the
+        // form could not parse with 1970-01-01 - destroying the stored date and
+        // taking the post's own page down with it. An unparseable field now
+        // leaves an existing record's date untouched; only a new post, which has
+        // to have one, falls back to the current time.
+        // ok_blog.date is a TIMESTAMP, whose range starts at 1970-01-01 00:00:01
+        // UTC - anything at or below zero is stored as 0000-00-00 instead, which
+        // is how a rescued epoch row got worse rather than better. `> 0` is the
+        // same guard updated_date already uses three lines down.
+        if (($time = strtotime((string)$this->request->post('date'))) > 0) {
+            $post->date = date('Y-m-d H:i:s', $time);
+        } elseif (empty($post->id)) {
+            $post->date = date('Y-m-d H:i:s');
+        }
         $post->rating = $this->request->post('rating', 'float');
         $post->votes  = $this->request->post('votes', 'integer');
         
