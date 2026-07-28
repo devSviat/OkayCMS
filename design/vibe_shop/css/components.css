@@ -2621,8 +2621,11 @@ body.hc-nav-open {
 }
 
 /* The fast-order button is rendered by the FastOrder module and cannot be      */
-/* edited from here; it still carries a font-awesome glyph in ::before, so its  */
-/* label is folded away rather than removed. Task 8 revisits it with the sprite. */
+/* edited from here - its markup hard-codes "fa fa-rocket". The theme ships no  */
+/* icon font, so the glyph would never arrive and the 44px control would be     */
+/* empty; ::before is given a theme-owned mask instead and the module's own     */
+/* label stays folded away by font-size: 0. A bolt, not a rocket: the same mark */
+/* the rest of the theme uses for speed, and drawn here rather than borrowed.   */
 
 .vs-card__actions .fast_order_button {
 	display: inline-flex;
@@ -2646,7 +2649,15 @@ body.hc-nav-open {
 }
 
 .vs-card__actions .fast_order_button::before {
-	font-size: 17px;
+	content: "";
+	flex: none;
+	width: 18px;
+	height: 18px;
+	background-color: currentColor;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2L4 13h6l-1 9L19 11h-6z'/%3E%3C/svg%3E") no-repeat center;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2L4 13h6l-1 9L19 11h-6z'/%3E%3C/svg%3E") no-repeat center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
 }
 
 /* ------------------------------------------------------------- breadcrumbs */
@@ -4326,9 +4337,9 @@ body.hc-nav-open {
 	display: inline-flex;
 }
 
-/* The fast-order button is rendered by the FastOrder module and cannot be      */
-/* edited from here; it still carries a font-awesome glyph in ::before, so its  */
-/* label is folded away rather than removed. Task 8 revisits it with the sprite. */
+/* Same treatment as the catalogue card's copy of this button - see the note    */
+/* there. The module's markup is shared, so the mask has to be repeated rather  */
+/* than inherited: the two buttons never appear on the same page.               */
 
 .vs-buybox__aside .fast_order_button {
 	display: inline-flex;
@@ -4352,7 +4363,15 @@ body.hc-nav-open {
 }
 
 .vs-buybox__aside .fast_order_button::before {
-	font-size: 17px;
+	content: "";
+	flex: none;
+	width: 18px;
+	height: 18px;
+	background-color: currentColor;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2L4 13h6l-1 9L19 11h-6z'/%3E%3C/svg%3E") no-repeat center;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2L4 13h6l-1 9L19 11h-6z'/%3E%3C/svg%3E") no-repeat center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
 }
 
 /* --------------------------------------------------- delivery / payment rows */
@@ -4473,13 +4492,14 @@ body.hc-nav-open {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 44px;
-	height: 44px;
-	padding: 0;
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0 var(--vs-space-4);
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-full);
 	background: var(--vs-surface);
 	color: var(--vs-text);
+	text-decoration: none;
 	transition: border-color var(--vs-dur-1) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease);
 }
 
@@ -4489,8 +4509,22 @@ body.hc-nav-open {
 	color: var(--vs-text);
 }
 
+/* The network name carries the button, the way .vs-socials already does. The   */
+/* logo element is jsSocials' <i class="fa fa-*"> and this theme ships no icon  */
+/* font, so it would be an empty inline box - removed rather than left to       */
+/* collapse. Kept as a rule so a custom social configured with a real image URL */
+/* (jsSocials emits <img> for those) is still suppressed instead of half-shown. */
+
 .vs-share .jssocials-share .jssocials-share-logo {
-	font-size: 17px;
+	display: none;
+}
+
+.vs-share .jssocials-share .jssocials-share-label {
+	margin: 0;
+	font-size: var(--vs-text-sm);
+	line-height: 1;
+	text-transform: capitalize;
+	white-space: nowrap;
 }
 
 /* -------------------------------------------------------------- sticky buy */
@@ -9289,9 +9323,8 @@ img.lazy:not(.loaded) {
 /* ---------------------------------------------------------- scroll to top */
 
 /* okay.js toggles .show on scroll and animates the jump. theme.css drew the    */
-/* glyph with a font-awesome codepoint in ::before; the CDN link is still in    */
-/* head.tpl for the module templates that need it, but nothing this theme owns  */
-/* should depend on it, so the chevron is two borders like every other one.     */
+/* glyph with a font-awesome codepoint in ::before. The theme now ships no icon */
+/* font at all, so the chevron is two borders like every other one here.        */
 
 .to_top {
 	position: fixed;
