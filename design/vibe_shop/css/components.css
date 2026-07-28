@@ -10032,7 +10032,7 @@ img.lazy:not(.loaded) {
 
 @media (max-height: 500px) {
 
-/* 21/9 from 768px makes the banner 362px at 844px wide. Under a 61px header on */
+/* 21/9 from 768px makes the banner 356px at 844px wide. Under a 61px header on */
 /* a 390px viewport that is the entire fold. 60vh is 234px there, which leaves  */
 /* about 95px of the next section showing - enough to say the page continues.   */
 
@@ -10060,8 +10060,10 @@ img.lazy:not(.loaded) {
 	}
 
 /* The card's breathing room is tuned for a portrait screen. These are the same */
-/* values the 575px block already uses; the plate cap is what actually buys the */
-/* second row, since a 1:1 plate in a three-column grid is 250px tall at 844.   */
+/* values the 575px block already uses. The plate cap is what does the work: a  */
+/* 1:1 plate in a three-column grid is 250px tall at 844, and capping it takes  */
+/* 68px off every row. It cannot bring row two above the fold - the page        */
+/* furniture above the grid already fills 313px of a 390px landscape screen.    */
 
 	.vs-card {
 		padding: var(--vs-space-2);
