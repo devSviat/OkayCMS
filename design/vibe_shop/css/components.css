@@ -2367,12 +2367,20 @@ body.hc-nav-open {
 	background-color: var(--vs-surface-subtle);
 }
 
+/* A solid ink disc turned "added to comparison" into the loudest thing on the  */
+/* card, above the photograph it sits on. The plate is enough to carry the     */
+/* state - the comparison glyph has no filled twin, so removing the plate      */
+/* would leave that control with no visible state at all.                      */
+
+/* Not --vs-surface-subtle: that is already the hover plate, and matching it   */
+/* would make hovering an unadded control look identical to an added one.      */
+
 .vs-card__tool.selected {
-	color: var(--vs-ink-text);
+	color: var(--vs-accent);
 }
 
 .vs-card__tool.selected::before {
-	background-color: var(--vs-ink);
+	background-color: var(--vs-n-200);
 }
 
 .vs-card__wish_off,
