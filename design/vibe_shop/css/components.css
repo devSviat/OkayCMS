@@ -699,9 +699,16 @@ body.other_page .main {
 	background-color: var(--vs-surface-subtle);
 }
 
-.vs-switcher__current img {
-	display: block;
-	border-radius: var(--vs-radius-sm);
+/* The language trigger leads with a globe, sized and toned like the phone and  */
+/* callback glyphs it sits beside in the utility bar. The flag thumbnails it    */
+/* replaces were raster files scaled to 20px and one per language, and they     */
+/* said nothing the language name did not.                                      */
+
+.vs-switcher__current--lang > svg {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	color: var(--vs-text-muted);
 }
 
 .vs-switcher__chevron {

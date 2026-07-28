@@ -8,10 +8,8 @@
 	{/foreach}
 	{if $cnt>1}
 		<div class="vs-switcher__item vs-disclosure">
-			<button type="button" class="vs-switcher__current vs-disclosure__trigger" aria-expanded="false">
-				{if is_file("{$config->lang_images_dir}{$language->label}.png")}
-					<img alt="{$language->current_name}" width="20" height="20" src='{("{$language->label}.png")|resize:20:20:false:$config->lang_resized_dir}'/>
-				{/if}
+			<button type="button" class="vs-switcher__current vs-switcher__current--lang vs-disclosure__trigger" aria-expanded="false">
+				{include file="svg.tpl" svgId="world"}
 				<span>{$language->name}</span>
 				<span class="vs-switcher__chevron">{include file="svg.tpl" svgId="chevron"}</span>
 			</button>
@@ -19,9 +17,6 @@
 				{foreach $languages as $l}
 					{if $l->enabled}
 						<a class="vs-switcher__link{if $language->id == $l->id} is-current{/if}" href="{preg_replace('/^(.+)\/$/', '$1', $l->url)}">
-							{if is_file("{$config->lang_images_dir}{$l->label}.png")}
-								<img alt="{$l->current_name}" width="20" height="20" src='{("{$l->label}.png")|resize:20:20:false:$config->lang_resized_dir}'/>
-							{/if}
 							<span>{$l->name|escape}</span>
 						</a>
 					{/if}
