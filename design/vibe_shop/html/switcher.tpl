@@ -8,8 +8,8 @@
 	{/foreach}
 	{if $cnt>1}
 		<div class="vs-switcher__item vs-disclosure">
-			<button type="button" class="vs-switcher__current vs-switcher__current--lang vs-disclosure__trigger" aria-expanded="false">
-				{include file="svg.tpl" svgId="world"}
+			<button type="button" class="vs-switcher__current vs-switcher__current--icon vs-disclosure__trigger" aria-expanded="false">
+				{include file="svg.tpl" svgId="language"}
 				<span>{$language->name}</span>
 				<span class="vs-switcher__chevron">{include file="svg.tpl" svgId="chevron"}</span>
 			</button>
@@ -29,7 +29,8 @@
 <!-- Currencies -->
 {if $currencies|count > 1}
 	<div class="vs-switcher__item vs-disclosure">
-		<button type="button" class="vs-switcher__current vs-disclosure__trigger" aria-expanded="false">
+		<button type="button" class="vs-switcher__current vs-switcher__current--icon vs-disclosure__trigger" aria-expanded="false">
+			{include file="svg.tpl" svgId="coins"}
 			<span>{$currency->name|escape}</span>
 			<span class="vs-switcher__chevron">{include file="svg.tpl" svgId="chevron"}</span>
 		</button>

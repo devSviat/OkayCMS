@@ -699,12 +699,12 @@ body.other_page .main {
 	background-color: var(--vs-surface-subtle);
 }
 
-/* The language trigger leads with a globe, sized and toned like the phone and  */
-/* callback glyphs it sits beside in the utility bar. The flag thumbnails it    */
-/* replaces were raster files scaled to 20px and one per language, and they     */
-/* said nothing the language name did not.                                      */
+/* Both switchers lead with a glyph, sized and toned like the phone and         */
+/* callback icons they sit beside in the utility bar. The flag thumbnails the   */
+/* language one replaces were raster files, one per language, scaled to 20px    */
+/* on request - and a flag is a poor stand-in for a language in any case.       */
 
-.vs-switcher__current--lang > svg {
+.vs-switcher__current--icon > svg {
 	flex: none;
 	width: 16px;
 	height: 16px;

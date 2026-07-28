@@ -544,13 +544,23 @@
         <path d="M6.979 3.074a6 6 0 0 1 4.988 1.425l.037 .033l.034 -.03a6 6 0 0 1 4.733 -1.44l.246 .036a6 6 0 0 1 3.364 10.008l-.18 .185l-.048 .041l-7.45 7.379a1 1 0 0 1 -1.313 .082l-.094 -.082l-7.493 -7.422a6 6 0 0 1 3.176 -10.215z"/>
     </svg>
 {/if}
-{if $svgId == "world"}
+{if $svgId == "language"}
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/>
-        <path d="M3.6 9h16.8"/>
-        <path d="M3.6 15h16.8"/>
-        <path d="M11.5 3a17 17 0 0 0 0 18"/>
-        <path d="M12.5 3a17 17 0 0 1 0 18"/>
+        <path d="M9 6.371c0 4.418 -2.239 6.629 -5 6.629"/>
+        <path d="M4 6.371h7"/>
+        <path d="M5 9c0 2.144 2.252 3.908 6 4"/>
+        <path d="M12 20l4 -9l4 9"/>
+        <path d="M19.1 18h-6.2"/>
+        <path d="M6.694 3l.793 .582"/>
+    </svg>
+{/if}
+{if $svgId == "coins"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M9 14c0 1.657 2.686 3 6 3s6 -1.343 6 -3s-2.686 -3 -6 -3s-6 1.343 -6 3"/>
+        <path d="M9 14v4c0 1.656 2.686 3 6 3s6 -1.344 6 -3v-4"/>
+        <path d="M3 6c0 1.072 1.144 2.062 3 2.598s4.144 .536 6 0c1.856 -.536 3 -1.526 3 -2.598c0 -1.072 -1.144 -2.062 -3 -2.598s-4.144 -.536 -6 0c-1.856 .536 -3 1.526 -3 2.598"/>
+        <path d="M3 6v10c0 .888 .772 1.45 2 2"/>
+        <path d="M3 11c0 .888 .772 1.45 2 2"/>
     </svg>
 {/if}
 {if $svgId == "compare"}
