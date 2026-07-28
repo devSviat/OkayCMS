@@ -4634,9 +4634,11 @@ body.hc-nav-open {
 /* has to sit above this bar whenever it is showing, and the two must move    */
 /* together if this bar's own box height ever changes. Declared on :root, not */
 /* on .vs-sticky-buy itself - custom properties do not inherit sideways to a  */
-/* sibling element, only down to descendants.                                 */
+/* sibling element, only down to descendants. The two trailing 1px terms are  */
+/* the bar's own top and bottom border - outside the padding box, so left out */
+/* of this calc the token undercounts the real height by 2px.                 */
 :root {
-	--vs-sticky-buy-h: calc(52px + var(--vs-space-2) * 2);
+	--vs-sticky-buy-h: calc(52px + var(--vs-space-2) * 2 + 1px + 1px);
 }
 
 .vs-sticky-buy {
@@ -9521,10 +9523,16 @@ img.lazy:not(.loaded) {
 /* The sticky buy bar and this button are both fixed at the same z-layer and   */
 /* both anchor near the bottom-left on phones - harmless while the bar was a   */
 /* full-bleed strip this button was flush against, but once the bar floats as  */
-/* an inset pill the two collide directly on top of the price. Lift this       */
-/* button clear of the bar only while the bar is actually shown.               */
-body:has(.vs-sticky-buy.is-visible) .to_top {
-	bottom: calc(var(--vs-space-3) + env(safe-area-inset-bottom) + var(--vs-sticky-buy-h) + var(--vs-space-3));
+/* an inset pill the two collide directly on top of the price. The class      */
+/* alone isn't a safe guard: vibe.js's IntersectionObserver sets is-visible at */
+/* every width, with no matchMedia guard, while the bar itself only renders    */
+/* below 992px. Without this breakpoint the button would lift to clear a bar   */
+/* that isn't even on screen above 992px. So the lift is scoped to the same    */
+/* width the bar renders at, and only applies while the bar is actually shown. */
+@media (max-width: 991px) {
+	body:has(.vs-sticky-buy.is-visible) .to_top {
+		bottom: calc(var(--vs-space-3) + env(safe-area-inset-bottom) + var(--vs-sticky-buy-h) + var(--vs-space-3));
+	}
 }
 
 /* Nudged down by 2px: an up-chevron drawn from a rotated square is optically   */
