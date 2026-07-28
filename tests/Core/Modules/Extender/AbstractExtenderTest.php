@@ -112,19 +112,25 @@ class AbstractExtenderTest extends TestCase
         $method = $reflector->getMethod('checkAndCorrectDeprecatedMethod');
         $method->setAccessible(true);
 
-        switch ($error) {
-            case E_USER_WARNING:
-                $this->expectWarning();
-                break;
+        // expectWarning() and expectDeprecation() were removed in PHPUnit 10, and
+        // they also turned the raised error into an exception - so the assertion
+        // on the return value below never ran for the two data sets that expect
+        // one. Collecting the error by hand keeps the method returning, which
+        // lets both halves be checked.
+        $raised = [];
+        set_error_handler(static function (int $errno) use (&$raised): bool {
+            $raised[] = $errno;
+            return true;
+        }, E_USER_WARNING | E_USER_DEPRECATED);
 
-            case E_USER_DEPRECATED:
-                $this->expectDeprecation();
-                break;
+        try {
+            $actualResult = $method->invoke($abstractExtender, $trigger);
+        } finally {
+            restore_error_handler();
         }
 
-        $actualResult = $method->invoke($abstractExtender, $trigger);
-
-        $this->assertEquals($actualResult, $expectedResult);
+        $this->assertSame($error === false ? [] : [$error], $raised);
+        $this->assertEquals($expectedResult, $actualResult);
     }
 
     /**
