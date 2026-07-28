@@ -4039,12 +4039,14 @@ body.hc-nav-open {
 	pointer-events: none;
 }
 
-/* The one badge Task 3 left without a rule. "Top seller" is shop copy, not a  */
-/* price event, so it is ink on the plate and never rose - rose is a discount. */
+/* "Top seller" is shop copy, not a price event, so it must not be rose - rose  */
+/* is a discount. It was ink; green at the shop owner's request, the same       */
+/* --vs-ok-600 the in-stock line already uses on this card. White on it clears  */
+/* AA for this size at 5.4:1.                                                    */
 
 .vs-badge--hit {
-	background-color: var(--vs-ink);
-	color: var(--vs-ink-text);
+	background-color: var(--vs-ok-600);
+	color: var(--vs-surface);
 }
 
 /* Swiper derives the slide height from the container height, so the strip needs */
