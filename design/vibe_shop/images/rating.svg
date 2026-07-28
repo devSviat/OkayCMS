@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="36" viewBox="0 0 18 36" role="presentation">
+	<!--
+		Rating sprite. Same geometry as the raster sprite it replaces: an 18x18
+		filled star stacked above an 18x18 empty star, tiled horizontally with
+		the row chosen by the background/mask position. components.css uses it
+		as a mask, so the colours below are inert there: the fill comes from the
+		vs-heading token (filled) and the vs-n-500 token (empty), which keeps the
+		empty star above 3:1 against both the vs-surface and vs-canvas tokens.
+		Black here only so the file is legible when opened on its own.
+
+		The two rows differ by SHAPE, not by tint: row 1 is a solid star, row 2
+		is the same star as an outline. Colour is never the only carrier.
+
+		The star is drawn once in a "-2 -2 28 28" space (the 2 units of padding
+		hold the outline's 1.8 unit stroke) and placed twice. scale(18/28) maps
+		that space onto an 18px cell; the outer translate drops the second copy
+		into the lower half. Do not change the 18x36 box: scripts.tpl's rater
+		reads $on.height() as its unit and $on.width() as the current value, and
+		the templates emit width:{rating*90/5}px against a 90x18 track.
+
+		Note for anyone editing this comment: XML forbids a double hyphen inside
+		a comment, so CSS custom property names cannot be written here in full.
+		A malformed comment makes the whole file unparseable and the mask then
+		resolves to nothing at all, with no error anywhere.
+	-->
+	<g transform="scale(0.64285714) translate(2 2)">
+		<path d="M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z"/>
+	</g>
+	<g transform="translate(0 18) scale(0.64285714) translate(2 2)">
+		<path d="M12 2.6l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.68l-5.9 3.1 1.13-6.58L2.45 9.54l6.6-.96z" fill="none" stroke="#000" stroke-width="1.8" stroke-linejoin="round"/>
+	</g>
+</svg>

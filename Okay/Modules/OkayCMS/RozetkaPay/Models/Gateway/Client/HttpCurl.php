@@ -58,7 +58,6 @@ class HttpCurl implements ClientInterface
         }
         $response = curl_exec($ch);
         $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
         return json_decode($response);
     }
 

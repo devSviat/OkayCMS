@@ -1,0 +1,213 @@
+/* The margin and padding zeroing came from okay.css until Task 8 deleted it.  */
+/* It is restated here rather than reasoned away: every component built in     */
+/* Tasks 1-7 was authored on top of it and states the spacing it wants, so     */
+/* handing the user-agent stylesheet back its defaults would put a margin on   */
+/* every heading, paragraph, list, fieldset and form control in the theme.     */
+/* Measured before this was restored: 40px of UA padding returned to each nav  */
+/* <ul>, and 16px of margin to every <li>.                                     */
+
+*,
+*::before,
+*::after {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+/* Navigation lists are structure, not prose. Every other list keeps its       */
+/* marker: the only unstyled lists left in the theme are inside .vs-prose,     */
+/* which restores the indent the reset above took away.                        */
+
+nav ul {
+	list-style: none;
+}
+
+body {
+	margin: 0;
+	background-color: var(--vs-canvas);
+	color: var(--vs-text);
+	font-family: var(--vs-font-ui);
+	font-size: var(--vs-text-base);
+	line-height: var(--vs-leading-body);
+	font-weight: 400;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* h5 and h6 joined the list in Task 8. They are rare outside .vs-prose, which  */
+/* sizes its own, but okay.css styled all six and admin-authored content can    */
+/* emit any of them - left out, they would have fallen back to the user-agent's */
+/* bold serif-metric defaults.                                                   */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin: 0 0 var(--vs-space-4);
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-weight: 600;
+	line-height: var(--vs-leading-tight);
+	letter-spacing: -0.01em;
+	text-wrap: balance;
+}
+
+h1 { font-size: var(--vs-text-3xl); }
+h2 { font-size: var(--vs-text-2xl); }
+h3 { font-size: var(--vs-text-xl); }
+h4 { font-size: var(--vs-text-lg); }
+h5 { font-size: var(--vs-text-base); }
+h6 { font-size: var(--vs-text-base); }
+
+p {
+	margin: 0 0 var(--vs-space-4);
+	text-wrap: pretty;
+	max-width: 70ch;
+}
+
+a {
+	color: inherit;
+	text-decoration-color: var(--vs-glyph);
+	text-underline-offset: 0.2em;
+	transition: text-decoration-color var(--vs-dur-1) var(--vs-ease);
+}
+
+/* Link hover is one of the two jobs spec 5.1 gives the owner's brand colour.   */
+/* It is the underline that takes the accent, never the text: the underline is  */
+/* decoration, so it carries no contrast floor and stays safe at every value    */
+/* --okay-basic-company can be set to, while the words keep --vs-text. Out of   */
+/* the box the accent ships as ink, so this renders as the near-black it was.   */
+/* The only link in the theme on an ink plate is .vs-skip, which sets           */
+/* text-decoration: none and so has no underline to colour.                     */
+/* This rule alone is not enough and must not be relied on alone: any later     */
+/* rule using the text-decoration SHORTHAND resets text-decoration-color to     */
+/* currentColor, and the theme's hover underlines all live in components.css    */
+/* after this file. Those rules therefore name text-decoration-line and         */
+/* text-decoration-color separately - see the note above .vs-catalog__link--3.  */
+
+a:hover {
+	text-decoration-color: var(--vs-accent);
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+	border-style: none;
+}
+
+/* Every lazy image ships a placeholder in src, so an image with no src at all */
+/* is a template that failed to fill one in - it must not draw a broken-image  */
+/* glyph in the middle of a product grid.                                       */
+
+img:not([src]) {
+	visibility: hidden;
+}
+
+svg:not(:root) {
+	overflow: hidden;
+}
+
+[hidden] {
+	display: none;
+}
+
+b,
+strong {
+	font-weight: 600;
+}
+
+small {
+	font-size: 80%;
+}
+
+sub,
+sup {
+	position: relative;
+	font-size: 75%;
+	line-height: 0;
+	vertical-align: baseline;
+}
+
+sub {
+	bottom: -0.25em;
+}
+
+sup {
+	top: -0.5em;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+	background-color: transparent;
+}
+
+hr {
+	height: 1px;
+	margin: var(--vs-space-5) 0;
+	border: 0;
+	background-color: var(--vs-hairline);
+}
+
+/* The ring is an outline, not a box-shadow, and that is the whole point.       */
+/* It was built from box-shadow until the final review: base.css loads before   */
+/* components.css, so every later rule of equal specificity that declared       */
+/* box-shadow - for elevation, which is what this theme uses box-shadow for -   */
+/* silently deleted the ring while leaving outline: none in force. Measured on  */
+/* /all-products: 72 .vs-card__tool elements focused with outline none AND      */
+/* box-shadow none, i.e. no focus indicator at all. outline cannot collide      */
+/* with elevation because nothing else in the theme declares it, and modern     */
+/* engines follow the element's own border-radius, so the radius restatement    */
+/* that used to force ~15 controls to change shape under focus is gone too.     */
+
+:focus-visible {
+	outline: 2px solid var(--vs-ink);
+	outline-offset: 2px;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+.vs-tabular {
+	font-variant-numeric: tabular-nums;
+}
+
+/* Present to assistive tech, absent to the eye. grid.css - the one utility     */
+/* sheet this theme inherited - ships no equivalent, so it is defined here      */
+/* rather than a fifth time next to each caller. The 1px clipped box, not       */
+/* display:none and not visibility:hidden: both of those take the element out   */
+/* of the accessibility tree, which is the opposite of what is wanted.          */
+
+.vs-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

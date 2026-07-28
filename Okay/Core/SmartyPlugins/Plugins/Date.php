@@ -12,6 +12,14 @@ use Okay\Core\SmartyPlugins\Modifier;
 
 class Date extends Modifier
 {
+    /**
+     * Used only when neither the caller nor the `date_format` setting supplies a
+     * format. date() returns the empty string for an empty format, which is how
+     * an unset setting emptied the admin's date input - and an empty input is
+     * what the blog form then tried to save back as a date.
+     */
+    private const FALLBACK_FORMAT = 'd.m.Y';
+
     private $translations;
     private $languages;
     private $langEntity;
@@ -30,10 +38,21 @@ class Date extends Modifier
         $this->dateFormat   = $dateFormat;
     }
     
-    public function run($date, $format = null) 
+    public function run($date, $format = null)
     {
-        if (is_numeric($date) || (!$time = strtotime($date))) {
-            $time = $date;
+        // strtotime() returns int(0) for the epoch, which the old `!$time` guard
+        // read as a parse failure; it then put the raw string back into $time and
+        // date() raised a TypeError on PHP 8. Compare against false explicitly so
+        // the one valid-but-falsy timestamp survives, and never hand date() a
+        // string: input it cannot parse is returned unformatted instead.
+        if (is_numeric($date)) {
+            $time = (int)$date;
+        } elseif ($date === null) {
+            $time = null; // date() reads null as "now" - long-standing behaviour.
+        } elseif (($parsed = strtotime((string)$date)) !== false) {
+            $time = $parsed;
+        } else {
+            return (string)$date;
         }
         if ($format !== null) {
             $language = $this->langEntity->get($this->languages->getLangId());
@@ -53,6 +72,10 @@ class Date extends Modifier
             $format = strtr($format, $custom_format);
         }
         
-        return date(!empty($format) ? $format : $this->dateFormat, $time);
+        if (empty($format)) {
+            $format = !empty($this->dateFormat) ? $this->dateFormat : self::FALLBACK_FORMAT;
+        }
+
+        return date($format, $time);
     }
 }

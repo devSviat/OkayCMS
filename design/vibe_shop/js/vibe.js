@@ -1,0 +1,1209 @@
+/**
+ * vibe_shop shared behaviour.
+ * Loaded after okay.js so every okay.js handler is already bound.
+ * Nothing here replaces okay.js logic - it only adds the overlay ("sheet")
+ * primitive, keyboard escapes and the touch fallback for hover-only menus.
+ */
+(function () {
+    'use strict';
+
+    var lastFocused = null;
+    var FOCUSABLE = 'a[href], button:not([disabled]), input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    /* prefers-reduced-motion, the half the stylesheet cannot reach.
+       base.css cuts every CSS transition and animation to 0.01ms with
+       !important, which no other rule in the theme overrides. jQuery's
+       animation queue is not CSS and is untouched by it, and okay.js drives
+       seven of them: the accordion slideDown/slideUp on the product panels and
+       the filter groups, the fades on the pop-up cart and the confirmations,
+       and the 1000ms scroll animation behind the back-to-top button. Setting
+       jQuery.fx.off makes each of them jump to its end state, which is the
+       same thing the CSS block does to a transition.
+
+       Read once, not watched: jQuery.fx.off is global and okay.js reads it at
+       the moment each animation starts, so a shopper who changes the setting
+       mid-session gets the new behaviour on the next page load - the same as
+       for every other reduced-motion consumer here. */
+    if (window.jQuery && window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        window.jQuery.fx.off = true;
+    }
+
+    /* A drawn box, not merely a match. The off-canvas navigation keeps every
+       sub-level in the DOM and only translates it out of sight, so the raw
+       selector returns ~90 nodes of which a dozen are on screen - trapping on
+       the first and last of those would hand Shift+Tab to a link nobody can
+       see. Cheap enough: it runs once per Tab keypress, never in a loop. */
+    function visibleFocusables(root) {
+        var nodes = root.querySelectorAll(FOCUSABLE);
+        var out = [];
+        for (var i = 0; i < nodes.length; i++) {
+            var box = nodes[i].getBoundingClientRect();
+            if (!box.width && !box.height) continue;
+            out.push(nodes[i]);
+        }
+        return out;
+    }
+
+    function trapFocus(sheet, event) {
+        var focusables = visibleFocusables(sheet);
+        if (!focusables.length) return;
+        var first = focusables[0];
+        var last = focusables[focusables.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    }
+
+    function backdropFor(sheet) {
+        var id = sheet.getAttribute('data-vs-backdrop');
+        return id ? document.getElementById(id) : document.querySelector('.vs-sheet__backdrop');
+    }
+
+    /* Any control pointed at the sheet with aria-controls announces its state,
+       whichever of the close paths - button, backdrop or Escape - was used. */
+    function announce(sheet, open) {
+        if (!sheet.id) return;
+        var triggers = document.querySelectorAll('[aria-controls="' + sheet.id + '"]');
+        for (var i = 0; i < triggers.length; i++) {
+            triggers[i].setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+    }
+
+    /* One element, two widgets. From 992px .vs-filters is a static column of the
+       page - a region, and role="dialog" on it would be a lie that also hides
+       the grid beside it from a screen reader. Below 992px the same element is
+       the sheet: modal, scroll-locking, focus-trapping. So the role is written
+       from the breakpoint rather than into the template, and only while the
+       sheet is actually open - a closed sheet is still in the tree (it is
+       translated off-screen, not display:none) and an aria-modal on it would
+       take the whole page out of the accessibility tree with nothing shown.
+       railQuery is declared with the catalogue code below; both are hoisted
+       var declarations in the same IIFE, and nothing here runs before it. */
+    function sheetIsModal() {
+        return !(railQuery && railQuery.matches);
+    }
+
+    function applySheetRole(sheet) {
+        if (!sheet) return;
+        if (sheet.classList.contains('is-open') && sheetIsModal()) {
+            sheet.setAttribute('role', 'dialog');
+            sheet.setAttribute('aria-modal', 'true');
+        } else {
+            sheet.removeAttribute('role');
+            sheet.removeAttribute('aria-modal');
+        }
+    }
+
+    window.vibeSheet = {
+        open: function (sheet) {
+            if (!sheet) return;
+            lastFocused = document.activeElement;
+            sheet.classList.add('is-open');
+            sheet.removeAttribute('aria-hidden');
+            applySheetRole(sheet);
+            var backdrop = backdropFor(sheet);
+            if (backdrop) backdrop.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+            announce(sheet, true);
+            var focusable = visibleFocusables(sheet)[0];
+            if (focusable) focusable.focus();
+        },
+        close: function (sheet) {
+            if (!sheet) return;
+            sheet.classList.remove('is-open');
+            applySheetRole(sheet);
+            var backdrop = backdropFor(sheet);
+            if (backdrop) backdrop.classList.remove('is-open');
+            document.body.style.overflow = '';
+            announce(sheet, false);
+            if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
+            lastFocused = null;
+        }
+    };
+
+    document.addEventListener('click', function (event) {
+        var backdrop = event.target.closest ? event.target.closest('.vs-sheet__backdrop') : null;
+        if (backdrop) {
+            var openSheet = document.querySelector('.vs-sheet.is-open');
+            if (openSheet) window.vibeSheet.close(openSheet);
+            return;
+        }
+        var closer = event.target.closest ? event.target.closest('[data-vs-sheet-close]') : null;
+        if (closer) {
+            window.vibeSheet.close(closer.closest('.vs-sheet'));
+        }
+    });
+
+    /* Disclosure: language / currency switchers and any click-driven dropdown. */
+    function closeDisclosures(except) {
+        var open = document.querySelectorAll('.vs-disclosure.is-open');
+        for (var i = 0; i < open.length; i++) {
+            if (open[i] === except) continue;
+            open[i].classList.remove('is-open');
+            var trigger = open[i].querySelector('.vs-disclosure__trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var trigger = event.target.closest('.vs-disclosure__trigger');
+        if (trigger) {
+            var host = trigger.closest('.vs-disclosure');
+            var willOpen = !host.classList.contains('is-open');
+            closeDisclosures(host);
+            host.classList.toggle('is-open', willOpen);
+            trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+            event.preventDefault();
+            return;
+        }
+        if (!event.target.closest('.vs-disclosure')) closeDisclosures(null);
+    });
+
+    /* Dismiss the catalogue mega-menu the only way okay.js offers - by clicking
+       its own trigger - and mirror aria-expanded. Called from the outside-click
+       listener below, from the Escape handler, and from the reviews-anchor
+       handler, which stops propagation in the capture phase and so never
+       reaches the listener below.
+
+       Returns whether it actually closed anything, so a caller that also wants
+       to move focus can tell an open menu from an absent one. */
+    function closeCatalogMenu() {
+        var catalog = document.querySelector('.vs-catalog');
+        var catalogTrigger = document.querySelector('.vs-catalog-btn');
+        if (!catalog || !catalogTrigger) return false;
+        if (catalog.offsetParent === null) return false;
+        catalogTrigger.click();
+        catalogTrigger.setAttribute('aria-expanded', 'false');
+        return true;
+    }
+
+    /* The catalogue drop-down is opened by okay.js and has no outside-click
+       close of its own; clicking the trigger again is what closes it.
+       okay.js also only toggles a class, so aria-expanded is mirrored here. */
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var catalog = document.querySelector('.vs-catalog');
+        var catalogTrigger = document.querySelector('.vs-catalog-btn');
+        if (!catalog || !catalogTrigger) return;
+        if (event.target.closest('.vs-catalog-btn')) {
+            catalogTrigger.setAttribute('aria-expanded', catalogTrigger.classList.contains('active') ? 'true' : 'false');
+            return;
+        }
+        if (catalog.offsetParent === null) return;
+        if (event.target.closest('.vs-catalog')) return;
+        closeCatalogMenu();
+    });
+
+    /* Touch fallback: the first tap on a parent item opens its submenu instead
+       of following the link.
+
+       Gated on (any-pointer: coarse), not (hover: none). A touchscreen laptop
+       has both pointers and reports hover: hover, so under the old gate this
+       handler never ran there and the submenus were reachable only by hovering
+       - i.e. not at all for someone using the screen. any-pointer asks the
+       question that actually matters: can this machine be touched.
+
+       The consequence of the wider gate is that the same machine still has a
+       mouse, and a mouse click on a parent must keep navigating rather than
+       being swallowed. So the submenu's own visibility decides: with a pointer
+       the CSS :hover rule has already displayed it by the time the click
+       lands, and the handler stands aside; with a finger there is no hover
+       state, the submenu is still display:none, and the tap opens it. */
+    var coarse = window.matchMedia ? window.matchMedia('(any-pointer: coarse)') : null;
+
+    document.addEventListener('click', function (event) {
+        if (!coarse || !coarse.matches || !event.target.closest) return;
+        var link = event.target.closest('.vs-has-children > a');
+        if (!link) return;
+        var item = link.parentNode;
+        if (item.classList.contains('is-open')) return;
+        var submenu = item.querySelector('ul');
+        if (submenu && window.getComputedStyle(submenu).display !== 'none') return;
+        event.preventDefault();
+        var siblings = item.parentNode.children;
+        for (var i = 0; i < siblings.length; i++) {
+            if (siblings[i] !== item) siblings[i].classList.remove('is-open');
+        }
+        item.classList.add('is-open');
+    });
+
+    /* ------------------------------------------- off-canvas mobile menu */
+
+    /* hc-offcanvas-nav builds its own <nav> at the end of <body> and moves it
+       into view with a transform. It gives it no role, never moves focus into
+       it, and leaves the page behind it fully tabbable - measured before this
+       block: opening the menu and pressing Tab eight times walked the logo,
+       the search toggle, four banner links and both carousel arrows, all of
+       them underneath the overlay, and Escape then left focus on the last of
+       those instead of on the burger.
+
+       The plugin's own open/close events fire on the source <ul>, which okay.js
+       owns; the body class it toggles is the same signal and is not okay.js's
+       to change, so that is what is watched. Everything else - the trap and
+       the Escape - reuses the machinery the filter sheet already has. */
+    var NAV_OPEN_CLASS = 'hc-nav-open';
+    var navLastFocused = null;
+
+    function offcanvasNav() {
+        return document.querySelector('.hc-offcanvas-nav');
+    }
+
+    function navTrigger() {
+        return document.querySelector('.fn_menu_switch') || document.querySelector('.hc-nav-trigger');
+    }
+
+    function offcanvasOpened() {
+        var nav = offcanvasNav();
+        if (!nav) return;
+        nav.setAttribute('role', 'dialog');
+        nav.setAttribute('aria-modal', 'true');
+        var trigger = navTrigger();
+        var label = trigger && trigger.getAttribute('aria-label');
+        if (label && !nav.getAttribute('aria-label')) nav.setAttribute('aria-label', label);
+        var active = document.activeElement;
+        navLastFocused = (active && active !== document.body) ? active : trigger;
+        var first = visibleFocusables(nav)[0];
+        if (first) first.focus();
+    }
+
+    function offcanvasClosed() {
+        var nav = offcanvasNav();
+        if (nav) {
+            nav.removeAttribute('role');
+            nav.removeAttribute('aria-modal');
+        }
+        if (navLastFocused && document.contains(navLastFocused)) navLastFocused.focus();
+        navLastFocused = null;
+    }
+
+    if (window.MutationObserver) {
+        var navWasOpen = document.body.classList.contains(NAV_OPEN_CLASS);
+        new MutationObserver(function () {
+            var isOpen = document.body.classList.contains(NAV_OPEN_CLASS);
+            if (isOpen === navWasOpen) return;
+            navWasOpen = isOpen;
+            if (!isOpen) {
+                offcanvasClosed();
+                return;
+            }
+            /* The panel is still translated off-screen on the frame the class
+               lands, and focusing a node that is off-screen makes the browser
+               scroll the page to it. One frame of slack is enough. */
+            window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(function () {
+                    if (document.body.classList.contains(NAV_OPEN_CLASS)) offcanvasOpened();
+                });
+            });
+        }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    /* ------------------------------------------------------- product card */
+
+    var LOW_STOCK_FALLBACK = 5;
+
+    /* Availability line. okay.js only knows the two states it can express with
+       hidden-xs-up on .fn_is_stock / .fn_not_preorder, so the three-state dot
+       is maintained here. The copy comes from data-* on the element itself so
+       it stays translated by the template, not hard-coded in JS.
+
+       The line is never hidden: all three states, out of stock included, are
+       stated in words, matching the product page. This is safe because the
+       card's .vs-stock carries no fn_ class - okay.js's variant handler only
+       ever calls parent.find('.fn_*'), so it cannot reach this element and
+       hidden-xs-up on it would be ours alone. Writing it here was what made
+       .vs-stock--out unreachable (hidden-xs-up is display:none !important). */
+    function applyStock(card, stock) {
+        var el = card.querySelector('.vs-stock');
+        if (!el) return;
+        var label = el.querySelector('.vs-stock__label');
+        var lowAt = parseInt(el.getAttribute('data-low-at'), 10);
+        if (isNaN(lowAt)) lowAt = LOW_STOCK_FALLBACK;
+
+        el.classList.remove('vs-stock--in', 'vs-stock--low', 'vs-stock--out');
+        /* Defensive: an older cached markup, or an ajax fragment rendered before
+           this fix, can still arrive with hidden-xs-up baked in. */
+        el.classList.remove('hidden-xs-up');
+
+        /* NaN (a variant with no stock figure at all) deliberately falls through
+           to "in stock" - that is how okay.js reads the same attribute, and the
+           two must not disagree about the same variant. */
+        if (stock < 1) {
+            el.classList.add('vs-stock--out');
+            if (label) label.textContent = el.getAttribute('data-out') || '';
+        } else if (stock <= lowAt) {
+            el.classList.add('vs-stock--low');
+            if (label) label.textContent = el.getAttribute('data-low') || '';
+        } else {
+            el.classList.add('vs-stock--in');
+            if (label) label.textContent = el.getAttribute('data-in') || '';
+        }
+    }
+
+    /* okay.js writes data-discount verbatim, and that attribute is a frozen
+       contract carrying two decimals ("-33.79 %"). The badge shows whole
+       percent instead. Applies to any host whose .fn_discount_label is one of
+       our badges - the card and the product page gallery both are; a theme that
+       still renders okay.js's own .sticker markup is left alone. */
+    function normaliseDiscount(card) {
+        var badge = card.querySelector('.fn_discount_label');
+        if (!badge || !badge.classList.contains('vs-badge')) return;
+        var match = badge.textContent.replace(/ /g, ' ').match(/-?\d+(?:[.,]\d+)?/);
+        if (!match) return;
+        var value = parseFloat(match[0].replace(',', '.'));
+        if (isNaN(value)) return;
+        badge.textContent = Math.round(value) + ' %';
+    }
+
+    function syncCard(select) {
+        var card = select.closest ? select.closest('.vs-card') : null;
+        if (!card) return;
+        var option = select.options[select.selectedIndex];
+        var chips = card.querySelectorAll('.vs-chip');
+        for (var i = 0; i < chips.length; i++) {
+            var on = chips[i].getAttribute('data-variant-id') === select.value;
+            chips[i].classList.toggle('vs-chip--selected', on);
+            chips[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+        applyStock(card, option ? parseInt(option.getAttribute('data-stock'), 10) : NaN);
+        normaliseDiscount(card);
+    }
+
+    /* A chip is a shortcut for the <select>, which stays the value the form
+       submits. Dispatching a real change event is what makes okay.js's existing
+       handler recalculate price, old price, SKU, stock and the discount badge. */
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var chip = event.target.closest('.vs-chip');
+        if (!chip) return;
+        var form = chip.closest('form');
+        var select = form ? form.querySelector('select[name="variant"]') : null;
+        if (!select) return;
+        event.preventDefault();
+        if (select.value === chip.getAttribute('data-variant-id')) return;
+        select.value = chip.getAttribute('data-variant-id');
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    /* ------------------------------------------------------- product page */
+
+    /* The product page keeps the same three-state availability line as the
+       card, but here both states are stated: okay.js swaps hidden-xs-up between
+       .fn_in_stock and .fn_not_stock, so "out of stock" has its own visible
+       line and only the amber "low stock" grade is left to add. */
+    function syncPdp(select) {
+        var pdp = select.closest ? select.closest('.vs-pdp') : null;
+        if (!pdp) return;
+        var option = select.options[select.selectedIndex];
+        var stock = option ? parseInt(option.getAttribute('data-stock'), 10) : NaN;
+
+        var chips = pdp.querySelectorAll('.vs-chip');
+        for (var i = 0; i < chips.length; i++) {
+            var on = chips[i].getAttribute('data-variant-id') === select.value;
+            chips[i].classList.toggle('vs-chip--selected', on);
+            chips[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+
+        var line = pdp.querySelector('.fn_in_stock.vs-stock');
+        if (line) {
+            var lowAt = parseInt(line.getAttribute('data-low-at'), 10);
+            if (isNaN(lowAt)) lowAt = LOW_STOCK_FALLBACK;
+            var low = !isNaN(stock) && stock > 0 && stock <= lowAt;
+            line.classList.toggle('vs-stock--low', low);
+            line.classList.toggle('vs-stock--in', !low);
+            var label = line.querySelector('.vs-stock__label');
+            var copy = line.getAttribute(low ? 'data-low' : 'data-in');
+            if (label && copy) label.textContent = copy;
+        }
+
+        normaliseDiscount(pdp);
+    }
+
+    /* ------------------------------------------------------- live region */
+
+    /* Picking a variant rewrites the price, the old price, the SKU, the
+       discount badge and the availability line - none of which is where the
+       focus is, so a screen reader said nothing at all and the shopper was
+       left to guess whether the 32Gb they chose costs the same as the 16Gb.
+
+       One polite region for the whole page, built here rather than in a
+       template: there are four templates that render a variant picker and the
+       region belongs to none of them. aria-atomic so the whole sentence is
+       re-read rather than only the word that changed, and the text is
+       assembled from what the DOM now says, so it is whatever okay.js just
+       wrote and stays translated by the server. */
+    var liveRegion = null;
+
+    function announceLive(text) {
+        if (!text) return;
+        if (!liveRegion) {
+            liveRegion = document.createElement('div');
+            liveRegion.className = 'vs-sr-only';
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            document.body.appendChild(liveRegion);
+        }
+        /* Same string twice in a row is not re-announced by most readers.
+           Clearing first makes a repeat pick speak. */
+        if (liveRegion.textContent === text) liveRegion.textContent = '';
+        liveRegion.textContent = text;
+    }
+
+    function textOf(root, selector) {
+        var el = root.querySelector(selector);
+        return el ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+    }
+
+    function announceVariant(root, select) {
+        if (!root) return;
+        var bits = [];
+        var option = select.options[select.selectedIndex];
+        if (option) bits.push(option.textContent.replace(/\s+/g, ' ').trim());
+        var price = textOf(root, '.fn_price');
+        var currency = textOf(root, '.vs-card__currency, .vs-buybox__currency');
+        if (price) bits.push(currency ? price + ' ' + currency : price);
+        var sku = textOf(root, '.fn_sku');
+        if (sku) bits.push(sku);
+        var stock = textOf(root, '.vs-stock__label');
+        if (stock) bits.push(stock);
+        announceLive(bits.join(', '));
+    }
+
+    /* Registered after okay.js so its handler has already rewritten the card.
+       select2 fires its change through jQuery, which never reaches a native
+       listener, so jQuery is used whenever it is present. */
+    function syncVariant(select) {
+        syncCard(select);
+        syncPdp(select);
+        var root = select.closest ? (select.closest('.vs-pdp') || select.closest('.vs-card')) : null;
+        announceVariant(root, select);
+    }
+
+    if (window.jQuery) {
+        window.jQuery(document).on('change', '.fn_variant', function () {
+            syncVariant(this);
+        });
+    } else {
+        document.addEventListener('change', function (event) {
+            var select = event.target;
+            if (!select || !select.classList || !select.classList.contains('fn_variant')) return;
+            syncVariant(select);
+        });
+    }
+
+    /* Quantity stepper. The <input name="amount"> is the value the cart posts
+       and is never replaced - the buttons only write to it. okay.js binds its
+       own handler to `.fn_product_amount span`, which real <button>s do not
+       match, so the arithmetic is handed straight back to okay.js's
+       amount_change: it clamps to data-max, keeps okay.amount in step for the
+       variant-change handler and fires the change event the cart page's ajax
+       listener is waiting for. A second clamp here would be a second, and
+       eventually divergent, definition of the maximum. */
+    function stepAmount(input, action) {
+        if (window.jQuery && typeof window.amount_change === 'function') {
+            window.amount_change(window.jQuery(input), action);
+            return;
+        }
+        var max = parseFloat(input.getAttribute('data-max'));
+        var current = parseFloat(input.value);
+        if (isNaN(current)) current = 1;
+        var next = current + (action === 'plus' ? 1 : -1);
+        if (!isNaN(max)) next = Math.min(max, next);
+        input.value = Math.max(1, next);
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var btn = event.target.closest('.vs-stepper__btn');
+        if (!btn) return;
+        var wrap = btn.closest('.fn_product_amount');
+        /* The product page posts name="amount"; the cart and the pop-up cart
+           post name="amounts[<variantId>]". Match the stepper's own input class
+           first so both pages resolve with one selector. */
+        var input = wrap ? wrap.querySelector('.vs-stepper__input, input[name="amount"]') : null;
+        if (!input) return;
+        var step = parseInt(btn.getAttribute('data-vs-step'), 10);
+        if (isNaN(step) || step === 0) return;
+        stepAmount(input, step > 0 ? 'plus' : 'minus');
+    });
+
+    /* Nothing in okay.js clamps a hand-typed quantity: amount_change has a
+       "keyup" branch but no caller for it on this page, so a typed 999 would be
+       posted as is and the order quietly cut back later. Clamped once, on
+       change, and never re-dispatched - the value is only corrected.
+
+       The ceiling is the same one amount_change uses: with pre-order enabled a
+       shopper may legitimately order past the stock figure, and the wrapper
+       carries fn_is_preorder in exactly that case, so clamping to data-max
+       there would refuse orders the shop accepts. */
+    document.addEventListener('change', function (event) {
+        var input = event.target;
+        if (!input || !input.classList || !input.classList.contains('vs-stepper__input')) return;
+        var max = parseFloat(input.getAttribute('data-max'));
+        if (window.jQuery) {
+            var live = window.jQuery(input).data('max');
+            if (live !== null && live !== undefined) max = parseFloat(live);
+        }
+        /* `okay` is declared with const in common_js, so it is a global
+           lexical binding and never a property of window - window.okay is
+           undefined here and the bare identifier is the only way to read it. */
+        var wrap = input.closest ? input.closest('.fn_product_amount') : null;
+        if (wrap && wrap.classList.contains('fn_is_preorder') && typeof okay !== 'undefined'
+            && !isNaN(parseFloat(okay.max_order_amount))) {
+            max = parseFloat(okay.max_order_amount);
+        }
+        var value = parseInt(input.value, 10);
+        if (isNaN(value) || value < 1) value = 1;
+        if (!isNaN(max) && max > 0 && value > max) value = max;
+        if (String(value) !== input.value) input.value = String(value);
+    });
+
+    /* Sticky mobile buy bar. Revealed once the inline buy row leaves the
+       viewport, hidden again when it comes back. The row is observed rather
+       than the button inside it: okay.js hides the add-to-cart button with
+       hidden-xs-up whenever the chosen variant is out of stock, and a
+       display:none element never intersects anything - the bar would latch on
+       and stay for the rest of the visit. */
+    (function () {
+        var inline = document.querySelector('.vs-buybox__submit');
+        var bar = document.querySelector('.vs-sticky-buy');
+        if (!inline || !bar || !('IntersectionObserver' in window)) return;
+        var target = inline.closest('.vs-buybox__buy') || inline;
+
+        new IntersectionObserver(function (entries) {
+            bar.classList.toggle('is-visible', !entries[0].isIntersecting);
+        }, { threshold: 0 }).observe(target);
+    }());
+
+    /* ------------------------------------------- tabs / disclosure panels */
+
+    /* The description, specification and review panels - and the delivery and
+       payment rows in the buy box - ship OPEN in the HTML. Content must never be
+       gated on a script having run: a crawler, a headless renderer or a shopper
+       with scripting off has to be able to read the specification. So the panels
+       are collapsed here rather than revealed here, and the block is marked
+       .is-enhanced, which is what lets components.css switch the desktop tab
+       grid on: three panels share one grid cell up there, which is only correct
+       while exactly one of them is displayed.
+
+       The same markup is a tab set from 992px and a stacked accordion below it,
+       so the ARIA is applied from the breakpoint listener rather than written
+       into the template: role="tab" on an accordion header would be a lie. */
+
+    var tabQuery = window.matchMedia ? window.matchMedia('(min-width: 992px)') : null;
+    var vsUid = 0;
+
+    function ensureId(el, prefix) {
+        if (!el.id) el.id = prefix + (++vsUid);
+        return el.id;
+    }
+
+    /* fn_accordion's own shape: .fn_accordion > .accordion__item >
+       (.accordion__title, .accordion__content). Items with no button are
+       skipped - the focusable control is what carries the tab semantics. */
+    function accordionParts(host) {
+        var out = [];
+        var items = host.querySelectorAll('.accordion__item');
+        for (var i = 0; i < items.length; i++) {
+            var head = items[i].querySelector('.accordion__title');
+            var panel = items[i].querySelector('.accordion__content');
+            var btn = head ? head.querySelector('button') : null;
+            if (head && panel && btn) out.push({ item: items[i], head: head, panel: panel, btn: btn });
+        }
+        return out;
+    }
+
+    function openIndex(parts) {
+        for (var i = 0; i < parts.length; i++) {
+            if (parts[i].head.classList.contains('active')) return i;
+        }
+        return -1;
+    }
+
+    /* asTabs = true gives the tab pattern.
+
+       The <h2> keeps its heading semantics at every width. It was marked
+       role="presentation" from Task 9 until the final review, on the reasoning
+       that a heading does not matter when only one panel's content is present.
+       That misreads what a heading is for: it is how a screen-reader user FINDS
+       a section, not how they enter a hidden one. Measured at 1440 before that
+       change: zero headings existed for Опис, Характеристики and Відгуки, so
+       heading navigation skipped the entire lower half of the product page.
+
+       The final review's own fix then added aria-owns to the tablist, so that
+       the tabs would still be its direct owned children with the <h2> in the
+       way. That silently undid the heading fix. Chrome honours aria-owns by
+       REPARENTING the owned button out of the <h2> in the accessibility tree,
+       and the <h2> takes its name from its contents - so it was left with no
+       contents and no name. Measured over Accessibility.getFullAXTree at 1440,
+       shipped: [{name:"", lvl:2}, {name:"", lvl:2}]; with aria-owns dropped:
+       [{name:"Характеристики", lvl:2, kids:["tab:Характеристики"]},
+        {name:"Відгуки", lvl:2, kids:["tab:Відгуки"]}]. Two unnamed headings are
+       worse than none, so aria-owns is gone. The tabs stay role="tab" with
+       aria-selected and roving tabindex inside a named tablist; only the AX
+       parent of each tab changes from tablist to its own heading. ARIA also
+       calls aria-owns redundant when it points at DOM descendants, which these
+       always are.
+
+       The item box keeps role="presentation" - it is a bare <div> with no
+       implicit role, and presentation on it says nothing about its descendants,
+       which keep their own roles. */
+    function applyAria(host, asTabs) {
+        var parts = accordionParts(host);
+        if (!parts.length) return;
+        var open = openIndex(parts);
+
+        if (asTabs) {
+            host.setAttribute('role', 'tablist');
+            var title = document.querySelector('.vs-pdp__title');
+            if (title) host.setAttribute('aria-label', title.textContent.trim());
+        } else {
+            host.removeAttribute('role');
+            host.removeAttribute('aria-label');
+        }
+
+        for (var i = 0; i < parts.length; i++) {
+            var p = parts[i];
+            var on = i === open || (open === -1 && i === 0);
+            ensureId(p.btn, 'vs_tab_');
+            ensureId(p.panel, 'vs_panel_');
+            p.btn.setAttribute('aria-controls', p.panel.id);
+            p.head.removeAttribute('role');
+
+            if (asTabs) {
+                p.item.setAttribute('role', 'presentation');
+                p.btn.setAttribute('role', 'tab');
+                p.btn.setAttribute('aria-selected', on ? 'true' : 'false');
+                p.btn.setAttribute('tabindex', on ? '0' : '-1');
+                p.btn.removeAttribute('aria-expanded');
+                p.panel.setAttribute('role', 'tabpanel');
+                p.panel.setAttribute('aria-labelledby', p.btn.id);
+                p.panel.setAttribute('tabindex', '0');
+            } else {
+                p.item.removeAttribute('role');
+                p.btn.removeAttribute('role');
+                p.btn.removeAttribute('aria-selected');
+                p.btn.removeAttribute('tabindex');
+                p.btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+                p.panel.removeAttribute('role');
+                p.panel.removeAttribute('aria-labelledby');
+                p.panel.removeAttribute('tabindex');
+            }
+        }
+    }
+
+    function tabHost() {
+        return document.querySelector('.vs-tabs');
+    }
+
+    function syncPanelAria() {
+        var tabs = tabHost();
+        if (tabs) applyAria(tabs, !!(tabQuery && tabQuery.matches));
+        var rows = document.querySelectorAll('.vs-disclosures');
+        for (var i = 0; i < rows.length; i++) applyAria(rows[i], false);
+    }
+
+    /* Collapse everything but the one the template marked .active. Runs before
+       DOMContentLoaded (vibe.js is a footer script, okay.js binds on ready), so
+       okay.js's accordion handler always finds exactly one open panel and its
+       "already visible - do nothing" branch keeps working. */
+    function collapse(host) {
+        var parts = accordionParts(host);
+        if (!parts.length) return;
+        var open = openIndex(parts);
+        for (var i = 0; i < parts.length; i++) {
+            var on = i === open || (open === -1 && i === 0);
+            parts[i].head.classList.toggle('active', on);
+            parts[i].item.classList.toggle('visible', on);
+            parts[i].panel.style.display = on ? 'block' : 'none';
+        }
+        host.classList.add('is-enhanced');
+    }
+
+    (function () {
+        var hosts = document.querySelectorAll('.vs-tabs, .vs-disclosures');
+        for (var i = 0; i < hosts.length; i++) collapse(hosts[i]);
+        syncPanelAria();
+    }());
+
+    /* okay.js's accordion handler only moves the .active / .visible classes, so
+       the state those classes describe is mirrored into ARIA afterwards. When it
+       takes its early "already open" branch it returns false, which stops the
+       event before it reaches this listener - correct, because nothing changed. */
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        if (!event.target.closest('.vs-tabs__head, .vs-disclosure-row__head')) return;
+        window.setTimeout(syncPanelAria, 0);
+    });
+
+    if (tabQuery) {
+        var onTabQuery = function () {
+            syncPanelAria();
+        };
+        if (tabQuery.addEventListener) {
+            tabQuery.addEventListener('change', onTabQuery);
+        } else if (tabQuery.addListener) {
+            tabQuery.addListener(onTabQuery);
+        }
+    }
+
+    /* Roving focus across the tab strip. Automatic activation: the panels are
+       plain content, so moving focus and showing it is what a shopper means. */
+    document.addEventListener('keydown', function (event) {
+        if (!event.target.closest) return;
+        var btn = event.target.closest('.vs-tabs__btn');
+        if (!btn || btn.getAttribute('role') !== 'tab') return;
+        var host = btn.closest('.vs-tabs');
+        if (!host) return;
+        var list = host.querySelectorAll('.vs-tabs__btn');
+        var i = Array.prototype.indexOf.call(list, btn);
+        var next = -1;
+
+        if (event.key === 'ArrowRight' || event.key === 'Right') {
+            next = (i + 1) % list.length;
+        } else if (event.key === 'ArrowLeft' || event.key === 'Left') {
+            next = (i - 1 + list.length) % list.length;
+        } else if (event.key === 'Home') {
+            next = 0;
+        } else if (event.key === 'End') {
+            next = list.length - 1;
+        } else {
+            return;
+        }
+
+        event.preventDefault();
+        list[next].focus();
+        list[next].click();
+    });
+
+    /* Anchor to the reviews.
+
+       okay.js does this (okay.js:645):
+           $("#fn_tab_comments").trigger("click");
+           destination = $("[id='comments']").offset().top - 110;
+       The fn_accordion handler that click reaches only *queues* slideDown(300),
+       so at the moment of the measurement #comments is still display:none,
+       offset().top is 0, the destination is -110 and scrollTop clamps to 0: the
+       panel opens and the page never moves. The old .tabs path used fadeIn(200),
+       which sets display synchronously, which is why this only broke when the
+       panels moved onto fn_accordion.
+
+       okay.js cannot be edited, so the anchor is taken over here. The listener
+       is on the capture phase and stops propagation, so okay.js's handler - the
+       one holding the stale measurement - never runs and there is exactly one
+       scroll. The panel is opened synchronously first, so the position measured
+       below is the real one. */
+    /* The events that mean "the shopper has taken the page back". wheel and
+       touchstart covered a mouse wheel and a finger and nothing else: dragging
+       the scrollbar and pressing Page Down both moved the page while the
+       correction loop was still running, and the loop dutifully yanked it
+       back. keydown is unconditional on purpose - a keystroke during a
+       1200ms scroll is the shopper doing something, whatever the key was -
+       and pointerdown covers the scrollbar drag, a middle-click autoscroll
+       and touch on any browser that has it, which is every one that matters
+       and is why touchstart is still listed for the ones that do not. */
+    var ANCHOR_ABANDON = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
+    var ANCHOR_GAP = 16;
+    var ANCHOR_TOLERANCE = 4;
+    var ANCHOR_PASSES = 3;
+    var ANCHOR_IDLE_MS = 100;
+    var ANCHOR_BAIL_MS = 1200;
+
+    /* How much of the top of the viewport is covered by something pinned there.
+       Both are checked because two different mechanisms pin on this theme: below
+       992px .vs-header is position: sticky from the (max-width: 991px) block in
+       components.css, and at every width sticky.min.js pulls .vs-header__main out
+       of the flow once the page moves. */
+    function anchorOffset() {
+        var nodes = document.querySelectorAll('.vs-header, .vs-header__main');
+        var covered = 0;
+        for (var i = 0; i < nodes.length; i++) {
+            var position = window.getComputedStyle(nodes[i]).position;
+            if (position !== 'sticky' && position !== 'fixed') continue;
+            var box = nodes[i].getBoundingClientRect();
+            if (box.top > 1) continue;
+            if (box.bottom > covered) covered = box.bottom;
+        }
+        /* Nothing is pinned yet at scrollY 0 on desktop: sticky.min.js only
+           takes .fn_header__sticky out of the flow once the page moves, so the
+           loop above measures 0 and the first destination lands one header
+           height too deep - 1018 instead of 931 on the product page, putting
+           the "Відгуки" heading behind the bar. The settle-and-correct pass
+           repaired that, but `abandon` is armed for wheel/touchstart/
+           pointerdown/keydown, so any input during the ~1.2s animation cancels
+           the correction and the shopper is left with the wrong destination.
+
+           Measuring the bar that is *about* to pin removes the need for a
+           correction at all. sticky.min.js activates an element when
+           data-sticky-for < viewport width (see its stickyFor comparison), and
+           data-sticky-wrap keeps a placeholder of the same height in the flow,
+           so what the pinned bar will cover is exactly its height now. */
+        if (!covered) {
+            var pending = document.querySelector('.fn_header__sticky[data-sticky-for]');
+            if (pending) {
+                var stickyFor = parseInt(pending.getAttribute('data-sticky-for'), 10);
+                if (!isNaN(stickyFor) && stickyFor < window.innerWidth) {
+                    covered = pending.getBoundingClientRect().height;
+                }
+            }
+        }
+        return covered + ANCHOR_GAP;
+    }
+
+    /* One destination is not enough on this page. sticky.min.js takes
+       .vs-header__main out of the flow the moment the page moves, so everything
+       below it shifts up by that much *while the animation is running*, and the
+       bar it pins in its place then covers the same amount of the viewport - a
+       single measurement taken at scrollY = 0 is 120px wrong by the time it
+       lands (measured: destination 1055, panel ends up at -44 with another 60
+       under the pinned bar). So the destination is re-measured once the motion
+       stops and corrected, at most twice, and the whole thing is abandoned the
+       instant the shopper touches the page themselves - being yanked back to a
+       target you have decided to leave is worse than a slightly short scroll. */
+    /* One in-flight scroll at a time. Two clicks on the reviews link used to
+       start two independent correction loops, each re-measuring while the
+       other was still moving the page, and they fought to a stop somewhere
+       between the two destinations. The token invalidates every earlier run:
+       an old loop that wakes up finds its ticket has been reissued and stops. */
+    var anchorRun = 0;
+
+    function scrollToPanel(panel) {
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var behavior = reduce ? 'auto' : 'smooth';
+        var passes = 0;
+        var idle = null;
+        var ticket = ++anchorRun;
+
+        function destination() {
+            var max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+            var top = panel.getBoundingClientRect().top + window.pageYOffset - anchorOffset();
+            return Math.min(max, Math.max(0, top));
+        }
+
+        function stop() {
+            window.clearTimeout(idle);
+            window.removeEventListener('scroll', onScroll);
+            for (var i = 0; i < ANCHOR_ABANDON.length; i++) {
+                window.removeEventListener(ANCHOR_ABANDON[i], abandon);
+            }
+        }
+
+        function abandon() {
+            passes = ANCHOR_PASSES;
+            stop();
+        }
+
+        function onScroll() {
+            window.clearTimeout(idle);
+            idle = window.setTimeout(settled, ANCHOR_IDLE_MS);
+        }
+
+        function settled() {
+            stop();
+            step();
+        }
+
+        function step() {
+            if (ticket !== anchorRun) return;
+            if (passes >= ANCHOR_PASSES) return;
+            var to = destination();
+            if (Math.abs(to - window.pageYOffset) < ANCHOR_TOLERANCE) return;
+            passes++;
+            window.addEventListener('scroll', onScroll);
+            for (var i = 0; i < ANCHOR_ABANDON.length; i++) {
+                window.addEventListener(ANCHOR_ABANDON[i], abandon, { passive: true });
+            }
+            idle = window.setTimeout(settled, ANCHOR_BAIL_MS);
+            window.scrollTo({ top: to, behavior: behavior });
+        }
+
+        step();
+    }
+
+    function openPanel(panel) {
+        if (!panel.classList.contains('accordion__content')) return;
+        var host = panel.closest('.fn_accordion');
+        if (!host) {
+            panel.style.display = 'block';
+            return;
+        }
+        var parts = accordionParts(host);
+        for (var i = 0; i < parts.length; i++) {
+            var on = parts[i].panel === panel;
+            /* A slide still in flight would finish on top of us and hide the
+               panel again a fraction of a second after the scroll landed. */
+            if (window.jQuery) window.jQuery(parts[i].panel).stop(true, true);
+            parts[i].head.classList.toggle('active', on);
+            parts[i].item.classList.toggle('visible', on);
+            parts[i].panel.style.display = on ? 'block' : 'none';
+        }
+        syncPanelAria();
+    }
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var anchor = event.target.closest('.fn_anchor_comments');
+        if (!anchor) return;
+        var href = anchor.getAttribute('href') || '';
+        if (href.charAt(0) !== '#') return;
+        var panel = document.getElementById(href.slice(1));
+        if (!panel) return;
+
+        event.preventDefault();
+        /* Stopping the event is what keeps okay.js's stale measurement from
+           running a second, competing animation - see above. The cost is that
+           it also stops vibe.js's OWN document-level click listeners, which is
+           where the header language and currency dropdowns are closed: click
+           the reviews link with one open and it stayed open, floating over the
+           page all the way down. They are closed explicitly here rather than
+           by weakening the guard.
+
+           The catalogue mega-menu is closed for the same reason and was missed
+           the first time: its outside-click close is a separate bubble listener
+           and stopPropagation kills that one too. Measured before this line:
+           open the menu on the product page, click the reviews link, and the
+           page arrived at scrollY 931 with a 1350x598 menu still covering the
+           whole content area, dismissable only by clicking the header button
+           again. */
+        event.stopPropagation();
+        closeDisclosures(null);
+        closeCatalogMenu();
+        openPanel(panel);
+        scrollToPanel(panel);
+    }, true);
+
+    /* --------------------------------------------------------- catalogue */
+
+    /* The filter panel is the shared .vs-sheet primitive - focus trap, scroll
+       lock, Escape and focus restore all come from window.vibeSheet above.
+       Only the trigger is bound here. Closing is handled by the generic
+       [data-vs-sheet-close] and backdrop listeners.
+
+       data-vs-sheet-open names the sheet by id, which is what the blog, post,
+       author and brands rails use; the bare .vs-filters__open form is kept for
+       the catalogue, where there is exactly one sheet on the page. */
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var trigger = event.target.closest('[data-vs-sheet-open]');
+        if (trigger) {
+            window.vibeSheet.open(document.getElementById(trigger.getAttribute('data-vs-sheet-open')));
+            return;
+        }
+        if (!event.target.closest('.vs-filters__open')) return;
+        window.vibeSheet.open(document.querySelector('.vs-filters.vs-sheet'));
+    });
+
+    /* Resizing past the rail breakpoint turns the sheet back into a static
+       column. Leaving it "open" would keep the body scroll lock on with no
+       visible overlay to explain it. Every rail on the site uses the same
+       992px switch, so this closes whichever sheet is open rather than only
+       the catalogue's. */
+    var railQuery = window.matchMedia ? window.matchMedia('(min-width: 992px)') : null;
+
+    function closeFiltersOnRail() {
+        var open = document.querySelector('.vs-sheet.is-open');
+        if (!railQuery || !railQuery.matches) {
+            /* Crossing back down: whatever is open is a modal sheet again. */
+            applySheetRole(open);
+            return;
+        }
+        if (open) window.vibeSheet.close(open);
+    }
+
+    if (railQuery) {
+        if (railQuery.addEventListener) {
+            railQuery.addEventListener('change', closeFiltersOnRail);
+        } else if (railQuery.addListener) {
+            railQuery.addListener(closeFiltersOnRail);
+        }
+    }
+
+    /* okay.js replaces the contents of #fn_products_content on every ajax
+       filter round-trip, and marks the trip in flight by appending its own
+       .fn_ajax_wait node to the same element. Both are observed here so the
+       skeleton is switched on by a class of ours and the result count - which
+       lives outside the replaced region - is refreshed from the strings the
+       server rendered with the new markup. Nothing is hidden until this runs:
+       the grid and the count are in the HTML and visible by default. */
+
+    /* okay.js has no error branch: if the request is dropped its .fn_ajax_wait
+       node is never removed, so the loading class would stay on for the rest of
+       the session and the shopper would be left looking at a shimmer instead of
+       the products that are still in the DOM underneath. The bail is generous -
+       it must never fire on a slow request that is still alive - and it only
+       takes the skeleton off; the stale results below it stay readable and the
+       page still works through a normal link. */
+    var LOADING_BAIL_MS = 10000;
+    var loadingBail = null;
+
+    function syncCatalogue() {
+        var region = document.querySelector('.vs-catalogue__region');
+        if (!region) return;
+
+        var results = region.querySelector('.vs-catalogue__results');
+        var loading = !!(results && results.querySelector('.fn_ajax_wait'));
+        region.classList.toggle('is-loading', loading);
+        /* The skeleton is the sighted half of this state; aria-busy is the
+           other half. Without it a screen reader reads the stale grid as
+           though it were the answer to the filter that was just applied. */
+        region.setAttribute('aria-busy', loading ? 'true' : 'false');
+
+        if (loadingBail) {
+            window.clearTimeout(loadingBail);
+            loadingBail = null;
+        }
+
+        if (loading) {
+            loadingBail = window.setTimeout(function () {
+                loadingBail = null;
+                region.classList.remove('is-loading');
+                /* Both halves of the state come off together. Taking the
+                   shimmer away and leaving aria-busy="true" behind told a
+                   screen-reader user the region was still updating for the
+                   rest of the session while a sighted user was already reading
+                   the grid. Measured at t=11.3s before this line:
+                   {loading: false, busy: "true"}. */
+                region.setAttribute('aria-busy', 'false');
+            }, LOADING_BAIL_MS);
+            return;
+        }
+
+        var state = region.querySelector('.vs-catalogue__state');
+        if (!state) return;
+        writeAll('.vs-results__value', state.getAttribute('data-vs-count'));
+        writeAll('.vs-filters__apply_label', state.getAttribute('data-vs-apply'));
+    }
+
+    function writeAll(selector, text) {
+        if (text === null) return;
+        var nodes = document.querySelectorAll(selector);
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].textContent = text;
+        }
+    }
+
+    var productsRegion = document.getElementById('fn_products_content');
+    if (productsRegion && window.MutationObserver) {
+        new MutationObserver(syncCatalogue).observe(productsRegion, { childList: true });
+        /* Once at rest, so aria-busy="false" is on the region from the start
+           rather than appearing only after the first filter round-trip - an
+           attribute that shows up mid-session is a change a live region user
+           may be told about. */
+        syncCatalogue();
+    }
+
+    /* The attribute in the markup describes the SCRIPTED state. Task 7.5 ships
+       most filter groups collapsed, but the collapse is a CSS rule gated on
+       html.js - so with scripting off the group is drawn fully expanded while
+       the server-rendered aria-expanded still says false, and a screen-reader
+       user is told a group is closed while reading its contents. It can only
+       be corrected from here, which is the one place that only exists when the
+       rule that collapses them exists. Same reading as the click handler
+       below: .active is okay.js's word for collapsed. */
+    (function () {
+        var heads = document.querySelectorAll('.fn_switch[aria-expanded]');
+        for (var i = 0; i < heads.length; i++) {
+            heads[i].setAttribute('aria-expanded', heads[i].classList.contains('active') ? 'false' : 'true');
+        }
+    }());
+
+    /* okay.js collapses a filter group by class only, so the state the group
+       header announces is mirrored here. Scoped to headers that already carry
+       the attribute, so no other .fn_switch consumer is touched. */
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var head = event.target.closest('.fn_switch');
+        if (!head || !head.hasAttribute('aria-expanded')) return;
+        window.setTimeout(function () {
+            head.setAttribute('aria-expanded', head.classList.contains('active') ? 'false' : 'true');
+        }, 0);
+    });
+
+    /* ------------------------------------------------------- fancybox */
+
+    /* fancybox 3 restores focus to its $trigger, and okay.js opens every popup
+       in this theme through $.fancybox.open() / .fancybox() rather than a
+       data-fancybox attribute, so $trigger is undefined and there is nothing
+       to go back to: measured on the callback form at 1440, Escape left focus
+       on <body> and the next Tab started again from the top of the page.
+       The control that was clicked is remembered on the way in - capture
+       phase, so it is recorded even for the handlers that stop the event. */
+    var fbLastFocused = null;
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        var control = event.target.closest('a[href], button, [tabindex]');
+        if (!control || control.closest('.fancybox-container')) return;
+        fbLastFocused = control;
+    }, true);
+
+    if (window.jQuery) {
+        window.jQuery(document).on('afterClose.fb', function () {
+            if (fbLastFocused && document.contains(fbLastFocused)) fbLastFocused.focus();
+            fbLastFocused = null;
+        });
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key !== 'Escape' && event.key !== 'Esc' && event.key !== 'Tab') return;
+
+        var sheet = document.querySelector('.vs-sheet.is-open');
+        if (sheet) {
+            if (event.key === 'Tab') {
+                trapFocus(sheet, event);
+            } else {
+                window.vibeSheet.close(sheet);
+            }
+            return;
+        }
+
+        /* fancybox drops every keystroke while focus is in a text field - its
+           own guard against closing a dialog in the middle of typing - and the
+           first thing it does on open is focus the first input. Measured on the
+           callback form at 1440: Escape from that input did nothing at all, and
+           did nothing however many times it was pressed; Escape from the submit
+           button below it closed the popup. Tab is deliberately left alone,
+           because fancybox's own trap works. */
+        if (event.key !== 'Tab' && window.jQuery && window.jQuery.fancybox
+            && window.jQuery.fancybox.getInstance()) {
+            window.jQuery.fancybox.close();
+            return;
+        }
+
+        /* Off-canvas mobile navigation (hc-offcanvas-nav, driven by okay.js
+           config in scripts.tpl) has neither a trap nor an Escape handler of
+           its own. Closing goes through the plugin's own trigger so its
+           scroll-position restore and body class both run; the observer above
+           then puts focus back on the burger. */
+        if (document.body.classList.contains(NAV_OPEN_CLASS)) {
+            var nav = offcanvasNav();
+            if (nav) {
+                if (event.key === 'Tab') {
+                    trapFocus(nav, event);
+                    return;
+                }
+                var toggle = navTrigger();
+                if (toggle) {
+                    toggle.click();
+                    return;
+                }
+            }
+        }
+
+        if (event.key === 'Tab') return;
+
+        if (closeCatalogMenu()) {
+            var catalogTrigger = document.querySelector('.vs-catalog-btn');
+            if (catalogTrigger) catalogTrigger.focus();
+            return;
+        }
+
+        closeDisclosures(null);
+    });
+}());

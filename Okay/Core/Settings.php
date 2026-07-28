@@ -127,7 +127,15 @@ class Settings
         set_error_handler(function () use (&$success) {
             $success = false;
         });
-        $original = unserialize($value, ['allowed_classes' => false]);
+        // Settings columns hold plain arrays and scalars with one exception:
+        // cart_discount_sets and purchase_discount_sets are written by
+        // BackendDiscountsRequest as arrays of stdClass. Denying every class turned
+        // those into __PHP_Incomplete_Class, so DiscountsHelper::parseSet() read
+        // null out of $set->set and no coupon or group discount could ever be
+        // attached. stdClass carries no methods, no destructor and no __wakeup, so
+        // permitting it is not an object-injection gadget - which is what the
+        // constraint exists to keep out.
+        $original = unserialize($value, ['allowed_classes' => [\stdClass::class]]);
         restore_error_handler();
         return $success ? $original : $default;
     }

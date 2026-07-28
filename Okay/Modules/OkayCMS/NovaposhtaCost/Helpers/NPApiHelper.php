@@ -168,7 +168,6 @@ class NPApiHelper
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestParams));
         curl_setopt($ch, CURLOPT_POST, 1);
         $response = curl_exec($ch);
-        curl_close($ch);
 
         if ($response === false) {
             $this->lastCallError = 'Error in API call';

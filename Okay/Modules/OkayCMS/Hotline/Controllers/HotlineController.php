@@ -74,7 +74,11 @@ class HotlineController extends AbstractController
         $query->setStatement('SET SESSION group_concat_max_len = 1000000;')->execute();
         
         // Для экономии памяти работаем с небуферизированными запросами
-        $pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        // PHP 8.5 deprecated PDO::MYSQL_ATTR_USE_BUFFERED_QUERY in favour of Pdo\Mysql::ATTR_USE_BUFFERED_QUERY (8.4+)
+        $bufferedQueryAttr = \PHP_VERSION_ID >= 80400
+            ? \Pdo\Mysql::ATTR_USE_BUFFERED_QUERY
+            : \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY;
+        $pdo->setAttribute($bufferedQueryAttr, false);
         $query = $hotlineHelper->getQuery($feed->id, $uploadCategories);
 
         $prevProductId = null;

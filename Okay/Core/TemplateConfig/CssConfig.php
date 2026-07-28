@@ -96,7 +96,14 @@ class CssConfig
         $resultFile .= '* Регистрировать этот файл для подключения в шаблоне не нужно' . PHP_EOL;
         $resultFile .= '*/' . PHP_EOL . PHP_EOL;
 
-        $resultFile .= trim($oCssDocument->render(OutputFormat::createPretty())) . PHP_EOL;
+        // The parser keeps the comments it read, and the renderer emits them again -
+        // so prepending the header unconditionally added one more copy of it on every
+        // save from Settings -> Theme, growing the file without limit. Leading comment
+        // blocks are dropped from the rendered body so exactly one header survives.
+        $renderedCss = trim($oCssDocument->render(OutputFormat::createPretty()));
+        $renderedCss = ltrim(preg_replace('~\A(?:\s*/\*.*?\*/)+~s', '', $renderedCss));
+
+        $resultFile .= $renderedCss . PHP_EOL;
         file_put_contents($this->settingsFile, $resultFile);
     }
     
@@ -133,27 +140,15 @@ class CssConfig
                 return $compiledFilename;
             }
 
+            // Every file is appended straight into one shared map - see compileLines().
+            // This used to compile each file to a temporary file with a temporary map,
+            // read them back, merge with SourceMap::concat() and delete them.
             $map = new SourceMap();
             $lineNum = 0;
             foreach ($this->templateCss[$position] as $k=>$fullFilePath) {
-                $inputFileName = pathinfo($fullFilePath, PATHINFO_BASENAME);
-                $tmpMapFile = $inputFileName . '.map';
-
-                $tmpCompiledFilename = $compileCssDir . $inputFileName;
-                $this->compileFile($fullFilePath, $tmpCompiledFilename);
-
-                $content = file_get_contents($tmpCompiledFilename);
-                $content = preg_replace('~/\*# sourceMappingURL.*\*/$~s', '', $content);
-                $content = rtrim($content);
-                $resultFile[] = $content;
-
-                $tmpMap = SourceMap::loadFromFile($compileCssDir . $tmpMapFile);
-                $map->concat($tmpMap, $lineNum);
-                unset($tmpMap);
-                $lineNum += 1;
+                $resultFile[] = rtrim($this->compileLines($fullFilePath, $map, $lineNum));
                 $resultFile[] = PHP_EOL;
-                unlink($compileCssDir . $inputFileName);
-                unlink($compileCssDir . $tmpMapFile);
+                $lineNum += 1;
             }
             $resultFile[] = "\n/*# sourceMappingURL=".$mapFile." */\n";
             $map->save($compileCssDir . $mapFile);
@@ -224,18 +219,48 @@ class CssConfig
     private function compileFile($fullFilePath, $compiledFilename)
     {
         $map = new SourceMap();
-        $position = new PosMap(null);
         $mapFile = $compiledFilename . '.map';
         $map->file = $compiledFilename;
-        $generated = $position->generated;
-        $source = $position->source;
 
-        $generated->line = 0;
+        $content = $this->compileLines($fullFilePath, $map, 0);
+        $content .= "\n/*# sourceMappingURL=" . pathinfo($mapFile, PATHINFO_BASENAME) . " */\n";
+
+        $map->save($mapFile);
+        $this->saveCompileFile($content, $compiledFilename);
+    }
+
+    /**
+     * Compiles one file and appends its positions to the given map at generated
+     * line $generatedLine. Returns the content without the sourceMappingURL
+     * comment - the caller appends that.
+     *
+     * Split out of compileFile() so compileRegistered() can build one combined
+     * map directly. It used to compile every file to a temporary file with a
+     * temporary map, read both back, merge them with SourceMap::concat() and
+     * delete them. Beyond the pointless I/O, concat() is the only path that
+     * reaches parsing/Line.php:495, where `isset($mNames[$ni])` is evaluated
+     * before `$ni !== null`. A CSS map's positions never carry a name, so $ni is
+     * always null and a cold cache raised tens of thousands of E_DEPRECATED. In
+     * the admin under debug_mode those print before header() is called and the
+     * request dies with "headers already sent".
+     *
+     * @param string $fullFilePath absolute path to the file on disk
+     * @param SourceMap $map map the positions are appended to
+     * @param int $generatedLine line number within the combined file
+     * @return string
+     */
+    private function compileLines($fullFilePath, SourceMap $map, $generatedLine)
+    {
+        $resultFile = [];
+        $posMap = new PosMap(null);
+        $generated = $posMap->generated;
+        $source = $posMap->source;
+
+        $generated->line = $generatedLine;
         $generated->column = 0;
 
         $source->fileName = Request::getRootUrl() . '/' . str_replace($this->rootDir, '', $fullFilePath);
         $sourceLine = 0;
-        $generatedLine = 0;
         $blockComment = false;
 
         foreach (file($fullFilePath) as $line) {
@@ -276,7 +301,7 @@ class CssConfig
                     $resultFile[] = $line;
                 }
 
-                $map->addPosition(clone $position);
+                $map->addPosition(clone $posMap);
                 $generated->column += $generatedStrLen;
                 $generated->line = $generatedLine;
 
@@ -284,9 +309,7 @@ class CssConfig
             $sourceLine++;
         }
 
-        $resultFile[] = "\n/*# sourceMappingURL=".pathinfo($mapFile, PATHINFO_BASENAME)." */\n";
-        $map->save($mapFile);
-        $this->saveCompileFile(implode("", $resultFile), $compiledFilename);
+        return implode("", $resultFile);
     }
 
     private function setCssVariables($cssLine, $file)

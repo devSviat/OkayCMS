@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" role="presentation">
+	<!--
+		Lazy load placeholder. It sits in the src of every lazy image in the
+		theme and is swapped out the moment lazyload.min.js pulls the real
+		photo in.
+
+		A 90 degree ring that turns once every 0.75s. It is a loading state,
+		so it says so. The rotation is a CSS animation declared inside this
+		file rather than the SMIL animateTransform the source spinner shipped
+		with, and that is deliberate: an SVG in an img element is its own
+		document, so base.css cannot reach it, but a media query in here is
+		still evaluated against the viewer's own environment. SMIL has no
+		equivalent hook, so a SMIL spinner keeps turning for someone who has
+		asked their system to stop animation. Under a reduce preference the
+		arc simply holds still; it is not hidden, because the mark is what
+		stands in for the photo and an empty box would be worse.
+
+		transform.box is view.box (spelled properly below) so that the origin
+		below resolves against the 24 unit viewBox rather than the path's own
+		bounding box. The path is a quarter arc sitting in one corner of the
+		box, so a fill.box origin would swing it around itself instead of
+		around the centre, and it would wobble rather than spin.
+
+		24 by 24 with a matching viewBox, and that pairing is half the job of
+		this file. The box gives the placeholder an intrinsic size, and
+		components.css pairs it with object fit scale.down (spelled properly
+		there) so the mark is painted at 24 in a large slot and shrunk to fit
+		in any slot smaller than that. It is never scaled up.
+
+		An earlier revision was sized in percentages with no viewBox, which
+		left it with no intrinsic size and no intrinsic ratio, so it stretched
+		to fill whatever box it landed in: 202 square on a product card, 380 by
+		240 on a blog card. That is the complaint this file answers.
+
+		The colour is a copy of the vs-n-300 token value, not a reference to
+		it: an SVG loaded through an img element is an independent document
+		and receives no custom properties from the page, so nothing in here
+		can be a token, and currentColor would resolve to black rather than to
+		the host page's text colour. Keep the two in step by hand. It is the
+		lightest neutral that still holds the ring against the plate and
+		canvas tokens, which is what a loading state wants. Present, and quiet
+		enough not to compete with the photographs it stands in for.
+
+		Note for anyone editing this comment: XML forbids a doubled hyphen
+		inside a comment, so CSS custom property names and some CSS keywords
+		cannot be written here in full. A malformed comment makes the whole
+		file unparseable, and it then renders as a broken image with HTTP 200
+		and no error reported anywhere.
+	-->
+	<style>
+		.vs-spin {
+			transform-box: view-box;
+			transform-origin: 12px 12px;
+			animation: vs-spin 0.75s linear infinite;
+		}
+
+		@keyframes vs-spin {
+			to { transform: rotate(360deg); }
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			.vs-spin { animation: none; }
+		}
+	</style>
+	<path class="vs-spin" fill="#cbcbce" d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"/>
+</svg>

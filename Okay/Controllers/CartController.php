@@ -188,11 +188,19 @@ class CartController extends AbstractController
 
         /*Рабтаем с товарами в корзине*/
         if ($cart->isEmpty === false) {
-            if (isset($_GET['coupon_code'])) {
-                $couponCode = trim($request->get('coupon_code', 'string'));
+            // okay.js posts the coupon (ajax_coupon(): type "post"), and so does
+            // every other action this method handles - $action above is read from
+            // $_POST. This branch alone looked in $_GET, so it never ran and no
+            // coupon could ever be applied from the cart. GET is still accepted so
+            // that a coupon carried in a URL keeps working.
+            $couponCodePosted = isset($_POST['coupon_code']);
+            if ($couponCodePosted || isset($_GET['coupon_code'])) {
+                $couponCode = trim($couponCodePosted
+                    ? $request->post('coupon_code', 'string')
+                    : $request->get('coupon_code', 'string'));
                 if (empty($couponCode)) {
                     $cart->applyCoupon('');
-                    if ($this->request->get('action') == 'coupon_apply') {
+                    if ($action == 'coupon_apply') {
                         $this->design->assign('coupon_error', 'empty');
                     }
                 } else {

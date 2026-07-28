@@ -92,6 +92,17 @@ class Cart
     public $total_products  = 0;
 
     /**
+     * @var object|null
+     * The coupon currently applied to the cart, or null when there is none.
+     * The stock cart template reads $cart->coupon->code to echo the applied code
+     * back into the field, and $cart->coupon->min_order_price for its note, but
+     * nothing ever assigned it - so the field blanked itself on every render and
+     * the note never appeared. Filled in attachCouponDiscount(), which is the one
+     * place that has already looked the coupon up and checked it.
+     */
+    public $coupon = null;
+
+    /**
      * @var array
      * All available discounts of the cart
      */
@@ -465,9 +476,13 @@ class Cart
 
     private function attachCouponDiscount()
     {
+        $this->coupon = null;
         if (!empty($_SESSION['coupon_code'])) {
             $coupon = $this->couponsEntity->get($_SESSION['coupon_code']);
             if ($coupon && $coupon->valid) {
+                // Exposed even when the order is below min_order_price: that is
+                // exactly the case the template's note is there to explain.
+                $this->coupon = $coupon;
                 if ($this->basic_total_price >= $coupon->min_order_price) {
                     $discount = new Discount();
                     $discount->sign = 'ok_coup';

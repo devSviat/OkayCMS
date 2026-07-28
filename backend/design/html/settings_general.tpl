@@ -57,9 +57,13 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="heading_label">{$btr->settings_general_date|escape}</div>
+                            <div class="heading_label">{$btr->settings_general_date|escape}
+                                <i class="fn_tooltips" title="{$btr->tooltip_settings_general_date|escape}">
+                                    {include file='svg_icon.tpl' svgId='icon_tooltips'}
+                                </i>
+                            </div>
                             <div class="mb-1">
-                                <input name="date_format" class="form-control" type="text" value="{$settings->date_format|escape}" />
+                                <input name="date_format" class="form-control" type="text" value="{$settings->date_format|escape}" placeholder="d.m.Y" />
                             </div>
                         </div>
                         <div class="col-md-6">

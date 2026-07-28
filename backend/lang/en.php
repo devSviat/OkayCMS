@@ -1474,6 +1474,7 @@ $lang['alert_info'] = 'Instruction';
 $lang['alert_success'] = 'Successfully!';
 $lang['alert_warning'] = 'Advice!';
 $lang['coupon_alert_text'] = 'The main currency of the site is considered to be the first in the list. In order to change the main currency, simply drag the desired currency to the first place';
+$lang['tooltip_settings_general_date'] = 'Date output format, PHP date() style. Used wherever a template does not pass a format of its own — the blog post date field among them. Examples: d.m.Y → 28.07.2026, d.m.Y H:i → 28.07.2026 14:30, j F Y → 28 July 2026. Left empty, d.m.Y is used';
 $lang['settings_phone_default_region'] = 'Default region for phone number';
 $lang['tooltip_settings_phone_default_region'] = 'Parsing phone numbers that are not written in an international format will be based on this region. Also, the validation of the phones of this country will take place without the country code, the phones of other countries must be written in the international format ';
 $lang['settings_phone_default_format'] = 'Default phone format';
