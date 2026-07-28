@@ -10058,6 +10058,22 @@ img.lazy:not(.loaded) {
 	.vs-blog__masthead {
 		padding: var(--vs-space-3) 0;
 	}
+
+/* The card's breathing room is tuned for a portrait screen. These are the same */
+/* values the 575px block already uses; the plate cap is what actually buys the */
+/* second row, since a 1:1 plate in a three-column grid is 250px tall at 844.   */
+
+	.vs-card {
+		padding: var(--vs-space-2);
+	}
+
+	.vs-card__media-link {
+		padding: var(--vs-space-3);
+	}
+
+	.vs-card__media {
+		max-height: 180px;
+	}
 }
 
 /* ------------------------------------------------ short and wide: phone in landscape */
