@@ -10335,6 +10335,17 @@ body:has(.vs-sticky-buy.is-visible) .to_top {
 		align-items: center;
 		min-height: 44px;
 	}
+
+/* The header search button. .vs-search is display: none below 768px, so the    */
+/* 375 portrait pass never rendered this control at all - not exempt, just      */
+/* invisible where that pass looked. From 768 up it is inline and 44x38, the    */
+/* 38 coming from a 3px inset on both sides of a 44px-tall .vs-search. Growing   */
+/* it here keeps the fix inside the 60px header bar with room to spare, and     */
+/* leaves the >991 desktop bar untouched, same as every other rule above.       */
+
+	.vs-search__submit {
+		min-height: 44px;
+	}
 }
 
 /* The carousel dots. 30x6 of paint, and the paint is the design - so the hit     */
