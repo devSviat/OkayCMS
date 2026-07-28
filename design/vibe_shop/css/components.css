@@ -4313,8 +4313,9 @@ body.hc-nav-open {
 
 /* -------------------------------------------------------- secondary actions */
 /* Fast order, wishlist and comparison. Never the same weight as the CTA: they */
-/* are icon buttons on a hairline, and a picked one reads as a filled ink disc */
-/* so state is never carried by colour alone.                                  */
+/* are icon buttons on a hairline, and a picked one tints its plate, matching  */
+/* the card. The tint - not the glyph colour - is what carries the state, so   */
+/* it survives for a reader who cannot separate the accent from the text.      */
 
 .vs-buybox__aside {
 	display: flex;
@@ -4336,9 +4337,9 @@ body.hc-nav-open {
 }
 
 .vs-buybox__tool.selected {
-	background-color: var(--vs-ink);
-	border-color: var(--vs-ink);
-	color: var(--vs-ink-text);
+	background-color: var(--vs-n-200);
+	border-color: var(--vs-n-200);
+	color: var(--vs-accent);
 }
 
 .vs-buybox__wish_off,
