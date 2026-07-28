@@ -226,6 +226,37 @@ Deliberately **not** changed, and worth recording because it looks like a defect
 - The CMS menu item reading "Контакты" is Russian while the rest of the menu is Ukrainian.
   That is database content, not theme markup.
 
+### Sticky buy bar
+
+**10. Float the sticky buy bar and reduce its CTA to the cart glyph.** Requested by the plan
+owner with a marked-up screenshot, after item 9.
+
+Today the bar is a full-bleed strip pinned to the bottom edge: `left: 0; right: 0; bottom: 0`,
+a top border, and a wide primary button carrying the words "Додати в кошик". The request is a
+floating pill — inset from all three edges, rounded, with the price on the left and an
+icon-only round button on the right.
+
+Three things this must not break:
+
+- **The accessible name.** An icon-only button with no text is unusable by a screen reader and
+  by the theme's own language switching. The label stays in the markup inside a `.vs-sr-only`
+  span (`base.css:192`) rather than being deleted, and no `aria-label` is added on top of it —
+  an `aria-label` would win over the span and freeze the label in one language. The button
+  reads as "Додати в кошик" to assistive technology and as a cart glyph to everyone else.
+- **The pre-order variant.** The same slot renders a second button when the shop runs in
+  pre-order mode, and a cart glyph is the wrong symbol for "pre-order". Only the in-stock
+  add-to-cart button becomes icon-only, via an explicit modifier class in the template — not
+  via the `fn_is_stock` JavaScript hook, which is not a styling contract.
+- **The touch target.** The round button is 52 px, above the 44 px floor the design principles
+  set, and unchanged from the current button's `min-height`.
+
+The bar is already scoped to below 992 px, so no new breakpoint is involved.
+
+**Trade-off, recorded rather than hidden:** an icon-only primary action is less explicit than a
+labelled one, and on a purchase button that is a real conversion consideration. On a product
+page the surrounding context makes a cart glyph legible, and the plan owner asked for it
+directly with a mockup, so it ships — but it is a deliberate choice, not an oversight.
+
 ## Explicitly out of scope
 
 - Pages: `/user`, wishlist, comparison, blog and posts, brands, static pages, 404, search.
