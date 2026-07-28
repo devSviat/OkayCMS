@@ -580,8 +580,10 @@ Inside the `@media (max-height: 500px)` block from Task 3, after the masthead ru
 
 ```css
 /* The card's breathing room is tuned for a portrait screen. These are the same */
-/* values the 575px block already uses; the plate cap is what actually buys the */
-/* second row, since a 1:1 plate in a three-column grid is 250px tall at 844.   */
+/* values the 575px block already uses. The plate cap is what does the work: a  */
+/* 1:1 plate in a three-column grid is 250px tall at 844, and capping it takes  */
+/* 68px off every row. It cannot bring row two above the fold - the page        */
+/* furniture above the grid already fills 313px of a 390px landscape screen.    */
 
 	.vs-card {
 		padding: var(--vs-space-2);

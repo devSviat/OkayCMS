@@ -114,8 +114,12 @@ not only on the home page.
 **4. Compact the card on short viewports.** In the `max-height: 500px` block, drop
 `.vs-card` padding to `--vs-space-2` and `.vs-card__media-link` to `--vs-space-3` — the
 values the ≤575 block already uses — and cap the media plate at 180 px so its 1:1 ratio
-cannot make a three-column row 250 px tall. The target is a second row of products starting
-within the 390 px viewport.
+cannot make a three-column row 250 px tall. The target is a shorter row, not a second row
+in view. Measured at 844x390, the furniture above the grid — 61 px header, 44 px
+breadcrumbs, 85 px masthead, 71 px toolbar, 52 px of gaps — already fills 313 px of the
+390, so the grid starts at 313 and no card height brings row two above the fold. What this
+buys is 68 px off every row, which is more product per scroll wherever a short viewport
+applies.
 
 The column counts themselves — 2 below 768 px, 3 above — measured correct at every viewport
 and are not touched.
