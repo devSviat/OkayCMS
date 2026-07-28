@@ -5448,6 +5448,15 @@ body.hc-nav-open {
 		padding: 0 var(--vs-space-2);
 		font-size: var(--vs-text-xs);
 	}
+
+	/* .vs-buybox__buy is a wrapping flex row and .vs-buybox__submit sits on a      */
+	/* 160px basis, so at 390px it stays beside the stepper at about 200px wide -   */
+	/* half the screen for the page's primary action. A 100% basis makes it wrap    */
+	/* onto its own line without touching the row anywhere else.                    */
+
+	.vs-buybox__submit {
+		flex: 1 1 100%;
+	}
 }
 
 /* ---------------------------------------------- touch: no hover available */
