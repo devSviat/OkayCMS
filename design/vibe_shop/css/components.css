@@ -2333,7 +2333,7 @@ body.hc-nav-open {
 	top: 0;
 	right: 0;
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 }
 
 .vs-card__tool {
@@ -2380,10 +2380,13 @@ body.hc-nav-open {
 /* - because it covers the photograph it sits on, and it sits there whether or  */
 /* not the shopper is looking at the corner.                                    */
 
-/* The state moves onto the glyph instead: muted outline at rest, solid ink     */
-/* fill once picked. Comparison can do this now that the set has a filled       */
-/* scale, which is why the plate had to stay until this commit - without a      */
-/* filled twin that control would have had no state left to show.               */
+/* The state moves onto the glyph: muted at rest, full text ink once picked,    */
+/* and the wishlist heart swaps outline for solid on top of that. Tabler's      */
+/* filled scale was tried for comparison and rejected on sight - at 24px it is  */
+/* a dense blob next to five other outline glyphs - so that control carries the */
+/* tone change alone. The jump from #6b6b71 to #1c1c20 is a lightness step, not */
+/* a hue one, and the title attribute states the state in words for anyone who  */
+/* is not reading tone at all.                                                  */
 
 /* A plate still paints on hover and focus, where it means "you are pointing at */
 /* this" rather than "this is on", and disappears with the pointer.             */
@@ -2406,26 +2409,6 @@ body.hc-nav-open {
 }
 
 .vs-card__wish.selected .vs-card__wish_on {
-	display: inline-flex;
-}
-
-/* The comparison page renders this control as a bare close glyph with no pair  */
-/* of spans, so these rules simply find nothing there.                          */
-
-.vs-card__compare_off,
-.vs-card__compare_on {
-	display: inline-flex;
-}
-
-.vs-card__compare_on {
-	display: none;
-}
-
-.vs-card__compare.selected .vs-card__compare_off {
-	display: none;
-}
-
-.vs-card__compare.selected .vs-card__compare_on {
 	display: inline-flex;
 }
 
@@ -4387,23 +4370,6 @@ body.hc-nav-open {
 }
 
 .vs-buybox__wish.selected .vs-buybox__wish_on {
-	display: inline-flex;
-}
-
-.vs-buybox__compare_off,
-.vs-buybox__compare_on {
-	display: inline-flex;
-}
-
-.vs-buybox__compare_on {
-	display: none;
-}
-
-.vs-buybox__compare.selected .vs-buybox__compare_off {
-	display: none;
-}
-
-.vs-buybox__compare.selected .vs-buybox__compare_on {
 	display: inline-flex;
 }
 

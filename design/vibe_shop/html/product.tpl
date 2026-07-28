@@ -299,15 +299,9 @@
                         {/if}
 
                         {if is_array($comparison->ids) && in_array($product->id, $comparison->ids)}
-                            <a class="fn_comparison vs-btn vs-btn--icon vs-buybox__tool vs-buybox__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->product_add_comparison}" data-language="product_remove_comparison">
-                                <span class="vs-buybox__compare_off">{include file="svg.tpl" svgId="compare"}</span>
-                                <span class="vs-buybox__compare_on">{include file="svg.tpl" svgId="compare_filled"}</span>
-                            </a>
+                            <a class="fn_comparison vs-btn vs-btn--icon vs-buybox__tool vs-buybox__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->product_add_comparison}" data-language="product_remove_comparison">{include file="svg.tpl" svgId="compare"}</a>
                         {else}
-                            <a class="fn_comparison vs-btn vs-btn--icon vs-buybox__tool vs-buybox__compare" href="#" data-id="{$product->id}" title="{$lang->product_add_comparison}" data-result-text="{$lang->remove_comparison}" data-language="product_add_comparison">
-                                <span class="vs-buybox__compare_off">{include file="svg.tpl" svgId="compare"}</span>
-                                <span class="vs-buybox__compare_on">{include file="svg.tpl" svgId="compare_filled"}</span>
-                            </a>
+                            <a class="fn_comparison vs-btn vs-btn--icon vs-buybox__tool vs-buybox__compare" href="#" data-id="{$product->id}" title="{$lang->product_add_comparison}" data-result-text="{$lang->remove_comparison}" data-language="product_add_comparison">{include file="svg.tpl" svgId="compare"}</a>
                         {/if}
                     </div>
                 </form>
