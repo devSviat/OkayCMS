@@ -96,7 +96,14 @@ class CssConfig
         $resultFile .= '* Регистрировать этот файл для подключения в шаблоне не нужно' . PHP_EOL;
         $resultFile .= '*/' . PHP_EOL . PHP_EOL;
 
-        $resultFile .= trim($oCssDocument->render(OutputFormat::createPretty())) . PHP_EOL;
+        // The parser keeps the comments it read, and the renderer emits them again -
+        // so prepending the header unconditionally added one more copy of it on every
+        // save from Settings -> Theme, growing the file without limit. Leading comment
+        // blocks are dropped from the rendered body so exactly one header survives.
+        $renderedCss = trim($oCssDocument->render(OutputFormat::createPretty()));
+        $renderedCss = ltrim(preg_replace('~\A(?:\s*/\*.*?\*/)+~s', '', $renderedCss));
+
+        $resultFile .= $renderedCss . PHP_EOL;
         file_put_contents($this->settingsFile, $resultFile);
     }
     
