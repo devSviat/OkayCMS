@@ -92,13 +92,26 @@
                 </a>
             {/if}
 
+            {* "Add to comparison" is switched off on the card by the shop owner's
+               decision. Delete the comment wrapper below to bring it back - nothing
+               else has to change: the control still exists on the product page, the
+               header informer still counts, and the comparison page still works.
+               fn_comparison and vs-card__compare are the hooks okay.js and
+               components.css bind to, so keep them intact. *}
+            {*
             {if $controller != "ComparisonController"}
                 {if is_array($comparison->ids) && in_array($product->id, $comparison->ids)}
                     <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->add_comparison}">{include file="svg.tpl" svgId="compare"}</a>
                 {else}
                     <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare" href="#" data-id="{$product->id}" title="{$lang->add_comparison}" data-result-text="{$lang->remove_comparison}">{include file="svg.tpl" svgId="compare"}</a>
                 {/if}
-            {else}
+            {/if}
+            *}
+
+            {* The comparison page draws the same card, and this is the only way to
+               drop a product from it - so that branch stays live whatever happens
+               above. *}
+            {if $controller == "ComparisonController"}
                 <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}">{include file="svg.tpl" svgId="close"}</a>
             {/if}
         </div>
