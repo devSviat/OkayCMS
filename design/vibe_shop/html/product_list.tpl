@@ -74,16 +74,6 @@
         {* Wishlist and comparison. Revealed on hover, permanently visible under
            (hover: none) - see components.css *}
         <div class="vs-card__tools">
-            {if $controller != "ComparisonController"}
-                {if is_array($comparison->ids) && in_array($product->id, $comparison->ids)}
-                    <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->add_comparison}">{include file="svg.tpl" svgId="compare"}</a>
-                {else}
-                    <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare" href="#" data-id="{$product->id}" title="{$lang->add_comparison}" data-result-text="{$lang->remove_comparison}">{include file="svg.tpl" svgId="compare"}</a>
-                {/if}
-            {else}
-                <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}">{include file="svg.tpl" svgId="close"}</a>
-            {/if}
-
             {if $controller != "WishListController"}
                 {if is_array($wishlist->ids) && in_array($product->id, $wishlist->ids)}
                     <a href="#" data-id="{$product->id}" class="fn_wishlist vs-btn vs-btn--icon vs-card__tool vs-card__wish selected" title="{$lang->remove_favorite}" data-result-text="{$lang->add_favorite}">
@@ -100,6 +90,16 @@
                 <a href="#" data-id="{$product->id}" class="fn_wishlist vs-btn vs-btn--icon vs-card__tool vs-card__wish vs-card__wish--remove selected" title="{$lang->remove_favorite}">
                     {include file="svg.tpl" svgId="close"}
                 </a>
+            {/if}
+
+            {if $controller != "ComparisonController"}
+                {if is_array($comparison->ids) && in_array($product->id, $comparison->ids)}
+                    <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->add_comparison}">{include file="svg.tpl" svgId="compare"}</a>
+                {else}
+                    <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare" href="#" data-id="{$product->id}" title="{$lang->add_comparison}" data-result-text="{$lang->remove_comparison}">{include file="svg.tpl" svgId="compare"}</a>
+                {/if}
+            {else}
+                <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}">{include file="svg.tpl" svgId="close"}</a>
             {/if}
         </div>
 
