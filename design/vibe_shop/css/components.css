@@ -2337,7 +2337,7 @@ body.hc-nav-open {
 	border-radius: var(--vs-radius-full);
 	background-color: transparent;
 	box-shadow: none;
-	color: var(--vs-text);
+	color: var(--vs-text-muted);
 	filter: drop-shadow(var(--vs-halo-plate));
 	transition: color var(--vs-dur-1) var(--vs-ease);
 }
@@ -2363,6 +2363,10 @@ body.hc-nav-open {
 	position: relative;
 }
 
+.vs-card__tool:hover {
+	color: var(--vs-text);
+}
+
 .vs-card__tool:hover::before {
 	background-color: var(--vs-surface-subtle);
 }
@@ -2375,8 +2379,13 @@ body.hc-nav-open {
 /* Not --vs-surface-subtle: that is already the hover plate, and matching it   */
 /* would make hovering an unadded control look identical to an added one.      */
 
+/* At rest the glyph is muted so it recedes from the photograph; picked, it     */
+/* darkens to full text ink. Two signals move together - tone and plate - and  */
+/* neither is the accent, so the pair reads the same whatever brand colour the */
+/* owner sets.                                                                  */
+
 .vs-card__tool.selected {
-	color: var(--vs-accent);
+	color: var(--vs-text);
 }
 
 .vs-card__tool.selected::before {
@@ -4328,18 +4337,19 @@ body.hc-nav-open {
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-full);
 	background-color: var(--vs-surface);
-	color: var(--vs-text);
+	color: var(--vs-text-muted);
 	transition: background-color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease), color var(--vs-dur-1) var(--vs-ease);
 }
 
 .vs-buybox__tool:hover {
 	border-color: var(--vs-border-strong);
+	color: var(--vs-text);
 }
 
 .vs-buybox__tool.selected {
 	background-color: var(--vs-n-200);
 	border-color: var(--vs-n-200);
-	color: var(--vs-accent);
+	color: var(--vs-text);
 }
 
 .vs-buybox__wish_off,
