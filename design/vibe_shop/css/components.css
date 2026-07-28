@@ -9320,13 +9320,22 @@ img.lazy:not(.loaded) {
 
 /* ------------------------------------------------------------ banner group */
 
-/* The banner group is a bare .swiper-container; theme.css zeroed its bottom    */
-/* margin and the home sections own their own rhythm. The arrows and bullets    */
-/* the same module renders are styled in LEGACY GENERIC DEFAULTS at the top of  */
-/* this file, because the theme refines them under .vs-gallery__nav and         */
-/* .vs-compare__nav at equal specificity and has to be the later rule.          */
+/* The banner group is a bare .swiper-container; the home sections own their     */
+/* own rhythm, so its bottom margin is zeroed here. The arrows and bullets the   */
+/* same module renders are styled in LEGACY GENERIC DEFAULTS at the top of this  */
+/* file, because the theme refines them under .vs-gallery__nav and               */
+/* .vs-compare__nav at equal specificity and has to be the later rule.           */
+/*                                                                              */
+/* The class is doubled because the module's own banners.css declares            */
+/* `.banner_group { margin-bottom: 15px }` and lands AFTER this file in the      */
+/* bundle - 216484 bytes in against 205855 - so a single-class rule here lost    */
+/* and the margin stayed. That mattered visually: .main_banner carries the       */
+/* radius and the overflow, so a container 15px taller than its own image put    */
+/* the two rounded bottom corners in an empty strip below the photograph and     */
+/* the banner read as square-bottomed. Doubling rather than scoping to           */
+/* .main_banner keeps it true for banner groups placed anywhere.                 */
 
-.banner_group {
+.banner_group.banner_group {
 	margin-bottom: 0;
 }
 
