@@ -375,15 +375,32 @@ class Design
 
         // Smarty 4 deprecates static class access in templates unless the class is
         // registered. Templates reference these classes by their full name.
+        //
+        // The lookup is on the literal token as written in the template
+        // (smarty_internal_templateparser.php yy_r99), so "\Okay\Core\Phone" and
+        // "Okay\Core\Phone" are different keys and both forms have to be listed
+        // for a class templates write either way.
+        //
+        // Module classes are included because their templates reference them and
+        // the module owns no hook into this method; registerClass() throws on a
+        // missing class, so each is guarded rather than assumed present.
         $staticClasses = [
             \Okay\Core\UserReferer\UserReferer::class,
+            \Okay\Core\Phone::class,
+            '\\' . \Okay\Core\Phone::class,
             \Okay\Helpers\AiRequests\AiBrandRequest::class,
             \Okay\Helpers\AiRequests\AiCategoryRequest::class,
             \Okay\Helpers\AiRequests\AiProductRequest::class,
+            \Okay\Modules\OkayCMS\Banners\DTO\BannerImageSettingsDTO::class,
+            \Okay\Modules\OkayCMS\GoogleMerchant\Init\Init::class,
+            \Okay\Modules\OkayCMS\Hotline\Init\Init::class,
+            \Okay\Modules\OkayCMS\NovaposhtaCost\Init\Init::class,
+            \Okay\Modules\OkayCMS\Rozetka\Init\Init::class,
         ];
         foreach ($staticClasses as $staticClass) {
-            if (!isset($this->smarty->registered_classes[$staticClass])) {
-                $this->smarty->registerClass($staticClass, $staticClass);
+            $className = ltrim($staticClass, '\\');
+            if (!isset($this->smarty->registered_classes[$staticClass]) && class_exists($className)) {
+                $this->smarty->registerClass($staticClass, $className);
             }
         }
     }
