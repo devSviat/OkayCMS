@@ -732,7 +732,12 @@ body.other_page .main {
 	right: 0;
 	z-index: var(--vs-z-dropdown);
 	display: none;
-	min-width: 170px;
+	/* Only the two switchers use this panel, and each row holds one word. The */
+	/* old 170px floor padded both out with nothing - the widest row needs     */
+	/* 109px in the language menu and 81px in the currency one. Tying the      */
+	/* floor to the trigger keeps the panel from ever being narrower than the  */
+	/* button it drops out of, and needs no number of its own.                 */
+	min-width: 100%;
 	padding: var(--vs-space-1-5);
 	background-color: var(--vs-surface);
 	border: 1px solid var(--vs-hairline);
