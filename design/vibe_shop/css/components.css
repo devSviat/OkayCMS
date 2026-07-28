@@ -2375,25 +2375,21 @@ body.hc-nav-open {
 	background-color: var(--vs-surface-subtle);
 }
 
-/* A solid ink disc turned "added to comparison" into the loudest thing on the  */
-/* card, above the photograph it sits on. The plate is enough to carry the     */
-/* state - the comparison glyph has no filled twin, so removing the plate      */
-/* would leave that control with no visible state at all.                      */
+/* Nothing opaque paints under a picked control any more. The plate is what     */
+/* the shop owner kept objecting to - first as an ink disc, then as a grey one  */
+/* - because it covers the photograph it sits on, and it sits there whether or  */
+/* not the shopper is looking at the corner.                                    */
 
-/* Not --vs-surface-subtle: that is already the hover plate, and matching it   */
-/* would make hovering an unadded control look identical to an added one.      */
+/* The state moves onto the glyph instead: muted outline at rest, solid ink     */
+/* fill once picked. Comparison can do this now that the set has a filled       */
+/* scale, which is why the plate had to stay until this commit - without a      */
+/* filled twin that control would have had no state left to show.               */
 
-/* At rest the glyph is muted so it recedes from the photograph; picked, it     */
-/* darkens to full text ink. Two signals move together - tone and plate - and  */
-/* neither is the accent, so the pair reads the same whatever brand colour the */
-/* owner sets.                                                                  */
+/* A plate still paints on hover and focus, where it means "you are pointing at */
+/* this" rather than "this is on", and disappears with the pointer.             */
 
 .vs-card__tool.selected {
 	color: var(--vs-text);
-}
-
-.vs-card__tool.selected::before {
-	background-color: var(--vs-n-200);
 }
 
 .vs-card__wish_off,
@@ -2410,6 +2406,26 @@ body.hc-nav-open {
 }
 
 .vs-card__wish.selected .vs-card__wish_on {
+	display: inline-flex;
+}
+
+/* The comparison page renders this control as a bare close glyph with no pair  */
+/* of spans, so these rules simply find nothing there.                          */
+
+.vs-card__compare_off,
+.vs-card__compare_on {
+	display: inline-flex;
+}
+
+.vs-card__compare_on {
+	display: none;
+}
+
+.vs-card__compare.selected .vs-card__compare_off {
+	display: none;
+}
+
+.vs-card__compare.selected .vs-card__compare_on {
 	display: inline-flex;
 }
 
@@ -4350,9 +4366,10 @@ body.hc-nav-open {
 	color: var(--vs-text);
 }
 
+/* Same state language as the card: the glyph fills, the button underneath does */
+/* not. The hairline stays put so the control keeps its shape in every state.   */
+
 .vs-buybox__tool.selected {
-	background-color: var(--vs-n-200);
-	border-color: var(--vs-n-200);
 	color: var(--vs-text);
 }
 
@@ -4370,6 +4387,23 @@ body.hc-nav-open {
 }
 
 .vs-buybox__wish.selected .vs-buybox__wish_on {
+	display: inline-flex;
+}
+
+.vs-buybox__compare_off,
+.vs-buybox__compare_on {
+	display: inline-flex;
+}
+
+.vs-buybox__compare_on {
+	display: none;
+}
+
+.vs-buybox__compare.selected .vs-buybox__compare_off {
+	display: none;
+}
+
+.vs-buybox__compare.selected .vs-buybox__compare_on {
 	display: inline-flex;
 }
 

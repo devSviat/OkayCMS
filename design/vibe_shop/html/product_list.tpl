@@ -76,9 +76,15 @@
         <div class="vs-card__tools">
             {if $controller != "ComparisonController"}
                 {if is_array($comparison->ids) && in_array($product->id, $comparison->ids)}
-                    <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->add_comparison}">{include file="svg.tpl" svgId="compare"}</a>
+                    <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->add_comparison}">
+                        <span class="vs-card__compare_off">{include file="svg.tpl" svgId="compare"}</span>
+                        <span class="vs-card__compare_on">{include file="svg.tpl" svgId="compare_filled"}</span>
+                    </a>
                 {else}
-                    <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare" href="#" data-id="{$product->id}" title="{$lang->add_comparison}" data-result-text="{$lang->remove_comparison}">{include file="svg.tpl" svgId="compare"}</a>
+                    <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare" href="#" data-id="{$product->id}" title="{$lang->add_comparison}" data-result-text="{$lang->remove_comparison}">
+                        <span class="vs-card__compare_off">{include file="svg.tpl" svgId="compare"}</span>
+                        <span class="vs-card__compare_on">{include file="svg.tpl" svgId="compare_filled"}</span>
+                    </a>
                 {/if}
             {else}
                 <a class="fn_comparison vs-btn vs-btn--icon vs-card__tool vs-card__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}">{include file="svg.tpl" svgId="close"}</a>
