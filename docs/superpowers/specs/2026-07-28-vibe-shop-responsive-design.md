@@ -111,11 +111,7 @@ not only on the home page.
 
 ### Catalogue
 
-**4. Align the grid rows.** At 390 px the two-column grid has ragged row heights because
-card titles run two or three lines. Clamp the title to two lines below 768 px and reserve
-both, so every card in a row starts its price block on the same baseline.
-
-**5. Compact the card on short viewports.** In the `max-height: 500px` block, drop
+**4. Compact the card on short viewports.** In the `max-height: 500px` block, drop
 `.vs-card` padding to `--vs-space-2` and `.vs-card__media-link` to `--vs-space-3` — the
 values the ≤575 block already uses — and cap the media plate at 180 px so its 1:1 ratio
 cannot make a three-column row 250 px tall. The target is a second row of products starting
@@ -126,7 +122,7 @@ and are not touched.
 
 ### Product page
 
-**6. Two columns on short and wide.** `.vs-pdp__layout` is already a two-column grid at
+**5. Two columns on short and wide.** `.vs-pdp__layout` is already a two-column grid at
 ≥992 px (`components.css:5237`, tracks `minmax(0, 760px) minmax(0, 460px)`). Apply the same
 layout in the short-and-wide block with narrower tracks sized for 844 px, and with it:
 
@@ -137,13 +133,13 @@ layout in the short-and-wide block with narrower tracks sized for 844 px, and wi
   beside the gallery the CTA is on screen, and the bar is then a duplicate button charging
   19 % of the viewport height for nothing.
 
-**7. Stack the buy row at ≤575 px.** The quantity stepper and "Додати в кошик" share one
+**6. Stack the buy row at ≤575 px.** The quantity stepper and "Додати в кошик" share one
 row, which squeezes the button to roughly 200 px at 390 px wide. Stepper on its own row,
 button full width beneath it.
 
 ### Cart and checkout
 
-**8. The short-viewport rhythm compression from item 3 applies here too.** Nothing else.
+**7. The short-viewport rhythm compression from item 3 applies here too.** Nothing else.
 The cart and checkout layouts measured well at 390, 820 and 844 — single column, full-width
 fields, readable rows.
 
@@ -156,7 +152,7 @@ new layout rather than a polish of an existing one, which is outside the agreed 
 
 ### Cross-cutting
 
-**9. Tap targets at the viewports the previous pass never measured.** `components.css`
+**8. Tap targets at the viewports the previous pass never measured.** `components.css`
 already ends with a finished touch-target pass — a `TOUCH TARGETS` block raising roughly
 twenty selectors to `min-height: 44px`, with three exemptions documented in place: links
 inside `.vs-prose` (WCAG 2.5.8 exempts inline links in a sentence), `<label for>` on a text
@@ -179,7 +175,12 @@ reason. This is not a re-run of the earlier pass and must not restate its rules.
   full-screen filter sheet.
 - The variant picker on the catalogue card, still open from the previous redesign round.
 - The orphan card in the blog grid: an artefact of there being four posts, not a defect.
-- A two-column checkout (see item 8).
+- Catalogue row alignment. An earlier draft of this spec called the 390 px grid ragged.
+  Measured, the cards go 412, 412, 428, 428, 440, 440 — every pair in a row is identical,
+  and rows differing from one another is `grid-auto-rows: auto` working as intended.
+  `.vs-card__name` already carries `-webkit-line-clamp: 2` with a reserved `min-height`.
+  There is nothing to fix.
+- A two-column checkout (see item 7).
 
 ## Verification
 
