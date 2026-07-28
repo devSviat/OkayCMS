@@ -2927,17 +2927,17 @@ body.hc-nav-open {
 
 .vs-sort__btn .sorting_icon {
 	flex: none;
-	width: 10px;
-	height: 15px;
+	width: 16px;
+	height: 16px;
 }
 
-.vs-sort__btn .sorting_icon--left,
-.vs-sort__btn .sorting_icon--right {
+.vs-sort__btn .sorting_icon--asc,
+.vs-sort__btn .sorting_icon--desc {
 	opacity: 0.35;
 }
 
-.vs-sort__btn.active_down .sorting_icon--left,
-.vs-sort__btn.active_up .sorting_icon--right {
+.vs-sort__btn.active_down .sorting_icon--desc,
+.vs-sort__btn.active_up .sorting_icon--asc {
 	opacity: 1;
 }
 
@@ -8770,8 +8770,8 @@ body.hc-nav-open {
 }
 
 .vs-404__mark svg {
-	width: 180px;
-	max-width: 60vw;
+	width: 88px;
+	max-width: 40vw;
 	height: auto;
 }
 
