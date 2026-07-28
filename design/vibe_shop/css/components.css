@@ -4630,6 +4630,15 @@ body.hc-nav-open {
 /* visibility as well as transform, so its controls leave the tab order while  */
 /* the bar is off-screen.                                                      */
 
+/* Height as a token, not a repeated number: .to_top (further down this file) */
+/* has to sit above this bar whenever it is showing, and the two must move    */
+/* together if this bar's own box height ever changes. Declared on :root, not */
+/* on .vs-sticky-buy itself - custom properties do not inherit sideways to a  */
+/* sibling element, only down to descendants.                                 */
+:root {
+	--vs-sticky-buy-h: calc(52px + var(--vs-space-2) * 2);
+}
+
 .vs-sticky-buy {
 	position: fixed;
 	left: var(--vs-space-3);
@@ -4638,6 +4647,7 @@ body.hc-nav-open {
 	z-index: var(--vs-z-sticky);
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: var(--vs-space-3);
 	padding: var(--vs-space-2) var(--vs-space-2) var(--vs-space-2) var(--vs-space-5);
 	background-color: var(--vs-surface);
@@ -9506,6 +9516,15 @@ img.lazy:not(.loaded) {
 
 .to_top:hover {
 	border-color: var(--vs-border-strong);
+}
+
+/* The sticky buy bar and this button are both fixed at the same z-layer and   */
+/* both anchor near the bottom-left on phones - harmless while the bar was a   */
+/* full-bleed strip this button was flush against, but once the bar floats as  */
+/* an inset pill the two collide directly on top of the price. Lift this       */
+/* button clear of the bar only while the bar is actually shown.               */
+body:has(.vs-sticky-buy.is-visible) .to_top {
+	bottom: calc(var(--vs-space-3) + env(safe-area-inset-bottom) + var(--vs-sticky-buy-h) + var(--vs-space-3));
 }
 
 /* Nudged down by 2px: an up-chevron drawn from a rotated square is optically   */
