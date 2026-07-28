@@ -379,14 +379,17 @@ body.other_page .main {
 }
 
 /* The bar is white on a near-white canvas, so this hairline is the only thing  */
-/* that ends the chrome - and it has to hold when the first thing under it is   */
-/* another white surface (the homepage banner plate). One step darker than the  */
-/* generic --vs-hairline for that reason. It sits on __main rather than on      */
-/* .vs-header so it travels with the bar when the bar sticks.                    */
+/* that ends the chrome. It was one ramp step darker than the generic hairline  */
+/* so it would still read where the first thing under it is another white       */
+/* surface - but --vs-n-300 drew a visible grey rule across the top of every    */
+/* page, which is louder than a chrome edge should be. Back on --vs-hairline,   */
+/* matching every other divider in the theme. It sits on __main rather than on  */
+/* .vs-header so it travels with the bar when the bar sticks, and the sticky    */
+/* shadow below is what separates the bar once the page scrolls under it.       */
 
 .vs-header__main {
 	background-color: var(--vs-surface);
-	border-bottom: 1px solid var(--vs-n-300);
+	border-bottom: 1px solid var(--vs-hairline);
 	transition: box-shadow var(--vs-dur-2) var(--vs-ease);
 }
 
