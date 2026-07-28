@@ -802,9 +802,13 @@ body.other_page .main {
 /* Same 1.4.11 argument as .vs-field: the fill is --vs-canvas on a white header */
 /* bar, a 1.09:1 step, so the outline is the field.                             */
 
+/* 44px, the height of the catalogue button and the informers either side of it, */
+/* so the whole header row shares one baseline instead of the field standing 2px */
+/* taller than everything next to it.                                            */
+
 .vs-search__input {
 	width: 100%;
-	height: 46px;
+	height: 44px;
 	padding: 0 52px 0 var(--vs-space-3);
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-md);
