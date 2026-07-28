@@ -2161,7 +2161,16 @@ body.hc-nav-open {
 	box-shadow: var(--vs-shadow-2);
 }
 
+/* The positioning context for the badges and the tools. They used to sit inside */
+/* .vs-card__media, which clips to a 12px radius, so each needed an inset of its */
+/* own to keep its corner - 8px for the badges, 4px for the tools. Anchored here */
+/* instead they pin to inset 0, which is the card's own padding edge: the badge  */
+/* now starts on the same vertical as the title and the SKU, and the tool row    */
+/* ends on the same vertical as the buy button. One padding step for the whole   */
+/* card rather than three competing ones.                                        */
+
 .vs-card__inner {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	width: 100%;
@@ -2209,8 +2218,9 @@ body.hc-nav-open {
 }
 
 /* Scoped to the media link, not to .vs-card__media: the shop owner's `special` */
-/* sticker is an <img> inside .vs-card__badges, which is also a child of the    */
-/* media box. It is uploaded artwork the theme must not resize or transform.    */
+/* sticker is an <img> inside .vs-card__badges and must not be resized or       */
+/* transformed - it is uploaded artwork. The badges now sit outside this box,   */
+/* but the narrow scope is still the right one and costs nothing to keep.       */
 
 .vs-card__media-link img {
 	width: 100%;
@@ -2242,8 +2252,8 @@ body.hc-nav-open {
 
 .vs-card__badges {
 	position: absolute;
-	top: var(--vs-space-2);
-	left: var(--vs-space-2);
+	top: 0;
+	left: 0;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
@@ -2313,8 +2323,8 @@ body.hc-nav-open {
 
 .vs-card__tools {
 	position: absolute;
-	top: var(--vs-space-1);
-	right: var(--vs-space-1);
+	top: 0;
+	right: 0;
 	display: flex;
 	flex-direction: row;
 }
