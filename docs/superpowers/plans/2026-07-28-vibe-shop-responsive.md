@@ -21,6 +21,8 @@
 - **Clear caches after every CSS edit**, or you verify the previous bundle: `rm -f compiled/vibe_shop/*.php cache/css/*`
 - **Evidence before claims.** Every task states a measured number before the change and a measured number after. No task is complete on the strength of reading the CSS.
 - **Commit messages carry no `Co-Authored-By` and no Claude/Anthropic attribution.**
+- **`.superpowers/sdd/` is git-ignored scratch** (`.superpowers/sdd/.gitignore` holds `*`). The harness, the audit JSONs, the screenshots and the ledger live there and are never committed. Only `design/vibe_shop/**` is staged by this plan. Never `git add -f` the workspace.
+- **No git worktree.** Nginx serves `/home/sviat/projects/OkayCMS` directly, so a worktree would be invisible to the browser and every measurement in this plan would describe the wrong tree. Work in place on `feature/vibe-shop-responsive`.
 
 ## File Structure
 
@@ -276,16 +278,14 @@ Done. Baseline: home/phone-landscape perView=4 hero=362, product/phone-landscape
 sticky=73 pdpCols=1, no horizontal overflow at any viewport, 0 console errors.
 ```
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Confirm there is nothing to commit**
 
 ```bash
 cd /home/sviat/projects/OkayCMS
-git add .superpowers/sdd/2026-07-28-vibe-shop-responsive/ docs/superpowers/plans/
-git commit -m "test(vibe_shop): add the responsive audit harness and baseline
-
-Measures 5 pages at 5 viewports in one session with a filled cart, so
-the phone and tablet pass has numbers to move rather than impressions."
+git status --short
 ```
+
+Expected: empty. `.superpowers/sdd/` is git-ignored (`.superpowers/sdd/.gitignore` holds `*`), so the harness, the baseline and the ledger are deliberately untracked scratch for this plan. This task ships no commit — its deliverable is the baseline JSON on disk and the ledger's first block. Do not try to force-add the workspace; later tasks depend on it staying untracked.
 
 ---
 
@@ -387,7 +387,7 @@ phone-landscape 4→3, tablet-portrait 4→3, tablet-landscape 4→5, desktop 4�
 
 ```bash
 cd /home/sviat/projects/OkayCMS
-git add design/vibe_shop/js/okay.js .superpowers/sdd/2026-07-28-vibe-shop-responsive/progress.md
+git add design/vibe_shop/js/okay.js
 git commit -m "fix(vibe_shop): repair the product carousel breakpoint ladder
 
 The breakpoints object declared 768 twice, so the first entry was dead
@@ -528,7 +528,7 @@ compiler-trap greps clear.
 
 ```bash
 cd /home/sviat/projects/OkayCMS
-git add design/vibe_shop/css/components.css .superpowers/sdd/2026-07-28-vibe-shop-responsive/progress.md
+git add design/vibe_shop/css/components.css
 git commit -m "feat(vibe_shop): add a height-aware layer for phones in landscape
 
 A phone sideways has a tablet's width on a third of the height, so the
@@ -638,7 +638,7 @@ Append the measured `cardH` and `secondRowTop` before and after to `progress.md`
 
 ```bash
 cd /home/sviat/projects/OkayCMS
-git add design/vibe_shop/css/components.css .superpowers/sdd/2026-07-28-vibe-shop-responsive/progress.md
+git add design/vibe_shop/css/components.css
 git commit -m "fix(vibe_shop): compact the product card on short viewports
 
 A 1:1 plate in a three-column grid is 250px tall at 844px wide, so one
@@ -768,7 +768,7 @@ Append the before/after of `pdpCols`, `stickyBuy` and `galleryFrameW` to `progre
 
 ```bash
 cd /home/sviat/projects/OkayCMS
-git add design/vibe_shop/css/components.css .superpowers/sdd/2026-07-28-vibe-shop-responsive/progress.md
+git add design/vibe_shop/css/components.css
 git commit -m "feat(vibe_shop): put the product page in two columns on a landscape phone
 
 At 844x390 the header and the sticky buy bar took 134px of 390 while
@@ -855,7 +855,7 @@ Same three greps as Task 3 Step 5, then append the before/after `submitW` to `pr
 
 ```bash
 cd /home/sviat/projects/OkayCMS
-git add design/vibe_shop/css/components.css .superpowers/sdd/2026-07-28-vibe-shop-responsive/progress.md
+git add design/vibe_shop/css/components.css
 git commit -m "fix(vibe_shop): give the add-to-cart button its own row below 576px
 
 Sharing a row with the quantity stepper squeezed the page's primary
@@ -955,7 +955,7 @@ Same three greps as Task 3 Step 5. Then:
 
 ```bash
 cd /home/sviat/projects/OkayCMS
-git add design/vibe_shop/css/components.css .superpowers/sdd/2026-07-28-vibe-shop-responsive/progress.md
+git add design/vibe_shop/css/components.css
 git commit -m "fix(vibe_shop): extend the touch-target pass to landscape and tablet
 
 The existing pass measured 375px portrait only. Covers what the wider
@@ -1027,19 +1027,16 @@ grep -nE '^\+\s*\.[a-z0-9_-]+\s*$' /tmp/added.txt || echo "trap 3 clear"
 
 Expected: three "clear" lines across the whole branch, not just the last task's diff.
 
-- [ ] **Step 6: Close the ledger and commit**
+- [ ] **Step 6: Close the ledger**
 
 Append to `progress.md` a final block: the baseline-to-final table for the rows that changed, the desktop-unchanged confirmation, and the one open item carried from the spec — the URL-bar height behaviour under `max-height: 500px` needs one check on a real phone in landscape, which headless cannot reproduce.
 
 ```bash
 cd /home/sviat/projects/OkayCMS
-git add .superpowers/sdd/2026-07-28-vibe-shop-responsive/
-git commit -m "test(vibe_shop): record the final responsive matrix
-
-25 page/viewport combinations, no horizontal overflow, no console
-errors, desktop geometry unchanged apart from the intended carousel
-step. One open item: URL-bar height on a real device."
+git status --short
 ```
+
+Expected: empty. Like Task 1, this task ships no commit — the workspace is git-ignored, and the branch's code commits all landed in Tasks 2 through 7. The deliverable here is the verification record, and the record that matters to git is already in those commits.
 
 ---
 
