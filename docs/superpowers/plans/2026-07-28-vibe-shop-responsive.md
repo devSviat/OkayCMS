@@ -499,13 +499,15 @@ D=.superpowers/sdd/2026-07-28-vibe-shop-responsive
 node $D/audit.mjs /tmp green-short | grep -E '(home|cart)/(phone-landscape|phone-portrait|tablet-portrait)'
 ```
 
-Expected: `home/phone-landscape hero` at roughly 234, down from 356; `home/phone-portrait hero` unchanged at its portrait value, because 844 px of height is nowhere near the threshold; `cart/phone-landscape docH` reduced by roughly 200-400 px from baseline. No `OVERFLOW-X`, `consoleErrors: 0`.
+Expected: `home/phone-landscape hero` at roughly 234, down from 356; `home/phone-portrait hero` unchanged at its portrait value, because 844 px of height is nowhere near the threshold; `cart/phone-landscape docH` reduced by about 36 px. No `OVERFLOW-X`, `consoleErrors: 0`.
+
+That 36 px is the honest figure and it is small: `/cart` carries exactly one `.vs-checkout__body` and no `.vs-section` or masthead, so halving its padding is the entire effect the rhythm compression can have there. The seven-screen checkout on a landscape phone is not meaningfully shortened by this task, and the spec already records that restructuring it is out of scope.
 
 - [ ] **Step 5: Grep the diff for the three compiler traps**
 
 ```bash
 cd /home/sviat/projects/OkayCMS
-git diff -U0 design/vibe_shop/css/components.css | grep '^+' | grep -n '[^ \t].*/\*' | grep -v '^\s*+\s*/\*' || echo "trap 1 clear: no comment shares a line with a declaration"
+git diff -U0 -- design/vibe_shop/css/components.css | grep '^+' | grep '/\*' | grep -v '^+[[:space:]]*/\*' || echo "trap 1 clear: no comment shares a line with a declaration"
 git diff -U0 design/vibe_shop/css/components.css | grep '^+' | grep 'var(--okay-' || echo "trap 2 clear: no --okay-* reference added"
 git diff -U0 design/vibe_shop/css/components.css | grep '^+' | grep -E '^\+\s*\.[a-z-]+[a-z0-9_-]*\s*$' || echo "trap 3 clear: no selector line ends without a comma"
 ```
@@ -1019,7 +1021,7 @@ Expected: 20. Open at minimum the four landscape and tablet views of home, catal
 ```bash
 cd /home/sviat/projects/OkayCMS
 git diff master...HEAD -- design/vibe_shop/css/components.css | grep '^+' > /tmp/added.txt
-grep -n '[^ \t].*/\*' /tmp/added.txt | grep -v '^\s*[0-9]*:\s*+\s*/\*' || echo "trap 1 clear"
+grep '/\*' /tmp/added.txt | grep -v '^+[[:space:]]*/\*' || echo "trap 1 clear"
 grep -n 'var(--okay-' /tmp/added.txt || echo "trap 2 clear"
 grep -nE '^\+\s*\.[a-z0-9_-]+\s*$' /tmp/added.txt || echo "trap 3 clear"
 ```
