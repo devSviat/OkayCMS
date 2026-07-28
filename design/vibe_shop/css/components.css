@@ -10014,6 +10014,64 @@ img.lazy:not(.loaded) {
 }
 
 /* ============================================================================ */
+/* SHORT VIEWPORT                                                               */
+/* ============================================================================ */
+
+/* A phone held sideways is 844x390: a tablet's width on a third of a phone's   */
+/* height. Every width breakpoint above has already fired and handed it the     */
+/* tablet layout, so the correction cannot key off width - it keys off height.  */
+/*                                                                             */
+/* 500px is the threshold because no tablet reaches it (an iPad sideways is     */
+/* 1180x820) and every phone in landscape is under it (844x390, 800x360,        */
+/* 736x414). It also catches a short desktop window and a tablet in split view, */
+/* which want the same treatment for the same reason.                          */
+/*                                                                             */
+/* Placed after every width block and before TOUCH TARGETS, which stays last:   */
+/* these rules and the min-width rules they correct carry equal specificity, so */
+/* source order is what decides them.                                          */
+
+@media (max-height: 500px) {
+
+/* 21/9 from 768px makes the banner 362px at 844px wide. Under a 61px header on */
+/* a 390px viewport that is the entire fold. 60vh is 234px there, which leaves  */
+/* about 95px of the next section showing - enough to say the page continues.   */
+
+	.main_banner .banner_group__item {
+		aspect-ratio: auto;
+		height: 60vh;
+	}
+
+/* The rhythm is tuned for a viewport at least twice this tall. Section padding */
+/* alone costs 48px between every pair of sections on a 390px screen.           */
+
+	.vs-section {
+		padding-top: var(--vs-space-5);
+	}
+
+	.vs-checkout__body {
+		padding: var(--vs-space-4) 0 var(--vs-space-5);
+	}
+
+	.vs-pdp__masthead,
+	.vs-catalogue__masthead,
+	.vs-page__masthead,
+	.vs-blog__masthead {
+		padding: var(--vs-space-3) 0;
+	}
+}
+
+/* ------------------------------------------------ short and wide: phone in landscape */
+
+/* 640px keeps an iPhone SE sideways (667x375) in this layer while excluding a  */
+/* narrow window that merely happens to be short.                              */
+
+@media (max-height: 500px) and (min-width: 640px) {
+	.vs-section {
+		padding-top: var(--vs-space-6);
+	}
+}
+
+/* ============================================================================ */
 /* TOUCH TARGETS                                                                */
 /* ============================================================================ */
 
