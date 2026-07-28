@@ -626,18 +626,30 @@
         return -1;
     }
 
-    /* asTabs = true gives the tab pattern. The item box and the <h2> sit between
-       the tablist and the tab, which ARIA does not allow through DOM ancestry -
-       so the tablist claims its tabs with aria-owns instead, which is the
-       relationship ARIA provides for exactly this shape.
+    /* asTabs = true gives the tab pattern.
 
        The <h2> keeps its heading semantics at every width. It was marked
        role="presentation" from Task 9 until the final review, on the reasoning
        that a heading does not matter when only one panel's content is present.
        That misreads what a heading is for: it is how a screen-reader user FINDS
-       a section, not how they enter a hidden one. Measured at 1440 before this
+       a section, not how they enter a hidden one. Measured at 1440 before that
        change: zero headings existed for Опис, Характеристики and Відгуки, so
        heading navigation skipped the entire lower half of the product page.
+
+       The final review's own fix then added aria-owns to the tablist, so that
+       the tabs would still be its direct owned children with the <h2> in the
+       way. That silently undid the heading fix. Chrome honours aria-owns by
+       REPARENTING the owned button out of the <h2> in the accessibility tree,
+       and the <h2> takes its name from its contents - so it was left with no
+       contents and no name. Measured over Accessibility.getFullAXTree at 1440,
+       shipped: [{name:"", lvl:2}, {name:"", lvl:2}]; with aria-owns dropped:
+       [{name:"Характеристики", lvl:2, kids:["tab:Характеристики"]},
+        {name:"Відгуки", lvl:2, kids:["tab:Відгуки"]}]. Two unnamed headings are
+       worse than none, so aria-owns is gone. The tabs stay role="tab" with
+       aria-selected and roving tabindex inside a named tablist; only the AX
+       parent of each tab changes from tablist to its own heading. ARIA also
+       calls aria-owns redundant when it points at DOM descendants, which these
+       always are.
 
        The item box keeps role="presentation" - it is a bare <div> with no
        implicit role, and presentation on it says nothing about its descendants,
@@ -654,10 +666,7 @@
         } else {
             host.removeAttribute('role');
             host.removeAttribute('aria-label');
-            host.removeAttribute('aria-owns');
         }
-
-        var owned = [];
 
         for (var i = 0; i < parts.length; i++) {
             var p = parts[i];
@@ -668,7 +677,6 @@
             p.head.removeAttribute('role');
 
             if (asTabs) {
-                owned.push(p.btn.id);
                 p.item.setAttribute('role', 'presentation');
                 p.btn.setAttribute('role', 'tab');
                 p.btn.setAttribute('aria-selected', on ? 'true' : 'false');
@@ -688,8 +696,6 @@
                 p.panel.removeAttribute('tabindex');
             }
         }
-
-        if (asTabs) host.setAttribute('aria-owns', owned.join(' '));
     }
 
     function tabHost() {

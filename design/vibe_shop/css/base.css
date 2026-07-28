@@ -85,6 +85,11 @@ a {
 /* the box the accent ships as ink, so this renders as the near-black it was.   */
 /* The only link in the theme on an ink plate is .vs-skip, which sets           */
 /* text-decoration: none and so has no underline to colour.                     */
+/* This rule alone is not enough and must not be relied on alone: any later     */
+/* rule using the text-decoration SHORTHAND resets text-decoration-color to     */
+/* currentColor, and the theme's hover underlines all live in components.css    */
+/* after this file. Those rules therefore name text-decoration-line and         */
+/* text-decoration-color separately - see the note above .vs-catalog__link--3.  */
 
 a:hover {
 	text-decoration-color: var(--vs-accent);

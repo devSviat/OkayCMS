@@ -1310,9 +1310,18 @@ body.other_page .main {
 }
 
 .vs-catalog__link--2:hover,
+/* Underline-on-hover rules across this sheet name the two longhands rather    */
+/* than the text-decoration shorthand. The shorthand resets                    */
+/* text-decoration-color to currentColor, which silently overrode base.css's   */
+/* a:hover accent underline - spec 5.1's second job for the brand colour       */
+/* reached one link in the whole shop until this was fixed. The colour is      */
+/* repeated here instead of left to base.css because several of these rules    */
+/* sit against a rest rule of equal specificity, where the later sheet wins.   */
+
 .vs-catalog__link--3:hover {
 	color: var(--vs-heading);
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 	text-underline-offset: 0.2em;
 }
 
@@ -1953,7 +1962,8 @@ body.hc-nav-open {
 
 .vs-footer__menu a:hover {
 	color: var(--vs-text);
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 	text-underline-offset: 0.2em;
 }
 
@@ -2393,7 +2403,8 @@ body.hc-nav-open {
 }
 
 .vs-card__name:hover {
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 	text-underline-offset: 0.2em;
 }
 
@@ -2688,7 +2699,8 @@ body.hc-nav-open {
 
 .vs-crumbs a:hover {
 	color: var(--vs-text);
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 	text-underline-offset: 0.2em;
 }
 
@@ -3575,6 +3587,25 @@ body.hc-nav-open {
 	color: inherit;
 }
 
+/* color: inherit only reaches an inline <svg>, which is why the blog rail's   */
+/* svg fallback survived the accent fill and the shop's raster thumbnail did   */
+/* not: a category image is a 20px PNG of dark line art, drawn for a light     */
+/* surface, and on the ink fill it went invisible. It gets a plate of that     */
+/* light surface back instead of losing the fill. <picture> is the marker -    */
+/* the template emits it only when the category has an image, so the svg       */
+/* fallback keeps the bare fill and needs no exception here.                   */
+
+.vs-filter-cats__link.is-current .vs-filter-cats__icon picture {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	padding: var(--vs-space-1);
+	border-radius: var(--vs-radius-sm);
+	background-color: var(--vs-surface);
+}
+
 .vs-filter-cats__icon img {
 	width: 100%;
 	height: 100%;
@@ -3816,7 +3847,8 @@ body.hc-nav-open {
 }
 
 .vs-pdp__brand:hover {
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 	text-underline-offset: 0.2em;
 }
 
@@ -5391,7 +5423,8 @@ body.hc-nav-open {
 
 .vs-checkout__back:hover {
 	color: var(--vs-heading);
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 	text-underline-offset: 0.2em;
 }
 
@@ -5621,7 +5654,8 @@ body.hc-nav-open {
 }
 
 .vs-cart__name:hover {
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 	text-underline-offset: 0.2em;
 }
 
@@ -6668,7 +6702,9 @@ body.hc-nav-open {
 /* boundary, so the boundary token has no business here. The two were split in   */
 /* Task 9 and this rule was the one site left pointing at the old value, which   */
 /* darkened admin-authored prose links #a5a5aa -> #6b6b71 without that being     */
-/* asked for or recorded. Hover still goes to currentColor, which is the cue.    */
+/* asked for or recorded. Hover takes the accent, the same cue every other link  */
+/* in the theme gets; it used to pin currentColor, which was the one rule        */
+/* actively cancelling spec 5.1's link-hover accent on the pages made of prose.  */
 
 .vs-prose a {
 	color: var(--vs-text);
@@ -6678,7 +6714,7 @@ body.hc-nav-open {
 }
 
 .vs-prose a:hover {
-	text-decoration-color: currentColor;
+	text-decoration-color: var(--vs-accent);
 }
 
 /* Pasted content routinely carries width/height attributes and inline styles   */
@@ -6850,7 +6886,8 @@ body.hc-nav-open {
 }
 
 .vs-table__link:hover {
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 }
 
 .vs-table__detail {
@@ -6964,7 +7001,8 @@ body.hc-nav-open {
 
 .vs-form__link:hover {
 	color: var(--vs-heading);
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 }
 
 .vs-form__link svg {
@@ -7490,7 +7528,8 @@ body.hc-nav-open {
 }
 
 .vs-post-card__link:hover {
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 	text-underline-offset: 0.2em;
 }
 
@@ -7565,7 +7604,8 @@ body.hc-nav-open {
 
 .vs-post-card__author:hover {
 	color: var(--vs-heading);
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 }
 
 /* ------------------------------------------------------------------ blog page */
@@ -7782,7 +7822,8 @@ body.hc-nav-open {
 }
 
 .vs-post__meta_item a:hover {
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 }
 
 .vs-post__meta_item svg {
@@ -7852,7 +7893,8 @@ body.hc-nav-open {
 }
 
 .vs-post__toc_list a:hover {
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 }
 
 .vs-post__body {
@@ -8064,7 +8106,8 @@ body.hc-nav-open {
 }
 
 .vs-author-card__name a:hover {
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 }
 
 .vs-author-card__position {
@@ -8167,7 +8210,8 @@ body.hc-nav-open {
 }
 
 .vs-author:hover .vs-author__name {
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 	text-underline-offset: 0.2em;
 }
 
@@ -8714,7 +8758,8 @@ body.hc-nav-open {
 
 .vs-404__menu a:hover {
 	color: var(--vs-heading);
-	text-decoration: underline;
+	text-decoration-line: underline;
+	text-decoration-color: var(--vs-accent);
 }
 
 /* ----------------------------------------------------------- main banner */
