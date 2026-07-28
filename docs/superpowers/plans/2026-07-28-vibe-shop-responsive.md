@@ -718,21 +718,6 @@ Inside the `@media (max-height: 500px) and (min-width: 640px)` block from Task 3
 		margin: 0;
 	}
 
-/* The bar earns its 73px - 19% of a 390px viewport - only while the real CTA   */
-/* is off screen. Beside the gallery the CTA is on screen and the bar is a      */
-/* duplicate button charging rent.                                             */
-
-	.vs-sticky-buy {
-		display: none;
-	}
-
-/* The bar owned the bottom edge, so the page reserved space for it. With the   */
-/* bar gone that clearance is a dead band at the end of the page.               */
-
-	.vs-pdp:last-child,
-	.vs-section:last-child {
-		padding-bottom: var(--vs-space-6);
-	}
 ```
 
 - [ ] **Step 4: Clear caches and verify**

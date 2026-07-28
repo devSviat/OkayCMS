@@ -132,10 +132,17 @@ layout in the short-and-wide block with narrower tracks sized for 844 px, and wi
 
 - lift the `max-width: 480px` cap on `.vs-gallery__frame` that the ≤991 block imposes — it
   exists to stop an uncapped square stage from being 897 px tall in one column, which the
-  two-column layout no longer risks;
-- hide `.vs-sticky-buy`. The bar earns its 73 px only while the real CTA is off screen;
-  beside the gallery the CTA is on screen, and the bar is then a duplicate button charging
-  19 % of the viewport height for nothing.
+  two-column layout no longer risks.
+
+**The sticky buy bar stays.** An earlier draft of this item hid it, on the argument that
+the bar only earns its 73 px while the real CTA is off screen and that a CTA beside the
+gallery is on screen. Measured, that argument is wrong: at 844×390 the header, breadcrumbs
+and masthead fill 250 px before the grid starts, and the buy box's own stack puts the
+submit button at y=388 against a 390 px viewport. The two columns are side by side, so the
+gallery's height has no bearing on where the CTA lands — only the 250 px above the grid
+does. Hiding the bar would leave a landscape phone with no reachable buy button at all,
+which is worse than the state this spec set out to improve. The bar is kept; the two-column
+layout and the uncapped gallery are the deliverable.
 
 **6. Stack the buy row at ≤575 px.** The quantity stepper and "Додати в кошик" share one
 row, which squeezes the button to roughly 200 px at 390 px wide. Stepper on its own row,
