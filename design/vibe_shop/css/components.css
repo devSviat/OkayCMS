@@ -7384,8 +7384,15 @@ body.hc-nav-open {
 /* Divider bookkeeping is written for any number of items, not for four: the      */
 /* owner configures how many advantage banners exist.                             */
 
+/* .container still carries the legacy 7px of horizontal padding. Every homepage */
+/* section zeroes it through .vs-home__section's own padding shorthand, but this */
+/* wrapper is a bare .container, so the strip started 7px inside every other     */
+/* block on the page - measured 44px against 37px at 1440.                       */
+
 .vs-advantages {
 	margin-top: var(--vs-space-8);
+	padding-left: 0;
+	padding-right: 0;
 }
 
 .vs-advantages .block {
