@@ -5230,7 +5230,8 @@ body.hc-nav-open {
 
 	.vs-pdp__layout {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 380px;
+		grid-template-columns: minmax(0, 760px) minmax(0, 460px);
+		justify-content: center;
 		gap: var(--vs-space-9);
 		align-items: start;
 	}
@@ -5259,13 +5260,15 @@ body.hc-nav-open {
 		top: calc(var(--vs-header-h) + var(--vs-space-4));
 	}
 
-/* The stage is capped rather than left to fill a 1352px container: an 830px    */
-/* square photograph pushes the whole detail section off the screen and reads   */
-/* as a banner, not as merchandise. The slack falls into the gutter between the */
-/* gallery and the buy box, which is where air belongs on this page.            */
+/* The stage is still capped - an 830px square photograph pushes the detail      */
+/* section off the screen and reads as a banner, not as merchandise - but the    */
+/* cap now lives on the grid column rather than on the frame. With both, the     */
+/* column was 924px wide and the frame 680, and the 244px difference became      */
+/* dead gutter: 292px of it between the photograph and the buy box at 1440.      */
+/* One cap per column, the leftover parked in the outer margins by               */
+/* justify-content, and the gutter is the 48px the grid actually declares.       */
 
 	.vs-gallery__frame {
-		max-width: 680px;
 		gap: var(--vs-space-4);
 	}
 
