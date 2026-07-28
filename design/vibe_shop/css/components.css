@@ -4361,10 +4361,14 @@ body.hc-nav-open {
 	color: var(--vs-text);
 }
 
-/* Same state language as the card: the glyph fills, the button underneath does */
-/* not. The hairline stays put so the control keeps its shape in every state.   */
+/* The card keeps its picked state to the glyph because anything behind it       */
+/* covers the photograph. Nothing sits behind this one, so the button carries    */
+/* the state too - and it has to: comparison has no filled glyph to swap to, so  */
+/* on the glyph alone its picked state was a tone step and nothing else.         */
 
 .vs-buybox__tool.selected {
+	background-color: var(--vs-n-200);
+	border-color: var(--vs-ink);
 	color: var(--vs-text);
 }
 
