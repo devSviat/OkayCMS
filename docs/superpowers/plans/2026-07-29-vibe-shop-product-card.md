@@ -581,6 +581,261 @@ what the .vs-cart__name rule below already says."
 
 ---
 
+### Task 6: A real edge gutter on phones
+
+**Execute before Task 4.** Added after the owner reported it with screenshots.
+
+**Files:**
+- Modify: `design/vibe_shop/css/components.css`
+
+**Interfaces:**
+- Consumes: nothing.
+
+- [ ] **Step 1: Record the two different failures**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+rm -f compiled/vibe_shop/*.php cache/css/*
+E="(()=>{const L=e=>e?Math.round(e.getBoundingClientRect().left):null;const q=s=>L(document.querySelector(s));return JSON.stringify({vw:innerWidth,container:q('.container'),homeTitle:q('.vs-home__title'),homeHead:q('.vs-home__head'),rail:q('.fn_products_slide'),crumbs:q('.vs-crumbs'),h1:q('h1'),grid:q('.vs-catalogue__grid'),card:q('.vs-card')})})()"
+for u in / /all-products /products/divan-redking; do
+  printf "%-26s " "$u"
+  node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs --url "http://localhost$u" --width 390 --height 844 --eval "$E" 2>&1 | sed -n '/evalResult/p'
+done
+```
+
+Expected: `/all-products` and the product page report 7 for `crumbs`, `h1`, `grid` and `card`;
+`/` reports 0 for `container`, `homeTitle` and `homeHead`.
+
+- [ ] **Step 2: Raise the container gutter below 576 px**
+
+`grid.css` sets the 7 px and loads before `components.css` (see `design/vibe_shop/css.php`), so
+a rule here wins without `!important`. Add it inside the existing `@media (max-width: 575px)`
+block — the first one, the component block that already carries `.vs-card` rules:
+
+```css
+/* grid.css gives .container a 7px gutter inherited from Bootstrap. That is too  */
+/* little on a phone against a theme whose own rhythm steps in 16 and 20, and it */
+/* put every block seven pixels from the screen edge. Raised only below 576px:   */
+/* tablet and desktop keep the value they were designed against, so no layout    */
+/* above this width can regress.                                                 */
+
+	.container-fluid,
+	.container-less,
+	.container {
+		padding-left: var(--vs-space-4);
+		padding-right: var(--vs-space-4);
+	}
+```
+
+Note each selector line breaks immediately after a comma, the only break the compiler allows.
+
+- [ ] **Step 3: Give the home headings the same gutter**
+
+`.vs-home__section` zeroes the container's horizontal padding so its carousels can pull
+themselves out by half a gutter and let a card peek off the edge — that bleed is deliberate and
+documented at `components.css:7410`. **Do not undo it.** The defect is only that the headings
+inherited the zero.
+
+In the same `@media (max-width: 575px)` block:
+
+```css
+/* The rails bleed past the edge on purpose - a card peeking off-screen is what  */
+/* says the row scrolls. A heading cannot scroll, so it should never have taken  */
+/* that treatment. It gets the page gutter back while the rails keep theirs.     */
+
+	.vs-home__head,
+	.vs-home__about {
+		padding-left: var(--vs-space-4);
+		padding-right: var(--vs-space-4);
+	}
+```
+
+- [ ] **Step 4: Clear caches and verify**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+rm -f compiled/vibe_shop/*.php cache/css/*
+```
+
+Re-run Step 1's loop.
+
+Expected: on `/all-products` and the product page, `crumbs`, `h1`, `grid` and `card` all report
+16. On `/`, `homeTitle` and `homeHead` report 16 while `rail` stays negative — the bleed intact.
+
+- [ ] **Step 5: Confirm nothing above 576 px moved**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+for w in 576 820 1440; do
+  printf "%-6s " "$w"
+  node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs --url http://localhost/all-products --width $w --height 900 \
+    --eval "(()=>{const c=document.querySelector('.container');return JSON.stringify({padL:getComputedStyle(c).paddingLeft,cardL:Math.round(document.querySelector('.vs-card').getBoundingClientRect().left)})})()" 2>&1 | sed -n '/evalResult/p'
+done
+```
+
+Expected: `padL: "7px"` at all three. The rule stops at the breakpoint.
+
+- [ ] **Step 6: Check for horizontal overflow**
+
+Adding 9 px of padding on each side narrows the content box. Confirm nothing now overflows:
+
+```bash
+cd /home/sviat/projects/OkayCMS
+for u in / /all-products /products/divan-redking /cart; do
+  printf "%-26s " "$u"
+  node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs --url "http://localhost$u" --width 390 --height 844 \
+    --eval "(()=>JSON.stringify({sw:document.documentElement.scrollWidth,iw:innerWidth,overflow:document.documentElement.scrollWidth>innerWidth}))()" 2>&1 | sed -n '/evalResult/p'
+done
+```
+
+Expected: `overflow: false` on all four. The home page is the one to watch — its rails already
+pull past the edge deliberately, and `overflow-x: clip` on `.vs-home__section` is what contains
+them.
+
+- [ ] **Step 7: Compiler traps, look at it, commit**
+
+Run the three greps from Task 1 Step 7. Then screenshot all four pages at 390×844 and **look at
+them** — describe what you see, in particular whether the home page's rails still bleed while its
+headings now line up with the cards below them.
+
+```bash
+cd /home/sviat/projects/OkayCMS
+git add design/vibe_shop/css/components.css
+git commit -m "fix(vibe_shop): give the page a real edge gutter on phones
+
+grid.css's 7px Bootstrap gutter put every block seven pixels from the
+screen edge. Raised to 16px below 576px only. The home headings get it
+too - the rails bleed on purpose, headings never should have."
+```
+
+---
+
+### Task 7: Put the label back on the sticky buy button
+
+**Execute before Task 4.** Requested by the owner after seeing the icon-only version ship.
+
+**Files:**
+- Modify: `design/vibe_shop/html/product.tpl:546-549`
+- Modify: `design/vibe_shop/css/components.css` (the `.vs-sticky-buy__cta--icon` rules)
+
+**Interfaces:**
+- Consumes: nothing.
+
+- [ ] **Step 1: Record the current state**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs \
+  --url http://localhost/products/divan-redking --width 390 --height 844 --out /tmp/cta-before.png \
+  --eval "(async()=>{scrollTo(0,1100);await new Promise(r=>setTimeout(r,900));const b=document.querySelector('.vs-sticky-buy__cta--icon');const r=b.getBoundingClientRect();const sp=b.querySelector('.vs-sr-only');return JSON.stringify({w:Math.round(r.width),h:Math.round(r.height),text:b.textContent.trim(),srOnly:!!sp,dataLang:sp?sp.getAttribute('data-language'):null})})()"
+```
+
+Expected: a 52×52 button whose `textContent` reads "Додати в кошик" from a `.vs-sr-only` span
+carrying `data-language="product_add_cart"`.
+
+- [ ] **Step 2: Make the label visible in the template**
+
+In `design/vibe_shop/html/product.tpl`, the in-stock sticky button currently reads:
+
+```smarty
+<button class="fn_is_stock vs-btn vs-btn--primary vs-sticky-buy__cta vs-sticky-buy__cta--icon{if $product->variant->stock < 1} hidden-xs-up{/if}" type="submit" form="vs_buy_form">
+    {include file="svg.tpl" svgId="cart"}
+    <span class="vs-sr-only" data-language="product_add_cart">{$lang->product_add_cart}</span>
+</button>
+```
+
+Drop `vs-sr-only` from the span so the text renders, keeping everything else:
+
+```smarty
+<button class="fn_is_stock vs-btn vs-btn--primary vs-sticky-buy__cta vs-sticky-buy__cta--icon{if $product->variant->stock < 1} hidden-xs-up{/if}" type="submit" form="vs_buy_form">
+    {include file="svg.tpl" svgId="cart"}
+    <span data-language="product_add_cart">{$lang->product_add_cart}</span>
+</button>
+```
+
+**`data-language` stays on the span.** It marks the element whose text the language switch
+rewrites; moving it back onto the button would put the swap target on an element that also
+contains an SVG, and a `.text()`-style write would delete the glyph. Leave the modifier class
+name `--icon` alone — renaming it would only churn the CSS below for no gain.
+
+- [ ] **Step 3: Turn the circle back into a pill**
+
+Replace the `.vs-sticky-buy__cta--icon` rules in `components.css`:
+
+```css
+/* Glyph plus label. The label was hidden when this shipped as a circle; the     */
+/* owner asked for it back, so the button is a pill again and the span simply    */
+/* renders. min-height keeps the 52px touch target the circle had.               */
+
+.vs-sticky-buy__cta--icon {
+	flex: none;
+	gap: var(--vs-space-2);
+	min-height: 52px;
+	padding: 0 var(--vs-space-5);
+	border-radius: var(--vs-radius-full);
+}
+
+.vs-sticky-buy__cta--icon svg {
+	width: 20px;
+	height: 20px;
+}
+```
+
+`width`, `min-width` and `height` all go — the pill sizes to its content. Check whether
+`.vs-btn` already supplies `display: inline-flex` and `align-items: center`; if it does, do not
+restate them.
+
+- [ ] **Step 4: Clear caches and verify**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+rm -f compiled/vibe_shop/*.php cache/css/*
+```
+
+Re-run Step 1's command with `--out /tmp/cta-after.png`.
+
+Expected: the button is wider than 52 px, at least 52 px tall, its `textContent` still reads
+"Додати в кошик", and the span still carries `data-language`.
+
+- [ ] **Step 5: Confirm the bar still fits at the narrowest width**
+
+The bar holds the price on the left and this button on the right, pinned apart by
+`justify-content: space-between`. A longer button leaves less room for the price.
+
+```bash
+cd /home/sviat/projects/OkayCMS
+for w in 320 390 844; do
+  printf "%-6s " "$w"
+  node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs --url http://localhost/products/divan-redking --width $w --height 844 \
+    --eval "(async()=>{scrollTo(0,1100);await new Promise(r=>setTimeout(r,900));const bar=document.querySelector('.vs-sticky-buy');const p=document.querySelector('.vs-sticky-buy__info');const b=document.querySelector('.vs-sticky-buy__cta--icon');const pr=p.getBoundingClientRect(),br=b.getBoundingClientRect();return JSON.stringify({barW:Math.round(bar.getBoundingClientRect().width),priceW:Math.round(pr.width),btnW:Math.round(br.width),overlap:pr.right>br.left,priceText:p.textContent.replace(/\s+/g,' ').trim().slice(0,24)})})()" 2>&1 | sed -n '/evalResult/p'
+done
+```
+
+Expected: `overlap: false` at every width, and the price text not truncated. 320 px is the
+narrowest this theme claims to serve and is where this will fail first if it fails.
+
+- [ ] **Step 6: Confirm the pre-order variant is untouched**
+
+The same slot renders a second button in pre-order mode, which never became a circle. Confirm
+its markup and rules are unchanged by this task — `grep -n 'fn_is_preorder' design/vibe_shop/html/product.tpl`.
+
+- [ ] **Step 7: Compiler traps, look at it, commit**
+
+Run the three greps from Task 1 Step 7. Then open `/tmp/cta-after.png` at 390 and the 320 shot,
+and **look at them** — the price and the button must both read without crowding.
+
+```bash
+cd /home/sviat/projects/OkayCMS
+git add design/vibe_shop/html/product.tpl design/vibe_shop/css/components.css
+git commit -m "fix(vibe_shop): put the label back on the sticky buy button
+
+It shipped as a circle with the words hidden for screen readers only.
+The owner asked for the text back, so it is a pill again; the touch
+target and the language-swap hook are unchanged."
+```
+
+---
+
 ## Self-Review
 
 **Spec coverage.** Spec item 1 (reserve the old-price tier, not inline) → Task 1 Steps 2-3. Item 2 (discount moves onto the tier) → Task 1 Steps 2 and 4. Item 3 (SKU commented, not deleted) → Task 2. Item 4 (translucent chrome, `color-mix` from `--vs-surface`, `@supports` gating both properties, measured contrast, measured performance) → Task 3 Steps 2-5. The spec's verification section → Task 1 Steps 5-6, Task 2 Steps 3-4, Task 3 Steps 4-5, and Task 4 throughout.
