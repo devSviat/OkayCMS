@@ -10640,6 +10640,59 @@ img.lazy:not(.loaded) {
 }
 
 /* ============================================================================ */
+/* TRANSLUCENT CHROME                                                           */
+/* ============================================================================ */
+
+/* The blur is the visible part but the translucency is the actual change:      */
+/* backdrop-filter does nothing behind an opaque background, and both of these  */
+/* were fully opaque.                                                          */
+/*                                                                             */
+/* The colour cannot be a literal rgba. --vs-surface is var(--okay-boxed-color),*/
+/* the shade the shop owner sets in the admin panel, so the translucent value   */
+/* is mixed from whatever they chose. By the time the browser sees it the token */
+/* holds a plain colour, so color-mix resolves normally.                       */
+/*                                                                             */
+/* Both properties live inside @supports together on purpose. A browser without */
+/* backdrop-filter must keep the opaque surface: giving it the translucency     */
+/* alone would be a see-through bar with no blur, worse contrast than today.    */
+/*                                                                             */
+/* Placed here and not beside .vs-header__main, for the same reason the two     */
+/* blocks below it are: .vs-sticky-buy sets its own background-color at equal   */
+/* specificity further down the file, so a copy of this rule up in the header   */
+/* section loses the cascade on the buy bar and leaves it opaque with a blur    */
+/* that has nothing to blur. Measured that way first: bg stayed opaque          */
+/* rgb(255, 255, 255). TOUCH TARGETS still stays last.                         */
+/*                                                                             */
+/* .vs-header has to give up its own fill or the whole thing is invisible on a  */
+/* phone, which is the only place it matters. Below 992px .vs-header is the     */
+/* element that pins (position: sticky, from the max-width: 991 block) and      */
+/* .vs-header__utility is display: none, so the two boxes are the same 390x61   */
+/* rectangle - and an opaque parent is exactly what a child's backdrop-filter   */
+/* samples. Computed style read color(srgb 1 1 1 / 0.82) and blur(12px) while   */
+/* the rendered band was a flat 255,255,255 at every scroll offset tested.      */
+/* Above 992px .vs-header goes back to being ordinary flow content that scrolls */
+/* away (sticky.min.js pins .vs-header__main itself, data-sticky-for="991"), so */
+/* the only thing it was still painting for is the utility strip, which now     */
+/* carries the surface colour on its own rule and keeps it opaque.              */
+
+@supports (backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px)) {
+	.vs-header {
+		background-color: transparent;
+	}
+
+	.vs-header__utility {
+		background-color: var(--vs-surface);
+	}
+
+	.vs-header__main,
+	.vs-sticky-buy {
+		background-color: color-mix(in srgb, var(--vs-surface) 82%, transparent);
+		-webkit-backdrop-filter: blur(12px);
+		backdrop-filter: blur(12px);
+	}
+}
+
+/* ============================================================================ */
 /* TOUCH TARGETS                                                                */
 /* ============================================================================ */
 
