@@ -5631,6 +5631,29 @@ body.hc-nav-open {
 	.vs-buybox__submit {
 		flex: 1 1 100%;
 	}
+
+	/* grid.css gives .container a 7px gutter inherited from Bootstrap. That is too  */
+	/* little on a phone against a theme whose own rhythm steps in 16 and 20, and it */
+	/* put every block seven pixels from the screen edge. Raised only below 576px:   */
+	/* tablet and desktop keep the value they were designed against, so no layout    */
+	/* above this width can regress.                                                 */
+
+	.container-fluid,
+	.container-less,
+	.container {
+		padding-left: var(--vs-space-4);
+		padding-right: var(--vs-space-4);
+	}
+
+	/* The rails bleed past the edge on purpose - a card peeking off-screen is what  */
+	/* says the row scrolls. A heading cannot scroll, so it should never have taken  */
+	/* that treatment. It gets the page gutter back while the rails keep theirs.     */
+
+	.vs-home__head,
+	.vs-home__about {
+		padding-left: var(--vs-space-4);
+		padding-right: var(--vs-space-4);
+	}
 }
 
 /* ---------------------------------------------- touch: no hover available */
