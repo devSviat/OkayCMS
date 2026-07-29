@@ -266,12 +266,10 @@
 {/if}
 {if $svgId == "catalog_icon"}
     <svg class="catalog_icon" width="20px" height="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-        <path d="M9 6l11 0"/>
-        <path d="M9 12l11 0"/>
-        <path d="M9 18l11 0"/>
-        <path d="M5 6l0 .01"/>
-        <path d="M5 12l0 .01"/>
-        <path d="M5 18l0 .01"/>
+        <path d="M4 4h6v6h-6z"/>
+        <path d="M14 4h6v6h-6z"/>
+        <path d="M4 14h6v6h-6z"/>
+        <path d="M14 14h6v6h-6z"/>
     </svg>
 {/if}
 {if $svgId == "subscribe_image"}

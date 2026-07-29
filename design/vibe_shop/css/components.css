@@ -1606,13 +1606,13 @@ body.hc-nav-open {
 
 .hc-offcanvas-nav .nav-content > ul > li > .vs-menu__link.nav-item::before {
 	position: absolute;
-	left: calc(var(--vs-space-5) + 7px);
+	left: calc(var(--vs-space-5) + 6px);
 	top: 50%;
-	width: 6px;
-	height: 6px;
-	margin-top: -3px;
+	width: 8px;
+	height: 8px;
+	margin-top: -4px;
+	border: 1.8px solid var(--vs-text-muted);
 	border-radius: var(--vs-radius-full);
-	background-color: var(--vs-text-muted);
 	content: "";
 }
 
