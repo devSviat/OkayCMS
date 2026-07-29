@@ -5911,9 +5911,21 @@ body.hc-nav-open {
 /* the redundant half of the button once the words are back, and dropping it   */
 /* frees the icon plus its gap, 28px, leaving 11px of slack at 320.            */
 
+/* The pre-order button has no glyph to give up - it never had one, because a    */
+/* cart icon is the wrong symbol for ordering something that is not in stock -   */
+/* and "Передзамовлення" is one unbreakable word. At 320 it ran 2.9px past the   */
+/* bar's content box into the padding. Its 20px sides come from .vs-btn, and     */
+/* 12px here buys 16px back, which clears it with room rather than on a          */
+/* hairline. The in-stock pill takes the same trim and is further inside for it. */
+
 @media (max-width: 359px) {
 	.vs-sticky-buy__cta--icon svg {
 		display: none;
+	}
+
+	.vs-sticky-buy__cta {
+		padding-left: var(--vs-space-3);
+		padding-right: var(--vs-space-3);
 	}
 }
 
@@ -7691,13 +7703,13 @@ body.hc-nav-open {
 /* them - the heading is the heading.                                            */
 
 /* overflow-x: clip, not hidden: the rail below pulls itself out by half a      */
-/* gutter on each side. From 576px up .vs-home__section zeroes .container's own */
-/* horizontal padding (the rule below), and up to 1366px - where grid.css caps  */
-/* .container's own width - that half-gutter is real page overflow: forcing     */
-/* overflow-x: visible and reading document.documentElement.scrollWidth against */
-/* window.innerWidth measures 8px of overflow at both 576px and 1365px. Below    */
-/* 576px the section keeps the container's own padding instead of zeroing it,   */
-/* so there is no zero left for the rail to overflow past. What is being        */
+/* gutter on each side, and .container only grants 7px, so 1px of that pull is  */
+/* real page overflow. Forcing overflow-x: visible and reading                  */
+/* document.documentElement.scrollWidth against window.innerWidth measures 1px  */
+/* at 576, 768, 1200 and 1366, and 0 from 1380 up - the container's own         */
+/* max-width is 1366, but the viewport has to exceed it by twice the 7px        */
+/* half-gutter before the centring margin absorbs the pull. Below 576px the     */
+/* container grants 16px and there is nothing left to overflow past. What is    */
 /* clipped is the empty padding inside the first and last slide, never a card.  */
 /* `clip` rather than `hidden` so the vertical axis stays visible and a card's  */
 /* hover shadow is not cut off at the section edge.                             */
@@ -10339,9 +10351,15 @@ img.lazy:not(.loaded) {
 	font-size: var(--vs-text-sm);
 }
 
+/* Bottom, not centre. The sum on the left is 44px; the column beside it is 72,  */
+/* because its field now carries a caption above it. Centring the pill against   */
+/* the whole column put it 14px down - level with neither the caption nor the    */
+/* field it belongs to. Both boxes are 44px tall, so aligning their bottoms      */
+/* lines the pill up with the input exactly.                                     */
+
 .captcha {
 	display: inline-flex;
-	align-items: center;
+	align-items: flex-end;
 	gap: var(--vs-space-2);
 }
 
@@ -10604,6 +10622,34 @@ img.lazy:not(.loaded) {
 
 	.vs-card__media {
 		max-height: 180px;
+	}
+
+/* A lightbox is the one thing on the page that cannot scroll away from its own */
+/* chrome. FastOrder's three fields came to 413px against a 390px landscape     */
+/* screen once each field gained a caption above it, so the form was 23px past  */
+/* the fold before the shopper typed anything. Taken from the frame rather than */
+/* from the fields: the box's own padding gives 16, the header and footer 8     */
+/* each, and 381 clears 390 with room. Nothing here touches a field's height or */
+/* its 44px target.                                                             */
+
+	.fancybox-content {
+		padding: var(--vs-space-3);
+	}
+
+	.form__header {
+		margin-bottom: var(--vs-space-2);
+	}
+
+	.form__footer {
+		margin-top: var(--vs-space-3);
+	}
+
+/* The frame alone clears 390 but not 375, which is an iPhone SE sideways - the */
+/* narrowest screen this layer is written for. The last 12px come from the gap  */
+/* between each caption and its own field, three of them at 4px instead of 8.   */
+
+	.form__placeholder {
+		margin-bottom: var(--vs-space-1);
 	}
 }
 
