@@ -194,3 +194,43 @@ numbers passing.
 - **All three `CssConfig` traps checked on every rule touched**: no comment sharing a line with
   a declaration, no `var(--okay-*)` outside `property: var(--okay-x);`, no selector broken
   anywhere but immediately after a comma. The `TOUCH TARGETS` block stays last in the file.
+
+## Addendum — item 7: the sort control on a phone
+
+Reported by the owner after the plan was written, with a screenshot. Desktop is fine.
+
+`.vs-sort__group` is `flex-wrap: wrap` inside a bordered, filled box. At 390px the four
+pills fall into a 2x2 grid, so a secondary control spends about 96px of the first screen and
+reads as a panel rather than as a choice.
+
+Below 576px it becomes **one 44px row carrying the current sort, which opens the theme's
+bottom sheet on tap**. The owner was offered a single scrolling row of pills and a de-boxed
+2x2 and chose the sheet: sort is a choose-one-of-four, and unlike a breadcrumb path all four
+options have to be visible at the moment of choosing.
+
+**Three findings decided how it is built, all established before the task was written.**
+
+- **The sheet primitive is entirely declarative.** `data-vs-sheet-open="<id>"` on a trigger,
+  `.vs-sheet` plus an `id` on the panel, `data-vs-sheet-close` on any closer, one
+  `.vs-sheet__backdrop` per page — `vibe.js` already binds all of it, including the focus
+  trap, the scroll lock, Escape and focus restore. **This item ships no JavaScript.**
+- **The stylesheet warns that a sheet nested inside a positioned, z-indexed ancestor paints
+  under the page whatever `--vs-z-modal` says** (`components.css:1385-1390`). Measured: of the
+  ten ancestors between `.vs-sort__group` and `<body>`, none creates a stacking context —
+  `main.main` is `position: relative` with `z-index: auto`, which does not — and none clips.
+  So the group can become the sheet **in place**, and the task must both re-verify that and
+  leave the finding in a comment.
+- **In place is not a convenience, it is what keeps the control correct.** The four options
+  are four `<form>`s posting `prg_seo_hide`, re-rendered inside `.fn_products_sort` on every
+  ajax sort. A second copy in `<body>` would not be re-rendered and its tick would drift out
+  of sync with the grid it describes.
+
+`.vs-sheet` geometry is unconditional, so the group must be un-sheeted above 576px exactly as
+`.vs-filters` is above 992px — the same manoeuvre, a different width.
+
+The trigger's label is the active option's name, derived from `$sort` in the template so the
+ajax re-render keeps it honest. Price, name and rating keep their two-arrow sprite: tapping an
+already-active option still flips its direction, and the sprite is what says so.
+
+**Out of scope:** the desktop control, which the owner said is fine, and the `prg_seo_hide`
+POST mechanism, which exists to keep sort URLs out of the index and is not being touched.
