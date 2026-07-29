@@ -10394,13 +10394,14 @@ img.lazy:not(.loaded) {
 	}
 
 /* Card titles. Two lines of 20px leading come to 40.3px, four short of the     */
-/* floor, so the box grows and the type does not move: the title sits at the    */
-/* top of a flex column and the extra pixels fall below the last line.          */
+/* floor, so min-height carries the difference. It must NOT become a flex box   */
+/* to get there: -webkit-line-clamp only works on display: -webkit-box, which   */
+/* the base rule sets, and display: flex here silently disabled the clamp -     */
+/* titles ran to five lines and card heights varied by 57px. The .vs-cart__name */
+/* rule below states the same constraint and got it right.                      */
 
 	.vs-card__name,
 	.vs-post-card__link {
-		display: flex;
-		align-items: flex-start;
 		min-height: 44px;
 	}
 
