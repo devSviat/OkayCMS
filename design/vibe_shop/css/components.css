@@ -5654,6 +5654,19 @@ body.hc-nav-open {
 		padding-left: var(--vs-space-4);
 		padding-right: var(--vs-space-4);
 	}
+
+	/* Same defect, different tag: these two grids sit flush in .vs-home__section  */
+	/* exactly like the headings above did, but neither one bleeds on purpose - no */
+	/* negative margin, no swiper, nothing documented. Scoped to the home context  */
+	/* (not bare .vs-posts / .vs-brands--compact) because both classes are reused  */
+	/* on /blog, /author and /brands inside an ordinary .container, which already */
+	/* gets its gutter from the rule above - an unscoped fix here would double it. */
+
+	.vs-home__section .vs-posts,
+	.vs-home__brands .vs-brands--compact {
+		padding-left: var(--vs-space-4);
+		padding-right: var(--vs-space-4);
+	}
 }
 
 /* ---------------------------------------------- touch: no hover available */
@@ -7601,10 +7614,21 @@ body.hc-nav-open {
 /* wrapper is a bare .container, so the strip started 7px inside every other     */
 /* block on the page - measured 44px against 37px at 1440.                       */
 
+/* Scoped to 576px up: that 7px is only still real from there. Below 576px       */
+/* .container's own gutter is now 16px (the first ≤575px block above), the same */
+/* value every other mobile block gets, so this strip should inherit it rather  */
+/* than be zeroed - an unscoped zero here has equal specificity to that rule    */
+/* and sits later in the file, so it would silently win the tie at every width. */
+
 .vs-advantages {
 	margin-top: var(--vs-space-8);
-	padding-left: 0;
-	padding-right: 0;
+}
+
+@media (min-width: 576px) {
+	.vs-advantages {
+		padding-left: 0;
+		padding-right: 0;
+	}
 }
 
 .vs-advantages .block {
