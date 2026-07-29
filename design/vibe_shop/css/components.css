@@ -3118,6 +3118,34 @@ body.hc-nav-open {
 	opacity: 1;
 }
 
+/* From 576px up the sheet is not a sheet: it is the plain wrapper the four     */
+/* pills have always sat in, and every fixed-position, translated, hidden       */
+/* declaration .vs-sheet carries is undone. The desktop control the owner said  */
+/* is fine must come out of this task byte-identical.                           */
+
+.vs-sort__trigger {
+	display: none;
+}
+
+.vs-sort__sheet_head {
+	display: none;
+}
+
+@media (min-width: 576px) {
+	.vs-sort__sheet {
+		position: static;
+		z-index: auto;
+		display: contents;
+		max-height: none;
+		background-color: transparent;
+		border-radius: 0;
+		box-shadow: none;
+		visibility: visible;
+		transform: none;
+		transition: none;
+	}
+}
+
 .vs-filters__open {
 	flex: none;
 }
@@ -5731,6 +5759,66 @@ body.hc-nav-open {
 	.vs-stepper__input {
 		width: 40px;
 		min-height: 42px;
+	}
+
+	/* One 44px row instead of a 96px 2x2 panel. Sorting is secondary - the       */
+	/* shopper came for the products - so it gets one line, and the four options  */
+	/* are all visible at once in the sheet, which a scrolling row of pills could */
+	/* not have offered.                                                          */
+
+	.vs-sort__trigger {
+		display: inline-flex;
+		width: 100%;
+		min-width: 0;
+		justify-content: space-between;
+	}
+
+	/* .vs-btn sets white-space: nowrap, and the label is the one child here that   */
+	/* can give. Without min-width: 0 it refuses to shrink below its text, and the  */
+	/* row overflows its own border rather than the text being clipped: measured at */
+	/* 320, the trigger box ended at x=179 while the chevron ran to x=195 and the   */
+	/* Фільтр button started at 191 - the glyph floated in the gap between the two  */
+	/* buttons, outside any border. The label box is 67px at 320 (ellipsis), 107 at */
+	/* 360 and 122 at 375 against a 102px longest label, so only the 320 class of    */
+	/* device truncates, and it truncates inside the button instead of spilling.    */
+
+	.vs-sort__trigger_label {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.vs-sort__sheet_head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--vs-space-3);
+		padding: var(--vs-space-4) var(--vs-space-4) 0;
+	}
+
+	.vs-sort__sheet_title {
+		color: var(--vs-heading);
+		font-family: var(--vs-font-display);
+		font-size: var(--vs-text-lg);
+		font-weight: 600;
+	}
+
+	.vs-sort__sheet .vs-sort__group {
+		flex-direction: column;
+		flex-wrap: nowrap;
+		align-items: stretch;
+		gap: 0;
+		row-gap: 0;
+		padding: var(--vs-space-2) var(--vs-space-4) var(--vs-space-6);
+		border: 0;
+		background-color: transparent;
+		overflow-x: visible;
+	}
+
+	.vs-sort__sheet .vs-sort__btn {
+		justify-content: flex-start;
+		width: 100%;
+		min-height: 52px;
 	}
 }
 
