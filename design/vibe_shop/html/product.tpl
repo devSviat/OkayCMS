@@ -545,7 +545,7 @@
 
         <button class="fn_is_stock vs-btn vs-btn--primary vs-sticky-buy__cta vs-sticky-buy__cta--icon{if $product->variant->stock < 1} hidden-xs-up{/if}" type="submit" form="vs_buy_form">
             {include file="svg.tpl" svgId="cart"}
-            <span class="vs-sr-only" data-language="product_add_cart">{$lang->product_add_cart}</span>
+            <span data-language="product_add_cart">{$lang->product_add_cart}</span>
         </button>
     </div>
 </div>

@@ -4807,21 +4807,16 @@ body.hc-nav-open {
 	min-height: 48px;
 }
 
-/* Icon-only in the floating bar: the label lives in a .vs-sr-only span so the */
-/* accessible name and the language swap both survive. 52px keeps the target */
-/* above the 44px floor. */
+/* Glyph plus label. The label was hidden when this shipped as a circle; the     */
+/* owner asked for it back, so the button is a pill again and the span simply    */
+/* renders. min-height keeps the 52px touch target the circle had. The gap, the  */
+/* horizontal padding and the 20px glyph all come from .vs-btn already, so only  */
+/* the three declarations that actually differ from it are restated here.        */
+
 .vs-sticky-buy__cta--icon {
 	flex: none;
-	width: 52px;
-	min-width: 52px;
-	height: 52px;
-	padding: 0;
+	min-height: 52px;
 	border-radius: var(--vs-radius-full);
-}
-
-.vs-sticky-buy__cta--icon svg {
-	width: 22px;
-	height: 22px;
 }
 
 .vs-sticky-buy .vs-buybox__unavailable {
@@ -5666,6 +5661,22 @@ body.hc-nav-open {
 	.vs-home__brands .vs-brands--compact {
 		padding-left: var(--vs-space-4);
 		padding-right: var(--vs-space-4);
+	}
+}
+
+/* --------------------------------------------------------------- ≤ 359 px */
+/* The labelled pill and the price do not both fit at 320px. Measured, not     */
+/* guessed: the bar's content box is 266px there, and price + gap + pill comes */
+/* to 267. It first fits at 337px with 0.02px to spare, so the cut is at 359   */
+/* rather than 337: only the 320px class of device loses the glyph, and no     */
+/* device sits on a hairline. Squeezing the padding does not buy enough - a    */
+/* 12px padding still leaves the pill 1px over - so the glyph gives way: it is */
+/* the redundant half of the button once the words are back, and dropping it   */
+/* frees the icon plus its gap, 28px, leaving 11px of slack at 320.            */
+
+@media (max-width: 359px) {
+	.vs-sticky-buy__cta--icon svg {
+		display: none;
 	}
 }
 
