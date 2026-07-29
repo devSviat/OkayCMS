@@ -6475,17 +6475,14 @@ body.hc-nav-open {
 	display: block;
 }
 
+/* Direct children only, and that child combinator is load-bearing. Delivery     */
+/* modules lay their fields out in Bootstrap columns, one .form__group per       */
+/* column, so every one of them is the last child of its own column. A           */
+/* descendant version of this rule matched all of them and deleted the gap       */
+/* between every stacked field on a phone - invisible on a desktop, where the    */
+/* columns sit side by side and no vertical gap is wanted anyway.                */
+
 .vs-option__extra > *:last-child {
-	margin-bottom: 0;
-}
-
-/* Direct children only. Delivery modules lay their fields out in Bootstrap      */
-/* columns, one .form__group per column, so every one of them is the last child  */
-/* of its own column. The descendant form of this rule therefore deleted the     */
-/* gap between every stacked field on a phone - invisible on a desktop, where    */
-/* the columns sit side by side and no vertical gap is wanted anyway.            */
-
-.vs-option__extra > .form__group:last-child {
 	margin-bottom: 0;
 }
 
