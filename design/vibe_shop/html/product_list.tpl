@@ -134,18 +134,23 @@
             *}
 
             <div class="vs-card__price">
-                <span class="vs-card__price_current{if $product->variant->compare_price} price--red{/if}"><span class="fn_price">{$product->variant->price|convert}</span>&nbsp;<span class="vs-card__currency">{$currency->sign|escape}</span></span>
+                {* The struck price and its badge sit ABOVE the current price: they
+                   are what the current price is being compared against, so they read
+                   as the thing being crossed out rather than as a footnote to it.
 
-                {* The second tier is rendered whether or not this product has a
-                   discount, and that is the point: okay.js hides its children by
-                   toggling hidden-xs-up, but the tier itself keeps its line, so the
-                   block is the same height on every card and the availability line
-                   below lands at the same y in neighbouring cards. Before this, a
-                   card with an old price was 28px taller through the middle. *}
+                   The tier is rendered whether or not this product has a discount,
+                   and that is the point: okay.js hides its children by toggling
+                   hidden-xs-up, but the tier itself keeps its line, so the block is
+                   the same height on every card and the price and availability lines
+                   land at the same y in neighbouring cards. The owner asked for that
+                   reserved line to be smaller, not for it to go - the alternative was
+                   a ragged row, and they chose alignment. *}
                 <span class="vs-card__price_second">
                     <span class="vs-card__price_old{if !$product->variant->compare_price} hidden-xs-up{/if}"><span class="fn_old_price">{$product->variant->compare_price|convert}</span>&nbsp;<span class="vs-card__currency">{$currency->sign|escape}</span></span>
                     <span class="fn_discount_label vs-badge vs-badge--sale{if !($product->variant->price>0 && $product->variant->compare_price>0 && $product->variant->compare_price>$product->variant->price)} hidden-xs-up{/if}">{if $product->variant->price>0 && $product->variant->compare_price>0 && $product->variant->compare_price>$product->variant->price}{round((($product->variant->price-$product->variant->compare_price)/$product->variant->compare_price)*100)}&nbsp;%{/if}</span>
                 </span>
+
+                <span class="vs-card__price_current{if $product->variant->compare_price} price--red{/if}"><span class="fn_price">{$product->variant->price|convert}</span>&nbsp;<span class="vs-card__currency">{$currency->sign|escape}</span></span>
             </div>
 
             {* Availability, stated in all three states - out of stock included, the

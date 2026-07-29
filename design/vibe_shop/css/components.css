@@ -2636,15 +2636,19 @@ body.hc-nav-open {
 	font-variant-numeric: tabular-nums;
 }
 
-/* The reserved second tier. Its min-height is one line of the old price's own   */
-/* size, so the number comes from the type scale rather than from a measurement  */
-/* that would rot the first time a token moves.                                  */
+/* The reserved comparison tier, above the current price. Its min-height is one  */
+/* line of its own type at its own leading, so the number comes from the scale   */
+/* rather than from a measurement that would rot the first time a token moves.   */
+/* The leading is tightened to 1.25 from the body's 1.55 deliberately: on a card */
+/* without a discount this line is empty, and every point of leading in it is    */
+/* dead air the owner asked to get back. 15px reserved instead of 20.            */
 
 .vs-card__price_second {
 	display: flex;
 	align-items: baseline;
 	gap: var(--vs-space-2);
-	min-height: calc(var(--vs-text-sm) * var(--vs-leading-body));
+	min-height: calc(var(--vs-text-xs) * 1.25);
+	line-height: 1.25;
 }
 
 .vs-card__price_current {
@@ -2666,8 +2670,18 @@ body.hc-nav-open {
 
 .vs-card__price_old {
 	color: var(--vs-text-muted);
-	font-size: var(--vs-text-sm);
+	font-size: var(--vs-text-xs);
 	text-decoration: line-through;
+}
+
+/* .vs-card__currency is 13px everywhere else, and the tier's leading is a       */
+/* number, so a 13px currency sign inside a 12px line made that line 16.25px     */
+/* while the reserved empty one stayed 15 - a 1px stagger between neighbouring   */
+/* cards, in the one element whose whole job is to stop that. It takes the       */
+/* tier's size here.                                                            */
+
+.vs-card__price_second .vs-card__currency {
+	font-size: inherit;
 }
 
 /* On the price tier rather than over the photograph, so the percentage sits    */
