@@ -1904,14 +1904,24 @@ body.hc-nav-open {
 	padding-left: var(--vs-space-5);
 }
 
+/* Round icon buttons rather than text pills - a third visual language in a    */
+/* menu that already had too many. 44px is the touch floor; the network name   */
+/* survives in .vs-sr-only and in the title attribute.                          */
+
 .hc-offcanvas-nav ul.bottom-nav .nav-item {
+	justify-content: center;
+	width: 44px;
 	min-height: 44px;
-	padding: 0 var(--vs-space-4);
+	padding: 0;
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-full);
 	color: var(--vs-text);
-	font-size: var(--vs-text-sm);
-	text-transform: capitalize;
+}
+
+.hc-offcanvas-nav ul.bottom-nav .nav-item svg {
+	width: 20px;
+	height: 20px;
+	color: var(--vs-text);
 }
 
 #main-nav {
