@@ -954,3 +954,280 @@ If any task shipped something other than what this plan specified — a padding 
 **Type consistency.** The two class names the JS writes and the CSS reads, `is-overflow-start` and `is-overflow-end`, appear in Task 2 Step 2 and Step 3 and are checked by name in Step 4. `.vs-card__price_second` is the class Task 1 of the previous pass created and is measured by that exact name in Task 6 Steps 2 and 4. The stepper arithmetic is stated once and used consistently: children 40x42 inside a 1px shell give 122x44, against 44x50 giving 134x52 today.
 
 **One thing worth flagging to the reviewer.** Task 5 ships buttons of 40x42, below the 44px floor this theme adopted in its touch-target pass. That is not an oversight and it is not avoidable: three 44px children plus the shell's border cannot be narrower than 134px, so the width the owner asked for and the 44px floor are mutually exclusive. The owner was shown the 40px button width in the option they chose. It is recorded in a comment in the stylesheet as well as here.
+
+---
+
+## Addendum — Task 8
+
+Added after execution began, from the owner's report on the sort control. **It runs after Task 6
+and before Task 7**, so the execution order is 1, 2, 3, 4, 5, 6, 8, 7. Task 7's sweep then
+covers it like everything else.
+
+### Task 8: The sort control becomes one row that opens a sheet
+
+**Files:**
+- Modify: `design/vibe_shop/html/products_sort.tpl`
+- Modify: `design/vibe_shop/css/components.css` (the `.vs-sort*` rules near `:2974-3120`, and the `@media (max-width: 575px)` block)
+
+**Interfaces:**
+- Consumes: nothing from earlier tasks.
+- Produces: nothing later tasks depend on.
+- **Ships no JavaScript.** `vibe.js` already binds the whole sheet contract declaratively.
+
+- [ ] **Step 1: Record the defect**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+rm -f compiled/vibe_shop/*.php cache/css/*
+node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs --url http://localhost/all-products --width 390 --height 844 --out /tmp/sort-before.png \
+  --eval "(()=>{const g=document.querySelector('.vs-sort__group');const r=g.getBoundingClientRect();const tops=[...g.querySelectorAll('.vs-sort__btn')].map(e=>Math.round(e.getBoundingClientRect().top));return JSON.stringify({h:Math.round(r.height),rows:[...new Set(tops)].length,btnTops:tops})})()" 2>&1 | sed -n '/evalResult/p'
+```
+
+Expected before the fix: a height near 96 and `rows: 2` — the four pills in a 2x2 inside a bordered box.
+
+- [ ] **Step 2: Re-verify that nesting the sheet here is safe**
+
+`components.css:1385-1390` warns that a sheet inside a positioned, z-indexed ancestor paints under the page whatever `--vs-z-modal` says. The measurement below said this chain is clean when the task was written; confirm it still is before relying on it.
+
+```bash
+cd /home/sviat/projects/OkayCMS
+node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs --url http://localhost/all-products --width 390 --height 844 \
+  --eval "(()=>{let e=document.querySelector('.vs-sort__group');const chain=[];while(e&&e!==document.documentElement){const s=getComputedStyle(e);chain.push({tag:e.tagName+'.'+String(e.className).slice(0,26),pos:s.position,z:s.zIndex,transform:s.transform==='none'?'-':'T',filter:s.filter==='none'?'-':'F',overflow:s.overflow});e=e.parentElement}return JSON.stringify(chain)})()" 2>&1 | sed -n '/evalResult/p'
+```
+
+Expected: every ancestor either `position: static`, or positioned with `z-index: auto`; no `transform`, no `filter`, no `overflow: hidden`. **If any ancestor now creates a stacking context or clips, stop and report it** — the whole shape of this task depends on it and the fallback (a body-level sheet) has different trade-offs that need a decision.
+
+- [ ] **Step 3: Restructure `products_sort.tpl`**
+
+Replace the whole file with:
+
+```smarty
+{* Sorting as one segmented control: the four options are mutually exclusive.
+   fn_ajax_buttons + fn_is_ajax keep okay.js's ajax pagination contract, and
+   the two-arrow sprite says which direction the next tap will sort in.
+
+   Below 576px the same markup is the theme's bottom sheet, opened by
+   .vs-sort__trigger. It is the .vs-sort__sheet wrapper and not
+   .vs-sort__group that carries .vs-sheet: vibeSheet writes role="dialog"
+   onto the sheet element when it opens and REMOVES the attribute when it
+   closes, so a role="group" living on that element would be destroyed by
+   the first open. The group keeps its own element, and its role with it.
+
+   The sheet is nested here rather than moved to a body-level element on
+   purpose. .fn_products_sort is re-rendered on every ajax sort, so a copy
+   outside it would keep a tick that no longer matches the grid. Measured
+   before this was written: no ancestor between .vs-sort__group and <body>
+   creates a stacking context or clips, so the fixed sheet is not clamped
+   by one - see the warning at the .vs-sheet primitive. *}
+{if $products|count > 0}
+    {if $sort == 'price' || $sort == 'price_desc'}
+        {$vs_sort_active = $lang->products_by_price}
+    {elseif $sort == 'name' || $sort == 'name_desc'}
+        {$vs_sort_active = $lang->products_by_name}
+    {elseif $sort == 'rating' || $sort == 'rating_desc'}
+        {$vs_sort_active = $lang->products_by_rating}
+    {else}
+        {$vs_sort_active = $lang->products_by_default}
+    {/if}
+
+    <span class="vs-sort__label hidden-sm-down" data-language="products_sort_by">{$lang->products_sort_by}:</span>
+
+    <button type="button" class="vs-btn vs-btn--secondary vs-sort__trigger" data-vs-sheet-open="vs_sort" aria-controls="vs_sort" aria-expanded="false">
+        {include file="svg.tpl" svgId="sort_icon"}
+        <span class="vs-sort__trigger_label">{$vs_sort_active|escape}</span>
+        {include file="svg.tpl" svgId="chevron"}
+    </button>
+
+    <div id="vs_sort" class="vs-sort__sheet vs-sheet">
+        <div class="vs-sort__sheet_head">
+            <span class="vs-sort__sheet_title" data-language="products_sort_by">{$lang->products_sort_by}</span>
+            <button type="button" class="vs-btn vs-btn--ghost vs-btn--icon vs-sort__sheet_close" data-vs-sheet-close aria-label="{$lang->mobile_filter_close|escape}">
+                {include file="svg.tpl" svgId="close"}
+            </button>
+        </div>
+
+        <div class="fn_ajax_buttons vs-sort__group" role="group" aria-label="{$lang->products_sort_by|escape}">
+            <form class="vs-sort__item" method="post">
+                <button type="submit" name="prg_seo_hide" class="vs-sort__btn{if $sort=='position'} active_up{/if}" value="{furl sort=position page=null absolute=1}">
+                    <span data-language="products_by_default">{$lang->products_by_default}</span>
+                </button>
+            </form>
+
+            <form class="vs-sort__item" method="post">
+                <button type="submit" name="prg_seo_hide" class="vs-sort__btn{if $sort=='price'} active_up{elseif $sort=='price_desc'} active_down{/if}" value="{if $sort=='price'}{furl sort=price_desc page=null absolute=1}{else}{furl sort=price page=null absolute=1}{/if}">
+                    <span data-language="products_by_price">{$lang->products_by_price}</span>
+                    {include file="svg.tpl" svgId="sort_icon"}
+                </button>
+            </form>
+
+            <form class="vs-sort__item" method="post">
+                <button type="submit" name="prg_seo_hide" class="vs-sort__btn{if $sort=='name'} active_up{elseif $sort=='name_desc'} active_down{/if}" value="{if $sort=='name'}{furl sort=name_desc page=null absolute=1}{else}{furl sort=name page=null absolute=1}{/if}">
+                    <span data-language="products_by_name">{$lang->products_by_name}</span>
+                    {include file="svg.tpl" svgId="sort_icon"}
+                </button>
+            </form>
+
+            <form class="vs-sort__item" method="post">
+                <button type="submit" name="prg_seo_hide" class="vs-sort__btn{if $sort=='rating'} active_up{elseif $sort=='rating_desc'} active_down{/if}" value="{if $sort=='rating'}{furl sort=rating_desc page=null absolute=1}{else}{furl sort=rating page=null absolute=1}{/if}">
+                    <span data-language="products_by_rating">{$lang->products_by_rating}</span>
+                    {include file="svg.tpl" svgId="sort_icon"}
+                </button>
+            </form>
+        </div>
+    </div>
+{/if}
+```
+
+**Check `$lang->mobile_filter_close` exists** — it is the string the filter sheet's close button uses in `products.tpl`. If it is absent, use whatever key that button actually uses rather than inventing one.
+
+- [ ] **Step 4: Un-sheet everything above 576px**
+
+`.vs-sheet` geometry is unconditional, so without this the desktop control becomes a bottom sheet. `.vs-filters` does the same thing at 992px; this is the same manoeuvre at a different width.
+
+Add near the other `.vs-sort` rules in `design/vibe_shop/css/components.css`:
+
+```css
+/* From 576px up the sheet is not a sheet: it is the plain wrapper the four     */
+/* pills have always sat in, and every fixed-position, translated, hidden       */
+/* declaration .vs-sheet carries is undone. The desktop control the owner said  */
+/* is fine must come out of this task byte-identical.                           */
+
+.vs-sort__trigger {
+	display: none;
+}
+
+.vs-sort__sheet_head {
+	display: none;
+}
+
+@media (min-width: 576px) {
+	.vs-sort__sheet {
+		position: static;
+		z-index: auto;
+		display: contents;
+		max-height: none;
+		background-color: transparent;
+		border-radius: 0;
+		box-shadow: none;
+		visibility: visible;
+		transform: none;
+		transition: none;
+	}
+}
+```
+
+`display: contents` is what keeps the desktop layout byte-identical: the wrapper stops generating a box entirely, so `.vs-sort__group` becomes a flex item of `.vs-sort` exactly as it was before this task. **Verify that claim in Step 6 rather than trusting it.**
+
+- [ ] **Step 5: Style the phone sheet**
+
+Add to the `@media (max-width: 575px)` block:
+
+```css
+	/* One 44px row instead of a 96px 2x2 panel. Sorting is secondary - the       */
+	/* shopper came for the products - so it gets one line, and the four options  */
+	/* are all visible at once in the sheet, which a scrolling row of pills could */
+	/* not have offered.                                                          */
+
+	.vs-sort__trigger {
+		display: inline-flex;
+		width: 100%;
+		justify-content: space-between;
+	}
+
+	.vs-sort__sheet_head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--vs-space-3);
+		padding: var(--vs-space-4) var(--vs-space-4) 0;
+	}
+
+	.vs-sort__sheet_title {
+		color: var(--vs-heading);
+		font-family: var(--vs-font-display);
+		font-size: var(--vs-text-lg);
+		font-weight: 600;
+	}
+
+	.vs-sort__sheet .vs-sort__group {
+		flex-direction: column;
+		flex-wrap: nowrap;
+		align-items: stretch;
+		gap: 0;
+		row-gap: 0;
+		padding: var(--vs-space-2) var(--vs-space-4) var(--vs-space-6);
+		border: 0;
+		background-color: transparent;
+		overflow-x: visible;
+	}
+
+	.vs-sort__sheet .vs-sort__btn {
+		justify-content: flex-start;
+		width: 100%;
+		min-height: 52px;
+	}
+```
+
+- [ ] **Step 6: Verify the desktop control is unchanged**
+
+This is the step that matters most: the owner said the desktop is fine.
+
+```bash
+cd /home/sviat/projects/OkayCMS
+rm -f compiled/vibe_shop/*.php cache/css/*
+for w in 576 992 1440; do
+  printf "%-6s " "$w"
+  node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs --url http://localhost/all-products --width $w --height 900 \
+    --eval "(()=>{const g=document.querySelector('.vs-sort__group');const r=g.getBoundingClientRect();const t=document.querySelector('.vs-sort__trigger');const btns=[...g.querySelectorAll('.vs-sort__btn')].map(e=>{const b=e.getBoundingClientRect();return [Math.round(b.left),Math.round(b.top),Math.round(b.width),Math.round(b.height)]});return JSON.stringify({group:[Math.round(r.left),Math.round(r.top),Math.round(r.width),Math.round(r.height)],triggerShown:t?getComputedStyle(t).display:'absent',btns})})()" 2>&1 | sed -n '/evalResult/p'
+done
+```
+
+Capture the same numbers on the pre-task baseline with `git stash` / `git stash pop` and put both sets in the report. **Every number must match**, and `triggerShown` must be `none`.
+
+- [ ] **Step 7: Verify the phone control and the sheet**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs --url http://localhost/all-products --width 390 --height 844 --out /tmp/sort-sheet.png \
+  --eval "(async()=>{const t=document.querySelector('.vs-sort__trigger');const closed={triggerH:Math.round(t.getBoundingClientRect().height),label:t.textContent.trim(),expanded:t.getAttribute('aria-expanded'),sheetVis:getComputedStyle(document.getElementById('vs_sort')).visibility};t.click();await new Promise(r=>setTimeout(r,600));const s=document.getElementById('vs_sort');const sr=s.getBoundingClientRect();const btns=[...s.querySelectorAll('.vs-sort__btn')].map(e=>({t:e.textContent.trim().slice(0,18),h:Math.round(e.getBoundingClientRect().height),active:e.className.indexOf('active')>-1}));const bd=document.querySelector('.vs-sheet__backdrop');return JSON.stringify({closed,open:{role:s.getAttribute('role'),vis:getComputedStyle(s).visibility,bottom:Math.round(sr.bottom),innerH:innerHeight,z:getComputedStyle(s).zIndex,backdropOpen:bd?bd.classList.contains('is-open'):null,expanded:t.getAttribute('aria-expanded')},btns,groupRole:s.querySelector('.vs-sort__group').getAttribute('role')})})()" 2>&1 | sed -n '/evalResult/p'
+```
+
+Expected: closed `triggerH: 44` and `sheetVis: "hidden"`; open `role: "dialog"`, `vis: "visible"`, `bottom` equal to `innerH`, `backdropOpen: true`, `expanded: "true"`; four buttons, exactly one `active`; and `groupRole: "group"` — the group's role must survive, which is the reason the sheet is a separate wrapper.
+
+- [ ] **Step 8: Verify the role survives a close, and that the sheet paints above the grid**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs --url http://localhost/all-products --width 390 --height 844 \
+  --eval "(async()=>{const t=document.querySelector('.vs-sort__trigger');t.click();await new Promise(r=>setTimeout(r,600));const s=document.getElementById('vs_sort');const mid=document.elementFromPoint(195, Math.round(s.getBoundingClientRect().top+30));const inSheet=!!(mid&&mid.closest&&mid.closest('#vs_sort'));document.querySelector('.vs-sort__sheet_close').click();await new Promise(r=>setTimeout(r,700));return JSON.stringify({paintsOnTop:inSheet,hitTarget:mid?mid.tagName+'.'+String(mid.className).slice(0,24):null,afterClose:{role:s.getAttribute('role'),vis:getComputedStyle(s).visibility,groupRole:s.querySelector('.vs-sort__group').getAttribute('role'),expanded:t.getAttribute('aria-expanded')}}) })()" 2>&1 | sed -n '/evalResult/p'
+```
+
+Expected: `paintsOnTop: true` — a point inside the open sheet must hit-test to something inside the sheet, not to a product card behind it. That is the concrete test of the stacking-context warning. After close: `vis: "hidden"`, `expanded: "false"`, and `groupRole: "group"` still present.
+
+- [ ] **Step 9: Verify sorting still sorts, over ajax**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs --url http://localhost/all-products --width 390 --height 844 \
+  --eval "(async()=>{const first=()=>{const n=document.querySelector('.vs-card__name');return n?n.textContent.trim().slice(0,30):null};const before=first();document.querySelector('.vs-sort__trigger').click();await new Promise(r=>setTimeout(r,500));const btns=[...document.querySelectorAll('.vs-sort__btn')];btns[1].click();await new Promise(r=>setTimeout(r,2500));const t=document.querySelector('.vs-sort__trigger');return JSON.stringify({before,after:first(),newLabel:t?t.textContent.trim():null,activeCount:document.querySelectorAll('.vs-sort__btn.active_up, .vs-sort__btn.active_down').length})})()" 2>&1 | sed -n '/evalResult/p'
+```
+
+Expected: the first card changes, `newLabel` names the price option, and `activeCount: 1`. **If the label still reads the old option, the re-render did not reach the trigger** — say so; that is the failure mode the nesting decision exists to prevent.
+
+- [ ] **Step 10: Look at it, check the console, commit**
+
+Open `/tmp/sort-before.png` and `/tmp/sort-sheet.png`. The closed control must be one clean row; the open sheet must sit on the bottom edge over a dimmed page with all four options readable and the active one obvious. Confirm the harness reported no console errors on every run above.
+
+```bash
+cd /home/sviat/projects/OkayCMS
+grep -nE '^[^/]*[a-z-]+:[^;]*;[^/]*/\*' design/vibe_shop/css/components.css | head
+grep -n 'var(--okay-' design/vibe_shop/css/components.css | grep -vE '^[0-9]+:\s*[a-z-]+: var\(--okay-[a-z0-9-]+\);\s*$' | head
+git add design/vibe_shop/html/products_sort.tpl design/vibe_shop/css/components.css
+git commit -m "fix(vibe_shop): turn the phone sort control into a sheet
+
+Four pills wrapped to a 2x2 inside a bordered box and spent about 96px of
+the first screen on a secondary control. On a phone it is now one 44px row
+naming the current sort, opening the theme's bottom sheet with all four
+options. No new JavaScript - the sheet contract is declarative - and the
+desktop control is unchanged."
+```
