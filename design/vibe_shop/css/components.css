@@ -1734,9 +1734,9 @@ body.hc-nav-open {
 	transition: background-color var(--vs-dur-1) var(--vs-ease);
 }
 
-.hc-offcanvas-nav span.nav-next {
-	border-left: 1px solid var(--vs-hairline);
-}
+/* No dividing rule on the chevron. It is an affordance inside the row, not a  */
+/* second control beside it - a vertical rule here split four rows into what   */
+/* looked like two buttons each. The hover state below still marks the target. */
 
 .hc-offcanvas-nav span.nav-next:hover {
 	background-color: var(--vs-surface-subtle);
@@ -1853,12 +1853,10 @@ body.hc-nav-open {
 	color: var(--vs-text-muted);
 }
 
-.hc-offcanvas-nav ul.contact-nav .nav-item,
-.hc-offcanvas-nav ul.currencies-nav .nav-item,
-.hc-offcanvas-nav ul.language-nav .nav-item {
-	color: var(--vs-text-muted);
-	font-size: var(--vs-text-sm);
-}
+/* Currency, language, phone and email were 13px and muted while the rows      */
+/* above them were 15px and full contrast. Same height, same rail, dimmer text  */
+/* reads as disabled rather than as secondary - and none of them is secondary   */
+/* to "Бренди". They inherit the list's one scale now.                          */
 
 .hc-offcanvas-nav ul.bottom-nav {
 	display: flex;
