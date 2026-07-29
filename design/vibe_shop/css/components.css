@@ -1732,7 +1732,6 @@ body.hc-nav-open {
 	transform: translate3d(0, 0, 0);
 }
 
-.hc-offcanvas-nav li.nav-close a,
 .hc-offcanvas-nav li.nav-back a {
 	background-color: var(--vs-surface-subtle);
 	color: var(--vs-text);
@@ -1874,6 +1873,59 @@ body.hc-nav-open {
 	color: var(--vs-text-muted);
 }
 
+/* The panel header: brand on the left, close on the right. hc-offcanvas-nav    */
+/* puts the close item in the first list, so top-nav becomes that header row.    */
+/* flex-direction is restated here: the earlier ul.top-nav rule above sets it   */
+/* to column for the single-<li> header it used to be; that declaration is not  */
+/* touched by this rule's cascade unless repeated, and column would stack the   */
+/* logo and the close button instead of placing them side by side.              */
+
+.hc-offcanvas-nav ul.top-nav {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--vs-space-3);
+	padding: var(--vs-space-3) var(--vs-space-5);
+}
+
+.hc-offcanvas-nav ul.top-nav > li {
+	flex: none;
+}
+
+/* This build has no ariaLabels option and emits the label as a bare text node  */
+/* inside the anchor, so it cannot be wrapped from the template. text-indent    */
+/* moves it off screen while leaving it in the accessibility tree; the glyph is  */
+/* drawn by the span the library already emits. Setting labelClose to an empty  */
+/* string instead would leave the button with no accessible name at all.        */
+
+.hc-offcanvas-nav li.nav-close a {
+	position: relative;
+	overflow: hidden;
+	width: 44px;
+	height: 44px;
+	min-height: 0;
+	padding: 0;
+	border: 0;
+	border-radius: var(--vs-radius-full);
+	background-color: transparent;
+	text-indent: -999em;
+}
+
+.hc-offcanvas-nav li.nav-close a:hover {
+	background-color: var(--vs-surface-subtle);
+}
+
+.hc-offcanvas-nav li.nav-close span {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	width: auto;
+	text-indent: 0;
+}
+
 /* Currency, language, phone and email were 13px and muted while the rows      */
 /* above them were 15px and full contrast. Same height, same rail, dimmer text  */
 /* reads as disabled rather than as secondary - and none of them is secondary   */
@@ -1889,19 +1941,6 @@ body.hc-nav-open {
 
 .hc-offcanvas-nav ul.bottom-nav li {
 	flex: none;
-}
-
-.hc-offcanvas-nav ul.bottom-nav li.nav-close {
-	flex: 1 0 100%;
-	order: 1;
-	margin-top: var(--vs-space-2);
-}
-
-.hc-offcanvas-nav ul.bottom-nav li.nav-close a {
-	justify-content: space-between;
-	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-md);
-	padding-left: var(--vs-space-5);
 }
 
 /* Round icon buttons rather than text pills - a third visual language in a    */

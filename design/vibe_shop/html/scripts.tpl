@@ -191,7 +191,7 @@
             navClass: 'mobile_nav',
             customToggle: $toggle,
             levelTitles: true,
-            insertClose: -1,
+            insertClose: 2,
             labelBack: '{$lang->mobile_menu_prev|escape}',
             labelClose: '{$lang->mobile_menu_close|escape}',
             closeLevels: false

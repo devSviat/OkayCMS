@@ -1,28 +1,26 @@
 <ul class="top-nav">
     <li>
-        <div class="">
-            {if !empty({$settings->site_logo})}
-            <a class="mobile__link " href="{if $controller=='MainController'}javascript:;{else}{url_generator route="main"}{/if}">
-                <img src="{$rootUrl}/{$config->design_images}{$settings->site_logo}?v={$settings->site_logo_version}" alt="{$settings->site_name|escape}"/>
-            </a>
-            {/if}
-        </div>
-        <div class="d-flex align-items-center f_col">
-            {if $user}
-                <a class="account__link" href="{url_generator route="user"}">
-                    {include file="svg.tpl" svgId="user"}
-                    <span>{$user->name|escape}</span>
-                </a>
-            {else}
-                <a class="account__link" rel="nofollow" href="{url_generator route='login'}"  title="{$lang->index_login}">
-                    {include file="svg.tpl" svgId="user"}
-                    <span class="account__login" data-language="index_login">{$lang->index_login}</span>
-                </a>
-            {/if}
-        </div>
+        {if !empty({$settings->site_logo})}
+        <a class="mobile__link" href="{if $controller=='MainController'}javascript:;{else}{url_generator route="main"}{/if}">
+            <img src="{$rootUrl}/{$config->design_images}{$settings->site_logo}?v={$settings->site_logo_version}" alt="{$settings->site_name|escape}"/>
+        </a>
+        {/if}
     </li>
 </ul>
 <ul class="second-nav">
+    <li>
+        {if $user}
+            <a href="{url_generator route="user"}">
+                {include file="svg.tpl" svgId="user"}
+                <span>{$user->name|escape}</span>
+            </a>
+        {else}
+            <a rel="nofollow" href="{url_generator route='login'}" title="{$lang->index_login}">
+                {include file="svg.tpl" svgId="user"}
+                <span class="account__login" data-language="index_login">{$lang->index_login}</span>
+            </a>
+        {/if}
+    </li>
     {if $controller != 'MainController'}
         <li>
             <a href="{url_generator route='main'}">
