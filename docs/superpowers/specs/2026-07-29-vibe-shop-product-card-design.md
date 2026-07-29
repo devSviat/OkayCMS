@@ -118,6 +118,36 @@ This is the larger half of the alignment problem and it was not in the spec's or
 diagnosis. `.vs-post-card__link` shares the rule; its own clamp must be checked rather than
 assumed, and the blog grid re-measured.
 
+**6. Give the page a real edge gutter on phones.** Reported by the owner with three
+screenshots. Measured at 390 px: on the catalogue and the product page every block starts at
+**x=7**, and on the home page at **x=0**.
+
+The 7 px comes from `grid.css`, which sets `.container { padding-left: 7px; padding-right: 7px }`
+— a legacy Bootstrap gutter. It is too small for a phone against a theme whose own rhythm steps
+in 16 and 20.
+
+The home page's 0 is different and half-deliberate. `.vs-home__section` zeroes the container's
+horizontal padding, and the carousels then pull themselves out by half a gutter so a card peeks
+off the edge and signals the row scrolls. That bleed is intentional and documented in place. The
+defect is that the **section headings** inherited it: `.vs-home__title` sits at x=0 inside
+`.vs-home__head`, and a heading cannot scroll.
+
+So: raise `.container` to 16 px below 576 px only — the width where it hurts, leaving tablet and
+desktop untouched so no regression is possible there — and give `.vs-home__head` the same 16 px
+so headings align with card content while the rails keep bleeding.
+
+**7. Put the label back on the sticky buy button.** Requested by the owner after seeing it ship.
+
+The floating bar's CTA is currently `.vs-sticky-buy__cta--icon`, a 52 px circle holding the cart
+glyph with its label hidden in `.vs-sr-only`. It becomes a pill carrying the glyph and the
+visible words again.
+
+The spec that made it icon-only recorded the trade at the time: "an icon-only primary action is
+less explicit than a labelled one, and on a purchase button that is a real conversion
+consideration." The owner has now seen it in place and asked for the label. The `data-language`
+attribute stays on the span that holds the text — it marks the element whose text the language
+switch rewrites, and it must not move back onto the button, which also contains the SVG.
+
 ## Explicitly out of scope
 
 - **The `special` badge image.** It is the shop owner's uploaded asset, and the theme's own
