@@ -2778,6 +2778,19 @@ body.hc-nav-open {
 	margin-top: auto;
 }
 
+/* Nothing to order in one tap when there is nothing in stock. With preorder    */
+/* switched on, the module keeps its rocket visible for an out-of-stock         */
+/* product while the card's own "add to cart" has already hidden itself, so     */
+/* the row was left offering the faster of two routes to a purchase that        */
+/* cannot happen yet. Done as a sibling rule rather than a condition around     */
+/* the include, because the module's template is not ours to edit and because   */
+/* vibe.js rewrites .vs-stock--out live when a variant changes - a Smarty test  */
+/* would freeze at render time and be wrong after the first variant switch.     */
+
+.vs-stock--out ~ .vs-card__form .fn_fast_order_button {
+	display: none;
+}
+
 /* Variant chips: one tap instead of open-dropdown-then-choose. They live on    */
 /* the PRODUCT PAGE only - the card deliberately shows no variant control, so   */
 /* the catalogue stays a scanning surface and the choice is made where the      */
@@ -4876,9 +4889,14 @@ body.hc-nav-open {
 	font-size: var(--vs-text-sm);
 }
 
+/* Fully round, like the in-stock pill beside it. The two buttons occupy the     */
+/* same slot and only one of them is ever shown, so a 12px radius on one and a  */
+/* pill on the other made the bar change shape with the stock level.            */
+
 .vs-sticky-buy__cta {
 	flex: 1 1 auto;
 	min-height: 48px;
+	border-radius: var(--vs-radius-full);
 }
 
 /* Glyph plus label. The label was hidden when this shipped as a circle; the     */
