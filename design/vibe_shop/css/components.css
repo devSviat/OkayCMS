@@ -4889,26 +4889,27 @@ body.hc-nav-open {
 	font-size: var(--vs-text-sm);
 }
 
-/* Fully round, like the in-stock pill beside it. The two buttons occupy the     */
-/* same slot and only one of them is ever shown, so a 12px radius on one and a  */
-/* pill on the other made the bar change shape with the stock level.            */
+/* Both buttons in this bar are pills that size to their own label. Only one of  */
+/* them is ever shown, so anything they do not share reads as the bar changing   */
+/* shape with the stock level: the pre-order one used to be a 12px rectangle     */
+/* that also grew to fill the row, while the in-stock one was a pill hugging     */
+/* its words. Sized by content here, and the padding trim below 360px is what    */
+/* keeps the longer of the two labels inside the bar at 320.                     */
 
 .vs-sticky-buy__cta {
-	flex: 1 1 auto;
+	flex: none;
 	min-height: 48px;
 	border-radius: var(--vs-radius-full);
 }
 
 /* Glyph plus label. The label was hidden when this shipped as a circle; the     */
 /* owner asked for it back, so the button is a pill again and the span simply    */
-/* renders. min-height keeps the 52px touch target the circle had. The gap, the  */
-/* horizontal padding and the 20px glyph all come from .vs-btn already, so only  */
-/* the three declarations that actually differ from it are restated here.        */
+/* renders. min-height keeps the 52px touch target the circle had. Everything    */
+/* else - the flex sizing, the radius, the gap, the horizontal padding and the   */
+/* 20px glyph - comes from .vs-btn and the rule above.                           */
 
 .vs-sticky-buy__cta--icon {
-	flex: none;
 	min-height: 52px;
-	border-radius: var(--vs-radius-full);
 }
 
 .vs-sticky-buy .vs-buybox__unavailable {
