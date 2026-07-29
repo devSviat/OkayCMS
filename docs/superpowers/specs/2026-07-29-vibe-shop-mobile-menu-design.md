@@ -74,10 +74,11 @@ translated string and the text is moved off screen with `text-indent`, leaving t
 the `<span>` the library already emits. Setting `labelClose: ''` would leave the button with no
 accessible name at all.
 
-**6. Capitalise any social label that survives as text.** The regex extracts a bare domain, so
-labels render lowercase. This applies only to a network whose glyph did not read cleanly under
-item 4 and therefore kept its text — if every glyph ships, nothing here renders and the rule is
-still worth having for the next shop that adds an unmatched network.
+**6. Capitalisation of social labels — already done, no work.** `components.css` already carries
+`text-transform: capitalize` on `.hc-offcanvas-nav ul.bottom-nav .nav-item`, which is why the
+current screenshot reads "Facebook" and "Twitter" rather than the bare lowercase domains the
+regex produces. Item 4 removes that rule along with the text it capitalised. It is only worth
+keeping if a glyph turns out not to read cleanly and its label is reverted to text.
 
 ## Explicitly out of scope
 
