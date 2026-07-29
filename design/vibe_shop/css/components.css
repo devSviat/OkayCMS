@@ -1589,6 +1589,27 @@ body.hc-nav-open {
 	padding-left: calc(var(--vs-space-5) + 20px + var(--vs-space-3));
 }
 
+/* The CMS rows reserve the rail but have nothing to put in it, so they read as */
+/* children of the row above rather than as peers. A dot fills the slot without */
+/* asserting a meaning: these pages are named by the shop owner, so any real    */
+/* glyph would claim to know what they are. A list marker claims only that they */
+/* are items, which is true.                                                     */
+/*                                                                              */
+/* Scoped inside .hc-offcanvas-nav because menu.tpl is shared with the desktop  */
+/* menu, which has no rail and must not grow bullets.                            */
+
+.hc-offcanvas-nav .nav-content > ul > li > .vs-menu__link.nav-item::before {
+	position: absolute;
+	left: calc(var(--vs-space-5) + 7px);
+	top: 50%;
+	width: 6px;
+	height: 6px;
+	margin-top: -3px;
+	border-radius: var(--vs-radius-full);
+	background-color: var(--vs-text-muted);
+	content: "";
+}
+
 /* The wrapper span from the paragraph above (currency and language) keeps the   */
 /* glyph and the value text as its own two children, once removed from          */
 /* .nav-item - so .nav-item's own flex/gap never reaches them and the two sit    */
