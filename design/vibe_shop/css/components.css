@@ -5616,6 +5616,18 @@ body.hc-nav-open {
 		gap: var(--vs-space-2);
 	}
 
+	/* The extra 4px of padding above comes straight out of the discount row, and   */
+	/* on the home rail there was nothing to spare: its cards are sized by swiper,   */
+	/* not by the grid gap, so they stayed 171px wide while the catalogue's grew to  */
+	/* 175. The widest row this shop can produce is 540 000,00 ₴ plus a two-digit    */
+	/* badge, 145px, against a 145px content box - equal, so it wrapped to two       */
+	/* lines and broke the constant tier height the card is built on. Halving this   */
+	/* gap buys 4px back: 141px into 145 on the rail and into 149 in the grid.       */
+
+	.vs-card__price_second {
+		gap: var(--vs-space-1);
+	}
+
 	.vs-card__media-link {
 		padding: var(--vs-space-3);
 	}
