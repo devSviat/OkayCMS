@@ -6483,24 +6483,20 @@ body.hc-nav-open {
 	margin-bottom: 0;
 }
 
-/* Payment and delivery modules render their own markup in here and this layer  */
-/* does not own it. These rules only lift the stock form controls to the same    */
-/* height, radius and border as the rest of the page.                            */
-
-.vs-option__extra .form__input,
-.vs-option__extra .form__input_captcha {
-	height: 44px;
-	border-color: var(--vs-border);
-	border-radius: var(--vs-radius-sm);
-	background-color: var(--vs-n-25);
-	font-size: var(--vs-text-base);
-}
+/* Same two states .vs-field uses, so a delivery field and a contact field       */
+/* respond identically. The single combined rule this replaces gave focus the    */
+/* hover colour, which made the cart the only place in the shop where a focused  */
+/* field looked like a hovered one.                                              */
 
 .vs-option__extra .form__input:hover,
-.vs-option__extra .form__input:focus,
-.vs-option__extra .form__input_captcha:hover,
-.vs-option__extra .form__input_captcha:focus {
+.vs-option__extra .form__input_captcha:hover {
 	border-color: var(--vs-border-strong);
+	background-color: var(--vs-surface);
+}
+
+.vs-option__extra .form__input:focus,
+.vs-option__extra .form__input_captcha:focus {
+	border-color: var(--vs-ink);
 	background-color: var(--vs-surface);
 }
 
@@ -9961,11 +9957,13 @@ img.lazy:not(.loaded) {
 /* hidden, and fancybox lifts it into a lightbox from the rocket button on a   */
 /* product card - so it is the one legacy form still reaching shoppers.        */
 /*                                                                             */
-/* .form__placeholder is a <span> that FOLLOWS its input in the DOM, which the */
-/* legacy sheet floated over the field and animated on focus. It is pinned      */
-/* instead: the field is tall enough to hold a caption line above the value and */
-/* the caption never moves, so it reads the same whether or not okay.js has     */
-/* toggled .filled - and a shopper filling the form never watches text slide.   */
+/* .form__placeholder is a <span> that FOLLOWS its input in the DOM. The legacy */
+/* sheet floated it over the field; this layer used to pin it inside a 56px     */
+/* box. It is now a plain caption above a 44px field - the same shape           */
+/* .vs-form__label and .vs-field already have - so the checkout stops showing   */
+/* two different kinds of input on one screen. The span keeps its DOM position  */
+/* and is lifted visually by `order`, which is what keeps the                   */
+/* `.form__input.error ~ .form__placeholder` selector working.                  */
 
 .form {
 	position: relative;
@@ -10011,6 +10009,8 @@ img.lazy:not(.loaded) {
 
 .form__group {
 	position: relative;
+	display: flex;
+	flex-direction: column;
 	margin-bottom: var(--vs-space-3);
 }
 
@@ -10018,8 +10018,8 @@ img.lazy:not(.loaded) {
 .form__textarea {
 	display: block;
 	width: 100%;
-	min-height: 56px;
-	padding: 22px var(--vs-space-3) 6px;
+	min-height: 44px;
+	padding: 0 var(--vs-space-3);
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-sm);
 	background-color: var(--vs-n-25);
@@ -10033,6 +10033,8 @@ img.lazy:not(.loaded) {
 
 .form__textarea {
 	min-height: 96px;
+	padding: var(--vs-space-3);
+	line-height: var(--vs-leading-body);
 	resize: vertical;
 }
 
@@ -10054,13 +10056,12 @@ img.lazy:not(.loaded) {
 }
 
 .form__placeholder {
-	position: absolute;
-	top: 8px;
-	left: var(--vs-space-3);
-	z-index: 1;
+	order: -1;
+	margin-bottom: var(--vs-space-2);
 	color: var(--vs-text-muted);
-	font-size: var(--vs-text-xs);
-	line-height: 1.2;
+	font-size: var(--vs-text-sm);
+	line-height: var(--vs-leading-body);
+	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	pointer-events: none;
