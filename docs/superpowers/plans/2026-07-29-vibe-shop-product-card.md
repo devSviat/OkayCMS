@@ -432,6 +432,155 @@ Append a close-out block to the ledger recording the measured alignment table, t
 
 ---
 
+### Task 5: Restore the card title's two-line clamp
+
+**Execute this before Task 4** — Task 4 is the verification pass and must see the finished state.
+This task was added after Task 1 revealed that the price block was the smaller half of the
+alignment problem.
+
+**Files:**
+- Modify: `design/vibe_shop/css/components.css:10395-10404`
+
+**Interfaces:**
+- Consumes: nothing. Independent of Tasks 1-3.
+
+- [ ] **Step 1: Record the variance**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+rm -f compiled/vibe_shop/*.php cache/css/*
+node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs \
+  --url http://localhost/all-products --width 390 --height 844 --out /tmp/clamp-before.png \
+  --eval "(()=>{const ns=[...document.querySelectorAll('.vs-card__name')].slice(0,6);const cs=getComputedStyle(ns[0]);return JSON.stringify({display:cs.display,clamp:cs.webkitLineClamp,heights:ns.map(n=>Math.round(n.getBoundingClientRect().height))})})()"
+```
+
+Expected: `display: "flex"`, `clamp: "2"` — the clamp declared but inert — and heights varying
+across roughly 44, 44, 81, 60, 101, 60.
+
+- [ ] **Step 2: Drop the two declarations that kill the clamp**
+
+At `components.css:10399-10404` the `TOUCH TARGETS` block carries:
+
+```css
+	.vs-card__name,
+	.vs-post-card__link {
+		display: flex;
+		align-items: flex-start;
+		min-height: 44px;
+	}
+```
+
+Remove `display: flex;` and `align-items: flex-start;`, keeping `min-height: 44px`:
+
+```css
+	.vs-card__name,
+	.vs-post-card__link {
+		min-height: 44px;
+	}
+```
+
+`display: -webkit-box` from the base rule at `:2561` then applies again and the clamp works.
+`min-height` alone still holds the 44 px touch floor — `-webkit-box` honours it.
+
+Replace the comment above the rule, which currently explains the flex-column reasoning that no
+longer applies:
+
+```css
+/* Card titles. Two lines of 20px leading come to 40.3px, four short of the     */
+/* floor, so min-height carries the difference. It must NOT become a flex box   */
+/* to get there: -webkit-line-clamp only works on display: -webkit-box, which   */
+/* the base rule sets, and display: flex here silently disabled the clamp -     */
+/* titles ran to five lines and card heights varied by 57px. The .vs-cart__name */
+/* rule below states the same constraint and got it right.                      */
+```
+
+- [ ] **Step 3: Clear caches and verify the clamp is live**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+rm -f compiled/vibe_shop/*.php cache/css/*
+```
+
+Re-run Step 1's command with `--out /tmp/clamp-after.png`.
+
+Expected: `display: "-webkit-box"` and every height 44. A height above 44 means the clamp is
+still not applying.
+
+- [ ] **Step 4: Confirm the touch target survives**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs \
+  --url http://localhost/all-products --width 390 --height 844 \
+  --eval "(()=>{const ns=[...document.querySelectorAll('.vs-card__name')].slice(0,6);return JSON.stringify(ns.map(n=>({h:Math.round(n.getBoundingClientRect().height),minH:getComputedStyle(n).minHeight})))})()"
+```
+
+Expected: every `h` at least 44 and every `minH` `"44px"`.
+
+- [ ] **Step 5: Check the blog card, which shares the rule**
+
+`.vs-post-card__link` is in the same selector and loses the same two declarations. Its own base
+rule may or may not set `-webkit-box`; check rather than assume.
+
+```bash
+cd /home/sviat/projects/OkayCMS
+grep -n 'vs-post-card__link' design/vibe_shop/css/components.css
+node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs \
+  --url http://localhost/all-posts --width 390 --height 844 --out /tmp/clamp-blog.png \
+  --eval "(()=>{const ls=[...document.querySelectorAll('.vs-post-card__link')];return JSON.stringify(ls.map(l=>({h:Math.round(l.getBoundingClientRect().height),display:getComputedStyle(l).display,clamp:getComputedStyle(l).webkitLineClamp})))})()"
+```
+
+Report what you find. If the blog title has no clamp of its own, removing `display: flex` simply
+returns it to normal flow — say so and show the measured heights before and after. If it looks
+worse, stop and report rather than inventing a clamp for it.
+
+- [ ] **Step 6: Alignment across six cards**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+node .superpowers/sdd/2026-07-26-vibe-shop-redesign/shot.mjs \
+  --url http://localhost/all-products --width 390 --height 844 --out /tmp/clamp-rows.png \
+  --eval "(()=>{const cs=[...document.querySelectorAll('.vs-card')].slice(0,6);const rel=(c,s)=>{const e=c.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect(),cr=c.getBoundingClientRect();return Math.round(r.top-cr.top)};return JSON.stringify(cs.map(c=>({h:Math.round(c.getBoundingClientRect().height),price:rel(c,'.vs-card__price'),stock:rel(c,'.vs-stock'),actions:rel(c,'.vs-card__actions')})))})()"
+```
+
+Expected: all six cards report the same `price`, `stock` and `actions` offsets, and the same
+height. This is the task's deliverable — with Task 1 already in, nothing above the price should
+vary any more.
+
+- [ ] **Step 7: Compiler traps**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+git diff -U0 -- design/vibe_shop/css/components.css | grep '^+' | grep '/\*' | grep -v '^+[[:space:]]*/\*' || echo "trap 1 clear"
+git diff -U0 -- design/vibe_shop/css/components.css | grep '^+' | grep 'var(--okay-' || echo "trap 2 clear"
+git diff -U0 -- design/vibe_shop/css/components.css | grep '^+' | grep -E '^\+\s*\.[a-z0-9_-]+\s*$' || echo "trap 3 clear"
+```
+
+Note the two-line selector `.vs-card__name,` / `.vs-post-card__link` breaks immediately after a
+comma, which is the only break the compiler allows — it is unchanged, but trap 3's grep will see
+it in context.
+
+- [ ] **Step 8: Look at it**
+
+Open `/tmp/clamp-after.png` and `/tmp/clamp-rows.png`. Every card in a row must be the same
+height with every element level. Confirm no title is cut mid-word in a way that loses meaning —
+a two-line clamp on a long product name is a deliberate trade, but it should still read.
+
+- [ ] **Step 9: Commit**
+
+```bash
+cd /home/sviat/projects/OkayCMS
+git add design/vibe_shop/css/components.css
+git commit -m "fix(vibe_shop): restore the card title's two-line clamp
+
+The touch-target pass set display: flex on .vs-card__name, which
+silently disabled -webkit-line-clamp - titles ran to five lines and card
+heights varied by 57px. min-height alone holds the 44px floor, which is
+what the .vs-cart__name rule below already says."
+```
+
+---
+
 ## Self-Review
 
 **Spec coverage.** Spec item 1 (reserve the old-price tier, not inline) → Task 1 Steps 2-3. Item 2 (discount moves onto the tier) → Task 1 Steps 2 and 4. Item 3 (SKU commented, not deleted) → Task 2. Item 4 (translucent chrome, `color-mix` from `--vs-surface`, `@supports` gating both properties, measured contrast, measured performance) → Task 3 Steps 2-5. The spec's verification section → Task 1 Steps 5-6, Task 2 Steps 3-4, Task 3 Steps 4-5, and Task 4 throughout.
