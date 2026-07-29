@@ -118,10 +118,20 @@
         <div class="vs-card__body">
             <a class="vs-card__name" data-product="{$product->id}" href="{url_generator route="product" url=$product->url}">{$product->name|escape}</a>
 
+            {* The article number is off the card by the shop owner's decision: in a
+               grid it costs 23px on every card for a value most shoppers do not scan.
+               Delete this comment wrapper to bring it back - nothing else has to
+               change. fn_sku is the hook okay.js writes into when a variant changes
+               (okay.js:59), and it reaches it with .find(), so its absence is a
+               no-op rather than an error; vibe.js:470 guards with `if (sku)` before
+               adding it to the live announcement. The product page states the SKU in
+               full either way. *}
+            {*
             <div class="vs-card__sku{if !$product->variant->sku} hidden-xs-up{/if}">
                 <span data-language="product_sku">{$lang->product_sku}:</span>
                 <span class="fn_sku">{$product->variant->sku|escape}</span>
             </div>
+            *}
 
             <div class="vs-card__price">
                 <span class="vs-card__price_current{if $product->variant->compare_price} price--red{/if}"><span class="fn_price">{$product->variant->price|convert}</span>&nbsp;<span class="vs-card__currency">{$currency->sign|escape}</span></span>
