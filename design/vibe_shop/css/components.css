@@ -5632,8 +5632,28 @@ body.hc-nav-open {
 		top: 0;
 	}
 
+/* Everything above the first product, measured at 390x844 before this block:   */
+/* header 61, air 32, breadcrumbs 44, masthead 87, toolbar 61, a 20px lead-in   */
+/* to the grid - 305px, and the same 305 on a landscape phone, where it is 80%  */
+/* of the screen. None of it is content, so the content is not what gives way:  */
+/* four spacing steps do, and the grid starts 44px earlier. Scoped at 991 and   */
+/* not at 575 deliberately - a phone on its side is 844px WIDE, so a phone-only */
+/* query is exactly the one that would miss the worst case.                     */
+
+	body.other_page .main {
+		padding-top: var(--vs-space-4);
+	}
+
 	.vs-catalogue__masthead {
-		padding: var(--vs-space-4) 0;
+		padding: var(--vs-space-3) 0;
+	}
+
+	.vs-catalogue__toolbar {
+		padding-bottom: var(--vs-space-2);
+	}
+
+	.vs-catalogue__region {
+		padding-top: var(--vs-space-2);
 	}
 
 	.vs-filters__browsed {
@@ -10712,6 +10732,52 @@ img.lazy:not(.loaded) {
 	.vs-gallery__frame {
 		max-width: none;
 		margin: 0;
+	}
+
+/* Same argument applied to the catalogue's masthead. Stacked, it spends 85px    */
+/* of a 390px screen on a title and a count that together use the left third of */
+/* an 844px row - the other two thirds are empty. On one baseline it is 45px,    */
+/* and the title comes down one step because a 28px heading is sized for a page  */
+/* that has room to spare. The annotation, when a category has one, keeps its    */
+/* own full-width line.                                                          */
+
+	.vs-catalogue__masthead {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		column-gap: var(--vs-space-3);
+	}
+
+	.vs-catalogue__title {
+		font-size: var(--vs-text-xl);
+	}
+
+	.vs-catalogue__masthead .vs-results {
+		margin: 0;
+	}
+
+	.vs-catalogue__intro {
+		flex: 1 0 100%;
+	}
+
+/* The product page's masthead is the same shape and the same waste: a title    */
+/* and a meta row stacked down the left of an 844px page, 113px before the      */
+/* gallery starts. On one baseline it is 49, so the photograph and the price    */
+/* both land above the fold instead of only the photograph's top edge.          */
+
+	.vs-pdp__masthead {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		column-gap: var(--vs-space-4);
+	}
+
+	.vs-pdp__title {
+		font-size: var(--vs-text-xl);
+	}
+
+	.vs-pdp__meta {
+		margin-top: 0;
 	}
 
 }
