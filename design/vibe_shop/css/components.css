@@ -10014,6 +10014,15 @@ img.lazy:not(.loaded) {
 	margin-bottom: var(--vs-space-3);
 }
 
+/* One group holds a checkbox and its label instead of a field and a caption    */
+/* - NovaposhtaCost's cash-on-delivery tick. A column stretches that label to   */
+/* the full row and hands it a tap target three times the width of its own      */
+/* text, so it keeps its intrinsic width.                                       */
+
+.form__group > label {
+	align-self: flex-start;
+}
+
 .form__input,
 .form__textarea {
 	display: block;
@@ -10129,8 +10138,15 @@ img.lazy:not(.loaded) {
 	gap: var(--vs-space-2);
 }
 
+/* FastOrder wraps the captcha's input and caption in this span rather than in  */
+/* a .form__group, so it needs the same column of its own - without it the      */
+/* caption's `order: -1` has no flex container to act on and the one field on   */
+/* the form labelled from below is the captcha.                                 */
+
 .form__captcha {
 	position: relative;
+	display: flex;
+	flex-direction: column;
 	flex: 1 1 auto;
 }
 
