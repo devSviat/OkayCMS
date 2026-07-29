@@ -5599,8 +5599,21 @@ body.hc-nav-open {
 /* --------------------------------------------------------------- ≤ 575 px */
 
 @media (max-width: 575px) {
+	/* The plates had 16px between them and 8px inside them - more air outside the   */
+	/* card than in it, which is what the owner saw. The first responsive pass cut   */
+	/* the padding to 8 to buy vertical space; that trade is being reversed here     */
+	/* with the owner's decision, for portrait phones only. The short-viewport block */
+	/* at the end of this file keeps 8px, because a landscape phone is starved of    */
+	/* height in a way a portrait one is not, and it is later in the file so it      */
+	/* still wins there.                                                             */
+
 	.vs-card {
-		padding: var(--vs-space-2);
+		padding: var(--vs-space-3);
+	}
+
+	.vs-catalogue__grid,
+	.vs-related__grid {
+		gap: var(--vs-space-2);
 	}
 
 	.vs-card__media-link {
