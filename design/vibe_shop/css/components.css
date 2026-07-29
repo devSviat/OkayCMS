@@ -1854,25 +1854,6 @@ body.hc-nav-open {
 	width: auto;
 }
 
-.hc-offcanvas-nav ul.top-nav .account__link {
-	display: inline-flex;
-	align-items: center;
-	gap: var(--vs-space-2);
-	min-height: 44px;
-	padding: 0 var(--vs-space-4);
-	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-md);
-	color: var(--vs-text);
-	font-size: var(--vs-text-sm);
-	white-space: nowrap;
-}
-
-.hc-offcanvas-nav ul.top-nav .account__link svg {
-	width: 18px;
-	height: 18px;
-	color: var(--vs-text-muted);
-}
-
 /* The panel header: brand on the left, close on the right. hc-offcanvas-nav    */
 /* puts the close item in the first list, so top-nav becomes that header row.    */
 /* flex-direction is restated here: the earlier ul.top-nav rule above sets it   */
@@ -1891,6 +1872,16 @@ body.hc-nav-open {
 
 .hc-offcanvas-nav ul.top-nav > li {
 	flex: none;
+}
+
+/* The shop can run with no logo configured (mobile_menu.tpl:3 wraps it in an   */
+/* {if}) - then the close item is the row's only child, and space-between pins  */
+/* a lone flex child to flex-start, moving the x to the left. margin-left: auto  */
+/* anchors it to the end on its own, independent of how many items precede it,  */
+/* so the x stays right whether or not the logo renders.                        */
+
+.hc-offcanvas-nav ul.top-nav li.nav-close {
+	margin-left: auto;
 }
 
 /* This build has no ariaLabels option and emits the label as a bare text node  */
@@ -10399,16 +10390,14 @@ img.lazy:not(.loaded) {
 /* from here. The logo link is a real link to the homepage on every page but the   */
 /* homepage itself, where the template emits href="javascript:;".                  */
 /*                                                                                 */
-/* Both selectors are written `ul.top-nav` on purpose. The stripping rule that     */
-/* takes the generic nav-item chrome off these two rows is                         */
+/* Written as `ul.top-nav .mobile__link` on purpose. The stripping rule that       */
+/* takes the generic nav-item chrome off this row is                               */
 /* `.hc-offcanvas-nav ul.top-nav .mobile__link { min-height: 0 }` at 0,3,1; a bare  */
 /* `.hc-offcanvas-nav .mobile__link` is 0,2,0 and loses to it however late it       */
 /* appears. Matching its weight and sitting later in the file is what makes the     */
-/* 44px land. .account__link already carries min-height: 44px from its own block    */
-/* above; it is repeated here so the pair is legible as one touch-target decision.  */
+/* 44px land.                                                                       */
 
-	.hc-offcanvas-nav ul.top-nav .mobile__link,
-	.hc-offcanvas-nav ul.top-nav .account__link {
+	.hc-offcanvas-nav ul.top-nav .mobile__link {
 		display: inline-flex;
 		align-items: center;
 		min-height: 44px;
