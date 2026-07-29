@@ -10675,20 +10675,30 @@ img.lazy:not(.loaded) {
 /* the only thing it was still painting for is the utility strip, which now     */
 /* carries the surface colour on its own rule and keeps it opaque.              */
 
-@supports (backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px)) {
-	.vs-header {
-		background-color: transparent;
-	}
+/* Bounded at 991px, which is where it earns its keep. On a phone the bar is     */
+/* narrow and content runs under it continuously, so it reads as frosted glass.  */
+/* At 1440 the bar is wide and mostly empty: the only thing under it is whatever */
+/* happens to be in the right-hand fifth, and the blur turns that into a pale    */
+/* cloud aligned to nothing behind the icons - a dirty corner rather than a      */
+/* material. Looked at before deciding; the numbers were fine at both widths.    */
+/* .vs-sticky-buy is already phone-only, so the bound costs it nothing.          */
 
-	.vs-header__utility {
-		background-color: var(--vs-surface);
-	}
+@media (max-width: 991px) {
+	@supports (backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px)) {
+		.vs-header {
+			background-color: transparent;
+		}
 
-	.vs-header__main,
-	.vs-sticky-buy {
-		background-color: color-mix(in srgb, var(--vs-surface) 82%, transparent);
-		-webkit-backdrop-filter: blur(12px);
-		backdrop-filter: blur(12px);
+		.vs-header__utility {
+			background-color: var(--vs-surface);
+		}
+
+		.vs-header__main,
+		.vs-sticky-buy {
+			background-color: color-mix(in srgb, var(--vs-surface) 82%, transparent);
+			-webkit-backdrop-filter: blur(12px);
+			backdrop-filter: blur(12px);
+		}
 	}
 }
 
