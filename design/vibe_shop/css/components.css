@@ -2630,10 +2630,21 @@ body.hc-nav-open {
 .vs-card__price {
 	display: flex;
 	align-items: baseline;
-	flex-wrap: wrap;
-	gap: var(--vs-space-2);
+	flex-direction: column;
+	gap: var(--vs-space-1);
 	margin-top: var(--vs-space-3);
 	font-variant-numeric: tabular-nums;
+}
+
+/* The reserved second tier. Its min-height is one line of the old price's own   */
+/* size, so the number comes from the type scale rather than from a measurement  */
+/* that would rot the first time a token moves.                                  */
+
+.vs-card__price_second {
+	display: flex;
+	align-items: baseline;
+	gap: var(--vs-space-2);
+	min-height: calc(var(--vs-text-sm) * var(--vs-leading-body));
 }
 
 .vs-card__price_current {
@@ -2657,6 +2668,16 @@ body.hc-nav-open {
 	color: var(--vs-text-muted);
 	font-size: var(--vs-text-sm);
 	text-decoration: line-through;
+}
+
+/* On the price tier rather than over the photograph, so the percentage sits    */
+/* next to the number it modifies. Smaller and tighter than the corner badges,  */
+/* which have to read against arbitrary shop photography.                       */
+
+.vs-card__price_second .vs-badge--sale {
+	min-height: 0;
+	padding: 0 var(--vs-space-1-5);
+	font-size: var(--vs-text-xs);
 }
 
 .vs-card__currency {
