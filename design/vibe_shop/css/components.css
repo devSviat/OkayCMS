@@ -5666,6 +5666,16 @@ body.hc-nav-open {
 		flex: none;
 	}
 
+	/* The global ring sits 2px outside the box, and here it has nowhere to go:     */
+	/* the link is 44px tall inside a 44px strip that clips on both the            */
+	/* overflow-y and the mask. Either one alone erases the ring, so the ring       */
+	/* paints inward instead. Measured before this rule: outline computed as        */
+	/* 2px solid but not one pixel of it reached the screen.                        */
+
+	.vs-crumbs__item a:focus-visible {
+		outline-offset: -2px;
+	}
+
 	/* The fade follows the scroll position instead of being painted once. A        */
 	/* static mask would dim the last crumb's tail even when there is nothing        */
 	/* further to scroll to, which reads as truncated text rather than as more      */
