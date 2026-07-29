@@ -2401,9 +2401,18 @@ body.hc-nav-open {
 	flex-direction: column;
 	align-items: flex-start;
 	gap: var(--vs-space-1);
-	max-width: calc(100% - 60px);
+	max-width: calc(100% - 48px);
 	pointer-events: none;
 }
+
+/* The 48px the badge column gives up is .vs-card__tools' own 44px plus a 4px    */
+/* gap - they sit in the same corner and must not overlap. It was 60px, which    */
+/* reserved 16px for nothing and clipped "Топ продажів" mid-glyph: 97px of text  */
+/* into an 89px box, and the default text-overflow is clip, not ellipsis.        */
+/* text-overflow is not the fix here either - this is a flex container, so the   */
+/* text is an anonymous flex item and the property has nothing to act on. Where  */
+/* the words still do not fit beside the tools the sticker wraps instead; see    */
+/* the phone block.                                                              */
 
 .vs-badge {
 	display: inline-flex;
@@ -2689,9 +2698,24 @@ body.hc-nav-open {
 /* which have to read against arbitrary shop photography.                       */
 
 .vs-card__price_second .vs-badge--sale {
+	flex: none;
 	min-height: 0;
 	padding: 0 var(--vs-space-1-5);
 	font-size: var(--vs-text-xs);
+}
+
+/* The guarantee, not the budget. The struck price is the one thing in this row  */
+/* that can give way: it is already crossed out and the badge states the saving  */
+/* on its own, so an ellipsis there costs almost nothing - while a wrap costs    */
+/* the constant tier height, and with it the alignment of every neighbouring     */
+/* card. Measured budgets keep being one pixel wide at some viewport nobody      */
+/* sampled; this holds whatever the data does.                                   */
+
+.vs-card__price_old {
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 .vs-card__currency {
@@ -5666,8 +5690,34 @@ body.hc-nav-open {
 	/* lines and broke the constant tier height the card is built on. Halving this   */
 	/* gap buys 4px back: 141px into 145 on the rail and into 149 in the grid.       */
 
+	/* At 360px - the commonest Android width, and the first one where this grid    */
+	/* goes two-up - the card's content box is 134px and the widest row this shop   */
+	/* can produce needed exactly 134.00. Equal, so it wrapped. Trimming the        */
+	/* badge's side padding buys 4px of real slack; the ellipsis above is what      */
+	/* stops the next shop with longer numbers from landing here again.            */
+
 	.vs-card__price_second {
 		gap: var(--vs-space-1);
+	}
+
+	.vs-card__price_second .vs-badge--sale {
+		padding: 0 var(--vs-space-1);
+	}
+
+	/* Two-up at 360 and 375 leaves the corner sticker 86-94px beside the tools     */
+	/* and "Топ продажів" wants 97, so it wraps to a second line rather than        */
+	/* losing its last word. A sticker is a phrase, not a number - half of it says  */
+	/* less than all of it on two lines. Only the corner stickers: the sale badge   */
+	/* on the price tier is a single token and must stay on one line.               */
+
+	/* The leading has to come with it. The badge sets line-height to its own font  */
+	/* size, which is fine for one line and clips a descender on two - measured at  */
+	/* 25px of content in a 24px box, the tail of the "д".                          */
+
+	.vs-card__badges .vs-badge {
+		white-space: normal;
+		text-align: left;
+		line-height: 1.25;
 	}
 
 	.vs-card__media-link {
