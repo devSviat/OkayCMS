@@ -7702,25 +7702,22 @@ body.hc-nav-open {
 /* `clip` rather than `hidden` so the vertical axis stays visible and a card's  */
 /* hover shadow is not cut off at the section edge.                             */
 
-/* The horizontal zero is scoped, not unconditional. Below 576px the section    */
-/* keeps the 16px .container already grants, so the headings, the two static    */
-/* grids and the rail's first card all measure from one box - the rail's        */
-/* -8/+8 pull then lands its first card exactly on the title, which is what     */
-/* that pull was written for. Above 576px the container is centred and wide     */
-/* and the zero is still what the rail is calibrated against.                   */
+/* The section keeps .container's own horizontal padding at every width. It      */
+/* used to zero it from 576px up, on the reasoning that the container is        */
+/* centred and wide up there - which is only true past 1366px, where grid.css   */
+/* caps the container. Between 576 and 1366 the container is full-bleed, so the */
+/* zero put the section's own content on x=0 and clipped the last card of every */
+/* grid against the screen edge; measured at 768, where the catalogue sits at 7 */
+/* and the home page sat at 0. The rail is unaffected either way: its -8/+8     */
+/* pull is relative to whatever padding the section has, so its first card      */
+/* still lands exactly on the title. It also cuts the overflow the block above  */
+/* describes from 8px to 1px, because -8 now starts from 7 rather than from 0.  */
 
 .vs-home__section {
 	padding-top: var(--vs-space-8);
 	padding-bottom: 0;
 	overflow-x: clip;
 	overflow-y: visible;
-}
-
-@media (min-width: 576px) {
-	.vs-home__section {
-		padding-left: 0;
-		padding-right: 0;
-	}
 }
 
 .vs-home__section--tight {
