@@ -5639,7 +5639,6 @@ body.hc-nav-open {
 		padding-left: var(--vs-space-4);
 		padding-right: var(--vs-space-4);
 	}
-
 }
 
 /* --------------------------------------------------------------- ≤ 359 px */
@@ -7433,12 +7432,16 @@ body.hc-nav-open {
 /* them - the heading is the heading.                                            */
 
 /* overflow-x: clip, not hidden: the rail below pulls itself out by half a      */
-/* gutter on each side and .vs-home__section zeroes .container's own horizontal */
-/* padding, so under 1366px that half-gutter is real page overflow - 383px of   */
-/* document in a 375px viewport, measured. What is being clipped is the empty   */
-/* padding inside the first and last slide, never a card. `clip` rather than    */
-/* `hidden` so the vertical axis stays visible and a card's hover shadow is not */
-/* cut off at the section edge.                                                 */
+/* gutter on each side. From 576px up .vs-home__section zeroes .container's own */
+/* horizontal padding (the rule below), and up to 1366px - where grid.css caps  */
+/* .container's own width - that half-gutter is real page overflow: forcing     */
+/* overflow-x: visible and reading document.documentElement.scrollWidth against */
+/* window.innerWidth measures 8px of overflow at both 576px and 1365px. Below    */
+/* 576px the section keeps the container's own padding instead of zeroing it,   */
+/* so there is no zero left for the rail to overflow past. What is being        */
+/* clipped is the empty padding inside the first and last slide, never a card.  */
+/* `clip` rather than `hidden` so the vertical axis stays visible and a card's  */
+/* hover shadow is not cut off at the section edge.                             */
 
 /* The horizontal zero is scoped, not unconditional. Below 576px the section    */
 /* keeps the 16px .container already grants, so the headings, the two static    */
@@ -7614,9 +7617,9 @@ body.hc-nav-open {
 /* owner configures how many advantage banners exist.                             */
 
 /* .container still carries the legacy 7px of horizontal padding. Every homepage */
-/* section zeroes it through .vs-home__section's own padding shorthand, but this */
-/* wrapper is a bare .container, so the strip started 7px inside every other     */
-/* block on the page - measured 44px against 37px at 1440.                       */
+/* section zeroes it above 576px via .vs-home__section's own media-scoped rule,  */
+/* but this wrapper is a bare .container, so the strip started 7px inside every  */
+/* other block on the page - measured 44px against 37px at 1440.                 */
 
 /* Scoped to 576px up: that 7px is only still real from there. Below 576px       */
 /* .container's own gutter is now 16px (the first ≤575px block above), the same */
