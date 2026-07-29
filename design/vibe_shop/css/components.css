@@ -5639,6 +5639,49 @@ body.hc-nav-open {
 		padding-left: var(--vs-space-4);
 		padding-right: var(--vs-space-4);
 	}
+
+	/* The trail is the one element on the page that deliberately leaves the        */
+	/* gutter. It pulls out by the page padding and puts the same value back        */
+	/* inside, so its first crumb starts level with the h1 while the strip itself   */
+	/* reaches the physical screen edge - a word cut at that edge is what says the  */
+	/* row scrolls. Three wrapped 44px rows became one; the 44px stays, because     */
+	/* that is the touch target, and the wrapping was the defect.                   */
+
+	.vs-crumbs {
+		flex-wrap: nowrap;
+		margin-left: calc(var(--vs-space-4) * -1);
+		margin-right: calc(var(--vs-space-4) * -1);
+		padding-left: var(--vs-space-4);
+		padding-right: var(--vs-space-4);
+		overflow-x: auto;
+		overflow-y: hidden;
+		scrollbar-width: none;
+	}
+
+	.vs-crumbs::-webkit-scrollbar {
+		display: none;
+	}
+
+	.vs-crumbs__item {
+		flex: none;
+	}
+
+	/* The fade follows the scroll position instead of being painted once. A        */
+	/* static mask would dim the last crumb's tail even when there is nothing        */
+	/* further to scroll to, which reads as truncated text rather than as more      */
+	/* content. vibe.js sets these two classes.                                     */
+
+	.vs-crumbs.is-overflow-start {
+		mask-image: linear-gradient(to right, transparent 0, #000 var(--vs-space-6));
+	}
+
+	.vs-crumbs.is-overflow-end {
+		mask-image: linear-gradient(to left, transparent 0, #000 var(--vs-space-6));
+	}
+
+	.vs-crumbs.is-overflow-start.is-overflow-end {
+		mask-image: linear-gradient(to right, transparent 0, #000 var(--vs-space-6), #000 calc(100% - var(--vs-space-6)), transparent 100%);
+	}
 }
 
 /* --------------------------------------------------------------- ≤ 359 px */

@@ -1206,4 +1206,35 @@
 
         closeDisclosures(null);
     });
+
+    /* The breadcrumb trail is a single scrolling row below 576px. Two things
+       need script. It opens scrolled to its end, because where the shopper
+       actually is matters more than where the tree starts, and dragging
+       right-to-left then walks back up. And the edge fade has to follow the
+       scroll rather than be painted once - a fixed mask dims the last crumb's
+       tail even when there is nothing further to reach.
+
+       scrollWidth is read again on load and on resize: web fonts land after
+       this footer script runs and change every crumb's width. */
+    (function () {
+        var trail = document.querySelector('.vs-crumbs');
+        if (!trail) return;
+
+        function syncFade() {
+            var max = trail.scrollWidth - trail.clientWidth;
+            var scrollable = max > 1;
+            trail.classList.toggle('is-overflow-start', scrollable && trail.scrollLeft > 1);
+            trail.classList.toggle('is-overflow-end', scrollable && trail.scrollLeft < max - 1);
+        }
+
+        function toEnd() {
+            trail.scrollLeft = trail.scrollWidth;
+            syncFade();
+        }
+
+        toEnd();
+        window.addEventListener('load', toEnd);
+        trail.addEventListener('scroll', syncFade, {passive: true});
+        window.addEventListener('resize', syncFade);
+    }());
 }());
