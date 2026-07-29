@@ -1530,6 +1530,12 @@ body.hc-nav-open {
 	text-decoration: none;
 }
 
+/* Currency, language, phone and email were 13px and muted while the rows      */
+/* above them were 15px and full contrast. Same height, same rail, dimmer text  */
+/* reads as disabled rather than as secondary - and none of them is secondary   */
+/* to "Бренди". They carry no size/color rule of their own now, so they fall    */
+/* back to this rule's color and font-size like every other row.                */
+
 .hc-offcanvas-nav .nav-item {
 	position: relative;
 	display: flex;
@@ -1861,6 +1867,13 @@ body.hc-nav-open {
 /* touched by this rule's cascade unless repeated, and column would stack the   */
 /* logo and the close button instead of placing them side by side.              */
 
+/* The panel scrolls (.nav-wrapper-0 > .nav-content, above) and this header row */
+/* was position: static inside it, so at short landscape heights the row - and  */
+/* the only close control the menu has - scrolled out of view with the rest of  */
+/* the list. sticky keeps it pinned to the top of the scroll container instead; */
+/* the earlier ul.top-nav rule already sets an opaque background-color, so the  */
+/* rows scrolling underneath do not show through.                               */
+
 .hc-offcanvas-nav ul.top-nav {
 	display: flex;
 	flex-direction: row;
@@ -1868,10 +1881,26 @@ body.hc-nav-open {
 	justify-content: space-between;
 	gap: var(--vs-space-3);
 	padding: var(--vs-space-3) var(--vs-space-5);
+	position: sticky;
+	top: 0;
+	z-index: 1;
 }
 
 .hc-offcanvas-nav ul.top-nav > li {
 	flex: none;
+}
+
+/* The logo is optional (mobile_menu.tpl:3 wraps it in an {if}), but the {if}    */
+/* sits inside the <li>, not around it - the template cannot drop the <li>      */
+/* itself without also losing the row hc-offcanvas-nav needs to place the close */
+/* control in. With no logo the library still builds a row for that empty <li>: */
+/* it emits `<span class="nav-item">` rather than emitting nothing, and that    */
+/* span then picks up .nav-item's min-height and border-bottom as a bare grey   */
+/* stub. Hiding it here is the fix; the row really is :empty, since the         */
+/* library's content collector already drops whitespace-only text nodes.       */
+
+.hc-offcanvas-nav ul.top-nav .nav-item:empty {
+	display: none;
 }
 
 /* The shop can run with no logo configured (mobile_menu.tpl:3 wraps it in an   */
@@ -1916,11 +1945,6 @@ body.hc-nav-open {
 	width: auto;
 	text-indent: 0;
 }
-
-/* Currency, language, phone and email were 13px and muted while the rows      */
-/* above them were 15px and full contrast. Same height, same rail, dimmer text  */
-/* reads as disabled rather than as secondary - and none of them is secondary   */
-/* to "Бренди". They inherit the list's one scale now.                          */
 
 .hc-offcanvas-nav ul.bottom-nav {
 	display: flex;
