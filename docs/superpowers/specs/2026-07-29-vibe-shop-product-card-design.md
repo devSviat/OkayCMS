@@ -22,7 +22,19 @@ adjacent cards in the same row, both 412 px tall:
 **The price block is 26 px on a card with no old price and 54 px on one with it.** Everything
 between the price and the actions shifts by 28 px, so the green availability line sits at a
 different height in neighbouring cards. The buttons still line up only because they are pinned
-to the bottom of a stretched grid row. That 28 px is the whole of the "ragged" complaint.
+to the bottom of a stretched grid row.
+
+**Correction, found while implementing this spec: that 28 px is the smaller half.** Sampling six
+cards instead of two shows `.vs-card__name` rendering at 44, 44, 81, 60, 101 and 60 px — up to
+57 px of variance. The title is declared with `-webkit-line-clamp: 2` at `components.css:2561`,
+but that clamp only works with `display: -webkit-box`, and the `TOUCH TARGETS` block at
+`components.css:10399` overrides it with `display: flex`. The clamp has been dead since that
+pass. The computed style still reports `-webkit-line-clamp: 2`, which is why it survived a
+touch-target pass, a whole-branch review and two responsive passes unnoticed.
+
+The same file prescribes the correct shape two rules below the mistake, for `.vs-cart__name`:
+"-webkit-box has to stay - it is what the clamp needs - so the height comes from min-height
+rather than from becoming a flex box." Restoring the clamp is item 5.
 
 Two other things load the card:
 
@@ -95,6 +107,16 @@ worst case found. The starting point is 82 %, but the measurement decides the sh
 frame is among the more expensive effects on a phone. If a scroll trace shows it costing frames
 at 390×844, the effect is dropped rather than shipped slow — a smooth opaque header beats a
 janky translucent one on the device this whole project exists to serve.
+
+**5. Restore the card title's two-line clamp.** Drop `display: flex` and
+`align-items: flex-start` from `components.css:10399-10403`, keeping `min-height: 44px`. The
+base rule at `:2561` already sets `display: -webkit-box`, so the clamp returns and the 44 px
+touch target survives on `min-height` — exactly the shape the neighbouring `.vs-cart__name`
+comment prescribes.
+
+This is the larger half of the alignment problem and it was not in the spec's original
+diagnosis. `.vs-post-card__link` shares the rule; its own clamp must be checked rather than
+assumed, and the blog grid re-measured.
 
 ## Explicitly out of scope
 
