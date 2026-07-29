@@ -2481,8 +2481,16 @@ body.hc-nav-open {
 	flex-direction: column;
 }
 
+/* The glyph sits in the corner, the 44px hit area stays 44px. The button fills  */
+/* the corner box either way; centring its glyph inside it put the heart 12px    */
+/* down and 12px in from the photo's corner while the sticker opposite it was    */
+/* flush, so the two corners of the same photo were set differently. Aligning    */
+/* the content instead of moving the box is what keeps the touch target.         */
+
 .vs-card__tool {
 	position: relative;
+	align-items: flex-start;
+	justify-content: flex-end;
 	border-radius: var(--vs-radius-full);
 	background-color: transparent;
 	box-shadow: none;
@@ -5713,8 +5721,15 @@ body.hc-nav-open {
 	/* The leading has to come with it. The badge sets line-height to its own font  */
 	/* size, which is fine for one line and clips a descender on two - measured at  */
 	/* 25px of content in a 24px box, the tail of the "д".                          */
+	/*                                                                             */
+	/* The trimmed padding is the same 4px trick the sale badge needs, and for the */
+	/* same reason: on the home rail at 390 the sticker had exactly 97px and       */
+	/* wanted exactly 97, so it wrapped while the catalogue showed it on one line  */
+	/* at the identical viewport. Swiper sizes those cards, the grid does not      */
+	/* reach them. 93 into 97 now, and 375 comes back onto one line too.           */
 
 	.vs-card__badges .vs-badge {
+		padding: 0 var(--vs-space-1-5);
 		white-space: normal;
 		text-align: left;
 		line-height: 1.25;
@@ -10857,6 +10872,19 @@ img.lazy:not(.loaded) {
 /* clip comes from the module's own ratio box, opening it up would let the slide  */
 /* bleed, and 30 x 41.3 on a 38px pitch still clears WCAG 2.5.8 by the spacing    */
 /* rule (24px circles centred on each dot never intersect).                       */
+
+/* The product rails carry no dots. They only ever rendered below 992px - the    */
+/* desktop rule already hid them - and the owner asked for them gone: four grey  */
+/* dots under every rail read as debris rather than as a control. Scoped to      */
+/* .fn_products_slide so the main banner keeps its own, which is a different     */
+/* thing: that one paginates full-bleed slides with nothing else to show them.   */
+/* Worth stating plainly, because it is the cost: with two of five cards in      */
+/* view, overflow: hidden and no peeking third card, the rail now gives no       */
+/* visual sign that it scrolls at all.                                           */
+
+.fn_products_slide .swiper-pagination {
+	display: none;
+}
 
 .swiper-pagination-bullet {
 	position: relative;
