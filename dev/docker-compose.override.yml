@@ -30,3 +30,21 @@ services:
     container_name: ${APP_NAME:?err}-mariadb
     ports:
       - '${BIND_IP:-127.0.0.1}:${MYSQL_PORT:?err}:3306'
+    volumes:
+      # Read-only: this is the seed dump and must never be written back to.
+      - '../1DB_changes/okay_clean.sql:/docker-entrypoint-initdb.d/init.sql:ro'
+
+  db-init:
+    image: mariadb:10.11
+    container_name: ${APP_NAME:?err}-db-init
+    restart: "no"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?err}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?err}
+      DB_INIT_SMTP: ${DB_INIT_SMTP:-1}
+    volumes:
+      - './config/mysql/db-init.sh:/db-init.sh:ro'
+    entrypoint: ["/bin/sh", "/db-init.sh"]

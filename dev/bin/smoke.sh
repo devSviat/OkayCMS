@@ -4,6 +4,9 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
+# shellcheck disable=SC1091
+set -a; . ./.env; set +a
+
 fails=0
 
 # expect_contains <description> <needle> <command...>
@@ -54,6 +57,22 @@ for ext in pdo_mysql mysqli gd zip xsl xmlwriter SimpleXML dom xmlreader curl mb
     expect_contains "extension loaded: $ext" "$ext" \
         docker compose exec -T php85 php -m
 done
+
+echo
+echo "Database"
+expect_contains "the database is on a named volume, not a bind mount" \
+    "volume" \
+    docker inspect -f '{{range .Mounts}}{{.Type}} {{.Destination}}{{"\n"}}{{end}}' "${APP_NAME}-mariadb"
+expect_missing "dev/mysql/DB_data is no longer mounted into the container" \
+    "/var/lib/mysql" \
+    sh -c "docker inspect -f '{{range .Mounts}}{{.Source}} {{.Destination}}{{\"\n\"}}{{end}}' ${APP_NAME}-mariadb | grep bind"
+expect_contains "the admin manager exists with the default password" \
+    '$apr1$8m1u0cp4$' \
+    docker compose exec -T mariadb sh -c \
+    'mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT password FROM ok_managers WHERE login = \"admin\";"'
+expect_contains "the stock MariaDB entrypoint is in use" \
+    "docker-entrypoint.sh" \
+    docker inspect -f '{{json .Config.Entrypoint}}' "${APP_NAME}-mariadb"
 
 echo
 if [ "$fails" -gt 0 ]; then

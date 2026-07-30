@@ -24,7 +24,7 @@ services:
       PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-}
     depends_on:
       mariadb:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "php -r 'exit(0);'"]
       interval: 30s
@@ -62,12 +62,16 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?err}
       MYSQL_DATABASE: ${MYSQL_DATABASE:?err}
     volumes:
-      - './mysql/DB_data:/var/lib/mysql'
-      - './../1DB_changes/okay_clean.sql:/docker-entrypoint-initdb.d/init.sql'
-      - './config/mysql/startup.sh:/always-initdb.d/startup.sh:ro'
-      - './config/mysql/entrypoint.sh:/custom-entrypoint.sh:ro'
-    entrypoint: /custom-entrypoint.sh
-    command: ["mysqld"]
+      - 'db_data:/var/lib/mysql'
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+volumes:
+  db_data:
 
 networks:
   default:
