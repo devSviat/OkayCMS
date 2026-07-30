@@ -10421,6 +10421,18 @@ img.lazy:not(.loaded) {
 	background-color: var(--vs-surface);
 }
 
+/* Every lightbox in the theme is a fancybox one, and fancybox's own stylesheet   */
+/* paints .fancybox-content white with square corners. The pop-up cart inside it  */
+/* already had --vs-radius-lg, but nobody could see it: the white box around it   */
+/* was the same colour and 44px larger on every side. The radius belongs on the   */
+/* element that draws the panel. No overflow: hidden with it - fancybox's own      */
+/* padding keeps content off the corners, and clipping would cut the close button */
+/* fancybox positions at the top right.                                           */
+
+.fancybox-content {
+	border-radius: var(--vs-radius-lg);
+}
+
 .popup {
 	width: 460px;
 	max-width: 100%;
