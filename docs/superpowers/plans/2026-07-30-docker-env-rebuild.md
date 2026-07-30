@@ -925,247 +925,151 @@ leaves the machine, which TEST_INTERNAL_EMAIL alone did not guarantee."
 
 ---
 
-### Task 5: Production profile
+### Task 5: Production profile — REVISED 2026-07-30
+
+> **This section was rewritten after the owner shared `devSviat/broken`, a second
+> OkayCMS deployment that runs production on Dokploy.** The original version
+> published ports, had no persistent storage for runtime-written paths, and had no
+> scheduler. All three were wrong. Decisions taken: support **both** Dokploy and
+> standalone; **add a scheduler service**.
 
 **Files:**
-- Create: `dev/docker-compose.prod.yml`, `dev/config/php/prod/prod.ini`, `config/config.local.prod-example.php`
-- Modify: `.gitignore` (repo root), `dev/bin/smoke.sh`
+- Create: `dev/docker-compose.prod.yml`, `dev/docker-compose.standalone.yml`, `config/config.local.prod-example.php`, `dev/bin/smoke-prod.sh`
+- Modify: `dev/docker-compose.yml` (networks, anchors, volumes), `dev/docker/Dockerfile` (scheduler entrypoint), `.gitignore` (repo root)
+- Note: `dev/config/php/prod/prod.ini` **already exists** — created during Task 1 to make the Dockerfile's prod stage buildable. Do not recreate it.
 
 **Interfaces:**
 - Consumes: the `prod` and `nginx-prod` stages and `Dockerfile.dockerignore` (Task 1); `expect_contains` / `expect_missing` (Task 1).
 
-- [ ] **Step 1: Write the failing check**
+#### 5.1 The data-loss problem this task must solve
 
-Add a separate script `dev/bin/smoke-prod.sh` — these checks build an image rather than talk to the running dev stack, so they do not belong in the main run:
+OkayCMS writes into its own source tree. In production the source tree lives inside
+the image, so anything written at runtime is destroyed on the next deploy unless it
+is mounted. Verified against this repository:
 
-```bash
-#!/usr/bin/env bash
-# Production image checks. Builds the prod image and inspects it; nothing is deployed.
-#   dev/bin/smoke-prod.sh
-set -uo pipefail
-cd "$(dirname "$0")/.."
-set -a; . ./.env; set +a
+| Path | Written by | Tracked in git? | If not persisted |
+| --- | --- | --- | --- |
+| `files/` | product image uploads, resizes | no | **product photos lost** |
+| `backend/files/{export,export_users,import,watermark}` | CSV export/import, watermark upload | no | exports and watermark lost |
+| `cache/` | CSS/JS bundles | no | regenerated — harmless |
+| `compiled/`, `backend/design/compiled/`, `Okay/xml/compiled/` | Smarty | no | regenerated — **use tmpfs** |
+| `Okay/log/` | application log | no | history lost |
+| `design/*/css/theme-settings.css` | `CssConfig`, from the admin theme editor | **yes** | see below — **not** a volume |
+| `design/*/lang/local.*.php` | admin translation editor | **yes** | see below — **not** a volume |
+| `robots.txt` | admin editor | **yes** | see below — **not** a volume |
 
-fails=0
-IMAGE="${APP_NAME}-prod-smoke"
+**The last three stay in the image. Do not mount them.** The owner edits these in
+the IDE, pushes to GitHub, and deploys from there, so git is the source of truth and
+the deployed file must match it. Persisting them in a volume would do real harm: the
+running site would keep a stale copy and silently ignore every subsequent deploy.
 
-echo "Building the prod image"
-if ! docker build --target prod -f docker/Dockerfile -t "$IMAGE" .. ; then
-    echo "FAIL  the prod stage does not build"
-    exit 1
-fi
+The tradeoff that must be written into the README, because it will surprise someone
+otherwise: **editing the theme, translations, or robots.txt through the admin panel
+in production has no lasting effect** — the next deploy overwrites it from git. That
+is deliberate under this workflow, not a bug. Anyone wanting a theme change makes it
+in the repository.
 
-check_absent() {  # check_absent <description> <path>
-    if docker run --rm --entrypoint sh "$IMAGE" -c "test -e '$2'" 2>/dev/null; then
-        printf '  FAIL  %s (%s is present in the image)\n' "$1" "$2"
-        fails=$((fails + 1))
-    else
-        printf '  ok    %s\n' "$1"
-    fi
-}
+One thing to check during implementation rather than assume: the prod stage runs as
+`www-data`, and `design/` is not among the directories chowned in the Dockerfile. If
+the admin theme editor attempts a write there it may fail with a permission error
+rather than failing silently. Find out which it does and record it — a loud failure
+is the better outcome here and worth keeping.
 
-check_present() {  # check_present <description> <path>
-    if docker run --rm --entrypoint sh "$IMAGE" -c "test -e '$2'" 2>/dev/null; then
-        printf '  ok    %s\n' "$1"
-    else
-        printf '  FAIL  %s (%s is missing from the image)\n' "$1" "$2"
-        fails=$((fails + 1))
-    fi
-}
+#### 5.2 Base file changes (`dev/docker-compose.yml`)
 
-echo
-echo "Secrets must not be baked in"
-check_absent "developer database credentials are not in the image" \
-    /var/www/html/config/config.local.php
-check_absent "the dev .env is not in the image" /var/www/html/dev/.env
+Adopted from `broken`, which gets these right:
 
-echo
-echo "Dev settings must not be present"
-check_absent "dev.ini is not in the image" /usr/local/etc/php/custom.d/dev.ini
-check_absent "xdebug.ini is not in the image" /usr/local/etc/php/custom.d/xdebug.ini
-check_present "prod.ini is in the image" /usr/local/etc/php/custom.d/prod.ini
-check_present "dependencies are installed" /var/www/html/vendor/autoload.php
+- **Two networks.** `frontend` (bridge) and `backend` (`internal: true`). `mariadb`
+  joins only `backend`, so it has no route off the host at all. `php85` and the
+  scheduler join both. This replaces the single default network.
+- **A YAML anchor for the shared environment**, `x-php-env: &php-env`, consumed by
+  `php85` and the scheduler so their env cannot drift apart.
+- **Named volumes** for `files`, `backend_files`, `app_cache`, `app_log`.
+- **tmpfs** for `compiled/` and `backend/design/compiled/`, sized as in `broken`
+  (`256m` and `64m`), so Smarty output is cleared on every container recreate.
 
-out=$(docker run --rm --entrypoint sh "$IMAGE" -c 'php -m' 2>&1)
-if printf '%s' "$out" | grep -qi xdebug; then
-    printf '  FAIL  xdebug is absent from the prod image\n'
-    fails=$((fails + 1))
-else
-    printf '  ok    xdebug is absent from the prod image\n'
-fi
+Keep the existing `no-new-privileges`, the real php-fpm listener healthcheck, and
+the `healthcheck.sh --connect --innodb_initialized` probe for MariaDB. Note for
+anyone comparing with `broken`: its MariaDB probe passes the root password on the
+healthcheck command line, which then shows up in `docker inspect`. Ours does not.
 
-docker image rm "$IMAGE" >/dev/null 2>&1
+#### 5.3 Scheduler service
 
-echo
-if [ "$fails" -gt 0 ]; then
-    printf '%d check(s) failed\n' "$fails"
-    exit 1
-fi
-echo "all prod checks passed"
-```
+`./ok scheduler:run` exists and `docs/scheduler.md` documents it, but nothing runs
+it — scheduled tasks simply never fire in production. Add a `scheduler` service on
+the same image as `php85`, following `broken`:
 
-```bash
-chmod +x dev/bin/smoke-prod.sh
-```
+- `supercronic` invoked through `tini` as PID 1, so signals and zombies are handled.
+- A crontab at `/etc/supercronic/crontab` calling `./ok scheduler:run`.
+- Its own healthcheck — the image's php-fpm healthcheck must be overridden, because
+  the scheduler does not listen on 9000. `broken` uses `pgrep -f supercronic`; that
+  proves the process exists, not that jobs run, so treat it as a liveness check and
+  say so in a comment rather than overselling it.
+- Same volumes as `php85` for `files` and `Okay/log`.
 
-- [ ] **Step 2: Run to verify it fails**
+#### 5.4 `docker-compose.prod.yml` — no published ports
 
-```bash
-cd dev && ./bin/smoke-prod.sh
-```
+Dokploy attaches Traefik directly to the container, so production publishes nothing.
+Contents:
 
-Expected: FAIL — `dev/config/php/prod/prod.ini` does not exist yet, so the build itself fails at the `COPY` in the prod stage.
+- `php85` and `scheduler` at `target: prod`, or pulled from a registry with
+  `pull_policy: always` and a version variable. Follow `broken`'s pattern of
+  `${OKAY_VERSION:-latest}` **and copy its warning**: the default must not be `:?`
+  because that breaks the first Dokploy redeploy before env vars exist in the UI —
+  but a production stack that silently runs `:latest` is its own hazard, so the
+  README must say the variable is mandatory in the Dokploy prod environment.
+- The runtime `config.local.php` mounted read-only from outside the image.
+- `restart: unless-stopped`, `deploy.resources.limits`, and a `max-size` logging cap.
+- MariaDB publishes nothing and stays on the `backend` network.
+- An `x-traefik-labels` comment block showing the label shape, with a pointer to
+  `broken`'s working example — do not invent router names, Dokploy generates them.
 
-**This is the check that matters most.** "developer database credentials are not in the image" is the one that would have caught the real bug: `config/config.local.php` is gitignored, but a build context reads the filesystem, so without `Dockerfile.dockerignore` the dev password ships inside any pushed image.
+#### 5.5 `docker-compose.standalone.yml`
 
-- [ ] **Step 3: Write the prod ini**
-
-`dev/config/php/prod/prod.ini`:
-
-```ini
-; Production-only PHP settings, copied into the `prod` image stage.
-; This file is never present in a dev image, and dev.ini is never present here.
-
-error_reporting = E_ALL & ~E_DEPRECATED
-display_errors = Off
-
-; Source files never change inside an image, so revalidation is pure overhead.
-opcache.enable = 1
-opcache.validate_timestamps = 0
-opcache.max_accelerated_files = 20000
-opcache.memory_consumption = 256
-opcache.interned_strings_buffer = 16
-```
-
-- [ ] **Step 4: Write the prod compose file**
-
-`dev/docker-compose.prod.yml`:
-
-```yaml
-# Production overrides. Never loaded automatically — opt in explicitly:
-#
-#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-#
-# Note the absent -f docker-compose.override.yml: the dev overrides (source bind
-# mounts, Xdebug, the seed dump, Mailpit) are simply not part of this stack.
-#
-# Out of scope on purpose, rather than half-built: TLS, backups, a secrets
-# manager. A reverse proxy in front is assumed to terminate HTTPS.
-#
-# Single-node only. Okay\Core\Config derives $salt from stat() of
-# config/config.php — its device id, inode and mtime — and AdminRecoveryToken
-# signs with it. Two replicas built or stored differently disagree on the salt,
-# and every image rebuild invalidates outstanding recovery tokens.
-
-x-logging: &logging
-  driver: json-file
-  options:
-    max-size: "10m"
-    max-file: "3"
-
-services:
-  php85:
-    build:
-      target: prod
-    environment:
-      XDEBUG_MODE: "off"
-    volumes:
-      # Supplied at runtime, never baked into the image. This is where the
-      # unprivileged database account and debug_mode = false are set.
-      - '../config/config.local.prod.php:/var/www/html/config/config.local.php:ro'
-    logging: *logging
-
-  nginx:
-    build:
-      context: ..
-      dockerfile: dev/docker/Dockerfile
-      target: nginx-prod
-    image: ${APP_NAME:?err}-nginx-prod
-    ports:
-      - '${BIND_IP:-127.0.0.1}:${HTTP_PORT:?err}:80'
-    logging: *logging
-
-  mariadb:
-    # No ports published: the database is reachable only over the compose network.
-    logging: *logging
-```
-
-- [ ] **Step 5: Write the runtime config template**
-
-`config/config.local.prod-example.php`:
-
-```php
-;<? exit(); ?>
-
-; Production configuration template. Copy to config/config.local.prod.php,
-; fill in the real values, and keep that copy out of git — the prod compose file
-; mounts it at runtime, and Dockerfile.dockerignore keeps it out of the image.
-
-[database]
-
-db_server = "mariadb"
-
-; Not root. This is the unprivileged account MYSQL_USER creates in dev/.env.
-db_user = "okay"
-db_password = ""
-db_name = "okay"
-
-db_driver = mysql
-db_prefix = ok_
-db_charset = UTF8MB4
-db_names = utf8mb4
-db_sql_mode = "ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
-
-[system]
-
-; The real control over error output. index.php:14 forces display_errors off
-; before anything runs and only this setting turns it back on, so false here
-; means errors are never shown regardless of any php.ini.
-debug_mode = false
-dev_mode = false
-smarty_force_compile = false
-```
-
-Add to the repository root `.gitignore`, next to the existing `config/config.local.php` line:
-
-```
-config/config.local.prod.php
-```
-
-- [ ] **Step 6: Run the checks**
+For a plain host with no Dokploy: adds `ports: ['${BIND_IP:-127.0.0.1}:${HTTP_PORT}:80']`
+to nginx and nothing else. Documented invocation:
 
 ```bash
-cd dev && ./bin/smoke-prod.sh
+docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.standalone.yml up -d
 ```
 
-Expected: PASS on every check. If "developer database credentials are not in the image" fails, BuildKit did not read the per-Dockerfile ignore file — move it with `git mv dev/docker/Dockerfile.dockerignore .dockerignore` and re-run.
+#### 5.6 Secrets
 
-- [ ] **Step 7: Confirm the full prod stack builds**
+Use Docker secrets with the image's `*_FILE` convention for `MYSQL_ROOT_PASSWORD`
+and `MYSQL_PASSWORD` — plain `environment:` values are visible to anyone who can run
+`docker inspect`, which was demonstrated on the running stack. `secrets:` with a
+`file:` source works in plain Compose; Swarm is not required.
 
-```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml build
-```
+State the limit honestly in the README: this protects the MariaDB container's own
+credentials. It does **not** protect the application's database password, because
+OkayCMS reads that from `config/config.local.php`, not from the environment. For
+that file the guidance is `chmod 600`, owned by the deploy user, mounted read-only,
+and excluded from the build context — the exclusion is already done and verified.
 
-Expected: all three images build. Do **not** claim the prod profile runs — it is not deployed anywhere and that is not being tested.
+#### 5.7 Steps
 
-- [ ] **Step 8: Commit**
-
-```bash
-git add -A dev config/config.local.prod-example.php .gitignore
-git -c user.name=devSviat -c user.email=devsviat@proton.me commit -m "build(docker): add an opt-in production profile
-
-Production reads its database credentials from config/config.local.php
-like dev does. That file is gitignored, but a build context reads the
-filesystem rather than git, so a naive COPY would bake the developer's
-password into a pushed image; the dockerignore keeps it out and the prod
-compose file supplies the file at runtime instead.
-
-smoke-prod.sh asserts exactly that, along with the absence of dev.ini and
-xdebug from the image. The profile is single-node: Config::salt is
-derived from stat() of config/config.php."
-```
-
----
+- [ ] **Step 1: Write the failing check** — extend `dev/bin/smoke-prod.sh` (create it
+      per the original Task 5 text, which still stands) with assertions that the prod
+      image contains no `config/config.local.php`, no `dev/.env`, no `dev.ini`, no
+      xdebug, and that `prod.ini` is present. Add one further assertion: that the
+      composed prod config publishes **no** ports —
+      `docker compose -f docker-compose.yml -f docker-compose.prod.yml config` must
+      contain no `published:` entry.
+- [ ] **Step 2: Run it, watch it fail.**
+- [ ] **Step 3:** base-file changes from 5.2.
+- [ ] **Step 4:** scheduler service and its crontab from 5.3.
+- [ ] **Step 5:** `docker-compose.prod.yml` from 5.4.
+- [ ] **Step 6:** `docker-compose.standalone.yml` from 5.5.
+- [ ] **Step 7:** secrets from 5.6, and `config/config.local.prod-example.php`.
+- [ ] **Step 8:** run `dev/bin/smoke-prod.sh`; then confirm the **dev** stack still
+      passes `dev/bin/smoke.sh` after the base-file changes — the two networks and the
+      new volumes touch dev as well, and that is the likeliest place to break
+      something.
+- [ ] **Step 9:** verify persistence for real, which is the point of 5.1: bring up the
+      standalone prod stack, upload an image through the admin panel, change a theme
+      colour, then `docker compose down && up -d` and confirm **both** survived.
+      A passing config check is not evidence that data persists.
+- [ ] **Step 10: Commit.**
 
 ### Task 6: Documentation
 
