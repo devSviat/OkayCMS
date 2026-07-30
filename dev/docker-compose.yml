@@ -54,6 +54,10 @@ services:
       # (APP_UID/APP_GID) or PHP cannot write its own compiled templates.
       - "/var/www/html/compiled:size=256m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
       - "/var/www/html/backend/design/compiled:size=64m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
+      # OpenSearchController::renderXml() compiles into Okay/xml/compiled at
+      # runtime (see .gitignore: only .keep_folder is tracked there) — same
+      # regenerate-on-demand reasoning as the two tmpfs entries above.
+      - "/var/www/html/Okay/xml/compiled:size=16m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
     security_opt:
       - "no-new-privileges:true"
     healthcheck:

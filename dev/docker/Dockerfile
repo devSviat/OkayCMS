@@ -81,8 +81,8 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY . /var/www/html
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress \
  && composer clear-cache \
- && mkdir -p compiled cache files backend/files backend/design/compiled Okay/log \
- && chown -R www-data:www-data vendor compiled cache files backend/files backend/design/compiled Okay/log
+ && mkdir -p compiled cache files backend/files backend/design/compiled Okay/log Okay/xml/compiled \
+ && chown -R www-data:www-data vendor compiled cache files backend/files backend/design/compiled Okay/log Okay/xml/compiled
 
 USER www-data
 
