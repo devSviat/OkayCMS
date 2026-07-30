@@ -193,6 +193,19 @@ expect_missing "nginx no longer writes into the repository" \
     docker compose exec -T nginx cat /etc/nginx/conf.d/okay.conf
 
 echo
+echo "Mail"
+expect_contains "mail() is routed to Mailpit via msmtp" \
+    "msmtp" \
+    docker compose exec -T php85 php -r 'echo ini_get("sendmail_path");'
+expect_contains "the SMTP settings point at Mailpit" \
+    "mailpit" \
+    docker compose exec -T mariadb sh -c \
+    'mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT value FROM ok_settings WHERE param = \"smtp_server\";"'
+expect_contains "a message sent from PHP arrives in Mailpit" \
+    '"total":1' \
+    sh -c "docker compose exec -T php85 php -r 'mail(\"smoke@example.com\", \"smoke test\", \"body\");' ; sleep 2 ; curl -sS http://127.0.0.1:${MAILPIT_PORT:-8025}/api/v1/messages?limit=1"
+
+echo
 if [ "$fails" -gt 0 ]; then
     printf '%d check(s) failed\n' "$fails"
     exit 1
