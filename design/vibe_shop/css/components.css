@@ -10718,6 +10718,55 @@ img.lazy:not(.loaded) {
 	.form__placeholder {
 		margin-bottom: var(--vs-space-1);
 	}
+
+/* The order button is the one control on the checkout that has to be reachable  */
+/* without hunting. Once the summary moves beside the fields (see the short-and- */
+/* wide block) it starts at y=134 and its own bottom - the button - lands at     */
+/* 447 on a 390px screen: the total is visible, the button is 57px under the     */
+/* fold. 27px of that comes from the page title above it and 36 from the         */
+/* summary's own frame, which puts the button at 384 and the whole summary on    */
+/* the first screen. No field, row or button loses height.                       */
+
+	.vs-checkout__title {
+		margin-bottom: var(--vs-space-2);
+		font-size: var(--vs-text-xl);
+	}
+
+	.vs-summary {
+		padding: var(--vs-space-3);
+	}
+
+	.vs-summary__title {
+		margin-bottom: var(--vs-space-2);
+	}
+
+	.vs-summary__row--total {
+		margin-top: var(--vs-space-1);
+	}
+
+	.vs-summary__submit {
+		margin-top: var(--vs-space-3);
+	}
+
+/* The promo field goes below the button. It is 106px of the summary and it sat  */
+/* first, between the title and the totals, because .vs-summary__coupon is       */
+/* display: contents and .vs-coupon therefore lands at order 0 in the explicit   */
+/* sequence above. On a 390px screen that 106px is what kept the order button    */
+/* under the fold; moved to the end it puts the button at 292 with its bottom at */
+/* 344, so the total and the button are both on the first screen. Nothing is     */
+/* hidden - a shopper with a code scrolls one panel for it, a shopper without    */
+/* one stops needing to scroll at all. The divider moves to the top edge so it   */
+/* still separates the block from the button now above it.                       */
+
+	.vs-checkout .vs-coupon {
+		order: 6;
+		margin-top: var(--vs-space-3);
+		margin-bottom: 0;
+		padding-top: var(--vs-space-3);
+		padding-bottom: 0;
+		border-top: 1px solid var(--vs-hairline);
+		border-bottom: 0;
+	}
 }
 
 /* ------------------------------------------------ short and wide: phone in landscape */
@@ -10806,6 +10855,42 @@ img.lazy:not(.loaded) {
 
 	.vs-pdp__meta {
 		margin-top: 0;
+	}
+
+/* The checkout, same trade again. .vs-cart already has exactly two children -   */
+/* the fields and the summary - and a two-column shape from 992px up, so nothing */
+/* new has to be built: the existing tracks just never reached a phone on its    */
+/* side. Stacked, the summary sat 2043px down a 2561px page, which put the total */
+/* and the order button six screens from the top. Beside the fields they are on  */
+/* the first screen instead.                                                     */
+/*                                                                              */
+/* Deliberately NOT sticky here, unlike the 992px rule. The summary is 385px     */
+/* tall and the viewport is 390: pinned at a 16px offset its own bottom - the    */
+/* submit button - would sit below the fold and stay there however far the page  */
+/* scrolled. In the right column's normal flow it is visible from the start.     */
+
+	.vs-cart {
+		grid-template-columns: minmax(0, 1fr) 280px;
+		gap: var(--vs-space-5);
+	}
+
+/* The line goes back to two rows, which is the shape it has below 768px. The    */
+/* single-row version above that width sizes the stepper and the line total from */
+/* their content and hands the remainder to the name, and the remainder here is  */
+/* 60px of a 480px line - the price under "Диван RedKing" broke across three     */
+/* lines. That is a consequence of the two-column cart above, not a pre-existing */
+/* bug: until the summary moved sideways the main column had the whole page.     */
+/* The total shares the second row with the stepper, as it does on a phone.      */
+
+	.vs-cart__line:not(.vs-cart__line--compact):not(.vs-cart__line--static) {
+		grid-template-columns: 72px minmax(0, 1fr) 44px;
+		grid-template-areas: "thumb info remove" "qty qty qty";
+		align-items: start;
+		gap: var(--vs-space-3);
+	}
+
+	.vs-cart__line:not(.vs-cart__line--compact):not(.vs-cart__line--static) .vs-cart__linetotal {
+		grid-area: qty;
 	}
 
 }
