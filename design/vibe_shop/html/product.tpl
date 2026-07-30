@@ -579,11 +579,16 @@
 {if $related_posts}
     <section class="vs-section">
         <h2 class="vs-section__title" data-language="product_related_post">{$lang->product_related_post}</h2>
-        <div class="fn_articles_slide article_list f_row no_gutters">
+        {* .vs-posts, the same track the home page, the blog index and an author
+           page use. This block was the one caller still on the legacy
+           `f_row no_gutters` + `f_col-*` wrappers, and no_gutters is exactly what
+           it says: the columns had no padding and nothing replaced it, so two
+           cards sat edge to edge with no gap at any width. The wrapper divs go
+           with it - the grid has to see the cards themselves for `align-items:
+           stretch` and for `.vs-posts > .vs-post-card:only-child` to apply. *}
+        <div class="fn_articles_slide vs-posts vs-posts--related">
             {foreach $related_posts as $r_p}
-                <div class="article_item no_hover f_col-sm-6 f_col-md-6 f_col-lg-3 f_col-xl-3">
-                    {include 'post_list.tpl' post = $r_p}
-                </div>
+                {include 'post_list.tpl' post = $r_p}
             {/foreach}
         </div>
     </section>

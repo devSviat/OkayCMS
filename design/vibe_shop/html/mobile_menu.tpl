@@ -170,25 +170,13 @@
 
 
 
-{$social_icons = [
-    'facebook' => 'social_facebook',
-    'instagram' => 'social_instagram',
-    'telegram' => 'social_telegram',
-    't' => 'social_telegram',
-    'youtube' => 'social_youtube',
-    'youtu' => 'social_youtube',
-    'tiktok' => 'social_tiktok',
-    'twitter' => 'social_x',
-    'x' => 'social_x',
-    'linkedin' => 'social_linkedin'
-]}
 <ul class="bottom-nav">
     {foreach $settings->site_social_links as $social_link}
     {$social_domain = preg_replace('~(https?://)?(www\.)?([^\.]+)?\..*~', '$3', $social_link)}
     {if $social_domain}
     <li>
         <a href="{if !preg_match('~^https?://.*$~', $social_link)}https://{/if}{$social_link|escape}" target="_blank" rel="noreferrer" title="{$social_domain|escape}">
-            {include file="svg.tpl" svgId=$social_icons[$social_domain]|default:'social_link'}
+            {include file="social_icon.tpl" domain=$social_domain}
             <span class="vs-sr-only">{$social_domain|escape}</span>
         </a>
     </li>

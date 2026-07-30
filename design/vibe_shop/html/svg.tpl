@@ -657,6 +657,12 @@
         <path d="M11.2 15.2a1.6 1.6 0 0 0 -3.2 0a1.6 1.6 0 0 0 3.2 0V3.2h4q1.6 4 4.8 4v4q-3.2 0 -4.8 -1.6v5.6a5.6 5.6 0 1 1 -4 -5.36"/>
     </svg>
 {/if}
+{if $svgId == "social_whatsapp"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/>
+        <path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/>
+    </svg>
+{/if}
 {if $svgId == "social_x"}
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
         <path d="M4 4l11.733 16h4.267l-11.733 -16z"/>

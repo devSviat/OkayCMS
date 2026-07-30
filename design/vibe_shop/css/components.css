@@ -2292,18 +2292,30 @@ body.hc-nav-open {
 	gap: var(--vs-space-2);
 }
 
+/* A glyph in a 44px circle, the same control the mobile menu's social row is,     */
+/* rather than the network's name in a pill. The name is not gone - it is in the    */
+/* title attribute and in a .vs-sr-only span, which is what keeps the link with an  */
+/* accessible name. font-size: 0 so the whitespace between the glyph and that span  */
+/* cannot widen the circle by a space character.                                   */
+
 .vs-social__link {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
+	width: 44px;
 	min-height: 44px;
-	padding: 0 var(--vs-space-4);
+	padding: 0;
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-full);
 	color: var(--vs-text);
-	font-size: var(--vs-text-sm);
+	font-size: 0;
 	text-decoration: none;
-	text-transform: capitalize;
 	transition: background-color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-social__link svg {
+	width: 20px;
+	height: 20px;
 }
 
 .vs-social__link:hover {
@@ -2537,11 +2549,19 @@ body.hc-nav-open {
 	background-color: var(--vs-surface);
 	box-shadow: var(--vs-shadow-1);
 	color: var(--vs-text);
-	font-size: var(--vs-text-xs);
+	font-size: var(--vs-text-2xs);
 	font-weight: 600;
 	line-height: 1;
 	white-space: nowrap;
 }
+
+/* --vs-text-2xs and not --vs-text-xs. The owner wanted the badge smaller on a    */
+/* small phone, where "Топ продажів" and a discount sit on the same photo, and    */
+/* moving the xs step down to 0.7rem did that - but xs also carries the struck    */
+/* comparison price, stock lines, chips, crumbs, post meta and spec hints, so     */
+/* every one of them shrank with it. A step below xs costs one token and leaves   */
+/* the scale intact; the badge is the only thing on it, and the 600 weight is     */
+/* what keeps it legible at 11.2px.                                              */
 
 .vs-badge--sale {
 	background-color: var(--vs-sale-500);
@@ -2773,18 +2793,23 @@ body.hc-nav-open {
 	font-variant-numeric: tabular-nums;
 }
 
-/* The reserved comparison tier, above the current price. Its min-height is one  */
-/* line of its own type at its own leading, so the number comes from the scale   */
-/* rather than from a measurement that would rot the first time a token moves.   */
-/* The leading is tightened to 1.25 from the body's 1.55 deliberately: on a card */
-/* without a discount this line is empty, and every point of leading in it is    */
-/* dead air the owner asked to get back. 15px reserved instead of 20.            */
+/* The reserved comparison tier, above the current price. Its min-height is the   */
+/* tallest thing that can sit in it, taken from the scale rather than from a      */
+/* measurement that would rot the first time a token moves. The leading is        */
+/* tightened to 1.25 from the body's 1.55 deliberately: on a card without a       */
+/* discount this line is empty, and every point of leading in it is dead air the  */
+/* owner asked to get back. 15.2px reserved instead of 20.                        */
+/*                                                                              */
+/* That tallest thing is now the sale badge - its own type plus the 2px of        */
+/* vertical padding it was given - and not the struck price's line box, which is  */
+/* 15. Reserving the badge's box is what keeps a card with a discount and a card  */
+/* without one exactly the same height.                                          */
 
 .vs-card__price_second {
 	display: flex;
 	align-items: baseline;
 	gap: var(--vs-space-2);
-	min-height: calc(var(--vs-text-xs) * 1.25);
+	min-height: calc(var(--vs-text-2xs) + 4px);
 	line-height: 1.25;
 }
 
@@ -2822,14 +2847,32 @@ body.hc-nav-open {
 }
 
 /* On the price tier rather than over the photograph, so the percentage sits    */
-/* next to the number it modifies. Smaller and tighter than the corner badges,  */
-/* which have to read against arbitrary shop photography.                       */
+/* next to the number it modifies. Tighter than the corner badges, which have   */
+/* to read against arbitrary shop photography - the difference is the padding    */
+/* and the dropped min-height, not the type size. It used to restate             */
+/* font-size: var(--vs-text-xs), which was the base value written twice; once    */
+/* the badge moved to --vs-text-2xs that restatement made the tier's badge the   */
+/* LARGER of the two, which is the opposite of what this rule is for.            */
+
+/* 2px above and below, not a --vs-space step: the smallest one is 4px and that   */
+/* makes the pill 19px against a 12px struck price beside it, which is a badge    */
+/* taller than the row it annotates. 2px is enough for the fill to read as a      */
+/* pill, and it also ends a 1px clip that had been there since the badge moved    */
+/* onto this tier - line-height: 1 gives the box the font size while the glyphs    */
+/* need slightly more, so "-8 %" reported 12px of ink in an 11px box.             */
+
+/* align-self, because the tier aligns on the baseline and a padded badge brings   */
+/* its padding into that alignment: the badge's text baseline meets the struck     */
+/* price's, which lifts the badge's box 2px above the price's line and made the    */
+/* tier 16.2 next to a discount with a struck price and 15.2 next to one without.  */
+/* Centring the badge takes it out of the baseline calculation, so the tier is one */
+/* height everywhere and the current price below it lines up across the row.       */
 
 .vs-card__price_second .vs-badge--sale {
 	flex: none;
+	align-self: center;
 	min-height: 0;
-	padding: 0 var(--vs-space-1-5);
-	font-size: var(--vs-text-xs);
+	padding: 2px var(--vs-space-1-5);
 }
 
 /* The guarantee, not the budget. The struck price is the one thing in this row  */
@@ -4988,14 +5031,39 @@ body.hc-nav-open {
 	color: var(--vs-text);
 }
 
-/* The network name carries the button, the way .vs-socials already does. The   */
-/* logo element is jsSocials' <i class="fa fa-*"> and this theme ships no icon  */
-/* font, so it would be an empty inline box - removed rather than left to       */
-/* collapse. Kept as a rule so a custom social configured with a real image URL */
-/* (jsSocials emits <img> for those) is still suppressed instead of half-shown. */
+/* The brand glyph carries the button, the owner's call - it used to be the       */
+/* network's name, because jsSocials' own logo is a Font Awesome <i> and this     */
+/* theme ships no icon font. scripts.tpl blanks that class and puts the theme's   */
+/* own SVG inside the element instead, so the box finally has something to show.  */
+/* :empty is the fallback and the reason nothing had to be guessed about the      */
+/* admin-editable network list: a share whose network has no glyph here keeps its */
+/* text label and its element stays hidden, exactly as before.                    */
+
+/* An explicit box, because the library sizes this element in em: jssocials.css   */
+/* ships `.jssocials-share-logo { width: 1em; font-size: 1.5em }` and it loads    */
+/* after this file. A font-size: 0 here to swallow the whitespace around the glyph */
+/* turned that 1em into zero and the buttons rendered as empty circles - the       */
+/* metric was clean, the SVG was in the DOM, and it measured 0 wide. The glyph     */
+/* fills the box instead of carrying its own size, so nothing the library says     */
+/* about width can reach it.                                                      */
 
 .vs-share .jssocials-share .jssocials-share-logo {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 20px;
+	height: 20px;
+	color: var(--vs-text);
+}
+
+.vs-share .jssocials-share .jssocials-share-logo:empty {
 	display: none;
+}
+
+.vs-share .jssocials-share .jssocials-share-logo svg {
+	width: 100%;
+	height: 100%;
 }
 
 .vs-share .jssocials-share .jssocials-share-label {
@@ -5004,6 +5072,26 @@ body.hc-nav-open {
 	line-height: 1;
 	text-transform: capitalize;
 	white-space: nowrap;
+}
+
+/* Clipped, not removed: it is the button's accessible name, and a link whose only */
+/* content is a glyph has none. Same technique as .vs-sr-only, restated here       */
+/* because the element is jsSocials' and cannot be given that class.               */
+
+.vs-share .jssocials-share.vs-share--glyph .jssocials-share-link {
+	width: 44px;
+	padding: 0;
+}
+
+.vs-share .jssocials-share.vs-share--glyph .jssocials-share-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	border: 0;
 }
 
 /* -------------------------------------------------------------- sticky buy */
@@ -5901,10 +5989,20 @@ body.hc-nav-open {
 		left: calc(-1 * var(--vs-space-4));
 		right: calc(-1 * var(--vs-space-4));
 		display: none;
-		padding: var(--vs-space-2) var(--vs-space-4) var(--vs-space-3);
+		padding: var(--vs-space-3) var(--vs-space-4);
 		border-bottom: 1px solid var(--vs-hairline);
 		background-color: var(--vs-surface);
 		box-shadow: var(--vs-shadow-2);
+	}
+
+/* .vs-search is the containing block for its own submit button, so the padding   */
+/* above pushes that button off the field it belongs to: the glyph slid to the    */
+/* screen edge, outside the field's rounded corner. The inset has to carry the     */
+/* padding with it. Vertically nothing is needed here - the ≤991px block centres   */
+/* this button on the field for its own reason.                                   */
+
+	.vs-search__submit {
+		right: calc(var(--vs-space-4) + 3px);
 	}
 
 	.vs-informers__slot--secondary {
@@ -5950,8 +6048,11 @@ body.hc-nav-open {
 		gap: var(--vs-space-1);
 	}
 
+	/* The shorthand, so the 2px above and below has to be restated here or the      */
+	/* phone loses it - which is exactly what happened the first time round.         */
+
 	.vs-card__price_second .vs-badge--sale {
-		padding: 0 var(--vs-space-1);
+		padding: 2px var(--vs-space-1);
 	}
 
 	/* Two-up at 360 and 375 leaves the corner sticker 86-94px beside the tools     */
@@ -8155,6 +8256,21 @@ body.hc-nav-open {
 
 .vs-posts > .vs-post-card:only-child {
 	max-width: 420px;
+}
+
+/* The product page's related posts are four fixed tracks on the desktop, the     */
+/* owner's call. auto-fit gives whatever exists the whole row, which is right for */
+/* the blog index and the home rail but not here: two related posts became two    */
+/* 666px cards with 416px-tall photographs, larger than the product's own gallery */
+/* thumbnails. Four tracks put them at the width the home page's news cards       */
+/* already have and leave the empty slots empty. Only from 992px - below that the */
+/* shared auto-fit rule still does the right thing, two up on a tablet and one    */
+/* on a phone.                                                                    */
+
+@media (min-width: 992px) {
+	.vs-posts--related {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
 }
 
 /* ------------------------------------------------------ shop advantages strip */
@@ -11409,9 +11525,17 @@ img.lazy:not(.loaded) {
 /* 38 coming from a 3px inset on both sides of a 44px-tall .vs-search. Growing   */
 /* it here keeps the fix inside the 60px header bar with room to spare, and     */
 /* leaves the >991 desktop bar untouched, same as every other rule above.       */
+/*                                                                             */
+/* 44px does not fit between a 3px top and a 3px bottom inset of a 44px field,  */
+/* and min-height wins that argument, so the button grew downwards and hung 3px */
+/* below the field it sits in. Centring instead of insetting is what makes a    */
+/* 44px control coincide with a 44px field exactly.                             */
 
 	.vs-search__submit {
+		top: 50%;
+		bottom: auto;
 		min-height: 44px;
+		transform: translateY(-50%);
 	}
 }
 

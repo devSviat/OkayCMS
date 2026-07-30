@@ -272,8 +272,15 @@
                             <div class="vs-social">
                                 <span class="vs-social__label" data-language="index_in_networks">{$lang->index_in_networks}</span>
                                 <div class="vs-social__list">
+                                    {* Glyph plus a clipped name, not the name as the label: the
+                                       title attribute states the network on hover and .vs-sr-only
+                                       states it to a screen reader, so the button keeps an
+                                       accessible name that a bare icon link would not have. *}
                                     {foreach $site_social as $social}
-                                        <a class="vs-social__link" rel="noreferrer" href="{if !preg_match('~^https?://.*$~', $social.url)}https://{/if}{$social.url|escape}" target="_blank" title="{$social.domain|escape}">{$social.domain|escape}</a>
+                                        <a class="vs-social__link" rel="noreferrer" href="{if !preg_match('~^https?://.*$~', $social.url)}https://{/if}{$social.url|escape}" target="_blank" title="{$social.domain|escape}">
+                                            {include file="social_icon.tpl" domain=$social.domain}
+                                            <span class="vs-sr-only">{$social.domain|escape}</span>
+                                        </a>
                                     {/foreach}
                                 </div>
                             </div>
@@ -315,6 +322,19 @@
     <div class="fn_mobile_menu hidden">
         {include file="mobile_menu.tpl"}
     </div>
+
+    {* Glyphs for the share pills. jsSocials builds those buttons in JS and its own
+       logo is a Font Awesome <i>, which this theme has no font for - so scripts.tpl
+       lifts the matching glyph out of here instead. A bank rather than data URIs in
+       the stylesheet: svg.tpl stays the one place the art lives, and the list is
+       built from the same setting the buttons are, so it can never fall behind it. *}
+    {if $settings->sj_shares}
+        <div id="fn_share_icons" class="hidden" aria-hidden="true">
+            {foreach $settings->sj_shares as $vsShare}
+                <span data-vs-share-icon="{$vsShare|escape}">{include file="social_icon.tpl" domain=$vsShare}</span>
+            {/foreach}
+        </div>
+    {/if}
 
     {* Форма зворотного дзвінка *}
     {include file='callback.tpl'}
