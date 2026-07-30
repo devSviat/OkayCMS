@@ -143,18 +143,23 @@ BIND_IP=0.0.0.0
 і перезапустіть `docker compose up -d` — рекреейт торкнеться лише сервісів,
 які публікують порти (`nginx`, `mailpit`).
 
-`MYSQL_PORT` в `.env` при цьому нічого не відкриває: `mariadb` сидить лише в
-мережі `backend`, яка навмисно `internal: true` (без маршруту з контейнера
-назовні — щоб база не мала мережевого доступу в інтернет). Docker у
-принципі не вміє публікувати порт контейнера, чия єдина мережа internal —
-NAT-правило для цього порту просто не створюється, незалежно від `BIND_IP`
-(перевірено: `nc -zv 127.0.0.1 3306` дає `Connection refused`, і в
-`iptables -t nat -L DOCKER` немає жодного правила на 3306). Щоб зайти в базу
-з хоста, використовуйте не публікацію порту, а сам контейнер:
+`MYSQL_PORT` працює так само, як порти nginx і Mailpit вище — база доступна з
+хоста на `${BIND_IP:-127.0.0.1}:${MYSQL_PORT}`, тож DBeaver, вбудований
+Database tool у PHPStorm чи звичайний `mariadb`-клієнт підключаються напряму:
 
 ```bash
-docker compose exec mariadb mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"
+mariadb -h 127.0.0.1 -P "$MYSQL_PORT" -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"
 ```
+
+Це навмисний виняток лише для розробки. У базовому файлі (`docker-compose.yml`)
+`mariadb` сидить лише в мережі `backend`, яка `internal: true` (без маршруту з
+контейнера назовні) — і саме так лишається в проді (`docker-compose.prod.yml`
+нічого тут не змінює, порт лишається неопублікованим). Docker не вміє
+публікувати порт контейнера, чия єдина мережа internal — NAT-правило просто не
+створюється незалежно від `BIND_IP`. Тому `docker-compose.override.yml`
+(діє лише в dev) додатково підключає `mariadb` ще й до мережі `frontend`, яка
+має маршрут на хост — це і відкриває опублікований порт. Прод-ізоляція від
+цього не страждає: `docker-compose.prod.yml` override.yml не використовує.
 
 ## Scheduler
 

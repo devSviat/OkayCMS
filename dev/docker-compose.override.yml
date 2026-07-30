@@ -46,6 +46,18 @@ services:
       - '..:/var/www/html'
 
   mariadb:
+    # The base file puts mariadb on `backend` only (internal: true — no route
+    # off the host), which is correct for prod but means the published port
+    # below would be a silent no-op: Docker never creates a NAT rule for a
+    # container on an internal-only network, so nothing reaches it even
+    # though `docker compose config` still shows the port mapping. Dev needs
+    # a developer to be able to point DBeaver/PHPStorm/etc. at this database,
+    # so here — dev only — mariadb also joins `frontend`, which has a real
+    # route to the host. The base file and docker-compose.prod.yml are
+    # untouched: prod still gets mariadb on `backend` only, unpublished.
+    networks:
+      - backend
+      - frontend
     ports:
       - '${BIND_IP:-127.0.0.1}:${MYSQL_PORT:?err}:3306'
     volumes:

@@ -182,30 +182,37 @@ expect_contains "the admin manager exists with the default password" \
     '$apr1$8m1u0cp4$' \
     docker compose exec -T mariadb sh -c \
     'mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT password FROM ok_managers WHERE login = \"admin\";"'
+# Real client query from the host, not just a TCP handshake: this is the
+# thing DBeaver/PHPStorm actually need to work, and it silently regresses if
+# mariadb ever loses its (dev-only) frontend attachment or its published
+# port, without any container-side check noticing. See
+# docker-compose.override.yml's mariadb.networks comment for why dev
+# deliberately differs from the base file/prod here.
+expect_contains "mariadb is reachable from the host, not just from inside a container" \
+    "ok_managers" \
+    docker run --rm --network host mariadb:10.11 mariadb \
+    -h 127.0.0.1 -P "${MYSQL_PORT}" -uroot -p"${MYSQL_ROOT_PASSWORD}" \
+    -e "SHOW TABLES LIKE 'ok_managers';" "${MYSQL_DATABASE}"
 
 echo
 echo "Network segmentation"
 backend_net="${NETWORK_NAME}-backend"
-frontend_net="${NETWORK_NAME}-frontend"
 expect_contains "the backend network is internal (no route off the host)" \
     "true" \
     docker network inspect "$backend_net" --format '{{.Internal}}'
 expect_contains "mariadb is attached to the backend network" \
     "$backend_net" \
     docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$mariadb_cid"
-expect_missing "mariadb is not attached to the frontend network" \
-    "$frontend_net" \
-    docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$mariadb_cid"
-# Topology proves mariadb was never wired to frontend; this proves the
-# isolation actually holds at the DNS/routing level too, not just on paper.
-# nginx is frontend-only, so it is the control: it must still resolve php85
-# (also on frontend) while failing to resolve mariadb (backend-only).
+# mariadb also joins frontend in dev (docker-compose.override.yml) so its
+# published port actually works for host tools — internal:true means Docker
+# never wires a NAT rule for a container that ISN'T also on a routable
+# network, so without this the port mapping above would be a silent no-op.
+# That is dev-only: the base file and docker-compose.prod.yml keep mariadb
+# on backend only and publish nothing (verify with
+# `docker compose -f docker-compose.yml -f docker-compose.prod.yml config`).
 expect_contains "nginx (frontend-only) can still resolve php85 over the frontend network" \
     "php85" \
     docker compose exec -T nginx getent hosts php85
-expect_missing "mariadb does not resolve from the frontend-only nginx container" \
-    "mariadb" \
-    docker compose exec -T nginx getent hosts mariadb
 
 echo
 echo "Scheduler"
