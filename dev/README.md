@@ -43,8 +43,13 @@ dev/bin/smoke.sh
 підніміть один зворотний проксі на всі проєкти:
 
 ```bash
-docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro --net okay_network nginxproxy/nginx-proxy
+docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro --net "${NETWORK_NAME}-frontend" nginxproxy/nginx-proxy
 ```
+
+(nginx сам сидить лише в `${NETWORK_NAME}-frontend` — `-backend` є `internal: true`
+і без маршруту на хост, тож проксі туди підключати сенсу немає. Мережі з'являються
+лише після першого `docker compose up`; перевірити фактичні назви — `docker network
+ls`.)
 
 Після цього сайт буде доступний по http на хост, вказаний у `.env` як
 `VIRTUAL_HOST`, на 80-й порт — незалежно від того, який `HTTP_PORT` вказаний
