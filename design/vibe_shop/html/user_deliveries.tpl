@@ -9,7 +9,7 @@
             {foreach $deliveries as $delivery}
                 <div class="delivery__item fn_delivery_item vs-option">
                     <label class="checkbox delivery__label vs-option-card{if $active_delivery->id == $delivery->id} active{/if}" for="deliveries_{$delivery->id}">
-                        {*NOTICE: Обратите внимание, data-total_price хранится в основной валюте сайта*}
+                        {*NOTICE: Зверніть увагу, data-total_price зберігається в основній валюті сайту*}
                         <input class="delivery__input vs-option-card__radio"
                                id="deliveries_{$delivery->id}"
                                onchange="okay.change_payment_method();"

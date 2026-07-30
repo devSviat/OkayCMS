@@ -266,12 +266,10 @@
 {/if}
 {if $svgId == "catalog_icon"}
     <svg class="catalog_icon" width="20px" height="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-        <path d="M9 6l11 0"/>
-        <path d="M9 12l11 0"/>
-        <path d="M9 18l11 0"/>
-        <path d="M5 6l0 .01"/>
-        <path d="M5 12l0 .01"/>
-        <path d="M5 18l0 .01"/>
+        <path d="M4 4h6v6h-6z"/>
+        <path d="M14 4h6v6h-6z"/>
+        <path d="M4 14h6v6h-6z"/>
+        <path d="M14 14h6v6h-6z"/>
     </svg>
 {/if}
 {if $svgId == "subscribe_image"}
@@ -622,6 +620,65 @@
         <path d="M18 19c0 1.657 -2.686 3 -6 3"/>
         <path d="M4 14a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2v-3"/>
         <path d="M15 14a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2v-3"/>
+    </svg>
+{/if}
+{if $svgId == "social_facebook"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3"/>
+    </svg>
+{/if}
+{if $svgId == "social_instagram"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M4 8a4 4 0 0 1 4 -4h8a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-8a4 4 0 0 1 -4 -4z"/>
+        <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
+        <path d="M16.5 7.5l0 .01"/>
+    </svg>
+{/if}
+{if $svgId == "social_telegram"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4"/>
+    </svg>
+{/if}
+{if $svgId == "social_youtube"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M2 8a4 4 0 0 1 4 -4h12a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4z"/>
+        <path d="M10 9l5 3l-5 3z"/>
+    </svg>
+{/if}
+{* The owner's own path, scaled by 0.8 about the centre of the box: as given it
+   spanned y 1..23 against the 3..21 every other social glyph here keeps, which
+   in a row of 20px icons read as one oversized member rather than as the same
+   family. Scaling the coordinates rather than wrapping the path in a transform
+   keeps the stroke at the family's 1.8 - a transform would scale the stroke too.
+   The shape it replaces was a single open outline whose counter closed into a
+   blob at 20px; this one keeps the note head as a real hole at 16px. *}
+{if $svgId == "social_tiktok"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M11.2 15.2a1.6 1.6 0 0 0 -3.2 0a1.6 1.6 0 0 0 3.2 0V3.2h4q1.6 4 4.8 4v4q-3.2 0 -4.8 -1.6v5.6a5.6 5.6 0 1 1 -4 -5.36"/>
+    </svg>
+{/if}
+{if $svgId == "social_x"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M4 4l11.733 16h4.267l-11.733 -16z"/>
+        <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/>
+    </svg>
+{/if}
+{if $svgId == "social_linkedin"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M3 7a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4z"/>
+        <path d="M8 11v5"/>
+        <path d="M8 8v.01"/>
+        <path d="M12 16v-5"/>
+        <path d="M16 16v-3a2 2 0 1 0 -4 0"/>
+    </svg>
+{/if}
+{if $svgId == "social_link"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/>
+        <path d="M3.6 9h16.8"/>
+        <path d="M3.6 15h16.8"/>
+        <path d="M11.5 3a17 17 0 0 0 0 18"/>
+        <path d="M12.5 3a17 17 0 0 1 0 18"/>
     </svg>
 {/if}
 {/strip}

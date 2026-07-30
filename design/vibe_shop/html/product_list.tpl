@@ -63,7 +63,6 @@
             {if $product->featured}
                 <span class="vs-badge vs-badge--hit" data-language="product_sticker_hit">{$lang->product_sticker_hit}</span>
             {/if}
-            <span class="fn_discount_label vs-badge vs-badge--sale{if !($product->variant->price>0 && $product->variant->compare_price>0 && $product->variant->compare_price>$product->variant->price)} hidden-xs-up{/if}">{if $product->variant->price>0 && $product->variant->compare_price>0 && $product->variant->compare_price>$product->variant->price}{round((($product->variant->price-$product->variant->compare_price)/$product->variant->compare_price)*100)}&nbsp;%{/if}</span>
             {if $product->special}
                 <span class="vs-badge vs-badge--special">
                     <img src='files/special/{$product->special}' alt='{$product->special|escape}' title="{$product->special|escape}"/>
@@ -119,14 +118,39 @@
         <div class="vs-card__body">
             <a class="vs-card__name" data-product="{$product->id}" href="{url_generator route="product" url=$product->url}">{$product->name|escape}</a>
 
+            {* The article number is off the card by the shop owner's decision: in a
+               grid it costs 23px on every card for a value most shoppers do not scan.
+               Delete this comment wrapper to bring it back - nothing else has to
+               change. fn_sku is the hook okay.js writes into when a variant changes
+               (okay.js:59), and it reaches it with .find(), so its absence is a
+               no-op rather than an error; vibe.js:470 guards with `if (sku)` before
+               adding it to the live announcement. The product page states the SKU in
+               full either way. *}
+            {*
             <div class="vs-card__sku{if !$product->variant->sku} hidden-xs-up{/if}">
                 <span data-language="product_sku">{$lang->product_sku}:</span>
                 <span class="fn_sku">{$product->variant->sku|escape}</span>
             </div>
+            *}
 
             <div class="vs-card__price">
+                {* The struck price and its badge sit ABOVE the current price: they
+                   are what the current price is being compared against, so they read
+                   as the thing being crossed out rather than as a footnote to it.
+
+                   The tier is rendered whether or not this product has a discount,
+                   and that is the point: okay.js hides its children by toggling
+                   hidden-xs-up, but the tier itself keeps its line, so the block is
+                   the same height on every card and the price and availability lines
+                   land at the same y in neighbouring cards. The owner asked for that
+                   reserved line to be smaller, not for it to go - the alternative was
+                   a ragged row, and they chose alignment. *}
+                <span class="vs-card__price_second">
+                    <span class="vs-card__price_old{if !$product->variant->compare_price} hidden-xs-up{/if}"><span class="fn_old_price">{$product->variant->compare_price|convert}</span>&nbsp;<span class="vs-card__currency">{$currency->sign|escape}</span></span>
+                    <span class="fn_discount_label vs-badge vs-badge--sale{if !($product->variant->price>0 && $product->variant->compare_price>0 && $product->variant->compare_price>$product->variant->price)} hidden-xs-up{/if}">{if $product->variant->price>0 && $product->variant->compare_price>0 && $product->variant->compare_price>$product->variant->price}{round((($product->variant->price-$product->variant->compare_price)/$product->variant->compare_price)*100)}&nbsp;%{/if}</span>
+                </span>
+
                 <span class="vs-card__price_current{if $product->variant->compare_price} price--red{/if}"><span class="fn_price">{$product->variant->price|convert}</span>&nbsp;<span class="vs-card__currency">{$currency->sign|escape}</span></span>
-                <span class="vs-card__price_old{if !$product->variant->compare_price} hidden-xs-up{/if}"><span class="fn_old_price">{$product->variant->compare_price|convert}</span>&nbsp;<span class="vs-card__currency">{$currency->sign|escape}</span></span>
             </div>
 
             {* Availability, stated in all three states - out of stock included, the

@@ -1,28 +1,26 @@
 <ul class="top-nav">
     <li>
-        <div class="">
-            {if !empty({$settings->site_logo})}
-            <a class="mobile__link " href="{if $controller=='MainController'}javascript:;{else}{url_generator route="main"}{/if}">
-                <img src="{$rootUrl}/{$config->design_images}{$settings->site_logo}?v={$settings->site_logo_version}" alt="{$settings->site_name|escape}"/>
-            </a>
-            {/if}
-        </div>
-        <div class="d-flex align-items-center f_col">
-            {if $user}
-                <a class="account__link" href="{url_generator route="user"}">
-                    {include file="svg.tpl" svgId="user"}
-                    <span>{$user->name|escape}</span>
-                </a>
-            {else}
-                <a class="account__link" rel="nofollow" href="{url_generator route='login'}"  title="{$lang->index_login}">
-                    {include file="svg.tpl" svgId="user"}
-                    <span class="account__login" data-language="index_login">{$lang->index_login}</span>
-                </a>
-            {/if}
-        </div>
+        {if !empty({$settings->site_logo})}
+        <a class="mobile__link" href="{if $controller=='MainController'}javascript:;{else}{url_generator route="main"}{/if}">
+            <img src="{$rootUrl}/{$config->design_images}{$settings->site_logo}?v={$settings->site_logo_version}" alt="{$settings->site_name|escape}"/>
+        </a>
+        {/if}
     </li>
 </ul>
 <ul class="second-nav">
+    <li>
+        {if $user}
+            <a href="{url_generator route="user"}">
+                {include file="svg.tpl" svgId="user"}
+                <span>{$user->name|escape}</span>
+            </a>
+        {else}
+            <a rel="nofollow" href="{url_generator route='login'}" title="{$lang->index_login}">
+                {include file="svg.tpl" svgId="user"}
+                <span class="account__login" data-language="index_login">{$lang->index_login}</span>
+            </a>
+        {/if}
+    </li>
     {if $controller != 'MainController'}
         <li>
             <a href="{url_generator route='main'}">
@@ -91,9 +89,12 @@
 {* Currencies *}
 {if $currencies|count > 1}
 <ul class="currencies-nav">
-    <li class="">
-
-        <span class=""><span data-language="mobile_menu_currency">{$lang->mobile_menu_currency}:</span> {$currency->name}</span>
+    <li>
+        <span>
+            {include file="svg.tpl" svgId="coins"}
+            <span class="vs-sr-only">{$lang->mobile_menu_currency|escape}: </span>
+            <span>{$currency->name|escape}</span>
+        </span>
         <ul class="">
             {foreach $currencies as $c}
             {if $c->enabled}
@@ -118,11 +119,11 @@
 {/foreach}
 {if $cnt>1}
     <ul class="language-nav">
-        <li class="">
-            {if is_file("{$config->lang_images_dir}{$language->label}.png")}
-            <img alt="{$language->current_name}" src="{("{$language->label}.png")|resize:20:20:false:$config->lang_resized_dir}" />
-            {/if}
-            <span class="">{$language->name}</span>
+        <li>
+            <span>
+                {include file="svg.tpl" svgId="language"}
+                <span>{$language->name|escape}</span>
+            </span>
             <ul class="">
                 {foreach $languages as $l}
                 {if $l->enabled}
@@ -144,39 +145,51 @@
 {/if}
 {/if}
 
-{if $settings->site_phones}
-{foreach $settings->site_phones as $phone}
+{if $settings->site_phones || $settings->site_email}
 <ul class="contact-nav">
+    {if $settings->site_phones}
+    {foreach $settings->site_phones as $phone}
     <li>
         <a class="phone" href="tel:{preg_replace('~[^0-9\+]~', '', $phone)}">
             {include file="svg.tpl" svgId="phone"}
             <span>{$phone|escape}</span>
         </a>
     </li>
-</ul>
-
-{/foreach}
-{/if}
-{if $settings->site_email}
-<ul class="contact-nav">
+    {/foreach}
+    {/if}
+    {if $settings->site_email}
     <li>
         <a class="email" href="mailto:{$settings->site_email|escape}">
             {include file="svg.tpl" svgId="mail"}
             <span>{$settings->site_email|escape}</span>
         </a>
     </li>
+    {/if}
 </ul>
 {/if}
 
 
 
+{$social_icons = [
+    'facebook' => 'social_facebook',
+    'instagram' => 'social_instagram',
+    'telegram' => 'social_telegram',
+    't' => 'social_telegram',
+    'youtube' => 'social_youtube',
+    'youtu' => 'social_youtube',
+    'tiktok' => 'social_tiktok',
+    'twitter' => 'social_x',
+    'x' => 'social_x',
+    'linkedin' => 'social_linkedin'
+]}
 <ul class="bottom-nav">
     {foreach $settings->site_social_links as $social_link}
     {$social_domain = preg_replace('~(https?://)?(www\.)?([^\.]+)?\..*~', '$3', $social_link)}
     {if $social_domain}
     <li>
         <a href="{if !preg_match('~^https?://.*$~', $social_link)}https://{/if}{$social_link|escape}" target="_blank" rel="noreferrer" title="{$social_domain|escape}">
-            <span>{$social_domain|escape}</span>
+            {include file="svg.tpl" svgId=$social_icons[$social_domain]|default:'social_link'}
+            <span class="vs-sr-only">{$social_domain|escape}</span>
         </a>
     </li>
     {/if}

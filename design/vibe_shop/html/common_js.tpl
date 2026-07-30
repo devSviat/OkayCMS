@@ -1,5 +1,5 @@
 <script>
-    {*todo написать инструкцию по файлу*}
+    {*todo написати інструкцію до файла*}
     {literal}
     const okay = {};
     okay.router = {};
@@ -62,7 +62,7 @@
                 }
             }
 
-            /*если способ оплаты не активен для данной доставки, тогда выберим первый доступный*/
+            /*якщо спосіб оплати не активний для цієї доставки, тоді виберемо перший доступний*/
             if ($('input[name="payment_method_id"][value="' + current_payment_id + '"]').is(':disabled')) {
                 $(".fn_payment_method__item:visible").first().find('input[name="payment_method_id"]').prop('checked', true).trigger('click');
             }
@@ -81,7 +81,7 @@
         $('#fn_cart_total_price').text(okay.convert(delivery_input.data('total_price')));
         $('#fn_total_purchases_price').text(okay.convert($('.fn_purchases_wrap').data('total_purchases_price'), null, true, true));
 
-        /*Обновляем информацию по стоимости доставки*/
+        /*Оновлюємо інформацію щодо вартості доставки*/
         if (delivery_input.data('is_free_delivery')) {
             $('#fn_total_free_delivery').show();
             $('#fn_total_delivery_price').hide();
@@ -90,7 +90,7 @@
             $('#fn_total_delivery_price').text(okay.convert(delivery_input.data('delivery_price'), null, true, true)).show();
         }
 
-        /*Обновляем информацию по оплате доставки (отдельно или нет)*/
+        /*Оновлюємо інформацію щодо оплати доставки (окремо чи ні)*/
         if (delivery_input.data('separate_payment') == true && delivery_input.data('is_free_delivery') == false) {
             $('#fn_total_separate_delivery').show();
         } else {
@@ -98,7 +98,7 @@
         }
     };
 
-    /*Метод ворматирования цены в js*/
+    /*Метод форматування ціни в js*/
     okay.convert = function(price, currencyId = null, format = true, withCurrency = false)
     {
 

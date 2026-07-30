@@ -93,6 +93,42 @@
 	transform: translateX(1px) rotate(135deg);
 }
 
+/* The banner's arrows are the only pair that sits ON a photograph, and they sat  */
+/* there permanently: two 44px plates parked over the image whether or not anyone */
+/* intended to page through it. On a phone the banner is 358px wide, so the pair  */
+/* covered a quarter of it.                                                       */
+/*                                                                               */
+/* With a pointer they fade in when the slider is pointed at, and :focus-within   */
+/* covers the keyboard - opacity rather than display, so the buttons stay in the  */
+/* tab order and Swiper keeps its disabled class on them. Without one they are    */
+/* gone: there is no hover to reveal them with, and swipe plus the dots is the    */
+/* whole interaction a touch slider needs. Scoped to .banner_group, which is the  */
+/* Banners module's slider root - the theme's own two pairs (.vs-gallery__nav on  */
+/* the product photos, .vs-compare__nav) match the bare selector too, and both    */
+/* are the only way to page those tracks.                                         */
+
+@media (hover: hover) {
+	.banner_group .swiper-button-prev,
+	.banner_group .swiper-button-next {
+		opacity: 0;
+		transition: opacity var(--vs-dur-2) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease);
+	}
+
+	.banner_group:hover .swiper-button-prev,
+	.banner_group:hover .swiper-button-next,
+	.banner_group:focus-within .swiper-button-prev,
+	.banner_group:focus-within .swiper-button-next {
+		opacity: 1;
+	}
+}
+
+@media (hover: none) {
+	.banner_group .swiper-button-prev,
+	.banner_group .swiper-button-next {
+		display: none;
+	}
+}
+
 /* ------------------------------------------------------------ generic tabs */
 
 /* .tabs / .tabs__navigation / .tabs__link / .tabs__content is okay.js's tab    */
@@ -234,11 +270,19 @@
 /* the answer: the state that matters is the focused one, and it can only stand  */
 /* out if the resting state is quiet.                                            */
 /*                                                                               */
-/* --vs-space-3 and --vs-radius-sm, not --vs-space-4 and --vs-radius-md: a 12px  */
-/* radius on a 44px control is half its height and reads as a pill. 8px is the   */
-/* same radius the rows inside every dropdown panel use, so fields and menu      */
-/* rows are finally one family. The 12px inset matches .vs-buybox__select and    */
-/* .vs-price__input, which already used it.                                      */
+/* --vs-radius-md, the button radius. This was --vs-radius-sm on the argument    */
+/* that 12px on a 44px control reads as a pill, and that fields should share the  */
+/* 8px of the rows inside dropdown panels. Both parts were wrong on this theme:   */
+/* 12px is 27% of 44px, not half, and .vs-btn, .vs-stepper and .vs-search__input  */
+/* are all 44px tall with 12px already - the field was the only control of that   */
+/* height carrying 8px, which is exactly what showed as a mismatch where a field  */
+/* and a button stand side by side, as the coupon row does. 8px stays the radius  */
+/* of the small square things - dropdown rows, checkboxes, badges - where 12px    */
+/* on a 20px box would be nearly a circle.                                       */
+/*                                                                               */
+/* The inset stays --vs-space-3 rather than --vs-space-4: a larger radius eats     */
+/* into the corner, but 12px of text inset is still clear of a 12px corner and    */
+/* .vs-buybox__select and .vs-price__input already used it.                       */
 /*                                                                               */
 /* The resting fill is the same neutral for every shop: --vs-surface follows the */
 /* owner's boxed colour and a field must stay distinguishable FROM its card, so  */
@@ -255,7 +299,7 @@
 	min-height: 44px;
 	padding: 0 var(--vs-space-3);
 	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	color: var(--vs-text);
 	font-size: var(--vs-text-base);
@@ -910,6 +954,27 @@ body.other_page .main {
 /* box sizes to its rows - so the panel grew to 422px for ten results and never */
 /* scrolled. As a block it honours the cap, which is why the bar below matters. */
 
+/* The panel has to be told where to sit, and only here. devbridge positions the */
+/* container itself - but fixPosition() returns early unless the container's     */
+/* parent is <body>, and okay.js hands this instance appendTo: "#fn_search". So  */
+/* the library sets position: absolute inline and never sets top, which leaves   */
+/* the static position to decide - and .vs-search is a flex row with             */
+/* align-items: center, where an absolutely positioned child's static position   */
+/* is the one it would get as the sole flex item. Centred. A 320px panel in a    */
+/* 44px row resolved to top: -138px, so the suggestions covered the header and   */
+/* ran off the top of the window. Below 768px .vs-search is a plain block and    */
+/* the same static position happened to land under the field, which is why this  */
+/* only ever showed on a wide screen.                                           */
+/*                                                                              */
+/* Scoped to .vs-search: the OkayCMS_Novaposhta city field uses the same library */
+/* with the default appendTo, so its panel IS a child of <body> and fixPosition  */
+/* does place it - overriding top there would fight the library.                 */
+
+.vs-search .autocomplete-suggestions {
+	top: 100%;
+	left: 0;
+}
+
 .autocomplete-suggestions::-webkit-scrollbar {
 	width: 8px;
 }
@@ -1079,7 +1144,7 @@ body.other_page .main {
 .select2-container--default .select2-selection--single {
 	height: 44px;
 	border: 1px solid var(--vs-hairline);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	transition: border-color var(--vs-dur-1) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease);
 }
@@ -1149,7 +1214,7 @@ body.other_page .main {
 	min-height: 44px;
 	padding: 0 var(--vs-space-3);
 	border: 1px solid var(--vs-hairline);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	color: var(--vs-text);
 	font-size: var(--vs-text-base);
@@ -1236,8 +1301,19 @@ body.other_page .main {
 	box-shadow: var(--vs-shadow-3);
 }
 
+/* Multi-column, and it has to be: this shop's tree is extremely uneven -        */
+/* measured on the demo data, twelve root categories, one of them ("Меблі для    */
+/* дому") with four children and seven shoppable grandchildren, five with no     */
+/* children at all. A CSS grid was tried here first and measured worse, which    */
+/* is worth writing down: a grid row is as tall as its tallest cell, so the deep */
+/* branch made row one 378px whatever the eleven short categories beside it      */
+/* needed, and the panel went from 598px to the 630px cap and started            */
+/* scrolling. Multi-column balances by flow height instead, which is the         */
+/* behaviour this data wants. What actually made the old layout bad was not the  */
+/* column algorithm but the row rhythm below it - see the link rules.            */
+
 .vs-catalog__list {
-	columns: 250px;
+	columns: 220px;
 	column-gap: var(--vs-space-7);
 	margin: 0;
 	padding: 0;
@@ -1255,6 +1331,14 @@ body.other_page .main {
 	break-inside: avoid;
 	padding-bottom: var(--vs-space-5);
 }
+
+/* 44px is the touch floor, and this menu never sees touch: its toggle is        */
+/* display: none below 992px, where the off-canvas nav takes over instead.       */
+/* Charging every row 44px is what made depth so expensive - a branch of one     */
+/* root, four children and seven grandchildren spent 528px on link boxes alone.  */
+/* The root keeps 44 because it carries the icon and is the primary target; the   */
+/* two levels under it get the rhythm below, both still clear of WCAG 2.5.8's    */
+/* 24px minimum for a pointer.                                                   */
 
 .vs-catalog__link {
 	display: flex;
@@ -1295,11 +1379,13 @@ body.other_page .main {
 	height: 22px;
 }
 
+/* Wraps rather than truncates. A 220px column minus a 22px icon and its gap     */
+/* cannot hold "Строительные инструменты", and an ellipsis there hid the name    */
+/* of a whole department behind three dots. Two lines cost 4px on one row; a     */
+/* name the shopper cannot read costs the department.                            */
+
 .vs-catalog__name {
 	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
 }
 
 .vs-catalog__sub {
@@ -1309,23 +1395,30 @@ body.other_page .main {
 }
 
 .vs-catalog__link--2 {
+	min-height: 32px;
 	font-size: var(--vs-text-sm);
 	font-weight: 500;
 }
 
-/* The hairline ties a leaf list to its parent, so the 44px rows read as one */
-/* group instead of floating apart.                                          */
+/* The hairline ties a leaf list to its parent, so the rows read as one group    */
+/* instead of floating apart.                                                    */
 
 .vs-catalog__leaf {
-	margin: 0 0 0 var(--vs-space-2);
-	padding-left: var(--vs-space-4);
+	margin: 0 0 var(--vs-space-2) var(--vs-space-2);
+	padding-left: var(--vs-space-3);
 	border-left: 1px solid var(--vs-hairline);
 	list-style: none;
 }
 
+/* The third level was muted text at the same size as the second, one indent     */
+/* deeper - so it read as a faint continuation of the list above it rather than  */
+/* as a level. Smaller and darker instead: the size difference carries the        */
+/* hierarchy and the colour stops the deepest rows looking disabled.              */
+
 .vs-catalog__link--3 {
-	font-size: var(--vs-text-sm);
-	color: var(--vs-text-muted);
+	min-height: 26px;
+	font-size: var(--vs-text-xs);
+	color: var(--vs-text);
 }
 
 .vs-catalog__link--2:hover,
@@ -1530,6 +1623,12 @@ body.hc-nav-open {
 	text-decoration: none;
 }
 
+/* Currency, language, phone and email were 13px and muted while the rows      */
+/* above them were 15px and full contrast. Same height, same rail, dimmer text  */
+/* reads as disabled rather than as secondary - and none of them is secondary   */
+/* to "Бренди". They carry no size/color rule of their own now, so they fall    */
+/* back to this rule's color and font-size like every other row.                */
+
 .hc-offcanvas-nav .nav-item {
 	position: relative;
 	display: flex;
@@ -1559,6 +1658,68 @@ body.hc-nav-open {
 	width: 20px;
 	height: 20px;
 	object-fit: contain;
+}
+
+/* One text edge for the whole menu. A row with a leading 20px glyph starts its  */
+/* text at 52px (20px padding + 20px glyph + 12px gap); a row without one starts */
+/* at 20px, which split the menu into two ragged columns. Rows with no glyph     */
+/* reserve the rail instead of sliding under it.                                 */
+/*                                                                              */
+/* The test is first-child, NOT :has(svg). The CMS row "Клієнтам" contains an    */
+/* svg - its submenu chevron, nested in a trailing .vs-menu__chevron span. Keyed */
+/* on :has(svg) that one row would count as railed and its four siblings would   */
+/* not, making the edge worse than leaving it alone.                             */
+/*                                                                              */
+/* hc-offcanvas-nav also injects an empty, absolutely-positioned <label> as the  */
+/* real first child of any row it turns into a checkbox-driven submenu toggle -  */
+/* here that is "Категорії" plus both switcher rows, since they now carry a      */
+/* glyph and already had a nested <ul>. The label costs no visible space, but it */
+/* does own the DOM :first-child slot, so a bare :has(> svg:first-child) stops   */
+/* seeing the glyph on exactly those three rows and wrongly re-rails them. The   */
+/* extra :not() clauses below recognise a glyph sitting right after that label - */
+/* directly, when hc-offcanvas-nav reuses the source <a> ("Категорії"), or one   */
+/* level deeper inside the wrapper <span> it builds around a source <span> row   */
+/* (the currency and language switchers).                                       */
+/*                                                                              */
+/* .bottom-nav is excluded: its social links are pills on their own row, not     */
+/* rail items.                                                                   */
+
+.hc-offcanvas-nav .nav-content > ul:not(.bottom-nav) > li > .nav-item:not(:has(> svg:first-child)):not(:has(> img:first-child)):not(:has(> .nav-icon:first-child)):not(:has(> label:first-child + svg)):not(:has(> label:first-child + img)):not(:has(> label:first-child + .nav-icon)):not(:has(> label:first-child + span > svg:first-child)):not(:has(> label:first-child + span > img:first-child)) {
+	padding-left: calc(var(--vs-space-5) + 20px + var(--vs-space-3));
+}
+
+/* The CMS rows reserve the rail but have nothing to put in it, so they read as */
+/* children of the row above rather than as peers. A dot fills the slot without */
+/* asserting a meaning: these pages are named by the shop owner, so any real    */
+/* glyph would claim to know what they are. A list marker claims only that they */
+/* are items, which is true.                                                     */
+/*                                                                              */
+/* Scoped inside .hc-offcanvas-nav because menu.tpl is shared with the desktop  */
+/* menu, which has no rail and must not grow bullets.                            */
+
+.hc-offcanvas-nav .nav-content > ul > li > .vs-menu__link.nav-item::before {
+	position: absolute;
+	left: calc(var(--vs-space-5) + 6px);
+	top: 50%;
+	width: 8px;
+	height: 8px;
+	margin-top: -4px;
+	border: 1.8px solid var(--vs-text-muted);
+	border-radius: var(--vs-radius-full);
+	content: "";
+}
+
+/* The wrapper span from the paragraph above (currency and language) keeps the   */
+/* glyph and the value text as its own two children, once removed from          */
+/* .nav-item - so .nav-item's own flex/gap never reaches them and the two sit    */
+/* with only a collapsed-whitespace gap instead of the rail's 12px. Restating    */
+/* the same flex row here on that inner span lines its text up with every other  */
+/* glyph row's 52px edge.                                                       */
+
+.hc-offcanvas-nav .nav-item > label:first-child + span:has(> svg:first-child) {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-3);
 }
 
 .hc-offcanvas-nav .nav-icon {
@@ -1670,7 +1831,6 @@ body.hc-nav-open {
 	transform: translate3d(0, 0, 0);
 }
 
-.hc-offcanvas-nav li.nav-close a,
 .hc-offcanvas-nav li.nav-back a {
 	background-color: var(--vs-surface-subtle);
 	color: var(--vs-text);
@@ -1693,9 +1853,9 @@ body.hc-nav-open {
 	transition: background-color var(--vs-dur-1) var(--vs-ease);
 }
 
-.hc-offcanvas-nav span.nav-next {
-	border-left: 1px solid var(--vs-hairline);
-}
+/* No dividing rule on the chevron. It is an affordance inside the row, not a  */
+/* second control beside it - a vertical rule here split four rows into what   */
+/* looked like two buttons each. The hover state below still marks the target. */
 
 .hc-offcanvas-nav span.nav-next:hover {
 	background-color: var(--vs-surface-subtle);
@@ -1793,31 +1953,110 @@ body.hc-nav-open {
 	width: auto;
 }
 
-.hc-offcanvas-nav ul.top-nav .account__link {
-	display: inline-flex;
+/* The panel header: brand on the left, close on the right. hc-offcanvas-nav    */
+/* puts the close item in the first list, so top-nav becomes that header row.    */
+/* flex-direction is restated here: the earlier ul.top-nav rule above sets it   */
+/* to column for the single-<li> header it used to be; that declaration is not  */
+/* touched by this rule's cascade unless repeated, and column would stack the   */
+/* logo and the close button instead of placing them side by side.              */
+
+/* The panel scrolls (.nav-wrapper-0 > .nav-content, above) and this header row */
+/* was position: static inside it, so at short landscape heights the row - and  */
+/* the only close control the menu has - scrolled out of view with the rest of  */
+/* the list. sticky keeps it pinned to the top of the scroll container instead; */
+/* the earlier ul.top-nav rule already sets an opaque background-color, so the  */
+/* rows scrolling underneath do not show through.                               */
+
+.hc-offcanvas-nav ul.top-nav {
+	display: flex;
+	flex-direction: row;
 	align-items: center;
-	gap: var(--vs-space-2);
-	min-height: 44px;
-	padding: 0 var(--vs-space-4);
-	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-md);
-	color: var(--vs-text);
-	font-size: var(--vs-text-sm);
-	white-space: nowrap;
+	justify-content: space-between;
+	gap: var(--vs-space-3);
+	padding: var(--vs-space-3) var(--vs-space-5);
+	position: sticky;
+	top: 0;
+	z-index: 1;
 }
 
-.hc-offcanvas-nav ul.top-nav .account__link svg {
-	width: 18px;
-	height: 18px;
-	color: var(--vs-text-muted);
+.hc-offcanvas-nav ul.top-nav > li {
+	flex: none;
 }
 
-.hc-offcanvas-nav ul.contact-nav .nav-item,
-.hc-offcanvas-nav ul.currencies-nav .nav-item,
-.hc-offcanvas-nav ul.language-nav .nav-item {
-	color: var(--vs-text-muted);
-	font-size: var(--vs-text-sm);
+/* The logo is optional (mobile_menu.tpl:3 wraps it in an {if}), but the {if}    */
+/* sits inside the <li>, not around it - the template cannot drop the <li>      */
+/* itself without also losing the row hc-offcanvas-nav needs to place the close */
+/* control in. With no logo the library still builds a row for that empty <li>: */
+/* it emits `<span class="nav-item">` rather than emitting nothing, and that    */
+/* span then picks up .nav-item's min-height and border-bottom as a bare grey   */
+/* stub. Hiding it here is the fix; the row really is :empty, since the         */
+/* library's content collector already drops whitespace-only text nodes.       */
+
+.hc-offcanvas-nav ul.top-nav .nav-item:empty {
+	display: none;
 }
+
+/* The shop can run with no logo configured (mobile_menu.tpl:3 wraps it in an   */
+/* {if}) - then the close item is the row's only child, and space-between pins  */
+/* a lone flex child to flex-start, moving the x to the left. margin-left: auto  */
+/* anchors it to the end on its own, independent of how many items precede it,  */
+/* so the x stays right whether or not the logo renders.                        */
+
+.hc-offcanvas-nav ul.top-nav li.nav-close {
+	margin-left: auto;
+}
+
+/* This build has no ariaLabels option and emits the label as a bare text node  */
+/* inside the anchor, so it cannot be wrapped from the template. text-indent    */
+/* moves it off screen while leaving it in the accessibility tree; the glyph is  */
+/* drawn by the span the library already emits. Setting labelClose to an empty  */
+/* string instead would leave the button with no accessible name at all.        */
+
+.hc-offcanvas-nav li.nav-close a {
+	position: relative;
+	overflow: hidden;
+	width: 44px;
+	height: 44px;
+	min-height: 0;
+	padding: 0;
+	border: 0;
+	border-radius: var(--vs-radius-full);
+	background-color: transparent;
+	text-indent: -999em;
+}
+
+.hc-offcanvas-nav li.nav-close a:hover {
+	background-color: var(--vs-surface-subtle);
+}
+
+.hc-offcanvas-nav li.nav-close span {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	width: auto;
+	text-indent: 0;
+}
+
+/* NO group separators here, and that is a decision rather than an omission.     */
+/* The panel holds thirteen rows in three jobs - the shop's own navigation, the  */
+/* CMS pages, its settings and contacts - distinguished only by their marker: an */
+/* icon for the first and third, a hollow dot for the middle. Two attempts at    */
+/* marking the boundaries were both rejected on a real phone, and both for the   */
+/* same underlying reason: every .nav-item draws its own bottom hairline, so the */
+/* boundary already HAS a line and it belongs to the row above it.               */
+/*                                                                              */
+/* A border on the group therefore drew a second line a few pixels under the     */
+/* first. Replacing it with space made the gap one-sided, because the line stays */
+/* glued to the row above while the row below gains all of the room. Splitting   */
+/* the space collapses to one margin and moves the asymmetry rather than curing  */
+/* it; centring the line for real means stripping the last row's border in each  */
+/* group and rebuilding the divider, which trades an even 52px rhythm for a      */
+/* grouping the dot already carries.                                             */
+/*                                                                              */
+/* So the rhythm wins. If this is revisited, the lever is the marker or a group   */
+/* heading - not a rule and not a gap.                                           */
 
 .hc-offcanvas-nav ul.bottom-nav {
 	display: flex;
@@ -1831,27 +2070,24 @@ body.hc-nav-open {
 	flex: none;
 }
 
-.hc-offcanvas-nav ul.bottom-nav li.nav-close {
-	flex: 1 0 100%;
-	order: 1;
-	margin-top: var(--vs-space-2);
-}
-
-.hc-offcanvas-nav ul.bottom-nav li.nav-close a {
-	justify-content: space-between;
-	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-md);
-	padding-left: var(--vs-space-5);
-}
+/* Round icon buttons rather than text pills - a third visual language in a    */
+/* menu that already had too many. 44px is the touch floor; the network name   */
+/* survives in .vs-sr-only and in the title attribute.                          */
 
 .hc-offcanvas-nav ul.bottom-nav .nav-item {
+	justify-content: center;
+	width: 44px;
 	min-height: 44px;
-	padding: 0 var(--vs-space-4);
+	padding: 0;
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-full);
 	color: var(--vs-text);
-	font-size: var(--vs-text-sm);
-	text-transform: capitalize;
+}
+
+.hc-offcanvas-nav ul.bottom-nav .nav-item svg {
+	width: 20px;
+	height: 20px;
+	color: var(--vs-text);
 }
 
 #main-nav {
@@ -2277,9 +2513,18 @@ body.hc-nav-open {
 	flex-direction: column;
 	align-items: flex-start;
 	gap: var(--vs-space-1);
-	max-width: calc(100% - 60px);
+	max-width: calc(100% - 48px);
 	pointer-events: none;
 }
+
+/* The 48px the badge column gives up is .vs-card__tools' own 44px plus a 4px    */
+/* gap - they sit in the same corner and must not overlap. It was 60px, which    */
+/* reserved 16px for nothing and clipped "Топ продажів" mid-glyph: 97px of text  */
+/* into an 89px box, and the default text-overflow is clip, not ellipsis.        */
+/* text-overflow is not the fix here either - this is a flex container, so the   */
+/* text is an anonymous flex item and the property has nothing to act on. Where  */
+/* the words still do not fit beside the tools the sticker wraps instead; see    */
+/* the phone block.                                                              */
 
 .vs-badge {
 	display: inline-flex;
@@ -2348,8 +2593,16 @@ body.hc-nav-open {
 	flex-direction: column;
 }
 
+/* The glyph sits in the corner, the 44px hit area stays 44px. The button fills  */
+/* the corner box either way; centring its glyph inside it put the heart 12px    */
+/* down and 12px in from the photo's corner while the sticker opposite it was    */
+/* flush, so the two corners of the same photo were set differently. Aligning    */
+/* the content instead of moving the box is what keeps the touch target.         */
+
 .vs-card__tool {
 	position: relative;
+	align-items: flex-start;
+	justify-content: flex-end;
 	border-radius: var(--vs-radius-full);
 	background-color: transparent;
 	box-shadow: none;
@@ -2362,14 +2615,22 @@ body.hc-nav-open {
 /* an unpositioned in-flow child. Giving the child position: relative puts both */
 /* in the same paint step, where tree order puts the glyph on top.              */
 
+/* Anchored to the glyph, not to the button. The plate used to be centred in the */
+/* 44px hit area, which was right while the glyph was centred too - but the glyph */
+/* moved to the corner and the plate stayed put, so hovering drew a grey disc     */
+/* 12px down and to the left of the heart it was supposed to be behind. The glyph */
+/* is 20px flush with the padding box's top right corner, so -8px on both sides   */
+/* is (20 - 36) / 2: the plate ends up concentric with it. That leaves 7px of the  */
+/* plate outside the photo, on the card's own 12px of padding, where nothing clips */
+/* it - .vs-card and .vs-card__inner are both overflow: visible.                  */
+
 .vs-card__tool::before {
 	content: "";
 	position: absolute;
-	top: 50%;
-	left: 50%;
+	top: -8px;
+	right: -8px;
 	width: 36px;
 	height: 36px;
-	transform: translate(-50%, -50%);
 	border-radius: var(--vs-radius-full);
 	background-color: transparent;
 	transition: background-color var(--vs-dur-1) var(--vs-ease);
@@ -2506,10 +2767,25 @@ body.hc-nav-open {
 .vs-card__price {
 	display: flex;
 	align-items: baseline;
-	flex-wrap: wrap;
-	gap: var(--vs-space-2);
+	flex-direction: column;
+	gap: var(--vs-space-1);
 	margin-top: var(--vs-space-3);
 	font-variant-numeric: tabular-nums;
+}
+
+/* The reserved comparison tier, above the current price. Its min-height is one  */
+/* line of its own type at its own leading, so the number comes from the scale   */
+/* rather than from a measurement that would rot the first time a token moves.   */
+/* The leading is tightened to 1.25 from the body's 1.55 deliberately: on a card */
+/* without a discount this line is empty, and every point of leading in it is    */
+/* dead air the owner asked to get back. 15px reserved instead of 20.            */
+
+.vs-card__price_second {
+	display: flex;
+	align-items: baseline;
+	gap: var(--vs-space-2);
+	min-height: calc(var(--vs-text-xs) * 1.25);
+	line-height: 1.25;
 }
 
 .vs-card__price_current {
@@ -2531,8 +2807,43 @@ body.hc-nav-open {
 
 .vs-card__price_old {
 	color: var(--vs-text-muted);
-	font-size: var(--vs-text-sm);
+	font-size: var(--vs-text-xs);
 	text-decoration: line-through;
+}
+
+/* .vs-card__currency is 13px everywhere else, and the tier's leading is a       */
+/* number, so a 13px currency sign inside a 12px line made that line 16.25px     */
+/* while the reserved empty one stayed 15 - a 1px stagger between neighbouring   */
+/* cards, in the one element whose whole job is to stop that. It takes the       */
+/* tier's size here.                                                            */
+
+.vs-card__price_second .vs-card__currency {
+	font-size: inherit;
+}
+
+/* On the price tier rather than over the photograph, so the percentage sits    */
+/* next to the number it modifies. Smaller and tighter than the corner badges,  */
+/* which have to read against arbitrary shop photography.                       */
+
+.vs-card__price_second .vs-badge--sale {
+	flex: none;
+	min-height: 0;
+	padding: 0 var(--vs-space-1-5);
+	font-size: var(--vs-text-xs);
+}
+
+/* The guarantee, not the budget. The struck price is the one thing in this row  */
+/* that can give way: it is already crossed out and the badge states the saving  */
+/* on its own, so an ellipsis there costs almost nothing - while a wrap costs    */
+/* the constant tier height, and with it the alignment of every neighbouring     */
+/* card. Measured budgets keep being one pixel wide at some viewport nobody      */
+/* sampled; this holds whatever the data does.                                   */
+
+.vs-card__price_old {
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 .vs-card__currency {
@@ -2585,6 +2896,19 @@ body.hc-nav-open {
 	margin: 0;
 	padding-top: var(--vs-space-4);
 	margin-top: auto;
+}
+
+/* Nothing to order in one tap when there is nothing in stock. With preorder    */
+/* switched on, the module keeps its rocket visible for an out-of-stock         */
+/* product while the card's own "add to cart" has already hidden itself, so     */
+/* the row was left offering the faster of two routes to a purchase that        */
+/* cannot happen yet. Done as a sibling rule rather than a condition around     */
+/* the include, because the module's template is not ours to edit and because   */
+/* vibe.js rewrites .vs-stock--out live when a variant changes - a Smarty test  */
+/* would freeze at render time and be wrong after the first variant switch.     */
+
+.vs-stock--out ~ .vs-card__form .fn_fast_order_button {
+	display: none;
 }
 
 /* Variant chips: one tap instead of open-dropdown-then-choose. They live on    */
@@ -2971,6 +3295,34 @@ body.hc-nav-open {
 .vs-sort__btn.active_down .sorting_icon--desc,
 .vs-sort__btn.active_up .sorting_icon--asc {
 	opacity: 1;
+}
+
+/* From 576px up the sheet is not a sheet: it is the plain wrapper the four     */
+/* pills have always sat in, and every fixed-position, translated, hidden       */
+/* declaration .vs-sheet carries is undone. The desktop control the owner said  */
+/* is fine must come out of this task byte-identical.                           */
+
+.vs-sort__trigger {
+	display: none;
+}
+
+.vs-sort__sheet_head {
+	display: none;
+}
+
+@media (min-width: 576px) {
+	.vs-sort__sheet {
+		position: static;
+		z-index: auto;
+		display: contents;
+		max-height: none;
+		background-color: transparent;
+		border-radius: 0;
+		box-shadow: none;
+		visibility: visible;
+		transform: none;
+		transition: none;
+	}
 }
 
 .vs-filters__open {
@@ -4155,7 +4507,7 @@ body.hc-nav-open {
 	min-height: 44px;
 	padding: 0 var(--vs-space-3);
 	border: 1px solid var(--vs-hairline);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	color: var(--vs-text);
 	font-size: var(--vs-text-sm);
@@ -4169,7 +4521,7 @@ body.hc-nav-open {
 .vs-buybox__variants .select2-container .select2-selection--single {
 	height: 44px;
 	border: 1px solid var(--vs-hairline);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 }
 
@@ -4188,12 +4540,21 @@ body.hc-nav-open {
 	margin-bottom: var(--vs-space-5);
 }
 
+/* The comparison price sits above the current one, as it does on the card: it   */
+/* is what the current price is being measured against, not a footnote to it.    */
+/* The two spans are already siblings, so this is a column and an order - no     */
+/* markup moves, unlike on the card where the DOM order changed too.             */
+
 .vs-buybox__prices {
 	display: flex;
-	align-items: baseline;
-	flex-wrap: wrap;
-	gap: var(--vs-space-2) var(--vs-space-3);
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--vs-space-1);
 	font-variant-numeric: tabular-nums;
+}
+
+.vs-buybox__old {
+	order: -1;
 }
 
 /* The price is the second thing the shopper looks for after the photograph,   */
@@ -4389,6 +4750,70 @@ body.hc-nav-open {
 
 .vs-buybox__wish.selected .vs-buybox__wish_on {
 	display: inline-flex;
+}
+
+/* The comparison tool gets the heart's off/on pair so its label can change with */
+/* the state on the click. The glyph is the same in both - only the words move.  */
+
+.vs-buybox__compare_off,
+.vs-buybox__compare_on {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+}
+
+.vs-buybox__compare_on {
+	display: none;
+}
+
+.vs-buybox__compare.selected .vs-buybox__compare_off {
+	display: none;
+}
+
+.vs-buybox__compare.selected .vs-buybox__compare_on {
+	display: inline-flex;
+}
+
+/* Icon plus words, which is what these two are for: a heart and a pair of       */
+/* scales say "favourite" and "compare" to someone who already knows this        */
+/* pattern and nothing at all to anyone else. .vs-btn--icon makes a square, so   */
+/* the tools opt out of it and size to their content instead.                    */
+
+.vs-buybox__tool {
+	width: auto;
+	padding: 0 var(--vs-space-4);
+}
+
+.vs-buybox__wish_off,
+.vs-buybox__wish_on {
+	align-items: center;
+	gap: var(--vs-space-2);
+}
+
+.vs-buybox__tool_label {
+	font-size: var(--vs-text-sm);
+	white-space: nowrap;
+}
+
+/* Two safeties, because the row measured a nought-pixel margin at 320 and one   */
+/* pixel at 360 - fitting exactly is how every other budget in this theme has    */
+/* broken. Below 360 the labels go and the tools are squares again, and at every */
+/* width the row may wrap, so a longer translation drops the second tool onto    */
+/* its own line instead of out of the box.                                       */
+
+.vs-buybox__aside {
+	flex-wrap: wrap;
+}
+
+@media (max-width: 359px) {
+	.vs-buybox__tool_label {
+		display: none;
+	}
+
+	.vs-buybox__tool {
+		width: 44px;
+		padding: 0;
+	}
 }
 
 /* Same treatment as the catalogue card's copy of this button - see the note    */
@@ -4589,22 +5014,34 @@ body.hc-nav-open {
 /* visibility as well as transform, so its controls leave the tab order while  */
 /* the bar is off-screen.                                                      */
 
+/* Height as a token, not a repeated number: .to_top (further down this file) */
+/* has to sit above this bar whenever it is showing, and the two must move    */
+/* together if this bar's own box height ever changes. Declared on :root, not */
+/* on .vs-sticky-buy itself - custom properties do not inherit sideways to a  */
+/* sibling element, only down to descendants. The two trailing 1px terms are  */
+/* the bar's own top and bottom border - outside the padding box, so left out */
+/* of this calc the token undercounts the real height by 2px.                 */
+:root {
+	--vs-sticky-buy-h: calc(52px + var(--vs-space-2) * 2 + 1px + 1px);
+}
+
 .vs-sticky-buy {
 	position: fixed;
-	left: 0;
-	right: 0;
-	bottom: 0;
+	left: var(--vs-space-3);
+	right: var(--vs-space-3);
+	bottom: calc(var(--vs-space-3) + env(safe-area-inset-bottom));
 	z-index: var(--vs-z-sticky);
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: var(--vs-space-3);
-	padding: var(--vs-space-3) var(--vs-space-4);
-	padding-bottom: calc(var(--vs-space-3) + env(safe-area-inset-bottom));
+	padding: var(--vs-space-2) var(--vs-space-2) var(--vs-space-2) var(--vs-space-5);
 	background-color: var(--vs-surface);
-	border-top: 1px solid var(--vs-border);
+	border: 1px solid var(--vs-border);
+	border-radius: var(--vs-radius-full);
 	box-shadow: var(--vs-shadow-3);
 	visibility: hidden;
-	transform: translateY(100%);
+	transform: translateY(calc(100% + var(--vs-space-3) + env(safe-area-inset-bottom)));
 	transition: transform var(--vs-dur-3) var(--vs-ease), visibility var(--vs-dur-0) var(--vs-ease) var(--vs-dur-3);
 }
 
@@ -4645,9 +5082,27 @@ body.hc-nav-open {
 	font-size: var(--vs-text-sm);
 }
 
+/* Both buttons in this bar are pills that size to their own label. Only one of  */
+/* them is ever shown, so anything they do not share reads as the bar changing   */
+/* shape with the stock level: the pre-order one used to be a 12px rectangle     */
+/* that also grew to fill the row, while the in-stock one was a pill hugging     */
+/* its words. Sized by content here, and the padding trim below 360px is what    */
+/* keeps the longer of the two labels inside the bar at 320.                     */
+
 .vs-sticky-buy__cta {
-	flex: 1 1 auto;
+	flex: none;
 	min-height: 48px;
+	border-radius: var(--vs-radius-full);
+}
+
+/* Glyph plus label. The label was hidden when this shipped as a circle; the     */
+/* owner asked for it back, so the button is a pill again and the span simply    */
+/* renders. min-height keeps the 52px touch target the circle had. Everything    */
+/* else - the flex sizing, the radius, the gap, the horizontal padding and the   */
+/* 20px glyph - comes from .vs-btn and the rule above.                           */
+
+.vs-sticky-buy__cta--icon {
+	min-height: 52px;
 }
 
 .vs-sticky-buy .vs-buybox__unavailable {
@@ -5370,8 +5825,28 @@ body.hc-nav-open {
 		top: 0;
 	}
 
+/* Everything above the first product, measured at 390x844 before this block:   */
+/* header 61, air 32, breadcrumbs 44, masthead 87, toolbar 61, a 20px lead-in   */
+/* to the grid - 305px, and the same 305 on a landscape phone, where it is 80%  */
+/* of the screen. None of it is content, so the content is not what gives way:  */
+/* four spacing steps do, and the grid starts 44px earlier. Scoped at 991 and   */
+/* not at 575 deliberately - a phone on its side is 844px WIDE, so a phone-only */
+/* query is exactly the one that would miss the worst case.                     */
+
+	body.other_page .main {
+		padding-top: var(--vs-space-4);
+	}
+
 	.vs-catalogue__masthead {
-		padding: var(--vs-space-4) 0;
+		padding: var(--vs-space-3) 0;
+	}
+
+	.vs-catalogue__toolbar {
+		padding-bottom: var(--vs-space-2);
+	}
+
+	.vs-catalogue__region {
+		padding-top: var(--vs-space-2);
 	}
 
 	.vs-filters__browsed {
@@ -5411,15 +5886,25 @@ body.hc-nav-open {
 
 /* --------------------------------------------------------------- ≤ 767 px */
 
+/* The search row reads as the header growing by one row, not as a white slab     */
+/* dropped on the page. It was inset to the container's gutter with no edge of    */
+/* its own, so it ended mid-sentence over whatever heading happened to be under   */
+/* it. Now it runs to both edges of the screen - the negative insets are the      */
+/* container's own 16px, given back as padding so the field still lines up with   */
+/* the page gutter - and it closes with the same hairline and shadow the sticky   */
+/* header uses, which is what makes it look attached to the bar above it.         */
+
 @media (max-width: 767px) {
 	.vs-search {
 		position: absolute;
 		top: 100%;
-		left: 0;
-		right: 0;
+		left: calc(-1 * var(--vs-space-4));
+		right: calc(-1 * var(--vs-space-4));
 		display: none;
-		padding: var(--vs-space-2) 0 var(--vs-space-4);
+		padding: var(--vs-space-2) var(--vs-space-4) var(--vs-space-3);
+		border-bottom: 1px solid var(--vs-hairline);
 		background-color: var(--vs-surface);
+		box-shadow: var(--vs-shadow-2);
 	}
 
 	.vs-informers__slot--secondary {
@@ -5430,8 +5915,66 @@ body.hc-nav-open {
 /* --------------------------------------------------------------- ≤ 575 px */
 
 @media (max-width: 575px) {
+	/* The plates had 16px between them and 8px inside them - more air outside the   */
+	/* card than in it, which is what the owner saw. The first responsive pass cut   */
+	/* the padding to 8 to buy vertical space; that trade is being reversed here     */
+	/* with the owner's decision, for portrait phones only. The short-viewport block */
+	/* at the end of this file keeps 8px, because a landscape phone is starved of    */
+	/* height in a way a portrait one is not, and it is later in the file so it      */
+	/* still wins there.                                                             */
+
 	.vs-card {
-		padding: var(--vs-space-2);
+		padding: var(--vs-space-3);
+	}
+
+	.vs-catalogue__grid,
+	.vs-related__grid {
+		gap: var(--vs-space-2);
+	}
+
+	/* The extra 4px of padding above comes straight out of the discount row, and   */
+	/* on the home rail there was nothing to spare: its cards are sized by swiper,   */
+	/* not by the grid gap, so they stayed 171px wide while the catalogue's grew to  */
+	/* 175. The widest row this shop can produce is 540 000,00 ₴ plus a two-digit    */
+	/* badge, 145px, against a 145px content box - equal, so it wrapped to two       */
+	/* lines and broke the constant tier height the card is built on. Halving this   */
+	/* gap buys 4px back: 141px into 145 on the rail and into 149 in the grid.       */
+
+	/* At 360px - the commonest Android width, and the first one where this grid    */
+	/* goes two-up - the card's content box is 134px and the widest row this shop   */
+	/* can produce needed exactly 134.00. Equal, so it wrapped. Trimming the        */
+	/* badge's side padding buys 4px of real slack; the ellipsis above is what      */
+	/* stops the next shop with longer numbers from landing here again.            */
+
+	.vs-card__price_second {
+		gap: var(--vs-space-1);
+	}
+
+	.vs-card__price_second .vs-badge--sale {
+		padding: 0 var(--vs-space-1);
+	}
+
+	/* Two-up at 360 and 375 leaves the corner sticker 86-94px beside the tools     */
+	/* and "Топ продажів" wants 97, so it wraps to a second line rather than        */
+	/* losing its last word. A sticker is a phrase, not a number - half of it says  */
+	/* less than all of it on two lines. Only the corner stickers: the sale badge   */
+	/* on the price tier is a single token and must stay on one line.               */
+
+	/* The leading has to come with it. The badge sets line-height to its own font  */
+	/* size, which is fine for one line and clips a descender on two - measured at  */
+	/* 25px of content in a 24px box, the tail of the "д".                          */
+	/*                                                                             */
+	/* The trimmed padding is the same 4px trick the sale badge needs, and for the */
+	/* same reason: on the home rail at 390 the sticker had exactly 97px and       */
+	/* wanted exactly 97, so it wrapped while the catalogue showed it on one line  */
+	/* at the identical viewport. Swiper sizes those cards, the grid does not      */
+	/* reach them. 93 into 97 now, and 375 comes back onto one line too.           */
+
+	.vs-card__badges .vs-badge {
+		padding: 0 var(--vs-space-1-5);
+		white-space: normal;
+		text-align: left;
+		line-height: 1.25;
 	}
 
 	.vs-card__media-link {
@@ -5447,6 +5990,197 @@ body.hc-nav-open {
 		flex: 1 1 60px;
 		padding: 0 var(--vs-space-2);
 		font-size: var(--vs-text-xs);
+	}
+
+	/* .vs-buybox__buy is a wrapping flex row and .vs-buybox__submit sits on a      */
+	/* 160px basis, so at 390px it stays beside the stepper at about 200px wide -   */
+	/* half the screen for the page's primary action. A 100% basis makes it wrap    */
+	/* onto its own line without touching the row anywhere else.                    */
+
+	.vs-buybox__submit {
+		flex: 1 1 100%;
+	}
+
+	/* grid.css gives .container a 7px gutter inherited from Bootstrap. That is too  */
+	/* little on a phone against a theme whose own rhythm steps in 16 and 20, and it */
+	/* put every block seven pixels from the screen edge. See the 576-991 block for  */
+	/* the same value carried up through the tablet band; the real desktop keeps      */
+	/* Bootstrap's number, because above 1366px .container is centred and the         */
+	/* margin is the gutter.                                                          */
+
+	.container-fluid,
+	.container-less,
+	.container {
+		padding-left: var(--vs-space-4);
+		padding-right: var(--vs-space-4);
+	}
+
+	/* The trail is the one element on the page that deliberately leaves the        */
+	/* gutter. It pulls out by the page padding and puts the same value back        */
+	/* inside, so its first crumb starts level with the h1 while the strip itself   */
+	/* reaches the physical screen edge - a word cut at that edge is what says the  */
+	/* row scrolls. Three wrapped 44px rows became one; the 44px stays, because     */
+	/* that is the touch target, and the wrapping was the defect.                   */
+
+	.vs-crumbs {
+		flex-wrap: nowrap;
+		margin-left: calc(var(--vs-space-4) * -1);
+		margin-right: calc(var(--vs-space-4) * -1);
+		padding-left: var(--vs-space-4);
+		padding-right: var(--vs-space-4);
+		overflow-x: auto;
+		overflow-y: hidden;
+		scrollbar-width: none;
+	}
+
+	.vs-crumbs::-webkit-scrollbar {
+		display: none;
+	}
+
+	.vs-crumbs__item {
+		flex: none;
+	}
+
+	/* The global ring sits 2px outside the box, and here it has nowhere to go:     */
+	/* the link is 44px tall inside a 44px strip that clips on both the            */
+	/* overflow-y and the mask. Either one alone erases the ring, so the ring       */
+	/* paints inward instead. Measured before this rule: outline computed as        */
+	/* 2px solid but not one pixel of it reached the screen.                        */
+
+	.vs-crumbs__item a:focus-visible {
+		outline-offset: -2px;
+	}
+
+	/* The fade follows the scroll position instead of being painted once. A        */
+	/* static mask would dim the last crumb's tail even when there is nothing        */
+	/* further to scroll to, which reads as truncated text rather than as more      */
+	/* content. vibe.js sets these two classes.                                     */
+
+	.vs-crumbs.is-overflow-start {
+		mask-image: linear-gradient(to right, transparent 0, #000 var(--vs-space-6));
+	}
+
+	.vs-crumbs.is-overflow-end {
+		mask-image: linear-gradient(to left, transparent 0, #000 var(--vs-space-6));
+	}
+
+	.vs-crumbs.is-overflow-start.is-overflow-end {
+		mask-image: linear-gradient(to right, transparent 0, #000 var(--vs-space-6), #000 calc(100% - var(--vs-space-6)), transparent 100%);
+	}
+
+	/* 40x42 children inside a 1px shell come to 44x122 - the owner asked for       */
+	/* the control to stop dominating the cart row and chose this over a 40x104     */
+	/* variant. Worth stating plainly: each button is 40x42 here, under the 44px    */
+	/* floor the touch-target pass adopted. Three 44px children plus the border     */
+	/* cannot be narrower than 134, so the width the owner asked for and that       */
+	/* floor cannot both hold. It clears WCAG 2.5.8 AA (24x24) with room to spare.  */
+	/* Phones only: the complaint was a phone, and at every wider width the         */
+	/* stepper sits beside a 52px add-to-cart button it has to match.               */
+
+	.vs-stepper__btn,
+	.vs-stepper__input {
+		width: 40px;
+		min-height: 42px;
+	}
+
+	/* One 44px row instead of a 96px 2x2 panel. Sorting is secondary - the       */
+	/* shopper came for the products - so it gets one line, and the four options  */
+	/* are all visible at once in the sheet, which a scrolling row of pills could */
+	/* not have offered.                                                          */
+
+	.vs-sort__trigger {
+		display: inline-flex;
+		width: 100%;
+		min-width: 0;
+		justify-content: space-between;
+	}
+
+	/* .vs-btn sets white-space: nowrap, and the label is the one child here that   */
+	/* can give. Without min-width: 0 it refuses to shrink below its text, and the  */
+	/* row overflows its own border rather than the text being clipped: measured at */
+	/* 320, the trigger box ended at x=179 while the chevron ran to x=195 and the   */
+	/* Фільтр button started at 191 - the glyph floated in the gap between the two  */
+	/* buttons, outside any border. The label box is 67px at 320 (ellipsis), 107 at */
+	/* 360 and 122 at 375 against a 102px longest label, so only the 320 class of    */
+	/* device truncates, and it truncates inside the button instead of spilling.    */
+
+	.vs-sort__trigger_label {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+/* The theme's sort strings are phrase tails - "Сортувати по" lives in a label   */
+/* and "замовчуванням" in the option - so the desktop composes the sentence but  */
+/* the phone's trigger showed the tail alone, starting on a lower-case letter    */
+/* and reading as a fragment. Capitalising just the first letter turns it into a */
+/* label value, which with the sort glyph beside it reads as "sort: default".    */
+/* Done here rather than in lang/ua.php on purpose: that string is shared with   */
+/* the desktop pills, where the lower case is correct after the colon.           */
+
+	.vs-sort__trigger_label::first-letter {
+		text-transform: uppercase;
+	}
+
+	.vs-sort__sheet_head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--vs-space-3);
+		padding: var(--vs-space-4) var(--vs-space-4) 0;
+	}
+
+	.vs-sort__sheet_title {
+		color: var(--vs-heading);
+		font-family: var(--vs-font-display);
+		font-size: var(--vs-text-lg);
+		font-weight: 600;
+	}
+
+	.vs-sort__sheet .vs-sort__group {
+		flex-direction: column;
+		flex-wrap: nowrap;
+		align-items: stretch;
+		gap: 0;
+		row-gap: 0;
+		padding: var(--vs-space-2) var(--vs-space-4) var(--vs-space-6);
+		border: 0;
+		background-color: transparent;
+		overflow-x: visible;
+	}
+
+	.vs-sort__sheet .vs-sort__btn {
+		justify-content: flex-start;
+		width: 100%;
+		min-height: 52px;
+	}
+}
+
+/* --------------------------------------------------------------- ≤ 359 px */
+/* The labelled pill and the price do not both fit at 320px. Measured, not     */
+/* guessed: the bar's content box is 266px there, and price + gap + pill comes */
+/* to 267. It first fits at 337px with 0.02px to spare, so the cut is at 359   */
+/* rather than 337: only the 320px class of device loses the glyph, and no     */
+/* device sits on a hairline. Squeezing the padding does not buy enough - a    */
+/* 12px padding still leaves the pill 1px over - so the glyph gives way: it is */
+/* the redundant half of the button once the words are back, and dropping it   */
+/* frees the icon plus its gap, 28px, leaving 11px of slack at 320.            */
+
+/* The pre-order button has no glyph to give up - it never had one, because a    */
+/* cart icon is the wrong symbol for ordering something that is not in stock -   */
+/* and "Передзамовлення" is one unbreakable word. At 320 it ran 2.9px past the   */
+/* bar's content box into the padding. Its 20px sides come from .vs-btn, and     */
+/* 12px here buys 16px back, which clears it with room rather than on a          */
+/* hairline. The in-stock pill takes the same trim and is further inside for it. */
+
+@media (max-width: 359px) {
+	.vs-sticky-buy__cta--icon svg {
+		display: none;
+	}
+
+	.vs-sticky-buy__cta {
+		padding-left: var(--vs-space-3);
+		padding-right: var(--vs-space-3);
 	}
 }
 
@@ -5802,6 +6536,19 @@ body.hc-nav-open {
 	grid-area: qty;
 	justify-self: start;
 	align-self: center;
+}
+
+/* The cart's stepper is the small one - 122x44 rather than the 134x52 of the    */
+/* product page, which is sized to stand beside a 52px add-to-cart button. Here  */
+/* its neighbours are the coupon field and its apply button, both 44 tall, and a */
+/* line already carrying a thumbnail, a name, a unit price and a total. Below    */
+/* 576px every stepper in the theme is this size already, so this only extends   */
+/* it upwards; the buybox keeps the large one.                                   */
+
+.vs-cart__qty .vs-stepper__btn,
+.vs-cart__qty .vs-stepper__input {
+	width: 40px;
+	min-height: 42px;
 }
 
 .vs-cart__qty-static {
@@ -6215,39 +6962,38 @@ body.hc-nav-open {
 	display: block;
 }
 
+/* Direct children only, and that child combinator is load-bearing. Delivery     */
+/* modules lay their fields out in Bootstrap columns, one .form__group per       */
+/* column, so every one of them is the last child of its own column. A           */
+/* descendant version of this rule matched all of them and deleted the gap       */
+/* between every stacked field on a phone - invisible on a desktop, where the    */
+/* columns sit side by side and no vertical gap is wanted anyway.                */
+
 .vs-option__extra > *:last-child {
 	margin-bottom: 0;
 }
 
-.vs-option__extra .form__group:last-child {
-	margin-bottom: 0;
-}
-
-/* Payment and delivery modules render their own markup in here and this layer  */
-/* does not own it. These rules only lift the stock form controls to the same    */
-/* height, radius and border as the rest of the page.                            */
-
-.vs-option__extra .form__input,
-.vs-option__extra .form__input_captcha {
-	height: 44px;
-	border-color: var(--vs-border);
-	border-radius: var(--vs-radius-sm);
-	background-color: var(--vs-n-25);
-	font-size: var(--vs-text-base);
-}
+/* Same two states .vs-field uses, so a delivery field and a contact field       */
+/* respond identically. The single combined rule this replaces gave focus the    */
+/* hover colour, which made the cart the only place in the shop where a focused  */
+/* field looked like a hovered one.                                              */
 
 .vs-option__extra .form__input:hover,
-.vs-option__extra .form__input:focus,
-.vs-option__extra .form__input_captcha:hover,
-.vs-option__extra .form__input_captcha:focus {
+.vs-option__extra .form__input_captcha:hover {
 	border-color: var(--vs-border-strong);
+	background-color: var(--vs-surface);
+}
+
+.vs-option__extra .form__input:focus,
+.vs-option__extra .form__input_captcha:focus {
+	border-color: var(--vs-ink);
 	background-color: var(--vs-surface);
 }
 
 .vs-option__extra .form__textarea {
 	min-height: 88px;
 	border-color: var(--vs-border);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	font-size: var(--vs-text-base);
 }
@@ -6634,8 +7380,26 @@ body.hc-nav-open {
 		display: inline;
 	}
 
-	.vs-cart__line:not(.vs-cart__line--compact):not(.vs-cart__line--static) {
+/* The track list lives on the container and the lines borrow it with subgrid,   */
+/* because each line used to be its own grid and a grid only ever aligns its own */
+/* tracks. The line total is content-sized, so 499 000,00 in one line and 109,00 */
+/* in the next gave the two lines different track widths and the flexible name    */
+/* column swallowed the difference - the steppers below each other started 33px   */
+/* apart. With subgrid both auto tracks are measured once across every line: the  */
+/* stepper column is a constant 122px and the total column is as wide as the      */
+/* widest total in the cart, so the steppers share a left edge and the prices     */
+/* share a right one. A fixed width on the total column would align them too, but */
+/* it would either cost the product name 40px it needs at 992px or let a longer   */
+/* price run over the stepper.                                                    */
+
+	.vs-cart__lines--main {
+		display: grid;
 		grid-template-columns: 88px minmax(0, 1fr) auto auto 44px;
+	}
+
+	.vs-cart__line:not(.vs-cart__line--compact):not(.vs-cart__line--static) {
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
 		grid-template-areas: "thumb info qty total remove";
 		align-items: center;
 		gap: var(--vs-space-4);
@@ -6652,9 +7416,16 @@ body.hc-nav-open {
 
 /* --------------------------------------------------- checkout ≥ 992 px */
 
+/* The summary grows with the page instead of staying at the 340px it needs at    */
+/* 992px, where the product name in a cart line is down to 146px and cannot pay   */
+/* for anything. The container caps at 1352px from 1366px up, so 30% resolves to  */
+/* 406 there and the clamp holds it at 400 - the summary gains 60px and the main   */
+/* column still leaves the name 468px. At 992px 30% is 293, below the floor, so    */
+/* that width keeps 340 exactly as before.                                        */
+
 @media (min-width: 992px) {
 	.vs-cart {
-		grid-template-columns: minmax(0, 1fr) 340px;
+		grid-template-columns: minmax(0, 1fr) clamp(340px, 30%, 400px);
 		gap: var(--vs-space-8);
 	}
 
@@ -7225,15 +7996,31 @@ body.hc-nav-open {
 /* them - the heading is the heading.                                            */
 
 /* overflow-x: clip, not hidden: the rail below pulls itself out by half a      */
-/* gutter on each side and .vs-home__section zeroes .container's own horizontal */
-/* padding, so under 1366px that half-gutter is real page overflow - 383px of   */
-/* document in a 375px viewport, measured. What is being clipped is the empty   */
-/* padding inside the first and last slide, never a card. `clip` rather than    */
-/* `hidden` so the vertical axis stays visible and a card's hover shadow is not */
-/* cut off at the section edge.                                                 */
+/* gutter on each side, and .container only grants 7px, so 1px of that pull is  */
+/* real page overflow. Forcing overflow-x: visible and reading                  */
+/* document.documentElement.scrollWidth against window.innerWidth measures 1px  */
+/* at 576, 768, 1200 and 1366, and 0 from 1380 up - the container's own         */
+/* max-width is 1366, but the viewport has to exceed it by twice the 7px        */
+/* half-gutter before the centring margin absorbs the pull. Below 576px the     */
+/* container grants 16px and there is nothing left to overflow past. What is    */
+/* clipped is the empty padding inside the first and last slide, never a card.  */
+/* `clip` rather than `hidden` so the vertical axis stays visible and a card's  */
+/* hover shadow is not cut off at the section edge.                             */
+
+/* The section keeps .container's own horizontal padding at every width. It      */
+/* used to zero it from 576px up, on the reasoning that the container is        */
+/* centred and wide up there - which is only true past 1366px, where grid.css   */
+/* caps the container. Between 576 and 1366 the container is full-bleed, so the */
+/* zero put the section's own content on x=0 and clipped the last card of every */
+/* grid against the screen edge; measured at 768, where the catalogue sits at 7 */
+/* and the home page sat at 0. The rail is unaffected either way: its -8/+8     */
+/* pull is relative to whatever padding the section has, so its first card      */
+/* still lands exactly on the title. It also cuts the overflow the block above  */
+/* describes from 8px to 1px, because -8 now starts from 7 rather than from 0.  */
 
 .vs-home__section {
-	padding: var(--vs-space-8) 0 0;
+	padding-top: var(--vs-space-8);
+	padding-bottom: 0;
 	overflow-x: clip;
 	overflow-y: visible;
 }
@@ -7391,14 +8178,25 @@ body.hc-nav-open {
 /* owner configures how many advantage banners exist.                             */
 
 /* .container still carries the legacy 7px of horizontal padding. Every homepage */
-/* section zeroes it through .vs-home__section's own padding shorthand, but this */
-/* wrapper is a bare .container, so the strip started 7px inside every other     */
-/* block on the page - measured 44px against 37px at 1440.                       */
+/* section zeroes it above 576px via .vs-home__section's own media-scoped rule,  */
+/* but this wrapper is a bare .container, so the strip started 7px inside every  */
+/* other block on the page - measured 44px against 37px at 1440.                 */
+
+/* Scoped to 576px up: that 7px is only still real from there. Below 576px       */
+/* .container's own gutter is now 16px (the first ≤575px block above), the same */
+/* value every other mobile block gets, so this strip should inherit it rather  */
+/* than be zeroed - an unscoped zero here has equal specificity to that rule    */
+/* and sits later in the file, so it would silently win the tie at every width. */
 
 .vs-advantages {
 	margin-top: var(--vs-space-8);
-	padding-left: 0;
-	padding-right: 0;
+}
+
+@media (min-width: 576px) {
+	.vs-advantages {
+		padding-left: 0;
+		padding-right: 0;
+	}
 }
 
 .vs-advantages .block {
@@ -9441,6 +10239,21 @@ img.lazy:not(.loaded) {
 	border-color: var(--vs-border-strong);
 }
 
+/* The sticky buy bar and this button are both fixed at the same z-layer and   */
+/* both anchor near the bottom-left on phones - harmless while the bar was a   */
+/* full-bleed strip this button was flush against, but once the bar floats as  */
+/* an inset pill the two collide directly on top of the price. The class      */
+/* alone isn't a safe guard: vibe.js's IntersectionObserver sets is-visible at */
+/* every width, with no matchMedia guard, while the bar itself only renders    */
+/* below 992px. Without this breakpoint the button would lift to clear a bar   */
+/* that isn't even on screen above 992px. So the lift is scoped to the same    */
+/* width the bar renders at, and only applies while the bar is actually shown. */
+@media (max-width: 991px) {
+	body:has(.vs-sticky-buy.is-visible) .to_top {
+		bottom: calc(var(--vs-space-3) + env(safe-area-inset-bottom) + var(--vs-sticky-buy-h) + var(--vs-space-3));
+	}
+}
+
 /* Nudged down by 2px: an up-chevron drawn from a rotated square is optically   */
 /* low in its box because the visual mass sits under the apex.                  */
 
@@ -9656,11 +10469,13 @@ img.lazy:not(.loaded) {
 /* hidden, and fancybox lifts it into a lightbox from the rocket button on a   */
 /* product card - so it is the one legacy form still reaching shoppers.        */
 /*                                                                             */
-/* .form__placeholder is a <span> that FOLLOWS its input in the DOM, which the */
-/* legacy sheet floated over the field and animated on focus. It is pinned      */
-/* instead: the field is tall enough to hold a caption line above the value and */
-/* the caption never moves, so it reads the same whether or not okay.js has     */
-/* toggled .filled - and a shopper filling the form never watches text slide.   */
+/* .form__placeholder is a <span> that FOLLOWS its input in the DOM. The legacy */
+/* sheet floated it over the field; this layer used to pin it inside a 56px     */
+/* box. It is now a plain caption above a 44px field - the same shape           */
+/* .vs-form__label and .vs-field already have - so the checkout stops showing   */
+/* two different kinds of input on one screen. The span keeps its DOM position  */
+/* and is lifted visually by `order`, which is what keeps the                   */
+/* `.form__input.error ~ .form__placeholder` selector working.                  */
 
 .form {
 	position: relative;
@@ -9671,6 +10486,18 @@ img.lazy:not(.loaded) {
 	border: 1px solid var(--vs-hairline);
 	border-radius: var(--vs-radius-lg);
 	background-color: var(--vs-surface);
+}
+
+/* Every lightbox in the theme is a fancybox one, and fancybox's own stylesheet   */
+/* paints .fancybox-content white with square corners. The pop-up cart inside it  */
+/* already had --vs-radius-lg, but nobody could see it: the white box around it   */
+/* was the same colour and 44px larger on every side. The radius belongs on the   */
+/* element that draws the panel. No overflow: hidden with it - fancybox's own      */
+/* padding keeps content off the corners, and clipping would cut the close button */
+/* fancybox positions at the top right.                                           */
+
+.fancybox-content {
+	border-radius: var(--vs-radius-lg);
 }
 
 .popup {
@@ -9706,17 +10533,28 @@ img.lazy:not(.loaded) {
 
 .form__group {
 	position: relative;
+	display: flex;
+	flex-direction: column;
 	margin-bottom: var(--vs-space-3);
+}
+
+/* One group holds a checkbox and its label instead of a field and a caption    */
+/* - NovaposhtaCost's cash-on-delivery tick. A column stretches that label to   */
+/* the full row and hands it a tap target three times the width of its own      */
+/* text, so it keeps its intrinsic width.                                       */
+
+.form__group > label {
+	align-self: flex-start;
 }
 
 .form__input,
 .form__textarea {
 	display: block;
 	width: 100%;
-	min-height: 56px;
-	padding: 22px var(--vs-space-3) 6px;
+	min-height: 44px;
+	padding: 0 var(--vs-space-3);
 	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	color: var(--vs-text);
 	font-family: inherit;
@@ -9728,6 +10566,8 @@ img.lazy:not(.loaded) {
 
 .form__textarea {
 	min-height: 96px;
+	padding: var(--vs-space-3);
+	line-height: var(--vs-leading-body);
 	resize: vertical;
 }
 
@@ -9749,13 +10589,12 @@ img.lazy:not(.loaded) {
 }
 
 .form__placeholder {
-	position: absolute;
-	top: 8px;
-	left: var(--vs-space-3);
-	z-index: 1;
+	order: -1;
+	margin-bottom: var(--vs-space-2);
 	color: var(--vs-text-muted);
-	font-size: var(--vs-text-xs);
-	line-height: 1.2;
+	font-size: var(--vs-text-sm);
+	line-height: var(--vs-leading-body);
+	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	pointer-events: none;
@@ -9817,14 +10656,27 @@ img.lazy:not(.loaded) {
 	font-size: var(--vs-text-sm);
 }
 
+/* Bottom, not centre. The sum on the left is 44px; the column beside it is 72,  */
+/* because its field now carries a caption above it. Centring the pill against   */
+/* the whole column put it 14px down - level with neither the caption nor the    */
+/* field it belongs to. Both boxes are 44px tall, so aligning their bottoms      */
+/* lines the pill up with the input exactly.                                     */
+
 .captcha {
 	display: inline-flex;
-	align-items: center;
+	align-items: flex-end;
 	gap: var(--vs-space-2);
 }
 
+/* FastOrder wraps the captcha's input and caption in this span rather than in  */
+/* a .form__group, so it needs the same column of its own - without it the      */
+/* caption's `order: -1` has no flex container to act on and the one field on   */
+/* the form labelled from below is the captcha.                                 */
+
 .form__captcha {
 	position: relative;
+	display: flex;
+	flex-direction: column;
 	flex: 1 1 auto;
 }
 
@@ -9838,7 +10690,7 @@ img.lazy:not(.loaded) {
 	min-height: 44px;
 	padding: 0 var(--vs-space-3);
 	border: 1px solid var(--vs-hairline);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-surface-subtle);
 	color: var(--vs-heading);
 	font-size: var(--vs-text-base);
@@ -10014,6 +10866,415 @@ img.lazy:not(.loaded) {
 }
 
 /* ============================================================================ */
+/* SHORT VIEWPORT                                                               */
+/* ============================================================================ */
+
+/* A phone held sideways is 844x390: a tablet's width on a third of a phone's   */
+/* height. Every width breakpoint above has already fired and handed it the     */
+/* tablet layout, so the correction cannot key off width - it keys off height.  */
+/*                                                                             */
+/* 500px is the threshold because no tablet reaches it (an iPad sideways is     */
+/* 1180x820) and every phone in landscape is under it (844x390, 800x360,        */
+/* 736x414). It also catches a short desktop window and a tablet in split view, */
+/* which want the same treatment for the same reason.                          */
+/*                                                                             */
+/* Placed after every width block and before TOUCH TARGETS, which stays last:   */
+/* these rules and the min-width rules they correct carry equal specificity, so */
+/* source order is what decides them.                                          */
+
+@media (max-height: 500px) {
+
+/* 21/9 from 768px makes the banner 356px at 844px wide. Under a 61px header on */
+/* a 390px viewport that is the entire fold. 60vh is 234px there, which leaves  */
+/* about 95px of the next section showing - enough to say the page continues.   */
+
+	.main_banner .banner_group__item {
+		aspect-ratio: auto;
+		height: 60vh;
+	}
+
+/* The rhythm is tuned for a viewport at least twice this tall. Section padding */
+/* alone costs 48px between every pair of sections on a 390px screen.           */
+
+	.vs-section {
+		padding-top: var(--vs-space-5);
+	}
+
+	.vs-checkout__body {
+		padding: var(--vs-space-4) 0 var(--vs-space-5);
+	}
+
+	.vs-pdp__masthead,
+	.vs-catalogue__masthead,
+	.vs-page__masthead,
+	.vs-blog__masthead {
+		padding: var(--vs-space-3) 0;
+	}
+
+/* The card's breathing room is tuned for a portrait screen. These are the same */
+/* values the 575px block already uses. The plate cap is what does the work: a  */
+/* 1:1 plate in a three-column grid is 250px tall at 844, and capping it takes  */
+/* 68px off every row. It cannot bring row two above the fold - the page        */
+/* furniture above the grid already fills 313px of a 390px landscape screen.    */
+
+	.vs-card {
+		padding: var(--vs-space-2);
+	}
+
+	.vs-card__media-link {
+		padding: var(--vs-space-3);
+	}
+
+	.vs-card__media {
+		max-height: 180px;
+	}
+
+/* A lightbox is the one thing on the page that cannot scroll away from its own */
+/* chrome. FastOrder's three fields came to 413px against a 390px landscape     */
+/* screen once each field gained a caption above it, so the form was 23px past  */
+/* the fold before the shopper typed anything. Taken from the frame rather than */
+/* from the fields: the box's own padding gives 16, the header and footer 8     */
+/* each, and 381 clears 390 with room. Nothing here touches a field's height or */
+/* its 44px target.                                                             */
+
+	.fancybox-content {
+		padding: var(--vs-space-3);
+	}
+
+	.form__header {
+		margin-bottom: var(--vs-space-2);
+	}
+
+	.form__footer {
+		margin-top: var(--vs-space-3);
+	}
+
+/* The frame alone clears 390 but not 375, which is an iPhone SE sideways - the */
+/* narrowest screen this layer is written for. The last 12px come from the gap  */
+/* between each caption and its own field, three of them at 4px instead of 8.   */
+
+	.form__placeholder {
+		margin-bottom: var(--vs-space-1);
+	}
+
+/* Below 360px of height the frame trim is not enough - the box is 373 and even  */
+/* 320px-tall phones exist sideways - so the fields go two-up. A lightbox is     */
+/* about 460px wide, which is room for two 210px fields, and the height that     */
+/* buys is a whole row: 373 down to 285.                                         */
+/*                                                                              */
+/* Safe as a grid because the three hidden inputs and the error div in this      */
+/* body are all display: none and so generate no grid items - verified, not      */
+/* assumed. The product name is the one real child that must not sit in a        */
+/* column, so it spans.                                                          */
+
+	.fancybox-content .form__body {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		column-gap: var(--vs-space-3);
+	}
+
+	.fancybox-content .form__body > .h6 {
+		grid-column: 1 / -1;
+	}
+
+/* The order button is the one control on the checkout that has to be reachable  */
+/* without hunting. Once the summary moves beside the fields (see the short-and- */
+/* wide block) it starts at y=134 and its own bottom - the button - lands at     */
+/* 447 on a 390px screen: the total is visible, the button is 57px under the     */
+/* fold. 27px of that comes from the page title above it and 36 from the         */
+/* summary's own frame, which puts the button at 384 and the whole summary on    */
+/* the first screen. No field, row or button loses height.                       */
+
+	.vs-checkout__title {
+		margin-bottom: var(--vs-space-2);
+		font-size: var(--vs-text-xl);
+	}
+
+	.vs-summary {
+		padding: var(--vs-space-3);
+	}
+
+	.vs-summary__title {
+		margin-bottom: var(--vs-space-2);
+	}
+
+	.vs-summary__row--total {
+		margin-top: var(--vs-space-1);
+	}
+
+	.vs-summary__submit {
+		margin-top: var(--vs-space-3);
+	}
+
+/* The promo field goes below the button. It is 106px of the summary and it sat  */
+/* first, between the title and the totals, because .vs-summary__coupon is       */
+/* display: contents and .vs-coupon therefore lands at order 0 in the explicit   */
+/* sequence above. On a 390px screen that 106px is what kept the order button    */
+/* under the fold; moved to the end it puts the button at 292 with its bottom at */
+/* 344, so the total and the button are both on the first screen. Nothing is     */
+/* hidden - a shopper with a code scrolls one panel for it, a shopper without    */
+/* one stops needing to scroll at all. The divider moves to the top edge so it   */
+/* still separates the block from the button now above it.                       */
+
+	.vs-checkout .vs-coupon {
+		order: 6;
+		margin-top: var(--vs-space-3);
+		margin-bottom: 0;
+		padding-top: var(--vs-space-3);
+		padding-bottom: 0;
+		border-top: 1px solid var(--vs-hairline);
+		border-bottom: 0;
+	}
+}
+
+/* ------------------------------------------------ short and wide: phone in landscape */
+
+/* 640px keeps an iPhone SE sideways (667x375) in this layer while excluding a  */
+/* narrow window that merely happens to be short.                              */
+
+@media (max-height: 500px) and (min-width: 640px) and (max-width: 991px) {
+	.vs-section {
+		padding-top: var(--vs-space-6);
+	}
+
+/* Width is the one thing a phone in landscape has. The 992px layout already    */
+/* knows this shape - gallery left, buy box right - so it is reused here with   */
+/* tracks that fit 844px rather than 1220px.                                    */
+
+	.vs-pdp__layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+		gap: var(--vs-space-5);
+		align-items: start;
+	}
+
+	.vs-pdp__gallery {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.vs-buybox {
+		grid-column: 2;
+		grid-row: 1 / span 2;
+	}
+
+/* The 480px cap exists because an uncapped square stage in ONE column is 897px */
+/* tall at 991px wide. In two columns the stage is half the page and that       */
+/* cannot happen below 992px, where this block stops - above it the real        */
+/* desktop layout already exists, and half of 1440 is still 720px, so the cap    */
+/* has to stay in force there instead of being dropped again.                   */
+
+	.vs-gallery__frame {
+		max-width: none;
+		margin: 0;
+	}
+
+/* Same argument applied to the catalogue's masthead. Stacked, it spends 85px    */
+/* of a 390px screen on a title and a count that together use the left third of */
+/* an 844px row - the other two thirds are empty. On one baseline it is 45px,    */
+/* and the title comes down one step because a 28px heading is sized for a page  */
+/* that has room to spare. The annotation, when a category has one, keeps its    */
+/* own full-width line.                                                          */
+
+	.vs-catalogue__masthead {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		column-gap: var(--vs-space-3);
+	}
+
+	.vs-catalogue__title {
+		font-size: var(--vs-text-xl);
+	}
+
+	.vs-catalogue__masthead .vs-results {
+		margin: 0;
+	}
+
+	.vs-catalogue__intro {
+		flex: 1 0 100%;
+	}
+
+/* The product page's masthead is the same shape and the same waste: a title    */
+/* and a meta row stacked down the left of an 844px page, 113px before the      */
+/* gallery starts. On one baseline it is 49, so the photograph and the price    */
+/* both land above the fold instead of only the photograph's top edge.          */
+
+	.vs-pdp__masthead {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		column-gap: var(--vs-space-4);
+	}
+
+	.vs-pdp__title {
+		font-size: var(--vs-text-xl);
+	}
+
+	.vs-pdp__meta {
+		margin-top: 0;
+	}
+
+/* The checkout, same trade again. .vs-cart already has exactly two children -   */
+/* the fields and the summary - and a two-column shape from 992px up, so nothing */
+/* new has to be built: the existing tracks just never reached a phone on its    */
+/* side. Stacked, the summary sat 2043px down a 2561px page, which put the total */
+/* and the order button six screens from the top. Beside the fields they are on  */
+/* the first screen instead.                                                     */
+/*                                                                              */
+/* Deliberately NOT sticky here, unlike the 992px rule. The summary is 385px     */
+/* tall and the viewport is 390: pinned at a 16px offset its own bottom - the    */
+/* submit button - would sit below the fold and stay there however far the page  */
+/* scrolled. In the right column's normal flow it is visible from the start.     */
+
+	.vs-cart {
+		grid-template-columns: minmax(0, 1fr) 280px;
+		gap: var(--vs-space-5);
+	}
+
+/* The line goes back to two rows, which is the shape it has below 768px. The    */
+/* single-row version above that width sizes the stepper and the line total from */
+/* their content and hands the remainder to the name, and the remainder here is  */
+/* 60px of a 480px line - the price under "Диван RedKing" broke across three     */
+/* lines. That is a consequence of the two-column cart above, not a pre-existing */
+/* bug: until the summary moved sideways the main column had the whole page.     */
+/* The total shares the second row with the stepper, as it does on a phone.      */
+
+	.vs-cart__line:not(.vs-cart__line--compact):not(.vs-cart__line--static) {
+		grid-template-columns: 72px minmax(0, 1fr) 44px;
+		grid-template-areas: "thumb info remove" "qty qty qty";
+		align-items: start;
+		gap: var(--vs-space-3);
+	}
+
+	.vs-cart__line:not(.vs-cart__line--compact):not(.vs-cart__line--static) .vs-cart__linetotal {
+		grid-area: qty;
+	}
+
+}
+
+/* ============================================================================ */
+/* TRANSLUCENT CHROME                                                           */
+/* ============================================================================ */
+
+/* The blur is the visible part but the translucency is the actual change:      */
+/* backdrop-filter does nothing behind an opaque background, and both of these  */
+/* were fully opaque.                                                          */
+/*                                                                             */
+/* The colour cannot be a literal rgba. --vs-surface is var(--okay-boxed-color),*/
+/* the shade the shop owner sets in the admin panel, so the translucent value   */
+/* is mixed from whatever they chose. By the time the browser sees it the token */
+/* holds a plain colour, so color-mix resolves normally.                       */
+/*                                                                             */
+/* Both properties live inside @supports together on purpose. A browser without */
+/* backdrop-filter must keep the opaque surface: giving it the translucency     */
+/* alone would be a see-through bar with no blur, worse contrast than today.    */
+/*                                                                             */
+/* Placed here and not beside .vs-header__main, for the same reason the two     */
+/* blocks below it are: .vs-sticky-buy sets its own background-color at equal   */
+/* specificity further down the file, so a copy of this rule up in the header   */
+/* section loses the cascade on the buy bar and leaves it opaque with a blur    */
+/* that has nothing to blur. Measured that way first: bg stayed opaque          */
+/* rgb(255, 255, 255). TOUCH TARGETS still stays last.                         */
+/*                                                                             */
+/* .vs-header has to give up its own fill or the whole thing is invisible on a  */
+/* phone, which is the only place it matters. Below 992px .vs-header is the     */
+/* element that pins (position: sticky, from the max-width: 991 block) and      */
+/* .vs-header__utility is display: none, so the two boxes are the same 390x61   */
+/* rectangle - and an opaque parent is exactly what a child's backdrop-filter   */
+/* samples. Computed style read color(srgb 1 1 1 / 0.82) and blur(12px) while   */
+/* the rendered band was a flat 255,255,255 at every scroll offset tested.      */
+/* Above 992px .vs-header goes back to being ordinary flow content that scrolls */
+/* away (sticky.min.js pins .vs-header__main itself, data-sticky-for="991"), so */
+/* the only thing it was still painting for is the utility strip, which now     */
+/* carries the surface colour on its own rule and keeps it opaque.              */
+
+/* Bounded at 991px, which is where it earns its keep. On a phone the bar is     */
+/* narrow and content runs under it continuously, so it reads as frosted glass.  */
+/* At 1440 the bar is wide and mostly empty: the only thing under it is whatever */
+/* happens to be in the right-hand fifth, and the blur turns that into a pale    */
+/* cloud aligned to nothing behind the icons - a dirty corner rather than a      */
+/* material. Looked at before deciding; the numbers were fine at both widths.    */
+/* .vs-sticky-buy is already phone-only, so the bound costs it nothing.          */
+
+@media (max-width: 991px) {
+	@supports (backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px)) {
+		.vs-header {
+			background-color: transparent;
+		}
+
+		.vs-header__utility {
+			background-color: var(--vs-surface);
+		}
+
+		.vs-header__main,
+		.vs-sticky-buy {
+			background-color: color-mix(in srgb, var(--vs-surface) 82%, transparent);
+			-webkit-backdrop-filter: blur(12px);
+			backdrop-filter: blur(12px);
+		}
+	}
+}
+
+/* ------------------------------------------------- tablet band: 576 - 991 px */
+
+/* The same 16px gutter the phone block sets, carried through the tablet band.  */
+/* Between 576 and 1366 .container is full-bleed - its max-width only bites     */
+/* past 1366 - so Bootstrap's 7px was the whole distance from a card's border   */
+/* to the screen edge at 768, against 16 on a phone and a centring margin on a  */
+/* real desktop. This band was simply the one nobody had measured. Bounded at   */
+/* 991 so the desktop layouts keep the value they were designed against.        */
+
+@media (min-width: 576px) and (max-width: 991px) {
+	.container-fluid,
+	.container-less,
+	.container {
+		padding-left: var(--vs-space-4);
+		padding-right: var(--vs-space-4);
+	}
+}
+
+/* ============================================================================ */
+/* POINTER TARGETS                                                              */
+/* ============================================================================ */
+
+/* 44px is the floor for a finger and the block below raises everything to it,   */
+/* but only up to 991px. WCAG 2.5.8 AA asks 24x24 of a POINTER too, and three    */
+/* links stayed under it at every width from 992 up - measured at 992, 1180,     */
+/* 1200 and 1440, identical each time, so this was never the 1180x820 case it    */
+/* was first filed as. All three are real links, none of them inline in a         */
+/* sentence, so neither of the exceptions applies:                               */
+/*                                                                              */
+/* - .vs-copyright__mark, an <a> to the CMS with an SVG and no text, 11x16 -     */
+/*   the smallest target on the site;                                            */
+/* - .vs-post-card__author, a standalone byline link, 4px short at 20;            */
+/* - .vs-cart__name, the product title in a cart line, 18 tall.                  */
+/*                                                                              */
+/* 24 rather than 44: with a mouse the extra 20px would push the footer mark     */
+/* out of its row and give a byline the height of a button. This range is         */
+/* disjoint from the block below, so their source order cannot matter and TOUCH   */
+/* TARGETS still stays last.                                                     */
+
+@media (min-width: 992px) {
+	.vs-copyright__mark {
+		align-items: center;
+		justify-content: center;
+		min-width: 24px;
+		min-height: 24px;
+	}
+
+	.vs-post-card__author {
+		display: inline-flex;
+		align-items: center;
+		min-height: 24px;
+	}
+
+	.vs-cart__name {
+		min-height: 24px;
+	}
+}
+
+/* ============================================================================ */
 /* TOUCH TARGETS                                                                */
 /* ============================================================================ */
 
@@ -10087,13 +11348,14 @@ img.lazy:not(.loaded) {
 	}
 
 /* Card titles. Two lines of 20px leading come to 40.3px, four short of the     */
-/* floor, so the box grows and the type does not move: the title sits at the    */
-/* top of a flex column and the extra pixels fall below the last line.          */
+/* floor, so min-height carries the difference. It must NOT become a flex box   */
+/* to get there: -webkit-line-clamp only works on display: -webkit-box, which   */
+/* the base rule sets, and display: flex here silently disabled the clamp -     */
+/* titles ran to five lines and card heights varied by 57px. The .vs-cart__name */
+/* rule below states the same constraint and got it right.                      */
 
 	.vs-card__name,
 	.vs-post-card__link {
-		display: flex;
-		align-items: flex-start;
 		min-height: 44px;
 	}
 
@@ -10128,18 +11390,27 @@ img.lazy:not(.loaded) {
 /* from here. The logo link is a real link to the homepage on every page but the   */
 /* homepage itself, where the template emits href="javascript:;".                  */
 /*                                                                                 */
-/* Both selectors are written `ul.top-nav` on purpose. The stripping rule that     */
-/* takes the generic nav-item chrome off these two rows is                         */
+/* Written as `ul.top-nav .mobile__link` on purpose. The stripping rule that       */
+/* takes the generic nav-item chrome off this row is                               */
 /* `.hc-offcanvas-nav ul.top-nav .mobile__link { min-height: 0 }` at 0,3,1; a bare  */
 /* `.hc-offcanvas-nav .mobile__link` is 0,2,0 and loses to it however late it       */
 /* appears. Matching its weight and sitting later in the file is what makes the     */
-/* 44px land. .account__link already carries min-height: 44px from its own block    */
-/* above; it is repeated here so the pair is legible as one touch-target decision.  */
+/* 44px land.                                                                       */
 
-	.hc-offcanvas-nav ul.top-nav .mobile__link,
-	.hc-offcanvas-nav ul.top-nav .account__link {
+	.hc-offcanvas-nav ul.top-nav .mobile__link {
 		display: inline-flex;
 		align-items: center;
+		min-height: 44px;
+	}
+
+/* The header search button. .vs-search is display: none below 768px, so the    */
+/* 375 portrait pass never rendered this control at all - not exempt, just      */
+/* invisible where that pass looked. From 768 up it is inline and 44x38, the    */
+/* 38 coming from a 3px inset on both sides of a 44px-tall .vs-search. Growing   */
+/* it here keeps the fix inside the 60px header bar with room to spare, and     */
+/* leaves the >991 desktop bar untouched, same as every other rule above.       */
+
+	.vs-search__submit {
 		min-height: 44px;
 	}
 }
@@ -10158,6 +11429,19 @@ img.lazy:not(.loaded) {
 /* clip comes from the module's own ratio box, opening it up would let the slide  */
 /* bleed, and 30 x 41.3 on a 38px pitch still clears WCAG 2.5.8 by the spacing    */
 /* rule (24px circles centred on each dot never intersect).                       */
+
+/* The product rails carry no dots. They only ever rendered below 992px - the    */
+/* desktop rule already hid them - and the owner asked for them gone: four grey  */
+/* dots under every rail read as debris rather than as a control. Scoped to      */
+/* .fn_products_slide so the main banner keeps its own, which is a different     */
+/* thing: that one paginates full-bleed slides with nothing else to show them.   */
+/* Worth stating plainly, because it is the cost: with two of five cards in      */
+/* view, overflow: hidden and no peeking third card, the rail now gives no       */
+/* visual sign that it scrolls at all.                                           */
+
+.fn_products_slide .swiper-pagination {
+	display: none;
+}
 
 .swiper-pagination-bullet {
 	position: relative;

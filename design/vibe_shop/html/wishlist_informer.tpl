@@ -1,4 +1,4 @@
-<!-- Информер избранного (отдаётся аяксом) -->
+<!-- Інформер обраного (віддається аяксом) -->
 {if $wishlist->products|count > 0}
     <a class="vs-informer" href="{url_generator route="wishlist"}" title="{$lang->wishlist_header|escape}" aria-label="{$lang->wishlist_header|escape}">
         {include file="svg.tpl" svgId="heart"}

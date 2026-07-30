@@ -5,14 +5,14 @@ function okayCsrfToken() {
   return match ? match[1] : "";
 }
 
-/* Начальное кол-во для смены в карточке и корзине */
+/* Початкова к-ть для зміни в картці та кошику */
 okay.amount = 1;
 
-/* Аяксовая корзина */
+/* Аяксовий кошик */
 $(document).on("submit", ".fn_variants", function (e) {
   e.preventDefault();
   var variant, amount;
-  /* Вариант */
+  /* Варіант */
   if ($(this).find("input[name=variant]:checked").length > 0) {
     variant = $(this).find("input[name=variant]:checked").val();
   } else if ($(this).find("input[name=variant]").length > 0) {
@@ -20,13 +20,13 @@ $(document).on("submit", ".fn_variants", function (e) {
   } else if ($(this).find("select[name=variant]").length > 0) {
     variant = $(this).find("select[name=variant]").val();
   }
-  /* Кол-во */
+  /* К-ть */
   if ($(this).find("input[name=amount]").length > 0) {
     amount = $(this).find("input[name=amount]").val();
   } else {
     amount = 1;
   }
-  /* ajax запрос */
+  /* ajax запит */
   $.ajax({
     url: okay.router["cart_ajax"],
     type: "post",
@@ -50,7 +50,7 @@ $(document).on("submit", ".fn_variants", function (e) {
   });
 });
 
-/* Смена варианта в превью товара и в карточке */
+/* Зміна варіанта в прев'ю товару та в картці */
 $(document).on("change", ".fn_variant", function () {
   var selected = $(this).children(":selected"),
     parent = selected.closest(".fn_product"),
@@ -63,7 +63,7 @@ $(document).on("change", ".fn_variant", function () {
     units = selected.data("units");
   price.html(selected.data("price"));
   amount.data("max", stock);
-  /* Количество товаров */
+  /* Кількість товарів */
   if (stock < camoun) {
     amount.val(stock);
   } else if (okay.amount > camoun) {
@@ -71,7 +71,7 @@ $(document).on("change", ".fn_variant", function () {
   } else if (isNaN(camoun)) {
     amount.val(okay.amount);
   }
-  /* Цены */
+  /* Ціни */
   if (selected.data("cprice")) {
     cprice.html(selected.data("cprice"));
     cprice.parent().removeClass("hidden-xs-up");
@@ -107,7 +107,7 @@ $(document).on("change", ".fn_variant", function () {
     sku.text("");
     sku.parent().addClass("hidden-xs-up");
   }
-  /* Наличие на складе */
+  /* Наявність на складі */
   if (stock < 1) {
     parent.find(".fn_not_stock").removeClass("hidden-xs-up");
     parent.find(".fn_in_stock").addClass("hidden-xs-up");
@@ -115,7 +115,7 @@ $(document).on("change", ".fn_variant", function () {
     parent.find(".fn_in_stock").removeClass("hidden-xs-up");
     parent.find(".fn_not_stock").addClass("hidden-xs-up");
   }
-  /* Предзаказ */
+  /* Передзамовлення */
   if (stock < 1 && okay.is_preorder) {
     parent.find(".fn_is_preorder").removeClass("hidden-xs-up");
     parent.find(".fn_is_stock, .fn_not_preorder").addClass("hidden-xs-up");
@@ -126,7 +126,7 @@ $(document).on("change", ".fn_variant", function () {
     parent.find(".fn_is_stock").removeClass("hidden-xs-up");
     parent.find(".fn_is_preorder, .fn_not_preorder").addClass("hidden-xs-up");
   }
-  /* Единица измерения */
+  /* Одиниця вимірювання */
   if (typeof units != "undefined") {
     parent.find(".fn_units").text(", " + units);
   } else {
@@ -135,7 +135,7 @@ $(document).on("change", ".fn_variant", function () {
 });
 
 
-/* Количество товара в карточке и корзине */
+/* Кількість товару в картці та кошику */
 $(document).on("click", ".fn_product_amount span", function () {
   var input = $(this).parent().find("input.amount__input"),
     action;
@@ -202,13 +202,13 @@ $(document).on("submit", ".fn_subscribe_form_blog", function (e) {
   });
 });
 
-/* Функция добавления / удаления в папку сравнения */
+/* Функція додавання / видалення в теку порівняння */
 $(document).on("click", ".fn_comparison", function (e) {
   e.preventDefault();
   var button = $(this),
     action = $(this).hasClass("selected") ? "delete" : "add",
     product = parseInt($(this).data("id"));
-  /* ajax запрос */
+  /* ajax запит */
   $.ajax({
     url: okay.router["comparison_ajax"],
     type: "post",
@@ -220,26 +220,26 @@ $(document).on("click", ".fn_comparison", function (e) {
     dataType: "json",
     success: function (data) {
       $("#comparison").html(data.template);
-      /* Смена класса кнопки */
+      /* Зміна класу кнопки */
       if (action == "add") {
         button.addClass("selected");
       } else if (action == "delete") {
         button.removeClass("selected");
       }
-      /* Смена тайтла */
+      /* Зміна тайтла */
       if (button.attr("title")) {
         var text = button.data("result-text"),
           title = button.attr("title");
         button.data("result-text", title);
         button.attr("title", text);
       }
-      /* Если находимся на странице сравнения - перезагрузить */
+      /* Якщо ми на сторінці порівняння - перезавантажити */
       if ($(".fn_comparison_products").length) {
         window.location = window.location;
       }
     },
   });
-  /* Попап Товар добавлен в сравнение */
+  /* Попап «Товар додано до порівняння» */
   if (!button.hasClass("selected")) {
     $.fancybox.open({
       src: "#fn_compare_confirm",
@@ -255,12 +255,12 @@ $(document).on("click", ".fn_comparison", function (e) {
   }
 });
 
-/* Функция добавления / удаления в папку избранного */
+/* Функція додавання / видалення в теку обраного */
 $(document).on("click", ".fn_wishlist", function (e) {
   e.preventDefault();
   var button = $(this),
     action = $(this).hasClass("selected") ? "delete" : "";
-  /* ajax запрос */
+  /* ajax запит */
   $.ajax({
     url: okay.router["wishlist_ajax"],
     type: "post",
@@ -272,26 +272,26 @@ $(document).on("click", ".fn_wishlist", function (e) {
     dataType: "json",
     success: function (data) {
       $("#wishlist").html(data.wishlist_informer);
-      /* Смена класса кнопки */
+      /* Зміна класу кнопки */
       if (action == "") {
         button.addClass("selected");
       } else {
         button.removeClass("selected");
       }
-      /* Смена тайтла */
+      /* Зміна тайтла */
       if (button.attr("title")) {
         var text = button.data("result-text"),
           title = button.attr("title");
         button.data("result-text", title);
         button.attr("title", text);
       }
-      /* Если находимся на странице сравнения - перезагрузить */
+      /* Якщо ми на сторінці порівняння - перезавантажити */
       if ($(".fn_wishlist_page").length) {
         window.location = window.location;
       }
     },
   });
-  /* Попап Товар добавлен в избранное */
+  /* Попап «Товар додано до обраного» */
   if (!button.hasClass("selected")) {
     $.fancybox.open({
       src: "#fn_wishlist_confirm",
@@ -307,7 +307,7 @@ $(document).on("click", ".fn_wishlist", function (e) {
   }
 });
 
-/* Отправка купона по нажатию на enter */
+/* Надсилання купона натисканням enter */
 $(document).on("keypress", ".fn_coupon", function (e) {
   if (e.keyCode == 13) {
     e.preventDefault();
@@ -315,12 +315,12 @@ $(document).on("keypress", ".fn_coupon", function (e) {
   }
 });
 
-/* Отправка купона по нажатию на кнопку */
+/* Надсилання купона натисканням кнопки */
 $(document).on("click", ".fn_sub_coupon", function (e) {
   ajax_coupon();
 });
 
-/* Функция фильтра по цене */
+/* Функція фільтра за ціною */
 function price_slider_init() {
   let stepsSlider = document.getElementById("fn_slider_price");
 
@@ -367,7 +367,7 @@ function price_slider_init() {
           $(".fn_products_sort").html(data.products_sort);
           $(".fn_features").html(data.features);
           $(".fn_selected_features").html(data.selected_features);
-          // Выпадающие блоки
+          // Випадні блоки
           $(".lazy").each(function () {
             var myLazyLoad = new LazyLoad({
               elements_selector: ".lazy",
@@ -467,7 +467,7 @@ function price_slider_init() {
 $(function () {
   update_delivery_module_data();
 
-  /* Мега меню */
+  /* Мегаменю */
   $(".fn_category_scroll").each(function () {
     if ($(this).children("li").length > 11) {
       $(this).addClass("scroll");
@@ -548,7 +548,7 @@ $(function () {
           768: {
             slidesPerView: 3,
           },
-          768: {
+          992: {
             slidesPerView: 4,
           },
           1200: {
@@ -703,7 +703,7 @@ $(function () {
     }
   });
 
-  //Фильтры мобильные, каталог мобильные
+  //Мобільні фільтри, мобільний каталог
   $(document).on("click", ".fn_switch_parent", function () {
     $(this).parent().next().slideToggle(500);
     $(this).toggleClass("down");
@@ -803,11 +803,11 @@ $(function () {
   $.fancybox.defaults.hash = false;
   $.fancybox.defaults.backFocus = false;
 
-  /* Аяксовый фильтр по цене */
+  /* Аяксовий фільтр за ціною */
   if ($("#fn_slider_price").length) {
     price_slider_init();
 
-    // Если после фильтрации у нас осталось товаров на несколько страниц, то постраничную навигацию мы тоже проведем с помощью ajax чтоб не сбить фильтр по цене
+    // Якщо після фільтрації лишилося товарів на кілька сторінок, то й посторінкову навігацію проведемо через ajax, щоб не збити фільтр за ціною
     $(document).on("click", "a.fn_sort_pagination_link", function (e) {
       if ($(this).closest(".fn_ajax_buttons").hasClass("fn_is_ajax")) {
         e.preventDefault();
@@ -848,7 +848,7 @@ $(function () {
     });
   }
 
-  /* Автозаполнитель поиска */
+  /* Автозаповнювач пошуку */
   $(".fn_search").devbridgeAutocomplete({
     serviceUrl: okay.router["ajax_search"],
     minChars: 1,
@@ -916,7 +916,7 @@ $(function () {
     },
   });
 
-  /* Слайдер в сравнении */
+  /* Слайдер у порівнянні */
   if ($(".fn_comparison_products").length) {
     /* Carousel products */
     var swiper = new Swiper(".fn_comparison_products", {
@@ -951,7 +951,7 @@ $(function () {
 
     resize_comparison();
 
-    /* Показать / скрыть одинаковые характеристики в сравнении */
+    /* Показати / сховати однакові характеристики в порівнянні */
     $(document).on("click", ".fn_show a", function (e) {
       e.preventDefault();
       $(".fn_show a.active").removeClass("active");
@@ -963,7 +963,7 @@ $(function () {
       }
     });
 
-    /* Формирование ровных строчек для характеристик */
+    /* Формування рівних рядків для характеристик */
     function resize_comparison() {
       var minHeightHead = 0;
       $(".fn_resize").each(function () {
@@ -988,20 +988,20 @@ $(function () {
       }
     }
 
-    /* В сравнении выравниваем строки */
+    /* У порівнянні вирівнюємо рядки */
     if ($(".fn_comparison_products").length) {
       $(window).on("load", resize_comparison);
     }
   }
 
-  /* Переключатель способа оплаты */
+  /* Перемикач способу оплати */
   $(document).on("click", '[name="payment_method_id"]', function () {
     $('[name="payment_method_id"]').parent().removeClass("active");
     $(this).parent().addClass("active");
   });
 });
 
-/* Обновление блоков: cart_informer, cart_purchases, cart_deliveries */
+/* Оновлення блоків: cart_informer, cart_purchases, cart_deliveries */
 function ajax_set_result(data) {
   $("#cart_informer").html(data.cart_informer);
   $("#fn_purchases").html(data.cart_purchases);
@@ -1029,10 +1029,10 @@ function ajax_set_result(data) {
   $('input[name="delivery_id"]:checked').trigger("change");
 }
 
-/* Аяксовое изменение кол-ва товаров в корзине */
+/* Аяксова зміна к-ті товарів у кошику */
 function ajax_change_amount(object, variant_id) {
   let amount = $(object).val();
-  /* ajax запрос */
+  /* ajax запит */
   $.ajax({
     url: okay.router["cart_ajax"],
     type: "post",
@@ -1054,7 +1054,7 @@ function ajax_change_amount(object, variant_id) {
   });
 }
 
-/* Функция изменения количества товаров */
+/* Функція зміни кількості товарів */
 function amount_change(input, action) {
   var max_val,
     curr_val = parseFloat(input.val()),
@@ -1064,13 +1064,13 @@ function amount_change(input, action) {
     curr_val = okay.amount;
   }
 
-  /* Если включен предзаказ макс. кол-во товаров ставим максимально количество товаров в заказе */
+  /* Якщо ввімкнено передзамовлення, макс. к-ть товарів ставимо як максимальну кількість товарів у замовленні */
   if (input.parent().hasClass("fn_is_preorder")) {
     max_val = okay.max_order_amount;
   } else {
     max_val = parseFloat(input.data("max"));
   }
-  /* Изменение кол-ва товара */
+  /* Зміна к-ті товару */
   if (action == "plus") {
     input.val(Math.min(max_val, Math.max(1, curr_val + step)));
     input.trigger("change");
@@ -1092,10 +1092,10 @@ function amount_change(input, action) {
   }
 }
 
-/* Аяксовый купон */
+/* Аяксовий купон */
 function ajax_coupon() {
   let coupon_code = $('input[name="coupon_code"]').val();
-  /* ajax запрос */
+  /* ajax запит */
   $.ajax({
     url: okay.router["cart_ajax"],
     type: "post",
@@ -1147,9 +1147,9 @@ function update_delivery_module_data() {
     .attr("disabled", false);
 }
 
-/* Аяксовое удаление товаров в корзине */
+/* Аяксове видалення товарів з кошика */
 function ajax_remove(variant_id) {
-  /* ajax запрос */
+  /* ajax запит */
   $.ajax({
     url: okay.router["cart_ajax"],
     type: "post",
@@ -1170,7 +1170,7 @@ function ajax_remove(variant_id) {
   });
 }
 
-/* Адаптивное видео и таблицы tiny MCE */
+/* Адаптивне відео та таблиці tiny MCE */
 if ($(".block__description").length) {
   $(".block__description").find("iframe").wrap('<p class="video"></p>');
   $(".block__description")
@@ -1287,7 +1287,7 @@ if ($(".block__description").length) {
   });
 }
 
-//Автопереход на оплату из корзины
+//Автоперехід на оплату з кошика
 $(function () {
   let simpleSubmit = false;
   $(document).on("submit", 'form[name="cart"]', function (e) {
@@ -1330,7 +1330,7 @@ $(function () {
   });
 });
 
-//Автопереход на оплату из корзины
+//Автоперехід на оплату з кошика
 $(function () {
   window.addEventListener("load", () => {
     let vh = window.innerHeight * 0.01;

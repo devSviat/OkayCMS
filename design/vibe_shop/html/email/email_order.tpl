@@ -1,6 +1,6 @@
 {*
-Для отладки данного сообщения пройдите по ссылке http://domain/backend/index.php?controller=EmailTemplatesAdmin&debug=emailOrderUser&order_id=1
-если потребуется, измените параметр order_id
+Для відладки цього листа перейдіть за посиланням http://domain/backend/index.php?controller=EmailTemplatesAdmin&debug=emailOrderUser&order_id=1
+за потреби змініть параметр order_id
 *}
 
 {$subject = "`$lang->email_order_title` `$order->id`" scope=global}
