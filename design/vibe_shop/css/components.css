@@ -8157,6 +8157,21 @@ body.hc-nav-open {
 	max-width: 420px;
 }
 
+/* The product page's related posts are four fixed tracks on the desktop, the     */
+/* owner's call. auto-fit gives whatever exists the whole row, which is right for */
+/* the blog index and the home rail but not here: two related posts became two    */
+/* 666px cards with 416px-tall photographs, larger than the product's own gallery */
+/* thumbnails. Four tracks put them at the width the home page's news cards       */
+/* already have and leave the empty slots empty. Only from 992px - below that the */
+/* shared auto-fit rule still does the right thing, two up on a tablet and one    */
+/* on a phone.                                                                    */
+
+@media (min-width: 992px) {
+	.vs-posts--related {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+}
+
 /* ------------------------------------------------------ shop advantages strip */
 /* The Banners module renders this block and its markup is not ours to edit, so  */
 /* the wrapper in index.tpl carries .vs-advantages and everything below reaches  */
