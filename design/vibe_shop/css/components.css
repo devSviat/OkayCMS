@@ -1974,23 +1974,24 @@ body.hc-nav-open {
 	text-indent: 0;
 }
 
-/* Group separators, and they are space rather than rules. The panel holds       */
-/* thirteen rows in three jobs - the shop's own navigation, the CMS pages, and   */
-/* its settings and contacts - and the only thing that distinguished them was    */
-/* the marker: an icon for the first and third, a hollow dot for the middle. So  */
-/* the first and third groups had nothing between them and the panel read as     */
-/* one undivided list. hc-offcanvas-nav rebuilds the markup but keeps the source */
-/* <ul> classes, so the boundaries the template already expresses carry this.    */
+/* NO group separators here, and that is a decision rather than an omission.     */
+/* The panel holds thirteen rows in three jobs - the shop's own navigation, the  */
+/* CMS pages, its settings and contacts - distinguished only by their marker: an */
+/* icon for the first and third, a hollow dot for the middle. Two attempts at    */
+/* marking the boundaries were both rejected on a real phone, and both for the   */
+/* same underlying reason: every .nav-item draws its own bottom hairline, so the */
+/* boundary already HAS a line and it belongs to the row above it.               */
 /*                                                                              */
-/* No border here. Every .nav-item already draws its own bottom hairline, so a   */
-/* border on the group produced a second line a few pixels under the first -     */
-/* the owner saw the double rule on a real phone and said so. The line at each   */
-/* boundary was never missing; the space was.                                    */
-
-.hc-offcanvas-nav ul.fn_menu_list.vs-menu--1,
-.hc-offcanvas-nav ul.currencies-nav {
-	margin-top: var(--vs-space-4);
-}
+/* A border on the group therefore drew a second line a few pixels under the     */
+/* first. Replacing it with space made the gap one-sided, because the line stays */
+/* glued to the row above while the row below gains all of the room. Splitting   */
+/* the space collapses to one margin and moves the asymmetry rather than curing  */
+/* it; centring the line for real means stripping the last row's border in each  */
+/* group and rebuilding the divider, which trades an even 52px rhythm for a      */
+/* grouping the dot already carries.                                             */
+/*                                                                              */
+/* So the rhythm wins. If this is revisited, the lever is the marker or a group   */
+/* heading - not a rule and not a gap.                                           */
 
 .hc-offcanvas-nav ul.bottom-nav {
 	display: flex;
@@ -10757,6 +10758,26 @@ img.lazy:not(.loaded) {
 
 	.form__placeholder {
 		margin-bottom: var(--vs-space-1);
+	}
+
+/* Below 360px of height the frame trim is not enough - the box is 373 and even  */
+/* 320px-tall phones exist sideways - so the fields go two-up. A lightbox is     */
+/* about 460px wide, which is room for two 210px fields, and the height that     */
+/* buys is a whole row: 373 down to 285.                                         */
+/*                                                                              */
+/* Safe as a grid because the three hidden inputs and the error div in this      */
+/* body are all display: none and so generate no grid items - verified, not      */
+/* assumed. The product name is the one real child that must not sit in a        */
+/* column, so it spans.                                                          */
+
+	.fancybox-content .form__body {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		column-gap: var(--vs-space-3);
+	}
+
+	.fancybox-content .form__body > .h6 {
+		grid-column: 1 / -1;
 	}
 
 /* The order button is the one control on the checkout that has to be reachable  */
