@@ -2537,11 +2537,19 @@ body.hc-nav-open {
 	background-color: var(--vs-surface);
 	box-shadow: var(--vs-shadow-1);
 	color: var(--vs-text);
-	font-size: var(--vs-text-xs);
+	font-size: var(--vs-text-2xs);
 	font-weight: 600;
 	line-height: 1;
 	white-space: nowrap;
 }
+
+/* --vs-text-2xs and not --vs-text-xs. The owner wanted the badge smaller on a    */
+/* small phone, where "Топ продажів" and a discount sit on the same photo, and    */
+/* moving the xs step down to 0.7rem did that - but xs also carries the struck    */
+/* comparison price, stock lines, chips, crumbs, post meta and spec hints, so     */
+/* every one of them shrank with it. A step below xs costs one token and leaves   */
+/* the scale intact; the badge is the only thing on it, and the 600 weight is     */
+/* what keeps it legible at 11.2px.                                              */
 
 .vs-badge--sale {
 	background-color: var(--vs-sale-500);
@@ -2773,18 +2781,23 @@ body.hc-nav-open {
 	font-variant-numeric: tabular-nums;
 }
 
-/* The reserved comparison tier, above the current price. Its min-height is one  */
-/* line of its own type at its own leading, so the number comes from the scale   */
-/* rather than from a measurement that would rot the first time a token moves.   */
-/* The leading is tightened to 1.25 from the body's 1.55 deliberately: on a card */
-/* without a discount this line is empty, and every point of leading in it is    */
-/* dead air the owner asked to get back. 15px reserved instead of 20.            */
+/* The reserved comparison tier, above the current price. Its min-height is the   */
+/* tallest thing that can sit in it, taken from the scale rather than from a      */
+/* measurement that would rot the first time a token moves. The leading is        */
+/* tightened to 1.25 from the body's 1.55 deliberately: on a card without a       */
+/* discount this line is empty, and every point of leading in it is dead air the  */
+/* owner asked to get back. 15.2px reserved instead of 20.                        */
+/*                                                                              */
+/* That tallest thing is now the sale badge - its own type plus the 2px of        */
+/* vertical padding it was given - and not the struck price's line box, which is  */
+/* 15. Reserving the badge's box is what keeps a card with a discount and a card  */
+/* without one exactly the same height.                                          */
 
 .vs-card__price_second {
 	display: flex;
 	align-items: baseline;
 	gap: var(--vs-space-2);
-	min-height: calc(var(--vs-text-xs) * 1.25);
+	min-height: calc(var(--vs-text-2xs) + 4px);
 	line-height: 1.25;
 }
 
@@ -2822,14 +2835,32 @@ body.hc-nav-open {
 }
 
 /* On the price tier rather than over the photograph, so the percentage sits    */
-/* next to the number it modifies. Smaller and tighter than the corner badges,  */
-/* which have to read against arbitrary shop photography.                       */
+/* next to the number it modifies. Tighter than the corner badges, which have   */
+/* to read against arbitrary shop photography - the difference is the padding    */
+/* and the dropped min-height, not the type size. It used to restate             */
+/* font-size: var(--vs-text-xs), which was the base value written twice; once    */
+/* the badge moved to --vs-text-2xs that restatement made the tier's badge the   */
+/* LARGER of the two, which is the opposite of what this rule is for.            */
+
+/* 2px above and below, not a --vs-space step: the smallest one is 4px and that   */
+/* makes the pill 19px against a 12px struck price beside it, which is a badge    */
+/* taller than the row it annotates. 2px is enough for the fill to read as a      */
+/* pill, and it also ends a 1px clip that had been there since the badge moved    */
+/* onto this tier - line-height: 1 gives the box the font size while the glyphs    */
+/* need slightly more, so "-8 %" reported 12px of ink in an 11px box.             */
+
+/* align-self, because the tier aligns on the baseline and a padded badge brings   */
+/* its padding into that alignment: the badge's text baseline meets the struck     */
+/* price's, which lifts the badge's box 2px above the price's line and made the    */
+/* tier 16.2 next to a discount with a struck price and 15.2 next to one without.  */
+/* Centring the badge takes it out of the baseline calculation, so the tier is one */
+/* height everywhere and the current price below it lines up across the row.       */
 
 .vs-card__price_second .vs-badge--sale {
 	flex: none;
+	align-self: center;
 	min-height: 0;
-	padding: 0 var(--vs-space-1-5);
-	font-size: var(--vs-text-xs);
+	padding: 2px var(--vs-space-1-5);
 }
 
 /* The guarantee, not the budget. The struck price is the one thing in this row  */
@@ -5960,8 +5991,11 @@ body.hc-nav-open {
 		gap: var(--vs-space-1);
 	}
 
+	/* The shorthand, so the 2px above and below has to be restated here or the      */
+	/* phone loses it - which is exactly what happened the first time round.         */
+
 	.vs-card__price_second .vs-badge--sale {
-		padding: 0 var(--vs-space-1);
+		padding: 2px var(--vs-space-1);
 	}
 
 	/* Two-up at 360 and 375 leaves the corner sticker 86-94px beside the tools     */
