@@ -1236,8 +1236,19 @@ body.other_page .main {
 	box-shadow: var(--vs-shadow-3);
 }
 
+/* Multi-column, and it has to be: this shop's tree is extremely uneven -        */
+/* measured on the demo data, twelve root categories, one of them ("Меблі для    */
+/* дому") with four children and seven shoppable grandchildren, five with no     */
+/* children at all. A CSS grid was tried here first and measured worse, which    */
+/* is worth writing down: a grid row is as tall as its tallest cell, so the deep */
+/* branch made row one 378px whatever the eleven short categories beside it      */
+/* needed, and the panel went from 598px to the 630px cap and started            */
+/* scrolling. Multi-column balances by flow height instead, which is the         */
+/* behaviour this data wants. What actually made the old layout bad was not the  */
+/* column algorithm but the row rhythm below it - see the link rules.            */
+
 .vs-catalog__list {
-	columns: 250px;
+	columns: 220px;
 	column-gap: var(--vs-space-7);
 	margin: 0;
 	padding: 0;
@@ -1255,6 +1266,14 @@ body.other_page .main {
 	break-inside: avoid;
 	padding-bottom: var(--vs-space-5);
 }
+
+/* 44px is the touch floor, and this menu never sees touch: its toggle is        */
+/* display: none below 992px, where the off-canvas nav takes over instead.       */
+/* Charging every row 44px is what made depth so expensive - a branch of one     */
+/* root, four children and seven grandchildren spent 528px on link boxes alone.  */
+/* The root keeps 44 because it carries the icon and is the primary target; the   */
+/* two levels under it get the rhythm below, both still clear of WCAG 2.5.8's    */
+/* 24px minimum for a pointer.                                                   */
 
 .vs-catalog__link {
 	display: flex;
@@ -1295,11 +1314,13 @@ body.other_page .main {
 	height: 22px;
 }
 
+/* Wraps rather than truncates. A 220px column minus a 22px icon and its gap     */
+/* cannot hold "Строительные инструменты", and an ellipsis there hid the name    */
+/* of a whole department behind three dots. Two lines cost 4px on one row; a     */
+/* name the shopper cannot read costs the department.                            */
+
 .vs-catalog__name {
 	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
 }
 
 .vs-catalog__sub {
@@ -1309,23 +1330,30 @@ body.other_page .main {
 }
 
 .vs-catalog__link--2 {
+	min-height: 32px;
 	font-size: var(--vs-text-sm);
 	font-weight: 500;
 }
 
-/* The hairline ties a leaf list to its parent, so the 44px rows read as one */
-/* group instead of floating apart.                                          */
+/* The hairline ties a leaf list to its parent, so the rows read as one group    */
+/* instead of floating apart.                                                    */
 
 .vs-catalog__leaf {
-	margin: 0 0 0 var(--vs-space-2);
-	padding-left: var(--vs-space-4);
+	margin: 0 0 var(--vs-space-2) var(--vs-space-2);
+	padding-left: var(--vs-space-3);
 	border-left: 1px solid var(--vs-hairline);
 	list-style: none;
 }
 
+/* The third level was muted text at the same size as the second, one indent     */
+/* deeper - so it read as a faint continuation of the list above it rather than  */
+/* as a level. Smaller and darker instead: the size difference carries the        */
+/* hierarchy and the colour stops the deepest rows looking disabled.              */
+
 .vs-catalog__link--3 {
-	font-size: var(--vs-text-sm);
-	color: var(--vs-text-muted);
+	min-height: 26px;
+	font-size: var(--vs-text-xs);
+	color: var(--vs-text);
 }
 
 .vs-catalog__link--2:hover,
