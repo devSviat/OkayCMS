@@ -30,7 +30,6 @@ class CanonicalHelperTest extends TestCase
         // Т.к. метод приватный, доступ к нему получаем через рефлексию
         $reflector = new \ReflectionClass(CanonicalHelper::class);
         $method = $reflector->getMethod('getCatalogCanonicalDataExecutor');
-        $method->setAccessible(true);
 
         $canonicalHelper = new CanonicalHelper;
 
@@ -55,7 +54,6 @@ class CanonicalHelperTest extends TestCase
         // Т.к. метод приватный, доступ к нему получаем через рефлексию
         $reflector = new \ReflectionClass(CanonicalHelper::class);
         $method = $reflector->getMethod('getBaseCatalogCanonicalData');
-        $method->setAccessible(true);
 
         $canonicalHelper = new CanonicalHelper;
 

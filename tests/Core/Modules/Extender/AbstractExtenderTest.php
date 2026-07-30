@@ -22,7 +22,6 @@ class AbstractExtenderTest extends TestCase
 
         $reflector = new \ReflectionClass($abstractExtender);
         $property = $reflector->getProperty('deprecatedMethods');
-        $property->setAccessible(true);
 
         $abstractExtender->setDeprecated($config);
 
@@ -59,7 +58,6 @@ class AbstractExtenderTest extends TestCase
 
         $reflector = new \ReflectionClass($abstractExtender);
         $property = $reflector->getProperty('triggers');
-        $property->setAccessible(true);
 
         $abstractExtender->newExtension(
             'Okay\ClassTest1',
@@ -68,7 +66,7 @@ class AbstractExtenderTest extends TestCase
             'testMethod2');
 
         $this->assertEquals($property->getValue(), $expectedResult);
-        $property->setValue([]);
+        $property->setValue(null, []);
     }
 
     public function testCompileTrigger()
@@ -78,7 +76,6 @@ class AbstractExtenderTest extends TestCase
 
         $reflector = new \ReflectionClass($abstractExtender);
         $method = $reflector->getMethod('compileTrigger');
-        $method->setAccessible(true);
 
         $actualResult = $method->invoke($abstractExtender, 'Okay\TestClass', 'testMethod');
 
@@ -97,7 +94,6 @@ class AbstractExtenderTest extends TestCase
 
         $reflector = new \ReflectionClass($abstractExtender);
         $property = $reflector->getProperty('deprecatedMethods');
-        $property->setAccessible(true);
         $property->setValue($abstractExtender, [
             'Okay\TestClass1::testMethod1' => [
                 ['Okay\TestClass1', 'testMethod1'],
@@ -110,7 +106,6 @@ class AbstractExtenderTest extends TestCase
         ]);
 
         $method = $reflector->getMethod('checkAndCorrectDeprecatedMethod');
-        $method->setAccessible(true);
 
         // expectWarning() and expectDeprecation() were removed in PHPUnit 10, and
         // they also turned the raised error into an exception - so the assertion
@@ -147,7 +142,6 @@ class AbstractExtenderTest extends TestCase
 
         $reflector = new \ReflectionClass($abstractExtender);
         $method = $reflector->getMethod('validateExtension');
-        $method->setAccessible(true);
 
         $actualResult = null;
         try {
@@ -172,8 +166,7 @@ class AbstractExtenderTest extends TestCase
 
         $reflector = new \ReflectionClass($abstractExtender);
         $property = $reflector->getProperty('triggers');
-        $property->setAccessible(true);
-        $property->setValue([
+        $property->setValue(null, [
             'Okay\TestClass::testMethod' => ['test']
         ]);
 
