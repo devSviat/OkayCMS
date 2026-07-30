@@ -918,6 +918,27 @@ body.other_page .main {
 /* box sizes to its rows - so the panel grew to 422px for ten results and never */
 /* scrolled. As a block it honours the cap, which is why the bar below matters. */
 
+/* The panel has to be told where to sit, and only here. devbridge positions the */
+/* container itself - but fixPosition() returns early unless the container's     */
+/* parent is <body>, and okay.js hands this instance appendTo: "#fn_search". So  */
+/* the library sets position: absolute inline and never sets top, which leaves   */
+/* the static position to decide - and .vs-search is a flex row with             */
+/* align-items: center, where an absolutely positioned child's static position   */
+/* is the one it would get as the sole flex item. Centred. A 320px panel in a    */
+/* 44px row resolved to top: -138px, so the suggestions covered the header and   */
+/* ran off the top of the window. Below 768px .vs-search is a plain block and    */
+/* the same static position happened to land under the field, which is why this  */
+/* only ever showed on a wide screen.                                           */
+/*                                                                              */
+/* Scoped to .vs-search: the OkayCMS_Novaposhta city field uses the same library */
+/* with the default appendTo, so its panel IS a child of <body> and fixPosition  */
+/* does place it - overriding top there would fight the library.                 */
+
+.vs-search .autocomplete-suggestions {
+	top: 100%;
+	left: 0;
+}
+
 .autocomplete-suggestions::-webkit-scrollbar {
 	width: 8px;
 }
@@ -5829,15 +5850,25 @@ body.hc-nav-open {
 
 /* --------------------------------------------------------------- ≤ 767 px */
 
+/* The search row reads as the header growing by one row, not as a white slab     */
+/* dropped on the page. It was inset to the container's gutter with no edge of    */
+/* its own, so it ended mid-sentence over whatever heading happened to be under   */
+/* it. Now it runs to both edges of the screen - the negative insets are the      */
+/* container's own 16px, given back as padding so the field still lines up with   */
+/* the page gutter - and it closes with the same hairline and shadow the sticky   */
+/* header uses, which is what makes it look attached to the bar above it.         */
+
 @media (max-width: 767px) {
 	.vs-search {
 		position: absolute;
 		top: 100%;
-		left: 0;
-		right: 0;
+		left: calc(-1 * var(--vs-space-4));
+		right: calc(-1 * var(--vs-space-4));
 		display: none;
-		padding: var(--vs-space-2) 0 var(--vs-space-4);
+		padding: var(--vs-space-2) var(--vs-space-4) var(--vs-space-3);
+		border-bottom: 1px solid var(--vs-hairline);
 		background-color: var(--vs-surface);
+		box-shadow: var(--vs-shadow-2);
 	}
 
 	.vs-informers__slot--secondary {
