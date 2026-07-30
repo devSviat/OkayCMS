@@ -1,4 +1,4 @@
-<!-- Сomparison informer (given by Ajax) -->
+<!-- Comparison informer (given by Ajax) -->
 {if $comparison->products|count > 0}
     <a class="vs-informer" href="{url_generator route="comparison"}" title="{$lang->comparison_header|escape}" aria-label="{$lang->comparison_header|escape}">
         {include file="svg.tpl" svgId="compare"}

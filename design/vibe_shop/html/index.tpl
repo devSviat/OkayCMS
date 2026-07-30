@@ -121,7 +121,7 @@
     </header>
     {/if}
 
-    {* Тело сайта.
+    {* Тіло сайту.
        <main> rather than <div>: the class is untouched, so every .main rule and
        every descendant selector still matches, and the page gains the landmark
        the skip link lands on. tabindex="-1" makes the landing programmatically
@@ -136,7 +136,7 @@
             </div>
         {/if}
 
-        {* Контент сайта *}
+        {* Контент сайту *}
         {if $controller == "MainController" || $controller == "CartController" || (!empty($page) && $page->url == '404')}
             <div class="fn_ajax_content">
                 {$content}
@@ -150,7 +150,7 @@
             </div>
         {/if}
 
-        {* Преимущества магазина.
+        {* Переваги магазину.
            The markup inside is the Banners module's, not ours - this wrapper is
            the only hook the theme has for restyling it, so it carries the class. *}
         {if !empty($banner_shortcode_advantage)}
@@ -160,7 +160,7 @@
         {/if}
     </main>
 
-    {* Кнопка на верх *}
+    {* Кнопка вгору *}
     <div class="fn_to_top to_top"></div>
 
     <div>
@@ -316,10 +316,10 @@
         {include file="mobile_menu.tpl"}
     </div>
 
-    {* Форма обратного звонка *}
+    {* Форма зворотного дзвінка *}
     {include file='callback.tpl'}
     
-    {* Всплывающая корзина *}
+    {* Спливний кошик *}
     {if $route_name != 'cart'}
     <div id="fn_pop_up_cart_wrap" class="popup_animated" style="display: none;">
         <div id="fn_pop_up_cart" class="popup_animated">
@@ -328,7 +328,7 @@
     </div>
     {/if}
 
-    {* Уведомления о добавление в сравнение *}
+    {* Повідомлення про додавання до порівняння *}
     <div id="fn_compare_confirm" class="popup_bg popup_animated"  style="display: none;">
         <div class="popup_confirm__title">
             {include file="svg.tpl" svgId="success_icon"}
@@ -336,7 +336,7 @@
         </div>
     </div>
 
-    {* Уведомления о добавление в избранное *}
+    {* Повідомлення про додавання до обраного *}
     <div id="fn_wishlist_confirm" class="popup_bg popup_animated" style="display: none;">
         <div class="popup_confirm__title">
             {include file="svg.tpl" svgId="success_icon"}

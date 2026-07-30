@@ -1,5 +1,5 @@
 <!-- Cart purchases template -->
-{*NOTICE: Обратите внимание, data-total_purchases_price хранится в основной валюте сайта*}
+{*NOTICE: Зверніть увагу, data-total_purchases_price зберігається в основній валюті сайту*}
 {* This block is re-rendered wholesale by okay.js (ajax_set_result replaces the
    innerHTML of #fn_purchases), so the thumbnails stay plain <img src>: a
    data-src/lazyload image would need lazyload re-initialised on every quantity

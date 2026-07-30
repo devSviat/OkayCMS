@@ -1,6 +1,6 @@
-{* Письмо ответа на комметарий или обращение пользователю
-Для отладки ответного сообщение пользователю на комментарий пройдите по ссылке http://domain/backend/index.php?controller=EmailTemplatesAdmin&debug=emailCommentAnswerToUser&comment_id=1, измените параметр comment_id - это номер ответного комментария
-Для отладки ответного сообщение пользователю на обратную связь пройдите по ссылке http://domain/backend/index.php?controller=EmailTemplatesAdmin&debug=emailFeedbackAnswerFoUser&feedback_id=1 для тестирования если потребуется, измените параметр feedback_id - это номер ответа пользователю.
+{* Лист-відповідь на коментар або на звернення користувача
+Для відладки відповіді користувачеві на коментар перейдіть за посиланням http://domain/backend/index.php?controller=EmailTemplatesAdmin&debug=emailCommentAnswerToUser&comment_id=1 і змініть параметр comment_id - це номер коментаря-відповіді
+Для відладки відповіді користувачеві на зворотний зв'язок перейдіть за посиланням http://domain/backend/index.php?controller=EmailTemplatesAdmin&debug=emailFeedbackAnswerFoUser&feedback_id=1 - за потреби змініть параметр feedback_id, це номер відповіді користувачеві.
 *}
 
 {if $object->type_obj == 'comment'}

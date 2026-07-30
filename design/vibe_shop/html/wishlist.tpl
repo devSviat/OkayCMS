@@ -20,7 +20,7 @@
            :not(.swiper-container) flex rule outranks .vs-catalogue__grid and
            would collapse the grid to one column. *}
         <div class="fn_wishlist_page vs-catalogue__grid">
-            {* Список избранных товаров *}
+            {* Список обраних товарів *}
             {foreach $wishlist->products as $product}
                 {include "product_list.tpl"}
             {/foreach}

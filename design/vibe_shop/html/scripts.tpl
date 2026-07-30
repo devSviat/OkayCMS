@@ -6,7 +6,7 @@
 
     okay.max_order_amount = {$settings->max_order_amount|escape};
 
-    /*Сброс фильтра*/
+    /*Скидання фільтра*/
     {if in_array($controller, ['ProductsController', 'BrandController', 'BrandsController', 'CategoryController'])}
         $(document).on('click', '.fn_filter_reset', function () {
             var date = new Date(0);
@@ -27,7 +27,7 @@
                     init: function () {
                         let openRequest = indexedDB.open("features_cache", this.DBVersion);
 
-                        // создаем хранилище
+                        // створюємо сховище
                         openRequest.onupgradeneeded = function() {
                             let db = openRequest.result;
                             if (!db.objectStoreNames.contains('features_cache_store')) {
@@ -63,7 +63,7 @@
                             openRequest.onsuccess = function() {
                                 let db = openRequest.result;
                                 let transaction = db.transaction("features_cache_store", "readonly");
-                                // получить хранилище объектов для работы с ним
+                                // отримати сховище об'єктів для роботи з ним
                                 let cacheObject = transaction.objectStore("features_cache_store");
                                 let request = cacheObject.get(key);
                                 request.onsuccess = function () {
@@ -95,7 +95,7 @@
                         openRequest.onsuccess = function() {
                             let db = openRequest.result;
                             let transaction = db.transaction("features_cache_store", "readwrite");
-                            // получить хранилище объектов для работы с ним
+                            // отримати сховище об'єктів для роботи з ним
                             let cacheObject = transaction.objectStore("features_cache_store");
 
                             let request = cacheObject.put({
@@ -199,7 +199,7 @@
         $main_nav.hcOffcanvasNav(defaultData);
     });
 
-    /* Показать все в фильтрах по свойствам и в футере категории */
+    /* Показати все у фільтрах за властивостями та у футері категорії */
     $( document ).on( 'click', '.fn_view_all', function(e) {
         $(this).closest('.fn_view_content').toggleClass('opened');
         $('.fn_view_all').not($(this)).html('{$lang->filter_view_show|escape}');
@@ -212,19 +212,19 @@
         return false;
     });
 
-    /* Предзаказ */
+    /* Передзамовлення */
     okay.is_preorder = {$settings->is_preorder|escape};
 
-    /* Ошибка при отправке комментария в посте */
+    /* Помилка при надсиланні коментаря в пості */
     {if $controller == 'BlogController' && $error}
-        /* Переход по якорю к форме */
+        /* Перехід за якорем до форми */
         $( window ).on( 'load', function() {
             location.href = location.href + '#fn_blog_comment';
             $( '#fn_blog_comment' ).trigger( 'submit' );
         } );
     {/if}
 
-    {* Обратный звонок, отправка формы *}
+    {* Зворотний дзвінок, надсилання форми *}
     {if $call_sent}
         $( function() {
             $.fancybox.open( {
@@ -241,7 +241,7 @@
         });
     {/if}
 
-    {* Карточка товара, ошибка в форме *}
+    {* Картка товару, помилка у формі *}
     {if $controller == 'ProductController' && $error}
         $( window ).on( 'load', function() {
             $( '.tabs__navigation a' ).removeClass( 'selected' );
@@ -249,7 +249,7 @@
             $( 'a[href="#comments"]' ).addClass( 'selected' );
              $( '#comments').show();
         } );
-    {* Карточка товара, отправка комментария *}
+    {* Картка товару, надсилання коментаря *}
     {elseif $controller == 'ProductController'}
         $( window ).on( 'load', function() {
             if( location.hash.search('comment') !=-1 ) {
@@ -419,7 +419,7 @@
     {if $settings->sj_shares}
          if($(".fn_share").length>0) {
         {if $js_custom_socials}
-        {*Расширяем функционал кастомными соц. сетями*}
+        {*Розширюємо функціонал кастомними соц. мережами*}
         {foreach $js_custom_socials as $social=>$params}
         jsSocials.shares.{$social|escape} = {$params|json_encode};
         {/foreach}
@@ -452,7 +452,7 @@
         }
     {/if}
 
-    /* Звёздный рейтинг товаров */
+    /* Зірковий рейтинг товарів */
     let ratingBlock = $(".fn_rating");
     if (ratingBlock.length>0) {
         $(function() {

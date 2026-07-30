@@ -120,7 +120,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="OkayCMS {$config->version}">
 
-    {* rel prev next для блога *}
+    {* rel prev next для блогу *}
     {if $controller == "BlogController" && $total_pages_num > 1}
         {if $current_page_num == $total_pages_num}
             {if $current_page_num == 2}
@@ -140,7 +140,7 @@
         {/if}
     {/if}
 
-    {* rel prev next для каталога товаров *}
+    {* rel prev next для каталогу товарів *}
     {$rel_prev_next}
 
     {* Images for social networks *}
@@ -255,10 +255,10 @@
                     var recaptcha_action = 'other';
                 {/if}
 
-                var allCaptchеs = document.getElementsByClassName('fn_recaptchav3');
+                var allCaptchas = document.getElementsByClassName('fn_recaptchav3');
                 grecaptcha.execute('{$settings->public_recaptcha_v3|escape}', { action: recaptcha_action })
                     .then(function (token) {
-                        for (capture of allCaptchеs) {
+                        for (capture of allCaptchas) {
                             capture.value = token;
                         }
                     });

@@ -180,7 +180,7 @@
 
                         <div class="vs-summary__row vs-summary__row--total">
                             <span class="vs-summary__label" data-language="cart_total_price">{$lang->cart_total_price}</span>
-                            {*Итоговую стоимость выводим с активной доставки*}
+                            {*Підсумкову вартість виводимо з активної доставки*}
                             <span class="vs-summary__grand vs-tabular"><span id="fn_cart_total_price">{$active_delivery->total_price_with_delivery|convert}</span> <span class="currency">{$currency->sign|escape}</span></span>
                         </div>
 
