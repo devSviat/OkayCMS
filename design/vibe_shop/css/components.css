@@ -1974,6 +1974,25 @@ body.hc-nav-open {
 	text-indent: 0;
 }
 
+/* Group separators. The panel holds thirteen rows in three jobs - the shop's    */
+/* own navigation, the CMS pages, and the shop's settings and contacts - and     */
+/* the only thing that distinguished them was the marker: an icon for the first  */
+/* and third, a hollow dot for the middle. So the first and third groups had     */
+/* nothing between them at all and the whole panel read as one undivided list.   */
+/* hc-offcanvas-nav rebuilds the markup but keeps the source <ul> classes, so    */
+/* the boundaries the template already expresses are available here.             */
+/*                                                                              */
+/* Two lines, not four: one before the CMS pages and one before the settings.    */
+/* Contacts follow the pickers as one group - both answer "about this shop" -    */
+/* and the social row is already separated by its own rule below.                */
+
+.hc-offcanvas-nav ul.fn_menu_list.vs-menu--1,
+.hc-offcanvas-nav ul.currencies-nav {
+	margin-top: var(--vs-space-2);
+	padding-top: var(--vs-space-2);
+	border-top: 1px solid var(--vs-hairline);
+}
+
 .hc-offcanvas-nav ul.bottom-nav {
 	display: flex;
 	flex-wrap: wrap;
@@ -4448,12 +4467,21 @@ body.hc-nav-open {
 	margin-bottom: var(--vs-space-5);
 }
 
+/* The comparison price sits above the current one, as it does on the card: it   */
+/* is what the current price is being measured against, not a footnote to it.    */
+/* The two spans are already siblings, so this is a column and an order - no     */
+/* markup moves, unlike on the card where the DOM order changed too.             */
+
 .vs-buybox__prices {
 	display: flex;
-	align-items: baseline;
-	flex-wrap: wrap;
-	gap: var(--vs-space-2) var(--vs-space-3);
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--vs-space-1);
 	font-variant-numeric: tabular-nums;
+}
+
+.vs-buybox__old {
+	order: -1;
 }
 
 /* The price is the second thing the shopper looks for after the photograph,   */
@@ -5932,6 +5960,18 @@ body.hc-nav-open {
 		min-width: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+/* The theme's sort strings are phrase tails - "Сортувати по" lives in a label   */
+/* and "замовчуванням" in the option - so the desktop composes the sentence but  */
+/* the phone's trigger showed the tail alone, starting on a lower-case letter    */
+/* and reading as a fragment. Capitalising just the first letter turns it into a */
+/* label value, which with the sort glyph beside it reads as "sort: default".    */
+/* Done here rather than in lang/ua.php on purpose: that string is shared with   */
+/* the desktop pills, where the lower case is correct after the colon.           */
+
+	.vs-sort__trigger_label::first-letter {
+		text-transform: uppercase;
 	}
 
 	.vs-sort__sheet_head {
@@ -10955,6 +10995,46 @@ img.lazy:not(.loaded) {
 			-webkit-backdrop-filter: blur(12px);
 			backdrop-filter: blur(12px);
 		}
+	}
+}
+
+/* ============================================================================ */
+/* POINTER TARGETS                                                              */
+/* ============================================================================ */
+
+/* 44px is the floor for a finger and the block below raises everything to it,   */
+/* but only up to 991px. WCAG 2.5.8 AA asks 24x24 of a POINTER too, and three    */
+/* links stayed under it at every width from 992 up - measured at 992, 1180,     */
+/* 1200 and 1440, identical each time, so this was never the 1180x820 case it    */
+/* was first filed as. All three are real links, none of them inline in a         */
+/* sentence, so neither of the exceptions applies:                               */
+/*                                                                              */
+/* - .vs-copyright__mark, an <a> to the CMS with an SVG and no text, 11x16 -     */
+/*   the smallest target on the site;                                            */
+/* - .vs-post-card__author, a standalone byline link, 4px short at 20;            */
+/* - .vs-cart__name, the product title in a cart line, 18 tall.                  */
+/*                                                                              */
+/* 24 rather than 44: with a mouse the extra 20px would push the footer mark     */
+/* out of its row and give a byline the height of a button. This range is         */
+/* disjoint from the block below, so their source order cannot matter and TOUCH   */
+/* TARGETS still stays last.                                                     */
+
+@media (min-width: 992px) {
+	.vs-copyright__mark {
+		align-items: center;
+		justify-content: center;
+		min-width: 24px;
+		min-height: 24px;
+	}
+
+	.vs-post-card__author {
+		display: inline-flex;
+		align-items: center;
+		min-height: 24px;
+	}
+
+	.vs-cart__name {
+		min-height: 24px;
 	}
 }
 
