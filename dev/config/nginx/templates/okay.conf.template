@@ -99,8 +99,24 @@ server {
         location ~* dev/ {
             return 404;
         }
-        
+
         location ~* config/ {
+            return 404;
+        }
+
+        # Same web root as the whole repository (nginx-prod stage copies the
+        # tree as-is) — these are not application paths and must not be
+        # servable: the 21 MB seed dump (with real-looking manager rows),
+        # dependency metadata and the test suite.
+        location ~* 1DB_changes/ {
+            return 404;
+        }
+
+        location ~* ^/?(composer\.(json|lock)|phpunit\.xml)$ {
+            return 404;
+        }
+
+        location ~* tests/ {
             return 404;
         }
         
