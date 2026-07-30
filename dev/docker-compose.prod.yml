@@ -91,6 +91,32 @@ services:
 
   nginx:
     <<: *prod-limits
+    # Without this, nginx inherits the base file's plain `image:
+    # nginx:1.29-alpine` and /var/www/html stays empty — every request 404s,
+    # because the base file's application bind mount lives only in
+    # docker-compose.override.yml (dev-only). nginx-prod
+    # (dev/docker/Dockerfile) COPYs the same tree the `prod` target just built
+    # and composer-installed, so static assets can never drift out of sync
+    # with the PHP image — both come from the identical build context/args.
+    build:
+      context: ..
+      dockerfile: dev/docker/Dockerfile
+      target: nginx-prod
+      args:
+        APP_UID: ${APP_UID:-1000}
+        APP_GID: ${APP_GID:-1000}
+    image: ${OKAY_NGINX_IMAGE:-okaycms-nginx}:${OKAY_VERSION:-latest}
+    pull_policy: ${OKAY_PULL_POLICY:-build}
+    volumes:
+      # The image only carries what was committed at build time. Everything
+      # OkayCMS writes at runtime — product/upload images (files,
+      # backend_files) and compiled CSS/JS (app_cache; see
+      # Okay/Core/config/parameters.php's compile_css_dir/compile_js_dir) —
+      # must be mounted here too, read-only, or it 404s even after the fix
+      # above. Same named volumes php85/scheduler already write into.
+      - files:/var/www/html/files:ro
+      - backend_files:/var/www/html/backend/files:ro
+      - app_cache:/var/www/html/cache:ro
     # --- Traefik ---
     # Dokploy generates and injects its own Traefik labels onto whichever
     # service/container it is pointed at (normally this one), and it also
