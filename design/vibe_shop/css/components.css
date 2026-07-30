@@ -234,11 +234,19 @@
 /* the answer: the state that matters is the focused one, and it can only stand  */
 /* out if the resting state is quiet.                                            */
 /*                                                                               */
-/* --vs-space-3 and --vs-radius-sm, not --vs-space-4 and --vs-radius-md: a 12px  */
-/* radius on a 44px control is half its height and reads as a pill. 8px is the   */
-/* same radius the rows inside every dropdown panel use, so fields and menu      */
-/* rows are finally one family. The 12px inset matches .vs-buybox__select and    */
-/* .vs-price__input, which already used it.                                      */
+/* --vs-radius-md, the button radius. This was --vs-radius-sm on the argument    */
+/* that 12px on a 44px control reads as a pill, and that fields should share the  */
+/* 8px of the rows inside dropdown panels. Both parts were wrong on this theme:   */
+/* 12px is 27% of 44px, not half, and .vs-btn, .vs-stepper and .vs-search__input  */
+/* are all 44px tall with 12px already - the field was the only control of that   */
+/* height carrying 8px, which is exactly what showed as a mismatch where a field  */
+/* and a button stand side by side, as the coupon row does. 8px stays the radius  */
+/* of the small square things - dropdown rows, checkboxes, badges - where 12px    */
+/* on a 20px box would be nearly a circle.                                       */
+/*                                                                               */
+/* The inset stays --vs-space-3 rather than --vs-space-4: a larger radius eats     */
+/* into the corner, but 12px of text inset is still clear of a 12px corner and    */
+/* .vs-buybox__select and .vs-price__input already used it.                       */
 /*                                                                               */
 /* The resting fill is the same neutral for every shop: --vs-surface follows the */
 /* owner's boxed colour and a field must stay distinguishable FROM its card, so  */
@@ -255,7 +263,7 @@
 	min-height: 44px;
 	padding: 0 var(--vs-space-3);
 	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	color: var(--vs-text);
 	font-size: var(--vs-text-base);
@@ -1079,7 +1087,7 @@ body.other_page .main {
 .select2-container--default .select2-selection--single {
 	height: 44px;
 	border: 1px solid var(--vs-hairline);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	transition: border-color var(--vs-dur-1) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease);
 }
@@ -1149,7 +1157,7 @@ body.other_page .main {
 	min-height: 44px;
 	padding: 0 var(--vs-space-3);
 	border: 1px solid var(--vs-hairline);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	color: var(--vs-text);
 	font-size: var(--vs-text-base);
@@ -4434,7 +4442,7 @@ body.hc-nav-open {
 	min-height: 44px;
 	padding: 0 var(--vs-space-3);
 	border: 1px solid var(--vs-hairline);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	color: var(--vs-text);
 	font-size: var(--vs-text-sm);
@@ -4448,7 +4456,7 @@ body.hc-nav-open {
 .vs-buybox__variants .select2-container .select2-selection--single {
 	height: 44px;
 	border: 1px solid var(--vs-hairline);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 }
 
@@ -6910,7 +6918,7 @@ body.hc-nav-open {
 .vs-option__extra .form__textarea {
 	min-height: 88px;
 	border-color: var(--vs-border);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	font-size: var(--vs-text-base);
 }
@@ -10452,7 +10460,7 @@ img.lazy:not(.loaded) {
 	min-height: 44px;
 	padding: 0 var(--vs-space-3);
 	border: 1px solid var(--vs-border);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-n-25);
 	color: var(--vs-text);
 	font-family: inherit;
@@ -10588,7 +10596,7 @@ img.lazy:not(.loaded) {
 	min-height: 44px;
 	padding: 0 var(--vs-space-3);
 	border: 1px solid var(--vs-hairline);
-	border-radius: var(--vs-radius-sm);
+	border-radius: var(--vs-radius-md);
 	background-color: var(--vs-surface-subtle);
 	color: var(--vs-heading);
 	font-size: var(--vs-text-base);
