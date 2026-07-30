@@ -27,7 +27,7 @@ wait_for_healthy() {
         # No jq: fall back to a hardcoded list. Whoever adds a healthcheck to
         # a new service (there is no jq way to skip this comment) must add it
         # here too.
-        services="mariadb php85 nginx"
+        services="mariadb php85 nginx scheduler"
     fi
 
     printf 'Waiting for services to become healthy: %s\n' "$(echo "$services" | tr '\n' ' ')"
@@ -182,6 +182,43 @@ expect_contains "the admin manager exists with the default password" \
     '$apr1$8m1u0cp4$' \
     docker compose exec -T mariadb sh -c \
     'mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT password FROM ok_managers WHERE login = \"admin\";"'
+
+echo
+echo "Network segmentation"
+backend_net="${NETWORK_NAME}-backend"
+frontend_net="${NETWORK_NAME}-frontend"
+expect_contains "the backend network is internal (no route off the host)" \
+    "true" \
+    docker network inspect "$backend_net" --format '{{.Internal}}'
+expect_contains "mariadb is attached to the backend network" \
+    "$backend_net" \
+    docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$mariadb_cid"
+expect_missing "mariadb is not attached to the frontend network" \
+    "$frontend_net" \
+    docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$mariadb_cid"
+# Topology proves mariadb was never wired to frontend; this proves the
+# isolation actually holds at the DNS/routing level too, not just on paper.
+# nginx is frontend-only, so it is the control: it must still resolve php85
+# (also on frontend) while failing to resolve mariadb (backend-only).
+expect_contains "nginx (frontend-only) can still resolve php85 over the frontend network" \
+    "php85" \
+    docker compose exec -T nginx getent hosts php85
+expect_missing "mariadb does not resolve from the frontend-only nginx container" \
+    "mariadb" \
+    docker compose exec -T nginx getent hosts mariadb
+
+echo
+echo "Scheduler"
+scheduler_cid=$(docker compose ps -q scheduler)
+expect_contains "the scheduler container is running" \
+    "true" \
+    docker inspect -f '{{.State.Running}}' "$scheduler_cid"
+# This only proves the supercronic process under tini is alive, not that any
+# scheduled job has run or succeeded — see the healthcheck's own comment in
+# docker-compose.yml.
+expect_contains "supercronic is running inside the scheduler container" \
+    "supercronic" \
+    docker compose exec -T scheduler pgrep -fa supercronic
 
 echo
 echo "Logging"

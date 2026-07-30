@@ -8,23 +8,52 @@
 
 name: ${APP_NAME:?err}
 
+# Shared between php85 and the scheduler so the two cannot drift apart — same
+# image, same build args.
+x-php-build: &php-build
+  context: ..
+  dockerfile: dev/docker/Dockerfile
+  target: dev
+  args:
+    APP_UID: ${APP_UID:-1000}
+    APP_GID: ${APP_GID:-1000}
+
+# Same idea for environment: php85 and the scheduler both run OkayCMS code
+# and must see identical TZ/mail-redirect/domain settings.
+x-php-env: &php-env
+  TZ: ${TZ:-Europe/Kyiv}
+  TEST_INTERNAL_EMAIL: ${TEST_INTERNAL_EMAIL:-}
+  PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-}
+
 services:
   php85:
-    build:
-      context: ..
-      dockerfile: dev/docker/Dockerfile
-      target: dev
-      args:
-        APP_UID: ${APP_UID:-1000}
-        APP_GID: ${APP_GID:-1000}
+    build: *php-build
     restart: unless-stopped
     environment:
-      TZ: ${TZ:-Europe/Kyiv}
-      TEST_INTERNAL_EMAIL: ${TEST_INTERNAL_EMAIL:-}
-      PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-}
+      <<: *php-env
     depends_on:
       mariadb:
         condition: service_healthy
+    networks:
+      - frontend
+      - backend
+    volumes:
+      # Paths OkayCMS writes into its own source tree at runtime, so they must
+      # survive a container recreate/redeploy. In dev, docker-compose.override.yml
+      # bind-mounts the whole repo over /var/www/html and re-declares binds at
+      # these exact same targets — otherwise these named volumes would shadow
+      # the corresponding host directories and hide uploads from the developer.
+      # See the override file for the concrete reasoning.
+      - files:/var/www/html/files
+      - backend_files:/var/www/html/backend/files
+      - app_cache:/var/www/html/cache
+      - app_log:/var/www/html/Okay/log
+    tmpfs:
+      # Smarty compiled output only — regenerated on demand, never needs to
+      # survive a recreate. uid/gid must match the container's www-data
+      # (APP_UID/APP_GID) or PHP cannot write its own compiled templates.
+      - "/var/www/html/compiled:size=256m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
+      - "/var/www/html/backend/design/compiled:size=64m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
     security_opt:
       - "no-new-privileges:true"
     healthcheck:
@@ -34,6 +63,43 @@ services:
       # against. The doubled $$ is required: Compose interpolates this string,
       # so a single $f would be swallowed before it ever reaches php.
       test: ["CMD-SHELL", "php -r '$$f=@fsockopen(\"127.0.0.1\", 9000); exit($$f ? 0 : 1);'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Runs `./ok scheduler:run` on a schedule so registered tasks (see
+  # docs/scheduler.md) actually fire — nothing did before this service existed.
+  scheduler:
+    build: *php-build
+    # tini is PID 1 so signals/zombies are handled correctly; supercronic is
+    # the cron daemon. -no-reap: tini already reaps, supercronic doesn't need
+    # to as well. -passthrough-logs: job output goes straight to our stdout/
+    # stderr instead of being wrapped in supercronic's own log lines, so
+    # `docker compose logs scheduler` reads like every other service's logs.
+    entrypoint: ["/usr/bin/tini", "--"]
+    command: ["/usr/local/bin/supercronic", "-no-reap", "-passthrough-logs", "/etc/supercronic/crontab"]
+    restart: unless-stopped
+    environment:
+      <<: *php-env
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+    volumes:
+      - files:/var/www/html/files
+      - app_log:/var/www/html/Okay/log
+    security_opt:
+      - "no-new-privileges:true"
+    healthcheck:
+      # This service never listens on 9000, so the image's default php-fpm
+      # healthcheck cannot apply and must be overridden. pgrep only proves the
+      # supercronic process is alive under tini — it is NOT evidence that any
+      # scheduled job has actually run or succeeded; check
+      # `docker compose logs scheduler` (or Okay/log/scheduler/) for that.
+      test: ["CMD-SHELL", "pgrep -f supercronic >/dev/null || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -51,6 +117,8 @@ services:
       # project name, so `docker compose -p other-name up` works.
       FASTCGI: php85
       VIRTUAL_HOST: ${VIRTUAL_HOST:?err}
+    networks:
+      - frontend
     volumes:
       - './config/nginx/templates:/etc/nginx/templates:ro'
     security_opt:
@@ -70,6 +138,9 @@ services:
       MYSQL_USER: ${MYSQL_USER:-okay}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?err}
       MYSQL_DATABASE: ${MYSQL_DATABASE:?err}
+    networks:
+      # backend only: mariadb has no route off the host at all.
+      - backend
     volumes:
       - 'db_data:/var/lib/mysql'
     security_opt:
@@ -83,7 +154,20 @@ services:
 
 volumes:
   db_data:
+  files:
+  backend_files:
+  app_cache:
+  app_log:
 
 networks:
-  default:
-    name: ${NETWORK_NAME:?err}
+  # bridge (the default type): has a route off the host, so nginx can be
+  # reached and php85/scheduler can make outbound calls (e.g. the
+  # NovaposhtaCost module's scheduled API lookups).
+  frontend:
+    name: ${NETWORK_NAME:?err}-frontend
+  # internal: true means no default route out of this network at all — a
+  # container with only this network cannot reach anything off the host,
+  # which is exactly what mariadb needs.
+  backend:
+    internal: true
+    name: ${NETWORK_NAME:?err}-backend

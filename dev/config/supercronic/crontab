@@ -1,0 +1,10 @@
+# Read by supercronic (see the scheduler service in dev/docker-compose.yml).
+#
+# `./ok scheduler:run` itself decides whether anything actually happens: every
+# registered task carries its own cron rule (Okay/Core/Scheduler/Task::isDue())
+# and an overlap guard, so invoking it every minute is not the same as running
+# every task every minute — it is a cheap "is anything due?" check, exactly as
+# docs/scheduler.md recommends. Output goes to supercronic's own stdout/stderr
+# (passed through, not wrapped), which lands in `docker compose logs scheduler`
+# the same way every other service's logs do in this project.
+* * * * * cd /var/www/html && php ok scheduler:run

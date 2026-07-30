@@ -34,6 +34,27 @@ ENV PHP_INI_SCAN_DIR="/usr/local/etc/php/conf.d:/usr/local/etc/php/custom.d"
 RUN mkdir -p /usr/local/etc/php/custom.d
 COPY dev/config/php/custom.d/okay.ini /usr/local/etc/php/custom.d/okay.ini
 
+# tini and supercronic back the `scheduler` service (dev/docker-compose.yml):
+# tini is PID 1 so signals are forwarded and dead children are reaped, and
+# supercronic is the cron daemon that actually calls `./ok scheduler:run`.
+# Both live in this stage, not just `prod`, so the same binaries back the
+# scheduler in dev too — no separate install path to drift out of sync.
+ARG SUPERCRONIC_VERSION=v0.2.48
+ARG TARGETARCH
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends tini \
+ && rm -rf /var/lib/apt/lists/* \
+ && case "${TARGETARCH}" in \
+        amd64) SUPERCRONIC_SHA256=88c1b66b94c486f972fdd1a4d1f901e3e75ff04f749cddd60c5db573e3a33c6c ;; \
+        arm64) SUPERCRONIC_SHA256=50ae8755e04fa72812d0a1bc47a112a856811cc91cce7b6c875c378a850788bc ;; \
+        *) echo "unsupported architecture for supercronic: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac \
+ && curl -fsSL -o /usr/local/bin/supercronic \
+        "https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-${TARGETARCH}" \
+ && echo "${SUPERCRONIC_SHA256}  /usr/local/bin/supercronic" | sha256sum -c - \
+ && chmod +x /usr/local/bin/supercronic
+COPY dev/config/supercronic/crontab /etc/supercronic/crontab
+
 WORKDIR /var/www/html
 
 # ──────────────────────────────── dev ───────────────────────────────
@@ -60,8 +81,8 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY . /var/www/html
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress \
  && composer clear-cache \
- && mkdir -p compiled cache files backend/design/compiled Okay/log \
- && chown -R www-data:www-data vendor compiled cache files backend/design/compiled Okay/log
+ && mkdir -p compiled cache files backend/files backend/design/compiled Okay/log \
+ && chown -R www-data:www-data vendor compiled cache files backend/files backend/design/compiled Okay/log
 
 USER www-data
 

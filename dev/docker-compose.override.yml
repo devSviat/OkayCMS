@@ -14,8 +14,29 @@ services:
       PHP_IDE_CONFIG: serverName=${VIRTUAL_HOST:?err}
     volumes:
       - '..:/var/www/html'
+      # The base file gives php85 named volumes at these same targets so a
+      # prod deploy persists them. A named volume mounted under a bind mount
+      # shadows whatever the bind put there — Docker mounts the more specific
+      # path last — so without this, the base's `files:` volume would hide
+      # the host's files/ directory behind an empty volume and every upload
+      # would become invisible in the working tree. Re-declaring a bind at the
+      # exact same target replaces the base's volume entry for this service
+      # (Compose merges volumes by target), so in dev these are ordinary bind
+      # mounts of the repo's own subdirectories, same as the rest of the tree.
+      - '../files:/var/www/html/files'
+      - '../backend/files:/var/www/html/backend/files'
+      - '../cache:/var/www/html/cache'
+      - '../Okay/log:/var/www/html/Okay/log'
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  # Same image and source tree as php85, so it needs the same neutralizing —
+  # see php85's volumes above for why.
+  scheduler:
+    volumes:
+      - '..:/var/www/html'
+      - '../files:/var/www/html/files'
+      - '../Okay/log:/var/www/html/Okay/log'
 
   nginx:
     hostname: ${VIRTUAL_HOST:?err}
@@ -41,6 +62,13 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?err}
       MYSQL_DATABASE: ${MYSQL_DATABASE:?err}
       DB_INIT_SMTP: ${DB_INIT_SMTP:-1}
+    # Only needs to reach mariadb. The base file no longer defines a `default`
+    # network for this service to fall back on (it replaced `default` with
+    # `frontend`/`backend`), and a service without an explicit `networks:` key
+    # gets Compose's own auto-created `default` network instead — which would
+    # leave this isolated from mariadb. Must be explicit here.
+    networks:
+      - backend
     volumes:
       - './config/mysql/db-init.sh:/db-init.sh:ro'
     entrypoint: ["/bin/sh", "/db-init.sh"]
@@ -55,5 +83,10 @@ services:
       # connection. Both flags are dev-only and this service is dev-only.
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    # Same reasoning as db-init above: needs an explicit network now that
+    # `default` no longer exists. frontend is enough — php85 (which sends
+    # mail here) is on both frontend and backend.
+    networks:
+      - frontend
     ports:
       - '${BIND_IP:-127.0.0.1}:${MAILPIT_PORT:-8025}:8025'
