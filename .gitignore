@@ -29,6 +29,7 @@ cache/
 
 /Okay/log/*
 config/config.local.php
+config/config.local.prod.php
 design/*/lang/local.*.php
 #design/*/css/theme-settings.css
 !*.keep_folder

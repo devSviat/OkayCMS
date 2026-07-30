@@ -1,1 +1,7 @@
 .env
+
+# Real secret files for docker-compose.prod.yml's `secrets:` block (5.6).
+# Only the .example templates are tracked; the actual mysql_*_password.txt
+# files are created locally/on the deploy host and must never reach git.
+secrets/*
+!secrets/*.example
