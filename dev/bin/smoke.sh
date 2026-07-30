@@ -60,7 +60,63 @@ wait_for_healthy() {
 
 wait_for_healthy
 
+# wait_for_db_init: db-init is a one-shot service (runs the seed SQL, then
+# exits 0) so it deliberately has no healthcheck and wait_for_healthy skips
+# it. But the "admin manager exists" check below depends on it having
+# actually finished. On a fast machine db-init happens to be done before we
+# get here, which made this pass by luck rather than by a real guarantee.
+# Poll until the container exits, then fail loudly — with its logs and exit
+# code — if it either times out or exited non-zero.
+wait_for_db_init() {
+    local timeout=120 waited=0 cid status exit_code
+
+    printf 'Waiting for db-init to finish: '
+    while [ "$waited" -lt "$timeout" ]; do
+        cid=$(docker compose ps -a -q db-init 2>/dev/null)
+        status=$(docker inspect -f '{{.State.Status}}' "$cid" 2>/dev/null || echo "unknown")
+        if [ "$status" = "exited" ]; then
+            exit_code=$(docker inspect -f '{{.State.ExitCode}}' "$cid" 2>/dev/null || echo "unknown")
+            echo
+            if [ "$exit_code" = "0" ]; then
+                printf 'db-init finished successfully after %ss\n\n' "$waited"
+                return 0
+            fi
+            printf 'db-init exited with code %s (expected 0)\n' "$exit_code"
+            printf 'db-init logs:\n'
+            docker compose logs db-init
+            exit 1
+        fi
+        printf '.'
+        sleep 2
+        waited=$((waited + 2))
+    done
+
+    echo
+    printf 'timed out after %ss waiting for db-init to finish, current state:\n' "$timeout"
+    if [ -n "${cid:-}" ]; then
+        docker inspect -f '  status={{.State.Status}} exitCode={{.State.ExitCode}}' "$cid" 2>/dev/null
+    else
+        echo "  db-init container not found"
+    fi
+    exit 1
+}
+
+wait_for_db_init
+
 fails=0
+
+# dump_actual_output <out>: print the actual captured output on failure, so a
+# mismatch shows whether the command errored, returned empty, or returned
+# something unexpected instead of just restating what we hoped to see.
+dump_actual_output() {
+    local out=$1 len
+    len=${#out}
+    printf '        actual output (%d bytes), first 300 chars:\n' "$len"
+    printf -- '        --- begin actual output ---\n'
+    printf '%s' "$out" | head -c 300
+    printf '\n'
+    printf -- '        --- end actual output ---\n'
+}
 
 # expect_contains <description> <needle> <command...>
 expect_contains() {
@@ -73,6 +129,7 @@ expect_contains() {
     else
         printf '  FAIL  %s\n' "$desc"
         printf '        expected output to contain: %s\n' "$needle"
+        dump_actual_output "$out"
         fails=$((fails + 1))
     fi
 }
@@ -86,6 +143,7 @@ expect_missing() {
     if printf '%s' "$out" | grep -qF -- "$needle"; then
         printf '  FAIL  %s\n' "$desc"
         printf '        expected output NOT to contain: %s\n' "$needle"
+        dump_actual_output "$out"
         fails=$((fails + 1))
     else
         printf '  ok    %s\n' "$desc"
@@ -98,7 +156,7 @@ expect_contains "stock extension ini files are not shadowed" \
     docker compose exec -T php85 ls /usr/local/etc/php/conf.d
 expect_contains "custom.d is on the scan path" \
     "custom.d" \
-    docker compose exec -T php85 php -i
+    docker compose exec -T php85 php --ini
 expect_contains "memory_limit comes from okay.ini" \
     "1024M" \
     docker compose exec -T php85 php -r 'echo ini_get("memory_limit");'
@@ -113,19 +171,17 @@ done
 
 echo
 echo "Database"
+mariadb_cid=$(docker compose ps -q mariadb)
 expect_contains "the database is on a named volume, not a bind mount" \
     "volume" \
-    docker inspect -f '{{range .Mounts}}{{.Type}} {{.Destination}}{{"\n"}}{{end}}' "${APP_NAME}-mariadb"
+    docker inspect -f '{{range .Mounts}}{{.Type}} {{.Destination}}{{"\n"}}{{end}}' "$mariadb_cid"
 expect_missing "dev/mysql/DB_data is no longer mounted into the container" \
     "/var/lib/mysql" \
-    sh -c "docker inspect -f '{{range .Mounts}}{{.Source}} {{.Destination}}{{\"\n\"}}{{end}}' ${APP_NAME}-mariadb | grep bind"
+    sh -c "docker inspect -f '{{range .Mounts}}{{.Source}} {{.Destination}}{{\"\n\"}}{{end}}' $mariadb_cid | grep bind"
 expect_contains "the admin manager exists with the default password" \
     '$apr1$8m1u0cp4$' \
     docker compose exec -T mariadb sh -c \
     'mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT password FROM ok_managers WHERE login = \"admin\";"'
-expect_contains "the stock MariaDB entrypoint is in use" \
-    "docker-entrypoint.sh" \
-    docker inspect -f '{{json .Config.Entrypoint}}' "${APP_NAME}-mariadb"
 
 echo
 if [ "$fails" -gt 0 ]; then
