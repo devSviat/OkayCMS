@@ -93,6 +93,42 @@
 	transform: translateX(1px) rotate(135deg);
 }
 
+/* The banner's arrows are the only pair that sits ON a photograph, and they sat  */
+/* there permanently: two 44px plates parked over the image whether or not anyone */
+/* intended to page through it. On a phone the banner is 358px wide, so the pair  */
+/* covered a quarter of it.                                                       */
+/*                                                                               */
+/* With a pointer they fade in when the slider is pointed at, and :focus-within   */
+/* covers the keyboard - opacity rather than display, so the buttons stay in the  */
+/* tab order and Swiper keeps its disabled class on them. Without one they are    */
+/* gone: there is no hover to reveal them with, and swipe plus the dots is the    */
+/* whole interaction a touch slider needs. Scoped to .banner_group, which is the  */
+/* Banners module's slider root - the theme's own two pairs (.vs-gallery__nav on  */
+/* the product photos, .vs-compare__nav) match the bare selector too, and both    */
+/* are the only way to page those tracks.                                         */
+
+@media (hover: hover) {
+	.banner_group .swiper-button-prev,
+	.banner_group .swiper-button-next {
+		opacity: 0;
+		transition: opacity var(--vs-dur-2) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease);
+	}
+
+	.banner_group:hover .swiper-button-prev,
+	.banner_group:hover .swiper-button-next,
+	.banner_group:focus-within .swiper-button-prev,
+	.banner_group:focus-within .swiper-button-next {
+		opacity: 1;
+	}
+}
+
+@media (hover: none) {
+	.banner_group .swiper-button-prev,
+	.banner_group .swiper-button-next {
+		display: none;
+	}
+}
+
 /* ------------------------------------------------------------ generic tabs */
 
 /* .tabs / .tabs__navigation / .tabs__link / .tabs__content is okay.js's tab    */
