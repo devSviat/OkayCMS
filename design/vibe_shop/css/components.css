@@ -2558,14 +2558,22 @@ body.hc-nav-open {
 /* an unpositioned in-flow child. Giving the child position: relative puts both */
 /* in the same paint step, where tree order puts the glyph on top.              */
 
+/* Anchored to the glyph, not to the button. The plate used to be centred in the */
+/* 44px hit area, which was right while the glyph was centred too - but the glyph */
+/* moved to the corner and the plate stayed put, so hovering drew a grey disc     */
+/* 12px down and to the left of the heart it was supposed to be behind. The glyph */
+/* is 20px flush with the padding box's top right corner, so -8px on both sides   */
+/* is (20 - 36) / 2: the plate ends up concentric with it. That leaves 7px of the  */
+/* plate outside the photo, on the card's own 12px of padding, where nothing clips */
+/* it - .vs-card and .vs-card__inner are both overflow: visible.                  */
+
 .vs-card__tool::before {
 	content: "";
 	position: absolute;
-	top: 50%;
-	left: 50%;
+	top: -8px;
+	right: -8px;
 	width: 36px;
 	height: 36px;
-	transform: translate(-50%, -50%);
 	border-radius: var(--vs-radius-full);
 	background-color: transparent;
 	transition: background-color var(--vs-dur-1) var(--vs-ease);
@@ -7341,9 +7349,16 @@ body.hc-nav-open {
 
 /* --------------------------------------------------- checkout ≥ 992 px */
 
+/* The summary grows with the page instead of staying at the 340px it needs at    */
+/* 992px, where the product name in a cart line is down to 146px and cannot pay   */
+/* for anything. The container caps at 1352px from 1366px up, so 30% resolves to  */
+/* 406 there and the clamp holds it at 400 - the summary gains 60px and the main   */
+/* column still leaves the name 468px. At 992px 30% is 293, below the floor, so    */
+/* that width keeps 340 exactly as before.                                        */
+
 @media (min-width: 992px) {
 	.vs-cart {
-		grid-template-columns: minmax(0, 1fr) 340px;
+		grid-template-columns: minmax(0, 1fr) clamp(340px, 30%, 400px);
 		gap: var(--vs-space-8);
 	}
 
