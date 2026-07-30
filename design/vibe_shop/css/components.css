@@ -5901,10 +5901,20 @@ body.hc-nav-open {
 		left: calc(-1 * var(--vs-space-4));
 		right: calc(-1 * var(--vs-space-4));
 		display: none;
-		padding: var(--vs-space-2) var(--vs-space-4) var(--vs-space-3);
+		padding: var(--vs-space-3) var(--vs-space-4);
 		border-bottom: 1px solid var(--vs-hairline);
 		background-color: var(--vs-surface);
 		box-shadow: var(--vs-shadow-2);
+	}
+
+/* .vs-search is the containing block for its own submit button, so the padding   */
+/* above pushes that button off the field it belongs to: the glyph slid to the    */
+/* screen edge, outside the field's rounded corner. The inset has to carry the     */
+/* padding with it. Vertically nothing is needed here - the ≤991px block centres   */
+/* this button on the field for its own reason.                                   */
+
+	.vs-search__submit {
+		right: calc(var(--vs-space-4) + 3px);
 	}
 
 	.vs-informers__slot--secondary {
@@ -11424,9 +11434,17 @@ img.lazy:not(.loaded) {
 /* 38 coming from a 3px inset on both sides of a 44px-tall .vs-search. Growing   */
 /* it here keeps the fix inside the 60px header bar with room to spare, and     */
 /* leaves the >991 desktop bar untouched, same as every other rule above.       */
+/*                                                                             */
+/* 44px does not fit between a 3px top and a 3px bottom inset of a 44px field,  */
+/* and min-height wins that argument, so the button grew downwards and hung 3px */
+/* below the field it sits in. Centring instead of insetting is what makes a    */
+/* 44px control coincide with a 44px field exactly.                             */
 
 	.vs-search__submit {
+		top: 50%;
+		bottom: auto;
 		min-height: 44px;
+		transform: translateY(-50%);
 	}
 }
 
