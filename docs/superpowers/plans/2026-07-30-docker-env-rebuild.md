@@ -361,6 +361,11 @@ services:
     volumes:
       - './config/nginx/templates:/etc/nginx/templates:ro'
     healthcheck:
+      # Config validation, deliberately not a request against the site. The real
+      # failure mode here is a template that did not render (a missing FASTCGI or
+      # VIRTUAL_HOST), which `nginx -t` catches. Fetching a page would instead
+      # make nginx's health depend on php-fpm and the database, so the container
+      # would flap whenever the stack is merely slow to start.
       test: ["CMD-SHELL", "nginx -t"]
       interval: 30s
       timeout: 5s
