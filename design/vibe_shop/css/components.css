@@ -6455,6 +6455,19 @@ body.hc-nav-open {
 	align-self: center;
 }
 
+/* The cart's stepper is the small one - 122x44 rather than the 134x52 of the    */
+/* product page, which is sized to stand beside a 52px add-to-cart button. Here  */
+/* its neighbours are the coupon field and its apply button, both 44 tall, and a */
+/* line already carrying a thumbnail, a name, a unit price and a total. Below    */
+/* 576px every stepper in the theme is this size already, so this only extends   */
+/* it upwards; the buybox keeps the large one.                                   */
+
+.vs-cart__qty .vs-stepper__btn,
+.vs-cart__qty .vs-stepper__input {
+	width: 40px;
+	min-height: 42px;
+}
+
 .vs-cart__qty-static {
 	grid-area: qty;
 	justify-self: start;
@@ -7284,8 +7297,26 @@ body.hc-nav-open {
 		display: inline;
 	}
 
-	.vs-cart__line:not(.vs-cart__line--compact):not(.vs-cart__line--static) {
+/* The track list lives on the container and the lines borrow it with subgrid,   */
+/* because each line used to be its own grid and a grid only ever aligns its own */
+/* tracks. The line total is content-sized, so 499 000,00 in one line and 109,00 */
+/* in the next gave the two lines different track widths and the flexible name    */
+/* column swallowed the difference - the steppers below each other started 33px   */
+/* apart. With subgrid both auto tracks are measured once across every line: the  */
+/* stepper column is a constant 122px and the total column is as wide as the      */
+/* widest total in the cart, so the steppers share a left edge and the prices     */
+/* share a right one. A fixed width on the total column would align them too, but */
+/* it would either cost the product name 40px it needs at 992px or let a longer   */
+/* price run over the stepper.                                                    */
+
+	.vs-cart__lines--main {
+		display: grid;
 		grid-template-columns: 88px minmax(0, 1fr) auto auto 44px;
+	}
+
+	.vs-cart__line:not(.vs-cart__line--compact):not(.vs-cart__line--static) {
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
 		grid-template-areas: "thumb info qty total remove";
 		align-items: center;
 		gap: var(--vs-space-4);

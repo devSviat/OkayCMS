@@ -4,7 +4,7 @@
    innerHTML of #fn_purchases), so the thumbnails stay plain <img src>: a
    data-src/lazyload image would need lazyload re-initialised on every quantity
    change and would otherwise show the spinner placeholder for good. *}
-<div class="fn_purchases_wrap vs-cart__lines" data-total_purchases_price="{$cart->total_price}">
+<div class="fn_purchases_wrap vs-cart__lines vs-cart__lines--main" data-total_purchases_price="{$cart->total_price}">
 {foreach $cart->purchases as $purchase}
     <article class="vs-cart__line">
         {* Product image. Decorative duplicate of the name link below it, so it
