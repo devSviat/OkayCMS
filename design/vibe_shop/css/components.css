@@ -4679,6 +4679,70 @@ body.hc-nav-open {
 	display: inline-flex;
 }
 
+/* The comparison tool gets the heart's off/on pair so its label can change with */
+/* the state on the click. The glyph is the same in both - only the words move.  */
+
+.vs-buybox__compare_off,
+.vs-buybox__compare_on {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--vs-space-2);
+}
+
+.vs-buybox__compare_on {
+	display: none;
+}
+
+.vs-buybox__compare.selected .vs-buybox__compare_off {
+	display: none;
+}
+
+.vs-buybox__compare.selected .vs-buybox__compare_on {
+	display: inline-flex;
+}
+
+/* Icon plus words, which is what these two are for: a heart and a pair of       */
+/* scales say "favourite" and "compare" to someone who already knows this        */
+/* pattern and nothing at all to anyone else. .vs-btn--icon makes a square, so   */
+/* the tools opt out of it and size to their content instead.                    */
+
+.vs-buybox__tool {
+	width: auto;
+	padding: 0 var(--vs-space-4);
+}
+
+.vs-buybox__wish_off,
+.vs-buybox__wish_on {
+	align-items: center;
+	gap: var(--vs-space-2);
+}
+
+.vs-buybox__tool_label {
+	font-size: var(--vs-text-sm);
+	white-space: nowrap;
+}
+
+/* Two safeties, because the row measured a nought-pixel margin at 320 and one   */
+/* pixel at 360 - fitting exactly is how every other budget in this theme has    */
+/* broken. Below 360 the labels go and the tools are squares again, and at every */
+/* width the row may wrap, so a longer translation drops the second tool onto    */
+/* its own line instead of out of the box.                                       */
+
+.vs-buybox__aside {
+	flex-wrap: wrap;
+}
+
+@media (max-width: 359px) {
+	.vs-buybox__tool_label {
+		display: none;
+	}
+
+	.vs-buybox__tool {
+		width: 44px;
+		padding: 0;
+	}
+}
+
 /* Same treatment as the catalogue card's copy of this button - see the note    */
 /* there. The module's markup is shared, so the mask has to be repeated rather  */
 /* than inherited: the two buttons never appear on the same page.               */

@@ -286,22 +286,36 @@
                     <div class="vs-buybox__aside">
                         {fast_order_btn product=$product}
 
+                        {* Both tools carry a visible label beside the glyph, and it lives in the
+                           SAME off/on pair the heart already used, so the words change with the
+                           state on the click rather than only after a reload. okay.js swaps the
+                           title attribute and data-result-text and never touches the element's
+                           text, so a text node here is safe - and nothing in the frontend reads
+                           data-language, checked before this was written, so no .text()-style
+                           write can eat the glyph. The label hides itself on the narrowest
+                           screens; see .vs-buybox__tool_label. *}
                         {if is_array($wishlist->ids) && in_array($product->id, $wishlist->ids)}
                             <a href="#" data-id="{$product->id}" class="fn_wishlist vs-btn vs-btn--icon vs-buybox__tool vs-buybox__wish selected" title="{$lang->product_remove_favorite}" data-result-text="{$lang->product_add_favorite}" data-language="product_remove_favorite">
-                                <span class="vs-buybox__wish_off">{include file="svg.tpl" svgId="heart"}</span>
-                                <span class="vs-buybox__wish_on">{include file="svg.tpl" svgId="heart_filled"}</span>
+                                <span class="vs-buybox__wish_off">{include file="svg.tpl" svgId="heart"}<span class="vs-buybox__tool_label">{$lang->product_add_favorite}</span></span>
+                                <span class="vs-buybox__wish_on">{include file="svg.tpl" svgId="heart_filled"}<span class="vs-buybox__tool_label">{$lang->product_remove_favorite}</span></span>
                             </a>
                         {else}
                             <a href="#" data-id="{$product->id}" class="fn_wishlist vs-btn vs-btn--icon vs-buybox__tool vs-buybox__wish" title="{$lang->product_add_favorite}" data-result-text="{$lang->product_remove_favorite}" data-language="product_add_favorite">
-                                <span class="vs-buybox__wish_off">{include file="svg.tpl" svgId="heart"}</span>
-                                <span class="vs-buybox__wish_on">{include file="svg.tpl" svgId="heart_filled"}</span>
+                                <span class="vs-buybox__wish_off">{include file="svg.tpl" svgId="heart"}<span class="vs-buybox__tool_label">{$lang->product_add_favorite}</span></span>
+                                <span class="vs-buybox__wish_on">{include file="svg.tpl" svgId="heart_filled"}<span class="vs-buybox__tool_label">{$lang->product_remove_favorite}</span></span>
                             </a>
                         {/if}
 
                         {if is_array($comparison->ids) && in_array($product->id, $comparison->ids)}
-                            <a class="fn_comparison vs-btn vs-btn--icon vs-buybox__tool vs-buybox__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->product_add_comparison}" data-language="product_remove_comparison">{include file="svg.tpl" svgId="compare"}</a>
+                            <a class="fn_comparison vs-btn vs-btn--icon vs-buybox__tool vs-buybox__compare selected" href="#" data-id="{$product->id}" title="{$lang->remove_comparison}" data-result-text="{$lang->product_add_comparison}" data-language="product_remove_comparison">
+                                <span class="vs-buybox__compare_off">{include file="svg.tpl" svgId="compare"}<span class="vs-buybox__tool_label">{$lang->product_add_comparison}</span></span>
+                                <span class="vs-buybox__compare_on">{include file="svg.tpl" svgId="compare"}<span class="vs-buybox__tool_label">{$lang->product_remove_comparison}</span></span>
+                            </a>
                         {else}
-                            <a class="fn_comparison vs-btn vs-btn--icon vs-buybox__tool vs-buybox__compare" href="#" data-id="{$product->id}" title="{$lang->product_add_comparison}" data-result-text="{$lang->remove_comparison}" data-language="product_add_comparison">{include file="svg.tpl" svgId="compare"}</a>
+                            <a class="fn_comparison vs-btn vs-btn--icon vs-buybox__tool vs-buybox__compare" href="#" data-id="{$product->id}" title="{$lang->product_add_comparison}" data-result-text="{$lang->remove_comparison}" data-language="product_add_comparison">
+                                <span class="vs-buybox__compare_off">{include file="svg.tpl" svgId="compare"}<span class="vs-buybox__tool_label">{$lang->product_add_comparison}</span></span>
+                                <span class="vs-buybox__compare_on">{include file="svg.tpl" svgId="compare"}<span class="vs-buybox__tool_label">{$lang->product_remove_comparison}</span></span>
+                            </a>
                         {/if}
                     </div>
                 </form>
