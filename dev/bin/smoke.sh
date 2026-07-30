@@ -245,9 +245,30 @@ expect_contains "the SMTP settings point at Mailpit" \
     "mailpit" \
     docker compose exec -T mariadb sh -c \
     'mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT value FROM ok_settings WHERE param = \"smtp_server\";"'
-expect_contains "a message sent from PHP arrives in Mailpit" \
-    '"total":1' \
-    sh -c "docker compose exec -T php85 php -r 'mail(\"smoke@example.com\", \"smoke test\", \"body\");' ; sleep 2 ; curl -sS http://127.0.0.1:${MAILPIT_PORT:-8025}/api/v1/messages?limit=1"
+# Mailpit keeps every message until the container is recreated, so its
+# "total" is cumulative across runs, not per-test. Asserting a fixed
+# "total":1 passes only on a freshly created stack and fails on any second
+# run against an otherwise healthy environment (observed "total":2 here) —
+# exactly the "harness that fails at random" this project's checks are
+# supposed to avoid. Capture the count before sending, send, then assert it
+# went up — an outcome, not an absolute number.
+mailpit_total() {
+    curl -sS "http://127.0.0.1:${MAILPIT_PORT:-8025}/api/v1/messages?limit=1" \
+        | grep -o '"total":[0-9]*' | head -1 | grep -o '[0-9]*'
+}
+before_total=$(mailpit_total)
+before_total=${before_total:-0}
+docker compose exec -T php85 php -r 'mail("smoke@example.com", "smoke test", "body");' >/dev/null 2>&1
+sleep 2
+after_total=$(mailpit_total)
+after_total=${after_total:-0}
+if [ -n "$after_total" ] && [ "$after_total" -gt "$before_total" ] 2>/dev/null; then
+    printf '  ok    %s (total %s -> %s)\n' "a message sent from PHP arrives in Mailpit" "$before_total" "$after_total"
+else
+    printf '  FAIL  %s\n' "a message sent from PHP arrives in Mailpit"
+    printf '        expected total to increase from %s, actual: %s\n' "$before_total" "$after_total"
+    fails=$((fails + 1))
+fi
 
 echo
 if [ "$fails" -gt 0 ]; then
