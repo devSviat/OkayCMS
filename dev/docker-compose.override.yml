@@ -1,0 +1,32 @@
+# Development overrides. Compose loads this automatically, so plain
+# `docker compose up -d` still gives a dev environment.
+#
+# For personal tweaks create docker-compose.local.yml (gitignored) and attach it
+# explicitly:  docker compose -f docker-compose.yml -f docker-compose.override.yml \
+#                             -f docker-compose.local.yml up -d
+
+services:
+  php85:
+    container_name: ${APP_NAME:?err}-php85
+    environment:
+      # Xdebug 3 reads this and it wins over the ini file, so debugging is
+      # switched on and off without rebuilding the image.
+      XDEBUG_MODE: ${XDEBUG_MODE:-off}
+      PHP_IDE_CONFIG: serverName=${VIRTUAL_HOST:?err}
+    volumes:
+      - '..:/var/www/html'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  nginx:
+    container_name: ${APP_NAME:?err}-nginx
+    hostname: ${VIRTUAL_HOST:?err}
+    ports:
+      - '${BIND_IP:-127.0.0.1}:${HTTP_PORT:?err}:80'
+    volumes:
+      - '..:/var/www/html'
+
+  mariadb:
+    container_name: ${APP_NAME:?err}-mariadb
+    ports:
+      - '${BIND_IP:-127.0.0.1}:${MYSQL_PORT:?err}:3306'

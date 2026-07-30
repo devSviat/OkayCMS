@@ -1,52 +1,71 @@
+# Base configuration, shared by dev and prod.
+#
+#   dev   docker compose up -d                       (override.yml auto-loads)
+#   prod  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Everything dev-specific — source bind mounts, published ports, Xdebug, the seed
+# dump — lives in docker-compose.override.yml, so it cannot reach production.
+
+name: ${APP_NAME:?err}
+
 services:
   php85:
-    build: ./docker/php/8.5
-    container_name: ${APP_NAME:?err}-php85
+    build:
+      context: ..
+      dockerfile: dev/docker/Dockerfile
+      target: dev
+      args:
+        APP_UID: ${APP_UID:-1000}
+        APP_GID: ${APP_GID:-1000}
+    restart: unless-stopped
     environment:
-      - TEST_INTERNAL_EMAIL=${TEST_INTERNAL_EMAIL:-}
-      - PRODUCTION_DOMAIN=${PRODUCTION_DOMAIN:-}
-    volumes:
-      - '..:/var/www/html'
-      - './config/php:/usr/local/etc/php'
-    links:
-      - mariadb
-    expose:
-      - 9001
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      TZ: ${TZ:-Europe/Kyiv}
+      TEST_INTERNAL_EMAIL: ${TEST_INTERNAL_EMAIL:-}
+      PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-}
+    depends_on:
+      mariadb:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(0);'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   nginx:
-    build: ./docker/nginx
-    container_name: ${APP_NAME:?err}-nginx
-    hostname: ${VIRTUAL_HOST:?err}
-    ports:
-      - '${HTTP_PORT:?err}:80'
-    links:
-      - php85
-    volumes:
-      - '..:/var/www/html'
-      - './config/nginx:/etc/nginx/conf.d'
-      - './config/nginx/templates:/etc/nginx/templates'
+    image: nginx:1.29-alpine
+    restart: unless-stopped
+    depends_on:
+      php85:
+        condition: service_started
     environment:
-      - FASTCGI=${APP_NAME:?err}-php85
-      - VIRTUAL_HOST=${VIRTUAL_HOST:?err}
+      TZ: ${TZ:-Europe/Kyiv}
+      # Service DNS, not ${APP_NAME}-php85: the vhost no longer depends on the
+      # project name, so `docker compose -p other-name up` works.
+      FASTCGI: php85
+      VIRTUAL_HOST: ${VIRTUAL_HOST:?err}
+    volumes:
+      - './config/nginx/templates:/etc/nginx/templates:ro'
+    healthcheck:
+      test: ["CMD-SHELL", "nginx -t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   mariadb:
-    build: ./docker/mysql
-    container_name: ${APP_NAME:?err}-mariadb
-    restart: 'on-failure'
-    ports:
-      - '${MYSQL_PORT:?err}:3306'
+    image: mariadb:10.11
+    restart: unless-stopped
     environment:
+      TZ: ${TZ:-Europe/Kyiv}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?err}
-      MYSQL_USER: mysql
-      MYSQL_DATABASE: ${MYSQL_DATABASE:?err}
+      MYSQL_USER: ${MYSQL_USER:-okay}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?err}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?err}
     volumes:
-      - ./mysql/DB_data:/var/lib/mysql
-      - ./../1DB_changes/okay_clean.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./config/mysql/startup.sh:/always-initdb.d/startup.sh:ro
-      - ./config/mysql/entrypoint.sh:/custom-entrypoint.sh:ro
+      - './mysql/DB_data:/var/lib/mysql'
+      - './../1DB_changes/okay_clean.sql:/docker-entrypoint-initdb.d/init.sql'
+      - './config/mysql/startup.sh:/always-initdb.d/startup.sh:ro'
+      - './config/mysql/entrypoint.sh:/custom-entrypoint.sh:ro'
     entrypoint: /custom-entrypoint.sh
     command: ["mysqld"]
 
