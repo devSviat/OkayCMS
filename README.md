@@ -27,3 +27,10 @@ Three things this fork adds on top of upstream OkayCMS v4.5.2:
    and the file manager, and more. It changes behaviour a custom theme or module can depend on -
    [`docs/UPGRADE-security.md`](docs/UPGRADE-security.md) states what breaks and what to do about
    it. No database migrations.
+
+The dependency work that came with PHP 8.5 support also cleared advisories the fork had inherited:
+`composer audit` reported 11 across four packages on the pre-fork lock file and reports 2 today. Six
+of the eleven were in Smarty 3.1.40 - the template engine that runs on every request - including PHP
+code injection (CVE-2024-35226, CVE-2022-29221) and a sandbox escape (CVE-2021-29454). The two that
+remain are in `maximebf/debugbar`, a `require-dev` package that never ships to production. The
+"Залежності" section of the same document has the package-by-package list.
