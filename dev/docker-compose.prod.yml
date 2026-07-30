@@ -140,7 +140,7 @@ services:
     # environment-variable or Docker-secrets trick touches it either way. For
     # that file the guidance is chmod 600, owned by the deploy user, mounted
     # read-only (see php85/scheduler above), and excluded from the build
-    # context (already done — see Dockerfile.dockerignore, verified by
+    # context (already done — see the root .dockerignore, verified by
     # dev/bin/smoke-prod.sh).
     environment:
       MYSQL_ROOT_PASSWORD: !reset null

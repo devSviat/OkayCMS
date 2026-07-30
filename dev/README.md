@@ -271,7 +271,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
   прикриває. Межа захисту для цього файлу — `chmod 600`, власник
   деплой-юзер, монтування в контейнер тільки для читання (це вже зроблено в
   `docker-compose.prod.yml`) і виключення з build-контексту
-  (`Dockerfile.dockerignore`, перевіряється `dev/bin/smoke-prod.sh`).
+  (кореневий `.dockerignore`, перевіряється `dev/bin/smoke-prod.sh`).
 - **Редагування теми, перекладів чи `robots.txt` через адмінку в продакшні
   не має тривалого ефекту.** `design/*/css/theme-settings.css` і
   `robots.txt` закомічені в git і потрапляють в образ через `COPY .` на

@@ -1,0 +1,39 @@
+# Root-level .dockerignore, not dev/docker/Dockerfile.dockerignore: the
+# per-Dockerfile ignore file is a BuildKit-only convention. With
+# DOCKER_BUILDKIT=0 (classic builder) it is silently ignored, and Docker falls
+# back to looking for exactly this file at the context root. This file is the
+# one every builder actually honours, BuildKit or not — verify both ways:
+#   DOCKER_BUILDKIT=1 docker build ...
+#   DOCKER_BUILDKIT=0 docker build ...
+#
+# Keeps developer credentials and local state out of the build context, and
+# therefore out of the production image. config/config.local.php is gitignored,
+# but a build context reads the filesystem rather than git — without this line
+# the dev database password would be baked into a pushed image.
+config/config.local.php
+config/config.local.prod.php
+
+# The Docker secrets' `file:` sources (docker-compose.prod.yml) — the real
+# MariaDB root/app passwords on a deploy host. Without this line `COPY .
+# /var/www/html` (Dockerfile) puts them in the image at
+# /var/www/html/dev/secrets/, readable by anyone who can pull or run it.
+dev/secrets
+
+# Gitignored personal compose overrides (docker-compose.override.yml's own
+# header comment) — may hold local-only values that should never ship either.
+dev/docker-compose.local.yml
+
+.git
+vendor
+node_modules
+
+dev/.env
+dev/mysql
+dev/logs
+dev/bin
+
+compiled/*/*.php
+backend/design/compiled/*.php
+cache
+Okay/log
+.phpunit.result.cache

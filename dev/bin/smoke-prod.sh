@@ -83,7 +83,7 @@ expect_missing() {
 echo "Filesystem: dev-only and secret-bearing files must not ship"
 # This is the check that matters most. config/config.local.php is gitignored,
 # but a Docker build reads the filesystem, not git — without the matching line
-# in Dockerfile.dockerignore, the developer's live database password would be
+# in the root .dockerignore, the developer's live database password would be
 # baked into every image ever pushed from this checkout.
 expect_contains "config/config.local.php did not make it into the image" \
     "absent" \
@@ -91,6 +91,9 @@ expect_contains "config/config.local.php did not make it into the image" \
 expect_contains "dev/.env did not make it into the image" \
     "absent" \
     run_in_image 'test -f /var/www/html/dev/.env && echo present || echo absent'
+expect_contains "dev/secrets did not make it into the image" \
+    "absent" \
+    run_in_image 'test -d /var/www/html/dev/secrets && echo present || echo absent'
 
 echo
 echo "PHP configuration: prod-only, nothing dev-only"
