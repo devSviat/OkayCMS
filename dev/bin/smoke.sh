@@ -184,6 +184,15 @@ expect_contains "the admin manager exists with the default password" \
     'mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT password FROM ok_managers WHERE login = \"admin\";"'
 
 echo
+echo "Logging"
+expect_contains "nginx access logs reach docker compose logs" \
+    "GET /" \
+    sh -c "curl -sS -o /dev/null -H 'Host: ${VIRTUAL_HOST}' http://127.0.0.1:${HTTP_PORT}/ ; sleep 1 ; docker compose logs --tail=20 nginx"
+expect_missing "nginx no longer writes into the repository" \
+    "dev/logs" \
+    docker compose exec -T nginx cat /etc/nginx/conf.d/okay.conf
+
+echo
 if [ "$fails" -gt 0 ]; then
     printf '%d check(s) failed\n' "$fails"
     exit 1

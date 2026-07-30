@@ -15,8 +15,10 @@ server {
     index index.php index.html;
     disable_symlinks if_not_owner from=$root_path;
     
-    access_log /var/www/html/dev/logs/application.access.log;
-    error_log /var/www/html/dev/logs/application.error.log;
+    # Container-native logging: `docker compose logs nginx` instead of files
+    # inside the working tree.
+    access_log /dev/stdout;
+    error_log  /dev/stderr;
         
     gzip on;
     gzip_comp_level 9;
