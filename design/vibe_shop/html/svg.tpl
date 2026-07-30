@@ -645,9 +645,16 @@
         <path d="M10 9l5 3l-5 3z"/>
     </svg>
 {/if}
+{* The owner's own path, scaled by 0.8 about the centre of the box: as given it
+   spanned y 1..23 against the 3..21 every other social glyph here keeps, which
+   in a row of 20px icons read as one oversized member rather than as the same
+   family. Scaling the coordinates rather than wrapping the path in a transform
+   keeps the stroke at the family's 1.8 - a transform would scale the stroke too.
+   The shape it replaces was a single open outline whose counter closed into a
+   blob at 20px; this one keeps the note head as a real hole at 16px. *}
 {if $svgId == "social_tiktok"}
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-        <path d="M21 7.917v4.034a9.948 9.948 0 0 1 -5 -1.951v4.5a6.5 6.5 0 1 1 -8 -6.326v4.326a2.5 2.5 0 1 0 4 2v-11.5h4.083a6.005 6.005 0 0 0 4.917 4.917z"/>
+        <path d="M11.2 15.2a1.6 1.6 0 0 0 -3.2 0a1.6 1.6 0 0 0 3.2 0V3.2h4q1.6 4 4.8 4v4q-3.2 0 -4.8 -1.6v5.6a5.6 5.6 0 1 1 -4 -5.36"/>
     </svg>
 {/if}
 {if $svgId == "social_x"}
