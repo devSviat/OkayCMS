@@ -241,7 +241,7 @@ because no mail leaves the host at all.
 | S4 | `expose: 9001` | removed |
 | S5 | Xdebug always on | `XDEBUG_MODE=${XDEBUG_MODE:-off}`, switchable without a rebuild |
 | S6 | `FASTCGI=${APP_NAME}-php85` | `FASTCGI=php85` |
-| H2 | `~E_DEPRECATED`, `display_errors=Off` | dev: `E_ALL` + `display_errors=On`; prod: unchanged from today |
+| H2 | `~E_DEPRECATED` | dev: `E_ALL`, and `error_log` to stderr — see the correction below |
 | H3 | logs into the repo | `/dev/stdout`, `/dev/stderr` |
 | H4 | `MYSQL_USER: mysql` | `${MYSQL_USER:-okay}`; `TZ` added; `restart:` on every service |
 
@@ -253,10 +253,43 @@ is used only by the init script.
 
 **H5, found while checking the above — the application connects to MariaDB as `root`.** That is
 the shipped dev default and it is not worth changing in dev, where root is `root`/`root` by
-design. It is recorded here so the prod profile does not inherit it: the prod compose file must
-point `db_user` at the unprivileged `${MYSQL_USER}` account, and the README section for prod must
-say so. `config/config.local.php` is gitignored, so this is a documentation obligation, not a
-file this change can edit for the reader.
+design. The prod profile must not inherit it — see section 8, which covers `config.local.php`
+end to end.
+
+### 6a. Correction: `display_errors` is decided by the application, not by php.ini
+
+The original H2 finding above was half wrong, and the review caught it. Reading the bootstrap:
+
+```php
+index.php:14           ini_set('display_errors', 'off');   // unconditional, before everything
+index.php:43-46        if ($config->get('debug_mode') == true) {
+                           ini_set('display_errors', 'on');
+                           error_reporting(E_ALL);
+                       }
+backend/index.php:19   ini_set('display_errors', 'off');    // same pattern
+backend/index.php:47-49
+```
+
+So for any web request OkayCMS overrides whatever php.ini said. `display_errors` in an ini file
+changes nothing for the storefront or the admin panel; **`debug_mode` in
+`config/config.local.php` is the real switch**, and `config/config.php:45` already ships
+`debug_mode = false`, so production is safe by default with no ini work at all.
+
+What the ini settings still govern, and why they are worth fixing anyway:
+
+- errors raised **before** line 14 — parse errors, a failed `vendor/autoload.php`
+- the `./ok` CLI and PHPUnit, which never run `index.php`
+- `error_reporting`, which sets the baseline until line 45 raises it
+
+So the dev ini keeps `error_reporting = E_ALL` (dropping the `~E_DEPRECATED` mask matters on PHP
+8.4/8.5) and adds `error_log = /dev/stderr` so that logs land in `docker compose logs`. It no
+longer claims to control `display_errors` for web requests, because it does not.
+
+**Structural guarantee that dev settings cannot reach prod.** Rather than relying on "the prod
+compose file just does not mount `custom.d`", the ini files move into the image stages:
+`dev.ini` and `xdebug.ini` are `COPY`ed in the **dev stage only**, and `prod/*.ini` in the prod
+stage only. A prod image therefore does not contain `dev.ini` at all — there is no mount to
+forget and no override to get wrong.
 
 New `.env` keys: `APP_UID`, `APP_GID`, `BIND_IP`, `XDEBUG_MODE`, `MYSQL_USER`, `MAILPIT_PORT`,
 `TZ`, `DB_INIT_SMTP`.
@@ -278,6 +311,57 @@ New `.env` keys: `APP_UID`, `APP_GID`, `BIND_IP`, `XDEBUG_MODE`, `MYSQL_USER`, `
 certificates, backups, and a secrets manager. The profile assumes a reverse proxy in front that
 terminates HTTPS.
 
+## 8. `config/config.local.php` — the file the prod profile must handle carefully
+
+Production reads its database credentials from the same `config/config.local.php` as dev.
+`Okay\Core\Config::initConfig()` parses `config/config.php` first, then overlays
+`config.local.php` when it exists. Two consequences that the first draft of this design got
+wrong:
+
+### 8.1 The dev credentials would be baked into the production image
+
+`config/config.local.php` is listed in `.gitignore`, which is why it was easy to overlook — but
+**a Docker build context reads the filesystem, not git**. A prod stage doing `COPY . /var/www/html`
+would pick up the developer's local file, complete with `db_user = "root"` and the dev password,
+and bake it into an image that then gets pushed to a registry.
+
+Mitigation, both halves required:
+
+- `dev/.dockerignore` excludes `config/config.local.php`, plus `dev/.env`, `dev/mysql/`,
+  `dev/logs/`, `.git/`, `vendor/`, `compiled/`, `cache/`.
+- The prod compose file supplies the file at **runtime** as a read-only bind mount
+  (`./config.local.prod.php:/var/www/html/config/config.local.php:ro`), never from the image.
+  A `config.local.prod-example.php` is committed as the template; the real file is gitignored.
+
+That runtime file is also where H5 is resolved: it sets `db_user` to the unprivileged
+`${MYSQL_USER}` account rather than `root`, and `debug_mode = false` (which section 6a shows is
+the actual control over error output).
+
+### 8.2 `Config::salt` is derived from the config file's inode and mtime
+
+```php
+$s = stat($this->configFile);
+$this->salt = md5(md5_file($this->configFile) . $s['dev'] . $s['ino'] . $s['uid'] . $s['mtime']);
+```
+
+The salt depends on the device id, inode number and mtime of `config/config.php`. It is consumed
+by `Okay\Core\Security\AdminRecoveryToken` (as the signing key for admin password-recovery
+tokens) and as the `uniqid` seed in `OrdersEntity`.
+
+In a container these values are properties of the image layer, so:
+
+- **Every image rebuild changes the salt**, invalidating any outstanding admin recovery token.
+  Low impact — recovery is a rare, retryable operation — but it will look like a bug when it
+  happens, so it belongs in the README.
+- **Two replicas built or stored differently can disagree on the salt**, and a token issued by
+  one would fail on another.
+
+This is not something the compose files can fix; it is a property of the application. It is
+recorded here as an explicit constraint: **the prod profile is single-node.** Anyone scaling it
+horizontally must first mount `config/config.php` from shared storage so that `stat()` agrees
+across replicas, or change how the salt is derived. Neither is in scope for this change, and
+neither will be implied to be handled.
+
 ## Verification
 
 Green output alone does not count; each item below is a thing to look at.
@@ -294,6 +378,11 @@ Green output alone does not count; each item below is a thing to look at.
 8. `docker compose port mariadb 3306` reports a loopback bind, not `0.0.0.0`.
 9. The prod profile **builds** (`docker compose -f docker-compose.yml -f docker-compose.prod.yml
    build`). It is not deployed anywhere, so "it runs in production" will not be claimed.
+10. `docker run --rm <prod-image> cat /var/www/html/config/config.local.php` must fail with "No
+    such file" — proof that `.dockerignore` kept the dev credentials out of the image (8.1).
+    This one is a genuine test, not a formality: it is the check that would have caught the bug.
+11. `docker compose exec php85 php -i | grep error_log` shows `/dev/stderr`, and a deliberate
+    warning appears in `docker compose logs php85`.
 
 ## Risks
 
