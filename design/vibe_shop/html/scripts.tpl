@@ -440,6 +440,33 @@
                     viber: "Viber", messenger: "Messenger", telegram: "Telegram",
                     line: "LINE", odnoklassniki: "OK", vkontakte: "VK"
                 };
+                {* jsSocials is from 2017 and several of its endpoints have moved on. *}
+                {* tg:// and whatsapp:// are app schemes: in a desktop browser        *}
+                {* without the app they open nothing at all, and they do it with       *}
+                {* shareIn: "self", which navigates the shop away to get there. The    *}
+                {* https forms work on a phone and on a desktop, so those two also go  *}
+                {* back to opening in a new tab. twitter.com/share still redirects and  *}
+                {* linkedin's shareArticle still answers, but both have a current form  *}
+                {* and there is no reason to ship a redirect. Viber is left alone -     *}
+                {* viber://forward is the only endpoint it has, so that button is a     *}
+                {* phone-only one by nature.                                          *}
+                {* {literal}, because jsSocials' placeholders are braced and Smarty  *}
+                {* reads {text} as a tag of its own - without this the whole template *}
+                {* fails to compile with "unknown tag 'text'".                        *}
+                {literal}
+                var vsShareUrls = {
+                    telegram: "https://t.me/share/url?url={url}&text={text}",
+                    whatsapp: "https://api.whatsapp.com/send?text={text}%20{url}",
+                    twitter: "https://x.com/intent/post?url={url}&text={text}",
+                    linkedin: "https://www.linkedin.com/sharing/share-offsite/?url={url}"
+                };
+                {/literal}
+                for (var vsUrlKey in vsShareUrls) {
+                    if (jsSocials.shares[vsUrlKey]) {
+                        jsSocials.shares[vsUrlKey].shareUrl = vsShareUrls[vsUrlKey];
+                        jsSocials.shares[vsUrlKey].shareIn = "blank";
+                    }
+                }
                 for (var vsShareKey in vsShareNames) {
                     if (jsSocials.shares[vsShareKey]) {
                         jsSocials.shares[vsShareKey].label = vsShareNames[vsShareKey];

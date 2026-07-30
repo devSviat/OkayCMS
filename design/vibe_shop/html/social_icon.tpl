@@ -23,6 +23,7 @@
     'twitter' => 'social_x',
     'x' => 'social_x',
     'linkedin' => 'social_linkedin',
+    'whatsapp' => 'social_whatsapp',
     'email' => 'mail'
 ]}
 {include file="svg.tpl" svgId=$vsSocialIcons[$domain|default:''|lower]|default:'social_link'}
