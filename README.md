@@ -14,7 +14,7 @@ Copyright 2015-2024 OkayCMS
 About this fork
 ----------------------
 
-Two things this fork adds on top of upstream OkayCMS v4.5.2:
+Three things this fork adds on top of upstream OkayCMS v4.5.2:
 
  - **PHP 8.4 and 8.5.** `composer.json` requires `php ^8.4`; CI runs the test suite on both 8.4 and
    8.5, and PHPStan on 8.5. The local Docker environment ships a single `php85` service - the
@@ -22,3 +22,8 @@ Two things this fork adds on top of upstream OkayCMS v4.5.2:
  - **`vibe_shop`, a new storefront theme.** A full redesign of the shop front, responsive on phones
    and tablets in both orientations. It is the theme this fork ships enabled; the stock `okay_shop`
    is untouched and can be selected back at any time in the admin panel under Design.
+ - **A security hardening pass.** CSRF protection and POST-only mutations on the storefront,
+   Argon2id password hashing, `HttpOnly` cookies, path-traversal fixes in the admin theme editors
+   and the file manager, and more. It changes behaviour a custom theme or module can depend on -
+   [`docs/UPGRADE-security.md`](docs/UPGRADE-security.md) states what breaks and what to do about
+   it. No database migrations.
