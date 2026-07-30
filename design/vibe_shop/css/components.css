@@ -2292,18 +2292,30 @@ body.hc-nav-open {
 	gap: var(--vs-space-2);
 }
 
+/* A glyph in a 44px circle, the same control the mobile menu's social row is,     */
+/* rather than the network's name in a pill. The name is not gone - it is in the    */
+/* title attribute and in a .vs-sr-only span, which is what keeps the link with an  */
+/* accessible name. font-size: 0 so the whitespace between the glyph and that span  */
+/* cannot widen the circle by a space character.                                   */
+
 .vs-social__link {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
+	width: 44px;
 	min-height: 44px;
-	padding: 0 var(--vs-space-4);
+	padding: 0;
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-full);
 	color: var(--vs-text);
-	font-size: var(--vs-text-sm);
+	font-size: 0;
 	text-decoration: none;
-	text-transform: capitalize;
 	transition: background-color var(--vs-dur-1) var(--vs-ease), border-color var(--vs-dur-1) var(--vs-ease);
+}
+
+.vs-social__link svg {
+	width: 20px;
+	height: 20px;
 }
 
 .vs-social__link:hover {
@@ -5019,14 +5031,39 @@ body.hc-nav-open {
 	color: var(--vs-text);
 }
 
-/* The network name carries the button, the way .vs-socials already does. The   */
-/* logo element is jsSocials' <i class="fa fa-*"> and this theme ships no icon  */
-/* font, so it would be an empty inline box - removed rather than left to       */
-/* collapse. Kept as a rule so a custom social configured with a real image URL */
-/* (jsSocials emits <img> for those) is still suppressed instead of half-shown. */
+/* The brand glyph carries the button, the owner's call - it used to be the       */
+/* network's name, because jsSocials' own logo is a Font Awesome <i> and this     */
+/* theme ships no icon font. scripts.tpl blanks that class and puts the theme's   */
+/* own SVG inside the element instead, so the box finally has something to show.  */
+/* :empty is the fallback and the reason nothing had to be guessed about the      */
+/* admin-editable network list: a share whose network has no glyph here keeps its */
+/* text label and its element stays hidden, exactly as before.                    */
+
+/* An explicit box, because the library sizes this element in em: jssocials.css   */
+/* ships `.jssocials-share-logo { width: 1em; font-size: 1.5em }` and it loads    */
+/* after this file. A font-size: 0 here to swallow the whitespace around the glyph */
+/* turned that 1em into zero and the buttons rendered as empty circles - the       */
+/* metric was clean, the SVG was in the DOM, and it measured 0 wide. The glyph     */
+/* fills the box instead of carrying its own size, so nothing the library says     */
+/* about width can reach it.                                                      */
 
 .vs-share .jssocials-share .jssocials-share-logo {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 20px;
+	height: 20px;
+	color: var(--vs-text);
+}
+
+.vs-share .jssocials-share .jssocials-share-logo:empty {
 	display: none;
+}
+
+.vs-share .jssocials-share .jssocials-share-logo svg {
+	width: 100%;
+	height: 100%;
 }
 
 .vs-share .jssocials-share .jssocials-share-label {
@@ -5035,6 +5072,26 @@ body.hc-nav-open {
 	line-height: 1;
 	text-transform: capitalize;
 	white-space: nowrap;
+}
+
+/* Clipped, not removed: it is the button's accessible name, and a link whose only */
+/* content is a glyph has none. Same technique as .vs-sr-only, restated here       */
+/* because the element is jsSocials' and cannot be given that class.               */
+
+.vs-share .jssocials-share.vs-share--glyph .jssocials-share-link {
+	width: 44px;
+	padding: 0;
+}
+
+.vs-share .jssocials-share.vs-share--glyph .jssocials-share-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	border: 0;
 }
 
 /* -------------------------------------------------------------- sticky buy */

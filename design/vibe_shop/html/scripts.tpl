@@ -424,16 +424,17 @@
         jsSocials.shares.{$social|escape} = {$params|json_encode};
         {/foreach}
             {/if}
-                {* The share buttons are named pills, not brand glyphs - the theme  *}
-                {* carries no icon font, and the network list is admin-editable so  *}
-                {* any glyph set would go stale. Same treatment as .vs-socials.     *}
-                {* jsSocials' own labels are calls to action for a specific button  *}
-                {* ("Tweet", "Like", "+1", "Share") and stop naming the network as  *}
-                {* soon as the glyph is gone, so the network names are restored     *}
-                {* here. Only the fifteen built-ins are touched: anything a module  *}
-                {* registered through js_custom_socials keeps the label it chose.   *}
+                {* The share buttons are brand glyphs, and the name goes to the      *}
+                {* screen reader. jsSocials' own labels are calls to action for a    *}
+                {* specific button ("Tweet", "Like", "+1", "Share") rather than the  *}
+                {* network's name, so the names are restored here - they are what     *}
+                {* .jssocials-share-label carries, and components.css clips that      *}
+                {* label instead of removing it. Twitter is X: the network renamed,   *}
+                {* the share endpoint did not, so the key stays twitter. Only the     *}
+                {* fifteen built-ins are touched - anything a module registered       *}
+                {* through js_custom_socials keeps the label it chose.                *}
                 var vsShareNames = {
-                    email: "Email", twitter: "Twitter", facebook: "Facebook",
+                    email: "Email", twitter: "X", facebook: "Facebook",
                     googleplus: "Google+", linkedin: "LinkedIn", pinterest: "Pinterest",
                     stumbleupon: "StumbleUpon", pocket: "Pocket", whatsapp: "WhatsApp",
                     viber: "Viber", messenger: "Messenger", telegram: "Telegram",
@@ -442,6 +443,12 @@
                 for (var vsShareKey in vsShareNames) {
                     if (jsSocials.shares[vsShareKey]) {
                         jsSocials.shares[vsShareKey].label = vsShareNames[vsShareKey];
+                        {* Emptied on purpose. The default is a Font Awesome class    *}
+                        {* and this theme ships no icon font, so the <i> would be a   *}
+                        {* box of nothing; blanking it leaves a bare element for the  *}
+                        {* glyph below to fill, and one that stays hidden (:empty) if *}
+                        {* there is no glyph to put in it.                           *}
+                        jsSocials.shares[vsShareKey].logo = "";
                     }
                 }
                 $(".fn_share").jsSocials({
@@ -449,6 +456,20 @@
                     showCount: false,
                     shares: {$settings->sj_shares|json_encode}
             });
+
+                {* index.tpl renders one glyph per configured share; each button gets *}
+                {* the one matching its own network class. A button whose network has *}
+                {* no glyph keeps its text label - .vs-share--glyph is what clips the *}
+                {* label, and it is only added where a glyph was actually found.      *}
+                $(".fn_share .jssocials-share").each(function () {
+                    var key = (this.className.match(/jssocials-share-([\w-]+)/) || [])[1];
+                    var icon = key && document.querySelector('#fn_share_icons [data-vs-share-icon="' + key + '"]');
+                    var logo = this.querySelector(".jssocials-share-logo");
+                    if (icon && logo) {
+                        logo.innerHTML = icon.innerHTML;
+                        this.classList.add("vs-share--glyph");
+                    }
+                });
         }
     {/if}
 
