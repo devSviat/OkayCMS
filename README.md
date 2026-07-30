@@ -10,3 +10,15 @@ OkayCMS is a PHP CMS for creating backend and frontend applications.
 OkayCMS is released under the LGPL license.
 
 Copyright 2015-2024 OkayCMS
+
+About this fork
+----------------------
+
+Two things this fork adds on top of upstream OkayCMS v4.5.2:
+
+ - **PHP 8.4 and 8.5.** `composer.json` requires `php ^8.4`; CI runs the test suite on both 8.4 and
+   8.5, and PHPStan on 8.5. The local Docker environment ships a single `php85` service - the
+   legacy PHP 7.4 one is gone.
+ - **`vibe_shop`, a new storefront theme.** A full redesign of the shop front, responsive on phones
+   and tablets in both orientations. It is the theme this fork ships enabled; the stock `okay_shop`
+   is untouched and can be selected back at any time in the admin panel under Design.
