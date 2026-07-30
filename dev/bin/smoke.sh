@@ -1,11 +1,64 @@
 #!/usr/bin/env bash
 # Smoke checks for the OkayCMS dev environment.
-# Run after `docker compose up -d`:  dev/bin/smoke.sh
+# Run any time after `docker compose up -d`:  dev/bin/smoke.sh
+# The script waits for every healthchecked service to report healthy itself
+# (see wait_for_healthy below), so callers do not need to sleep first.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
 # shellcheck disable=SC1091
 set -a; . ./.env; set +a
+
+# wait_for_healthy: block until every service that declares a healthcheck in
+# the merged compose config reports "healthy", or fail loudly after a bounded
+# timeout. Without this, whether the checks below pass depended on how long
+# the caller happened to sleep after `up -d` — a harness that fails at random
+# just teaches people to shrug at red output.
+#
+# db-init is deliberately never waited on: it is a one-shot service that runs
+# once and exits 0, so it never reports "healthy" and never will.
+wait_for_healthy() {
+    local timeout=120 waited=0 services svc cid status all_healthy
+
+    if command -v jq >/dev/null 2>&1; then
+        services=$(docker compose config --format json 2>/dev/null \
+            | jq -r '.services | to_entries[] | select(.value.healthcheck != null) | .key')
+    else
+        # No jq: fall back to a hardcoded list. Whoever adds a healthcheck to
+        # a new service (there is no jq way to skip this comment) must add it
+        # here too.
+        services="mariadb php85 nginx"
+    fi
+
+    printf 'Waiting for services to become healthy: %s\n' "$(echo "$services" | tr '\n' ' ')"
+
+    while [ "$waited" -lt "$timeout" ]; do
+        all_healthy=1
+        for svc in $services; do
+            cid=$(docker compose ps -q "$svc" 2>/dev/null)
+            status=$(docker inspect -f '{{.State.Health.Status}}' "$cid" 2>/dev/null || echo "unknown")
+            [ "$status" = "healthy" ] || all_healthy=0
+        done
+        if [ "$all_healthy" -eq 1 ]; then
+            printf 'all services healthy after %ss\n\n' "$waited"
+            return 0
+        fi
+        printf '.'
+        sleep 2
+        waited=$((waited + 2))
+    done
+
+    echo
+    printf 'timed out after %ss waiting for services to become healthy:\n' "$timeout"
+    for svc in $services; do
+        cid=$(docker compose ps -q "$svc" 2>/dev/null)
+        status=$(docker inspect -f '{{.State.Health.Status}}' "$cid" 2>/dev/null || echo "unknown")
+        printf '  %-8s %s\n' "$svc" "$status"
+    done
+    exit 1
+}
+
+wait_for_healthy
 
 fails=0
 
