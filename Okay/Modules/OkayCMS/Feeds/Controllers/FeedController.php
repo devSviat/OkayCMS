@@ -14,7 +14,7 @@ class FeedController extends AbstractController
         $url
     ) {
         $feed = $feedsEntity->findOne(['url' => $url]);
-        if (empty($feed) || (!$feed->enabled && empty($_SESSION['admin']))) {
+        if (empty($feed) || (!$feed->enabled && !\Okay\Core\Security\SessionNames::isAdmin())) {
             return false;
         }
 

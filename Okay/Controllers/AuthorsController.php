@@ -27,7 +27,7 @@ class AuthorsController extends AbstractController
 
         $author = $authorsEntity->findOne(['url' => $url]);
         $author->socials = $authorsHelper->getSocials($author);
-        if (empty($author) || (!$author->visible && empty($_SESSION['admin']))) {
+        if (empty($author) || (!$author->visible && !\Okay\Core\Security\SessionNames::isAdmin())) {
             return false;
         }
         

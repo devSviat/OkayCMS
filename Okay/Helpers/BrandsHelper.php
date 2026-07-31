@@ -168,7 +168,7 @@ class BrandsHelper implements GetListInterface
      */
     public function setBrand($brand)
     {
-        if (empty($brand) || (!$brand->visible && empty($_SESSION['admin']))) {
+        if (empty($brand) || (!$brand->visible && !\Okay\Core\Security\SessionNames::isAdmin())) {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
         }
 

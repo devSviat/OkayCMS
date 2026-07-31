@@ -39,7 +39,7 @@ class CategoryController extends AbstractController
 
         $category = $categoriesEntity->get((string)$url);
 
-        if (empty($category) || (!$category->visible && empty($_SESSION['admin']))) {
+        if (empty($category) || (!$category->visible && !\Okay\Core\Security\SessionNames::isAdmin())) {
             return false;
         }
 
@@ -251,7 +251,7 @@ class CategoryController extends AbstractController
 
         $category = $categoriesEntity->get((string)$url);
 
-        if (empty($category) || (!$category->visible && empty($_SESSION['admin']))) {
+        if (empty($category) || (!$category->visible && !\Okay\Core\Security\SessionNames::isAdmin())) {
             return false;
         }
 

@@ -18,7 +18,7 @@ class PagesHelper
      */
     public function setPage($page, $url)
     {
-        if (empty($page) || (!$page->visible && empty($_SESSION['admin'])) || $url == '404') {
+        if (empty($page) || (!$page->visible && !\Okay\Core\Security\SessionNames::isAdmin()) || $url == '404') {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
         }
 
