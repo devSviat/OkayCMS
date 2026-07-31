@@ -147,6 +147,41 @@ class SessionNames
         }
     }
 
+    /**
+     * Повний вихід менеджера: дані, ідентифікатор і кука бекендової сесії.
+     * Викликати при активній бекендовій сесії.
+     */
+    public static function destroyBackend()
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        $_SESSION = [];
+        session_regenerate_id(true);
+        session_destroy();
+
+        self::deleteCookie(self::BACKEND);
+    }
+
+    /**
+     * cookieParams() описує сесійну куку для session_set_cookie_params(), і
+     * її 'lifetime' для setcookie() - невалідна опція (ValueError).
+     */
+    public static function deleteCookie($name)
+    {
+        setcookie($name, '', self::expiredCookieParams());
+    }
+
+    public static function expiredCookieParams()
+    {
+        $params = self::cookieParams();
+        unset($params['lifetime']);
+        $params['expires'] = time() - 3600;
+
+        return $params;
+    }
+
     public static function cookieParams()
     {
         return [

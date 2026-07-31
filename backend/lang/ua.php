@@ -489,6 +489,7 @@ $lang['reportstats_yesterday'] = 'Вчора';
 $lang['robots_file'] = 'Файл robots.txt';
 $lang['robots_message'] = 'В цьому розділі ви можете редагувати файл robots.txt';
 $lang['robots_permissions'] = 'Встановіть права на записування файлу robots.txt';
+$lang['settings_theme_css_write_error'] = 'Не вдалося записати файл налаштувань теми. Встановіть права на записування design/<тема>/css/theme-settings.css';
 $lang['robots_updated'] = 'Robots оновлений';
 $lang['scripts_scripts'] = 'Скрипти';
 $lang['seo_patterns_ajax_brand_name'] = 'Назва бренду';

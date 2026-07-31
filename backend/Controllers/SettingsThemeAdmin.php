@@ -16,7 +16,7 @@ class SettingsThemeAdmin extends IndexAdmin
         BackendValidateHelper  $backendValidateHelper
     ) {
         if ($this->request->method('POST')) {
-            $backendSettingsHelper->updateThemeSettings();
+            $cssSaved = $backendSettingsHelper->updateThemeSettings();
 
             // Favicon
             if (is_null($settingsRequest->postFavicon())) {
@@ -42,7 +42,12 @@ class SettingsThemeAdmin extends IndexAdmin
 
 
             $backendSettingsHelper->initSettings();
-            $this->design->assign('message_success', 'saved');
+
+            if ($cssSaved === false) {
+                $this->design->assign('message_error', 'css_write_error');
+            } else {
+                $this->design->assign('message_success', 'saved');
+            }
         }
 
         $cssVariables    = $backendSettingsHelper->getCssVariables();

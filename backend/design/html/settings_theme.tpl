@@ -12,6 +12,22 @@
     </div>
 </div>
 
+{if $message_error}
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="alert alert--center alert--icon alert--error">
+                <div class="alert__content">
+                    <div class="alert__title">
+                        {if $message_error == 'css_write_error'}
+                            {$btr->settings_theme_css_write_error|escape}
+                        {/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
+
 {*Вывод успешных сообщений*}
 {if $message_success}
     <div class="row">
@@ -317,7 +333,7 @@
 
                                     <div style="display: none;">
                                     {foreach $js_socials as $soc}
-                                        <input type="checkbox" class="fn_{$soc}" name="sj_shares[]"{if in_array($soc, $settings->sj_shares)} checked{/if} value="{$soc}" />
+                                        <input type="checkbox" class="fn_{$soc}" name="sj_shares[]"{if is_array($settings->sj_shares) && in_array($soc, $settings->sj_shares)} checked{/if} value="{$soc}" />
                                     {/foreach}
                                     </div>
                                 </div>

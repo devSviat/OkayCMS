@@ -358,8 +358,9 @@ class BackendSettingsHelper
 
     public function updateThemeSettings()
     {
+        $cssSaved = true;
         if ($cssColors = $this->request->post('css_colors')) {
-            $this->frontTemplateConfig->updateCssVariables($cssColors);
+            $cssSaved = $this->frontTemplateConfig->updateCssVariables($cssColors);
         }
 
         if ($this->settings->get('social_share_theme') != $this->request->post('social_share_theme')) {
@@ -367,7 +368,9 @@ class BackendSettingsHelper
         }
 
         $this->settings->set('social_share_theme', $this->request->post('social_share_theme'));
-        $this->settings->set('sj_shares', $this->request->post('sj_shares'));
+        // Знята остання галочка не постить нічого, і без приведення до масиву
+        // в налаштуванні опинявся false, на якому падав in_array() у шаблоні.
+        $this->settings->set('sj_shares', (array)$this->request->post('sj_shares'));
         $this->settings->set('site_email', $this->request->post('site_email'));
 
         $siteSocialLinks = $this->request->post('site_social_links');
@@ -396,7 +399,7 @@ class BackendSettingsHelper
         }
         $this->settings->set('site_phones', $phones);
 
-        ExtenderFacade::execute(__METHOD__, null, func_get_args());
+        return ExtenderFacade::execute(__METHOD__, $cssSaved, func_get_args());
     }
 
     public function updateOpenAiSettings()

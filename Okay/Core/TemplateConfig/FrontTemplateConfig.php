@@ -383,7 +383,7 @@ class FrontTemplateConfig
 
     public function updateCssVariables($variables)
     {
-        $this->cssConfig->updateCssVariables($variables);
+        return $this->cssConfig->updateCssVariables($variables);
     }
 
     /**
