@@ -13,6 +13,7 @@ use Okay\Core\EntityFactory;
 use Okay\Core\Modules\Module;
 use Okay\Core\Modules\Modules;
 use Okay\Core\Router;
+use Okay\Core\Security\SessionNames;
 use Okay\Core\ServiceLocator;
 use Okay\Core\Settings;
 use Okay\Entities\ManagersEntity;
@@ -315,7 +316,8 @@ class FrontTemplateConfig
 
         $footer = $this->getIncludeHtml(TC_POSITION_FOOTER);
 
-        if (!empty($_SESSION['admin']) && ($manager = $managersEntity->get($_SESSION['admin']))) {
+        $adminLogin = SessionNames::adminLogin();
+        if ($adminLogin !== null && ($manager = $managersEntity->get($adminLogin))) {
 
             $templatesDir = $design->getTemplatesDir();
             $compiledDir = $design->getCompiledDir();

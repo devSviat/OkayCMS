@@ -39,7 +39,7 @@ class BrandController extends AbstractController
 
         $brand = $brandsEntity->get((string)$url);
 
-        if (empty($brand) || (!$brand->visible && empty($_SESSION['admin']))) {
+        if (empty($brand) || (!$brand->visible && !\Okay\Core\Security\SessionNames::isAdmin())) {
             return false;
         }
 
@@ -225,7 +225,7 @@ class BrandController extends AbstractController
 
         $brand = $brandsEntity->get((string)$url);
 
-        if (empty($brand) || (!$brand->visible && empty($_SESSION['admin']))) {
+        if (empty($brand) || (!$brand->visible && !\Okay\Core\Security\SessionNames::isAdmin())) {
             return false;
         }
 

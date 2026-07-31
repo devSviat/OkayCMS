@@ -100,4 +100,113 @@ class SessionNamesTest extends TestCase
             'customer reset' => ['Okay/Controllers/UserController.php', "\$_SESSION['user_id'] = "],
         ];
     }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testNoBackendCookieMeansNoAdmin()
+    {
+        unset($_COOKIE[SessionNames::BACKEND]);
+
+        $this->assertFalse(SessionNames::isAdmin());
+        $this->assertNull(SessionNames::adminLogin());
+        $this->assertSame(
+            PHP_SESSION_NONE,
+            session_status(),
+            'no session should be started at all when the backend cookie is absent'
+        );
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testMalformedSessionIdGrantsNothing()
+    {
+        // Явно неправильна форма: не той алфавіт/довжина, спроба ін'єкції тощо.
+        $_COOKIE[SessionNames::BACKEND] = "'; DROP TABLE managers; --";
+
+        $this->assertFalse(SessionNames::isAdmin());
+        $this->assertNull(SessionNames::adminLogin());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testForgedButWellFormedSessionIdGrantsNothing()
+    {
+        // Синтаксично коректний ідентифікатор (правильний алфавіт і довжина),
+        // якому просто не відповідає жодна реальна сесія на диску.
+        $length = (int)ini_get('session.sid_length') ?: 32;
+        $_COOKIE[SessionNames::BACKEND] = str_repeat('a', $length);
+
+        $this->assertFalse(SessionNames::isAdmin());
+        $this->assertNull(SessionNames::adminLogin());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testGenuineBackendSessionIsSeen()
+    {
+        $sessionId = $this->createBackendSession('some_manager_login');
+        $_COOKIE[SessionNames::BACKEND] = $sessionId;
+
+        try {
+            $this->assertTrue(SessionNames::isAdmin());
+            $this->assertSame('some_manager_login', SessionNames::adminLogin());
+        } finally {
+            $this->destroySessionFile($sessionId);
+        }
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testAdminAwarenessIsNotPersistedIntoTheFrontendSession()
+    {
+        $sessionId = $this->createBackendSession('some_manager_login');
+        $_COOKIE[SessionNames::BACKEND] = $sessionId;
+
+        try {
+            // Той самий порядок, що і в index.php: спочатку читаємо бекенд,
+            // тоді стартуємо сесію вітрини.
+            $this->assertTrue(SessionNames::isAdmin());
+
+            SessionNames::startFrontend();
+
+            $this->assertArrayNotHasKey(
+                'admin',
+                $_SESSION,
+                "вихід менеджера з бекенду має одразу забирати привілеї на вітрині, " .
+                "а не після того, як хтось випадково запише 'admin' в сесію вітрини"
+            );
+
+            $frontendSessionId = session_id();
+            session_write_close();
+            $this->destroySessionFile($frontendSessionId);
+        } finally {
+            $this->destroySessionFile($sessionId);
+        }
+    }
+
+    private function createBackendSession(string $login): string
+    {
+        session_name(SessionNames::BACKEND);
+        session_start();
+        $_SESSION['admin'] = $login;
+        $id = session_id();
+        session_write_close();
+
+        return $id;
+    }
+
+    private function destroySessionFile(?string $id): void
+    {
+        if (empty($id)) {
+            return;
+        }
+
+        $path = session_save_path() ?: sys_get_temp_dir();
+        @unlink(rtrim($path, '/') . '/sess_' . $id);
+    }
 }

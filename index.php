@@ -15,6 +15,9 @@ ini_set('display_errors', 'off');
 
 require_once('vendor/autoload.php');
 
+// Має відбутися до старту сесії вітрини: одночасно активною може бути
+// лише одна сесія, а тут ми на мить читаємо бекендову.
+\Okay\Core\Security\SessionNames::isAdmin();
 \Okay\Core\Security\SessionNames::startFrontend();
 
 /** @var OkayContainer $DI */

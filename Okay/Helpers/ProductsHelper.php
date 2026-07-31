@@ -396,7 +396,7 @@ class ProductsHelper implements GetListInterface
      */
     public function setProduct($product)
     {
-        if (empty($product) || (!$product->visible && empty($_SESSION['admin']))) {
+        if (empty($product) || (!$product->visible && !\Okay\Core\Security\SessionNames::isAdmin())) {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
         }
 

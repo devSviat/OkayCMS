@@ -280,7 +280,7 @@ class BlogHelper implements GetListInterface
      */
     public function setPost($post)
     {
-        if (empty($post) || (!$post->visible && empty($_SESSION['admin']))) {
+        if (empty($post) || (!$post->visible && !\Okay\Core\Security\SessionNames::isAdmin())) {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
         }
 
@@ -297,7 +297,7 @@ class BlogHelper implements GetListInterface
      */
     public function setBlogCategory($category)
     {
-        if (empty($category) || (!$category->visible && empty($_SESSION['admin']))) {
+        if (empty($category) || (!$category->visible && !\Okay\Core\Security\SessionNames::isAdmin())) {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
         }
 

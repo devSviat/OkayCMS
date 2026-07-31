@@ -198,7 +198,7 @@ class Router {
                 $this->modules->indexingNotInstalledModules();
 
                 // Если язык выключен, отдадим 404
-                if (!$language->enabled && empty($_SESSION['admin'])) {
+                if (!$language->enabled && !\Okay\Core\Security\SessionNames::isAdmin()) {
                     $controllerName = self::DEFAULT_CONTROLLER_NAMESPACE . 'ErrorController';
                     $method = 'pageNotFound';
                 }
@@ -223,7 +223,7 @@ class Router {
                 $routeVars = array_merge($routeVars, $matches[1]);
 
                 $settings = $this->serviceLocator->getService(Settings::class);
-                if ((!isset($route['always_active']) || $route['always_active'] !== true) && $settings->get('site_work') === 'off' && empty($_SESSION['admin'])) {
+                if ((!isset($route['always_active']) || $route['always_active'] !== true) && $settings->get('site_work') === 'off' && !\Okay\Core\Security\SessionNames::isAdmin()) {
                     $controllerName = self::DEFAULT_CONTROLLER_NAMESPACE . 'ErrorController';
                     $method = 'siteDisabled';
                 }
