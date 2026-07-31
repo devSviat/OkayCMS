@@ -179,9 +179,13 @@ done
 echo
 echo "Database"
 mariadb_cid=$(docker compose ps -q mariadb)
+# Дивимось саме на монтування в /var/lib/mysql, а не на «чи є серед монтувань
+# хоч один том». Стара версія грепала весь список на слово volume і проходила
+# б навіть тоді, коли база знову лежить у bind mount, — бо в mariadb є ще й
+# том сідового дампа.
 expect_contains "the database is on a named volume, not a bind mount" \
     "volume" \
-    docker inspect -f '{{range .Mounts}}{{.Type}} {{.Destination}}{{"\n"}}{{end}}' "$mariadb_cid"
+    docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/mysql"}}{{.Type}}{{end}}{{end}}' "$mariadb_cid"
 expect_missing "dev/mysql/DB_data is no longer mounted into the container" \
     "/var/lib/mysql" \
     sh -c "docker inspect -f '{{range .Mounts}}{{.Source}} {{.Destination}}{{\"\n\"}}{{end}}' $mariadb_cid | grep bind"
@@ -246,9 +250,27 @@ echo "Logging"
 expect_contains "nginx access logs reach docker compose logs" \
     "GET /" \
     sh -c "curl -sS -o /dev/null -H 'Host: ${VIRTUAL_HOST}' http://127.0.0.1:${HTTP_PORT}/ ; sleep 1 ; docker compose logs --tail=20 nginx"
-expect_missing "nginx no longer writes into the repository" \
-    "dev/logs" \
-    docker compose exec -T nginx cat /etc/nginx/conf.d/okay.conf
+# Перевірка результату, а не конфігу. Робимо запит з унікальним маркером і
+# шукаємо його в усьому робочому дереві: якщо nginx кудись пише файлом, маркер
+# там опиниться.
+#
+# Попередня версія грепала /etc/nginx/conf.d/okay.conf на рядок "dev/logs". Її
+# зламало перейменування шаблону на default.conf: cat почав падати з
+# "No such file or directory", вивід більше не містив голки, і expect_missing
+# проходив завжди. Перевірка, нездатна впасти, гірша за відсутню — вона
+# виглядає як покриття. Тепер тут немає залежності від імені файлу.
+log_marker="smoke-nolog-$$"
+curl -sS -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+    "http://127.0.0.1:${HTTP_PORT}/${log_marker}" 2>/dev/null || true
+sleep 1
+expect_missing "nginx writes no log files into the working tree" \
+    "$log_marker" \
+    docker compose exec -T nginx sh -c \
+    "grep -r '$log_marker' /var/www/html 2>/dev/null"
+# Саме grep -r, а не -rl. З -l друкуються ІМЕНА файлів, а імʼя файлу маркера не
+# містить — expect_missing шукав би голку у виводі, де її не може бути, і
+# проходив би завжди. Та сама пастка, що й у попередній версії цієї перевірки:
+# порівнювати треба з тим, що команда справді друкує.
 
 echo
 echo "Mail"
