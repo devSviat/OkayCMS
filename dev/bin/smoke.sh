@@ -181,10 +181,18 @@ mariadb_cid=$(docker compose ps -q mariadb)
 expect_contains "the database is on a named volume, not a bind mount" \
     "volume" \
     docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/mysql"}}{{.Type}}{{end}}{{end}}' "$mariadb_cid"
-expect_contains "the admin manager exists with the default password" \
-    '$apr1$8m1u0cp4$' \
-    docker compose exec -T mariadb sh -c \
-    'mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT password FROM ok_managers WHERE login = \"admin\";"'
+# Перевіряємо, що пароль справді підходить, а не що в базі лежить конкретний
+# хеш. OkayCMS перехешовує застарілі формати після успішного входу
+# (Okay\Core\Security\PasswordHasher), тож звірка з рядком із сідового дампа
+# ламалась після першого ж входу в адмінку.
+admin_hash=$(docker compose exec -T mariadb sh -c \
+    'mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT password FROM ok_managers WHERE login = \"admin\";"' \
+    2>/dev/null | tr -d '\r\n')
+expect_contains "admin still authenticates with the default password" \
+    "OK" \
+    docker compose exec -T php85 php -r \
+    'require "/var/www/html/vendor/autoload.php"; $h = new Okay\Core\Security\PasswordHasher(); echo $h->verify("1234", $argv[1]) ? "OK" : "FAIL";' \
+    -- "$admin_hash"
 # Реальний запит клієнта з хоста, а не просто TCP-хендшейк: саме це потрібно
 # DBeaver/PHPStorm. Регресує мовчки, якщо mariadb колись втратить (dev-only)
 # приєднання до frontend або опублікований порт — жодна перевірка всередині
