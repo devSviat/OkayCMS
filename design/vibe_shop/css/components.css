@@ -6203,27 +6203,27 @@ body.hc-nav-open {
 		padding: 2px var(--vs-space-1);
 	}
 
-	/* Two-up at 360 and 375 leaves the corner sticker 86-94px beside the tools     */
-	/* and "Топ продажів" wants 97, so it wraps to a second line rather than        */
-	/* losing its last word. A sticker is a phrase, not a number - half of it says  */
-	/* less than all of it on two lines. Only the corner stickers: the sale badge   */
-	/* on the price tier is a single token and must stay on one line.               */
-
-	/* The leading has to come with it. The badge sets line-height to its own font  */
-	/* size, which is fine for one line and clips a descender on two - measured at  */
-	/* 25px of content in a 24px box, the tail of the "д".                          */
+	/* Two-up at 360 leaves the corner sticker 86px beside the tools, and "Топ      */
+	/* продажів" at the 2xs step wants 88. This used to be allowed to wrap to a     */
+	/* second line; the owner asked for one line instead, and for the sticker to    */
+	/* be smaller on a phone if that is what it takes. So: the step below 2xs and   */
+	/* the 4px padding, which brings the same words to 78.5 into 86 - seven pixels  */
+	/* of slack rather than the two that 2xs with trimmed padding would leave, and  */
+	/* two pixels is exactly the margin that put it on two lines the last time.     */
 	/*                                                                             */
-	/* The trimmed padding is the same 4px trick the sale badge needs, and for the */
-	/* same reason: on the home rail at 390 the sticker had exactly 97px and       */
-	/* wanted exactly 97, so it wrapped while the catalogue showed it on one line  */
-	/* at the identical viewport. Swiper sizes those cards, the grid does not      */
-	/* reach them. 93 into 97 now, and 375 comes back onto one line too.           */
+	/* Measured on the catalogue grid at 360 and 375 and on the home rail at 390,   */
+	/* where swiper sizes the cards and the grid's numbers do not reach.            */
+	/*                                                                             */
+	/* nowrap without an ellipsis is deliberate - .vs-badge is a flex container, so */
+	/* the text is an anonymous flex item and text-overflow has nothing to act on.  */
+	/* A sticker longer than these words would be clipped, not wrapped; the copy    */
+	/* that exists fits with room to spare.                                         */
 
 	.vs-card__badges .vs-badge {
-		padding: 0 var(--vs-space-1-5);
-		white-space: normal;
+		padding: 0 var(--vs-space-1);
+		font-size: var(--vs-text-3xs);
+		white-space: nowrap;
 		text-align: left;
-		line-height: 1.25;
 	}
 
 	.vs-card__media-link {
