@@ -72,15 +72,45 @@ class StorefrontCsrfGuardTest extends TestCase
         ];
     }
 
-    public function testThemeJsSendsTheTokenOnEveryMutation()
+    public function themeProvider()
     {
-        $js = $this->read('design/okay_shop/js/okay.js');
+        return [['okay_shop'], ['vibe_shop']];
+    }
 
-        $this->assertStringContainsString('function okayCsrfToken', $js);
+    /**
+     * @dataProvider themeProvider
+     */
+    public function testThemeJsSendsTheTokenOnEveryMutation($theme)
+    {
+        $js = $this->read('design/' . $theme . '/js/okay.js');
+
+        $this->assertStringContainsString('function okayCsrfToken', $js, $theme);
 
         // Кожен мутуючий виклик має бути POST і нести токен
-        $this->assertSame(8, substr_count($js, 'customer_csrf_token'), 'token missing on some ajax call');
+        $this->assertSame(6, substr_count($js, 'customer_csrf_token: okayCsrfToken()'), $theme);
+        $this->assertSame(2, substr_count($js, '&customer_csrf_token='), $theme);
         $this->assertSame(0, substr_count($js, 'okay.router["cart_ajax"],' . "\n" . '    data: {' . "\n" . '      action'), 'cart ajax still sends a bare GET');
+    }
+
+    /**
+     * Стоковий OkayCMS читає ці ендпоінти з $_GET, тож параметри мають дублюватись
+     * у рядок запиту - інакше тема мовчки не працює на нефоркнутому рушії.
+     *
+     * @dataProvider themeProvider
+     */
+    public function testMutatingCallsGoThroughOkayAjax($theme)
+    {
+        $js = $this->read('design/' . $theme . '/js/okay.js');
+
+        $this->assertStringContainsString('function okayAjax', $js, $theme);
+        $this->assertSame(6, substr_count($js, 'okayAjax({'), $theme);
+        $this->assertSame(
+            0,
+            preg_match_all('~\$\.ajax\(\{\s*url: okay\.router\["(?:cart_ajax|wishlist_ajax|comparison_ajax)"\]~', $js),
+            $theme
+        );
+        // Токен лишається в тілі: в URL він осів би в логах і Referer
+        $this->assertStringContainsString('key !== "customer_csrf_token"', $js, $theme);
     }
 
     /**
