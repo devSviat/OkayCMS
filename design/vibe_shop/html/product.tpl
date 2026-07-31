@@ -46,7 +46,10 @@
     {if !$v->name}{assign var="vsChipNamed" value=false}
     {elseif $v->name|count_characters > $vsChipLen}{assign var="vsChipLen" value=$v->name|count_characters}{/if}
 {/foreach}
-{assign var="vsChips" value=($vsVariantCount > 1 && $vsVariantCount <= 6 && $vsChipNamed && $vsChipLen <= 20)}
+{* `le`, not `<=`: inside an {assign} a `<` reads as the start of an HTML tag to
+   Okay\Core\TplMod, which then truncates the template from here on. Only an opening
+   {if} survives a `<`, which is why the tests further down keep theirs. *}
+{assign var="vsChips" value=($vsVariantCount > 1 && $vsVariantCount le 6 && $vsChipNamed && $vsChipLen le 20)}
 {assign var="vsLowAt" value=5}
 {assign var="vsHasDiscount" value=($product->variant->price > 0 && $product->variant->compare_price > 0 && $product->variant->compare_price > $product->variant->price)}
 
