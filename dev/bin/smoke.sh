@@ -304,6 +304,23 @@ expect_contains "the virtual host still serves the storefront" \
     "OkayCMS" \
     curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/"
 
+# Оскільки dev працює з error_reporting = E_ALL, будь-який Notice чи Deprecated
+# друкується просто в сторінку — і робить це ДО заголовків, тобто ламає редіректи,
+# а не лише псує вигляд. Саме так було зламане оформлення замовлення: присвоєння
+# неоголошених властивостей у CartHelper давало "Creation of dynamic property
+# Okay\Core\Cart::$purchasesToDB", і редірект на сторінку замовлення не відправлявся.
+#
+# Межі цих перевірок, щоб не створювати хибного відчуття безпеки: вони роблять
+# лише GET і покривають рендеринг сторінок. Той баг із кошиком вони НЕ спіймали б —
+# prepareCart() виконується тільки при відправці замовлення. Перевірено прямо:
+# з тимчасово прибраним оголошенням властивості всі чотири лишались зеленими.
+# Повне покриття чекауту потребує браузерного сценарію, якому тут не місце.
+for pg in "/" "/cart" "/blog" "/brands"; do
+    expect_missing "no PHP diagnostics leak into the page: ${pg}" \
+        "Deprecated:" \
+        curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}${pg}"
+done
+
 echo
 if [ "$fails" -gt 0 ]; then
     printf '%d check(s) failed\n' "$fails"
