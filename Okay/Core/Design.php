@@ -9,7 +9,7 @@ use Okay\Core\Modules\Modules;
 use Okay\Core\TemplateConfig\FrontTemplateConfig;
 use Okay\Core\TplMod\TplMod;
 use Smarty;
-use Mobile_Detect;
+use Detection\MobileDetect;
 
 class Design
 {
@@ -22,7 +22,7 @@ class Design
      */
     public $smarty;
 
-    /** @var Mobile_Detect */
+    /** @var MobileDetect */
     public $detect;
 
     /** @var FrontTemplateConfig */
@@ -115,7 +115,7 @@ class Design
 
     public function __construct(
         Smarty $smarty,
-        Mobile_Detect $mobileDetect,
+        MobileDetect $mobileDetect,
         FrontTemplateConfig $frontTemplateConfig,
         Module $module,
         Modules $modules,

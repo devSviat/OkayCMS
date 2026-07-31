@@ -28,7 +28,7 @@ use Okay\Helpers\OrdersHelper;
 use Psr\Log\LoggerInterface;
 use Bramus\Router\Router as BRouter;
 use Smarty;
-use Mobile_Detect;
+use Detection\MobileDetect;
 use Aura\SqlQuery\QueryFactory as AuraQueryFactory;
 use Aura\Sql\ExtendedPdo;
 use Okay\Core\Import as ImportCore;
@@ -60,8 +60,8 @@ $services = [
     Smarty::class => [
         'class' => Smarty::class,
     ],
-    Mobile_Detect::class => [
-        'class' => Mobile_Detect::class,
+    MobileDetect::class => [
+        'class' => MobileDetect::class,
     ],
     Router::class => [
         'class' => Router::class,
@@ -189,7 +189,7 @@ $services = [
         'class' => Design::class,
         'arguments' => [
             new SR(Smarty::class),
-            new SR(Mobile_Detect::class),
+            new SR(MobileDetect::class),
             new SR(FrontTemplateConfig::class),
             new SR(Module::class),
             new SR(Modules::class),
