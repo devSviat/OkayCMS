@@ -1,0 +1,194 @@
+# Рекомендована конфігурація Nginx для OkayCMS. Це не готове фінальне
+# налаштування сервера — за тоншим тюнінгом зверніться до системного
+# адміністратора.
+#
+# Назва файлу — default.conf.template — навмисна: entrypoint образу nginx
+# розгортає /etc/nginx/templates/*.template у /etc/nginx/conf.d/ під тим самим
+# іменем, тож цей файл заміщує штатний default.conf образу. Без цього штатний
+# default.conf лишався б поруч, а його `server_name localhost` є точним збігом
+# для http://localhost/ і виграв би в нашого віртуального хоста.
+#
+# default_server додано, щоб сайт відповідав на будь-який Host — localhost,
+# 127.0.0.1, IP машини — а не лише на ${VIRTUAL_HOST}.
+
+server {
+    listen 80 default_server;
+    server_name ${VIRTUAL_HOST};
+    
+    #add_header Strict-Transport-Security "max-age=31536000;";
+    
+    set $root_path /var/www/html;
+    root $root_path;
+
+    # Без цього nginx будує Location у редіректах як абсолютний URL із $host і
+    # власним портом 80, і опублікований HTTP_PORT губиться — редірект іде в
+    # нікуди щоразу, коли порт не 80.
+    absolute_redirect off;
+    
+    charset off;
+    index index.php index.html;
+    disable_symlinks if_not_owner from=$root_path;
+    
+    # Логи йдуть у `docker compose logs nginx`, а не у файли робочого дерева.
+    access_log /dev/stdout;
+    error_log  /dev/stderr;
+        
+    gzip on;
+    gzip_comp_level 9;
+    gzip_disable "msie6";
+    gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript;
+    gzip_vary on;
+
+    client_max_body_size 100M;
+
+    if ($host ~* ^www\.(.*)$) {
+        return 301 https://$server_name$request_uri;
+    }
+    
+    if ($request_uri ~* "^(.*/)index\.php$") {
+        return 301 $1;
+    }
+    
+    if ($request_uri ~* "^(.*/)index\.html") {
+        return 301 $1;
+    }
+    
+    location / {
+        location ~* \.(tpl.?)$ {
+            return 404;
+        }
+        
+        location ~* \.(htaccess|htpasswd|git|svn) {
+            return 404;
+        }
+        
+        location ~* ^/admin$ {
+            rewrite /admin /backend/ redirect;
+        }
+        
+        location ~* backend/design/js/admintooltip/admintooltip.js {
+            rewrite ^(/backend/design/js/admintooltip)/admintooltip.js$ $1/admintooltip.php break;
+            try_files /no_file @php;
+        }
+        
+        location ~* backend/files/ {
+            rewrite ^(/backend/files)/export/(.+)\.csv$ $1/index.php?file=$2&folder=export&ext=csv break;
+            rewrite ^(/backend/files)/export_users/(.+)\.csv$ $1/index.php?file=$2&folder=export_users&ext=csv break;
+            rewrite ^(/backend/files)/import/(.+)\.csv$ $1/index.php?file=$2&folder=import&ext=csv break;
+            rewrite ^(/backend/files)/watermark/(.+)\.(png|jpg|jpeg|gif|tif|bmp|ico)$ $1/index.php?file=$2&folder=watermark&ext=$3 break;
+            rewrite ^(\w+)$ /backend/files/index.php?file= break;
+            try_files /does_not_exists @php;
+        }
+        
+        location ~* files/originals {
+            return 404;
+        }
+    
+        location ~* docs/ {
+            return 404;
+        }
+        
+        location ~* /(\w+/)?(\w+/)?(.+\.(jpg|jpeg|gif|png|webp|svg|js|css|mp3|ogg|mpe?g|avi|zip|gz|bz2?|rar|swf|woff|woff2|ttf|xls|xlsx|doc|docx|pdf))$ {
+            try_files $uri $uri/ /$2$3 /$3 /index.php?$args;
+            allow all;
+            access_log off;
+            expires max;
+            add_header Cache-Control public;
+            add_header Access-Control-Allow-Origin *;
+        }
+        
+        location ~* Okay/ {
+            return 404;
+        }
+        
+        location ~* backend/design/js/filemanager/config {
+            return 404;
+        }
+        
+        location ~* backend/lang {
+            return 404;
+        }
+
+        location ~* dev/ {
+            return 404;
+        }
+
+        location ~* config/ {
+            return 404;
+        }
+
+        # Корінь сайту — весь репозиторій (nginx-prod копіює дерево як є),
+        # тож ці шляхи потрібно явно закривати: сідовий дамп, метадані
+        # залежностей і тести — не публічні застосункові шляхи.
+        location ~* 1DB_changes/ {
+            return 404;
+        }
+
+        location ~* ^/?(composer\.(json|lock)|phpunit\.xml)$ {
+            return 404;
+        }
+
+        location ~* tests/ {
+            return 404;
+        }
+
+        # Крапкові файли й директорії (.git, .claude, .superpowers, .env,
+        # .dockerignore, .gitignore тощо) ніколи не публічні. Заборона за
+        # формою шляху, а не за переліком імен: перелік завжди відстає від
+        # нового файлу, доданого в корінь репозиторію (так вже витікав сідовий
+        # дамп і composer.lock раніше на цій гілці). /.well-known/ виключено —
+        # стандартний шлях ACME-валідації (Let's Encrypt) теж лежить під
+        # крапковою директорією і має лишатись доступним.
+        location ~ /\.(?!well-known/) {
+            return 404;
+        }
+
+        # Метадані проєкту в корені репозиторію (nginx-prod копіює все дерево
+        # як є) — заборона за розширенням/іменем файлу, а не переліком
+        # конкретних шляхів, з тієї ж причини, що й вище.
+        location ~* ^/[^/]+\.(md|neon|lock|ya?ml|dist|sh|toml)$ {
+            return 404;
+        }
+
+        location ~* ^/(Dockerfile(\..+)?|Makefile)$ {
+            return 404;
+        }
+
+        # Обидва деny-блоки вище — рубіж безпеки на випадок, якщо щось
+        # опиниться в build context помилково. Це не заміна гігієни
+        # build context: усе по-справжньому секретне (паролі, приватні ключі,
+        # .env) не повинно потрапляти в контекст збірки взагалі — див.
+        # кореневий .dockerignore.
+
+        location ~* ^design/.+/(.+\.(phtml|php|php3|php4|php5|php6|phps|cgi|exe|pl|asp|aspx|shtml|shtm|fcgi|fpl|jsp|htm|html|wml)) {
+            return 404;
+        }
+        
+        location ~* ^files/(.+\.(phtml|php|php3|php4|php5|php6|phps|cgi|exe|pl|asp|aspx|shtml|shtm|fcgi|fpl|jsp|htm|html|wml))$ {
+            return 404;
+        }
+        
+        location ~ [^/]\.ph(p\d*|tml)$ {
+            try_files /does_not_exists @php;
+        }
+        
+        try_files $uri $uri/ /index.php?$args;
+        
+        location ~* ^.+\.(jpg|jpeg|gif|png|webp|svg|js|css|mp3|ogg|mpe?g|avi|zip|gz|bz2?|rar|swf)$ {
+            expires max;
+        }
+    }
+    
+    location @php {
+        try_files $uri $uri/ /$2$3 /$3 /index.php =404;
+        fastcgi_pass ${FASTCGI}:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $request_filename;
+        fastcgi_param DOCUMENT_ROOT $root_path;
+        fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
+        fastcgi_buffering off;
+        #fastcgi_buffers 16 16k;
+        #fastcgi_buffer_size 32k;
+        include fastcgi_params;
+    }
+}

@@ -27,7 +27,6 @@ class SettingsUnserializeTest extends TestCase
         // are skipped rather than mocked.
         $settings = (new ReflectionClass(Settings::class))->newInstanceWithoutConstructor();
         $method = (new ReflectionClass(Settings::class))->getMethod('unserialize');
-        $method->setAccessible(true);
 
         return $method->invoke($settings, $value, $default);
     }

@@ -1,0 +1,7 @@
+# Читається supercronic (сервіс scheduler у dev/docker-compose.yml).
+#
+# `./ok scheduler:run` сам вирішує, чи є що виконувати: кожне зареєстроване
+# завдання має власне cron-правило (Okay/Core/Scheduler/Task::isDue()) і захист
+# від накладання, тож щохвилинний виклик — це дешева перевірка "чи щось
+# готове?", а не запуск усіх завдань щохвилини, як і радить docs/scheduler.md.
+* * * * * cd /var/www/html && php ok scheduler:run

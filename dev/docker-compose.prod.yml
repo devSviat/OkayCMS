@@ -1,0 +1,128 @@
+# Production-оверлей — вмикається явно, поверх docker-compose.yml:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Не публікує жодного порту на жодному сервісі: PaaS (Dokploy, Coolify тощо)
+# підключає власний проксі прямо до контейнера, тож публікація тут була б
+# зайвою поверхнею атаки. Єдине місце, де прод-деплой публікує порт, —
+# docker-compose.standalone.yml, для хостів без такого проксі.
+#
+# Mailpit — dev-only і живе лише в docker-compose.override.yml, якого цей
+# оверлей не чіпає, тож сюди він потрапити не може.
+
+# Спільне для php85 і scheduler — той самий принцип, що й x-php-build/
+# x-php-env у базовому файлі: одне визначення, щоб образи не розійшлись.
+x-php-build-prod: &php-build-prod
+  context: ..
+  dockerfile: dev/docker/Dockerfile
+  target: prod
+  args:
+    APP_UID: ${APP_UID:-1000}
+    APP_GID: ${APP_GID:-1000}
+
+# restart/resources/logging однакові для кожного сервісу цього файлу, тож
+# лежать в одному якорі, а не в чотирьох копіях.
+x-prod-limits: &prod-limits
+  restart: unless-stopped
+  deploy:
+    resources:
+      limits:
+        cpus: "${PROD_CPU_LIMIT:-1.0}"
+        memory: "${PROD_MEM_LIMIT:-512M}"
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  php85:
+    <<: *prod-limits
+    # Два шляхи отримати прод-образ: PaaS (Dokploy, Coolify, ...) збирає
+    # прямо з репозиторію — працює `build` нижче; готовий образ з реєстру —
+    # задайте APP_IMAGE/APP_IMAGE_TAG і APP_PULL_POLICY=always.
+    #
+    # APP_IMAGE_TAG за замовчуванням `latest`, щоб перший деплой не падав до
+    # налаштування змінних — але production має виставити конкретний
+    # незмінний тег, інакше неможливо відкотитись при невдалому пуші.
+    build: *php-build-prod
+    image: ${APP_IMAGE:-okaycms}:${APP_IMAGE_TAG:-latest}
+    pull_policy: ${APP_PULL_POLICY:-build}
+    volumes:
+      # Конфігурація рантайму — разом із паролем БД застосунку — приходить
+      # ззовні, а не запікається в образ. Шаблон: config/config.local-example.php.
+      # Якщо файлу немає — деплой падає з явною помилкою, а не отримує теку,
+      # створену Docker'ом замість нього.
+      - type: bind
+        source: ../config/config.local.php
+        target: /var/www/html/config/config.local.php
+        read_only: true
+        bind:
+          create_host_path: false
+
+  # Той самий образ і причина, що й у php85 — див. `scheduler` у базовому
+  # файлі.
+  scheduler:
+    <<: *prod-limits
+    build: *php-build-prod
+    image: ${APP_IMAGE:-okaycms}:${APP_IMAGE_TAG:-latest}
+    pull_policy: ${APP_PULL_POLICY:-build}
+    volumes:
+      # Якщо файлу немає — деплой падає з явною помилкою, а не отримує теку,
+      # створену Docker'ом замість нього.
+      - type: bind
+        source: ../config/config.local.php
+        target: /var/www/html/config/config.local.php
+        read_only: true
+        bind:
+          create_host_path: false
+
+  nginx:
+    <<: *prod-limits
+    # Без цього nginx успадковує базовий `image: nginx:1.29-alpine` із
+    # порожнім /var/www/html — bind-mount із кодом є лише в dev-оверлеї.
+    # Stage nginx-prod копіює те саме дерево, яке зібрав stage `prod`, тож
+    # статика не може розійтись із PHP-образом.
+    build:
+      context: ..
+      dockerfile: dev/docker/Dockerfile
+      target: nginx-prod
+      args:
+        APP_UID: ${APP_UID:-1000}
+        APP_GID: ${APP_GID:-1000}
+    image: ${APP_NGINX_IMAGE:-okaycms-nginx}:${APP_IMAGE_TAG:-latest}
+    pull_policy: ${APP_PULL_POLICY:-build}
+    volumes:
+      # Образ містить лише те, що було на момент білду. Усе, що OkayCMS пише
+      # під час роботи (files, backend_files, app_cache; див.
+      # Okay/Core/config/parameters.php compile_css_dir/compile_js_dir) має
+      # бути змонтоване й сюди, read-only — інакше 404 навіть після build
+      # вище. Ті самі іменовані томи, у які пишуть php85/scheduler.
+      - files:/var/www/html/files:ro
+      - backend_files:/var/www/html/backend/files:ro
+      - app_cache:/var/www/html/cache:ro
+    # --- Traefik ---
+    # PaaS (Dokploy, Coolify, ...) генерує й підставляє власні мітки Traefik
+    # сюди сам — нижче лише приклад їхньої форми для звірки з робочим стеком,
+    # не заготовка для розкоментування (`<paas-generated-name>` — не ваше
+    # значення). Якщо Traefik керуєте самі, без PaaS — додайте ці мітки й
+    # мережу проксі свідомо.
+    #
+    # labels:
+    #   traefik.enable: "true"
+    #   traefik.http.routers.<paas-generated-name>.rule: Host(`example.com`)
+    #   traefik.http.routers.<paas-generated-name>.entrypoints: websecure
+    #   traefik.http.routers.<paas-generated-name>.tls.certresolver: letsencrypt
+    #   traefik.http.services.<paas-generated-name>.loadbalancer.server.port: "80"
+
+  mariadb:
+    <<: *prod-limits
+    # Ні `ports:`, ні мережевих правок тут немає — базовий файл уже лишає
+    # mariadb неопублікованою і лише в internal-мережі `backend`.
+    #
+    # Паролі — зі змінних оточення базового файлу (${MYSQL_ROOT_PASSWORD:?err} /
+    # ${MYSQL_PASSWORD:?err}), тобто з `.env` на хості або з панелі змінних
+    # платформи розгортання. Вони видимі у `docker inspect`, а пароль, яким
+    # застосунок ходить у базу, однаково лежить відкритим текстом у
+    # config/config.local.php. Реальний захист тут — права доступу на
+    # хості: обидва файли мають бути chmod 600 і належати користувачеві деплою.

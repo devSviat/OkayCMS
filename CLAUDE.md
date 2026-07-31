@@ -18,6 +18,7 @@ OkayCMS (fork) — PHP e-commerce platform with a modular architecture, custom D
 
 ```bash
 cd dev && docker compose up -d         # start the local environment (Nginx + php-fpm + MariaDB)
+dev/bin/smoke.sh                        # verify the environment came up correctly (run from repo root)
 php vendor/bin/phpunit                  # run all tests (config in phpunit.xml, suite dir: tests/)
 php vendor/bin/phpunit tests/Core/      # run tests in a directory
 php vendor/bin/phpunit --filter TplModTest   # run a single test class
@@ -30,7 +31,7 @@ php vendor/bin/phpunit --filter TplModTest   # run a single test class
 
 Run CLI/PHPUnit inside the PHP container if PHP is not on the host: `cd dev && docker compose exec php85 php vendor/bin/phpunit` (the `php85` service runs PHP 8.5; the app requires PHP ≥ 8.4).
 
-Local env config lives in `dev/.env` (copy from `dev/.env-example`). On container creation the default DB dump `1DB_changes/okay_clean.sql` is loaded and the `admin` manager is (re)created.
+Local env config lives in `dev/.env` (copy from `dev/.env-example`). On container creation the default DB dump `1DB_changes/okay_clean.sql` is loaded and the `admin` manager is (re)created. The database now lives on a named Docker volume — `docker compose down -v` destroys it (no more leftover files under a bind-mounted directory).
 
 Admin panel: `http://<VIRTUAL_HOST>/admin`, login `admin`, password `1234`.
 

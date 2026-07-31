@@ -115,6 +115,27 @@ class Cart
     public $discounts = [];
 
     /**
+     * @var array
+     * Purchases prepared for insertion, keyed as in $purchases.
+     * Filled by CartHelper::prepareCart() right before the order is written.
+     */
+    public array $purchasesToDB = [];
+
+    /**
+     * @var array
+     * Applied discounts prepared for insertion.
+     * Filled by CartHelper::prepareDiscounts().
+     */
+    public array $discountsToDB = [];
+
+    /**
+     * @var array
+     * Language-specific rows for the applied discounts, prepared for insertion.
+     * Filled by CartHelper::prepareDiscounts() alongside $discountsToDB.
+     */
+    public array $langDiscountsToDB = [];
+
+    /**
      * @var bool
      * Whether the cart is currently empty
      */

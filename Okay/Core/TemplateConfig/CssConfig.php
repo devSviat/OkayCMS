@@ -10,6 +10,7 @@ use Okay\Core\Request;
 use Okay\Core\TemplateConfig\Css as TemplateCss;
 use Sabberworm\CSS\OutputFormat;
 use Sabberworm\CSS\Parser;
+use Sabberworm\CSS\Value\Value;
 
 class CssConfig
 {
@@ -83,10 +84,10 @@ class CssConfig
         $oCssParser = new Parser(file_get_contents($this->settingsFile));
         $oCssDocument = $oCssParser->parse();
         foreach ($oCssDocument->getAllRuleSets() as $oBlock) {
-            foreach ($oBlock->getRules() as $r) {
-                if (isset($variables[$r->getRule()])) {
-                    $r->setValue($variables[$r->getRule()]);
-                    $this->cssVariables[$r->getRule()] = $variables[$r->getRule()];
+            foreach ($oBlock->getDeclarations() as $r) {
+                if (isset($variables[$r->getPropertyName()])) {
+                    $r->setValue($variables[$r->getPropertyName()]);
+                    $this->cssVariables[$r->getPropertyName()] = $variables[$r->getPropertyName()];
                 }
             }
         }
@@ -348,10 +349,15 @@ class CssConfig
             $oCssParser = new Parser(file_get_contents($this->settingsFile));
             $oCssDocument = $oCssParser->parse();
             foreach ($oCssDocument->getAllRuleSets() as $oBlock) {
-                foreach ($oBlock->getRules() as $r) {
-                    $css_value = (string)$r->getValue();
-                    if (strpos($r->getRule(), '--') === 0) {
-                        $this->cssVariables[$r->getRule()] = $css_value;
+                foreach ($oBlock->getDeclarations() as $r) {
+                    // getValue() returns either a plain string or a Value object (Color,
+                    // Size, RuleValueList, etc.) - since php-css-parser 9.x, Value no longer
+                    // has __toString(), only render(OutputFormat). A bare (string) cast on
+                    // a Value throws; that's what broke on colors like --okay-basic-company.
+                    $value = $r->getValue();
+                    $css_value = $value instanceof Value ? $value->render(OutputFormat::createPretty()) : (string)$value;
+                    if (strpos($r->getPropertyName(), '--') === 0) {
+                        $this->cssVariables[$r->getPropertyName()] = $css_value;
                     }
                 }
             }

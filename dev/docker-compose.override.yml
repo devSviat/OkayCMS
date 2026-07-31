@@ -1,0 +1,105 @@
+# Dev-оверрайди. Compose підключає цей файл автоматично, тож звичайний
+# `docker compose up -d` і так дає dev-оточення.
+#
+# Для особистих правок створіть docker-compose.local.yml (у .gitignore) і
+# підключіть його явно: docker compose -f docker-compose.yml \
+#   -f docker-compose.override.yml -f docker-compose.local.yml up -d
+
+services:
+  php85:
+    environment:
+      # Xdebug 3 читає цю змінну, і вона має пріоритет над ini-файлом — режим
+      # можна перемикати без перезбирання образу.
+      XDEBUG_MODE: ${XDEBUG_MODE:-off}
+      PHP_IDE_CONFIG: serverName=${VIRTUAL_HOST:?err}
+    volumes:
+      - '..:/var/www/html'
+      # Базовий файл дає php85 іменовані томи на ці самі цілі (щоб прод їх
+      # зберігав між деплоями). Іменований том, змонтований поверх
+      # bind-mount, перекриває вміст bind'у — без цього перевизначення файли
+      # робочого дерева були б невидимі всередині контейнера. Bind на тій же
+      # цілі замінює том базового файлу (Compose мерджить volumes за ціллю).
+      - '../files:/var/www/html/files'
+      - '../backend/files:/var/www/html/backend/files'
+      - '../cache:/var/www/html/cache'
+      - '../Okay/log:/var/www/html/Okay/log'
+    # tmpfs для compiled/ — прод-оптимізація; у dev вимикаємо. tmpfs щоразу
+    # порожній, і теку теми створює той процес, що звернувся першим: команди
+    # через `docker compose exec` виконуються від root, після чого php-fpm під
+    # www-data у неї вже не запише. У dev ці теки лежать у прив'язаному
+    # робочому дереві з правильним власником.
+    tmpfs: !reset null
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Той самий образ і код, що й у php85 — потребує того самого перевизначення
+  # (див. коментар вище). Список має повністю збігатися з php85: обидва
+  # діляться якорем x-app-volumes у базовому файлі, тож будь-яка
+  # неперевизначена тут ціль лишиться іменованим томом і перекриє робоче
+  # дерево планувальника.
+  scheduler:
+    volumes:
+      - '..:/var/www/html'
+      - '../files:/var/www/html/files'
+      - '../backend/files:/var/www/html/backend/files'
+      - '../cache:/var/www/html/cache'
+      - '../Okay/log:/var/www/html/Okay/log'
+    tmpfs: !reset null
+
+  nginx:
+    hostname: ${VIRTUAL_HOST:?err}
+    ports:
+      - '${BIND_IP:-127.0.0.1}:${HTTP_PORT:?err}:80'
+    volumes:
+      - '..:/var/www/html'
+
+  mariadb:
+    # Базовий файл лишає mariadb лише в `backend` (internal: true) —
+    # правильно для прода, але тоді опублікований нижче порт нічого не дає:
+    # Docker не створює NAT-правило для контейнера без маршруту назовні. У dev
+    # потрібен доступ із DBeaver/PHPStorm тощо, тож тут mariadb додатково
+    # приєднана до `frontend`. Прод (docker-compose.prod.yml) це не зачіпає.
+    networks:
+      - backend
+      - frontend
+    ports:
+      - '${BIND_IP:-127.0.0.1}:${MYSQL_PORT:?err}:3306'
+    volumes:
+      # Лише читання: це сідовий дамп, і в нього не можна писати.
+      - '../1DB_changes/okay_clean.sql:/docker-entrypoint-initdb.d/init.sql:ro'
+
+  db-init:
+    image: mariadb:10.11
+    restart: "no"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?err}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?err}
+      DB_INIT_SMTP: ${DB_INIT_SMTP:-1}
+    # Потрібен лише доступ до mariadb. Базовий файл замінив мережу `default`
+    # на `frontend`/`backend`, тож сервіс без явного `networks:` опиниться в
+    # автостворюваній `default` — ізольовано від mariadb. Тому вказано явно.
+    networks:
+      - backend
+    volumes:
+      - './config/mysql/db-init.sh:/db-init.sh:ro'
+    entrypoint: ["/bin/sh", "/db-init.sh"]
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Europe/Kyiv}
+      # Okay/Core/Notify.php:92 завжди вмикає SMTPAuth, тож Mailpit має
+      # приймати AUTH-команду навіть на незахищеному з'єднанні. Обидва
+      # прапори dev-only, як і сам сервіс.
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    # Та сама причина, що й у db-init: мережі `default` більше немає, тож
+    # потрібна явна мережа. frontend достатньо — php85 (звідки йде пошта) є і там.
+    networks:
+      - frontend
+    ports:
+      - '${BIND_IP:-127.0.0.1}:${MAILPIT_PORT:-8025}:8025'
