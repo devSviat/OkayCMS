@@ -13,10 +13,11 @@
 config/config.local.php
 config/config.local.prod.php
 
-# The Docker secrets' `file:` sources (docker-compose.prod.yml) — the real
-# MariaDB root/app passwords on a deploy host. Without this line `COPY .
-# /var/www/html` (Dockerfile) puts them in the image at
-# /var/www/html/dev/secrets/, readable by anyone who can pull or run it.
+# Legacy path, kept as a defensive ignore: an earlier revision of
+# docker-compose.prod.yml read the MariaDB root/app passwords from files
+# under dev/secrets/ (Docker secrets). That mechanism was removed — the
+# passwords now come from env vars — and dev/secrets/ no longer exists, but
+# there is no cost to still excluding the name if it ever comes back.
 dev/secrets
 
 # Gitignored personal compose overrides (docker-compose.override.yml's own
