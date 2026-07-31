@@ -3,17 +3,17 @@
 ; config/config.local.prod.php (gitignored — see the root .gitignore), fill in
 ; real values, then:
 ;   - chmod 600 it, owned by the deploy user;
-;   - never let it enter a build context (already excluded in
-;     Dockerfile.dockerignore, verified by dev/bin/smoke-prod.sh);
+;   - never let it enter a build context (already excluded in the repo-root
+;     .dockerignore, verified by dev/bin/smoke-prod.sh);
 ;   - let docker-compose.prod.yml mount it read-only at
 ;     /var/www/html/config/config.local.php — do not bake it into the image.
 ;
 ; OkayCMS reads its DB credentials from this file, not from the environment.
-; That means the Docker-secrets setup in docker-compose.prod.yml (5.6) does
-; NOT cover this password — it only keeps MariaDB's own root/app credentials
-; out of `docker inspect`. This file is the actual boundary for the
-; application's DB password, which is why it gets chmod 600 + read-only mount
-; instead of a Docker secret.
+; docker-compose.prod.yml does not use Docker secrets (removed — the
+; MariaDB root/app passwords live in env vars, protected only by host file
+; permissions, same as everything else). This file is the only place the
+; application's own DB password lives, which is why it gets chmod 600 + a
+; read-only bind mount instead of shipping in the image.
 
 [database]
 db_server = "mariadb"
