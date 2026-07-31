@@ -40,14 +40,14 @@ services:
     <<: *prod-limits
     # Два шляхи отримати прод-образ: PaaS (Dokploy, Coolify, ...) збирає
     # прямо з репозиторію — працює `build` нижче; готовий образ з реєстру —
-    # задайте OKAY_IMAGE/OKAY_VERSION і OKAY_PULL_POLICY=always.
+    # задайте APP_IMAGE/APP_IMAGE_TAG і APP_PULL_POLICY=always.
     #
-    # OKAY_VERSION за замовчуванням `latest`, щоб перший деплой не падав до
+    # APP_IMAGE_TAG за замовчуванням `latest`, щоб перший деплой не падав до
     # налаштування змінних — але production має виставити конкретний
     # незмінний тег, інакше неможливо відкотитись при невдалому пуші.
     build: *php-build-prod
-    image: ${OKAY_IMAGE:-okaycms}:${OKAY_VERSION:-latest}
-    pull_policy: ${OKAY_PULL_POLICY:-build}
+    image: ${APP_IMAGE:-okaycms}:${APP_IMAGE_TAG:-latest}
+    pull_policy: ${APP_PULL_POLICY:-build}
     volumes:
       # Конфігурація рантайму — разом із паролем БД застосунку — приходить
       # ззовні, а не запікається в образ. Шаблон: config/config.local.prod-example.php.
@@ -65,8 +65,8 @@ services:
   scheduler:
     <<: *prod-limits
     build: *php-build-prod
-    image: ${OKAY_IMAGE:-okaycms}:${OKAY_VERSION:-latest}
-    pull_policy: ${OKAY_PULL_POLICY:-build}
+    image: ${APP_IMAGE:-okaycms}:${APP_IMAGE_TAG:-latest}
+    pull_policy: ${APP_PULL_POLICY:-build}
     volumes:
       # Якщо файлу немає — деплой падає з явною помилкою, а не отримує теку,
       # створену Docker'ом замість нього.
@@ -90,8 +90,8 @@ services:
       args:
         APP_UID: ${APP_UID:-1000}
         APP_GID: ${APP_GID:-1000}
-    image: ${OKAY_NGINX_IMAGE:-okaycms-nginx}:${OKAY_VERSION:-latest}
-    pull_policy: ${OKAY_PULL_POLICY:-build}
+    image: ${APP_NGINX_IMAGE:-okaycms-nginx}:${APP_IMAGE_TAG:-latest}
+    pull_policy: ${APP_PULL_POLICY:-build}
     volumes:
       # Образ містить лише те, що було на момент білду. Усе, що OkayCMS пише
       # під час роботи (files, backend_files, app_cache; див.
