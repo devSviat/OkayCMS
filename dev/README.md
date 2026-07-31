@@ -35,18 +35,20 @@ dev/bin/smoke.sh
 розширення, що база на named volume, мережеву ізоляцію mariadb, що scheduler
 живий, що логи nginx йдуть у `docker compose logs`, і що обидва поштові шляхи
 долітають до Mailpit. Якщо на машині одночасно піднято кілька копій цього
-проєкту — впевніться, що `APP_NAME` та `NETWORK_NAME` в `.env` унікальні для
-кожної копії (компоуз-проєкт і назви мереж беруться саме з них).
+проєкту — задайте кожній свій `APP_NAME` (з нього береться ім'я compose-проєкту).
+Мережі Compose іменує сам, за проєктом: `<APP_NAME>_frontend` і `<APP_NAME>_backend`.
 
 Для чужого зручного доступу по http замість `http://localhost:80`,
 `http://localhost:81`... додайте хости в `/etc/hosts` на `127.0.0.1` і
 підніміть один зворотний проксі на всі проєкти:
 
 ```bash
-docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro --net "${NETWORK_NAME}-frontend" nginxproxy/nginx-proxy
+docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro \
+  --net "$(docker compose ps --format '{{.Name}}' nginx | head -1 | sed 's/-nginx-1$//')_frontend" \
+  nginxproxy/nginx-proxy
 ```
 
-(nginx сам сидить лише в `${NETWORK_NAME}-frontend` — `-backend` є `internal: true`
+(nginx сам сидить лише у `frontend` — `backend` є `internal: true`
 і без маршруту на хост, тож проксі туди підключати сенсу немає. Мережі з'являються
 лише після першого `docker compose up`; перевірити фактичні назви — `docker network
 ls`.)

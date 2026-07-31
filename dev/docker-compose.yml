@@ -167,11 +167,19 @@ networks:
   # bridge (the default type): has a route off the host, so nginx can be
   # reached and php85/scheduler can make outbound calls (e.g. the
   # NovaposhtaCost module's scheduled API lookups).
+  #
+  # Імена мереж НЕ задаються явно. Compose сам додає префікс проєкту, тож
+  # виходить <project>_frontend / <project>_backend.
+  #
+  # Раніше тут стояло `name: ${NETWORK_NAME}-frontend`. Фіксоване глобальне
+  # ім'я ламає ізоляцію так само, як це робив container_name: два стеки цього
+  # ж проєкту з різними -p опинялись в ОДНІЙ мережі. Наслідок спостерігався
+  # наживо — prod-стек резолвив `mariadb` у контейнер бази з dev-оточення і
+  # ходив у чужу базу. На спільному хості це означало б, що продакшн пише в
+  # базу розробки.
   frontend:
-    name: ${NETWORK_NAME:?err}-frontend
   # internal: true means no default route out of this network at all — a
   # container with only this network cannot reach anything off the host,
   # which is exactly what mariadb needs.
   backend:
     internal: true
-    name: ${NETWORK_NAME:?err}-backend

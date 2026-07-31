@@ -203,7 +203,14 @@ expect_contains "mariadb is reachable from the host, not just from inside a cont
 
 echo
 echo "Network segmentation"
-backend_net="${NETWORK_NAME}-backend"
+# Ім'я мережі береться з самого контейнера, а не з .env. Раніше тут стояло
+# "${NETWORK_NAME}-backend", і фіксоване ім'я було не лише крихким для цієї
+# перевірки — воно ламало ізоляцію: два стеки цього проєкту з різними -p
+# опинялись в одній мережі, і prod-стек ходив у dev-базу. Тепер мережі іменує
+# Compose за проєктом, тож єдине надійне джерело — сам контейнер.
+backend_net=$(docker inspect -f \
+    '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{"\n"}}{{end}}' "$mariadb_cid" \
+    | grep -- '_backend$' | head -1)
 expect_contains "the backend network is internal (no route off the host)" \
     "true" \
     docker network inspect "$backend_net" --format '{{.Internal}}'

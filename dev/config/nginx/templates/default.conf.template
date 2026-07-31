@@ -20,6 +20,13 @@ server {
     
     set $root_path /var/www/html;
     root $root_path;
+
+    # Location у редіректах — відносний. Інакше nginx будує абсолютний URL із
+    # $host і власного порту 80, і опублікований порт губиться: /admin на
+    # http://localhost:8080/ віддавав 302 на http://localhost/backend/, тобто
+    # в нікуди. Проявляється щоразу, коли HTTP_PORT не 80 — а це документована
+    # змінна, і standalone-профіль прода нею користується.
+    absolute_redirect off;
     
     charset off;
     index index.php index.html;
