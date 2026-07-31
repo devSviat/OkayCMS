@@ -2740,6 +2740,84 @@ body.hc-nav-open {
 	font-size: var(--vs-text-xs);
 }
 
+/* The card states the rating read-only: no fn_rating, no data-rating_post_url,  */
+/* because scripts.tpl:504 turns .fn_rating into a ballot (hover, click, AJAX)    */
+/* and a card in a grid is not a place to vote from. Same shape comparison.tpl    */
+/* already draws.                                                                 */
+/*                                                                                */
+/* The row is reserved whether or not the product has votes, exactly like the     */
+/* discount tier below it: price and availability have to sit at the same y in    */
+/* neighbouring cards, and a row that appears only on rated products is what      */
+/* breaks that.                                                                   */
+/*                                                                                */
+/* nowrap on the whole row is what holds the reserved height - a second line of   */
+/* text would push the block past the height the grid row is aligned to.          */
+
+.vs-card__rating {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-1);
+	min-height: calc(var(--vs-text-2xs) * 1.25);
+	margin-top: var(--vs-space-2);
+	line-height: 1.25;
+	white-space: nowrap;
+}
+
+/* 60x12, not the 90x18 of the product page and the comparison table. The         */
+/* narrowest card this theme produces is the two-up grid at 360px, whose content  */
+/* box is 134px (measured, see the 575px block below), and it also has to hold    */
+/* the counter - the demo database reaches five digits. At 60px the row is about  */
+/* 100px and the count can grow without the card ever being the thing that gives. */
+/*                                                                                */
+/* The multiplier is recomputed in the template - product_list.tpl emits          */
+/* rating*60/5 - rather than the box being scaled with transform: the inline      */
+/* width IS the value, and transform would leave a 90px layout box behind while   */
+/* painting 60, pushing the counter 30px out. The two numbers are tied: move one, */
+/* move the other. Nothing reads them back - the rater in scripts.tpl binds to    */
+/* .fn_rating only, which this row deliberately is not.                           */
+/*                                                                                */
+/* These win on specificity, not order: 0,2,0 and 0,2,1 against the 0,1,0 and     */
+/* 0,1,1 of the base rating section further down the file. Only mask-size and     */
+/* mask-position are overridden - the mask shorthand with its url() stays base,   */
+/* so the reference to images/rating.svg lives in exactly one place.              */
+/*                                                                                */
+/* flex: none is load-bearing. This is a flex item with a fixed 60px, and were it */
+/* allowed to shrink, the inline width would measure itself against a smaller box */
+/* - the card would state someone else's rating rather than a clipped one.        */
+
+.vs-card__rating .rating_starOff {
+	flex: none;
+	width: 60px;
+	height: 12px;
+}
+
+.vs-card__rating .rating_starOff::before {
+	width: 60px;
+	height: 12px;
+	-webkit-mask-position: 0 -12px;
+	-webkit-mask-size: 12px 24px;
+	mask-position: 0 -12px;
+	mask-size: 12px 24px;
+}
+
+.vs-card__rating .rating_starOn {
+	height: 12px;
+	-webkit-mask-size: 12px 24px;
+	mask-size: 12px 24px;
+}
+
+/* The counter is the only thing in the row that can outgrow it, so it is what    */
+/* shrinks and, past that, ends in an ellipsis. Wrapping is not on offer: it      */
+/* would break the reserved height the whole block exists for.                    */
+
+.vs-card__votes {
+	min-width: 0;
+	overflow: hidden;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-2xs);
+	text-overflow: ellipsis;
+}
+
 /* The short annotation. Off by default and off for good on a touch device -    */
 /* a hover-only affordance is unreachable there, so nothing may live only in    */
 /* it, and this text is a truncated copy of what the product page states in     */
@@ -5206,13 +5284,45 @@ body.hc-nav-open {
 /* used: it writes an inline display:none on hidden panels at every width, and */
 /* an inline style can only be overridden with !important.                      */
 
+/* The plate is painted on .vs-tabs itself, with no new wrapper anywhere. That   */
+/* is not taste, it is two contracts: okay.js:747 reaches the panel through      */
+/* $(this).next(".accordion__content") and the items through                     */
+/* $(outerBox).children(".accordion__item"), and the desktop grid below makes    */
+/* .vs-tabs__item display: contents, so heads and panels are already direct grid */
+/* items of .vs-tabs. A spare <div> anywhere inside would break switching        */
+/* silently and shift the nth-child that lays the tabs out into columns.         */
+/*                                                                               */
+/* The border-top this rule used to carry is gone: the plate draws that line     */
+/* now, and two identical hairlines 0px apart read as a dirty edge.              */
+/*                                                                               */
+/* Formula is the theme's canonical card - --vs-surface, 1px --vs-hairline,      */
+/* --vs-radius-lg (.vs-card, .vs-author-card). No shadow: in this theme a shadow */
+/* is the hover state of something clickable, and this is a stationary panel.    */
+/*                                                                               */
+/* overflow is deliberately NOT declared. The global :focus-visible in base.css  */
+/* has outline-offset: 2px, and clipping here would eat the ring on the first    */
+/* and last pill. It is not needed either - the horizontal padding is wider than */
+/* the ring's reach, so nothing gets near the corners.                           */
+
 .vs-tabs {
 	margin-top: var(--vs-space-8);
-	border-top: 1px solid var(--vs-hairline);
+	padding: 0 var(--vs-space-4);
+	background-color: var(--vs-surface);
+	border: 1px solid var(--vs-hairline);
+	border-radius: var(--vs-radius-lg);
 }
 
 .vs-tabs__item {
 	border-bottom: 1px solid var(--vs-hairline);
+}
+
+/* The last row's rule and the plate's own bottom edge are one line drawn twice, */
+/* on the single edge that is also a corner radius. The plate keeps the line,    */
+/* the row gives it up. On desktop the item is display: contents and paints no   */
+/* box at all, so there this is a no-op.                                         */
+
+.vs-tabs__item:last-child {
+	border-bottom: 0;
 }
 
 .vs-tabs__head {
@@ -5264,7 +5374,13 @@ body.hc-nav-open {
 /* the tab grid stacks all three panels in one cell, which is only ever correct   */
 /* when exactly one of them is displayed, i.e. only once the script is running.   */
 
-.vs-tabs__panel {
+/* Scoped to .vs-tabs to outweigh .accordion__content further down the file,     */
+/* which carries `padding: var(--vs-space-2) 0` at the same weight and a later   */
+/* position - so the panel's bottom padding was actually 8px, not the 24 meant   */
+/* here. Invisible while the block was flat; with a plate around it the last     */
+/* open panel would have ended 8px from the border.                              */
+
+.vs-tabs .vs-tabs__panel {
 	display: block;
 	padding-bottom: var(--vs-space-6);
 }
@@ -5838,13 +5954,18 @@ body.hc-nav-open {
 		grid-column: 1;
 		grid-row: 2;
 		margin-top: 0;
-		border-top: 0;
+		padding: var(--vs-space-5) var(--vs-space-6) var(--vs-space-6);
 	}
+
+/* row-gap is the air between the strip of pills and the line under it. There    */
+/* was none before, because row 1 and row 2 sat flush and nothing showed it;     */
+/* with a filled pill the line would otherwise touch its bottom edge.            */
 
 	.vs-tabs.is-enhanced {
 		display: grid;
 		grid-template-columns: repeat(3, max-content) minmax(0, 1fr);
-		column-gap: var(--vs-space-6);
+		column-gap: var(--vs-space-3);
+		row-gap: var(--vs-space-4);
 	}
 
 	.vs-tabs.is-enhanced .vs-tabs__item {
@@ -5853,7 +5974,6 @@ body.hc-nav-open {
 
 	.vs-tabs.is-enhanced .vs-tabs__head {
 		grid-row: 1;
-		border-bottom: 2px solid transparent;
 	}
 
 	.vs-tabs.is-enhanced .vs-tabs__item:nth-child(1) .vs-tabs__head {
@@ -5868,36 +5988,64 @@ body.hc-nav-open {
 		grid-column: 3;
 	}
 
-	.vs-tabs.is-enhanced .vs-tabs__head.active {
-		border-bottom-color: var(--vs-ink);
-	}
-
-/* max-content columns size the tab to its label, and "Опис" is 38px wide - a  */
-/* 38x48 target on a 992px screen, which is a touch width. The minimum is the  */
-/* 44px rule, and the label is centred in it so a short tab does not sit off   */
-/* to one side of its own underline.                                          */
+/* Pills. The 2px underline the active tab used to wear is gone: on a white     */
+/* plate it was a second horizontal rule 16px from the real one. The theme      */
+/* already owns a "chosen" state in pill form - .vs-chip--selected - and it is  */
+/* built from exactly --vs-ink under --vs-ink-text. The tab strip borrows that  */
+/* rather than inventing a third look for chosen.                               */
+/*                                                                              */
+/* max-content columns size the tab to its label, and "Опис" is 38px wide - a   */
+/* 38x48 target on a 992px screen, which is a touch width. The minimum is the   */
+/* 44px rule, and the label is centred in it so a short tab does not sit off    */
+/* to one side of its own pill.                                                 */
 
 	.vs-tabs.is-enhanced .vs-tabs__btn {
 		justify-content: center;
 		min-width: 44px;
-		min-height: 48px;
-		padding: 0 var(--vs-space-2);
+		min-height: 44px;
+		padding: 0 var(--vs-space-5);
+		border-radius: var(--vs-radius-full);
 		color: var(--vs-text-muted);
+		transition: background-color var(--vs-dur-2) var(--vs-ease), color var(--vs-dur-2) var(--vs-ease);
 	}
 
-	.vs-tabs.is-enhanced .vs-tabs__head.active .vs-tabs__btn {
+/* Hover is offered only to a tab that is not already open: the active pill is  */
+/* filled, and a hover of its own would read as a second chosen state.          */
+
+	.vs-tabs.is-enhanced .vs-tabs__head:not(.active) .vs-tabs__btn:hover {
+		background-color: var(--vs-surface-subtle);
 		color: var(--vs-heading);
+	}
+
+/* The fill goes on the button, not on the <h2>: the <h2> is a grid item        */
+/* stretched across its whole row track, so filling it would paint a band the   */
+/* height of the row instead of a pill the size of the label. The state comes   */
+/* from .active on .vs-tabs__head, which okay.js and vibe.js both set; ARIA is  */
+/* deliberately not read here, because on mobile it is a different attribute.   */
+
+	.vs-tabs.is-enhanced .vs-tabs__head.active .vs-tabs__btn {
+		background-color: var(--vs-ink);
+		color: var(--vs-ink-text);
 	}
 
 	.vs-tabs.is-enhanced .vs-tabs__chevron {
 		display: none;
 	}
 
+/* The line between the strip and the panel. There is nothing to hang it on but */
+/* the panel itself: the heads sit in columns 1-3 of row 1 and stop where the   */
+/* third label stops, so a border on them would be three short dashes, and the  */
+/* fourth column holds no element to carry the rest. The panel is the only box  */
+/* with grid-column: 1 / -1, and exactly one of the three is ever displayed, so */
+/* its top border is one continuous line drawn once. row-gap above holds it     */
+/* clear of the pills.                                                          */
+
 	.vs-tabs.is-enhanced .vs-tabs__panel {
 		grid-row: 2;
 		grid-column: 1 / -1;
-		padding-top: var(--vs-space-7);
+		padding-top: var(--vs-space-6);
 		padding-bottom: 0;
+		border-top: 1px solid var(--vs-hairline);
 	}
 
 	.vs-reviews {
@@ -6055,27 +6203,27 @@ body.hc-nav-open {
 		padding: 2px var(--vs-space-1);
 	}
 
-	/* Two-up at 360 and 375 leaves the corner sticker 86-94px beside the tools     */
-	/* and "Топ продажів" wants 97, so it wraps to a second line rather than        */
-	/* losing its last word. A sticker is a phrase, not a number - half of it says  */
-	/* less than all of it on two lines. Only the corner stickers: the sale badge   */
-	/* on the price tier is a single token and must stay on one line.               */
-
-	/* The leading has to come with it. The badge sets line-height to its own font  */
-	/* size, which is fine for one line and clips a descender on two - measured at  */
-	/* 25px of content in a 24px box, the tail of the "д".                          */
+	/* Two-up at 360 leaves the corner sticker 86px beside the tools, and "Топ      */
+	/* продажів" at the 2xs step wants 88. This used to be allowed to wrap to a     */
+	/* second line; the owner asked for one line instead, and for the sticker to    */
+	/* be smaller on a phone if that is what it takes. So: the step below 2xs and   */
+	/* the 4px padding, which brings the same words to 78.5 into 86 - seven pixels  */
+	/* of slack rather than the two that 2xs with trimmed padding would leave, and  */
+	/* two pixels is exactly the margin that put it on two lines the last time.     */
 	/*                                                                             */
-	/* The trimmed padding is the same 4px trick the sale badge needs, and for the */
-	/* same reason: on the home rail at 390 the sticker had exactly 97px and       */
-	/* wanted exactly 97, so it wrapped while the catalogue showed it on one line  */
-	/* at the identical viewport. Swiper sizes those cards, the grid does not      */
-	/* reach them. 93 into 97 now, and 375 comes back onto one line too.           */
+	/* Measured on the catalogue grid at 360 and 375 and on the home rail at 390,   */
+	/* where swiper sizes the cards and the grid's numbers do not reach.            */
+	/*                                                                             */
+	/* nowrap without an ellipsis is deliberate - .vs-badge is a flex container, so */
+	/* the text is an anonymous flex item and text-overflow has nothing to act on.  */
+	/* A sticker longer than these words would be clipped, not wrapped; the copy    */
+	/* that exists fits with room to spare.                                         */
 
 	.vs-card__badges .vs-badge {
-		padding: 0 var(--vs-space-1-5);
-		white-space: normal;
+		padding: 0 var(--vs-space-1);
+		font-size: var(--vs-text-3xs);
+		white-space: nowrap;
 		text-align: left;
-		line-height: 1.25;
 	}
 
 	.vs-card__media-link {
