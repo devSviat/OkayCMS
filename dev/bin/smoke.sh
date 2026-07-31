@@ -124,7 +124,12 @@ expect_contains() {
     shift 2
     local out
     out=$("$@" 2>&1) || true
-    if printf '%s' "$out" | grep -qF -- "$needle"; then
+    # Порівняння вбудованим шаблоном bash, а не `printf | grep -q`. З pipefail
+    # конвеєр ламався на великому виводі: grep -q виходить одразу після збігу,
+    # printf отримує SIGPIPE, і pipefail оголошує весь конвеєр невдалим — тобто
+    # асершен падав саме тоді, коли голку БУЛО знайдено. На малому виводі printf
+    # встигав завершитись, тому баг спав до першої перевірки HTML-сторінки.
+    if [[ "$out" == *"$needle"* ]]; then
         printf '  ok    %s\n' "$desc"
     else
         printf '  FAIL  %s\n' "$desc"
@@ -140,7 +145,9 @@ expect_missing() {
     shift 2
     local out
     out=$("$@" 2>&1) || true
-    if printf '%s' "$out" | grep -qF -- "$needle"; then
+    # Той самий шаблон bash замість `printf | grep -q` — див. коментар вище
+    # про SIGPIPE під pipefail.
+    if [[ "$out" == *"$needle"* ]]; then
         printf '  FAIL  %s\n' "$desc"
         printf '        expected output NOT to contain: %s\n' "$needle"
         dump_actual_output "$out"
@@ -269,6 +276,26 @@ else
     printf '        expected total to increase from %s, actual: %s\n' "$before_total" "$after_total"
     fails=$((fails + 1))
 fi
+
+echo
+echo "Web"
+# Навмисно БЕЗ заголовка Host. Кожна інша перевірка тут ходила з
+# `-H "Host: $VIRTUAL_HOST"`, і саме тому повз них пройшов регрес: образ nginx
+# має власний default.conf із `server_name localhost`, який є точним збігом для
+# http://localhost/ і виграє в нашого віртуального хоста. Замість магазину
+# показувалась заглушка "Welcome to nginx!". Людина заходить саме так.
+# Host: localhost задано явно. Просте звернення на 127.0.0.1 НЕ відтворює
+# проблему — точним збігом для штатного `server_name localhost` є саме рядок
+# "localhost", тож запит із Host: 127.0.0.1 і так потрапляє до нашого сервера.
+expect_missing "http://localhost/ is not the stock nginx placeholder" \
+    "Welcome to nginx" \
+    curl -sS -H "Host: localhost" "http://127.0.0.1:${HTTP_PORT}/"
+expect_contains "http://localhost/ serves the storefront" \
+    "OkayCMS" \
+    curl -sS -H "Host: localhost" "http://127.0.0.1:${HTTP_PORT}/"
+expect_contains "the virtual host still serves the storefront" \
+    "OkayCMS" \
+    curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/"
 
 echo
 if [ "$fails" -gt 0 ]; then
