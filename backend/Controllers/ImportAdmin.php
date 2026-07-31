@@ -114,7 +114,7 @@ class ImportAdmin extends IndexAdmin
     
     private function convertFile($source, $dest) {
         // Узнаем какая кодировка у файла
-        $testString = file_get_contents($source, null, null, null, 1000000);
+        $testString = file_get_contents($source, false, null, 0, 1000000);
 
         if ($this->isUtf8Encoding($testString)) {
             return copy($source, $dest);

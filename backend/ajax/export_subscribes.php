@@ -54,7 +54,7 @@ if(empty($page) || $page==1) {
 $f = fopen($exportFilesDir.$filename, 'ab');
 
 if($page == 1) {
-    fputcsv($f, $columnsNames, $columnDelimiter);
+    fputcsv($f, $columnsNames, $columnDelimiter, '"', '\\');
 }
 
 $filter = [];
@@ -69,7 +69,7 @@ foreach($subscribesEntity->find($filter) as $s) {
         $str[] = $s->$n;
     }
 
-    fputcsv($f, $str, $columnDelimiter);
+    fputcsv($f, $str, $columnDelimiter, '"', '\\');
 }
 
 fclose($f);
