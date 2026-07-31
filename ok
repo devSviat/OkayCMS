@@ -4,8 +4,14 @@
 use Okay\Core\Console\Application;
 use Okay\Core\ServiceLocator;
 
+// Діагностика не глушиться. Тут раніше стояло error_reporting(false), і воно
+// вимикало геть усе - warning, notice, deprecated - для кожної консольної
+// команди. Планувальник крутиться в контейнері без нагляду, тобто саме та
+// поверхня, де помилку нікому побачити, була єдиною повністю німою.
+// display_errors лишається вимкненим (okay.ini), тож повідомлення йдуть у
+// stderr через log_errors, а не в stdout команди.
 ini_set('display_errors', false);
-error_reporting(false);
+error_reporting(E_ALL);
 
 chdir(__DIR__);
 

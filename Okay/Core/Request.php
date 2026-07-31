@@ -339,7 +339,10 @@ class Request
     
     public static function getDomain()
     {
-        return !empty(self::$domain) ? self::$domain : rtrim($_SERVER['HTTP_HOST']);
+        // HTTP_HOST не існує в CLI, а ./ok доходить сюди через LicenseStorage на
+        // кожному запуску планувальника: без ?? це undefined array key плюс
+        // rtrim(null), deprecated з PHP 8.1.
+        return !empty(self::$domain) ? self::$domain : rtrim($_SERVER['HTTP_HOST'] ?? '');
     }
     
     public static function setDomain($domain)

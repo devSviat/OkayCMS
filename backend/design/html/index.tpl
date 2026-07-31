@@ -315,7 +315,10 @@
                         <input type="hidden" name="id" value="{$manager->id}" />
                         <ul id="fn_sort_menu_section" class="menu_items">
                             {foreach $left_menu as $section=>$items}
-                                <li class="{if isset($items.$menu_selected)}open active{/if} {if $items|count > 1} fn_item_sub_switch nav-dropdown{/if}">
+                                {* $menu_selected порожній, коли поточного контролера немає в лівому меню
+                                   (наприклад SupportAdmin) - ManagerMenu::getActiveControllerName повертає null.
+                                   PHP 8.5 вважає null як індекс масиву deprecated, тож перевіряємо його окремо. *}
+                                <li class="{if $menu_selected && isset($items.$menu_selected)}open active{/if} {if $items|count > 1} fn_item_sub_switch nav-dropdown{/if}">
                                     {if $items|count == 1}
                                         <input type="hidden" value="{$items|reset}" name="manager_menu[{$section|escape}][{$items|key}]" />
                                     {/if}

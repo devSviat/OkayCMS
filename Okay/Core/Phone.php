@@ -63,7 +63,11 @@ class Phone
      */
     public static function clear($phoneNumber): string
     {
-        return substr(preg_replace('~[^0-9.+]~', '', $phoneNumber), 0, PhoneNumberUtil::MAX_LENGTH_FOR_NSN);
+        // Приводимо до рядка: сюди приходить і null - з форми без поля телефону
+        // (UserRequest::postRegisterUser), і з запису БД, де phone дозволено NULL
+        // (OrdersEntity, CartHelper). З PHP 8.1 null у preg_replace() - deprecated,
+        // а метод оголошений як :string, тож порожній рядок і є правильним входом.
+        return substr(preg_replace('~[^0-9.+]~', '', (string)$phoneNumber), 0, PhoneNumberUtil::MAX_LENGTH_FOR_NSN);
     }
 
     /**
@@ -122,6 +126,9 @@ class Phone
      */
     public static function format($phoneNumber, $numberFormat = null): string
     {
+        // Той самий null, що й у clear(): substr(null) - deprecated з PHP 8.1.
+        $phoneNumber = (string)$phoneNumber;
+
         if (substr($phoneNumber, 0, 2) == '+0') {
             $phoneNumber = substr($phoneNumber, 1);
         }
