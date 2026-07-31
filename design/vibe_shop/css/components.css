@@ -2740,6 +2740,84 @@ body.hc-nav-open {
 	font-size: var(--vs-text-xs);
 }
 
+/* The card states the rating read-only: no fn_rating, no data-rating_post_url,  */
+/* because scripts.tpl:504 turns .fn_rating into a ballot (hover, click, AJAX)    */
+/* and a card in a grid is not a place to vote from. Same shape comparison.tpl    */
+/* already draws.                                                                 */
+/*                                                                                */
+/* The row is reserved whether or not the product has votes, exactly like the     */
+/* discount tier below it: price and availability have to sit at the same y in    */
+/* neighbouring cards, and a row that appears only on rated products is what      */
+/* breaks that.                                                                   */
+/*                                                                                */
+/* nowrap on the whole row is what holds the reserved height - a second line of   */
+/* text would push the block past the height the grid row is aligned to.          */
+
+.vs-card__rating {
+	display: flex;
+	align-items: center;
+	gap: var(--vs-space-1);
+	min-height: calc(var(--vs-text-2xs) * 1.25);
+	margin-top: var(--vs-space-2);
+	line-height: 1.25;
+	white-space: nowrap;
+}
+
+/* 60x12, not the 90x18 of the product page and the comparison table. The         */
+/* narrowest card this theme produces is the two-up grid at 360px, whose content  */
+/* box is 134px (measured, see the 575px block below), and it also has to hold    */
+/* the counter - the demo database reaches five digits. At 60px the row is about  */
+/* 100px and the count can grow without the card ever being the thing that gives. */
+/*                                                                                */
+/* The multiplier is recomputed in the template - product_list.tpl emits          */
+/* rating*60/5 - rather than the box being scaled with transform: the inline      */
+/* width IS the value, and transform would leave a 90px layout box behind while   */
+/* painting 60, pushing the counter 30px out. The two numbers are tied: move one, */
+/* move the other. Nothing reads them back - the rater in scripts.tpl binds to    */
+/* .fn_rating only, which this row deliberately is not.                           */
+/*                                                                                */
+/* These win on specificity, not order: 0,2,0 and 0,2,1 against the 0,1,0 and     */
+/* 0,1,1 of the base rating section further down the file. Only mask-size and     */
+/* mask-position are overridden - the mask shorthand with its url() stays base,   */
+/* so the reference to images/rating.svg lives in exactly one place.              */
+/*                                                                                */
+/* flex: none is load-bearing. This is a flex item with a fixed 60px, and were it */
+/* allowed to shrink, the inline width would measure itself against a smaller box */
+/* - the card would state someone else's rating rather than a clipped one.        */
+
+.vs-card__rating .rating_starOff {
+	flex: none;
+	width: 60px;
+	height: 12px;
+}
+
+.vs-card__rating .rating_starOff::before {
+	width: 60px;
+	height: 12px;
+	-webkit-mask-position: 0 -12px;
+	-webkit-mask-size: 12px 24px;
+	mask-position: 0 -12px;
+	mask-size: 12px 24px;
+}
+
+.vs-card__rating .rating_starOn {
+	height: 12px;
+	-webkit-mask-size: 12px 24px;
+	mask-size: 12px 24px;
+}
+
+/* The counter is the only thing in the row that can outgrow it, so it is what    */
+/* shrinks and, past that, ends in an ellipsis. Wrapping is not on offer: it      */
+/* would break the reserved height the whole block exists for.                    */
+
+.vs-card__votes {
+	min-width: 0;
+	overflow: hidden;
+	color: var(--vs-text-muted);
+	font-size: var(--vs-text-2xs);
+	text-overflow: ellipsis;
+}
+
 /* The short annotation. Off by default and off for good on a touch device -    */
 /* a hover-only affordance is unreachable there, so nothing may live only in    */
 /* it, and this text is a truncated copy of what the product page states in     */

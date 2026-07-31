@@ -133,6 +133,37 @@
             </div>
             *}
 
+            {* Рейтинг: зірки плюс кількість голосів. Рядок резервується завжди -
+               у товару без голосів він порожній, - бо ціна й наявність у сусідніх
+               картках ряду мають стояти на одній висоті. Той самий прийом, що й у
+               зарезервованого рядка знижки нижче.
+
+               Свідомо БЕЗ fn_rating і БЕЗ data-rating_post_url: scripts.tpl:504
+               перетворює .fn_rating на бюлетень (hover, click, AJAX POST), а картка
+               в сітці голосувати не має. Це та сама read-only форма, яку вже малює
+               comparison.tpl:50-54.
+
+               Інлайнова ширина рахується від 60, а не від 90, як на сторінці товару:
+               у картці спрайт 60x12, див. .vs-card__rating у components.css. Ці два
+               числа зв'язані - рухається одне, рухається й друге. Назад їх не читає
+               ніхто: рейтер у scripts.tpl зв'язується лише з .fn_rating.
+
+               На сторінці порівняння рядок придушено цілком - comparison.tpl:50-54
+               малює власний рядок рейтингу одразу під карткою, і копія тут була б
+               дублем. Рядок саме "ComparisonController": це те, що MainHelper:309
+               кладе в $controller з маршруту, і той самий тест, який блок
+               інструментів вище вже робить двічі. *}
+            {if $controller != "ComparisonController"}
+                <div class="vs-card__rating">
+                    {if $product->votes > 0}
+                        <span class="rating_starOff" aria-hidden="true">
+                            <span class="rating_starOn" style="width:{$product->rating*60/5|string_format:'%.0f'}px;"></span>
+                        </span>
+                        <span class="vs-card__votes"><span class="vs-sr-only">{$lang->product_rating}: {$product->rating|string_format:"%.1f"} / 5.</span>({$product->votes|string_format:"%.0f"})</span>
+                    {/if}
+                </div>
+            {/if}
+
             <div class="vs-card__price">
                 {* The struck price and its badge sit ABOVE the current price: they
                    are what the current price is being compared against, so they read
