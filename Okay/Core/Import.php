@@ -42,7 +42,7 @@ class Import
     protected $valuesDelimiter      = ',,';                    // Разделитель значений свойства в товаре
     protected $columnDelimiter      = ';';
     protected $columns              = [];
-    protected $locale               = 'ru_RU.UTF-8';
+    protected $locale               = 'uk_UA.UTF-8';
 
     // Заменяем имена колонок из файла на внутренние имена колонок
     public function initInternalColumns($fields = [])
@@ -74,7 +74,7 @@ class Import
     public function initColumns()
     {
         $f = fopen($this->importFilesDir.$this->import_file, 'r');
-        $this->columns = fgetcsv($f, null, $this->columnDelimiter);
+        $this->columns = fgetcsv($f, null, $this->columnDelimiter, '"', '\\');
         fclose($f);
     }
 

@@ -38,7 +38,7 @@ $result = new \stdClass();
 
 // Определяем колонки из первой строки файла
 $f = fopen($import->getImportFilesDir() . $import->getImportFile(), 'r');
-$import->setColumns(fgetcsv($f, null, $import->getColumnDelimiter()));
+$import->setColumns(fgetcsv($f, null, $import->getColumnDelimiter(), '"', '\\'));
 $import->initInternalColumns($fields);
 
 // Если нет названия товара - не будем импортировать
@@ -64,7 +64,7 @@ $importedItems = [];
 // или пока не импортировано достаточно строк для одного запроса
 for($k=0; !feof($f) && $k < $productsCount; $k++) {
     // Читаем строку
-    $line = fgetcsv($f, 0, $import->getColumnDelimiter());
+    $line = fgetcsv($f, 0, $import->getColumnDelimiter(), '"', '\\');
 
     $product = null;
     if(is_array($line) && !empty($line)) {

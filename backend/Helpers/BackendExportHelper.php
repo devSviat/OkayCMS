@@ -147,7 +147,7 @@ class BackendExportHelper
         }
 
         if($page == 1) {
-            fputcsv($f, $columnsNames, $columnDelimiter);
+            fputcsv($f, $columnsNames, $columnDelimiter, '"', '\\');
         }
 
         fclose($f);
@@ -300,7 +300,7 @@ class BackendExportHelper
                             $res[$internalName] = '';
                         }
                     }
-                    fputcsv($f, $res, $columnDelimiter);
+                    fputcsv($f, $res, $columnDelimiter, '"', '\\');
                 }
             }
         }

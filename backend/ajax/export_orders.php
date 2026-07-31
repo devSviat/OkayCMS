@@ -92,7 +92,7 @@ if (!empty($toDate)) {
 }
 
 if($page == 1) {
-    fputcsv($f, $columnsNames, $columnDelimiter);
+    fputcsv($f, $columnsNames, $columnDelimiter, '"', '\\');
 }
 
 $mainCurrency =  $currenciesEntity->getMainCurrency();
@@ -105,7 +105,7 @@ if (!empty($orders)) {
         foreach($columnsNames as $n=>$c) {
             $str[] = $o->$n;
         }
-        fputcsv($f, $str, $columnDelimiter);
+        fputcsv($f, $str, $columnDelimiter, '"', '\\');
     }
 }
 

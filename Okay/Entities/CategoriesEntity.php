@@ -347,9 +347,9 @@ class CategoriesEntity extends Entity
         $file = 'files/downloads/market_categories.csv';
         if (file_exists($file)) {
             $f = fopen($file, 'r');
-            fgetcsv($f, 0, '^');
+            fgetcsv($f, 0, '^', '"', '\\');
             while (!feof($f)) {
-                $line = fgetcsv($f, 0, '^');
+                $line = fgetcsv($f, 0, '^', '"', '\\');
                 if (empty($query) || strpos(mb_strtolower($line[0]), $query) !== false) {
                     $marketCats[] = $line[0];
                 }

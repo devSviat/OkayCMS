@@ -20,6 +20,17 @@ RUN install-php-extensions \
         xmlwriter \
         opcache
 
+# Системна локаль для імпорту: образи php:*-fpm мають лише C/POSIX, а
+# ImportAdmin попереджає, коли setlocale не вдається.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends locales \
+ && sed -i 's/^# *\(uk_UA.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
+ && locale-gen uk_UA.UTF-8 \
+ && rm -rf /var/lib/apt/lists/*
+ENV LANG=uk_UA.UTF-8 \
+    LANGUAGE=uk_UA:uk \
+    LC_ALL=uk_UA.UTF-8
+
 # Підганяє www-data під хостового користувача, щоб bind-mounted файли лишались
 # доступними для запису. Названо APP_UID, а не UID, бо UID — readonly-змінна
 # в bash/zsh і ніколи не дійшла б до Compose.
