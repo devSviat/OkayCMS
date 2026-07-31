@@ -732,10 +732,50 @@
         syncPanelAria();
     }());
 
-    /* okay.js's accordion handler only moves the .active / .visible classes, so
-       the state those classes describe is mirrored into ARIA afterwards. When it
-       takes its early "already open" branch it returns false, which stops the
-       event before it reaches this listener - correct, because nothing changed. */
+    /* In tab mode the switch happens here, instantly, and okay.js never sees the
+       click. Its handler slides the outgoing panel up and the incoming one down
+       at the same time (okay.js:762-768), and from 992px both panels are grid
+       items in the SAME cell - grid-row 2, grid-column 1 / -1 - so for those 300
+       milliseconds the two texts are drawn on top of each other. On the white
+       plate that reads as a rendering fault, which is what it looks like.
+
+       Below 992px nothing changes: the accordion stacks its panels in flow, one
+       slides shut while the next slides open with no overlap at all, and that
+       motion is what tells a shopper the row they tapped is the row that opened.
+
+       Capture phase, because okay.js binds its handler to the .fn_accordion
+       element: a capture listener on document runs before the event reaches it,
+       and stopPropagation there means its animation never starts. The rest of
+       this function is exactly what okay.js's handler does to the DOM, minus the
+       animation - same classes, same inline display, so vibe.js's own collapse()
+       and every CSS rule keyed on .active / .visible keep working unchanged. */
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest) return;
+        if (!tabQuery || !tabQuery.matches) return;
+
+        var head = event.target.closest('.vs-tabs__head');
+        if (!head) return;
+
+        var host = head.closest('.vs-tabs');
+        if (!host) return;
+
+        event.stopPropagation();
+        event.preventDefault();
+
+        var parts = accordionParts(host);
+        for (var i = 0; i < parts.length; i++) {
+            var on = parts[i].head === head;
+            parts[i].head.classList.toggle('active', on);
+            parts[i].item.classList.toggle('visible', on);
+            parts[i].panel.style.display = on ? 'block' : 'none';
+        }
+        syncPanelAria();
+    }, true);
+
+    /* Below 992px okay.js still does the switching, so the state its classes
+       describe is mirrored into ARIA afterwards. When it takes its early
+       "already open" branch it returns false, which stops the event before it
+       reaches this listener - correct, because nothing changed. */
     document.addEventListener('click', function (event) {
         if (!event.target.closest) return;
         if (!event.target.closest('.vs-tabs__head, .vs-disclosure-row__head')) return;
