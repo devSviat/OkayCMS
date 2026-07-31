@@ -5,6 +5,23 @@ function okayCsrfToken() {
   return match ? match[1] : "";
 }
 
+/* Кошик, обране й порівняння читаються з $_POST на цьому рушії та з $_GET на
+   стоковому OkayCMS, тож ті самі параметри йдуть і в тілі, і в рядку запиту.
+   CSRF-токен лишається тільки в тілі - в URL він потрапив би в логи й Referer. */
+function okayAjax(options) {
+  var params = {};
+  for (var key in options.data) {
+    if (Object.prototype.hasOwnProperty.call(options.data, key) && key !== "customer_csrf_token") {
+      params[key] = options.data[key];
+    }
+  }
+  var query = $.param(params);
+  if (query) {
+    options.url += (options.url.indexOf("?") === -1 ? "?" : "&") + query;
+  }
+  return $.ajax(options);
+}
+
 /* Початкова к-ть для зміни в картці та кошику */
 okay.amount = 1;
 
@@ -27,7 +44,7 @@ $(document).on("submit", ".fn_variants", function (e) {
     amount = 1;
   }
   /* ajax запит */
-  $.ajax({
+  okayAjax({
     url: okay.router["cart_ajax"],
     type: "post",
     data: {
@@ -209,7 +226,7 @@ $(document).on("click", ".fn_comparison", function (e) {
     action = $(this).hasClass("selected") ? "delete" : "add",
     product = parseInt($(this).data("id"));
   /* ajax запит */
-  $.ajax({
+  okayAjax({
     url: okay.router["comparison_ajax"],
     type: "post",
     data: {
@@ -261,7 +278,7 @@ $(document).on("click", ".fn_wishlist", function (e) {
   var button = $(this),
     action = $(this).hasClass("selected") ? "delete" : "";
   /* ajax запит */
-  $.ajax({
+  okayAjax({
     url: okay.router["wishlist_ajax"],
     type: "post",
     data: {
@@ -1033,7 +1050,7 @@ function ajax_set_result(data) {
 function ajax_change_amount(object, variant_id) {
   let amount = $(object).val();
   /* ajax запит */
-  $.ajax({
+  okayAjax({
     url: okay.router["cart_ajax"],
     type: "post",
     data: {
@@ -1096,7 +1113,7 @@ function amount_change(input, action) {
 function ajax_coupon() {
   let coupon_code = $('input[name="coupon_code"]').val();
   /* ajax запит */
-  $.ajax({
+  okayAjax({
     url: okay.router["cart_ajax"],
     type: "post",
     data: {
@@ -1150,7 +1167,7 @@ function update_delivery_module_data() {
 /* Аяксове видалення товарів з кошика */
 function ajax_remove(variant_id) {
   /* ajax запит */
-  $.ajax({
+  okayAjax({
     url: okay.router["cart_ajax"],
     type: "post",
     data: {
