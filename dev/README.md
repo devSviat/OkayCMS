@@ -6,6 +6,10 @@
 `docker-compose.override.yml` підвантажується автоматично і додає все
 dev-специфічне: bind-mount коду, опубліковані порти, Xdebug, сідовий дамп бази.
 
+Потрібна Docker Compose ≥ 2.24.0 — `docker-compose.override.yml` використовує
+директиву `!reset` (Compose YAML tag), доданою саме в цій версії. На старіших
+Compose падає з помилкою парсингу YAML одразу при старті — не мовчки.
+
 ## Швидкий старт
 
 ```bash
@@ -18,6 +22,13 @@ cp .env-example .env
 sed -i "s/^APP_UID=.*/APP_UID=$(id -u)/" .env
 sed -i "s/^APP_GID=.*/APP_GID=$(id -g)/" .env
 
+# config/config.local.php — гітігнорений, без нього Okay\Core\Config
+# відкочується до config/config.php (db_server = localhost), яка всередині
+# контейнера не веде до MariaDB. Значення в example-файлі вже узгоджені з
+# .env-example вище; якщо міняєте MYSQL_ROOT_PASSWORD/MYSQL_DATABASE в .env —
+# продублюйте зміну і тут.
+cp ../config/config.local-example.php ../config/config.local.php
+
 docker compose up -d
 ./bin/smoke.sh
 ```
@@ -28,9 +39,17 @@ docker compose up -d
 розширення, базу на named volume, мережеву ізоляцію mariadb, живий scheduler,
 логи nginx і обидва поштові шляхи.
 
+Адмінка після цього доступна на `http://<VIRTUAL_HOST>/admin` (значення
+`VIRTUAL_HOST` — з `.env`, за замовчуванням `okaycms.loc`), логін `admin`,
+пароль `1234` — цей самий пароль `db-init` (одноразовий контейнер, що
+запускається на кожному `up`) примусово виставляє акаунту `admin` на
+кожному старті, див. розділ нижче.
+
 Якщо на машині одночасно кілька копій цього проєкту — задайте кожній свій
-`APP_NAME` в `.env` (з нього Compose бере ім'я проєкту і назви мереж:
-`<APP_NAME>_frontend`, `<APP_NAME>_backend`).
+`APP_NAME` в `.env`. З нього Compose бере ім'я проєкту і назви мереж, але сам
+проєкт (а з ним і мережі) завжди лишає в нижньому регістрі: з
+`APP_NAME=OkayCmsDev` вийде не `OkayCmsDev_frontend`, а `okaycmsdev_frontend` /
+`okaycmsdev_backend`.
 
 ## Щоденні команди
 
@@ -107,6 +126,13 @@ docker compose up -d
 4. Увімкнути "Start Listening for PHP Debug Connections" і відкрити сторінку
    сайту в браузері.
 
+Щоб перевірити, який режим Xdebug дійсно діє в цьому запиті, не довіряйте
+`ini_get('xdebug.mode')` — він читає значення з ini-файлів і тому завжди
+покаже дефолтний `develop`, навіть коли `XDEBUG_MODE` з `.env` реально
+перевизначив режим (змінна оточення має пріоритет над ini, але `ini_get()`
+цього не бачить). Використовуйте `xdebug_info()` — вона показує ефективне
+значення.
+
 ## Порти й доступ до бази
 
 `HTTP_PORT` (nginx) і `MAILPIT_PORT` (Mailpit) за замовчуванням прив'язані
@@ -156,6 +182,14 @@ http. Працює лише для розмірів ресайзу, що збі�
 `originals` на локальному сервері нічого не додається, лише в `resized`.
 
 ## Продакшн
+
+**На прод-хості `-f` прапорці обов'язкові. Голий `docker compose up -d`
+(без `-f`) там руйнівний.** `docker-compose.override.yml` затрекано в git і
+Compose підвантажує його автоматично — без явного списку `-f` це перетворює
+прод-стек на dev: змонтує сідовий дамп, опублікує порти, увімкне Xdebug, а
+`db-init` (`config/mysql/db-init.sh:21-23`) безумовно скине пароль акаунта
+`admin` на публічно відомий `1234`. Завжди явно передавайте весь список
+файлів нижче — жодного `docker compose up` без `-f` на прод-хості.
 
 Оверлей `docker-compose.prod.yml` ніколи не підвантажується сам — додається
 явно поверх бази. Портів не публікує, монтує `config/config.local.prod.php`
@@ -245,11 +279,12 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
   оточення видно у `docker inspect`, а пароль застосунку до бази однаково
   лежить відкритим текстом у `config.local.prod.php`, бо звідти OkayCMS його
   й читає.
-- **Редагування теми чи `robots.txt` через адмінку тут не працює** — файли
-  закомічені в git, потрапляють в образ через `COPY .` і належать `root`,
-  а php-fpm у prod виконується під `www-data`. Це свідоме рішення (тема
-  котиться з репозиторію), але поведінка при спробі зберегти різна:
-  `RobotsAdmin` перевіряє `is_writable()` і показує помилку, а
-  `CssConfig::updateCssVariables()` цієї перевірки не робить — запис мовчки
+- **Редагування теми, `robots.txt` чи перекладів адмінки через адмінку тут
+  не працює** — файли (`design/*/css/theme-settings.css`, `robots.txt`,
+  `design/*/lang/local.*.php`) закомічені в git, потрапляють в образ через
+  `COPY .` і належать `root`, а php-fpm у prod виконується під `www-data`.
+  Це свідоме рішення (тема котиться з репозиторію), але поведінка при спробі
+  зберегти різна: `RobotsAdmin` перевіряє `is_writable()` і показує помилку,
+  а `CssConfig::updateCssVariables()` цієї перевірки не робить — запис мовчки
   провалюється, а адмінка все одно каже "збережено". Це вада `CssConfig`,
   не документу; виправляється окремо, в коді застосунку.
