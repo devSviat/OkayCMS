@@ -50,11 +50,11 @@ services:
     pull_policy: ${APP_PULL_POLICY:-build}
     volumes:
       # Конфігурація рантайму — разом із паролем БД застосунку — приходить
-      # ззовні, а не запікається в образ. Шаблон: config/config.local.prod-example.php.
+      # ззовні, а не запікається в образ. Шаблон: config/config.local-example.php.
       # Якщо файлу немає — деплой падає з явною помилкою, а не отримує теку,
       # створену Docker'ом замість нього.
       - type: bind
-        source: ../config/config.local.prod.php
+        source: ../config/config.local.php
         target: /var/www/html/config/config.local.php
         read_only: true
         bind:
@@ -71,7 +71,7 @@ services:
       # Якщо файлу немає — деплой падає з явною помилкою, а не отримує теку,
       # створену Docker'ом замість нього.
       - type: bind
-        source: ../config/config.local.prod.php
+        source: ../config/config.local.php
         target: /var/www/html/config/config.local.php
         read_only: true
         bind:
@@ -124,5 +124,5 @@ services:
     # ${MYSQL_PASSWORD:?err}), тобто з `.env` на хості або з панелі змінних
     # платформи розгортання. Вони видимі у `docker inspect`, а пароль, яким
     # застосунок ходить у базу, однаково лежить відкритим текстом у
-    # config/config.local.prod.php. Реальний захист тут — права доступу на
+    # config/config.local.php. Реальний захист тут — права доступу на
     # хості: обидва файли мають бути chmod 600 і належати користувачеві деплою.

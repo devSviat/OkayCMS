@@ -192,7 +192,7 @@ Compose підвантажує його автоматично — без явн
 файлів нижче — жодного `docker compose up` без `-f` на прод-хості.
 
 Оверлей `docker-compose.prod.yml` ніколи не підвантажується сам — додається
-явно поверх бази. Портів не публікує, монтує `config/config.local.prod.php`
+явно поверх бази. Портів не публікує, монтує `config/config.local.php`
 в `php85`/`scheduler` read-only. Дві форми:
 
 **1. За PaaS/проксі, який сам приєднується до контейнера** (Dokploy, Coolify,
@@ -228,10 +228,12 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
 
 **Перед першим запуском:**
 
-- Скопіювати `config/config.local.prod-example.php` в
-  `config/config.local.prod.php`, прописати `db_password` для окремого
-  непривілейованого MySQL-користувача (dev ходить під root — прод не має),
-  `debug_mode = false`, виставити `chmod 600` і власника — деплой-юзера.
+- Створити `config/config.local.php` із того самого шаблону, що й у dev
+  (`config/config.local-example.php`), але з прод-значеннями: окремий
+  непривілейований MySQL-користувач замість root, його пароль, і
+  `debug_mode = false`. Виставити `chmod 600` і власника — деплой-юзера.
+  Prod-оверлей монтує цей файл ззовні лише для читання; в образ він не
+  потрапляє (кореневий `.dockerignore`, перевіряється `bin/smoke-prod.sh`).
 - Задати `MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD`, `MYSQL_USER`,
   `MYSQL_DATABASE` — у `.env` на standalone-хості або в панелі змінних PaaS.
 - За замовчуванням образ **збирається локально** з поточного коду
@@ -275,9 +277,9 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
   дві репліки одночасно порахують різну сіль і не звірять токен одна одної.
   Горизонтальне масштабування не підтримується.
 - **Паролі бази захищені лише правами доступу на хості** — `chmod 600` на
-  `.env` і `config/config.local.prod.php`, власник — деплой-юзер. Змінні
+  `.env` і `config/config.local.php`, власник — деплой-юзер. Змінні
   оточення видно у `docker inspect`, а пароль застосунку до бази однаково
-  лежить відкритим текстом у `config.local.prod.php`, бо звідти OkayCMS його
+  лежить відкритим текстом у `config.local.php`, бо звідти OkayCMS його
   й читає.
 - **Редагування теми, `robots.txt` чи перекладів адмінки через адмінку тут
   не працює** — файли (`design/*/css/theme-settings.css`, `robots.txt`,

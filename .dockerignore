@@ -11,7 +11,6 @@
 # but a build context reads the filesystem rather than git — without this line
 # the dev database password would be baked into a pushed image.
 config/config.local.php
-config/config.local.prod.php
 
 # Legacy path, kept as a defensive ignore: an earlier revision of
 # docker-compose.prod.yml read the MariaDB root/app passwords from files
