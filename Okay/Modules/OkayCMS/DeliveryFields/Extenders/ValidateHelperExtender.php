@@ -44,6 +44,13 @@ class ValidateHelperExtender implements ExtensionInterface
         }
 
         $deliveryId = $this->request->post('delivery_id');
+
+        // Без способу доставки валідувати нічого. (array)null дало б порожній
+        // масив, а це IN () - синтаксична помилка SQL на кожному оформленні.
+        if (empty($deliveryId)) {
+            return $error;
+        }
+
         $deliveryFields = $this->deliveryFieldsEntity->mappedBy('id')->find([
             'delivery_id' => (array)$deliveryId,
         ]);

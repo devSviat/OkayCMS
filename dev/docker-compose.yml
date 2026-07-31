@@ -82,6 +82,10 @@ services:
     entrypoint: ["/usr/bin/tini", "--"]
     command: ["/usr/local/bin/supercronic", "-no-reap", "-passthrough-logs", "/etc/supercronic/crontab"]
     restart: unless-stopped
+    # Той самий користувач, що й у php-fpm. Від root планувальник створював
+    # денний файл Okay/log/app-<дата>.log під root, після чого вітрина вже не
+    # могла в нього дописати.
+    user: www-data
     environment:
       <<: *php-env
     depends_on:

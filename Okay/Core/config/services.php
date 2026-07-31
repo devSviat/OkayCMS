@@ -6,6 +6,7 @@ namespace Okay\Core;
 
 use Monolog\Handler\ChromePHPHandler;
 use Monolog\Handler\RotatingFileHandler;
+use Okay\Core\Log\SafeRotatingFileHandler;
 use Okay\Core\Console\Application AS ConsoleApplication;
 use Okay\Core\Entity\UrlUniqueValidator;
 use Okay\Core\Modules\LicenseModulesTemplates;
@@ -273,7 +274,7 @@ $services = [
         ],
     ],
     RotatingFileHandler::class => [
-        'class' => RotatingFileHandler::class,
+        'class' => SafeRotatingFileHandler::class,
         'arguments' => [
             new PR('logger.file'),
             new PR('logger.max_files_rotation'),

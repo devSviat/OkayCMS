@@ -2,8 +2,8 @@
 
 namespace Okay\Core\Scheduler;
 
-use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
+use Okay\Core\Log\SafeRotatingFileHandler;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
@@ -26,7 +26,7 @@ class Scheduler
         $this->lockFactory = new LockFactory(new FlockStore());
 
         $logger = new Logger('Scheduler');
-        $logger->pushHandler(new RotatingFileHandler($loggerDir.'/scheduler/scheduler.log', 10));
+        $logger->pushHandler(new SafeRotatingFileHandler($loggerDir.'/scheduler/scheduler.log', 10));
         $this->pushLogger($logger);
     }
 
