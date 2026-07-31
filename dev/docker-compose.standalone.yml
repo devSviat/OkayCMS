@@ -1,5 +1,5 @@
-# For a plain host with no Dokploy (or any other reverse proxy) attaching to
-# the container automatically. Adds the one thing docker-compose.prod.yml
+# For a plain host with no PaaS or reverse proxy (Dokploy, Coolify, a bare
+# Traefik, ...) attaching to the container automatically. Adds the one thing docker-compose.prod.yml
 # deliberately omits — a published nginx port — and nothing else.
 #
 # Invocation (three files, in this order — prod first so this file's `ports:`
@@ -8,9 +8,9 @@
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
 #                  -f docker-compose.standalone.yml up -d
 #
-# Do not add this file on top of a Dokploy deployment: Traefik reaches nginx
+# Do not add this file on top of such a deployment: the proxy reaches nginx
 # over the `frontend` network directly, so a host-published port here does
-# nothing for Dokploy and only widens the container's exposure for no benefit.
+# nothing for it and only widens the container's exposure for no benefit.
 
 services:
   nginx:

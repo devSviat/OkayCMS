@@ -3,12 +3,12 @@
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
 # The single biggest difference from the dev override: this file publishes
-# NO ports on ANY service. Dokploy attaches its own Traefik instance directly
-# to the container it is told to route to, so a host port publication here
-# would be redundant at best and a stray extra attack surface at worst. The
-# one place a production deployment is allowed to publish a port is
-# docker-compose.standalone.yml, and only for hosts that have no Dokploy (or
-# equivalent reverse proxy) in front at all.
+# NO ports on ANY service. A PaaS like Dokploy or Coolify attaches its own
+# proxy (Traefik in both cases) directly to the container it routes to, so a
+# host port publication here would be redundant at best and a stray extra
+# attack surface at worst. The one place a production deployment is allowed
+# to publish a port is docker-compose.standalone.yml, and only for hosts with
+# no such proxy in front at all.
 #
 # Mailpit is dev-only and lives solely in docker-compose.override.yml, which
 # this overlay never touches — it cannot leak in here. Confirmed while writing
@@ -45,7 +45,8 @@ services:
     <<: *prod-limits
     # Two ways to end up with the prod image, matching two different
     # deployment shapes:
-    #   - Dokploy building straight from this git repo: `build` below wins
+    #   - A PaaS (Dokploy, Coolify, ...) building straight from this git repo:
+    #     `build` below wins
     #     (target: prod), and the `image:` line is just the tag it gets built
     #     as.
     #   - A pre-built image from a registry, produced by CI elsewhere: point
@@ -56,7 +57,7 @@ services:
     # The version variable's default is `latest`, deliberately NOT
     # `${OKAY_VERSION:?err}`. A required-with-no-default variable looks like
     # the more careful choice for a production file, but it means the very
-    # first Dokploy redeploy — before anyone has had the chance to open its
+    # first redeploy on a PaaS — before anyone has had the chance to open its
     # environment-variables UI and type OKAY_VERSION in — fails outright with
     # no container to even show the error in. `:-latest` at least boots.
     # The opposite failure mode is just as real, though: a production stack
@@ -64,7 +65,7 @@ services:
     # actually running, and a bad push takes prod down on the next redeploy
     # with no version to roll back to by name. Splitting the difference
     # honestly: this file defaults to `latest` so it is never dead on
-    # arrival, but the Dokploy prod environment MUST set OKAY_VERSION
+    # arrival, but the production environment MUST set OKAY_VERSION
     # explicitly to a real, immutable tag — that requirement belongs in the
     # deployment runbook, not buried only in this comment.
     build: *php-build-prod
@@ -74,8 +75,8 @@ services:
       # The runtime config — including the application's own DB
       # password — comes from outside the image, never baked in. See
       # config/config.local.prod-example.php for the template and the
-      # comments in this file's `mariadb.environment` block for what this
-      # file's own secrets handling does and does not cover.
+      # comments in this file's `mariadb` block for where the database
+      # passwords come from and what actually guards them.
       # Довга форма заради create_host_path: false. Зі скороченою формою
       # Docker, не знайшовши файлу, мовчки створює на його місці ТЕКУ — і
       # застосунок падає незрозуміло, замість того щоб деплой зупинився з
@@ -136,73 +137,47 @@ services:
       - backend_files:/var/www/html/backend/files:ro
       - app_cache:/var/www/html/cache:ro
     # --- Traefik ---
-    # Dokploy generates and injects its own Traefik labels onto whichever
-    # service/container it is pointed at (normally this one), and it also
-    # generates the router/service names itself — those are not ours to
-    # invent. The block below exists only to document the *shape* Dokploy's
-    # labels take, for anyone comparing a running stack against this file;
-    # see devSviat/broken for what Dokploy actually generated there. Do not
-    # uncomment this as-is — `<dokploy-generated-name>` is not a blank for us
-    # to fill in with a name of our choosing.
+    # A PaaS such as Dokploy or Coolify generates and injects its own Traefik
+    # labels onto whichever service/container it is pointed at (normally this
+    # one), and generates the router/service names itself — those are not ours
+    # to invent. The block below documents only the *shape* those labels take,
+    # for anyone comparing a running stack against this file. Do not uncomment
+    # it as-is: `<paas-generated-name>` is not a blank for us to fill in.
+    #
+    # If you drive Traefik yourself (no PaaS), you own these labels and the
+    # external proxy network — add them here deliberately.
     #
     # labels:
     #   traefik.enable: "true"
-    #   traefik.http.routers.<dokploy-generated-name>.rule: Host(`example.com`)
-    #   traefik.http.routers.<dokploy-generated-name>.entrypoints: websecure
-    #   traefik.http.routers.<dokploy-generated-name>.tls.certresolver: letsencrypt
-    #   traefik.http.services.<dokploy-generated-name>.loadbalancer.server.port: "80"
+    #   traefik.http.routers.<paas-generated-name>.rule: Host(`example.com`)
+    #   traefik.http.routers.<paas-generated-name>.entrypoints: websecure
+    #   traefik.http.routers.<paas-generated-name>.tls.certresolver: letsencrypt
+    #   traefik.http.services.<paas-generated-name>.loadbalancer.server.port: "80"
 
   mariadb:
     <<: *prod-limits
-    # No `ports:` override here, or anywhere else in this file — the base
-    # file already leaves mariadb unpublished and on the internal `backend`
-    # network only; there is nothing to change.
+    # Ні `ports:`, ні мережевих правок тут немає — базовий файл уже лишає
+    # mariadb неопублікованою і лише в internal-мережі `backend`.
     #
-    # Docker secrets, `*_FILE` convention: the mariadb image reads
-    # MYSQL_ROOT_PASSWORD_FILE / MYSQL_PASSWORD_FILE (a path) in preference to
-    # MYSQL_ROOT_PASSWORD / MYSQL_PASSWORD (the value itself) if both kinds
-    # are present it refuses to start — so the plain-value keys must not
-    # reach the container at all.
+    # Паролі беруться зі змінних оточення базового файлу
+    # (${MYSQL_ROOT_PASSWORD:?err} / ${MYSQL_PASSWORD:?err}), тобто з `.env` на
+    # хості або з панелі змінних вашої платформи розгортання.
     #
-    # The base file keeps `${MYSQL_ROOT_PASSWORD:?err}` / `${MYSQL_PASSWORD:?err}`
-    # so `docker compose config` still fails loudly if a deploy forgot to set
-    # *something* there — that's a good guard rail to keep. To satisfy it
-    # without leaking a real password, set both to any non-empty placeholder
-    # in the Dokploy environment panel (its actual text is irrelevant and
-    # never used). `!reset null` below then deletes that key again before the
-    # merged config reaches the container, so the placeholder never shows up
-    # in `docker inspect` either — only the *_FILE path does, and a path is
-    # not a secret.
+    # Тут раніше стояли Docker secrets із конвенцією *_FILE. Прибрано свідомо,
+    # і ось чесний облік того, що це змінює.
     #
-    # Plain Compose, not Swarm: `secrets:` with a `file:` source (below) works
-    # fine outside Swarm mode; nothing here requires `docker stack deploy`.
+    # Що secrets давали: пароль БД не з'являвся у виводі `docker inspect`.
+    # Що вони НЕ давали: захисту від того, хто вже має доступ до Docker —
+    # `docker exec ... cat /run/secrets/mysql_password` читається так само
+    # легко; група `docker` фактично дорівнює root на хості.
+    # І головне: пароль, яким у базу ходить сам застосунок, однаково лежить
+    # відкритим текстом у config/config.local.prod.php, бо OkayCMS читає його
+    # звідти, а не з оточення. Механізм закривав одну дірку з двох, коштуючи
+    # при цьому окремих файлів секретів, трюку `!reset null` і вимоги
+    # виставляти фіктивне значення змінної, яке нікуди не йде.
     #
-    # What this actually protects, stated plainly: MariaDB's own root and app
-    # credentials, so they no longer show up in `docker inspect`. It does NOT
-    # protect the application's own database password — OkayCMS reads that
-    # from config/config.local.php, never from the environment, so no
-    # environment-variable or Docker-secrets trick touches it either way. For
-    # that file the guidance is chmod 600, owned by the deploy user, mounted
-    # read-only (see php85/scheduler above), and excluded from the build
-    # context (already done — see the root .dockerignore, verified by
-    # dev/bin/smoke-prod.sh).
-    environment:
-      MYSQL_ROOT_PASSWORD: !reset null
-      MYSQL_PASSWORD: !reset null
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
-      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
-    secrets:
-      - mysql_root_password
-      - mysql_password
-
-secrets:
-  # `file:` sources — the actual secret files live at dev/secrets/*.txt,
-  # gitignored (dev/.gitignore); only the *.example templates are tracked.
-  # Create the real files locally/on the deploy host before `up`:
-  #   cp secrets/mysql_root_password.txt.example secrets/mysql_root_password.txt
-  #   cp secrets/mysql_password.txt.example       secrets/mysql_password.txt
-  #   $EDITOR secrets/*.txt   # then chmod 600 secrets/*.txt
-  mysql_root_password:
-    file: ./secrets/mysql_root_password.txt
-  mysql_password:
-    file: ./secrets/mysql_password.txt
+    # Отже реальна межа захисту тут — права доступу на хості: на `.env` і на
+    # config/config.local.prod.php. Обидва мають бути chmod 600 і належати
+    # користувачеві деплою. Пам'ятайте, що змінні оточення видно в
+    # `docker inspect`, тож не вставляйте цей вивід у тікети й не збирайте
+    # його моніторингом без фільтрації.
