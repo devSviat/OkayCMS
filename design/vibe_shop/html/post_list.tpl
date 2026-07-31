@@ -36,11 +36,21 @@
            section <h2> on the home page, the author page and the product page,
            and directly under the page <h1> on the blog list, where a fixed <h3>
            skipped a level. The caller passes the level it sits at; <h3> stays
-           the default because three of the four callers want it. *}
+           the default because three of the four callers want it.
+           Both levels are spelled out instead of interpolating the tag name: a tag
+           whose name is a Smarty variable is invisible to Okay\Core\TplMod, which
+           drops the rest of the file - and silently, with nothing in the log.
+           blog.tpl is the only caller that asks for h2, so two branches cover it. *}
         {$cardHeading = $cardHeading|default:'h3'}
-        <{$cardHeading} class="vs-post-card__title">
-            <a class="vs-post-card__link" href="{url_generator route='post' url=$post->url}" data-post="{$post->id}">{$post->name|escape}</a>
-        </{$cardHeading}>
+        {if $cardHeading == 'h2'}
+            <h2 class="vs-post-card__title">
+                <a class="vs-post-card__link" href="{url_generator route='post' url=$post->url}" data-post="{$post->id}">{$post->name|escape}</a>
+            </h2>
+        {else}
+            <h3 class="vs-post-card__title">
+                <a class="vs-post-card__link" href="{url_generator route='post' url=$post->url}" data-post="{$post->id}">{$post->name|escape}</a>
+            </h3>
+        {/if}
 
         <div class="vs-post-card__meta">
             <span class="vs-post-card__meta_item">

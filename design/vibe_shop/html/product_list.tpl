@@ -160,9 +160,14 @@
                is reachable. okay.js keeps toggling hidden-xs-up on the fn_ elements in
                the actions row below, untouched.
                vibe.js rewrites the class and the label from these data-* strings when
-               a variant changes, so the copy stays localised. *}
-            <p class="vs-stock{if $product->variant->stock < 1} vs-stock--out{elseif $product->variant->stock <= 5} vs-stock--low{else} vs-stock--in{/if}" data-low-at="5" data-in="{$lang->product_in_stock|escape}" data-low="{$lang->product_low_stock|escape}" data-out="{$lang->out_of_stock|escape}">
-                <span class="vs-stock__label">{if $product->variant->stock < 1}{$lang->out_of_stock}{elseif $product->variant->stock <= 5}{$lang->product_low_stock}{else}{$lang->product_in_stock}{/if}</span>
+               a variant changes, so the copy stays localised.
+               The low-stock test says `le`, not `<=`, on purpose: once any module
+               declares a modification for this file, Okay\Core\TplMod re-parses the
+               whole template, and its regexes read a `<` inside an {elseif} as the
+               start of an HTML tag and truncate the file from that point on. `<` in
+               the opening {if} survives; in an {elseif} it does not. *}
+            <p class="vs-stock{if $product->variant->stock < 1} vs-stock--out{elseif $product->variant->stock le 5} vs-stock--low{else} vs-stock--in{/if}" data-low-at="5" data-in="{$lang->product_in_stock|escape}" data-low="{$lang->product_low_stock|escape}" data-out="{$lang->out_of_stock|escape}">
+                <span class="vs-stock__label">{if $product->variant->stock < 1}{$lang->out_of_stock}{elseif $product->variant->stock le 5}{$lang->product_low_stock}{else}{$lang->product_in_stock}{/if}</span>
             </p>
 
             <form class="fn_variants vs-card__form" action="{url_generator route="cart"}">
