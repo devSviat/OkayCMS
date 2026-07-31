@@ -221,6 +221,32 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
 і так ходить до nginx по мережі `frontend`, а зайва публікація порту тільки
 розширює поверхню атаки без жодної користі.
 
+У standalone-формі `BIND_IP` має дефолт `0.0.0.0`, а не `127.0.0.1` як у dev:
+цей файл існує рівно для хоста, який сам приймає трафік ззовні, і з петльовим
+інтерфейсом сайт був би недоступний саме там, де має працювати.
+
+**Але дефолт спрацьовує лише тоді, коли змінна взагалі не задана.** Файл
+`dev/.env` (той, що ви робите з `.env-example` для розробки) виставляє
+`BIND_IP=127.0.0.1` явно — і якщо він лежить поруч на прод-хості, standalone
+підхопить саме його, а сайт мовчки слухатиме тільки петльовий інтерфейс.
+Тому на прод-хості або не тримайте dev-івський `.env`, або виставте значення
+свідомо:
+
+```bash
+BIND_IP=0.0.0.0 docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+                               -f docker-compose.standalone.yml up -d
+```
+
+Перевірити, що вийшло насправді:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+               -f docker-compose.standalone.yml config | grep -A2 published
+```
+
+Якщо треба вужче — задайте конкретний інтерфейс, наприклад `BIND_IP=10.0.0.5`.
+Firewall на хості лишається вашою відповідальністю.
+
 Перед першим запуском в обох формах:
 
 - Підготувати рантайм-конфіг застосунку: скопіювати
@@ -242,6 +268,43 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
   видаляє його з фінального конфігу через `!reset null`), воно лише
   задовольняє перевірку `${VAR:?err}` в базовому файлі, щоб конфіг не впав
   при рендері, якщо там взагалі нічого не задано.
+- **Ініціалізувати базу даних.** У проді немає ані сервісу `db-init`, ані
+  монтування сід-дампа — і це навмисно: автоматично заливати дамп у продакшн
+  означало б ризик затерти живі дані при кожному `up`. База піднімається
+  порожньою, схему створює оператор один раз. Два шляхи, залежно від ситуації.
+
+  *Новий магазин з нуля* — залити чистий дамп із репозиторію:
+
+  ```bash
+  docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+    exec -T php85 php ok database:deploy
+  ```
+
+  Команда бере `1DB_changes/okay_clean.sql` (шлях перевизначається через
+  `--file_path`). Далі обов'язково задати пароль менеджера — дамп містить
+  дефолтний `admin`, і лишати його в проді не можна:
+
+  ```bash
+  docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+    exec -T mariadb sh -c 'mariadb -uroot -p"$(cat /run/secrets/mysql_root_password)" \
+    "$MYSQL_DATABASE" -e "UPDATE ok_managers SET password = ... WHERE login = \"admin\";"'
+  ```
+
+  Хеш генерується в форматі APR1-MD5 (`Okay\Core\Security\PasswordHasher`);
+  найпростіше — змінити пароль через адмінку одразу після першого входу.
+
+  *Перенесення наявного магазину* — відновити свій бекап замість дампа:
+
+  ```bash
+  docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+    exec -T mariadb sh -c 'mariadb -uroot -p"$(cat /run/secrets/mysql_root_password)" \
+    "$MYSQL_DATABASE"' < backup.sql
+  ```
+
+  Після оновлення коду на вже наповненій базі застосовуються міграції модулів —
+  див. `docs/modules/table_migrate.md`; `database:deploy` для цього не
+  призначений, він заливає саме чисту базу.
+
 - Для реального деплою (не першого пробного піднімання) явно виставити
   `OKAY_VERSION` на конкретний незмінний тег образу. За замовчуванням
   використовується `latest` — свідомо, щоб перший `up` у щойно створеному

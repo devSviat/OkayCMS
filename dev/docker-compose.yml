@@ -25,6 +25,26 @@ x-php-env: &php-env
   TEST_INTERNAL_EMAIL: ${TEST_INTERNAL_EMAIL:-}
   PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-}
 
+# Шляхи, у які OkayCMS пише під час роботи. Спільні для php85 і scheduler —
+# обидва крутять той самий код на тому ж образі, тож і писати можуть в те саме.
+#
+# Один якір, а не два списки, свідомо: раніше scheduler мав лише files та
+# app_log, і завдання, яке згенерувало б експорт CSV чи компільований ассет,
+# писало б у власний шар контейнера — невидимо для php85 і назавжди втрачено
+# при наступному деплої. Копія списку розійшлася б знову; якір цього не дає.
+x-app-volumes: &app-volumes
+  - files:/var/www/html/files
+  - backend_files:/var/www/html/backend/files
+  - app_cache:/var/www/html/cache
+  - app_log:/var/www/html/Okay/log
+
+# Компільовані шаблони Smarty та XML: чистий кеш, який відновлюється сам.
+# У tmpfs, щоб очищався при кожному перестворенні контейнера й не ріс на диску.
+x-app-tmpfs: &app-tmpfs
+  - "/var/www/html/compiled:size=256m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
+  - "/var/www/html/backend/design/compiled:size=64m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
+  - "/var/www/html/Okay/xml/compiled:size=16m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
+
 services:
   php85:
     build: *php-build
@@ -37,27 +57,14 @@ services:
     networks:
       - frontend
       - backend
-    volumes:
-      # Paths OkayCMS writes into its own source tree at runtime, so they must
-      # survive a container recreate/redeploy. In dev, docker-compose.override.yml
-      # bind-mounts the whole repo over /var/www/html and re-declares binds at
-      # these exact same targets — otherwise these named volumes would shadow
-      # the corresponding host directories and hide uploads from the developer.
-      # See the override file for the concrete reasoning.
-      - files:/var/www/html/files
-      - backend_files:/var/www/html/backend/files
-      - app_cache:/var/www/html/cache
-      - app_log:/var/www/html/Okay/log
-    tmpfs:
-      # Smarty compiled output only — regenerated on demand, never needs to
-      # survive a recreate. uid/gid must match the container's www-data
-      # (APP_UID/APP_GID) or PHP cannot write its own compiled templates.
-      - "/var/www/html/compiled:size=256m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
-      - "/var/www/html/backend/design/compiled:size=64m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
-      # OpenSearchController::renderXml() compiles into Okay/xml/compiled at
-      # runtime (see .gitignore: only .keep_folder is tracked there) — same
-      # regenerate-on-demand reasoning as the two tmpfs entries above.
-      - "/var/www/html/Okay/xml/compiled:size=16m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
+    # Шляхи, у які OkayCMS пише під час роботи, тож вони мають пережити
+    # перестворення контейнера й деплой. У dev docker-compose.override.yml
+    # монтує весь репозиторій у /var/www/html і перевизначає bind'и на тих
+    # самих цілях — інакше ці іменовані томи перекрили б відповідні теки
+    # робочого дерева й сховали завантаження від розробника. Докладніше — в
+    # коментарі до php85 у самому override-файлі.
+    volumes: *app-volumes
+    tmpfs: *app-tmpfs
     security_opt:
       - "no-new-privileges:true"
     healthcheck:
@@ -92,9 +99,8 @@ services:
     networks:
       - frontend
       - backend
-    volumes:
-      - files:/var/www/html/files
-      - app_log:/var/www/html/Okay/log
+    volumes: *app-volumes
+    tmpfs: *app-tmpfs
     security_opt:
       - "no-new-privileges:true"
     healthcheck:

@@ -31,11 +31,16 @@ services:
       - "host.docker.internal:host-gateway"
 
   # Same image and source tree as php85, so it needs the same neutralizing —
-  # see php85's volumes above for why.
+  # see php85's volumes above for why. Список мусить збігатися з php85 повністю:
+  # scheduler ділить із ним якір x-app-volumes у базовому файлі, тож будь-яка
+  # ціль, не перевизначена тут, лишиться іменованим томом і перекриє робоче
+  # дерево саме для планувальника.
   scheduler:
     volumes:
       - '..:/var/www/html'
       - '../files:/var/www/html/files'
+      - '../backend/files:/var/www/html/backend/files'
+      - '../cache:/var/www/html/cache'
       - '../Okay/log:/var/www/html/Okay/log'
 
   nginx:

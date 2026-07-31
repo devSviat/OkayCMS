@@ -76,7 +76,16 @@ services:
       # config/config.local.prod-example.php for the template and the
       # comments in this file's `mariadb.environment` block for what this
       # file's own secrets handling does and does not cover.
-      - '../config/config.local.prod.php:/var/www/html/config/config.local.php:ro'
+      # Довга форма заради create_host_path: false. Зі скороченою формою
+      # Docker, не знайшовши файлу, мовчки створює на його місці ТЕКУ — і
+      # застосунок падає незрозуміло, замість того щоб деплой зупинився з
+      # ясною причиною. З цим прапорцем відсутній файл дає помилку одразу.
+      - type: bind
+        source: ../config/config.local.prod.php
+        target: /var/www/html/config/config.local.php
+        read_only: true
+        bind:
+          create_host_path: false
 
   # Same image, same reasoning, as php85 — see the base file's `scheduler`
   # service for why this exists at all (nothing ran `./ok scheduler:run`
@@ -87,7 +96,16 @@ services:
     image: ${OKAY_IMAGE:-okaycms}:${OKAY_VERSION:-latest}
     pull_policy: ${OKAY_PULL_POLICY:-build}
     volumes:
-      - '../config/config.local.prod.php:/var/www/html/config/config.local.php:ro'
+      # Довга форма заради create_host_path: false. Зі скороченою формою
+      # Docker, не знайшовши файлу, мовчки створює на його місці ТЕКУ — і
+      # застосунок падає незрозуміло, замість того щоб деплой зупинився з
+      # ясною причиною. З цим прапорцем відсутній файл дає помилку одразу.
+      - type: bind
+        source: ../config/config.local.prod.php
+        target: /var/www/html/config/config.local.php
+        read_only: true
+        bind:
+          create_host_path: false
 
   nginx:
     <<: *prod-limits
