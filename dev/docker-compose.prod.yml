@@ -1,22 +1,17 @@
-# Production overlay — opt-in only, layered on top of docker-compose.yml:
+# Production-оверлей — вмикається явно, поверх docker-compose.yml:
 #
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
-# The single biggest difference from the dev override: this file publishes
-# NO ports on ANY service. A PaaS like Dokploy or Coolify attaches its own
-# proxy (Traefik in both cases) directly to the container it routes to, so a
-# host port publication here would be redundant at best and a stray extra
-# attack surface at worst. The one place a production deployment is allowed
-# to publish a port is docker-compose.standalone.yml, and only for hosts with
-# no such proxy in front at all.
+# Не публікує жодного порту на жодному сервісі: PaaS (Dokploy, Coolify тощо)
+# підключає власний проксі прямо до контейнера, тож публікація тут була б
+# зайвою поверхнею атаки. Єдине місце, де прод-деплой публікує порт, —
+# docker-compose.standalone.yml, для хостів без такого проксі.
 #
-# Mailpit is dev-only and lives solely in docker-compose.override.yml, which
-# this overlay never touches — it cannot leak in here. Confirmed while writing
-# this file: `docker compose -f docker-compose.yml -f docker-compose.prod.yml
-# config` lists no mailpit service.
+# Mailpit — dev-only і живе лише в docker-compose.override.yml, якого цей
+# оверлей не чіпає, тож сюди він потрапити не може.
 
-# Shared by php85 and scheduler, same reasoning as the base file's
-# x-php-build/x-php-env: one definition so the two images cannot drift apart.
+# Спільне для php85 і scheduler — той самий принцип, що й x-php-build/
+# x-php-env у базовому файлі: одне визначення, щоб образи не розійшлись.
 x-php-build-prod: &php-build-prod
   context: ..
   dockerfile: dev/docker/Dockerfile
@@ -25,8 +20,8 @@ x-php-build-prod: &php-build-prod
     APP_UID: ${APP_UID:-1000}
     APP_GID: ${APP_GID:-1000}
 
-# restart/resources/logging are identical across every service in this file,
-# so they live in one anchor rather than four copy-pasted blocks.
+# restart/resources/logging однакові для кожного сервісу цього файлу, тож
+# лежать в одному якорі, а не в чотирьох копіях.
 x-prod-limits: &prod-limits
   restart: unless-stopped
   deploy:
@@ -43,44 +38,21 @@ x-prod-limits: &prod-limits
 services:
   php85:
     <<: *prod-limits
-    # Two ways to end up with the prod image, matching two different
-    # deployment shapes:
-    #   - A PaaS (Dokploy, Coolify, ...) building straight from this git repo:
-    #     `build` below wins
-    #     (target: prod), and the `image:` line is just the tag it gets built
-    #     as.
-    #   - A pre-built image from a registry, produced by CI elsewhere: point
-    #     OKAY_IMAGE at that registry path, set OKAY_VERSION to a real tag,
-    #     and set OKAY_PULL_POLICY=always so Compose pulls instead of
-    #     building.
+    # Два шляхи отримати прод-образ: PaaS (Dokploy, Coolify, ...) збирає
+    # прямо з репозиторію — працює `build` нижче; готовий образ з реєстру —
+    # задайте OKAY_IMAGE/OKAY_VERSION і OKAY_PULL_POLICY=always.
     #
-    # The version variable's default is `latest`, deliberately NOT
-    # `${OKAY_VERSION:?err}`. A required-with-no-default variable looks like
-    # the more careful choice for a production file, but it means the very
-    # first redeploy on a PaaS — before anyone has had the chance to open its
-    # environment-variables UI and type OKAY_VERSION in — fails outright with
-    # no container to even show the error in. `:-latest` at least boots.
-    # The opposite failure mode is just as real, though: a production stack
-    # that silently tracks `:latest` forever has no record of which commit is
-    # actually running, and a bad push takes prod down on the next redeploy
-    # with no version to roll back to by name. Splitting the difference
-    # honestly: this file defaults to `latest` so it is never dead on
-    # arrival, but the production environment MUST set OKAY_VERSION
-    # explicitly to a real, immutable tag — that requirement belongs in the
-    # deployment runbook, not buried only in this comment.
+    # OKAY_VERSION за замовчуванням `latest`, щоб перший деплой не падав до
+    # налаштування змінних — але production має виставити конкретний
+    # незмінний тег, інакше неможливо відкотитись при невдалому пуші.
     build: *php-build-prod
     image: ${OKAY_IMAGE:-okaycms}:${OKAY_VERSION:-latest}
     pull_policy: ${OKAY_PULL_POLICY:-build}
     volumes:
-      # The runtime config — including the application's own DB
-      # password — comes from outside the image, never baked in. See
-      # config/config.local.prod-example.php for the template and the
-      # comments in this file's `mariadb` block for where the database
-      # passwords come from and what actually guards them.
-      # Довга форма заради create_host_path: false. Зі скороченою формою
-      # Docker, не знайшовши файлу, мовчки створює на його місці ТЕКУ — і
-      # застосунок падає незрозуміло, замість того щоб деплой зупинився з
-      # ясною причиною. З цим прапорцем відсутній файл дає помилку одразу.
+      # Конфігурація рантайму — разом із паролем БД застосунку — приходить
+      # ззовні, а не запікається в образ. Шаблон: config/config.local.prod-example.php.
+      # Якщо файлу немає — деплой падає з явною помилкою, а не отримує теку,
+      # створену Docker'ом замість нього.
       - type: bind
         source: ../config/config.local.prod.php
         target: /var/www/html/config/config.local.php
@@ -88,19 +60,16 @@ services:
         bind:
           create_host_path: false
 
-  # Same image, same reasoning, as php85 — see the base file's `scheduler`
-  # service for why this exists at all (nothing ran `./ok scheduler:run`
-  # before it).
+  # Той самий образ і причина, що й у php85 — див. `scheduler` у базовому
+  # файлі.
   scheduler:
     <<: *prod-limits
     build: *php-build-prod
     image: ${OKAY_IMAGE:-okaycms}:${OKAY_VERSION:-latest}
     pull_policy: ${OKAY_PULL_POLICY:-build}
     volumes:
-      # Довга форма заради create_host_path: false. Зі скороченою формою
-      # Docker, не знайшовши файлу, мовчки створює на його місці ТЕКУ — і
-      # застосунок падає незрозуміло, замість того щоб деплой зупинився з
-      # ясною причиною. З цим прапорцем відсутній файл дає помилку одразу.
+      # Якщо файлу немає — деплой падає з явною помилкою, а не отримує теку,
+      # створену Docker'ом замість нього.
       - type: bind
         source: ../config/config.local.prod.php
         target: /var/www/html/config/config.local.php
@@ -110,13 +79,10 @@ services:
 
   nginx:
     <<: *prod-limits
-    # Without this, nginx inherits the base file's plain `image:
-    # nginx:1.29-alpine` and /var/www/html stays empty — every request 404s,
-    # because the base file's application bind mount lives only in
-    # docker-compose.override.yml (dev-only). nginx-prod
-    # (dev/docker/Dockerfile) COPYs the same tree the `prod` target just built
-    # and composer-installed, so static assets can never drift out of sync
-    # with the PHP image — both come from the identical build context/args.
+    # Без цього nginx успадковує базовий `image: nginx:1.29-alpine` із
+    # порожнім /var/www/html — bind-mount із кодом є лише в dev-оверлеї.
+    # Stage nginx-prod копіює те саме дерево, яке зібрав stage `prod`, тож
+    # статика не може розійтись із PHP-образом.
     build:
       context: ..
       dockerfile: dev/docker/Dockerfile
@@ -127,25 +93,20 @@ services:
     image: ${OKAY_NGINX_IMAGE:-okaycms-nginx}:${OKAY_VERSION:-latest}
     pull_policy: ${OKAY_PULL_POLICY:-build}
     volumes:
-      # The image only carries what was committed at build time. Everything
-      # OkayCMS writes at runtime — product/upload images (files,
-      # backend_files) and compiled CSS/JS (app_cache; see
-      # Okay/Core/config/parameters.php's compile_css_dir/compile_js_dir) —
-      # must be mounted here too, read-only, or it 404s even after the fix
-      # above. Same named volumes php85/scheduler already write into.
+      # Образ містить лише те, що було на момент білду. Усе, що OkayCMS пише
+      # під час роботи (files, backend_files, app_cache; див.
+      # Okay/Core/config/parameters.php compile_css_dir/compile_js_dir) має
+      # бути змонтоване й сюди, read-only — інакше 404 навіть після build
+      # вище. Ті самі іменовані томи, у які пишуть php85/scheduler.
       - files:/var/www/html/files:ro
       - backend_files:/var/www/html/backend/files:ro
       - app_cache:/var/www/html/cache:ro
     # --- Traefik ---
-    # A PaaS such as Dokploy or Coolify generates and injects its own Traefik
-    # labels onto whichever service/container it is pointed at (normally this
-    # one), and generates the router/service names itself — those are not ours
-    # to invent. The block below documents only the *shape* those labels take,
-    # for anyone comparing a running stack against this file. Do not uncomment
-    # it as-is: `<paas-generated-name>` is not a blank for us to fill in.
-    #
-    # If you drive Traefik yourself (no PaaS), you own these labels and the
-    # external proxy network — add them here deliberately.
+    # PaaS (Dokploy, Coolify, ...) генерує й підставляє власні мітки Traefik
+    # сюди сам — нижче лише приклад їхньої форми для звірки з робочим стеком,
+    # не заготовка для розкоментування (`<paas-generated-name>` — не ваше
+    # значення). Якщо Traefik керуєте самі, без PaaS — додайте ці мітки й
+    # мережу проксі свідомо.
     #
     # labels:
     #   traefik.enable: "true"
@@ -159,25 +120,9 @@ services:
     # Ні `ports:`, ні мережевих правок тут немає — базовий файл уже лишає
     # mariadb неопублікованою і лише в internal-мережі `backend`.
     #
-    # Паролі беруться зі змінних оточення базового файлу
-    # (${MYSQL_ROOT_PASSWORD:?err} / ${MYSQL_PASSWORD:?err}), тобто з `.env` на
-    # хості або з панелі змінних вашої платформи розгортання.
-    #
-    # Тут раніше стояли Docker secrets із конвенцією *_FILE. Прибрано свідомо,
-    # і ось чесний облік того, що це змінює.
-    #
-    # Що secrets давали: пароль БД не з'являвся у виводі `docker inspect`.
-    # Що вони НЕ давали: захисту від того, хто вже має доступ до Docker —
-    # `docker exec ... cat /run/secrets/mysql_password` читається так само
-    # легко; група `docker` фактично дорівнює root на хості.
-    # І головне: пароль, яким у базу ходить сам застосунок, однаково лежить
-    # відкритим текстом у config/config.local.prod.php, бо OkayCMS читає його
-    # звідти, а не з оточення. Механізм закривав одну дірку з двох, коштуючи
-    # при цьому окремих файлів секретів, трюку `!reset null` і вимоги
-    # виставляти фіктивне значення змінної, яке нікуди не йде.
-    #
-    # Отже реальна межа захисту тут — права доступу на хості: на `.env` і на
-    # config/config.local.prod.php. Обидва мають бути chmod 600 і належати
-    # користувачеві деплою. Пам'ятайте, що змінні оточення видно в
-    # `docker inspect`, тож не вставляйте цей вивід у тікети й не збирайте
-    # його моніторингом без фільтрації.
+    # Паролі — зі змінних оточення базового файлу (${MYSQL_ROOT_PASSWORD:?err} /
+    # ${MYSQL_PASSWORD:?err}), тобто з `.env` на хості або з панелі змінних
+    # платформи розгортання. Вони видимі у `docker inspect`, а пароль, яким
+    # застосунок ходить у базу, однаково лежить відкритим текстом у
+    # config/config.local.prod.php. Реальний захист тут — права доступу на
+    # хості: обидва файли мають бути chmod 600 і належати користувачеві деплою.

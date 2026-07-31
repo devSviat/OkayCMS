@@ -1,28 +1,24 @@
-# Development overrides. Compose loads this automatically, so plain
-# `docker compose up -d` still gives a dev environment.
+# Dev-оверрайди. Compose підключає цей файл автоматично, тож звичайний
+# `docker compose up -d` і так дає dev-оточення.
 #
-# For personal tweaks create docker-compose.local.yml (gitignored) and attach it
-# explicitly:  docker compose -f docker-compose.yml -f docker-compose.override.yml \
-#                             -f docker-compose.local.yml up -d
+# Для особистих правок створіть docker-compose.local.yml (у .gitignore) і
+# підключіть його явно: docker compose -f docker-compose.yml \
+#   -f docker-compose.override.yml -f docker-compose.local.yml up -d
 
 services:
   php85:
     environment:
-      # Xdebug 3 reads this and it wins over the ini file, so debugging is
-      # switched on and off without rebuilding the image.
+      # Xdebug 3 читає цю змінну, і вона має пріоритет над ini-файлом — режим
+      # можна перемикати без перезбирання образу.
       XDEBUG_MODE: ${XDEBUG_MODE:-off}
       PHP_IDE_CONFIG: serverName=${VIRTUAL_HOST:?err}
     volumes:
       - '..:/var/www/html'
-      # The base file gives php85 named volumes at these same targets so a
-      # prod deploy persists them. A named volume mounted under a bind mount
-      # shadows whatever the bind put there — Docker mounts the more specific
-      # path last — so without this, the base's `files:` volume would hide
-      # the host's files/ directory behind an empty volume and every upload
-      # would become invisible in the working tree. Re-declaring a bind at the
-      # exact same target replaces the base's volume entry for this service
-      # (Compose merges volumes by target), so in dev these are ordinary bind
-      # mounts of the repo's own subdirectories, same as the rest of the tree.
+      # Базовий файл дає php85 іменовані томи на ці самі цілі (щоб прод їх
+      # зберігав між деплоями). Іменований том, змонтований поверх
+      # bind-mount, перекриває вміст bind'у — без цього перевизначення файли
+      # робочого дерева були б невидимі всередині контейнера. Bind на тій же
+      # цілі замінює том базового файлу (Compose мерджить volumes за ціллю).
       - '../files:/var/www/html/files'
       - '../backend/files:/var/www/html/backend/files'
       - '../cache:/var/www/html/cache'
@@ -30,11 +26,11 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  # Same image and source tree as php85, so it needs the same neutralizing —
-  # see php85's volumes above for why. Список мусить збігатися з php85 повністю:
-  # scheduler ділить із ним якір x-app-volumes у базовому файлі, тож будь-яка
-  # ціль, не перевизначена тут, лишиться іменованим томом і перекриє робоче
-  # дерево саме для планувальника.
+  # Той самий образ і код, що й у php85 — потребує того самого перевизначення
+  # (див. коментар вище). Список має повністю збігатися з php85: обидва
+  # діляться якорем x-app-volumes у базовому файлі, тож будь-яка
+  # неперевизначена тут ціль лишиться іменованим томом і перекриє робоче
+  # дерево планувальника.
   scheduler:
     volumes:
       - '..:/var/www/html'
@@ -51,22 +47,18 @@ services:
       - '..:/var/www/html'
 
   mariadb:
-    # The base file puts mariadb on `backend` only (internal: true — no route
-    # off the host), which is correct for prod but means the published port
-    # below would be a silent no-op: Docker never creates a NAT rule for a
-    # container on an internal-only network, so nothing reaches it even
-    # though `docker compose config` still shows the port mapping. Dev needs
-    # a developer to be able to point DBeaver/PHPStorm/etc. at this database,
-    # so here — dev only — mariadb also joins `frontend`, which has a real
-    # route to the host. The base file and docker-compose.prod.yml are
-    # untouched: prod still gets mariadb on `backend` only, unpublished.
+    # Базовий файл лишає mariadb лише в `backend` (internal: true) —
+    # правильно для прода, але тоді опублікований нижче порт нічого не дає:
+    # Docker не створює NAT-правило для контейнера без маршруту назовні. У dev
+    # потрібен доступ із DBeaver/PHPStorm тощо, тож тут mariadb додатково
+    # приєднана до `frontend`. Прод (docker-compose.prod.yml) це не зачіпає.
     networks:
       - backend
       - frontend
     ports:
       - '${BIND_IP:-127.0.0.1}:${MYSQL_PORT:?err}:3306'
     volumes:
-      # Read-only: this is the seed dump and must never be written back to.
+      # Лише читання: це сідовий дамп, і в нього не можна писати.
       - '../1DB_changes/okay_clean.sql:/docker-entrypoint-initdb.d/init.sql:ro'
 
   db-init:
@@ -79,11 +71,9 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?err}
       MYSQL_DATABASE: ${MYSQL_DATABASE:?err}
       DB_INIT_SMTP: ${DB_INIT_SMTP:-1}
-    # Only needs to reach mariadb. The base file no longer defines a `default`
-    # network for this service to fall back on (it replaced `default` with
-    # `frontend`/`backend`), and a service without an explicit `networks:` key
-    # gets Compose's own auto-created `default` network instead — which would
-    # leave this isolated from mariadb. Must be explicit here.
+    # Потрібен лише доступ до mariadb. Базовий файл замінив мережу `default`
+    # на `frontend`/`backend`, тож сервіс без явного `networks:` опиниться в
+    # автостворюваній `default` — ізольовано від mariadb. Тому вказано явно.
     networks:
       - backend
     volumes:
@@ -95,14 +85,13 @@ services:
     restart: unless-stopped
     environment:
       TZ: ${TZ:-Europe/Kyiv}
-      # Okay/Core/Notify.php:92 sets SMTPAuth = true unconditionally, so Mailpit
-      # has to accept an AUTH command it would otherwise refuse on a plain
-      # connection. Both flags are dev-only and this service is dev-only.
+      # Okay/Core/Notify.php:92 завжди вмикає SMTPAuth, тож Mailpit має
+      # приймати AUTH-команду навіть на незахищеному з'єднанні. Обидва
+      # прапори dev-only, як і сам сервіс.
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
-    # Same reasoning as db-init above: needs an explicit network now that
-    # `default` no longer exists. frontend is enough — php85 (which sends
-    # mail here) is on both frontend and backend.
+    # Та сама причина, що й у db-init: мережі `default` більше немає, тож
+    # потрібна явна мережа. frontend достатньо — php85 (звідки йде пошта) є і там.
     networks:
       - frontend
     ports:

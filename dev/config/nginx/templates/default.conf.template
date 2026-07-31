@@ -1,13 +1,12 @@
-# Рекомендована конфігурація Nginx для OkayCMS 3. Це не остаточне налаштування
-# сервера — за тоншим налаштуванням зверніться до свого системного адміністратора.
+# Рекомендована конфігурація Nginx для OkayCMS. Це не готове фінальне
+# налаштування сервера — за тоншим тюнінгом зверніться до системного
+# адміністратора.
 #
-# Файл названо саме default.conf.template навмисно. Entrypoint образу nginx
-# розгортає /etc/nginx/templates/*.template у /etc/nginx/conf.d/, тож ця назва
-# ЗАМІЩУЄ штатний default.conf, який приходить із образом. Інакше той файл
-# лишається поруч із нашим, а його `server_name localhost` є точним збігом для
-# http://localhost/ — і виграє в нашого віртуального хоста незалежно від порядку
-# підключення. Саме через це замість магазину показувалась заглушка
-# "Welcome to nginx!".
+# Назва файлу — default.conf.template — навмисна: entrypoint образу nginx
+# розгортає /etc/nginx/templates/*.template у /etc/nginx/conf.d/ під тим самим
+# іменем, тож цей файл заміщує штатний default.conf образу. Без цього штатний
+# default.conf лишався б поруч, а його `server_name localhost` є точним збігом
+# для http://localhost/ і виграв би в нашого віртуального хоста.
 #
 # default_server додано, щоб сайт відповідав на будь-який Host — localhost,
 # 127.0.0.1, IP машини — а не лише на ${VIRTUAL_HOST}.
@@ -21,19 +20,16 @@ server {
     set $root_path /var/www/html;
     root $root_path;
 
-    # Location у редіректах — відносний. Інакше nginx будує абсолютний URL із
-    # $host і власного порту 80, і опублікований порт губиться: /admin на
-    # http://localhost:8080/ віддавав 302 на http://localhost/backend/, тобто
-    # в нікуди. Проявляється щоразу, коли HTTP_PORT не 80 — а це документована
-    # змінна, і standalone-профіль прода нею користується.
+    # Без цього nginx будує Location у редіректах як абсолютний URL із $host і
+    # власним портом 80, і опублікований HTTP_PORT губиться — редірект іде в
+    # нікуди щоразу, коли порт не 80.
     absolute_redirect off;
     
     charset off;
     index index.php index.html;
     disable_symlinks if_not_owner from=$root_path;
     
-    # Container-native logging: `docker compose logs nginx` instead of files
-    # inside the working tree.
+    # Логи йдуть у `docker compose logs nginx`, а не у файли робочого дерева.
     access_log /dev/stdout;
     error_log  /dev/stderr;
         
@@ -121,10 +117,9 @@ server {
             return 404;
         }
 
-        # Same web root as the whole repository (nginx-prod stage copies the
-        # tree as-is) — these are not application paths and must not be
-        # servable: the 21 MB seed dump (with real-looking manager rows),
-        # dependency metadata and the test suite.
+        # Корінь сайту — весь репозиторій (nginx-prod копіює дерево як є),
+        # тож ці шляхи потрібно явно закривати: сідовий дамп, метадані
+        # залежностей і тести — не публічні застосункові шляхи.
         location ~* 1DB_changes/ {
             return 404;
         }

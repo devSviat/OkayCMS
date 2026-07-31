@@ -1,26 +1,22 @@
-# For a plain host with no PaaS or reverse proxy (Dokploy, Coolify, a bare
-# Traefik, ...) attaching to the container automatically. Adds the one thing docker-compose.prod.yml
-# deliberately omits — a published nginx port — and nothing else.
+# Для звичайного хоста без PaaS чи проксі (Dokploy, Coolify, окремий Traefik),
+# який сам приймає трафік ззовні. Додає єдине, що docker-compose.prod.yml
+# навмисно не робить, — опублікований порт nginx, і більше нічого.
 #
-# Invocation (three files, in this order — prod first so this file's `ports:`
-# lands on top of the same nginx service prod configures):
+# Виклик (три файли саме в такому порядку — prod перед цим файлом, щоб
+# `ports:` звідси ліг поверх того самого сервісу nginx):
 #
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
 #                  -f docker-compose.standalone.yml up -d
 #
-# Do not add this file on top of such a deployment: the proxy reaches nginx
-# over the `frontend` network directly, so a host-published port here does
-# nothing for it and only widens the container's exposure for no benefit.
+# Не підключайте цей файл, якщо проксі вже стоїть перед хостом: він і так
+# ходить до nginx мережею `frontend`, а опублікований порт лише розширює
+# поверхню контейнера без користі.
 
 services:
   nginx:
     ports:
-      # Дефолт тут 0.0.0.0, а не 127.0.0.1 як у dev-оверлеї, і це навмисно:
-      # цей файл існує рівно для хоста, який сам приймає трафік ззовні. З
-      # прив'язкою до петльового інтерфейсу він не робив би нічого корисного —
-      # сайт був би недоступний саме там, де мав би працювати.
-      #
-      # Якщо треба вужче — задайте BIND_IP явно, наприклад BIND_IP=10.0.0.5
-      # для конкретного інтерфейсу. Публікація на 0.0.0.0 означає, що сайт
-      # доступний на всіх інтерфейсах машини; спереду очікується firewall.
+      # Дефолт тут 0.0.0.0, а не 127.0.0.1 як у dev-оверлеї, навмисно: цей файл
+      # саме для хоста, який приймає трафік ззовні. 0.0.0.0 означає, що сайт
+      # доступний на всіх інтерфейсах машини — попереду очікується firewall.
+      # Для конкретного інтерфейсу задайте BIND_IP явно, напр. BIND_IP=10.0.0.5.
       - '${BIND_IP:-0.0.0.0}:${HTTP_PORT:?err}:80'

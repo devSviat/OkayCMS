@@ -1,15 +1,14 @@
-# Base configuration, shared by dev and prod.
+# Базова конфігурація, спільна для dev і prod.
 #
-#   dev   docker compose up -d                       (override.yml auto-loads)
+#   dev   docker compose up -d                       (override.yml підключається сам)
 #   prod  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
-# Everything dev-specific — source bind mounts, published ports, Xdebug, the seed
-# dump — lives in docker-compose.override.yml, so it cannot reach production.
+# Усе dev-специфічне — bind-mount'и вихідного коду, опубліковані порти, Xdebug,
+# сідовий дамп — лежить у docker-compose.override.yml і в прод не потрапляє.
 
 name: ${APP_NAME:?err}
 
-# Shared between php85 and the scheduler so the two cannot drift apart — same
-# image, same build args.
+# Спільне для php85 і scheduler, щоб образи не розійшлись між собою.
 x-php-build: &php-build
   context: ..
   dockerfile: dev/docker/Dockerfile
@@ -18,20 +17,17 @@ x-php-build: &php-build
     APP_UID: ${APP_UID:-1000}
     APP_GID: ${APP_GID:-1000}
 
-# Same idea for environment: php85 and the scheduler both run OkayCMS code
-# and must see identical TZ/mail-redirect/domain settings.
+# Те саме для оточення: php85 і scheduler виконують той самий код OkayCMS і
+# мають бачити однакові TZ/mail-redirect/domain.
 x-php-env: &php-env
   TZ: ${TZ:-Europe/Kyiv}
   TEST_INTERNAL_EMAIL: ${TEST_INTERNAL_EMAIL:-}
   PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-}
 
 # Шляхи, у які OkayCMS пише під час роботи. Спільні для php85 і scheduler —
-# обидва крутять той самий код на тому ж образі, тож і писати можуть в те саме.
-#
-# Один якір, а не два списки, свідомо: раніше scheduler мав лише files та
-# app_log, і завдання, яке згенерувало б експорт CSV чи компільований ассет,
-# писало б у власний шар контейнера — невидимо для php85 і назавжди втрачено
-# при наступному деплої. Копія списку розійшлася б знову; якір цього не дає.
+# обидва крутять той самий код на тому ж образі. Один якір, а не два списки:
+# інакше ціль, не перевизначена для scheduler, лишалась би невидимою для
+# php85 і губилась би при наступному деплої.
 x-app-volumes: &app-volumes
   - files:/var/www/html/files
   - backend_files:/var/www/html/backend/files
@@ -39,7 +35,7 @@ x-app-volumes: &app-volumes
   - app_log:/var/www/html/Okay/log
 
 # Компільовані шаблони Smarty та XML: чистий кеш, який відновлюється сам.
-# У tmpfs, щоб очищався при кожному перестворенні контейнера й не ріс на диску.
+# У tmpfs, щоб очищався при перестворенні контейнера й не ріс на диску.
 x-app-tmpfs: &app-tmpfs
   - "/var/www/html/compiled:size=256m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
   - "/var/www/html/backend/design/compiled:size=64m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
@@ -57,37 +53,32 @@ services:
     networks:
       - frontend
       - backend
-    # Шляхи, у які OkayCMS пише під час роботи, тож вони мають пережити
-    # перестворення контейнера й деплой. У dev docker-compose.override.yml
-    # монтує весь репозиторій у /var/www/html і перевизначає bind'и на тих
-    # самих цілях — інакше ці іменовані томи перекрили б відповідні теки
-    # робочого дерева й сховали завантаження від розробника. Докладніше — в
-    # коментарі до php85 у самому override-файлі.
+    # Мають пережити перестворення контейнера й деплой. У dev
+    # docker-compose.override.yml перевизначає ці цілі bind-mount'ами того ж
+    # репозиторію — інакше іменовані томи перекрили б робоче дерево
+    # розробника (докладніше — коментар до php85 в override-файлі).
     volumes: *app-volumes
     tmpfs: *app-tmpfs
     security_opt:
       - "no-new-privileges:true"
     healthcheck:
-      # Opens the FastCGI port itself rather than just proving the CLI binary
-      # runs — `php -r 'exit(0);'` passed even when php-fpm wasn't listening,
-      # which is exactly the state nginx's depends_on is supposed to guard
-      # against. The doubled $$ is required: Compose interpolates this string,
-      # so a single $f would be swallowed before it ever reaches php.
+      # Перевіряє, що php-fpm справді слухає порт, а не лише що живий
+      # CLI-бінарник. Подвоєний $$ обов'язковий: Compose підставляє власні
+      # змінні в цей рядок, і одинарний $f зник би, не дійшовши до php.
       test: ["CMD-SHELL", "php -r '$$f=@fsockopen(\"127.0.0.1\", 9000); exit($$f ? 0 : 1);'"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
 
-  # Runs `./ok scheduler:run` on a schedule so registered tasks (see
-  # docs/scheduler.md) actually fire — nothing did before this service existed.
+  # Запускає `./ok scheduler:run` за розкладом, щоб зареєстровані завдання
+  # (docs/scheduler.md) справді виконувались.
   scheduler:
     build: *php-build
-    # tini is PID 1 so signals/zombies are handled correctly; supercronic is
-    # the cron daemon. -no-reap: tini already reaps, supercronic doesn't need
-    # to as well. -passthrough-logs: job output goes straight to our stdout/
-    # stderr instead of being wrapped in supercronic's own log lines, so
-    # `docker compose logs scheduler` reads like every other service's logs.
+    # tini — PID 1, обробляє сигнали й зомбі-процеси; supercronic — cron-демон.
+    # -no-reap: tini вже виконує reap. -passthrough-logs: вивід завдань іде
+    # напряму в stdout/stderr, тож `docker compose logs scheduler` виглядає
+    # так само, як у решти сервісів.
     entrypoint: ["/usr/bin/tini", "--"]
     command: ["/usr/local/bin/supercronic", "-no-reap", "-passthrough-logs", "/etc/supercronic/crontab"]
     restart: unless-stopped
@@ -104,11 +95,10 @@ services:
     security_opt:
       - "no-new-privileges:true"
     healthcheck:
-      # This service never listens on 9000, so the image's default php-fpm
-      # healthcheck cannot apply and must be overridden. pgrep only proves the
-      # supercronic process is alive under tini — it is NOT evidence that any
-      # scheduled job has actually run or succeeded; check
-      # `docker compose logs scheduler` (or Okay/log/scheduler/) for that.
+      # Сервіс не слухає порт 9000, тож типовий healthcheck php-fpm тут не
+      # підходить. pgrep підтверджує лише, що процес supercronic живий — не
+      # що якесь завдання виконалось успішно; для цього дивіться
+      # `docker compose logs scheduler` (або Okay/log/scheduler/).
       test: ["CMD-SHELL", "pgrep -f supercronic >/dev/null || exit 1"]
       interval: 30s
       timeout: 5s
@@ -123,8 +113,8 @@ services:
         condition: service_started
     environment:
       TZ: ${TZ:-Europe/Kyiv}
-      # Service DNS, not ${APP_NAME}-php85: the vhost no longer depends on the
-      # project name, so `docker compose -p other-name up` works.
+      # DNS-ім'я сервісу, а не ${APP_NAME}-php85: vhost не залежить від назви
+      # проєкту, тож `docker compose -p other-name up` теж працює.
       FASTCGI: php85
       VIRTUAL_HOST: ${VIRTUAL_HOST:?err}
     networks:
@@ -149,7 +139,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?err}
       MYSQL_DATABASE: ${MYSQL_DATABASE:?err}
     networks:
-      # backend only: mariadb has no route off the host at all.
+      # Лише backend: mariadb взагалі не має маршруту назовні з хоста.
       - backend
     volumes:
       - 'db_data:/var/lib/mysql'
@@ -170,22 +160,15 @@ volumes:
   app_log:
 
 networks:
-  # bridge (the default type): has a route off the host, so nginx can be
-  # reached and php85/scheduler can make outbound calls (e.g. the
-  # NovaposhtaCost module's scheduled API lookups).
+  # bridge (тип за замовчуванням): має маршрут з хоста назовні, тож nginx
+  # доступний, а php85/scheduler можуть звертатись назовні (наприклад,
+  # заплановані запити модуля NovaposhtaCost до зовнішнього API).
   #
-  # Імена мереж НЕ задаються явно. Compose сам додає префікс проєкту, тож
-  # виходить <project>_frontend / <project>_backend.
-  #
-  # Раніше тут стояло `name: ${NETWORK_NAME}-frontend`. Фіксоване глобальне
-  # ім'я ламає ізоляцію так само, як це робив container_name: два стеки цього
-  # ж проєкту з різними -p опинялись в ОДНІЙ мережі. Наслідок спостерігався
-  # наживо — prod-стек резолвив `mariadb` у контейнер бази з dev-оточення і
-  # ходив у чужу базу. На спільному хості це означало б, що продакшн пише в
-  # базу розробки.
+  # Мережі навмисно без явного `name:`. Compose сам додає префікс проєкту
+  # (<project>_frontend / <project>_backend) — з фіксованим іменем два стеки
+  # цього проєкту з різними `-p` опинились би в одній мережі й бачили чужі
+  # контейнери (наприклад, prod резолвив би `mariadb` у базу dev).
   frontend:
-  # internal: true means no default route out of this network at all — a
-  # container with only this network cannot reach anything off the host,
-  # which is exactly what mariadb needs.
+  # internal: true — без маршруту назовні з хоста; саме це й потрібно mariadb.
   backend:
     internal: true

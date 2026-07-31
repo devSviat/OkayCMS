@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# Smoke checks for the OkayCMS *production* image and the composed prod config.
-# Unlike smoke.sh, this never talks to a running stack — it builds a throwaway
-# `prod`-stage image from scratch and interrogates that directly, plus checks
-# the merged `docker compose ... config` output for the one thing an image
-# alone can never prove: whether the composed stack publishes any ports.
+# Smoke-перевірки *production*-образу OkayCMS і зібраного prod-конфігу.
+# На відміну від smoke.sh, тут немає запущеного стеку — скрипт збирає
+# одноразовий образ stage `prod` і перевіряє його напряму, а також звіряє
+# вивід `docker compose ... config` на єдине, що образ сам довести не може:
+# чи публікує зібраний стек якісь порти.
 #
-# Run any time, no `docker compose up -d` required:  dev/bin/smoke-prod.sh
+# Запуск у будь-який момент, без `docker compose up -d`: dev/bin/smoke-prod.sh
 set -uo pipefail
-cd "$(dirname "$0")/.."   # now in dev/
+cd "$(dirname "$0")/.."   # тепер у dev/
 
 # shellcheck disable=SC1091
-# Only used here for MYSQL_*/APP_NAME/NETWORK_NAME/VIRTUAL_HOST so `docker
-# compose ... config` below can interpolate the base file's required (":?err")
-# variables. None of the values themselves matter to these checks.
+# Потрібно лише для MYSQL_*/APP_NAME/NETWORK_NAME/VIRTUAL_HOST, щоб `docker
+# compose ... config` нижче міг підставити обов'язкові (":?err") змінні
+# базового файлу. Самі значення для цих перевірок не важливі.
 set -a; . ./.env; set +a
 
 fails=0
@@ -29,15 +29,15 @@ if ! docker build -f docker/Dockerfile --target prod -t "$image_tag" \
 fi
 echo
 
-# run_in_image <shell-command>: run a throwaway, already-removed-on-exit
-# container from the image just built and capture its output. --entrypoint sh
-# bypasses the image's real php-fpm entrypoint so we can run one-liners.
+# run_in_image <shell-command>: запускає одноразовий контейнер щойно
+# зібраного образу (сам видаляється на виході) і забирає вивід. --entrypoint sh
+# обходить реальний php-fpm entrypoint образу, щоб виконати один рядок.
 run_in_image() {
     docker run --rm --entrypoint sh "$image_tag" -c "$1" 2>&1
 }
 
-# dump_actual_output <out>: show what a failed check actually produced instead
-# of just restating what we hoped for.
+# dump_actual_output <out>: показує, що насправді видала команда, а не лише
+# те, чого ми очікували.
 dump_actual_output() {
     local out=$1 len
     len=${#out}
@@ -81,10 +81,10 @@ expect_missing() {
 }
 
 echo "Filesystem: dev-only and secret-bearing files must not ship"
-# This is the check that matters most. config/config.local.php is gitignored,
-# but a Docker build reads the filesystem, not git — without the matching line
-# in the root .dockerignore, the developer's live database password would be
-# baked into every image ever pushed from this checkout.
+# Найважливіша перевірка тут. config/config.local.php у .gitignore, але
+# Docker-білд читає файлову систему, а не git — без відповідного рядка в
+# кореневому .dockerignore реальний пароль бази розробника потрапив би в
+# кожен зібраний з цього checkout образ.
 expect_contains "config/config.local.php did not make it into the image" \
     "absent" \
     run_in_image 'test -f /var/www/html/config/config.local.php && echo present || echo absent'
@@ -115,17 +115,17 @@ expect_contains "vendor/autoload.php is present (composer install ran)" \
 
 echo
 echo "Composed prod config"
-# The single most important property of docker-compose.prod.yml: Dokploy
-# attaches Traefik straight to the container, so the composed stack must
-# publish nothing. A config check is not a running-stack check, but it is the
-# only thing that can be asserted without a real Dokploy/Traefik instance in
-# front, and it does catch a stray `ports:` creeping back into either file.
+# Найважливіша властивість docker-compose.prod.yml: Dokploy підключає Traefik
+# прямо до контейнера, тож зібраний стек не повинен публікувати нічого.
+# Перевірка конфігу — не те саме, що перевірка запущеного стеку, але це
+# єдине, що можна перевірити без реального Dokploy/Traefik, і вона ловить
+# випадковий `ports:`, що прокрався в один із файлів.
 #
-# This must be two checks, not one. `docker compose ... config` errors with
-# "no such file" if docker-compose.prod.yml is simply missing, and that error
-# text does not contain "published:" either — so a lone expect_missing on
-# "published:" would report success for the wrong reason (the command failed,
-# not "no ports found"). Assert the config actually rendered first.
+# Це мають бути дві окремі перевірки: якщо docker-compose.prod.yml зникне,
+# `docker compose ... config` впаде з "no such file", і цей текст так само не
+# містить "published:" — самотній expect_missing пройшов би, але з хибної
+# причини (команда впала, а не "портів не знайдено"). Тому спершу перевіряємо,
+# що конфіг взагалі згенерувався.
 expect_contains "docker compose config (base + prod overlay) renders successfully" \
     "services:" \
     docker compose -f docker-compose.yml -f docker-compose.prod.yml config

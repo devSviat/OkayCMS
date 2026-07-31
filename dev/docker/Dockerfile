@@ -1,16 +1,15 @@
 # syntax=docker/dockerfile:1
 #
-# Build context is the repository root, so COPY paths are prefixed with dev/.
-# Stages: base -> dev | prod -> nginx-prod
+# Контекст білду — корінь репозиторію, тому шляхи в COPY йдуть з префіксом dev/.
+# Стадії: base -> dev | prod -> nginx-prod
 
 ARG PHP_VERSION=8.5
 
 # ─────────────────────────────── base ───────────────────────────────
 FROM php:${PHP_VERSION}-fpm AS base
 
-# install-php-extensions resolves the system libraries each extension needs and
-# cleans up after itself. It replaces the hand-rolled apt-get blocks, which had
-# `update` and `install` in separate layers — the classic stale-cache bug.
+# install-php-extensions сам підтягує потрібні системні бібліотеки й прибирає
+# за собою після встановлення кожного розширення.
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
         pdo_mysql \
@@ -21,24 +20,24 @@ RUN install-php-extensions \
         xmlwriter \
         opcache
 
-# Matches the host user so bind-mounted files stay writable. Named APP_UID rather
-# than UID because UID is readonly in bash and zsh and never reaches Compose.
+# Підганяє www-data під хостового користувача, щоб bind-mounted файли лишались
+# доступними для запису. Названо APP_UID, а не UID, бо UID — readonly-змінна
+# в bash/zsh і ніколи не дійшла б до Compose.
 ARG APP_UID=1000
 ARG APP_GID=1000
 RUN groupmod -o -g "${APP_GID}" www-data \
  && usermod  -o -u "${APP_UID}" -g "${APP_GID}" www-data
 
-# Append our directory to the scan path instead of mounting over /usr/local/etc/php,
-# which used to hide every docker-php-ext-*.ini the image generates.
+# Наша тека додається до шляху сканування, а не монтується поверх
+# /usr/local/etc/php — інакше вона б ховала кожен docker-php-ext-*.ini образу.
 ENV PHP_INI_SCAN_DIR="/usr/local/etc/php/conf.d:/usr/local/etc/php/custom.d"
 RUN mkdir -p /usr/local/etc/php/custom.d
 COPY dev/config/php/custom.d/okay.ini /usr/local/etc/php/custom.d/okay.ini
 
-# tini and supercronic back the `scheduler` service (dev/docker-compose.yml):
-# tini is PID 1 so signals are forwarded and dead children are reaped, and
-# supercronic is the cron daemon that actually calls `./ok scheduler:run`.
-# Both live in this stage, not just `prod`, so the same binaries back the
-# scheduler in dev too — no separate install path to drift out of sync.
+# tini і supercronic обслуговують сервіс `scheduler` (dev/docker-compose.yml):
+# tini — PID 1, пересилає сигнали й прибирає зомбі-процеси; supercronic —
+# cron-демон, який викликає `./ok scheduler:run`. Встановлені тут, а не лише
+# в `prod`, щоб dev і prod використовували ті самі бінарники.
 ARG SUPERCRONIC_VERSION=v0.2.48
 ARG TARGETARCH
 RUN apt-get update \
@@ -63,7 +62,7 @@ FROM base AS dev
 RUN install-php-extensions xdebug
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
-# msmtp hands mail() to Mailpit; see sendmail_path in dev.ini.
+# msmtp передає mail() у Mailpit; див. sendmail_path у dev.ini.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends msmtp \
  && rm -rf /var/lib/apt/lists/*
@@ -87,7 +86,7 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progre
 USER www-data
 
 # ───────────────────────────── nginx-prod ───────────────────────────
-# Static assets come from the same build as the PHP code, so the two containers
-# cannot drift apart.
+# Статика береться з того самого білду, що й PHP-код, тож контейнери не
+# можуть розійтись між собою.
 FROM nginx:1.29-alpine AS nginx-prod
 COPY --from=prod /var/www/html /var/www/html
