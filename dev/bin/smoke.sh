@@ -171,13 +171,16 @@ echo "Database"
 mariadb_cid=$(docker compose ps -q mariadb)
 # Дивимось саме на монтування в /var/lib/mysql, а не на «чи є серед монтувань
 # хоч один том»: mariadb має ще й том сідового дампа, тож грубіша перевірка
-# пройшла б навіть якщо сама база лежить у bind mount.
+# пройшла б навіть якщо сама база лежить у bind mount. Це вже повністю
+# покриває "не bind mount": {{.Type}} для /var/lib/mysql може бути лише
+# "volume", "bind" або "tmpfs", тож "volume" виключає bind. Окрема перевірка
+# "bind більше не змонтований" тут раніше не мала сенсу: Go-шаблон друкував
+# лише {{.Source}} {{.Destination}} (без {{.Type}}), тож підрядок "bind" міг
+# з'явитись лише якщо він був у самому шляху — `grep bind` завжди повертав
+# порожній вивід і expect_missing проходив незалежно від реального стану.
 expect_contains "the database is on a named volume, not a bind mount" \
     "volume" \
     docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/mysql"}}{{.Type}}{{end}}{{end}}' "$mariadb_cid"
-expect_missing "dev/mysql/DB_data is no longer mounted into the container" \
-    "/var/lib/mysql" \
-    sh -c "docker inspect -f '{{range .Mounts}}{{.Source}} {{.Destination}}{{\"\n\"}}{{end}}' $mariadb_cid | grep bind"
 expect_contains "the admin manager exists with the default password" \
     '$apr1$8m1u0cp4$' \
     docker compose exec -T mariadb sh -c \
@@ -195,12 +198,14 @@ expect_contains "mariadb is reachable from the host, not just from inside a cont
 
 echo
 echo "Network segmentation"
-# Ім'я мережі береться з самого контейнера, а не з .env: мережі іменує Compose
-# за назвою проєкту (див. docker-compose.yml), тож фіксованого імені для
-# порівняння немає — єдине надійне джерело це сам контейнер.
-backend_net=$(docker inspect -f \
-    '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{"\n"}}{{end}}' "$mariadb_cid" \
-    | grep -- '_backend$' | head -1)
+# Ім'я мережі рахується з APP_NAME (.env), а НЕ вичитується з самого
+# контейнера mariadb: Compose іменує мережі як <lowercase(project)>_<key>
+# (див. docker-compose.yml, networks.backend), тож це джерело незалежне від
+# того, що перевіряється нижче. Раніше backend_net брався з мережевого
+# списку самого mariadb-контейнера, а потім перевірялось, що той самий
+# список містить те саме значення — тавтологія, яка не могла впасти навіть
+# якби mariadb взагалі відключили від backend.
+backend_net="$(printf '%s' "${APP_NAME:?err}" | tr '[:upper:]' '[:lower:]')_backend"
 expect_contains "the backend network is internal (no route off the host)" \
     "true" \
     docker network inspect "$backend_net" --format '{{.Internal}}'
