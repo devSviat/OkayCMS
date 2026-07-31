@@ -11,29 +11,29 @@
     <script>document.documentElement.className += ' js';</script>
 
     {* Include fonts *}
-    <link href="{$rootUrl}/design/{$settings->theme}/fonts/inter/InterVariable.woff2" rel="preload" as="font" crossorigin="anonymous" type="font/woff2">
-    <link href="{$rootUrl}/design/{$settings->theme}/fonts/montserrat/Montserrat-SemiBold.woff2" rel="preload" as="font" crossorigin="anonymous" type="font/woff2">
+    <link href="{$rootUrl}/design/{get_theme}/fonts/inter/InterVariable.woff2" rel="preload" as="font" crossorigin="anonymous" type="font/woff2">
+    <link href="{$rootUrl}/design/{get_theme}/fonts/montserrat/Montserrat-SemiBold.woff2" rel="preload" as="font" crossorigin="anonymous" type="font/woff2">
     <style>
         @font-face {
             font-family: 'Inter';
             font-display: swap;
-            src: url('{$rootUrl}/design/{$settings->theme}/fonts/inter/InterVariable.woff2') format('woff2');
+            src: url('{$rootUrl}/design/{get_theme}/fonts/inter/InterVariable.woff2') format('woff2');
             font-weight: 100 900;
             font-style: normal;
         }
         @font-face {
             font-family: 'Montserrat';
             font-display: swap;
-            src: url('{$rootUrl}/design/{$settings->theme}/fonts/montserrat/Montserrat-SemiBold.woff2') format('woff2'),
-                 url('{$rootUrl}/design/{$settings->theme}/fonts/montserrat/Montserrat-SemiBold.woff') format('woff');
+            src: url('{$rootUrl}/design/{get_theme}/fonts/montserrat/Montserrat-SemiBold.woff2') format('woff2'),
+                 url('{$rootUrl}/design/{get_theme}/fonts/montserrat/Montserrat-SemiBold.woff') format('woff');
             font-weight: 600;
             font-style: normal;
         }
         @font-face {
             font-family: 'Montserrat';
             font-display: swap;
-            src: url('{$rootUrl}/design/{$settings->theme}/fonts/montserrat/Montserrat-Bold.woff2') format('woff2'),
-                 url('{$rootUrl}/design/{$settings->theme}/fonts/montserrat/Montserrat-Bold.woff') format('woff');
+            src: url('{$rootUrl}/design/{get_theme}/fonts/montserrat/Montserrat-Bold.woff2') format('woff2'),
+                 url('{$rootUrl}/design/{get_theme}/fonts/montserrat/Montserrat-Bold.woff') format('woff');
             font-weight: 700;
             font-style: normal;
         }
