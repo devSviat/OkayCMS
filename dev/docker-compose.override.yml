@@ -23,6 +23,12 @@ services:
       - '../backend/files:/var/www/html/backend/files'
       - '../cache:/var/www/html/cache'
       - '../Okay/log:/var/www/html/Okay/log'
+    # tmpfs для compiled/ — прод-оптимізація; у dev вимикаємо. tmpfs щоразу
+    # порожній, і теку теми створює той процес, що звернувся першим: команди
+    # через `docker compose exec` виконуються від root, після чого php-fpm під
+    # www-data у неї вже не запише. У dev ці теки лежать у прив'язаному
+    # робочому дереві з правильним власником.
+    tmpfs: !reset null
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -38,6 +44,7 @@ services:
       - '../backend/files:/var/www/html/backend/files'
       - '../cache:/var/www/html/cache'
       - '../Okay/log:/var/www/html/Okay/log'
+    tmpfs: !reset null
 
   nginx:
     hostname: ${VIRTUAL_HOST:?err}
