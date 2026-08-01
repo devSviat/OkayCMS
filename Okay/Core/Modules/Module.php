@@ -534,8 +534,8 @@ class Module
      */
     public function getMathVersion($version) : int
     {
-        $parts = explode('.', $version);
-        
+        $parts = explode('.', (string)$version);
+
         if (count($parts) != 3) {
             return 0;
         }

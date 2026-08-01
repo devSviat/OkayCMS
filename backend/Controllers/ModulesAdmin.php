@@ -32,7 +32,9 @@ class ModulesAdmin extends IndexAdmin
             if (!empty($this->request->post('email_for_module')) && $this->settings->get('email_for_module') != $this->request->post('email_for_module')
                 || empty($this->request->post('email_for_module'))){
                 $this->settings->set('modules_access_expires', '');
-                $licenseModulesTemplates->setLicenseEmail($this->request->post('email_for_module'));
+                // POST без цього поля (а воно живе лише в одній із форм сторінки)
+                // давав Fatal error: setLicenseEmail() не приймає null.
+                $licenseModulesTemplates->setLicenseEmail((string)$this->request->post('email_for_module'));
                 $backendModulesHelper->updateModulesAccessExpiresCache();
                 $licenseModulesTemplates->clearRequestRetry();
                 $licenseModulesTemplates->updateLicenseInfo();
@@ -40,7 +42,16 @@ class ModulesAdmin extends IndexAdmin
             $this->settings->set('email_for_module', $this->request->post('email_for_module'));
 
             if (!empty($this->request->post('install_module'))) {
-                if ($modulesInstaller->install($this->request->post('install_module'))) {
+                // Installer::install() кидає виняток, зокрема на вже встановленому
+                // модулі. Без перехоплення адмінка віддавала голий Fatal error.
+                try {
+                    $installed = $modulesInstaller->install($this->request->post('install_module'));
+                } catch (\Exception $e) {
+                    $installed = false;
+                    $this->design->assign('message_error', $e->getMessage());
+                }
+
+                if ($installed) {
                     $this->design->clearCompiled();
                     $this->response->redirectTo($this->request->getCurrentUrl());
                 }
@@ -77,7 +88,7 @@ class ModulesAdmin extends IndexAdmin
             }
 
             // Сортировка
-            $positions = $this->request->post('positions');
+            $positions = (array)$this->request->post('positions');
             $ids = array_keys($positions);
             rsort($positions);
             foreach ($positions as $i=>$position) {
