@@ -108,12 +108,10 @@ USER www-data
 # ───────────────────────────── nginx-prod ───────────────────────────
 # Статика береться з того самого білду, що й PHP-код, тож контейнери не
 # можуть розійтись між собою.
-FROM nginx:1.29-alpine AS nginx-prod
+FROM nginx:1.20-alpine AS nginx-prod
 
 # Та сама причина, що й `apt-get upgrade` у стадії base: образ nginx:1.29-alpine
 # перезбирається рідше, ніж Alpine патчить пакети, тож на момент білду везе
 # виправні CVE в libssl3/libxml2/expat/nghttp2. Сам nginx лишається на своїй
 # версії — він ставиться з репозиторію nginx.org, а не з alpine/main.
-RUN apk upgrade --no-cache
-
 COPY --from=prod /var/www/html /var/www/html
