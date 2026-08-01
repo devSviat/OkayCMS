@@ -130,6 +130,12 @@ class FrontExtender implements ExtensionInterface
                 $np_cart_calculate = 'Вычисляем...';
             }
             $this->design->assignJsVar('np_cart_calculate', $np_cart_calculate);
+
+            $np_cart_calculate_error = $this->frontTranslations->getTranslation('np_cart_calculate_error');
+            if (empty($np_cart_calculate_error)) {
+                $np_cart_calculate_error = 'Не удалось рассчитать доставку. Попробуйте ещё раз.';
+            }
+            $this->design->assignJsVar('np_cart_calculate_error', $np_cart_calculate_error);
         }
 
         return ExtenderFacade::execute(__METHOD__, $defaultData, func_get_args());

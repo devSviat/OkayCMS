@@ -1,6 +1,18 @@
 {* Title *}
 {$meta_title=$btr->modules_list_title scope=global}
 
+{if $message_error}
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="alert alert--center alert--icon alert--error">
+                <div class="alert__content">
+                    <div class="alert__title">{$message_error|escape}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
+
 {*Название страницы*}
 <div class="row">
     <div class="col-lg-12 col-md-12">

@@ -6,7 +6,9 @@ class VersionControl
 {
     public function versionCompare($version1, $version2): ?int
     {
-        return version_compare($version1, $version2);
+        // ok_modules.version буває NULL (модуль стоїть, а версія не записана),
+        // а version_compare() від PHP 8.1 сварить на null.
+        return version_compare((string)$version1, (string)$version2);
     }
 
     public function greaterThan($version1, $version2): bool

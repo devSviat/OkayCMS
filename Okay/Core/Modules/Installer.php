@@ -81,18 +81,23 @@ class Installer
             return;
         }
 
-        if (!$moduleMathVersion = $this->module->getMathVersion($module->version)) {
-            return;
-        }
-        
+        $moduleMathVersion = $this->module->getMathVersion($module->version);
+
         if (!($moduleParams = $this->module->getModuleParams($module->vendor, $module->module_name)) || empty($moduleParams->getMathVersion())) {
             return;
         }
 
         if ($initClassName = $this->module->getInitClassName($module->vendor, $module->module_name)) {
 
-            $updateMethods = $this->getUpdateMethods($initClassName, $moduleParams->getMathVersion(), $moduleMathVersion);
-            
+            // Нечитабельна версія в БД (NULL у ok_modules) означає невідомий стан
+            // модуля, з якого нема від чого мігрувати: update-методи не обовʼязково
+            // ідемпотентні (NovaposhtaCost::update_1_2_0 додає тип доставки). Раніше
+            // тут був вихід і кнопка оновлення мовчки нічого не робила; тепер
+            // принаймні записуємо версію з маніфеста, щоб зникла фантомна кнопка.
+            $updateMethods = $moduleMathVersion
+                ? $this->getUpdateMethods($initClassName, $moduleParams->getMathVersion(), $moduleMathVersion)
+                : [];
+
             // Вызываем поочередно методы для обновления модуля
             if (!empty($updateMethods)) {
                 $initObject = $this->getInitObject($initClassName, $moduleId, $module->vendor, $module->module_name);
