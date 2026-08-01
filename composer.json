@@ -46,7 +46,7 @@
         "haydenpierce/class-finder": "^0.3.3",
         "axy/sourcemap": "^1.1",
         "snowplow/referer-parser": "^0.2.0",
-        "giggsey/libphonenumber-for-php": "^8.12",
+        "giggsey/libphonenumber-for-php": "^9.0",
         "rosell-dk/webp-convert": "^2.3",
         "psr/container": "^1.1",
         "symfony/console": "^5.3",
