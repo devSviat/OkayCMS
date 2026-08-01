@@ -31,7 +31,7 @@ class GetNewProducts extends Func
         $this->productsHelper = $productsHelper;
     }
 
-    public function run($params, $smarty = null)
+    public function run($params, $smarty)
     {
         if (!isset($params['visible'])) {
             $params['visible'] = 1;

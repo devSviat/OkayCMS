@@ -19,8 +19,7 @@ use Okay\Core\TemplateConfig\FrontTemplateConfig;
 use Okay\Entities\ModulesEntity;
 use Okay\Core\EntityFactory;
 use Okay\Core\ServiceLocator;
-use Okay\Core\SmartyPlugins\Func;
-use Okay\Core\SmartyPlugins\Modifier;
+use Okay\Core\SmartyPlugins\Plugin;
 
 class Modules // TODO: подумать, мож сюда переедет CRUD Entity/Modules
 {
@@ -164,7 +163,6 @@ class Modules // TODO: подумать, мож сюда переедет CRUD E
                 foreach ($plugins as $plugin) {
                     $reflector = new \ReflectionClass($plugin['class']);
                     $props     = (object) $reflector->getDefaultProperties();
-                    $parentClass = $reflector->getParentClass();
 
                     if (!empty($props->tag)) {
                         $tag = $props->tag;
@@ -176,11 +174,8 @@ class Modules // TODO: подумать, мож сюда переедет CRUD E
                         return '';
                     };
 
-                    if ($parentClass->name === \Okay\Core\SmartyPlugins\Func::class) {
-                        $design->registerPlugin('function', $tag, $mock);
-                    }
-                    elseif ($parentClass->name === \Okay\Core\SmartyPlugins\Modifier::class) {
-                        $design->registerPlugin('modifier', $tag, $mock);
+                    if ($type = Plugin::resolveType($plugin['class'])) {
+                        $design->registerPlugin($type, $tag, $mock);
                     }
                 }
                 DebugBar::stopMeasure("$module->vendor/$module->module_name", ['init' => '']);
@@ -421,13 +416,8 @@ class Modules // TODO: подумать, мож сюда переедет CRUD E
                 $pluginName = strtolower(end($classParts));
             }
 
-            // Тип виводимо з базового класу: заглушка під не тим типом лишає
-            // тег незареєстрованим, а Smarty 5 на це вже кидає помилку компіляції.
-            if ($pluginClass->isSubclassOf(Func::class)) {
-                $type = 'function';
-            } elseif ($pluginClass->isSubclassOf(Modifier::class)) {
-                $type = 'modifier';
-            } else {
+            $type = Plugin::resolveType($plugin['class']);
+            if ($type === null) {
                 continue;
             }
 

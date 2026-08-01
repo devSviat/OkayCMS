@@ -4,11 +4,10 @@
 namespace Core\SmartyPlugins;
 
 
+use Design\TemplateTagInventory;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../../Design/TemplateTagInventory.php';
-
-use Design\TemplateTagInventory;
 
 /**
  * Обʼєкт шаблону, який Smarty передає плагіну другим аргументом, називається
@@ -32,7 +31,8 @@ class PluginSignatureTest extends TestCase
                 continue;
             }
 
-            foreach ($type instanceof \ReflectionUnionType ? $type->getTypes() : [$type] as $single) {
+            $parts = $type instanceof \ReflectionNamedType ? [$type] : $type->getTypes();
+            foreach ($parts as $single) {
                 $name = ltrim($single->getName(), '\\');
                 if (stripos($name, 'Smarty') === 0) {
                     $offenders[] = "\${$parameter->getName()}: {$name}";
@@ -48,7 +48,7 @@ class PluginSignatureTest extends TestCase
         );
     }
 
-    public function pluginProvider(): array
+    public static function pluginProvider(): array
     {
         $cases = [];
         foreach (TemplateTagInventory::pluginClasses() as $class) {

@@ -23,7 +23,7 @@ class GetBrowsedProducts extends Func
         $this->browsedProducts = $browsedProducts;
     }
 
-    public function run($params, $smarty = null)
+    public function run($params, $smarty)
     {
         $smarty->assign($params['var'], $this->browsedProducts->get($params['limit']));
     }

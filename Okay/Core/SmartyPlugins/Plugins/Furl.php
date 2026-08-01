@@ -19,7 +19,7 @@ class Furl extends Func
         $this->filterHelper = $filterHelper;
     }
 
-    public function run($params, $smarty = null)
+    public function run($params, $smarty)
     {
 
         if (is_array($params) && is_array(reset($params))) {

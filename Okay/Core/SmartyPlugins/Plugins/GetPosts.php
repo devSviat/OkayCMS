@@ -27,7 +27,7 @@ class GetPosts extends Func
         $this->blogHelper = $blogHelper;
     }
 
-    public function run($params, $smarty = null)
+    public function run($params, $smarty)
     {
         if (!isset($params['visible'])) {
             $params['visible'] = 1;

@@ -27,7 +27,7 @@ class GetBrands extends Func
         $this->brandsHelper = $brandsHelper;
     }
 
-    public function run($params, $smarty = null)
+    public function run($params, $smarty)
     {
         if (!isset($params['visible'])) {
             $params['visible'] = 1;
