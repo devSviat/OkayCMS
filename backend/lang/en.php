@@ -489,6 +489,7 @@ $lang['reportstats_yesterday'] = 'Yesterday';
 $lang['robots_file'] = 'File robots.txtx';
 $lang['robots_message'] = 'In this section you can edit the file robots.txt';
 $lang['robots_permissions'] = 'Set permissions to write to the robots.txt file';
+$lang['settings_theme_css_write_error'] = 'Could not write the theme settings file. Grant write permissions to design/<theme>/css/theme-settings.css';
 $lang['robots_updated'] = 'Robots updated';
 $lang['scripts_scripts'] = 'Scripts';
 $lang['seo_patterns_ajax_brand_name'] = 'Brand name';

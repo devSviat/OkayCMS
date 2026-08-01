@@ -5099,6 +5099,38 @@ header.navbar .container-fluid{
 .admin_exit a:hover {
     color: #f82828;
 }
+/* Вихід тепер кнопка в формі, а не посилання: вигляд лишається той самий. */
+.admin_exit__form {
+    margin: 0;
+}
+.admin_exit__form--inline {
+    display: inline;
+}
+.admin_exit__button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+    padding: 10px 15px 10px 8px;
+    border: 0;
+    background: none;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+.admin_exit__button:hover {
+    color: #f82828;
+}
+.admin_exit__link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}
 .admin_name a:hover {
     color: #28f852;
 }

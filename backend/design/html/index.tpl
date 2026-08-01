@@ -147,10 +147,14 @@
                     </a>
                 </div>
                 <div class="admin_exit hidden-sm-down hint-bottom-right-t-info-s-small-mobile  hint-anim" data-hint="{$btr->index_exit|escape}">
-                    <a href="{$rootUrl}?logout">
-                        {*<span class="hidden-lg-down">{$btr->index_exit|escape}</span>*}
-                        {include file='svg_icon.tpl' svgId='exit'}
-                    </a>
+                    {* Вихід постом із токеном: посиланням його міг би викликати
+                       будь-який сторонній сайт. Обробник - backend/index.php. *}
+                    <form method="post" action="" class="admin_exit__form">
+                        <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
+                        <button type="submit" name="logout" value="1" class="admin_exit__button">
+                            {include file='svg_icon.tpl' svgId='exit'}
+                        </button>
+                    </form>
                 </div>
                 <div class="admin_name hint-bottom-middle-t-info-s-small-mobile  hint-anim" data-hint="{$manager->login|escape}">
                     <a href="index.php?controller=ManagerAdmin&id={$manager->id}">
@@ -281,10 +285,13 @@
                     </div>
                 </div>
                 <div class="admin_exit hidden-md-up">
-                    <a href="{$rootUrl}?logout">
-                        <span class="">{$btr->index_exit|escape}</span>
-                        {include file='svg_icon.tpl' svgId='exit'}
-                    </a>
+                    <form method="post" action="" class="admin_exit__form">
+                        <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
+                        <button type="submit" name="logout" value="1" class="admin_exit__button">
+                            <span class="">{$btr->index_exit|escape}</span>
+                            {include file='svg_icon.tpl' svgId='exit'}
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -411,7 +418,10 @@
                     <div class="col-md-12 font_12 text_white">
                         <a href="https://okay-cms.com">OkayCMS</a> &copy; {$smarty.now|date_format:"%Y"} v.{$config->version|escape} | {$btr->index_logged|escape}
                         <a href="index.php?controller=ManagerAdmin&id={$manager->id}">{$manager->login|escape}</a>
-                        (<a href="{$rootUrl}?logout">{$btr->index_exit|escape}</a>)
+                        (<form method="post" action="" class="admin_exit__form admin_exit__form--inline">
+                            <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
+                            <button type="submit" name="logout" value="1" class="admin_exit__link">{$btr->index_exit|escape}</button>
+                        </form>)
                         <div class="float-md-right">
                             <a href='index.php?controller=LicenseAdmin' class="text_white">{$btr->license_text|escape} </a>
                             ,

@@ -105,7 +105,15 @@ class CssConfig
         $renderedCss = ltrim(preg_replace('~\A(?:\s*/\*.*?\*/)+~s', '', $renderedCss));
 
         $resultFile .= $renderedCss . PHP_EOL;
-        file_put_contents($this->settingsFile, $resultFile);
+
+        // Раніше відмова в правах лишалась непоміченою, і адмінка повідомляла
+        // про збереження кольорів, яких не зберегла. Права перевіряються до
+        // запису, щоб не друкувати warning у відповідь при debug_mode.
+        if (!is_writable($this->settingsFile)) {
+            return false;
+        }
+
+        return file_put_contents($this->settingsFile, $resultFile) !== false;
     }
     
     /**

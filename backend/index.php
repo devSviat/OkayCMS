@@ -52,6 +52,17 @@ if ($config->get('debug_mode') == true) {
 /** @var Request $request */
 $request = $DI->get(Request::class);
 
+// Вихід менеджера. Тільки POST і тільки з валідним CSRF-токеном; сам вихід
+// має відбуватись тут, бо бекендова сесія активна лише в цьому вході -
+// вітринний ?logout її не бачить із моменту розділення просторів сесій.
+if ($request->isPost() && $request->post('logout') !== null && $request->checkSession()) {
+    \Okay\Core\Security\SessionNames::destroyBackend();
+    \Okay\Core\Security\SessionNames::deleteCookie('admin_login');
+
+    header('Location: ' . $request->getRootUrl() . '/backend/index.php?controller=AuthAdmin');
+    exit;
+}
+
 /** @var Languages $languages */
 $languages = $DI->get(Languages::class);
 
