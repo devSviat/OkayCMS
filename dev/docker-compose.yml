@@ -91,7 +91,7 @@ services:
       start_period: 10s
 
   nginx:
-    image: nginx:1.29-alpine
+    image: nginx:1.29.8-alpine
     restart: unless-stopped
     depends_on:
       php85:
@@ -115,7 +115,7 @@ services:
       retries: 3
 
   mariadb:
-    image: mariadb:10.11
+    image: mariadb:10.11.18
     restart: unless-stopped
     environment:
       TZ: ${TZ:-Europe/Kyiv}

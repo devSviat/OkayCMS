@@ -3,10 +3,9 @@
 # Контекст білду — корінь репозиторію, тому шляхи в COPY йдуть з префіксом dev/.
 # Стадії: base -> dev | prod -> nginx-prod
 
-ARG PHP_VERSION=8.5
-
 # ─────────────────────────────── base ───────────────────────────────
-FROM php:${PHP_VERSION}-fpm AS base
+# Версії образів запінені до патча, оновлює їх Dependabot (.github/dependabot.yml).
+FROM php:8.5.9-fpm AS base
 
 # Образи php:*-fpm перезбираються рідше, ніж Debian патчить пакети. Першим
 # шаром — щоб усе нижче лягало на пропатчену базу.
@@ -15,7 +14,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # install-php-extensions сам підтягує системні бібліотеки й прибирає за собою.
-COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
+COPY --from=mlocati/php-extension-installer:2.11.12 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
         pdo_mysql \
         mysqli \
@@ -73,7 +72,7 @@ WORKDIR /var/www/html
 FROM base AS dev
 
 RUN install-php-extensions xdebug
-COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2.10.2 /usr/bin/composer /usr/local/bin/composer
 
 # msmtp передає mail() у Mailpit; див. sendmail_path у dev.ini.
 RUN apt-get update \
@@ -87,7 +86,7 @@ COPY dev/config/php/custom.d/xdebug.ini /usr/local/etc/php/custom.d/xdebug.ini
 FROM base AS prod
 
 COPY dev/config/php/prod/prod.ini /usr/local/etc/php/custom.d/prod.ini
-COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2.10.2 /usr/bin/composer /usr/local/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 COPY . /var/www/html
@@ -100,7 +99,7 @@ USER www-data
 
 # ───────────────────────────── nginx-prod ───────────────────────────
 # Статика — з того самого білду, що й PHP-код, тож контейнери не розійдуться.
-FROM nginx:1.29-alpine AS nginx-prod
+FROM nginx:1.29.8-alpine AS nginx-prod
 
 # Те саме, що й apt-get upgrade у base. Сам nginx не рухається — він
 # ставиться з репозиторію nginx.org, а не з alpine/main.

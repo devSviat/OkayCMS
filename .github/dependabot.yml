@@ -1,0 +1,24 @@
+# Образи запінені до патч-версії, тож самі вони більше не оновлюються. Оновлює
+# їх цей бот — новий патч приходить окремим PR, який видно й можна відкотити.
+# Без нього патч-пін означав би застряглі PHP/nginx/mariadb без жодного сигналу:
+# Trivy бачить лише бібліотеки образу, а сам сервіс — ні.
+version: 2
+updates:
+  - package-ecosystem: docker
+    directory: /dev/docker
+    schedule:
+      interval: weekly
+      day: monday
+
+  - package-ecosystem: docker-compose
+    directory: /dev
+    schedule:
+      interval: weekly
+      day: monday
+
+  # Той самий клас проблеми: неіснуючий тег дії видно лише на реальному прогоні.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
