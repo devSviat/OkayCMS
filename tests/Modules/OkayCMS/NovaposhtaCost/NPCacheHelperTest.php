@@ -11,6 +11,7 @@ use Okay\Modules\OkayCMS\NovaposhtaCost\Helpers\NPCacheHelper;
 use Okay\Modules\OkayCMS\NovaposhtaCost\Init\Init;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * removeRedundant() видаляє все, чий updated_at старіший за час старту оновлення.
@@ -73,22 +74,23 @@ class NPCacheHelperTest extends TestCase
         $helper->cronUpdateWarehousesCache();
     }
 
-    /**
-     * @dataProvider startUpdateTimeProvider
-     */
+    #[DataProvider('startUpdateTimeProvider')]
     public function testStartUpdateTimeIsDroppedOnceItIsOlderThanHalfAnHour(
         int $minutesAgo,
         bool $expectedUsable
     ): void {
         $startTime = date('Y-m-d H:i:s', time() - $minutesAgo * 60);
 
-        $settings = $this->createMock(Settings::class);
-        $settings->method('get')->with('np_start_update_datetime')->willReturn($startTime);
+        $settings = $this->createStub(Settings::class);
+        // with() без expects() у PHPUnit 14 зникне — умова переїхала в колбек.
+        $settings->method('get')->willReturnCallback(
+            static fn (string $name): ?string => $name === 'np_start_update_datetime' ? $startTime : null
+        );
 
         $helper = new NPCacheHelper(
-            $this->createMock(NPApiHelper::class),
-            $this->createMock(EntityFactory::class),
-            $this->createMock(Languages::class),
+            $this->createStub(NPApiHelper::class),
+            $this->createStub(EntityFactory::class),
+            $this->createStub(Languages::class),
             $settings
         );
 
@@ -98,7 +100,7 @@ class NPCacheHelperTest extends TestCase
         );
     }
 
-    public function startUpdateTimeProvider(): array
+    public static function startUpdateTimeProvider(): array
     {
         return [
             'щойно'          => [10, true],

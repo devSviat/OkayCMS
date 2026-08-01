@@ -5,6 +5,7 @@ namespace Design;
 
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 require_once __DIR__ . '/TemplateTagInventory.php';
 require_once __DIR__ . '/SmartyTagScanner.php';
@@ -24,9 +25,7 @@ require_once __DIR__ . '/SmartyTagScanner.php';
  */
 class NoPluginTagInFunctionPositionTest extends TestCase
 {
-    /**
-     * @dataProvider templateProvider
-     */
+    #[DataProvider('templateProvider')]
     public function testNoModifierTagIsCalledAsFunction(string $relativePath): void
     {
         $tags = TemplateTagInventory::pluginTags()['modifier'];
@@ -54,7 +53,7 @@ class NoPluginTagInFunctionPositionTest extends TestCase
         );
     }
 
-    public function templateProvider(): array
+    public static function templateProvider(): array
     {
         $root = TemplateTagInventory::rootDir();
         $cases = [];

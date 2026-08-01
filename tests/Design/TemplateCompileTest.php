@@ -5,6 +5,7 @@ namespace Design;
 
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 require_once __DIR__ . '/TemplateTagInventory.php';
 
@@ -35,9 +36,7 @@ class TemplateCompileTest extends TestCase
         self::removeDir(self::$compileRoot);
     }
 
-    /**
-     * @dataProvider templateProvider
-     */
+    #[DataProvider('templateProvider')]
     public function testTemplateCompiles(string $surface, string $relativePath): void
     {
         $this->expectNotToPerformAssertions();

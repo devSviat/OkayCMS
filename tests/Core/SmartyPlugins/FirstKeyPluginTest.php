@@ -6,18 +6,17 @@ namespace Core\SmartyPlugins;
 
 use Okay\Core\SmartyPlugins\Plugins\FirstKey;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class FirstKeyPluginTest extends TestCase
 {
-    /**
-     * @dataProvider firstKeyProvider
-     */
+    #[DataProvider('firstKeyProvider')]
     public function testReturnsFirstKey($input, $expected): void
     {
         $this->assertSame($expected, (new FirstKey())->run($input));
     }
 
-    public function firstKeyProvider(): array
+    public static function firstKeyProvider(): array
     {
         return [
             'рядковий ключ'      => [['preset_a' => 1, 'preset_b' => 2], 'preset_a'],

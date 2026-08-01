@@ -3,6 +3,7 @@
 namespace Security;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Редактори теми в адмінці склеюють значення із запиту з каталогом теми.
@@ -10,9 +11,7 @@ use PHPUnit\Framework\TestCase;
  */
 class AdminFileEditorTraversalTest extends TestCase
 {
-    /**
-     * @dataProvider guardedCallSiteProvider
-     */
+    #[DataProvider('guardedCallSiteProvider')]
     public function testRequestSuppliedNamesGoThroughSafeFileName($file, array $mustContain)
     {
         $source = $this->source($file);
@@ -22,7 +21,7 @@ class AdminFileEditorTraversalTest extends TestCase
         }
     }
 
-    public function guardedCallSiteProvider()
+    public static function guardedCallSiteProvider()
     {
         return [
             'images: delete/rename/upload' => [

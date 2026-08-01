@@ -5,13 +5,14 @@ namespace Seo;
 use Okay\Helpers\MetaRobotsHelper;
 use PHPUnit\Framework\TestCase;
 use Exception;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class MetaRobotsHelperTest extends TestCase
 {
 
-    public function __construct($name = null, array $data = [], $dataName = '')
+    protected function setUp(): void
     {
-        parent::__construct($name, $data, $dataName);
+        // TestCase::__construct() у PHPUnit 10+ final.
         require_once 'Okay/Core/config/constants.php';
     }
 
@@ -19,9 +20,9 @@ class MetaRobotsHelperTest extends TestCase
      * @param array $robotsSettings
      * @param array $otherFilters
      * @param $expectedResult
-     * @dataProvider getBaseCatalogOtherFiltersDataProvider
      *
      */
+    #[DataProvider('getBaseCatalogOtherFiltersDataProvider')]
     public function testGetBaseCatalogRobots(array $robotsSettings, array $otherFilters, $expectedResult)
     {
         // Т.к. метод приватный, доступ к нему получаем через рефлексию
@@ -41,8 +42,8 @@ class MetaRobotsHelperTest extends TestCase
     /**
      * @param array $features
      * @param string $expectedExceptionMessage
-     * @dataProvider setAvailableFeaturesDataProvider
      */
+    #[DataProvider('setAvailableFeaturesDataProvider')]
     public function testSetAvailableFeatures(array $features, string $expectedExceptionMessage)
     {
         $metaRobotsHelper = new MetaRobotsHelper;
@@ -66,8 +67,8 @@ class MetaRobotsHelperTest extends TestCase
      * @param array $brandsFilter
      * @param $expectedResult
      * @throws Exception
-     * @dataProvider getCatalogPaginationFullFiltersDataProvider
      */
+    #[DataProvider('getCatalogPaginationFullFiltersDataProvider')]
     public function testGetCatalogRobots(array $robotsSettings, $page, array $otherFilters, array $featuresFilter, array $brandsFilter, $expectedResult)
     {
         $metaRobotsHelper = new MetaRobotsHelper;
@@ -187,8 +188,8 @@ class MetaRobotsHelperTest extends TestCase
      * @param array $brandsFilter
      * @param array|false $expectedResult
      * @throws \ReflectionException
-     * @dataProvider getCatalogFeaturesFilterDataProvider
      */
+    #[DataProvider('getCatalogFeaturesFilterDataProvider')]
     public function testGetCatalogRobotsExecutor(array $robotsSettings, array $featuresFilter, array $brandsFilter, $expectedResult)
     {
         // Т.к. метод приватный, доступ к нему получаем через рефлексию
@@ -204,7 +205,7 @@ class MetaRobotsHelperTest extends TestCase
         $this->assertEquals($expectedResult, $actualResult);
     }
 
-    public function getCatalogFeaturesFilterDataProvider() : array
+    public static function getCatalogFeaturesFilterDataProvider() : array
     {
         return [
             [
@@ -333,7 +334,7 @@ class MetaRobotsHelperTest extends TestCase
         ];
     }
     
-    public function getBaseCatalogOtherFiltersDataProvider() : array
+    public static function getBaseCatalogOtherFiltersDataProvider() : array
     {
         return [
             [
@@ -440,7 +441,7 @@ class MetaRobotsHelperTest extends TestCase
      * Немного кейсов определения robots в категории при разных условиях
      * @return array[]
      */
-    public function getCatalogPaginationFullFiltersDataProvider() : array
+    public static function getCatalogPaginationFullFiltersDataProvider() : array
     {
         return [
             [
@@ -950,7 +951,7 @@ class MetaRobotsHelperTest extends TestCase
         ];
     }
     
-    public function setAvailableFeaturesDataProvider() : array
+    public static function setAvailableFeaturesDataProvider() : array
     {
         return [
             [

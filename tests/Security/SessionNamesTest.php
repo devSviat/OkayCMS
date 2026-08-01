@@ -4,6 +4,8 @@ namespace Security;
 
 use Okay\Core\Security\SessionNames;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 
 class SessionNamesTest extends TestCase
 {
@@ -45,9 +47,7 @@ class SessionNamesTest extends TestCase
         $_SERVER = $server;
     }
 
-    /**
-     * @dataProvider entrypointProvider
-     */
+    #[DataProvider('entrypointProvider')]
     public function testEntrypointsNoLongerDeriveSessionNameFromUserAgent($file)
     {
         $source = file_get_contents(dirname(__DIR__, 2) . '/' . $file);
@@ -63,7 +63,7 @@ class SessionNamesTest extends TestCase
         );
     }
 
-    public function entrypointProvider()
+    public static function entrypointProvider()
     {
         return [
             'storefront'   => ['index.php'],
@@ -77,9 +77,7 @@ class SessionNamesTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider privilegeTransitionProvider
-     */
+    #[DataProvider('privilegeTransitionProvider')]
     public function testPrivilegeTransitionsRegenerateTheSessionId($file, $assignment)
     {
         $source = file_get_contents(dirname(__DIR__, 2) . '/' . $file);
@@ -93,7 +91,7 @@ class SessionNamesTest extends TestCase
         $this->assertLessThan($login, $regenerate, $file);
     }
 
-    public function privilegeTransitionProvider()
+    public static function privilegeTransitionProvider()
     {
         return [
             'admin login'    => ['backend/Controllers/AuthAdmin.php', "\$_SESSION['admin'] = \$manager->login;"],
@@ -101,9 +99,7 @@ class SessionNamesTest extends TestCase
         ];
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testNoBackendCookieMeansNoAdmin()
     {
         unset($_COOKIE[SessionNames::BACKEND]);
@@ -117,9 +113,7 @@ class SessionNamesTest extends TestCase
         );
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testMalformedSessionIdGrantsNothing()
     {
         // Явно неправильна форма: не той алфавіт/довжина, спроба ін'єкції тощо.
@@ -129,9 +123,7 @@ class SessionNamesTest extends TestCase
         $this->assertNull(SessionNames::adminLogin());
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testForgedButWellFormedSessionIdGrantsNothing()
     {
         // Синтаксично коректний ідентифікатор (правильний алфавіт і довжина),
@@ -143,9 +135,7 @@ class SessionNamesTest extends TestCase
         $this->assertNull(SessionNames::adminLogin());
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testGenuineBackendSessionIsSeen()
     {
         $sessionId = $this->createBackendSession('some_manager_login');
@@ -159,9 +149,7 @@ class SessionNamesTest extends TestCase
         }
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testAdminAwarenessIsNotPersistedIntoTheFrontendSession()
     {
         $sessionId = $this->createBackendSession('some_manager_login');

@@ -10,6 +10,7 @@ use Okay\Core\TplMod\TplMod;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Smarty\Smarty;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * У Smarty 4 нативну функцію в шаблоні пускала політика безпеки, тож реєстрація
@@ -22,9 +23,7 @@ use Smarty\Smarty;
  */
 class DesignPhpFunctionRegistrationTest extends TestCase
 {
-    /**
-     * @dataProvider securityProvider
-     */
+    #[DataProvider('securityProvider')]
     public function testPhpFunctionsAreRegisteredRegardlessOfSecurity(bool $security): void
     {
         $smarty = $this->buildDesignAndGetSmarty($security);
@@ -37,7 +36,7 @@ class DesignPhpFunctionRegistrationTest extends TestCase
         }
     }
 
-    public function securityProvider(): array
+    public static function securityProvider(): array
     {
         return ['security увімкнено' => [true], 'security вимкнено' => [false]];
     }
@@ -62,18 +61,18 @@ class DesignPhpFunctionRegistrationTest extends TestCase
         $rootDir = sys_get_temp_dir() . '/okaycms-design-test/';
         @mkdir($rootDir . 'compiled/vibe_shop', 0777, true);
 
-        $frontTemplateConfig = $this->createMock(FrontTemplateConfig::class);
+        $frontTemplateConfig = $this->createStub(FrontTemplateConfig::class);
         $frontTemplateConfig->method('getTheme')->willReturn('vibe_shop');
 
         $smarty = new Smarty();
 
         $design = new Design(
             $smarty,
-            $this->createMock(\Detection\MobileDetect::class),
+            $this->createStub(\Detection\MobileDetect::class),
             $frontTemplateConfig,
-            $this->createMock(Module::class),
-            $this->createMock(Modules::class),
-            $this->createMock(TplMod::class),
+            $this->createStub(Module::class),
+            $this->createStub(Modules::class),
+            $this->createStub(TplMod::class),
             0,
             true,
             false,

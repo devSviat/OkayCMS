@@ -3,12 +3,11 @@
 namespace Security;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class FilemanagerAccessTest extends TestCase
 {
-    /**
-     * @dataProvider guardedEntrypointProvider
-     */
+    #[DataProvider('guardedEntrypointProvider')]
     public function testEntrypointRequiresAnAuthenticatedManager($file)
     {
         $source = $this->read($file);
@@ -16,9 +15,7 @@ class FilemanagerAccessTest extends TestCase
         $this->assertStringContainsString('okay_access.php', $source, $file);
     }
 
-    /**
-     * @dataProvider guardedEntrypointProvider
-     */
+    #[DataProvider('guardedEntrypointProvider')]
     public function testGuardPrecedesAnyConfigurationOrFilesystemWork($file)
     {
         $source = $this->read($file);
@@ -34,7 +31,7 @@ class FilemanagerAccessTest extends TestCase
         }
     }
 
-    public function guardedEntrypointProvider()
+    public static function guardedEntrypointProvider()
     {
         return [
             'dialog'   => ['backend/design/js/filemanager/dialog.php'],

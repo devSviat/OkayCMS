@@ -4,20 +4,19 @@ namespace Security;
 
 use Okay\Core\Security\SafeRedirect;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class SafeRedirectTest extends TestCase
 {
     const BASE = 'http://okaycms.loc';
 
-    /**
-     * @dataProvider allowedProvider
-     */
+    #[DataProvider('allowedProvider')]
     public function testSameOriginUrlsAreAllowed($url)
     {
         $this->assertTrue(SafeRedirect::isSameOrigin($url, self::BASE), var_export($url, true));
     }
 
-    public function allowedProvider()
+    public static function allowedProvider()
     {
         return [
             'root'               => ['/'],
@@ -30,15 +29,13 @@ class SafeRedirectTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider rejectedProvider
-     */
+    #[DataProvider('rejectedProvider')]
     public function testForeignAndMalformedUrlsAreRejected($url)
     {
         $this->assertFalse(SafeRedirect::isSameOrigin($url, self::BASE), var_export($url, true));
     }
 
-    public function rejectedProvider()
+    public static function rejectedProvider()
     {
         return [
             'null'                 => [null],

@@ -3,12 +3,11 @@
 namespace Security;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class StorefrontCsrfGuardTest extends TestCase
 {
-    /**
-     * @dataProvider guardedControllerProvider
-     */
+    #[DataProvider('guardedControllerProvider')]
     public function testMutationControllersInvokeTheGuard($file, $expectedCalls)
     {
         $source = $this->read($file);
@@ -20,7 +19,7 @@ class StorefrontCsrfGuardTest extends TestCase
         );
     }
 
-    public function guardedControllerProvider()
+    public static function guardedControllerProvider()
     {
         return [
             'cart'       => ['Okay/Controllers/CartController.php', 3],
@@ -42,9 +41,7 @@ class StorefrontCsrfGuardTest extends TestCase
         $this->assertStringContainsString('setStatusCode(403)', $source);
     }
 
-    /**
-     * @dataProvider mutationParamReaderProvider
-     */
+    #[DataProvider('mutationParamReaderProvider')]
     public function testMutationParamsAreReadFromPost($file, $forbidden)
     {
         $source = $this->read($file);
@@ -54,7 +51,7 @@ class StorefrontCsrfGuardTest extends TestCase
         }
     }
 
-    public function mutationParamReaderProvider()
+    public static function mutationParamReaderProvider()
     {
         return [
             'cart' => [
@@ -72,14 +69,12 @@ class StorefrontCsrfGuardTest extends TestCase
         ];
     }
 
-    public function themeProvider()
+    public static function themeProvider()
     {
         return [['okay_shop'], ['vibe_shop']];
     }
 
-    /**
-     * @dataProvider themeProvider
-     */
+    #[DataProvider('themeProvider')]
     public function testThemeJsSendsTheTokenOnEveryMutation($theme)
     {
         $js = $this->read('design/' . $theme . '/js/okay.js');
@@ -96,8 +91,8 @@ class StorefrontCsrfGuardTest extends TestCase
      * Стоковий OkayCMS читає ці ендпоінти з $_GET, тож параметри мають дублюватись
      * у рядок запиту - інакше тема мовчки не працює на нефоркнутому рушії.
      *
-     * @dataProvider themeProvider
      */
+    #[DataProvider('themeProvider')]
     public function testMutatingCallsGoThroughOkayAjax($theme)
     {
         $js = $this->read('design/' . $theme . '/js/okay.js');
@@ -113,9 +108,7 @@ class StorefrontCsrfGuardTest extends TestCase
         $this->assertStringContainsString('key !== "customer_csrf_token"', $js, $theme);
     }
 
-    /**
-     * @dataProvider tokenCarryingTemplateProvider
-     */
+    #[DataProvider('tokenCarryingTemplateProvider')]
     public function testThemeFormsCarryTheToken($template)
     {
         $source = $this->read('design/okay_shop/html/' . $template);
@@ -123,7 +116,7 @@ class StorefrontCsrfGuardTest extends TestCase
         $this->assertStringContainsString('name="customer_csrf_token"', $source, $template);
     }
 
-    public function tokenCarryingTemplateProvider()
+    public static function tokenCarryingTemplateProvider()
     {
         return [
             'feedback' => ['feedback.tpl'],

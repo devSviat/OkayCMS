@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
  * передавав null у strtotime() - і PHP 8 друкував Deprecated просто в HTML
  * сторінки менеджерів. Розбір дати має збігатися з Date.
  *
- * convertDeprecationsToExceptions у phpunit.xml робить ці тести чутливими:
+ * failOnDeprecation у phpunit.xml робить ці тести чутливими:
  * повернення null у strtotime() завалить їх само собою.
  */
 class TimePluginTest extends TestCase

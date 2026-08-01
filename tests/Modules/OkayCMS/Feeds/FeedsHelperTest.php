@@ -5,6 +5,7 @@ namespace Modules\OkayCMS\Feeds;
 use Okay\Modules\OkayCMS\Feeds\Helpers\FeedsHelper;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * $languages, $firstLanguage and $language used to be assigned in the
@@ -13,9 +14,7 @@ use ReflectionClass;
  */
 class FeedsHelperTest extends TestCase
 {
-    /**
-     * @dataProvider declaredPropertyProvider
-     */
+    #[DataProvider('declaredPropertyProvider')]
     public function testDeclaresProperty(string $property): void
     {
         $this->assertTrue(
@@ -24,7 +23,7 @@ class FeedsHelperTest extends TestCase
         );
     }
 
-    public function declaredPropertyProvider(): array
+    public static function declaredPropertyProvider(): array
     {
         return [
             'languages'     => ['languages'],
