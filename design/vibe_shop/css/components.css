@@ -2706,12 +2706,10 @@ body.hc-nav-open {
 	padding: 2px var(--vs-space-1-5);
 }
 
-/* The guarantee, not the budget. The struck price is the one thing in this row  */
-/* that can give way: it is already crossed out and the badge states the saving  */
-/* on its own, so an ellipsis there costs almost nothing - while a wrap costs    */
-/* the constant tier height, and with it the alignment of every neighbouring     */
-/* card. Measured budgets keep being one pixel wide at some viewport nobody      */
-/* sampled; this holds whatever the data does.                                   */
+/* Перекреслена ціна — єдине в цьому рядку, що може поступитись: вона вже       */
+/* закреслена, а стікер називає економію сам. Трикрапка тут майже нічого не     */
+/* коштує, а перенос коштував би постійної висоти ярусу й вирівнювання сусідніх */
+/* карток.                                                                       */
 
 .vs-card__price_old {
 	min-width: 0;
@@ -2772,25 +2770,20 @@ body.hc-nav-open {
 	margin-top: auto;
 }
 
-/* Nothing to order in one tap when there is nothing in stock. With preorder    */
-/* switched on, the module keeps its rocket visible for an out-of-stock         */
-/* product while the card's own "add to cart" has already hidden itself, so     */
-/* the row was left offering the faster of two routes to a purchase that        */
-/* cannot happen yet. Done as a sibling rule rather than a condition around     */
-/* the include, because the module's template is not ours to edit and because   */
-/* vibe.js rewrites .vs-stock--out live when a variant changes - a Smarty test  */
-/* would freeze at render time and be wrong after the first variant switch.     */
+/* Немає чого замовляти в один дотик, коли товару немає. Зроблено сусіднім      */
+/* правилом, а не умовою навколо include: шаблон модуля не наш, а .vs-stock--out */
+/* переписує vibe.js наживо при зміні варіанта — Smarty-перевірка застигла б на */
+/* моменті рендера й помилялась би після першого ж перемикання.                 */
 
 .vs-stock--out ~ .vs-card__form .fn_fast_order_button {
 	display: none;
 }
 
-/* Variant chips: one tap instead of open-dropdown-then-choose. They live on    */
-/* the PRODUCT PAGE only - the card deliberately shows no variant control, so   */
-/* the catalogue stays a scanning surface and the choice is made where the      */
-/* photography, the description and the stock line can back it up. The <select> */
-/* stays in the DOM on both and vibe.js keeps the two in sync, so okay.js       */
-/* recalculates price, old price, SKU, stock and discount.                      */
+/* Чипи варіантів — один дотик замість «відкрити список і вибрати». Лише на     */
+/* СТОРІНЦІ ТОВАРУ: картка навмисно не має вибору варіанта, щоб каталог         */
+/* лишався поверхнею для перегляду. <select> лишається в DOM в обох випадках і  */
+/* vibe.js тримає їх синхронними, тож okay.js перераховує ціну, артикул і       */
+/* наявність.                                                                    */
 
 .vs-chips {
 	display: flex;
@@ -2863,12 +2856,10 @@ body.hc-nav-open {
 	text-align: center;
 }
 
-/* The fast-order button is rendered by the FastOrder module and cannot be      */
-/* edited from here - its markup hard-codes "fa fa-rocket". The theme ships no  */
-/* icon font, so the glyph would never arrive and the 44px control would be     */
-/* empty; ::before is given a theme-owned mask instead and the module's own     */
-/* label stays folded away by font-size: 0. A bolt, not a rocket: the same mark */
-/* the rest of the theme uses for speed, and drawn here rather than borrowed.   */
+/* Кнопку швидкого замовлення рендерить модуль FastOrder, і його розмітка       */
+/* жорстко задає клас іконкового шрифту. Тема такого шрифту не має, тож гліф не */
+/* прийшов би і контрол лишився б порожнім — замість нього ::before із власною  */
+/* маскою теми, а підпис модуля згорнуто через font-size: 0.                    */
 
 .vs-card__actions .fast_order_button {
 	display: inline-flex;
@@ -2959,10 +2950,8 @@ body.hc-nav-open {
 }
 
 /* ---------------------------------------------------------- catalogue page */
-/* The old page wrapped the results in a bordered white panel, so every        */
-/* bordered card sat inside a second bordered box - the nested-card shape      */
-/* PRODUCT.md rules out. The grid now sits straight on the canvas and the      */
-/* cards are the only plates on the screen.                                    */
+/* Сітка лежить прямо на полотні, і картки — єдині плашки на екрані: панель з   */
+/* рамкою навколо них дала б картку в картці.                                   */
 
 .vs-catalogue {
 	padding-bottom: var(--vs-space-8);
@@ -3043,27 +3032,17 @@ body.hc-nav-open {
 	font-size: var(--vs-text-sm);
 }
 
-/* A segmented control rather than four loose links: the options are mutually  */
-/* exclusive, so they read as one control.                                     */
+/* Сегментний контрол, а не чотири окремі посилання: варіанти взаємовиключні,   */
+/* тож читаються як один контрол.                                              */
 /*                                                                             */
-/* It wrapped instead of scrolling from the final review on. Task 4 chose to   */
-/* scroll on the argument that a second row pushes the grid down where         */
-/* vertical space is scarcest; the argument is right about the cost and wrong  */
-/* about the alternative. Measured at 375: clientWidth 234, scrollWidth 401 -  */
-/* 167px hidden, "назвою" and "рейтингом" entirely off-screen, the visible     */
-/* edge cut mid-word under the Фільтр button, and with overlay scrollbars      */
-/* nothing on screen said the strip moved at all. Two of four sort options     */
-/* simply did not exist for a phone shopper. 50px of layout is the cheaper     */
-/* loss.                                                                       */
+/* Переноситься, а не прокручується: при прокрутці частина варіантів просто     */
+/* лишалась за екраном, а з накладними скролбарами ніщо не підказувало, що      */
+/* смуга взагалі рухається. flex-wrap адаптивний, тож брейкпойнт не потрібен —  */
+/* на широкому екрані пігулки вміщаються в рядок і перенос не вмикається.       */
+/* overflow-x лишається крайнім засобом для локалі з задовгими підписами.       */
 /*                                                                             */
-/* flex-wrap is adaptive, so no breakpoint is needed: from 992px the four      */
-/* pills fit on one line and it never engages. overflow-x stays as the last    */
-/* resort for a locale whose labels are too long to fit even one per row - it  */
-/* is what keeps that case out of the page's own horizontal scroll.            */
-/*                                                                             */
-/* row-gap is 12px and not the 6px column gap on purpose: .vs-sort__btn's      */
-/* 44px ::before target overhangs its 36px pill by 4px top and bottom, so two  */
-/* stacked rows 6px apart would have overlapping hit areas.                    */
+/* row-gap більший за column-gap навмисно: ціль ::before у пігулки виступає за  */
+/* її межі згори й знизу, тож два ряди впритул мали б перекриті зони натискання. */
 
 .vs-sort__group {
 	display: flex;
@@ -3090,15 +3069,12 @@ body.hc-nav-open {
 	margin: 0;
 }
 
-/* The pill is 36px, the touch target is 44px. Sorting is a secondary control - */
-/* the shopper came for the products, not for the sort order - and a 52px slab  */
-/* of solid ink at the top of the grid was reading louder than the first row of */
-/* merchandise. The ::before restores the full 44px hit height around a pill    */
-/* painted smaller, so the control loses weight without losing reach; it is     */
-/* inert (no background, no pointer-events change) and sits under the label.    */
-/* 36 + the group's 4px padding top and bottom is exactly 44: the group scrolls */
-/* horizontally, and overflow-x: auto clips the y axis too, so a taller ::before */
-/* would simply be cut off there rather than extending the target.               */
+/* Пігулка менша за ціль дотику. Сортування вторинне — покупець прийшов по      */
+/* товар, а не по порядок — тож контрол малюється легшим, а ::before повертає   */
+/* повну висоту натискання навколо нього. Він інертний і лежить під підписом.   */
+/* Висота пігулки плюс поле групи дає рівно ціль: група прокручується по        */
+/* горизонталі, а overflow-x: auto обрізає і вертикаль, тож вищий ::before      */
+/* просто зрізало б, а не подовжило ціль.                                       */
 
 .vs-sort__btn {
 	position: relative;
@@ -3134,11 +3110,9 @@ body.hc-nav-open {
 	background-color: var(--vs-surface-subtle);
 }
 
-/* Accent, not ink: this is the active state of a control, which is the first  */
-/* of the two jobs spec 5.1 gives --okay-basic-company. The fill and the label */
-/* are the owner's pair - --okay-basic-company and --okay-basic-company-text   */
-/* are set together in Settings -> Design - so the label stays legible at any  */
-/* brand colour without the theme guessing a foreground for it.                */
+/* Акцент, а не чорнило: це активний стан контрола. Заливка й підпис — пара     */
+/* власника, обидві задаються разом у Налаштуваннях, тож підпис лишається       */
+/* читабельним за будь-якого фірмового кольору без здогадок теми.               */
 
 .vs-sort__btn.active_up,
 .vs-sort__btn.active_down {
@@ -3249,13 +3223,11 @@ body.hc-nav-open {
 	transition: background-color var(--vs-dur-1) var(--vs-ease);
 }
 
-/* An applied filter is an active state, so the ring is the owner's accent -   */
-/* spec 5.1 again. It is the border and not the fill: the chip's label is a    */
-/* feature name and its value, prose that has to stay at --vs-text, and a      */
-/* border has no contrast floor to breach at whatever the brand colour is.     */
-/* Hover moves the fill instead of the border, which the border used to do -   */
-/* --vs-border-strong on hover would now read as the accent being replaced by  */
-/* grey, i.e. the state going backwards.                                       */
+/* Застосований фільтр — активний стан, тож обвід бере акцент власника. Саме    */
+/* рамка, а не заливка: підпис чипа — назва характеристики та її значення,      */
+/* тобто текст, який мусить лишитись на --vs-text, а рамка не має порога        */
+/* контрасту. На hover рухається заливка, бо сірий обвід читався б як заміна    */
+/* акценту, тобто крок назад.                                                   */
 
 .vs-applied__chip:hover {
 	background-color: var(--vs-surface-subtle);
@@ -3332,10 +3304,9 @@ body.hc-nav-open {
 }
 
 /* --------------------------------------------------------------- skeleton */
-/* The real grid is always in the markup and always visible; the skeleton is   */
-/* an overlay that vibe.js switches on while an okay.js ajax filter round-trip */
-/* is in flight, so a browser that never runs the script still ships the       */
-/* products rather than a blank page waiting for a class to be removed.        */
+/* Справжня сітка завжди в розмітці й завжди видима, а скелет — накладка, яку   */
+/* вмикає vibe.js на час ajax-запиту фільтра. Браузер без скриптів отримує      */
+/* товари, а не порожню сторінку в очікуванні зняття класу.                     */
 
 .vs-catalogue__skeleton {
 	display: none;
@@ -3384,12 +3355,8 @@ body.hc-nav-open {
 	}
 }
 
-/* The incoming tab panel fades in. Opacity only, on purpose: a transform would  */
-/* make the panel a containing block for anything positioned inside it, and the  */
-/* reviews panel holds a form. It cannot overlap the outgoing panel the way      */
-/* okay.js's slide did - vibe.js switches the panels instantly, so exactly one   */
-/* of them is ever rendered. The global prefers-reduced-motion rule in base.css  */
-/* already reduces this to nothing for anyone who asked for that.                */
+/* Лише opacity, навмисно: transform зробив би панель блоком-контейнером для    */
+/* всього позиціонованого всередині, а панель відгуків містить форму.           */
 
 @keyframes vs-tab-in {
 	from {
@@ -3485,11 +3452,10 @@ body.hc-nav-open {
 }
 
 /* ------------------------------------------------------------ filter panel */
-/* One markup, two presentations. Below 992px .vs-filters is the .vs-sheet     */
-/* bottom sheet; from 992px the media query at the end of this file turns the  */
-/* very same element into a static rail. Rendering it once is what keeps       */
-/* okay.js binding fn_features a single time and leaves the ajax filter path   */
-/* untouched.                                                                  */
+/* Одна розмітка, дві подачі: на вузькому екрані це нижня шторка, на широкому — */
+/* медіазапит у кінці файлу робить із того самого елемента бічну панель.        */
+/* Один рендер — це те, що лишає okay.js єдину прив'язку fn_features і не чіпає */
+/* ajax-шлях фільтра.                                                           */
 
 .vs-filters {
 	max-height: 88dvh;
@@ -3512,13 +3478,11 @@ body.hc-nav-open {
 	font-weight: 600;
 }
 
-/* overflow-x is stated explicitly. Left at its initial `visible` it does not    */
-/* stay visible: a box that scrolls on one axis forces the other axis to `auto`, */
-/* so any horizontal spill - the price slider's 44px touch area used to overhang */
-/* the rail by 10px - raised a real horizontal bar under the filters. The spill  */
-/* itself is fixed at source; `clip` is the belt so it can never come back.      */
-/* Scrollbar stays visible but thin and token-coloured: a scrollable region with */
-/* no visible bar is its own usability failure.                                  */
+/* overflow-x задано явно: лишений на `visible` він таким не лишається — коробка */
+/* зі скролом по одній осі змушує другу перейти в `auto`, і будь-який           */
+/* горизонтальний виступ підняв би справжню смугу прокрутки під фільтрами.      */
+/* Скролбар лишається видимим, лише тонким: область, що прокручується без       */
+/* видимої смуги, — окрема вада зручності.                                       */
 
 .vs-filters__scroll {
 	flex: 1 1 auto;
@@ -3584,18 +3548,14 @@ body.hc-nav-open {
 	cursor: pointer;
 }
 
-/* Collapsed state. okay.js owns the toggle: it flips .active on the head and   */
-/* slideToggle()s the next sibling, so .active IS the collapsed state and the    */
-/* rule below is simply that state expressed before the first click. features.tpl*/
-/* ships .active on every group past the first two, and on any group whose       */
-/* filter is not applied - so the shopper meets a short list of 29 headings      */
-/* instead of eight metres of open groups.                                       */
-/* Gated on .js (set by an inline script in head.tpl) because the head is a      */
-/* type="button" with no no-script fallback: without JavaScript a collapsed      */
-/* group could never be opened again, so without JavaScript nothing collapses.   */
-/* jQuery's showHide() reads a cascade-hidden element as hidden and writes an    */
-/* inline display on the way open, so the first click expands correctly and      */
-/* every later toggle runs on inline styles that outrank this rule.              */
+/* Згорнутий стан. Перемикачем володіє okay.js: він ставить .active на голову   */
+/* групи, тож .active І Є згорнутим станом, а правило нижче — лише той самий    */
+/* стан до першого кліку.                                                        */
+/*                                                                              */
+/* Обмежено класом .js, бо голова групи — це <button> без запасного варіанта:   */
+/* без JavaScript згорнуту групу вже не відкрити, тож без нього нічого й не     */
+/* згортається. jQuery на першому кліку пише інлайновий display, який далі      */
+/* переважає це правило.                                                        */
 
 .js .vs-filter-group__head.active + .vs-filter-group__body {
 	display: none;
@@ -3750,11 +3710,10 @@ body.hc-nav-open {
 	font-size: var(--vs-text-sm);
 }
 
-/* The side inset is sized by the touch area, not by taste. At either end of the  */
-/* rail the handle's centre sits exactly on the rail's edge, and .noUi-touch-area */
-/* below is 44px wide and centred on that handle - so it reaches 22px past the    */
-/* rail. 12px of inset left 10px of it outside the panel, which is precisely the  */
-/* horizontal overflow that produced the scrollbar. 24px clears 22px.             */
+/* Бічний відступ задає зона дотику, а не смак: у крайніх положеннях центр       */
+/* ручки стоїть рівно на краю смуги, а її зона дотику вдвічі ширша й виступає    */
+/* за смугу. Відступ має цей виступ перекривати, інакше він дає горизонтальний   */
+/* скрол панелі.                                                                 */
 
 .vs-price__slider {
 	margin: var(--vs-space-6) var(--vs-space-6) var(--vs-space-2);
@@ -3796,14 +3755,11 @@ body.hc-nav-open {
 	display: none;
 }
 
-/* Both handles are focusable divs with tabindex="0", so the 44x44 rule applies   */
-/* to them - and a price range is the primary control inside the filter sheet on  */
-/* a phone. A 44px disc on a 4px rail would read as a knob, so the hit area is    */
-/* grown instead of the visual: noUiSlider 14.6.1 binds its drag start to         */
-/* handle.children[0], i.e. .noUi-touch-area, so that is the element that has to  */
-/* be 44px. A transparent ::before on the handle would enlarge nothing - the      */
-/* pointer event would land on the handle and never reach the touch area's        */
-/* listener.                                                                      */
+/* Обидві ручки фокусовані, тож поріг дотику до них застосовний. Росте зона      */
+/* натискання, а не сама ручка: бібліотека вішає початок перетягування на першу  */
+/* дитину ручки, тобто саме .noUi-touch-area має бути потрібного розміру.        */
+/* Прозорий ::before на ручці не збільшив би нічого — подія лягла б на ручку й   */
+/* до слухача зони дотику не дійшла б.                                            */
 
 .vs-price__slider .noUi-touch-area {
 	position: absolute;
@@ -3821,13 +3777,9 @@ body.hc-nav-open {
 
 /* --------------------------------------------------------- category filter */
 
-/* features.tpl and blog_sidebar.tpl both emit .vs-filter-cats--sub on every    */
-/* nesting level past the first, and until the final review nothing in this     */
-/* sheet matched it: measured on /blog, the level-2 list started at x 1116,     */
-/* the same x as its parent, so the tree rendered as one flat list and a        */
-/* subcategory was indistinguishable from a sibling of its own parent. The      */
-/* step is 24px, the width of .vs-filter-cats__icon, so a child's glyph lines   */
-/* up with where its parent's label begins.                                     */
+/* Крок відступу дорівнює ширині іконки, тож гліф дитини стає рівно там, де     */
+/* починається підпис батька — інакше дерево читається як плаский список і      */
+/* підкатегорію не відрізнити від сусіда її ж батька.                            */
 
 .vs-filter-cats--sub {
 	padding-left: var(--vs-space-6);
@@ -3854,13 +3806,10 @@ body.hc-nav-open {
 	background-color: var(--vs-surface-subtle);
 }
 
-/* The active nav item, spec 5.1's third accent surface. The category rail is  */
-/* the theme's real navigation - it is what marks where the shopper is on a    */
-/* catalogue page and, through blog_sidebar.tpl, on the blog. Filled with the  */
-/* owner's pair rather than tinted text, for the same reason as the sort       */
-/* segment: the pair is set together in the admin, so it cannot be made        */
-/* illegible from the design screen. The weight stays, so the state survives   */
-/* an accent that happens to sit close to the surface colour.                  */
+/* Активний пункт навігації. Заливка парою власника, а не підфарбований текст:  */
+/* пара задається в адмінці разом, тож зробити підпис нечитабельним з екрана    */
+/* дизайну неможливо. Насиченість лишається, щоб стан пережив акцент, близький  */
+/* до кольору поверхні.                                                          */
 
 .vs-filter-cats__link.is-current {
 	background-color: var(--vs-accent);
@@ -3886,13 +3835,11 @@ body.hc-nav-open {
 	color: inherit;
 }
 
-/* color: inherit only reaches an inline <svg>, which is why the blog rail's   */
-/* svg fallback survived the accent fill and the shop's raster thumbnail did   */
-/* not: a category image is a 20px PNG of dark line art, drawn for a light     */
-/* surface, and on the ink fill it went invisible. It gets a plate of that     */
-/* light surface back instead of losing the fill. <picture> is the marker -    */
-/* the template emits it only when the category has an image, so the svg       */
-/* fallback keeps the bare fill and needs no exception here.                   */
+/* color: inherit дістає лише інлайновий <svg>, тож растрова мініатюра          */
+/* категорії — темна графіка, намальована для світлої поверхні — на заливці     */
+/* акцентом зникала б. Замість втрати заливки вона отримує назад плашку тієї    */
+/* світлої поверхні. Маркером слугує <picture>: шаблон віддає його лише за      */
+/* наявності зображення, тож svg-запасний варіант винятку не потребує.          */
 
 .vs-filter-cats__link.is-current .vs-filter-cats__icon picture {
 	display: flex;
@@ -4159,10 +4106,9 @@ body.hc-nav-open {
 }
 
 /* ----------------------------------------------------------------- gallery */
-/* gallery-top, gallery-thumbs and every swiper-* class are okay.js's Swiper   */
-/* bindings and cannot be renamed; the thumb strip is vertical because okay.js */
-/* configures it that way, so it can only be a column beside the stage. Below  */
-/* 768px it is hidden (hidden-sm-down) and the stage is swiped instead.        */
+/* Усі swiper-* — прив'язки Swiper з okay.js, перейменувати їх не можна. Смуга  */
+/* мініатюр вертикальна, бо так її налаштовує okay.js, тож вона може бути лише  */
+/* колонкою збоку від сцени.                                                     */
 
 .vs-pdp__gallery {
 	min-width: 0;
@@ -4218,13 +4164,10 @@ body.hc-nav-open {
 	object-fit: contain;
 }
 
-/* Swiper's own arrows were a dark translucent slab in okay.css. They are the  */
-/* same plate-on-photograph control the rest of the theme uses, and they reach */
-/* 44px so they are usable with a thumb. The glyph is drawn with two borders   */
-/* rather than the swiper-icons font, so nothing here depends on a sheet that  */
-/* no longer exists. Every property below is also declared by the generic      */
-/* .swiper-button-* default at the top of this file; stating them again here   */
-/* is what makes this instance own its look, and this rule is the later one.   */
+/* Гліф малюється двома рамками, а не шрифтом swiper-icons, тож ніщо тут не     */
+/* залежить від зовнішнього іконкового шрифту. Кожну властивість оголошує ще й  */
+/* загальне правило .swiper-button-* на початку файлу — повторення тут і робить */
+/* цей екземпляр власником свого вигляду, бо це правило пізніше.                */
 
 .vs-gallery__nav {
 	top: 50%;
@@ -4292,12 +4235,10 @@ body.hc-nav-open {
 	color: var(--vs-surface);
 }
 
-/* Swiper derives the slide height from the container height, so the strip needs */
-/* a deterministic one: left to stretch, it and the square stage would size each */
-/* other in a loop and the stage would stop being square (measured at 991px:     */
-/* 897 wide by 2537 tall). okay.js pins the strip to 3 slides below 992px and 5  */
-/* above it, so the height is chosen to make each slot square: 3x68 + 2x10 here, */
-/* 5x76 + 4x10 in the >= 992 block, matching Swiper's spaceBetween of 10.        */
+/* Swiper виводить висоту слайда з висоти контейнера, тож смузі потрібна певна: */
+/* лишена тягнутись, вона й квадратна сцена розмірювали б одна одну по колу.    */
+/* Висота підібрана так, щоб кожне гніздо було квадратним при тій кількості     */
+/* слайдів, яку задає okay.js, і при його ж spaceBetween.                       */
 
 .vs-gallery__thumbs {
 	flex: none;
@@ -4322,11 +4263,9 @@ body.hc-nav-open {
 	border-color: var(--vs-border-strong);
 }
 
-/* Two pixels of accent rather than one of ink. The width is the point: the    */
-/* accent is the owner's to set and could arrive pale, and a thumbnail strip   */
-/* whose only "you are looking at this one" signal is a 1px hairline in an     */
-/* unknown colour is a state carried by colour alone. Doubling the border      */
-/* makes the weight change readable even when the hue is not.                  */
+/* Товща рамка акценту, а не тонка чорнильна. Товщина тут і є суттю: акцент     */
+/* задає власник і той може виявитись блідим, а стан, позначений лише тонкою    */
+/* лінією невідомого кольору, тримається на самому кольорі.                     */
 
 .vs-gallery__thumb.swiper-slide-thumb-active {
 	border-width: 2px;
