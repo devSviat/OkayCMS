@@ -87,48 +87,36 @@ class Design
     
 
     /**
+     * Smarty 5 не викликає нативну PHP-функцію з шаблону, поки її не зареєстровано,
+     * і однаково в позиції модифікатора {$x|trim} та виклику {max(1,$n)}. Це білий
+     * список того, що дозволено авторам шаблонів; registerSmartyPlugins() реєструє
+     * його цілком. Вбудованих модифікаторів Smarty тут немає навмисно: розширення
+     * резолвляться раніше за наші реєстрації, тож запис був би мертвим.
+     *
      * @var array
      */
     private $allowedPhpFunctions = [
-        'escape',
-        'cat',
-        'count',
-        'in_array',
-        'nl2br',
         'str_replace',
-        'reset',
         'floor',
-        'round',
         'ceil',
         'max',
         'min',
-        'number_format',
         'print_r',
         'var_dump',
-        'printa',
         'file_exists',
         'stristr',
         'strtotime',
-        'empty',
         'urlencode',
         'intval',
-        'isset',
         'sizeof',
-        'is_array',
         'array_intersect',
         'time',
-        'array',
         'base64_encode',
-        'implode',
-        'explode',
         'preg_replace',
         'preg_match',
-        'key',
-        'json_encode',
         'json_decode',
         'is_file',
         'date',
-        'strip_tags',
         'trim',
         'ltrim',
         'rtrim',
