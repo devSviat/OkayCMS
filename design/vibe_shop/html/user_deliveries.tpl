@@ -14,7 +14,7 @@
                                id="deliveries_{$delivery->id}"
                                onchange="okay.change_payment_method();"
                                data-module_id="{$delivery->module_id}"
-                               data-payment_method_ids="{implode(',', $delivery->payment_methods_ids)}"
+                               data-payment_method_ids="{join($delivery->payment_methods_ids, ',')}"
                                type="radio"
                                name="delivery_id"
                                value="{$delivery->id}"

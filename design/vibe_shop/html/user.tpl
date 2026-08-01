@@ -1,7 +1,7 @@
 {* Account page *}
 
 {* The page title *}
-{$meta_title = $lang->user_title scope=global}
+{if empty($meta_title)}{$meta_title = $lang->user_title scope=global}{/if}
 
 {* Two presentations, one markup, exactly as the stock theme had it:
    - from 768px okay.js's .tabs script shows one .tab at a time and

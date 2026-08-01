@@ -28,7 +28,7 @@ use Okay\Core\TplMod\TplMod;
 use Okay\Helpers\OrdersHelper;
 use Psr\Log\LoggerInterface;
 use Bramus\Router\Router as BRouter;
-use Smarty;
+use Smarty\Smarty;
 use Detection\MobileDetect;
 use Aura\SqlQuery\QueryFactory as AuraQueryFactory;
 use Aura\Sql\ExtendedPdo;

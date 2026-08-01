@@ -1,7 +1,7 @@
 <!-- Registration page -->
 
 {* The page title *}
-{$meta_title = $lang->register_title scope=global}
+{if empty($meta_title)}{$meta_title = $lang->register_title scope=global}{/if}
 
 <div class="block">
     {* The page heading *}
