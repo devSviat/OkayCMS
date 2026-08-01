@@ -6,6 +6,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 OkayCMS (fork) — PHP e-commerce platform with a modular architecture, custom DI container, and custom ORM.
 
+## Branches
+
+| Branch | What it is |
+| ------ | ---------- |
+| `main` | This fork's line of development. Default branch — every PR targets it. |
+| `master` | A mirror of `OkayCMS/OkayCMS@master`. Nothing of ours is ever committed here. |
+| `develop` | The upstream `develop` line, kept for the same reason. |
+
+A fresh clone has no `upstream` remote — add it once:
+
+```bash
+git remote add upstream https://github.com/OkayCMS/OkayCMS.git
+```
+
+Pulling a new upstream release and seeing what it changes:
+
+```bash
+git fetch upstream
+git push origin upstream/master:master   # move the mirror
+git log --oneline main..origin/master    # what they added
+git diff main...origin/master -- <path>  # what it means for us
+```
+
+Upstream changes are merged into `main` deliberately, file by file — this fork has rewritten
+security boundaries, themes and the Docker environment, so a blind merge would undo them.
+
 ## Stack
 
 - PHP `^8.4` (verified on 8.4–8.5)
