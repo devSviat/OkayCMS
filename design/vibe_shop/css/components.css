@@ -1,14 +1,7 @@
 /**
 * vibe_shop component layer.
-* This file is the new component styling built on top of tokens.css and
-* base.css, and it is registered last of the six served sheets (tokens.css,
-* grid.css, vendor.css, select2.css, base.css, components.css) so it wins over
-* all of them on source order at equal specificity.
-*
-* The legacy sheets this theme shipped with - okay.css, theme.css, media.css
-* and mobile_menu.css - were deleted in Task 8. Nothing in this file may lean
-* on them any more; where a comment below names one it is describing what a
-* rule replaced, in the past tense, not a live ordering constraint.
+* Registered last of the six served sheets, so it wins over all of them on
+* source order at equal specificity.
 *
 * House rules for this file, enforced by the compiler:
 * - every declaration lives on one physical line (lines are concatenated
@@ -17,11 +10,10 @@
 * - comments occupy whole lines
 * - no raw colour, shadow, radius, duration or font stack; tokens only
 *
-* Two sections carry the generic class names module templates render:
-* - LEGACY GENERIC DEFAULTS, immediately below, holds the ones this file also
-*   refines on the SAME element under a .vs-* name. They have to come first so
-*   the .vs-* rule wins on source order at equal specificity.
-* - LEGACY CLASS CONTRACT, at the end of the file, holds the rest.
+* Generic class names that module templates render live in two sections:
+* LEGACY GENERIC DEFAULTS below (those this file also refines under a .vs-*
+* name - they come first so the .vs-* rule wins on source order) and
+* LEGACY CLASS CONTRACT at the end of the file.
 */
 
 /* ============================================================================ */
@@ -93,19 +85,13 @@
 	transform: translateX(1px) rotate(135deg);
 }
 
-/* The banner's arrows are the only pair that sits ON a photograph, and they sat  */
-/* there permanently: two 44px plates parked over the image whether or not anyone */
-/* intended to page through it. On a phone the banner is 358px wide, so the pair  */
-/* covered a quarter of it.                                                       */
-/*                                                                               */
-/* With a pointer they fade in when the slider is pointed at, and :focus-within   */
-/* covers the keyboard - opacity rather than display, so the buttons stay in the  */
-/* tab order and Swiper keeps its disabled class on them. Without one they are    */
-/* gone: there is no hover to reveal them with, and swipe plus the dots is the    */
-/* whole interaction a touch slider needs. Scoped to .banner_group, which is the  */
-/* Banners module's slider root - the theme's own two pairs (.vs-gallery__nav on  */
-/* the product photos, .vs-compare__nav) match the bare selector too, and both    */
-/* are the only way to page those tracks.                                         */
+/* Єдина пара стрілок, що сидить ПОВЕРХ фотографії, тож показується лише за     */
+/* наведення, а на дотику зникає зовсім: там гортання і крапки — вся потрібна    */
+/* взаємодія. Саме opacity, а не display, щоб кнопки лишались у tab-порядку і    */
+/* Swiper тримав на них свій disabled-клас.                                      */
+/*                                                                              */
+/* Обмежено .banner_group: власні пари теми (.vs-gallery__nav, .vs-compare__nav) */
+/* теж збігаються з голим селектором, а для них це єдиний спосіб гортати.        */
 
 @media (hover: hover) {
 	.banner_group .swiper-button-prev,
@@ -262,33 +248,17 @@
 
 /* ------------------------------------------------------- fields and notes */
 
-/* The field is a three-state object, not a static outline. At rest it is a      */
-/* quiet recess - one value step below the white card it sits on - inside a      */
-/* hairline; the border firms to --vs-border-strong on hover and to --vs-ink on  */
-/* focus, where the fill also goes white so the field reads as the live one. A   */
-/* heavy resting border is what made this look dated, and a heavier one is not   */
-/* the answer: the state that matters is the focused one, and it can only stand  */
-/* out if the resting state is quiet.                                            */
-/*                                                                               */
-/* --vs-radius-md, the button radius. This was --vs-radius-sm on the argument    */
-/* that 12px on a 44px control reads as a pill, and that fields should share the  */
-/* 8px of the rows inside dropdown panels. Both parts were wrong on this theme:   */
-/* 12px is 27% of 44px, not half, and .vs-btn, .vs-stepper and .vs-search__input  */
-/* are all 44px tall with 12px already - the field was the only control of that   */
-/* height carrying 8px, which is exactly what showed as a mismatch where a field  */
-/* and a button stand side by side, as the coupon row does. 8px stays the radius  */
-/* of the small square things - dropdown rows, checkboxes, badges - where 12px    */
-/* on a 20px box would be nearly a circle.                                       */
-/*                                                                               */
-/* The inset stays --vs-space-3 rather than --vs-space-4: a larger radius eats     */
-/* into the corner, but 12px of text inset is still clear of a 12px corner and    */
-/* .vs-buybox__select and .vs-price__input already used it.                       */
-/*                                                                               */
-/* The resting fill is the same neutral for every shop: --vs-surface follows the */
-/* owner's boxed colour and a field must stay distinguishable FROM its card, so  */
-/* deriving one from the other would collapse whenever the owner picks a tint.   */
-/* --vs-text-muted on --vs-n-25 measures 5.07:1, clear of the 4.5:1 floor a      */
-/* placeholder has to hold.                                                      */
+/* Поле — обʼєкт із трьох станів. У спокої тиха западина в тонкій межі; межа     */
+/* твердішає на hover і на фокусі, де заливка стає білою. Стан, що має значення, */
+/* — сфокусований, і він помітний лише доти, доки стан спокою тихий.             */
+/*                                                                              */
+/* Радіус — той самий, що в кнопки: усі контроли висотою 44px мають однаковий,   */
+/* інакше поле й кнопка поруч (рядок купона) не збігаються. 8px лишається для    */
+/* дрібних квадратних елементів, де більший радіус дав би майже коло.            */
+/*                                                                              */
+/* Заливка в спокої — той самий нейтральний для будь-якого магазину, а не        */
+/* похідна від --vs-surface: та йде за кольором картки власника, і поле мусить   */
+/* лишатись відрізнюваним ВІД картки за будь-якого тону.                         */
 
 /* --vs-border, not --vs-hairline: the fill is --vs-n-25 on a --vs-n-0 card, a  */
 /* 1.04:1 step, so the outline is the only thing that says "field here" and     */
@@ -950,25 +920,17 @@ body.other_page .main {
 	scrollbar-color: var(--vs-n-300) transparent;
 }
 
-/* display:table also swallowed the library's inline max-height:320px - a table */
-/* box sizes to its rows - so the panel grew to 422px for ten results and never */
-/* scrolled. As a block it honours the cap, which is why the bar below matters. */
+/* Саме block: display:table ковтав би інлайновий max-height бібліотеки, бо */
+/* табличний бокс розмірюється за рядками — панель не скролилась би. */
 
-/* The panel has to be told where to sit, and only here. devbridge positions the */
-/* container itself - but fixPosition() returns early unless the container's     */
-/* parent is <body>, and okay.js hands this instance appendTo: "#fn_search". So  */
-/* the library sets position: absolute inline and never sets top, which leaves   */
-/* the static position to decide - and .vs-search is a flex row with             */
-/* align-items: center, where an absolutely positioned child's static position   */
-/* is the one it would get as the sole flex item. Centred. A 320px panel in a    */
-/* 44px row resolved to top: -138px, so the suggestions covered the header and   */
-/* ran off the top of the window. Below 768px .vs-search is a plain block and    */
-/* the same static position happened to land under the field, which is why this  */
-/* only ever showed on a wide screen.                                           */
+/* Позицію панелі задаємо ми, і лише тут. fixPosition() бібліотеки виходить      */
+/* достроково, якщо контейнер не дитина <body>, а okay.js віддає цьому екземпляру */
+/* appendTo: "#fn_search" — тож top не виставляється взагалі й панель сідає за  */
+/* статичною позицією, тобто по центру флекс-рядка, поверх шапки.                 */
 /*                                                                              */
-/* Scoped to .vs-search: the OkayCMS_Novaposhta city field uses the same library */
-/* with the default appendTo, so its panel IS a child of <body> and fixPosition  */
-/* does place it - overriding top there would fight the library.                 */
+/* Обмежено .vs-search: поле міста NovaposhtaCost використовує ту саму бібліотеку */
+/* з типовим appendTo, там панель справді дитина <body> і fixPosition її ставить  */
+/* — перевизначення top билося б із бібліотекою.                                  */
 
 .vs-search .autocomplete-suggestions {
 	top: 100%;
@@ -988,15 +950,9 @@ body.other_page .main {
 	background-color: var(--vs-n-300);
 }
 
-/* This library serves two inputs on this site: the header product search, and  */
-/* the OkayCMS_NovaposhtaCost city field in the cart. They share the class      */
-/* names and share nothing else - a product row is thumbnail + link + price,    */
-/* a city row is one bare <div> of text. Everything from here to the plain-text */
-/* reset is common ground; the product skin below it is scoped to .vs-search.   */
-/*                                                                             */
-/* 44px is the theme's control height - the field the panel hangs off, the      */
-/* select2 rows in the same delivery block, every label in .vs-option__extra -  */
-/* so a text-only suggestion sits at the same rhythm as its neighbours.         */
+/* Бібліотека обслуговує два поля: пошук товарів у шапці й поле міста           */
+/* NovaposhtaCost у кошику. Спільні лише імена класів. Усе звідси до скидання   */
+/* простого тексту — спільне; шкурка товару нижче обмежена .vs-search.          */
 
 .autocomplete-suggestion {
 	display: flex;
@@ -1065,9 +1021,8 @@ body.other_page .main {
 	background-color: var(--vs-plate);
 }
 
-/* The plate is --vs-plate, not --vs-surface-subtle: the selected row already   */
-/* takes surface-subtle, and a thumbnail that dissolved into its own row on     */
-/* selection would lose the one element that identifies the product.            */
+/* --vs-plate, а не --vs-surface-subtle: його вже бере вибраний рядок, і        */
+/* мініатюра розчинилась би в ньому при виборі.                                  */
 
 .vs-search .autocomplete-suggestion > div img {
 	max-width: 100%;
