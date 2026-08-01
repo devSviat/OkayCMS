@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
-# Smoke-перевірки *production*-образів OkayCMS і зібраного prod-конфігу.
-# На відміну від smoke.sh, тут немає запущеного docker-compose стеку —
-# скрипт збирає одноразові образи стадій `prod` і `nginx-prod`, піднімає їх
-# напряму (`docker run`, без Compose) і перевіряє, а також звіряє вивід
-# `docker compose ... config` на те, що образи самі довести не можуть: чи
-# публікує зібраний стек порти, чи присутні в composed конфізі dev-сервіси
-# (mailpit, db-init).
+# Smoke-перевірки production-образів і зібраного prod-конфігу. Живого стеку не
+# потребує: збирає одноразові образи стадій `prod` і `nginx-prod`, піднімає їх
+# через `docker run` і додатково звіряє вивід `docker compose ... config`.
 #
-# Запуск у будь-який момент, без `docker compose up -d`: dev/bin/smoke-prod.sh
+# Запуск: dev/bin/smoke-prod.sh
 set -uo pipefail
 cd "$(dirname "$0")/.."   # тепер у dev/
 
@@ -46,8 +42,7 @@ run_in_image() {
     docker run --rm --entrypoint sh "$image_tag" -c "$1" 2>&1
 }
 
-# dump_actual_output <out>: показує, що насправді видала команда, а не лише
-# те, чого ми очікували.
+# Показує, що команда видала насправді, а не лише чого ми очікували.
 dump_actual_output() {
     local out=$1 len
     len=${#out}
@@ -91,10 +86,8 @@ expect_missing() {
 }
 
 echo "Filesystem: dev-only and secret-bearing files must not ship"
-# Найважливіша перевірка тут. config/config.local.php у .gitignore, але
-# Docker-білд читає файлову систему, а не git — без відповідного рядка в
-# кореневому .dockerignore реальний пароль бази розробника потрапив би в
-# кожен зібраний з цього checkout образ.
+# Найважливіша перевірка тут: білд читає файлову систему, а не git, тож без
+# рядка в .dockerignore пароль дев-бази потрапив би в кожен образ.
 expect_contains "config/config.local.php did not make it into the image" \
     "absent" \
     run_in_image 'test -f /var/www/html/config/config.local.php && echo present || echo absent'
@@ -125,13 +118,8 @@ expect_contains "vendor/autoload.php is present (composer install ran)" \
 
 echo
 echo "nginx-prod image (regression test: prod nginx must not serve an empty web root)"
-# Раніше docker-compose.prod.yml збирав nginx з образу nginx:1.29-alpine "як
-# є" (штатний default.conf, порожній /usr/share/nginx/html) замість стадії
-# nginx-prod (dev/docker/Dockerfile) — кожен запит повертав 404. Жодна
-# автоматична перевірка цього не ловила. Тут збираємо nginx-prod окремо,
-# піднімаємо його з реальним vhost-шаблоном і справжнім php-fpm бекендом
-# (стадія prod, той самий образ, що й вище) на ізольованій мережі — без
-# `docker compose`, тому й без залежності від живого dev-стеку.
+# Регресія, яку це ловить: nginx, зібраний не зі стадії nginx-prod, віддавав
+# 404 на кожен запит, і жодна перевірка цього не бачила.
 if ! docker build -f docker/Dockerfile --target nginx-prod -t "$nginx_image_tag" \
         --build-arg APP_UID="${APP_UID:-1000}" --build-arg APP_GID="${APP_GID:-1000}" \
         .. ; then
@@ -141,10 +129,8 @@ else
     docker network create "$net_name" >/dev/null
     docker run -d --name "$php_stub_name" --network "$net_name" "$image_tag" >/dev/null
 
-    # nginx-prod навмисно не копіює vhost-шаблон в образ (Dockerfile-коментар
-    # біля стадії) — його підключає docker-compose.prod.yml bind-mount'ом.
-    # Відтворюємо це тут же, руками, щоб перевірка була чесною: образ сам по
-    # собі "порожній" без цього монтування, так само як і в composed стеку.
+    # vhost-шаблон в образ не копіюється — його підключає прод-оверлей
+    # bind-mount'ом. Відтворюємо це руками, щоб перевірка була чесною.
     docker run -d --name "$nginx_stub_name" --network "$net_name" \
         -p "127.0.0.1::80" \
         -e VIRTUAL_HOST="${VIRTUAL_HOST:-okaycms.loc}" \
@@ -168,25 +154,17 @@ else
         docker logs "$nginx_stub_name" 2>&1 | tail -20
     else
         nginx_port=$(docker port "$nginx_stub_name" 80/tcp | head -1 | cut -d: -f2)
-        # robots.txt потребує лише файлової системи, не БД — саме тому й
-        # обраний для позитивної перевірки "дерево застосунку присутнє":
-        # index.php тут не годиться, бо без змонтованого
-        # config/config.local.php (його свідомо немає в цьому
-        # ізольованому прогоні — див. Filesystem-перевірки вище) застосунок
-        # ловить \Exception при спробі з'єднання з БД (index.php:92-99) і
-        # віддає порожню 500-відповідь. Це коректна прод-поведінка (жодного
-        # витоку інформації без debug_mode), а не ознака порожнього кореня —
-        # але вона робить "GET / -> 200" непридатною перевіркою тут.
+        # robots.txt, а не index.php: без config.local.php застосунок віддає
+        # порожню 500 (коректна прод-поведінка), тож "GET / -> 200" тут не
+        # годиться як ознака присутнього дерева.
         expect_contains "nginx-prod: robots.txt is served (application tree is present, not an empty web root)" \
             "200" \
             sh -c "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/robots.txt"
         expect_contains "nginx-prod: a design/ CSS asset is served" \
             "200" \
             sh -c "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/design/okay_shop/css/grid.css"
-        # "/" не 404: був би 404, якби index.php фізично був відсутній на
-        # диску (справжній симптом старого багу — nginx-prod, зібраний без
-        # COPY --from=prod, або взагалі не той stage). 500 тут — очікувано
-        # (див. коментар вище), і саме тому перевіряємо "не 404", а не "200".
+        # Не 404, а не 200: 500 тут очікувана (див. вище), а 404 означав би
+        # фізично відсутній index.php — симптом старого багу.
         expect_missing "nginx-prod: / does not 404 (index.php is present and executes, unlike an empty web root)" \
             "404" \
             sh -c "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/"
@@ -201,17 +179,9 @@ fi
 
 echo
 echo "Composed prod config"
-# Найважливіша властивість docker-compose.prod.yml: Dokploy підключає Traefik
-# прямо до контейнера, тож зібраний стек не повинен публікувати нічого.
-# Перевірка конфігу — не те саме, що перевірка запущеного стеку, але це
-# єдине, що можна перевірити без реального Dokploy/Traefik, і вона ловить
-# випадковий `ports:`, що прокрався в один із файлів.
-#
-# Це мають бути дві окремі перевірки: якщо docker-compose.prod.yml зникне,
-# `docker compose ... config` впаде з "no such file", і цей текст так само не
-# містить "published:" — самотній expect_missing пройшов би, але з хибної
-# причини (команда впала, а не "портів не знайдено"). Тому спершу перевіряємо,
-# що конфіг взагалі згенерувався.
+# Дві окремі перевірки навмисно: якщо конфіг не згенерується, вивід так само
+# не міститиме "published:", і самотній expect_missing пройшов би з хибної
+# причини — команда впала, а не "портів не знайдено".
 expect_contains "docker compose config (base + prod overlay) renders successfully" \
     "services:" \
     docker compose -f docker-compose.yml -f docker-compose.prod.yml config

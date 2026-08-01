@@ -1,14 +1,10 @@
-# Базова конфігурація, спільна для dev і prod.
-#
-#   dev   docker compose up -d                       (override.yml підключається сам)
-#   prod  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-#
-# Усе dev-специфічне — bind-mount'и вихідного коду, опубліковані порти, Xdebug,
-# сідовий дамп — лежить у docker-compose.override.yml і в прод не потрапляє.
+# Базова конфігурація, спільна для dev і prod. Усе dev-специфічне —
+# bind-mount'и коду, порти, Xdebug, сідовий дамп — у docker-compose.override.yml
+# і в прод не потрапляє. Команди запуску — dev/README.md.
 
 name: ${APP_NAME:?err}
 
-# Спільне для php85 і scheduler, щоб образи не розійшлись між собою.
+# Спільне для php85 і scheduler, щоб образи й оточення не розійшлись.
 x-php-build: &php-build
   context: ..
   dockerfile: dev/docker/Dockerfile
@@ -17,25 +13,21 @@ x-php-build: &php-build
     APP_UID: ${APP_UID:-1000}
     APP_GID: ${APP_GID:-1000}
 
-# Те саме для оточення: php85 і scheduler виконують той самий код OkayCMS і
-# мають бачити однакові TZ/mail-redirect/domain.
 x-php-env: &php-env
   TZ: ${TZ:-Europe/Kyiv}
   TEST_INTERNAL_EMAIL: ${TEST_INTERNAL_EMAIL:-}
   PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-}
 
-# Шляхи, у які OkayCMS пише під час роботи. Спільні для php85 і scheduler —
-# обидва крутять той самий код на тому ж образі. Один якір, а не два списки:
-# інакше ціль, не перевизначена для scheduler, лишалась би невидимою для
-# php85 і губилась би при наступному деплої.
+# Шляхи, у які OkayCMS пише під час роботи. Один якір на обидва сервіси —
+# інакше ціль, не перевизначена для scheduler, губилась би при деплої.
 x-app-volumes: &app-volumes
   - files:/var/www/html/files
   - backend_files:/var/www/html/backend/files
   - app_cache:/var/www/html/cache
   - app_log:/var/www/html/Okay/log
 
-# Компільовані шаблони Smarty та XML: чистий кеш, який відновлюється сам.
-# У tmpfs, щоб очищався при перестворенні контейнера й не ріс на диску.
+# Компільовані шаблони — кеш, що відновлюється сам. У tmpfs, щоб очищався при
+# перестворенні контейнера й не ріс на диску.
 x-app-tmpfs: &app-tmpfs
   - "/var/www/html/compiled:size=256m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
   - "/var/www/html/backend/design/compiled:size=64m,uid=${APP_UID:-1000},gid=${APP_GID:-1000}"
@@ -53,38 +45,29 @@ services:
     networks:
       - frontend
       - backend
-    # Мають пережити перестворення контейнера й деплой. У dev
-    # docker-compose.override.yml перевизначає ці цілі bind-mount'ами того ж
-    # репозиторію — інакше іменовані томи перекрили б робоче дерево
-    # розробника (докладніше — коментар до php85 в override-файлі).
     volumes: *app-volumes
     tmpfs: *app-tmpfs
     security_opt:
       - "no-new-privileges:true"
     healthcheck:
-      # Перевіряє, що php-fpm справді слухає порт, а не лише що живий
-      # CLI-бінарник. Подвоєний $$ обов'язковий: Compose підставляє власні
-      # змінні в цей рядок, і одинарний $f зник би, не дійшовши до php.
+      # Перевіряє, що php-fpm слухає порт, а не лише що живий CLI-бінарник.
+      # Подвоєний $$ обов'язковий — інакше Compose з'їсть $f.
       test: ["CMD-SHELL", "php -r '$$f=@fsockopen(\"127.0.0.1\", 9000); exit($$f ? 0 : 1);'"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
 
-  # Запускає `./ok scheduler:run` за розкладом, щоб зареєстровані завдання
-  # (docs/scheduler.md) справді виконувались.
+  # Запускає `./ok scheduler:run` за розкладом — див. docs/scheduler.md.
   scheduler:
     build: *php-build
-    # tini — PID 1, обробляє сигнали й зомбі-процеси; supercronic — cron-демон.
-    # -no-reap: tini вже виконує reap. -passthrough-logs: вивід завдань іде
-    # напряму в stdout/stderr, тож `docker compose logs scheduler` виглядає
-    # так само, як у решти сервісів.
+    # tini — PID 1, обробляє сигнали й зомбі. -no-reap: tini вже це робить.
+    # -passthrough-logs: вивід завдань іде в stdout, як у решти сервісів.
     entrypoint: ["/usr/bin/tini", "--"]
     command: ["/usr/local/bin/supercronic", "-no-reap", "-passthrough-logs", "/etc/supercronic/crontab"]
     restart: unless-stopped
-    # Той самий користувач, що й у php-fpm. Від root планувальник створював
-    # денний файл Okay/log/app-<дата>.log під root, після чого вітрина вже не
-    # могла в нього дописати.
+    # Той самий користувач, що й php-fpm: від root планувальник створював денний
+    # лог під root, і вітрина вже не могла в нього дописати.
     user: www-data
     environment:
       <<: *php-env
@@ -99,10 +82,8 @@ services:
     security_opt:
       - "no-new-privileges:true"
     healthcheck:
-      # Сервіс не слухає порт 9000, тож типовий healthcheck php-fpm тут не
-      # підходить. pgrep підтверджує лише, що процес supercronic живий — не
-      # що якесь завдання виконалось успішно; для цього дивіться
-      # `docker compose logs scheduler` (або Okay/log/scheduler/).
+      # Сервіс не слухає порт, тож перевіряється лише живий процес supercronic —
+      # не успішність завдань. Для них: docker compose logs scheduler.
       test: ["CMD-SHELL", "pgrep -f supercronic >/dev/null || exit 1"]
       interval: 30s
       timeout: 5s
@@ -117,8 +98,8 @@ services:
         condition: service_started
     environment:
       TZ: ${TZ:-Europe/Kyiv}
-      # DNS-ім'я сервісу, а не ${APP_NAME}-php85: vhost не залежить від назви
-      # проєкту, тож `docker compose -p other-name up` теж працює.
+      # DNS-ім'я сервісу, а не ${APP_NAME}-php85: щоб `docker compose -p
+      # other-name up` теж працював.
       FASTCGI: php85
       VIRTUAL_HOST: ${VIRTUAL_HOST:?err}
     networks:
@@ -143,7 +124,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?err}
       MYSQL_DATABASE: ${MYSQL_DATABASE:?err}
     networks:
-      # Лише backend: mariadb взагалі не має маршруту назовні з хоста.
+      # Лише backend: mariadb не має маршруту назовні з хоста.
       - backend
     volumes:
       - 'db_data:/var/lib/mysql'
@@ -164,15 +145,8 @@ volumes:
   app_log:
 
 networks:
-  # bridge (тип за замовчуванням): має маршрут з хоста назовні, тож nginx
-  # доступний, а php85/scheduler можуть звертатись назовні (наприклад,
-  # заплановані запити модуля NovaposhtaCost до зовнішнього API).
-  #
-  # Мережі навмисно без явного `name:`. Compose сам додає префікс проєкту
-  # (<project>_frontend / <project>_backend) — з фіксованим іменем два стеки
-  # цього проєкту з різними `-p` опинились би в одній мережі й бачили чужі
-  # контейнери (наприклад, prod резолвив би `mariadb` у базу dev).
+  # Без явного `name:` навмисно: Compose додає префікс проєкту, інакше два
+  # стеки з різними `-p` опинились би в одній мережі й бачили чужі контейнери.
   frontend:
-  # internal: true — без маршруту назовні з хоста; саме це й потрібно mariadb.
   backend:
     internal: true

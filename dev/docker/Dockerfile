@@ -14,8 +14,7 @@ RUN apt-get update \
  && apt-get upgrade -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 
-# install-php-extensions сам підтягує потрібні системні бібліотеки й прибирає
-# за собою після встановлення кожного розширення.
+# install-php-extensions сам підтягує системні бібліотеки й прибирає за собою.
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
         pdo_mysql \
@@ -26,8 +25,8 @@ RUN install-php-extensions \
         xmlwriter \
         opcache
 
-# Системна локаль для імпорту: образи php:*-fpm мають лише C/POSIX, а
-# ImportAdmin попереджає, коли setlocale не вдається.
+# Образи php:*-fpm мають лише C/POSIX, а ImportAdmin попереджає, коли
+# setlocale не вдається.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends locales \
  && sed -i 's/^# *\(uk_UA.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
@@ -38,23 +37,20 @@ ENV LANG=uk_UA.UTF-8 \
     LC_ALL=uk_UA.UTF-8
 
 # Підганяє www-data під хостового користувача, щоб bind-mounted файли лишались
-# доступними для запису. Названо APP_UID, а не UID, бо UID — readonly-змінна
-# в bash/zsh і ніколи не дійшла б до Compose.
+# доступними для запису. Не UID — це readonly-змінна в bash/zsh.
 ARG APP_UID=1000
 ARG APP_GID=1000
 RUN groupmod -o -g "${APP_GID}" www-data \
  && usermod  -o -u "${APP_UID}" -g "${APP_GID}" www-data
 
-# Наша тека додається до шляху сканування, а не монтується поверх
-# /usr/local/etc/php — інакше вона б ховала кожен docker-php-ext-*.ini образу.
+# Додається до шляху сканування, а не монтується поверх /usr/local/etc/php —
+# інакше сховала б кожен docker-php-ext-*.ini образу.
 ENV PHP_INI_SCAN_DIR="/usr/local/etc/php/conf.d:/usr/local/etc/php/custom.d"
 RUN mkdir -p /usr/local/etc/php/custom.d
 COPY dev/config/php/custom.d/okay.ini /usr/local/etc/php/custom.d/okay.ini
 
-# tini і supercronic обслуговують сервіс `scheduler` (dev/docker-compose.yml):
-# tini — PID 1, пересилає сигнали й прибирає зомбі-процеси; supercronic —
-# cron-демон, який викликає `./ok scheduler:run`. Встановлені тут, а не лише
-# в `prod`, щоб dev і prod використовували ті самі бінарники.
+# Обслуговують сервіс `scheduler`. У base, а не в prod, щоб dev і prod мали ті
+# самі бінарники.
 ARG SUPERCRONIC_VERSION=v0.2.48
 ARG TARGETARCH
 RUN apt-get update \
@@ -103,8 +99,7 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progre
 USER www-data
 
 # ───────────────────────────── nginx-prod ───────────────────────────
-# Статика береться з того самого білду, що й PHP-код, тож контейнери не
-# можуть розійтись між собою.
+# Статика — з того самого білду, що й PHP-код, тож контейнери не розійдуться.
 FROM nginx:1.29-alpine AS nginx-prod
 
 # Те саме, що й apt-get upgrade у base. Сам nginx не рухається — він
