@@ -345,8 +345,8 @@ class Modules // TODO: подумать, мож сюда переедет CRUD E
             $this->queryFactory->newSelect()
                 ->from(ModulesEntity::getTable())
                 ->cols(['enabled'])
-                ->where('vendor = ?', (string)$vendor)
-                ->where('module_name = ?', (string)$moduleName)
+                ->where('vendor = :vendor', ['vendor' => (string)$vendor])
+                ->where('module_name = :module_name', ['module_name' => (string)$moduleName])
         );
 
         return (bool)$this->db->result('enabled');

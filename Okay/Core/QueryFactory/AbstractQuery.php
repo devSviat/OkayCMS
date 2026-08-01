@@ -115,4 +115,11 @@ abstract class AbstractQuery implements QueryInterface
     {
         return $this->queryObject->getStatement();
     }
+
+    // aura/sqlquery 3 додав resetFlags() до QueryInterface.
+    public function resetFlags()
+    {
+        $this->queryObject->resetFlags();
+        return $this;
+    }
 }

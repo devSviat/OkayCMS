@@ -41,7 +41,7 @@
         "bramus/router": "~1.4",
         "psr/log": "^2",
         "monolog/monolog": "^3",
-        "aura/sqlquery": "^2.7",
+        "aura/sqlquery": "^3.0",
         "aura/sql": "^6.0",
         "haydenpierce/class-finder": "^0.3.3",
         "axy/sourcemap": "^1.1",

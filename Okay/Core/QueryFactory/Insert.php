@@ -39,9 +39,9 @@ class Insert extends AbstractQuery
         return $this->queryObject->getLastInsertIdName($col);
     }
 
-    public function col($col)
+    public function col($col, ...$value)
     {
-        $this->queryObject->col($col);
+        $this->queryObject->col($col, ...$value);
         return $this;
     }
 
