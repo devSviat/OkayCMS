@@ -19,7 +19,7 @@ class GetCaptcha extends Func
         $this->design = $design;
     }*/
 
-    public function run($params, \Smarty_Internal_Template $smarty)
+    public function run($params, $smarty)
     {
         if(isset($params['var'])) {
             $number = 0;

@@ -861,7 +861,7 @@ class FilterHelper
             $resultString .= '?keyword='.htmlspecialchars(strip_tags($keyword));
         }
         if ($smarty !== null) {
-            /** @var \Smarty_Internal_Template $smarty */
+            // Обʼєкт шаблону, який Smarty передає плагіну другим аргументом.
             $smarty->assign('seo_hide_filter', $seoHideFilter);
         }
         $this->design->assign('seo_hide_filter', $seoHideFilter);

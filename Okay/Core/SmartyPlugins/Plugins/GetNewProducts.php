@@ -31,7 +31,7 @@ class GetNewProducts extends Func
         $this->productsHelper = $productsHelper;
     }
 
-    public function run($params, \Smarty_Internal_Template $smarty)
+    public function run($params, $smarty)
     {
         if (!isset($params['visible'])) {
             $params['visible'] = 1;
