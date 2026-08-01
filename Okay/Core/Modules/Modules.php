@@ -19,6 +19,8 @@ use Okay\Core\TemplateConfig\FrontTemplateConfig;
 use Okay\Entities\ModulesEntity;
 use Okay\Core\EntityFactory;
 use Okay\Core\ServiceLocator;
+use Okay\Core\SmartyPlugins\Func;
+use Okay\Core\SmartyPlugins\Modifier;
 
 class Modules // TODO: подумать, мож сюда переедет CRUD Entity/Modules
 {
@@ -419,7 +421,22 @@ class Modules // TODO: подумать, мож сюда переедет CRUD E
                 $pluginName = strtolower(end($classParts));
             }
 
-            $this->smarty->registerPlugin('function', $pluginName, function() {
+            // Тип виводимо з базового класу: заглушка під не тим типом лишає
+            // тег незареєстрованим, а Smarty 5 на це вже кидає помилку компіляції.
+            if ($pluginClass->isSubclassOf(Func::class)) {
+                $type = 'function';
+            } elseif ($pluginClass->isSubclassOf(Modifier::class)) {
+                $type = 'modifier';
+            } else {
+                continue;
+            }
+
+            // registerPlugin() у Smarty 5 кидає виняток на вже зайнятому тезі.
+            if (isset($this->smarty->registered_plugins[$type][$pluginName])) {
+                continue;
+            }
+
+            $this->smarty->registerPlugin($type, $pluginName, function () {
                 return null;
             });
         }

@@ -19,7 +19,7 @@ class Furl extends Func
         $this->filterHelper = $filterHelper;
     }
 
-    public function run($params, \Smarty_Internal_Template $smarty)
+    public function run($params, $smarty = null)
     {
 
         if (is_array($params) && is_array(reset($params))) {
