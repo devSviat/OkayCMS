@@ -59,6 +59,29 @@ class Design
     private $smartyHtmlMinify;
     
     /**
+     * Smarty забороняє статичний доступ до незареєстрованого класу. Пошук іде за
+     * літеральним токеном, як його написано в шаблоні, тож "\Okay\Core\Phone" і
+     * "Okay\Core\Phone" — різні ключі, і обидві форми треба перелічити. Класи
+     * модулів включені, бо їхні шаблони на них посилаються, а власного хука сюди
+     * модуль не має; registerClass() кидає виняток на відсутньому класі, тому
+     * кожен проходить перевірку перед реєстрацією.
+     */
+    public const STATIC_CLASSES = [
+        \Okay\Core\UserReferer\UserReferer::class,
+        \Okay\Core\Phone::class,
+        '\\' . \Okay\Core\Phone::class,
+        \libphonenumber\PhoneNumberFormat::class,
+        \Okay\Helpers\AiRequests\AiBrandRequest::class,
+        \Okay\Helpers\AiRequests\AiCategoryRequest::class,
+        \Okay\Helpers\AiRequests\AiProductRequest::class,
+        \Okay\Modules\OkayCMS\Banners\DTO\BannerImageSettingsDTO::class,
+        \Okay\Modules\OkayCMS\GoogleMerchant\Init\Init::class,
+        \Okay\Modules\OkayCMS\Hotline\Init\Init::class,
+        \Okay\Modules\OkayCMS\NovaposhtaCost\Init\Init::class,
+        \Okay\Modules\OkayCMS\Rozetka\Init\Init::class,
+    ];
+
+    /**
      * @var array
      */
     private $allowedPhpFunctions = [
@@ -373,27 +396,7 @@ class Design
             }
         }
 
-        // Smarty 4 забороняє статичний доступ до незареєстрованого класу.
-        // Пошук іде за літеральним токеном, як його написано в шаблоні, тож
-        // "\Okay\Core\Phone" і "Okay\Core\Phone" — різні ключі, і обидві форми
-        // треба перелічити. Класи модулів включені, бо їхні шаблони на них
-        // посилаються, а власного хука сюди модуль не має; registerClass() кидає
-        // виняток на відсутньому класі, тому кожен під перевіркою.
-        $staticClasses = [
-            \Okay\Core\UserReferer\UserReferer::class,
-            \Okay\Core\Phone::class,
-            '\\' . \Okay\Core\Phone::class,
-            \libphonenumber\PhoneNumberFormat::class,
-            \Okay\Helpers\AiRequests\AiBrandRequest::class,
-            \Okay\Helpers\AiRequests\AiCategoryRequest::class,
-            \Okay\Helpers\AiRequests\AiProductRequest::class,
-            \Okay\Modules\OkayCMS\Banners\DTO\BannerImageSettingsDTO::class,
-            \Okay\Modules\OkayCMS\GoogleMerchant\Init\Init::class,
-            \Okay\Modules\OkayCMS\Hotline\Init\Init::class,
-            \Okay\Modules\OkayCMS\NovaposhtaCost\Init\Init::class,
-            \Okay\Modules\OkayCMS\Rozetka\Init\Init::class,
-        ];
-        foreach ($staticClasses as $staticClass) {
+        foreach (self::STATIC_CLASSES as $staticClass) {
             $className = ltrim($staticClass, '\\');
             if (!isset($this->smarty->registered_classes[$staticClass]) && class_exists($className)) {
                 $this->smarty->registerClass($staticClass, $className);
