@@ -64,6 +64,9 @@ preload_head_css = false
 preload_head_js = false
 preload_footer_css = false
 preload_footer_js = false
+; Панель відладки. Вмикається лише разом із debug_mode.
+; Перевизначати в config/config.local.php, а не тут — цей файл спільний для всіх копій
+debug_bar = false
 
 ;Пока TplMod находится в состоянии теста, оставим здесь возможность экстренного отключения
 ;disable_tpl_mod = true

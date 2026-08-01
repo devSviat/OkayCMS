@@ -5,6 +5,7 @@ namespace Okay\Core\Log;
 
 
 use Monolog\Handler\RotatingFileHandler;
+use Monolog\LogRecord;
 
 /**
  * Недоступний для запису лог не повинен валити запит.
@@ -18,12 +19,14 @@ use Monolog\Handler\RotatingFileHandler;
  */
 class SafeRotatingFileHandler extends RotatingFileHandler
 {
-    protected function write(array $record)
+    protected function write(LogRecord $record): void
     {
         try {
             parent::write($record);
         } catch (\Throwable $e) {
-            $original = isset($record['formatted']) ? $record['formatted'] : $record['message'];
+            // У Monolog 3 запис - обʼєкт LogRecord, а не масив; formatted лишається
+            // порожнім, поки хендлер не дійшов до форматера.
+            $original = !empty($record->formatted) ? (string)$record->formatted : $record->message;
             error_log('log write failed (' . $e->getMessage() . '); original message: ' . trim($original));
         }
     }

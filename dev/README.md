@@ -26,7 +26,8 @@ sed -i "s/^APP_GID=.*/APP_GID=$(id -g)/" .env
 # відкочується до config/config.php (db_server = localhost), яка всередині
 # контейнера не веде до MariaDB. Значення в example-файлі вже узгоджені з
 # .env-example вище; якщо міняєте MYSQL_ROOT_PASSWORD/MYSQL_DATABASE в .env —
-# продублюйте зміну і тут.
+# продублюйте зміну і тут. debug_mode і debug_bar у шаблоні вимкнені — для
+# розробки їх вмикають уже у своїй копії.
 cp ../config/config.local-example.php ../config/config.local.php
 
 docker compose up -d

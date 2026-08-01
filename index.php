@@ -23,14 +23,16 @@ require_once('vendor/autoload.php');
 /** @var OkayContainer $DI */
 $DI = include 'Okay/Core/config/container.php';
 
-/** Инициализируем панель отладки */
-if (false) {
+/** @var Config $config Конфигурируем в конструкторе сервиса параметры системы */
+$config = $DI->get(Config::class);
+
+// Панель відладки вмикається з конфіга (debug_bar у config.local.php), а не
+// хардкодом `if (false)`, який тут стояв. Конфіг доводиться читати раніше за
+// init(): без нього нема чим керувати.
+if ($config->get('debug_bar') == true && $config->get('debug_mode') == true) {
     DebugBar::init();
 }
 DebugBar::startMeasure('init', 'System init');
-
-/** @var Config $config Конфигурируем в конструкторе сервиса параметры системы */
-$config = $DI->get(Config::class);
 
 try {
     /** @var Router $router */
