@@ -1,7 +1,7 @@
 <!-- Password remind page -->
 
 {* The page title *}
-{$meta_title = $lang->password_remind_title scope=global}
+{if empty($meta_title)}{$meta_title = $lang->password_remind_title scope=global}{/if}
 
 <div class="vs-page vs-auth">
     <div class="vs-page__masthead">

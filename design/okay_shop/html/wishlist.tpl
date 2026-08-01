@@ -1,5 +1,5 @@
 <!-- page title -->
-{$meta_title = $lang->wishlist_title scope=global}
+{if empty($meta_title)}{$meta_title = $lang->wishlist_title scope=global}{/if}
 
 <div class="block">
     {* Page heading *}

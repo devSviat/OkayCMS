@@ -16,7 +16,7 @@
 							    id="deliveries_{$delivery->id}"
 							   onchange="okay.change_payment_method(); update_delivery_module_data();"
 							   data-module_id="{$delivery->module_id}"
-							   data-payment_method_ids="{implode(',', $delivery->payment_methods_ids)}"
+							   data-payment_method_ids="{join($delivery->payment_methods_ids, ',')}"
 							   data-total_price="{$delivery->total_price_with_delivery}"
 							   data-delivery_price="{$delivery->price}"
 							   data-is_free_delivery="{$delivery->is_free_delivery|intval}"

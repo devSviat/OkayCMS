@@ -8,7 +8,8 @@ use Okay\Core\Modules\Module;
 use Okay\Core\Modules\Modules;
 use Okay\Core\TemplateConfig\FrontTemplateConfig;
 use Okay\Core\TplMod\TplMod;
-use Smarty;
+use Smarty\Smarty;
+use Smarty\Filter\Output\TrimWhitespace;
 use Detection\MobileDetect;
 
 class Design
@@ -80,6 +81,9 @@ class Design
     private $useTemplateDir = self::TEMPLATES_DEFAULT;
     
     private $smartyHtmlMinify;
+
+    /** @var int глибина вкладених fetch() з примусовою мініфікацією */
+    private $forceMinifyDepth = 0;
     
 
     /**
@@ -161,18 +165,19 @@ class Design
         $this->rootDir        = $rootDir;
 
         $this->smarty = $smarty;
-        $this->smarty->compile_check   = $smartyCompileCheck;
-        $this->smarty->caching         = $smartyCaching;
-        $this->smarty->cache_lifetime  = $smartyCacheLifetime;
-        $this->smarty->debugging       = $smartyDebugging;
-        $this->smarty->error_reporting = E_ALL & ~E_NOTICE & ~E_WARNING;
+        $this->smarty->setCompileCheck($smartyCompileCheck ? Smarty::COMPILECHECK_ON : Smarty::COMPILECHECK_OFF);
+        $this->smarty->setCaching($smartyCaching ? Smarty::CACHING_LIFETIME_CURRENT : Smarty::CACHING_OFF);
+        $this->smarty->setCacheLifetime($smartyCacheLifetime);
+        $this->smarty->setDebugging($smartyDebugging);
+        $this->smarty->setErrorReporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
         $theme = $this->frontTemplateConfig->getTheme();
 
         if ($smartySecurity == true) {
             $this->smarty->enableSecurity();
-            $this->smarty->security_policy->php_modifiers = $this->allowedPhpFunctions;
-            $this->smarty->security_policy->php_functions = $this->allowedPhpFunctions;
+            // php_modifiers і php_functions у Smarty 5 більше не існують: єдиний
+            // спосіб дозволити нативну функцію - зареєструвати її як модифікатор,
+            // що й робить registerSmartyPlugins().
             $this->smarty->security_policy->secure_dir = array(
                 $rootDir . 'design/' . $theme,
                 $rootDir . 'backend/design',
@@ -192,9 +197,10 @@ class Design
         $this->smarty->setCacheDir('cache');
         
         $this->smartyHtmlMinify = $smartyHtmlMinify;
-        if ($smartyHtmlMinify) {
-            $this->smarty->loadFilter('output', 'trimwhitespace');
-        }
+        // Smarty 5 позначив loadFilter()/unloadFilter() застарілими, а вони ще й
+        // знімали мініфікацію із зовнішнього fetch(), коли завершувався вкладений.
+        // Один фільтр на весь час життя, рішення - у момент виклику.
+        $this->smarty->registerFilter('output', [$this, 'minifyOutput']);
 
         if ($smartyForceCompile) {
             $smarty->setForceCompile(true);
@@ -203,11 +209,14 @@ class Design
         $this->smarty->registerFilter('pre', [$this, 'applyTplModifiers']);
     }
     
+    /** @param \Smarty\Template $s */
     public function applyTplModifiers($content, $s)
     {
-        
-        $currentFile = $s->_current_file;
-        
+        // Smarty 5 прибрав _current_file. getFilepath() дає абсолютний шлях, або
+        // null/false для нефайлових ресурсів (string:, eval:) - обидва стають ''.
+        $source = $s->getSource();
+        $currentFile = $source !== null ? (string)$source->getFilepath() : '';
+
         // Определяем модификации чего сейчас нам нужны, фронта или бека
         if (strpos($currentFile, $this->rootDir.'backend'.DIRECTORY_SEPARATOR.'design'.DIRECTORY_SEPARATOR.'html') !== false) {
             $modifications = $this->modules->getBackendModulesTplModifications();
@@ -282,7 +291,7 @@ class Design
      * 
      * @param $tplFile
      * @return bool
-     * @throws \SmartyException
+     * @throws \Smarty\Exception
      */
     public function templateExists($tplFile)
     {
@@ -310,7 +319,7 @@ class Design
      * @param mixed $value
      * @param bool $dynamicJs Если установить в true, переменная будет доступна в файле scripts.tpl клиентского шаблона,
      * как обычная Smarty переменная
-     * @return \Smarty_Internal_Data
+     * @return \Smarty\Data
      */
     public function assign($var, $value, $dynamicJs = false)
     {
@@ -337,20 +346,30 @@ class Design
     /*Отображение конкретного шаблона*/
     public function fetch($template, $forceMinify = false)
     {
-        if (!$this->smartyHtmlMinify && $forceMinify === true) {
-            $this->smarty->loadFilter('output', 'trimwhitespace');
+        if ($forceMinify === true) {
+            $this->forceMinifyDepth++;
         }
-        
+
         $this->registerSmartyPlugins();
 
         $this->setSmartyTemplatesDir();
 
-        $html = $this->smarty->fetch($template);
-        
-        if (!$this->smartyHtmlMinify && $forceMinify === true) {
-            $this->smarty->unloadFilter('output', 'trimwhitespace');
+        try {
+            return $this->smarty->fetch($template);
+        } finally {
+            if ($forceMinify === true) {
+                $this->forceMinifyDepth--;
+            }
         }
-        return $html;
+    }
+
+    public function minifyOutput($output, $template)
+    {
+        if (!$this->smartyHtmlMinify && $this->forceMinifyDepth === 0) {
+            return $output;
+        }
+
+        return (new TrimWhitespace())->filter($output, $template);
     }
 
     public function useDefaultDir()
@@ -375,25 +394,31 @@ class Design
     
     private function registerSmartyPlugins()
     {
+        // registerPlugin() у Smarty 5 кидає виняток на вже зайнятому тезі, тож
+        // кожна реєстрація нижче йде під перевіркою.
         foreach ($this->smartyModifiers as $tag => $callback) {
-            $this->smarty->registerPlugin('modifier', $tag, $callback);
+            if (!isset($this->smarty->registered_plugins['modifier'][$tag])) {
+                $this->smarty->registerPlugin('modifier', $tag, $callback);
+            }
             unset($this->smartyModifiers[$tag]);
         }
-        
+
         foreach ($this->smartyFunctions as $tag => $callback) {
-            $this->smarty->registerPlugin('function', $tag, $callback);
+            if (!isset($this->smarty->registered_plugins['function'][$tag])) {
+                $this->smarty->registerPlugin('function', $tag, $callback);
+            }
             unset($this->smartyFunctions[$tag]);
         }
 
-        // Smarty 4 deprecates using a PHP function as a modifier unless it is
-        // explicitly registered. Register the security-allowed PHP functions as
-        // modifiers, skipping any already registered (e.g. custom modifiers above).
-        if (!empty($this->smarty->security_policy)) {
-            foreach ($this->allowedPhpFunctions as $phpFunction) {
-                if (function_exists($phpFunction)
-                    && !isset($this->smarty->registered_plugins['modifier'][$phpFunction])) {
-                    $this->smarty->registerPlugin('modifier', $phpFunction, $phpFunction);
-                }
+        // Smarty 5 не викликає нативну PHP-функцію з шаблону, поки її не
+        // зареєстровано - однаково в позиції модифікатора {$x|trim} і в позиції
+        // виклику {max(1,$n)}. Реєстрація тут єдиний механізм, і вона не залежить
+        // від політики безпеки: із smarty_security = false шаблони мають так само
+        // працювати. Наші плагіни зареєстровані вище, тому свої теги вони й тримають.
+        foreach ($this->allowedPhpFunctions as $phpFunction) {
+            if (function_exists($phpFunction)
+                && !isset($this->smarty->registered_plugins['modifier'][$phpFunction])) {
+                $this->smarty->registerPlugin('modifier', $phpFunction, $phpFunction);
             }
         }
 

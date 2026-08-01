@@ -10,7 +10,7 @@ use Okay\Core\Modules\DTO\ModuleParamsDTO;
 use Okay\Core\OkayContainer\OkayContainer;
 use Okay\Core\Request;
 use Okay\Core\Router;
-use Smarty;
+use Smarty\Smarty;
 use Okay\Core\Design;
 use Okay\Core\Database;
 use Okay\Core\QueryFactory;

@@ -1,7 +1,7 @@
 {* Account page *}
 
 {* The page title *}
-{$meta_title = $lang->user_title scope=global}
+{if empty($meta_title)}{$meta_title = $lang->user_title scope=global}{/if}
 
 <div class="block">
     <div class="tabs tabs--user clearfix">
