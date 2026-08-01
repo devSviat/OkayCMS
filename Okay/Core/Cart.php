@@ -93,12 +93,9 @@ class Cart
 
     /**
      * @var object|null
-     * The coupon currently applied to the cart, or null when there is none.
-     * The stock cart template reads $cart->coupon->code to echo the applied code
-     * back into the field, and $cart->coupon->min_order_price for its note, but
-     * nothing ever assigned it - so the field blanked itself on every render and
-     * the note never appeared. Filled in attachCouponDiscount(), which is the one
-     * place that has already looked the coupon up and checked it.
+     * Застосований купон або null. Шаблон кошика читає його code і
+     * min_order_price, тож без цього поля код купона зникав із форми на кожному
+     * рендері. Заповнюється в attachCouponDiscount().
      */
     public $coupon = null;
 

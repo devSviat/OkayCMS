@@ -9,21 +9,16 @@ use Okay\Core\TplMod\Parser;
 use Okay\Core\TplMod\TplMod;
 
 /**
- * A template that some module modifies is not compiled from disk. Design::applyTplModifiers
- * hands it to TplMod first, which re-parses the whole file into a node tree and prints it
- * back out. That round trip is allowed to change whitespace and nothing else.
+ * Шаблон, який модифікує якийсь модуль, проходить через TplMod: той розбирає файл
+ * у дерево вузлів і друкує назад. Цей обхід має міняти лише пробіли.
  *
- * When it changes more, it drops the rest of the file from the point it lost its footing -
- * sometimes loudly, as a Smarty syntax error, sometimes silently, leaving a page rendered
- * half-empty with nothing in the log. Known ways to trip it: a `<` anywhere but an opening
- * {if} (so `le`/`lt` in {elseif}, {assign} and inline assignments), a tag whose name is a
- * Smarty variable, and an HTML tag opened inside one {if} branch and closed after {/if}.
+ * Коли міняє більше — мовчки відкидає решту файлу, лишаючи половину сторінки без жодного
+ * запису в лог. Відомі пастки: `<` будь-де, крім відкривального {if}; тег, чиє імʼя
+ * є Smarty-змінною; HTML-тег, відкритий в одній гілці {if} і закритий після {/if}.
  *
- * Which templates take that path depends on the modules a given shop has installed, so
- * every storefront and backend template is checked rather than a known few.
- *
- * Templates under Okay/Modules are out of scope on purpose: the XML feed fragments
- * (feed_head/feed_footer) are open-ended by design and cannot survive a balanced round trip.
+ * Перевіряються всі шаблони вітрини й бекенду, бо набір модифікованих залежить від
+ * встановлених модулів. Шаблони під Okay/Modules поза межами: XML-фрагменти фідів
+ * навмисно незбалансовані.
  */
 class ThemeTemplatesTplModTest extends \PHPUnit\Framework\TestCase
 {

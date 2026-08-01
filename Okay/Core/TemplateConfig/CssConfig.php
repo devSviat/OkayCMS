@@ -243,15 +243,10 @@ class CssConfig
      * line $generatedLine. Returns the content without the sourceMappingURL
      * comment - the caller appends that.
      *
-     * Split out of compileFile() so compileRegistered() can build one combined
-     * map directly. It used to compile every file to a temporary file with a
-     * temporary map, read both back, merge them with SourceMap::concat() and
-     * delete them. Beyond the pointless I/O, concat() is the only path that
-     * reaches parsing/Line.php:495, where `isset($mNames[$ni])` is evaluated
-     * before `$ni !== null`. A CSS map's positions never carry a name, so $ni is
-     * always null and a cold cache raised tens of thousands of E_DEPRECATED. In
-     * the admin under debug_mode those print before header() is called and the
-     * request dies with "headers already sent".
+     * Окремо від compileFile(), щоб compileRegistered() будував одну спільну
+     * мапу напряму: злиття мап через SourceMap::concat() — єдиний шлях, який
+     * на холодному кеші сипле десятками тисяч E_DEPRECATED, а в адмінці під
+     * debug_mode вони друкуються до header() і запит гине на "headers already sent".
      *
      * @param string $fullFilePath absolute path to the file on disk
      * @param SourceMap $map map the positions are appended to

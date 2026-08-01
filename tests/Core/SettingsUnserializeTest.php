@@ -7,17 +7,13 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
 /**
- * Settings values are unserialized with an allowed_classes constraint so a
- * tampered row cannot instantiate arbitrary objects. The constraint started as
- * `false`, which denies every class - including stdClass, which the discount
- * settings genuinely store: BackendDiscountsRequest writes cart_discount_sets and
- * purchase_discount_sets as arrays of (object)[...].
+ * Значення налаштувань розсеріалізовуються з обмеженням allowed_classes, щоб
+ * підмінений рядок не міг створити довільний обʼєкт. Дозволено лише stdClass —
+ * його справді зберігають налаштування знижок, а заборона перетворювала їх на
+ * __PHP_Incomplete_Class і жодна знижка не застосовувалась.
  *
- * With stdClass denied, those became __PHP_Incomplete_Class, DiscountsHelper read
- * null out of $set->set, and no coupon or group discount could be attached at all.
- *
- * stdClass has no methods, no destructor and no __wakeup, so allowing it is not an
- * object-injection gadget. Anything that does have such magic must stay denied.
+ * stdClass не має методів, деструктора й __wakeup, тож не є гаджетом для
+ * обʼєктної інʼєкції. Усе, що таку магію має, лишається забороненим.
  */
 class SettingsUnserializeTest extends TestCase
 {
