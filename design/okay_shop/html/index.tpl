@@ -410,6 +410,7 @@
     </div>
 
     {if $debug_bar_renderer}
+        {$debug_bar_inline_assets}
         {$debug_bar_renderer->render()}
     {/if}
 </body>

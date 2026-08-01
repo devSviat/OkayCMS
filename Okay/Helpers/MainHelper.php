@@ -208,6 +208,7 @@ class MainHelper
 
         // Передаём в дизайн DebugBarRenderer
         $design->assign('debug_bar_renderer', DebugBar::getRenderer());
+        $design->assign('debug_bar_inline_assets', DebugBar::getInlineAssets());
 
         // Передаем стили и скрипты в шаблон
         /** @var FrontTemplateConfig $frontTemplateConfig */
