@@ -117,6 +117,9 @@ $plugins = [
     Plugins\First::class => [
         'class' => Plugins\First::class,
     ],
+    Plugins\FirstKey::class => [
+        'class' => Plugins\FirstKey::class,
+    ],
     Plugins\FirstLetter::class => [
         'class' => Plugins\FirstLetter::class,
     ],

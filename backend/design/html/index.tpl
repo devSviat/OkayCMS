@@ -327,14 +327,14 @@
                                    PHP 8.5 вважає null як індекс масиву deprecated, тож перевіряємо його окремо. *}
                                 <li class="{if $menu_selected && isset($items.$menu_selected)}open active{/if} {if $items|count > 1} fn_item_sub_switch nav-dropdown{/if}">
                                     {if $items|count == 1}
-                                        <input type="hidden" value="{$items|reset}" name="manager_menu[{$section|escape}][{$items|key}]" />
+                                        <input type="hidden" value="{$items|first}" name="manager_menu[{$section|escape}][{$items|first_key}]" />
                                     {/if}
 
                                     {if $config->dev_mode}
                                         <div class="fn_backend_menu_section" data-section_name="{$section}">{$section}</div>
                                     {/if}
 
-                                    <a class="fn_learning_{$section} nav-link {if $items|count > 1}fn_item_switch nav-dropdown-toggle{/if}{if $section == 'left_modules' && ($modules_access_expire_counter > 0 || $not_licensed_modules_counter > 0)} danger_counter{elseif $section == 'left_design' && $template_error_counter} danger_counter{/if}" href="{if $items|count > 1}javascript:;{else}index.php?controller={$items|reset|reset}{/if}">
+                                    <a class="fn_learning_{$section} nav-link {if $items|count > 1}fn_item_switch nav-dropdown-toggle{/if}{if $section == 'left_modules' && ($modules_access_expire_counter > 0 || $not_licensed_modules_counter > 0)} danger_counter{elseif $section == 'left_design' && $template_error_counter} danger_counter{/if}" href="{if $items|count > 1}javascript:;{else}index.php?controller={$items|first|first}{/if}">
                                         <span class="{$section} title">{$btr->getTranslation({$section})}</span>
                                         <span class="icon-thumbnail">
                                             {if !empty($additional_section_icons[$section])}

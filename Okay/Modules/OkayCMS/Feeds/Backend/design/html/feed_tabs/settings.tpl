@@ -4,7 +4,7 @@
         {$block}
     </div>
 {/if}
-<div class="fn_settings" data-preset_name="{if $feed}{$feed->preset}{else}{$settings_templates|key}{/if}">
+<div class="fn_settings" data-preset_name="{if $feed}{$feed->preset}{else}{$settings_templates|first_key}{/if}">
     {$settings_template}
 </div>
 
