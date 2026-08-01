@@ -4463,11 +4463,9 @@ body.hc-nav-open {
 }
 
 /* ----------------------------------------------------------------- stepper */
-/* The input is the form value carrier okay.js and the cart both read, so it   */
-/* is wrapped, never replaced. The buttons are real buttons: okay.js's own     */
-/* handler is bound to `.fn_product_amount span`, so it does not fire for      */
-/* them, and vibe.js hands the arithmetic back to okay.js's amount_change      */
-/* instead of reimplementing the clamp.                                        */
+/* Поле — носій значення форми, яке читають і okay.js, і кошик, тож воно        */
+/* обгортається, а не замінюється. Обробник okay.js прив'язаний до span, тож на */
+/* справжніх кнопках не спрацьовує — арифметику vibe.js віддає назад в okay.js. */
 
 .vs-stepper {
 	display: inline-flex;
@@ -4515,13 +4513,9 @@ body.hc-nav-open {
 	text-align: center;
 }
 
-/* The only place in the theme where the focus ring has to be drawn inwards.   */
-/* .vs-stepper clips to overflow: hidden so its children stay inside the       */
-/* rounded shell, and both children are flush with that shell - measured with  */
-/* the default outline-offset: 2px, three of the ring's four sides were cut    */
-/* away and only the inner edge survived. A negative offset puts the whole     */
-/* ring inside the button, where nothing clips it. The old box-shadow ring was */
-/* cut the same way; this is the first version of it that is actually visible. */
+/* Єдине місце теми, де кільце фокуса малюється всередину: .vs-stepper обрізає  */
+/* вміст, а обидві кнопки стоять упритул до оболонки, тож зовнішнє кільце       */
+/* зрізалося б з трьох боків. Відʼємний offset кладе його всередину кнопки.     */
 
 .vs-stepper__btn:focus-visible,
 .vs-stepper__input:focus-visible {
@@ -4732,12 +4726,9 @@ body.hc-nav-open {
 	transform: rotate(180deg);
 }
 
-/* Visible by default, collapsed by vibe.js - never the other way round. okay.css */
-/* hid every .accordion__content, so with scripting off the delivery and payment   */
-/* copy would have been unreachable; this rule takes it back and the script does   */
-/* the hiding, which is the only order in which a no-JS render still carries       */
-/* content. The bare .accordion__content restated at the end of this file          */
-/* deliberately carries no display rule for the same reason.                       */
+/* Видиме за замовчуванням, згортає vibe.js — ніколи навпаки. Це єдиний порядок, */
+/* за якого сторінка без JavaScript усе одно несе вміст. Голий                    */
+/* .accordion__content у кінці файлу з тієї ж причини не має правила display.     */
 
 .vs-disclosure-row__body {
 	display: block;
@@ -4761,11 +4752,9 @@ body.hc-nav-open {
 }
 
 /* ------------------------------------------------------------------- share */
-/* jssocials-theme-flat.css is registered after this file and paints a brand   */
-/* colour per network - five more hues on a page whose whole argument is that  */
-/* rose and emerald mean something. Its selectors are two classes deep, so     */
-/* three are needed here to win without !important and without a load-order    */
-/* change that would be undone the next time the theme sheet moves.            */
+/* Тема jsSocials реєструється після цього файлу й фарбує кожну мережу у власний */
+/* колір. Її селектори — два класи завглибшки, тож тут потрібні три, щоб виграти */
+/* без !important і без зміни порядку завантаження.                              */
 
 .vs-share {
 	display: flex;
@@ -4818,21 +4807,13 @@ body.hc-nav-open {
 	color: var(--vs-text);
 }
 
-/* The brand glyph carries the button, the owner's call - it used to be the       */
-/* network's name, because jsSocials' own logo is a Font Awesome <i> and this     */
-/* theme ships no icon font. scripts.tpl blanks that class and puts the theme's   */
-/* own SVG inside the element instead, so the box finally has something to show.  */
-/* :empty is the fallback and the reason nothing had to be guessed about the      */
-/* admin-editable network list: a share whose network has no glyph here keeps its */
-/* text label and its element stays hidden, exactly as before.                    */
+/* Логотип jsSocials — це <i> іконкового шрифту, якого тема не має, тож          */
+/* scripts.tpl гасить той клас і кладе всередину власний SVG. :empty — запасний  */
+/* варіант: мережа, для якої гліфа тут немає, лишається з текстовим підписом.    */
 
-/* An explicit box, because the library sizes this element in em: jssocials.css   */
-/* ships `.jssocials-share-logo { width: 1em; font-size: 1.5em }` and it loads    */
-/* after this file. A font-size: 0 here to swallow the whitespace around the glyph */
-/* turned that 1em into zero and the buttons rendered as empty circles - the       */
-/* metric was clean, the SVG was in the DOM, and it measured 0 wide. The glyph     */
-/* fills the box instead of carrying its own size, so nothing the library says     */
-/* about width can reach it.                                                      */
+/* Явна коробка, бо бібліотека розмірює цей елемент в em і завантажується після  */
+/* нас: будь-який font-size: 0 тут перетворив би ту ширину на нуль і кнопки       */
+/* вийшли б порожніми колами. Гліф заповнює коробку, а не несе власний розмір.    */
 
 .vs-share .jssocials-share .jssocials-share-logo {
 	display: inline-flex;
@@ -4882,20 +4863,16 @@ body.hc-nav-open {
 }
 
 /* -------------------------------------------------------------- sticky buy */
-/* Phones only, and the single most valuable affordance on this page: once the */
-/* inline buy row scrolls away the price and the CTA follow the shopper down.  */
-/* The button carries form="vs_buy_form", so it submits the very same          */
-/* .fn_variants form and introduces no second cart path. Hidden with           */
-/* visibility as well as transform, so its controls leave the tab order while  */
-/* the bar is off-screen.                                                      */
+/* Лише телефони: коли рядок покупки їде вгору, ціна й кнопка йдуть за          */
+/* покупцем. Кнопка через атрибут form відправляє ту саму форму варіантів, тож  */
+/* другого шляху в кошик не зʼявляється. Ховається ще й visibility, щоб контроли */
+/* виходили з tab-порядку, поки смуга за екраном.                               */
 
-/* Height as a token, not a repeated number: .to_top (further down this file) */
-/* has to sit above this bar whenever it is showing, and the two must move    */
-/* together if this bar's own box height ever changes. Declared on :root, not */
-/* on .vs-sticky-buy itself - custom properties do not inherit sideways to a  */
-/* sibling element, only down to descendants. The two trailing 1px terms are  */
-/* the bar's own top and bottom border - outside the padding box, so left out */
-/* of this calc the token undercounts the real height by 2px.                 */
+/* Висота токеном, а не повтореним числом: кнопка «вгору» має стояти над цією   */
+/* смугою, і обидві мусять рухатись разом. Оголошено на :root, а не на самій     */
+/* смузі — власні властивості не успадковуються вбік, до сусіда.Два доданки по   */
+/* 1px — власні рамки смуги: вони поза padding-боксом, тож без них токен         */
+/* недорахував би реальну висоту.                                               */
 :root {
 	--vs-sticky-buy-h: calc(52px + var(--vs-space-2) * 2 + 1px + 1px);
 }
@@ -4957,12 +4934,9 @@ body.hc-nav-open {
 	font-size: var(--vs-text-sm);
 }
 
-/* Both buttons in this bar are pills that size to their own label. Only one of  */
-/* them is ever shown, so anything they do not share reads as the bar changing   */
-/* shape with the stock level: the pre-order one used to be a 12px rectangle     */
-/* that also grew to fill the row, while the in-stock one was a pill hugging     */
-/* its words. Sized by content here, and the padding trim below 360px is what    */
-/* keeps the longer of the two labels inside the bar at 320.                     */
+/* Обидві кнопки смуги — пігулки за розміром власного підпису. Показується      */
+/* завжди лише одна, тож будь-яка відмінність між ними читалась би як зміна     */
+/* форми смуги залежно від наявності товару.                                     */
 
 .vs-sticky-buy__cta {
 	flex: none;
@@ -4985,33 +4959,22 @@ body.hc-nav-open {
 }
 
 /* ------------------------------------------------- description / spec / tabs */
-/* One markup, two presentations, one state machine. fn_accordion (okay.js) is */
-/* already an exclusive disclosure - one panel open, clicking the open one is  */
-/* a no-op - which is exactly tab semantics. Below 992px it reads as a stacked */
-/* accordion; from 992px CSS grid lifts the same headers into a single row and */
-/* drops the panels underneath. okay.js's own tab script is deliberately NOT   */
-/* used: it writes an inline display:none on hidden panels at every width, and */
-/* an inline style can only be overridden with !important.                      */
+/* Одна розмітка, дві подачі, один автомат станів: fn_accordion уже є винятковим */
+/* розкриттям, тобто рівно семантикою вкладок. Власний таб-скрипт okay.js        */
+/* навмисно НЕ використовується — він пише інлайновий display:none на будь-якій  */
+/* ширині, а інлайновий стиль перебивається лише через !important.               */
 
-/* The plate is painted on .vs-tabs itself, with no new wrapper anywhere. That   */
-/* is not taste, it is two contracts: okay.js:747 reaches the panel through      */
-/* $(this).next(".accordion__content") and the items through                     */
-/* $(outerBox).children(".accordion__item"), and the desktop grid below makes    */
-/* .vs-tabs__item display: contents, so heads and panels are already direct grid */
-/* items of .vs-tabs. A spare <div> anywhere inside would break switching        */
-/* silently and shift the nth-child that lays the tabs out into columns.         */
+/* Плашка малюється на самій .vs-tabs, без жодної нової обгортки — це не смак, а */
+/* два контракти: okay.js шукає панель через .next() і елементи через            */
+/* .children(), а десктопна сітка робить .vs-tabs__item display: contents.       */
+/* Зайвий <div> усередині мовчки зламав би перемикання і зсунув nth-child, який  */
+/* розкладає вкладки в колонки.                                                  */
 /*                                                                               */
-/* The border-top this rule used to carry is gone: the plate draws that line     */
-/* now, and two identical hairlines 0px apart read as a dirty edge.              */
+/* Без тіні: у цій темі тінь — стан наведення на щось клікабельне, а це нерухома */
+/* панель.                                                                       */
 /*                                                                               */
-/* Formula is the theme's canonical card - --vs-surface, 1px --vs-hairline,      */
-/* --vs-radius-lg (.vs-card, .vs-author-card). No shadow: in this theme a shadow */
-/* is the hover state of something clickable, and this is a stationary panel.    */
-/*                                                                               */
-/* overflow is deliberately NOT declared. The global :focus-visible in base.css  */
-/* has outline-offset: 2px, and clipping here would eat the ring on the first    */
-/* and last pill. It is not needed either - the horizontal padding is wider than */
-/* the ring's reach, so nothing gets near the corners.                           */
+/* overflow навмисно НЕ оголошено: глобальне :focus-visible має відступ, і       */
+/* обрізання зʼїло б кільце на першій і останній пігулці.                        */
 
 .vs-tabs {
 	margin-top: var(--vs-space-8);
@@ -5075,13 +5038,11 @@ body.hc-nav-open {
 	transform: rotate(180deg);
 }
 
-/* Same rule as the disclosure rows: the panels are open in the HTML and vibe.js  */
-/* collapses them once it has run. A description, a specification table and the   */
-/* reviews are the substance of this page - a headless renderer, a crawler or a   */
-/* shopper with scripting off must not be handed a product page without them.     */
-/* .is-enhanced is written by vibe.js and is what unlocks the desktop tab layout: */
-/* the tab grid stacks all three panels in one cell, which is only ever correct   */
-/* when exactly one of them is displayed, i.e. only once the script is running.   */
+/* Панелі відкриті в HTML, згортає їх vibe.js: опис, характеристики й відгуки —  */
+/* суть цієї сторінки, і краулер чи покупець без скриптів не має отримати товар  */
+/* без них. .is-enhanced пише vibe.js, і саме він відмикає десктопну розкладку:  */
+/* сітка вкладок кладе всі три панелі в одну комірку, що коректно лише коли      */
+/* показана рівно одна.                                                          */
 
 /* Scoped to .vs-tabs to outweigh .accordion__content further down the file,     */
 /* which carries `padding: var(--vs-space-2) 0` at the same weight and a later   */
@@ -5102,22 +5063,15 @@ body.hc-nav-open {
 	display: none;
 }
 
-/* The one-frame flash. Every panel is open in the HTML and vibe.js is a footer   */
-/* script, so between first paint and the moment it runs the product page draws   */
-/* all three panels plus both buy-box rows at full height and then snaps back.    */
-/* Measured at 1440 on telefon-meizu-m3-note-32-gb with the footer bundle          */
-/* blocked, which is exactly that frame: 3225px of document height without this    */
-/* rule against 1940px settled - the page collapsed 1285px under the shopper.      */
-/* With the rule the same frame measures 2045px, and the 105px left is the sticky  */
-/* buy bar, not a panel.                                                           */
+/* Спалах на один кадр: усі панелі відкриті в HTML, а vibe.js — скрипт підвалу,  */
+/* тож між першим малюванням і його запуском сторінка показує все розгорнутим і  */
+/* потім різко стискається під покупцем.                                          */
 /*                                                                                */
-/* The remedy is the `js` class head.tpl writes on <html> from an inline          */
-/* statement before any stylesheet is parsed - the same hook the filter groups    */
-/* use, deliberately not a second one. Gated on it, the collapse is true from     */
-/* the first paint of a scripted page and simply absent from an unscripted one,   */
-/* where every panel must stay open. vibe.js writes an inline display on every    */
-/* panel a moment later, and an inline style outranks this, so the rule governs   */
-/* exactly the frames before the script and nothing after it.                     */
+/* Ліки — клас `js`, який head.tpl ставить на <html> інлайновим рядком до розбору */
+/* будь-якого стилю (той самий хук, що й у груп фільтрів, навмисно не другий).    */
+/* За ним згортання істинне з першого кадру сторінки зі скриптами і просто        */
+/* відсутнє без них. Трохи згодом vibe.js пише інлайновий display, який це        */
+/* правило перебиває — тож воно керує рівно кадрами до скрипта й нічим після.     */
 
 .js .vs-tabs .accordion__item:not(.visible) .accordion__content,
 .js .vs-disclosures .accordion__item:not(.visible) .accordion__content {
@@ -5391,12 +5345,9 @@ body.hc-nav-open {
 	color: var(--vs-text-muted);
 }
 
-/* The shared "chevron" glyph is a V pointing down (svg.tpl's M5 9l7 7 7-7), so */
-/* a quarter turn aims it sideways - and the two rotations were the wrong way  */
-/* round until the final review. CSS rotate() is clockwise, so the previous    */
-/* link was rendering matrix(0,-1,1,0), a right-pointing arrow, and the next   */
-/* link matrix(0,1,-1,0), a left-pointing one: a shopper clicking the arrow    */
-/* that pointed forward went back a product. Same pager on post.tpl.           */
+/* Спільний гліф шеврона дивиться вниз, тож чверть оберту спрямовує його вбік.  */
+/* CSS rotate() крутить за годинниковою — переплутати знак тут означає, що       */
+/* стрілка «вперед» веде назад.                                                  */
 
 .vs-pager__link--prev svg {
 	transform: rotate(90deg);
@@ -5549,14 +5500,13 @@ body.hc-nav-open {
 		display: none;
 	}
 
-/* The rail sticks. 21 filter groups ship expanded and run past 2000px, so a      */
-/* shopper who has scrolled to the twentieth card is a long way from the control  */
-/* that would narrow the list - on the primary path of the primary screen. The    */
-/* groups stay expanded: collapsing them by default would trade the reach problem */
-/* for a discoverability one. Offsets clear the sticky header (--vs-header-h) and */
-/* the internal scroll is `auto`, so a short rail shows no scrollbar at all.      */
-/* align-items: start above is load-bearing: a stretched grid item fills its grid */
-/* area and then has no room left to move.                                       */
+/* Панель липне: групи фільтрів розгорнуті й тягнуться далеко вниз, тож без      */
+/* цього покупець біля двадцятої картки далеко від контрола, який звузив би      */
+/* список. Відступи обходять липку шапку, внутрішній скрол `auto` — коротка      */
+/* панель смуги не показує.                                                       */
+/*                                                                               */
+/* align-items: start вище несуче: розтягнутий елемент сітки заповнює свою       */
+/* область і рухатись йому вже нікуди.                                            */
 
 	.vs-filters {
 		position: sticky;
@@ -5578,15 +5528,13 @@ body.hc-nav-open {
 		display: none;
 	}
 
-/* The sheet's 20px side padding absorbs the negative margin .vs-filter__list      */
-/* uses to bleed a row's hover highlight out to the panel edge. The rail had no    */
-/* padding at all, so that same 8px bleed landed outside the scroll box and was    */
-/* the second contributor to the horizontal bar. Padding the box and pulling it    */
-/* back out by the same amount keeps every heading and label on the column's left  */
-/* edge, pixel for pixel, with nothing spilling.                                   */
-/* 12px rather than the 8px of the bleed itself, because a scroll container clips  */
-/* its descendants and the focus ring is a 4px box-shadow: 8px would have left     */
-/* every filter row's ring shaved off down both sides.                             */
+/* Поле коробки поглинає відʼємний відступ, яким .vs-filter__list виводить       */
+/* підсвітку рядка до краю панелі; без нього той виступ падав би за межі         */
+/* скрол-боксу й піднімав горизонтальну смугу. Коробка з полем, витягнута назад  */
+/* на ту саму величину, лишає всі заголовки на лівому краю колонки.               */
+/*                                                                               */
+/* Поле більше за сам виступ, бо контейнер прокрутки обрізає нащадків, а кільце  */
+/* фокуса — тінь: рівно за виступом воно зрізалося б з обох боків.                */
 
 	.vs-filters__scroll {
 		margin: 0 calc(var(--vs-space-3) * -1);
@@ -5634,13 +5582,9 @@ body.hc-nav-open {
 		top: calc(var(--vs-header-h) + var(--vs-space-4));
 	}
 
-/* The stage is still capped - an 830px square photograph pushes the detail      */
-/* section off the screen and reads as a banner, not as merchandise - but the    */
-/* cap now lives on the grid column rather than on the frame. With both, the     */
-/* column was 924px wide and the frame 680, and the 244px difference became      */
-/* dead gutter: 292px of it between the photograph and the buy box at 1440.      */
-/* One cap per column, the leftover parked in the outer margins by               */
-/* justify-content, and the gutter is the 48px the grid actually declares.       */
+/* Сцена обмежена — завелика квадратна фотографія виштовхує деталі за екран і    */
+/* читається як банер, — але обмеження живе на колонці сітки, а не на рамці:     */
+/* два обмеження водночас перетворювали різницю між ними на мертвий проміжок.    */
 
 	.vs-gallery__frame {
 		gap: var(--vs-space-4);
@@ -5651,13 +5595,11 @@ body.hc-nav-open {
 		height: 420px;
 	}
 
-/* Tab set. Every head is lifted into grid row 1 by an explicit column so the  */
-/* placement cannot drift, and the panels share row 2 - only one of them is    */
-/* ever displayed, because fn_accordion keeps exactly one open. The item boxes */
-/* are display: contents so their heads and panels become grid items directly. */
-/* Gated on .is-enhanced: three panels sharing one grid cell overlap, so this  */
-/* layout is only ever correct while the script that collapses two of them is  */
-/* running. Without it the same markup stays a stacked, fully readable list.   */
+/* Голови підняті в перший рядок сітки явною колонкою, панелі ділять другий —    */
+/* показана завжди рівно одна, бо fn_accordion тримає відкритою одну. Коробки    */
+/* елементів — display: contents, щоб голови й панелі стали елементами сітки     */
+/* напряму. За .is-enhanced: три панелі в одній комірці накладаються, тож ця     */
+/* розкладка коректна лише поки працює скрипт, що згортає дві з них.             */
 
 	.vs-tabs {
 		grid-column: 1;
@@ -5697,16 +5639,12 @@ body.hc-nav-open {
 		grid-column: 3;
 	}
 
-/* Pills. The 2px underline the active tab used to wear is gone: on a white     */
-/* plate it was a second horizontal rule 16px from the real one. The theme      */
-/* already owns a "chosen" state in pill form - .vs-chip--selected - and it is  */
-/* built from exactly --vs-ink under --vs-ink-text. The tab strip borrows that  */
-/* rather than inventing a third look for chosen.                               */
+/* Стан «вибрано» тема вже має у формі пігулки — смуга вкладок позичає його, а   */
+/* не вигадує третій вигляд для того самого стану.                               */
 /*                                                                              */
-/* max-content columns size the tab to its label, and "Опис" is 38px wide - a   */
-/* 38x48 target on a 992px screen, which is a touch width. The minimum is the   */
-/* 44px rule, and the label is centred in it so a short tab does not sit off    */
-/* to one side of its own pill.                                                 */
+/* Колонки max-content розмірюють вкладку за підписом, тож короткий підпис дав   */
+/* би ціль, вужчу за поріг дотику; мінімум тримає ширину, а підпис центрується,  */
+/* щоб коротка вкладка не тулилась до краю власної пігулки.                      */
 
 	.vs-tabs.is-enhanced .vs-tabs__btn {
 		justify-content: center;
@@ -5741,13 +5679,10 @@ body.hc-nav-open {
 		display: none;
 	}
 
-/* The line between the strip and the panel. There is nothing to hang it on but */
-/* the panel itself: the heads sit in columns 1-3 of row 1 and stop where the   */
-/* third label stops, so a border on them would be three short dashes, and the  */
-/* fourth column holds no element to carry the rest. The panel is the only box  */
-/* with grid-column: 1 / -1, and exactly one of the three is ever displayed, so */
-/* its top border is one continuous line drawn once. row-gap above holds it     */
-/* clear of the pills.                                                          */
+/* Лінію між смугою і панеллю нема на що вішати, крім самої панелі: голови       */
+/* займають лише перші колонки й закінчуються там, де закінчується третій        */
+/* підпис, тож рамка на них дала б три коротких риски. Панель — єдина коробка на */
+/* всю ширину, і показана завжди одна, тож її верхня рамка — одна суцільна лінія. */
 
 	.vs-tabs.is-enhanced .vs-tabs__panel {
 		grid-row: 2;
@@ -5771,13 +5706,10 @@ body.hc-nav-open {
 		top: 0;
 	}
 
-/* Everything above the first product, measured at 390x844 before this block:   */
-/* header 61, air 32, breadcrumbs 44, masthead 87, toolbar 61, a 20px lead-in   */
-/* to the grid - 305px, and the same 305 on a landscape phone, where it is 80%  */
-/* of the screen. None of it is content, so the content is not what gives way:  */
-/* four spacing steps do, and the grid starts 44px earlier. Scoped at 991 and   */
-/* not at 575 deliberately - a phone on its side is 844px WIDE, so a phone-only */
-/* query is exactly the one that would miss the worst case.                     */
+/* Усе над першим товаром — шапка, крихти, заголовок, тулбар — не є контентом,   */
+/* тож поступається саме воно: коротшають чотири кроки відступів. Межа взята     */
+/* широка навмисно: телефон на боці має велику ШИРИНУ, тож запит «лише телефон»  */
+/* пропустив би саме найгірший випадок.                                          */
 
 	body.other_page .main {
 		padding-top: var(--vs-space-4);
@@ -5842,13 +5774,10 @@ body.hc-nav-open {
 
 /* --------------------------------------------------------------- ≤ 767 px */
 
-/* The search row reads as the header growing by one row, not as a white slab     */
-/* dropped on the page. It was inset to the container's gutter with no edge of    */
-/* its own, so it ended mid-sentence over whatever heading happened to be under   */
-/* it. Now it runs to both edges of the screen - the negative insets are the      */
-/* container's own 16px, given back as padding so the field still lines up with   */
-/* the page gutter - and it closes with the same hairline and shadow the sticky   */
-/* header uses, which is what makes it look attached to the bar above it.         */
+/* Рядок пошуку читається як шапка, що виросла на один рядок, а не як біла плита */
+/* поверх сторінки: він іде до обох країв екрана (відʼємні відступи — власне поле */
+/* контейнера, повернуте як padding, щоб поле лишилось на сітці сторінки) і       */
+/* закривається тією ж лінією й тінню, що й липка шапка.                          */
 
 @media (max-width: 767px) {
 	.vs-search {
@@ -5881,13 +5810,9 @@ body.hc-nav-open {
 /* --------------------------------------------------------------- ≤ 575 px */
 
 @media (max-width: 575px) {
-	/* The plates had 16px between them and 8px inside them - more air outside the   */
-	/* card than in it, which is what the owner saw. The first responsive pass cut   */
-	/* the padding to 8 to buy vertical space; that trade is being reversed here     */
-	/* with the owner's decision, for portrait phones only. The short-viewport block */
-	/* at the end of this file keeps 8px, because a landscape phone is starved of    */
-	/* height in a way a portrait one is not, and it is later in the file so it      */
-	/* still wins there.                                                             */
+	/* Повітря всередині картки має бути не меншим за проміжок між картками.       */
+	/* Блок низького вікна в кінці файлу лишає менше поле: телефон на боці         */
+	/* голодний на висоту так, як портретний ні, і він пізніше в файлі.            */
 
 	.vs-card {
 		padding: var(--vs-space-3);
@@ -5898,13 +5823,10 @@ body.hc-nav-open {
 		gap: var(--vs-space-2);
 	}
 
-	/* The extra 4px of padding above comes straight out of the discount row, and   */
-	/* on the home rail there was nothing to spare: its cards are sized by swiper,   */
-	/* not by the grid gap, so they stayed 171px wide while the catalogue's grew to  */
-	/* 175. The widest row this shop can produce is 540 000,00 ₴ plus a two-digit    */
-	/* badge, 145px, against a 145px content box - equal, so it wrapped to two       */
-	/* lines and broke the constant tier height the card is built on. Halving this   */
-	/* gap buys 4px back: 141px into 145 on the rail and into 149 in the grid.       */
+	/* Додане поле картки йде з ярусу знижки, а на домашній стрічці запасу немає: */
+	/* її картки розмірює swiper, а не проміжок сітки. Найширший можливий рядок   */
+	/* ціни зі стікером тоді переноситься на два рядки і ламає постійну висоту    */
+	/* ярусу, на якій тримається картка — цей проміжок і повертає потрібне.       */
 
 	/* At 360px - the commonest Android width, and the first one where this grid    */
 	/* goes two-up - the card's content box is 134px and the widest row this shop   */
@@ -5923,21 +5845,12 @@ body.hc-nav-open {
 		padding: 2px var(--vs-space-1);
 	}
 
-	/* Two-up at 360 leaves the corner sticker 86px beside the tools, and "Топ      */
-	/* продажів" at the 2xs step wants 88. This used to be allowed to wrap to a     */
-	/* second line; the owner asked for one line instead, and for the sticker to    */
-	/* be smaller on a phone if that is what it takes. So: the step below 2xs and   */
-	/* the 4px padding, which brings the same words to 78.5 into 86 - seven pixels  */
-	/* of slack rather than the two that 2xs with trimmed padding would leave, and  */
-	/* two pixels is exactly the margin that put it on two lines the last time.     */
-	/*                                                                             */
-	/* Measured on the catalogue grid at 360 and 375 and on the home rail at 390,   */
-	/* where swiper sizes the cards and the grid's numbers do not reach.            */
-	/*                                                                             */
-	/* nowrap without an ellipsis is deliberate - .vs-badge is a flex container, so */
-	/* the text is an anonymous flex item and text-overflow has nothing to act on.  */
-	/* A sticker longer than these words would be clipped, not wrapped; the copy    */
-	/* that exists fits with room to spare.                                         */
+	/* Стікер має лишитись в один рядок навіть у двоколонковій сітці на вузькому */
+	/* екрані, тож тут крок нижче за 2xs і трохи менше поле — саме це дає запас.  */
+	/*                                                                            */
+	/* nowrap без трикрапки навмисно: .vs-badge — флекс-контейнер, текст у ньому  */
+	/* анонімний флекс-елемент, і text-overflow нема на що діяти. Довший стікер   */
+	/* буде обрізаний, а не перенесений.                                          */
 
 	.vs-card__badges .vs-badge {
 		padding: 0 var(--vs-space-1);
@@ -6037,14 +5950,11 @@ body.hc-nav-open {
 		mask-image: linear-gradient(to right, transparent 0, #000 var(--vs-space-6), #000 calc(100% - var(--vs-space-6)), transparent 100%);
 	}
 
-	/* 40x42 children inside a 1px shell come to 44x122 - the owner asked for       */
-	/* the control to stop dominating the cart row and chose this over a 40x104     */
-	/* variant. Worth stating plainly: each button is 40x42 here, under the 44px    */
-	/* floor the touch-target pass adopted. Three 44px children plus the border     */
-	/* cannot be narrower than 134, so the width the owner asked for and that       */
-	/* floor cannot both hold. It clears WCAG 2.5.8 AA (24x24) with room to spare.  */
-	/* Phones only: the complaint was a phone, and at every wider width the         */
-	/* stepper sits beside a 52px add-to-cart button it has to match.               */
+	/* Свідомий виняток: кнопки степера тут нижчі за поріг дотику 44px. Три      */
+	/* таких дитини з рамкою не вміщаються в ширину, яку просив власник, тож      */
+	/* обидві вимоги разом не тримаються. WCAG 2.5.8 AA (24x24) виконано із       */
+	/* запасом. Лише телефони — на ширших екранах степер стоїть поруч із вищою    */
+	/* кнопкою кошика і має їй відповідати.                                       */
 
 	.vs-stepper__btn,
 	.vs-stepper__input {
@@ -6064,14 +5974,9 @@ body.hc-nav-open {
 		justify-content: space-between;
 	}
 
-	/* .vs-btn sets white-space: nowrap, and the label is the one child here that   */
-	/* can give. Without min-width: 0 it refuses to shrink below its text, and the  */
-	/* row overflows its own border rather than the text being clipped: measured at */
-	/* 320, the trigger box ended at x=179 while the chevron ran to x=195 and the   */
-	/* Фільтр button started at 191 - the glyph floated in the gap between the two  */
-	/* buttons, outside any border. The label box is 67px at 320 (ellipsis), 107 at */
-	/* 360 and 122 at 375 against a 102px longest label, so only the 320 class of    */
-	/* device truncates, and it truncates inside the button instead of spilling.    */
+	/* .vs-btn ставить white-space: nowrap, і підпис — єдина дитина, що може     */
+	/* поступитись. Без min-width: 0 він відмовляється стискатись нижче за свій   */
+	/* текст, і рядок вилазить за власну рамку замість того, щоб текст обрізався. */
 
 	.vs-sort__trigger_label {
 		min-width: 0;
@@ -6079,13 +5984,9 @@ body.hc-nav-open {
 		text-overflow: ellipsis;
 	}
 
-/* The theme's sort strings are phrase tails - "Сортувати по" lives in a label   */
-/* and "замовчуванням" in the option - so the desktop composes the sentence but  */
-/* the phone's trigger showed the tail alone, starting on a lower-case letter    */
-/* and reading as a fragment. Capitalising just the first letter turns it into a */
-/* label value, which with the sort glyph beside it reads as "sort: default".    */
-/* Done here rather than in lang/ua.php on purpose: that string is shared with   */
-/* the desktop pills, where the lower case is correct after the colon.           */
+/* Рядки сортування — хвости фрази: початок живе в підписі, а не в опції, тож на */
+/* телефоні тригер показував би сам хвіст із малої літери. Робиться тут, а не в  */
+/* lang/, бо той самий рядок ділять десктопні пігулки, де мала літера правильна. */
 
 	.vs-sort__trigger_label::first-letter {
 		text-transform: uppercase;
@@ -6126,14 +6027,9 @@ body.hc-nav-open {
 }
 
 /* --------------------------------------------------------------- ≤ 359 px */
-/* The labelled pill and the price do not both fit at 320px. Measured, not     */
-/* guessed: the bar's content box is 266px there, and price + gap + pill comes */
-/* to 267. It first fits at 337px with 0.02px to spare, so the cut is at 359   */
-/* rather than 337: only the 320px class of device loses the glyph, and no     */
-/* device sits on a hairline. Squeezing the padding does not buy enough - a    */
-/* 12px padding still leaves the pill 1px over - so the glyph gives way: it is */
-/* the redundant half of the button once the words are back, and dropping it   */
-/* frees the icon plus its gap, 28px, leaving 11px of slack at 320.            */
+/* На найвужчих екранах пігулка з підписом і ціна разом не вміщаються. Межа      */
+/* взята з запасом, щоб жоден пристрій не стояв рівно на ній. Поступається гліф: */
+/* коли слова повернулись, він — надлишкова половина кнопки.                     */
 
 /* The pre-order button has no glyph to give up - it never had one, because a    */
 /* cart icon is the wrong symbol for ordering something that is not in stock -   */
@@ -6718,15 +6614,10 @@ body.hc-nav-open {
 	font-size: var(--vs-text-base);
 }
 
-/* Summary order on the cart page. .vs-summary__coupon (the element okay.js     */
-/* also knows as #fn_cart_coupon) is one AJAX-replaced                          */
-/* container (okay.js rewrites its innerHTML wholesale) holding BOTH the coupon */
-/* field and the cart-level discount rows, so the two cannot be placed          */
-/* separately in the markup. The container is display:contents and the rows     */
-/* after it are ordered explicitly, which puts a discount where a shopper reads */
-/* for it - between the order sum and the total - while the coupon field stays  */
-/* at the top of the panel. Scoped to .vs-checkout: the order page's summary    */
-/* has its own row sequence and keeps plain document order.                     */
+/* Купон і рядки знижки лежать в одному контейнері, який okay.js переписує      */
+/* цілком через AJAX, тож у розмітці їх не рознести. Контейнер —                */
+/* display:contents, а порядок рядків задано явно: знижка стає між сумою        */
+/* замовлення й підсумком, а поле купона лишається вгорі панелі.                */
 
 .vs-checkout .vs-summary {
 	display: flex;
@@ -6893,15 +6784,10 @@ body.hc-nav-open {
 	overflow: hidden;
 }
 
-/* The cap is in px, not a percentage: lazyload leaves the placeholder in place */
-/* until the image scrolls in, and a percentage max-height against the auto     */
-/* height of <picture> computes to none - the placeholder then renders at its   */
-/* own size and bursts the row. Width and height are auto here, so this is the  */
-/* one slot the theme sizes from the image rather than from CSS: while the      */
-/* logo is loading that is images/xloading.svg's own 24x24, comfortably inside  */
-/* both caps, and once it lands the real logo takes over up to 56x28. The       */
-/* growth is leftward only, because .vs-option-card__logo is a fixed 56x28 box  */
-/* that aligns its contents to the end, so the row around it never moves.       */
+/* Обмеження в px, а не у відсотках: відсоткова max-height проти auto-висоти    */
+/* <picture> обчислюється в none, і плейсхолдер lazyload намалювався б у        */
+/* власному розмірі, розірвавши рядок. Це єдине місце теми, де розмір диктує    */
+/* зображення, а не CSS; коробка навколо фіксована й вирівнює вміст до кінця.   */
 
 .vs-option-card__logo img {
 	width: auto;
@@ -6997,13 +6883,11 @@ body.hc-nav-open {
 }
 
 /* -------------------------------------------- Nova Poshta warehouse chooser */
-/* OkayCMS_NovaposhtaCost markup, built by the module's own JS after the city  */
-/* autocomplete resolves. Nothing in the module is edited: every selector here */
-/* is one of its published class names. The module ships design/css/np.css and */
-/* TemplateConfig appends it AFTER this theme's compiled bundle, so an equally */
-/* specific rule would lose on source order - each of these is scoped through  */
-/* .vs-option__extra, which outranks the module by one class and needs no      */
-/* !important.                                                                 */
+/* Розмітку будує JS самого модуля, і в модулі нічого не редагується — кожен    */
+/* селектор тут є його опублікованим імʼям класу. Свій CSS модуль підключає     */
+/* ПІСЛЯ нашого бандла, тож правило рівної специфічності програло б за          */
+/* порядком: усе тут обмежене через .vs-option__extra, що дає перевагу на один  */
+/* клас без !important.                                                         */
 
 .vs-option__extra .np_delivery_types_heading,
 .vs-option__extra .np_delivery_types_content {
@@ -7349,17 +7233,12 @@ body.hc-nav-open {
 		display: inline;
 	}
 
-/* The track list lives on the container and the lines borrow it with subgrid,   */
-/* because each line used to be its own grid and a grid only ever aligns its own */
-/* tracks. The line total is content-sized, so 499 000,00 in one line and 109,00 */
-/* in the next gave the two lines different track widths and the flexible name    */
-/* column swallowed the difference - the steppers below each other started 33px   */
-/* apart. With subgrid both auto tracks are measured once across every line: the  */
-/* stepper column is a constant 122px and the total column is as wide as the      */
-/* widest total in the cart, so the steppers share a left edge and the prices     */
-/* share a right one. A fixed width on the total column would align them too, but */
-/* it would either cost the product name 40px it needs at 992px or let a longer   */
-/* price run over the stepper.                                                    */
+/* Список доріжок живе на контейнері, а рядки позичають його через subgrid:     */
+/* сітка вирівнює лише власні доріжки, тож окремі сітки в кожному рядку давали  */
+/* б різну ширину колонок від різної довжини сум, і степери під собою           */
+/* розʼїжджались. З subgrid обидві авто-доріжки міряються один раз на весь      */
+/* кошик. Фіксована ширина колонки суми теж вирівняла б їх, але або відібрала   */
+/* б місце в назви товару, або дала б довшій ціні наїхати на степер.            */
 
 	.vs-cart__lines--main {
 		display: grid;
@@ -7540,14 +7419,9 @@ body.hc-nav-open {
 	margin-bottom: 0;
 }
 
-/* The underline reads --vs-glyph, the same token base.css gives every other     */
-/* link in the theme, and NOT --vs-border-strong: an underline is not a control  */
-/* boundary, so the boundary token has no business here. The two were split in   */
-/* Task 9 and this rule was the one site left pointing at the old value, which   */
-/* darkened admin-authored prose links #a5a5aa -> #6b6b71 without that being     */
-/* asked for or recorded. Hover takes the accent, the same cue every other link  */
-/* in the theme gets; it used to pin currentColor, which was the one rule        */
-/* actively cancelling spec 5.1's link-hover accent on the pages made of prose.  */
+/* Підкреслення бере --vs-glyph, як і всі інші посилання теми, а НЕ             */
+/* --vs-border-strong: підкреслення не є межею контрола, тож токен межі тут     */
+/* недоречний. Hover бере акцент — той самий сигнал, що й у решти посилань.     */
 
 .vs-prose a {
 	color: var(--vs-text);
@@ -7964,28 +7838,16 @@ body.hc-nav-open {
 /* editorial split, article cards. No tracked-uppercase kicker above any of      */
 /* them - the heading is the heading.                                            */
 
-/* overflow-x: clip, not hidden: the rail below pulls itself out by half a      */
-/* gutter on each side, and .container only grants 7px, so 1px of that pull is  */
-/* real page overflow. Forcing overflow-x: visible and reading                  */
-/* document.documentElement.scrollWidth against window.innerWidth measures 1px  */
-/* at 576, 768, 1200 and 1366, and 0 from 1380 up - the container's own         */
-/* max-width is 1366, but the viewport has to exceed it by twice the 7px        */
-/* half-gutter before the centring margin absorbs the pull. Below 576px the     */
-/* container grants 16px and there is nothing left to overflow past. What is    */
-/* clipped is the empty padding inside the first and last slide, never a card.  */
-/* `clip` rather than `hidden` so the vertical axis stays visible and a card's  */
-/* hover shadow is not cut off at the section edge.                             */
+/* Стрічка нижче витягує себе на пів проміжку в кожен бік, а контейнер стільки  */
+/* не дає — залишок стає справжнім горизонтальним переповненням сторінки.       */
+/* Обрізається порожнє поле першого й останнього слайда, ніколи не картка.      */
+/* Саме `clip`, а не `hidden`, щоб вертикаль лишилась видимою і тінь наведення  */
+/* на картку не зрізало на краю секції.                                         */
 
-/* The section keeps .container's own horizontal padding at every width. It      */
-/* used to zero it from 576px up, on the reasoning that the container is        */
-/* centred and wide up there - which is only true past 1366px, where grid.css   */
-/* caps the container. Between 576 and 1366 the container is full-bleed, so the */
-/* zero put the section's own content on x=0 and clipped the last card of every */
-/* grid against the screen edge; measured at 768, where the catalogue sits at 7 */
-/* and the home page sat at 0. The rail is unaffected either way: its -8/+8     */
-/* pull is relative to whatever padding the section has, so its first card      */
-/* still lands exactly on the title. It also cuts the overflow the block above  */
-/* describes from 8px to 1px, because -8 now starts from 7 rather than from 0.  */
+/* Секція тримає власне поле контейнера на будь-якій ширині. Обнулити його      */
+/* можна було б лише там, де контейнер справді центрований і обмежений; нижче   */
+/* тієї межі він на всю ширину, і нуль поставив би вміст на самий край екрана,  */
+/* обрізавши останню картку кожної сітки.                                       */
 
 .vs-home__section {
 	padding-top: var(--vs-space-8);
@@ -8054,15 +7916,10 @@ body.hc-nav-open {
 	padding-top: var(--vs-space-8);
 }
 
-/* okay.js constructs the rail Swiper with no spaceBetween and that call is not */
-/* ours to change, so the gutter is put inside the slide instead and Swiper's   */
-/* own width arithmetic is left untouched. It is a margin on the card and not   */
-/* padding on the slide because media.css shipped                                */
-/* `.product_item { padding: 0 !important }` below 992px, which no selector      */
-/* here could outrank - the card was the first box in the slide that legacy     */
-/* sheet did not reach. The rail is then pulled out by the same half-gutter on  */
-/* both sides so the first and last card line up with the section title rather  */
-/* than sitting 8px inside it.                                                   */
+/* okay.js будує Swiper без spaceBetween, і той виклик не наш, тож проміжок     */
+/* кладеться всередину слайда, а ширинна арифметика Swiper лишається            */
+/* недоторканою. Далі стрічку витягують на пів проміжку в обидва боки, щоб      */
+/* перша й остання картка стали рівно під заголовком секції.                    */
 
 .vs-home__rail {
 	min-width: 0;
@@ -8071,13 +7928,10 @@ body.hc-nav-open {
 	margin-right: calc(var(--vs-space-2) * -1);
 }
 
-/* `flex: 1 1 0%` and not `width: auto`: .product_item is a flex container (the  */
-/* card-host block above), so an auto-width card takes its max-content size and  */
-/* then shrinks by weight. Card widths were therefore content-dependent - five   */
-/* slides of an identical 276.39px held cards of 260.39/260.39/260.39/256.67/    */
-/* 199.70px, and the gutters between them read 16/16/16/19.72px. A zero basis     */
-/* makes every card fill its own slide minus the two margins, so the gutter is    */
-/* exactly 2 x --vs-space-2 on every pair, on every rail.                         */
+/* `flex: 1 1 0%`, а не `width: auto`: .product_item — флекс-контейнер, тож     */
+/* картка з авто-шириною бере свій max-content і далі стискається за вагою, і   */
+/* ширини карток стають залежними від вмісту. Нульова база змушує кожну картку  */
+/* заповнити власний слайд мінус два відступи.                                  */
 
 .vs-home__rail .vs-card {
 	flex: 1 1 0%;
@@ -8114,26 +7968,20 @@ body.hc-nav-open {
 	align-items: stretch;
 }
 
-/* The one case auto-fit cannot make look deliberate is a single post - on an    */
-/* author page with one article the lone card would stretch the full 1382px and  */
-/* its 16/10 media with it. A ceiling on the card and not on the track: a        */
-/* definite max inside the minmax() is what auto-fit divides the container by,   */
-/* so minmax(240px, 420px) yields three 420px columns at 1440 and wraps the      */
-/* fourth post onto a second row. Scoped to :only-child so two or more cards     */
-/* still share the row evenly rather than leaving a ragged tail.                 */
+/* Єдиний випадок, який auto-fit не може зробити навмисним, — один допис:       */
+/* самотня картка розтяглася б на всю ширину разом зі своїм зображенням.        */
+/* Обмеження на картці, а не на доріжці: певний максимум усередині minmax() є   */
+/* тим, на що auto-fit ділить контейнер. Обмежено :only-child, щоб дві й більше */
+/* карток і далі ділили рядок рівно.                                            */
 
 .vs-posts > .vs-post-card:only-child {
 	max-width: 420px;
 }
 
-/* The product page's related posts are four fixed tracks on the desktop, the     */
-/* owner's call. auto-fit gives whatever exists the whole row, which is right for */
-/* the blog index and the home rail but not here: two related posts became two    */
-/* 666px cards with 416px-tall photographs, larger than the product's own gallery */
-/* thumbnails. Four tracks put them at the width the home page's news cards       */
-/* already have and leave the empty slots empty. Only from 992px - below that the */
-/* shared auto-fit rule still does the right thing, two up on a tablet and one    */
-/* on a phone.                                                                    */
+/* Повʼязані дописи на сторінці товару — чотири фіксовані доріжки на десктопі,  */
+/* рішення власника: auto-fit віддав би наявним карткам увесь рядок, і два      */
+/* дописи стали б більшими за галерею самого товару. Порожні гнізда лишаються   */
+/* порожніми. Лише від 992px — нижче спільне auto-fit правило робить потрібне.  */
 
 @media (min-width: 992px) {
 	.vs-posts--related {
@@ -8142,24 +7990,16 @@ body.hc-nav-open {
 }
 
 /* ------------------------------------------------------ shop advantages strip */
-/* The Banners module renders this block and its markup is not ours to edit, so  */
-/* the wrapper in index.tpl carries .vs-advantages and everything below reaches  */
-/* in from there. What shipped was the legacy .block--boxed panel: a 3px-radius  */
-/* square box holding four more square boxes, on a page where every other        */
-/* surface is a 16px-radius hairline card.                                        */
-/*                                                                                */
-/* One strip, not four cards. These are shop policies, not merchandise - giving   */
-/* each its own card would put a content block at the same visual weight as a     */
-/* product. A single hairline band divided by hairlines reads as one quiet        */
-/* statement and stays below the cards above it.                                  */
-/*                                                                                */
-/* The icon slot deliberately has NO tinted plate behind it: the shop owner's     */
-/* advantage images are JPEGs with a baked white background (this shop's are      */
-/* 100x100 and 600x600), and a tint would frame each one in a visible white       */
-/* square - the same artefact Task 3 hit on the product card.                     */
-/*                                                                                */
-/* Divider bookkeeping is written for any number of items, not for four: the      */
-/* owner configures how many advantage banners exist.                             */
+/* Блок рендерить модуль Banners, його розмітку не редагуємо — обгортка в       */
+/* index.tpl несе .vs-advantages, і все нижче дотягується звідти.               */
+/*                                                                             */
+/* Одна смуга, а не чотири картки: це політики магазину, не товар, і власна     */
+/* картка для кожної зрівняла б їх вагою з товаром.                             */
+/*                                                                             */
+/* Під іконкою навмисно НЕМАЄ підкладки: зображення переваг власника — JPEG із  */
+/* запеченим білим тлом, і будь-яка заливка обвела б кожне видимим квадратом.   */
+/*                                                                             */
+/* Облік роздільників написаний під будь-яку кількість елементів.               */
 
 /* .container still carries the legacy 7px of horizontal padding. Every homepage */
 /* section zeroes it above 576px via .vs-home__section's own media-scoped rule,  */
@@ -8855,31 +8695,22 @@ body.hc-nav-open {
 }
 
 /* ----------------------------------------------------------------- rating */
-/* The stock rating was a gold raster sprite - a third chromatic event against  */
-/* PRODUCT.md's two (rose = discount, emerald = availability), and a raster      */
-/* dependency. Filled versus outline carries the same meaning in ink.            */
-/* The geometry is load-bearing: scripts.tpl's rater reads $on.height() as its   */
-/* unit and $on.width() as the current value, and the templates emit             */
-/* width:{rating*90/5}px - so the box stays 90x18 with 18px stars.               */
+/* Заливка проти контуру передає те саме, що робив кольоровий растр, але        */
+/* чорнилом. Геометрія несуча: скрипт оцінювання читає висоту як одиницю, а     */
+/* ширину як поточне значення, і шаблони віддають ширину числом — тож розміри   */
+/* коробки й зірки міняти не можна.                                             */
 
-/* images/rating.svg is the same 18x36 sprite the raster was - solid star over   */
-/* outline star - and the row is chosen the same way, by shifting the mask up    */
-/* 18px for the empty row. Two rules therefore share one file instead of         */
-/* carrying two inline copies of the path. It is a mask rather than a            */
-/* background-image so the two colours stay tokens: an SVG behind                */
-/* background-image would bake them in, and .rating_starHover could not repaint  */
-/* the filled row. The relative url is rewritten by CssConfig::setCssVariables   */
-/* ('../' -> '../../design/vibe_shop/'), which is how the raster resolved from   */
-/* the compiled sheet in cache/css/.                                             */
+/* Спрайт: залита зірка над контурною, потрібний ряд обирається зсувом маски.   */
+/* Саме маска, а не background-image, щоб обидва кольори лишились токенами —    */
+/* SVG у фоні запік би їх, і підсвітка при наведенні не змогла б перефарбувати  */
+/* залитий ряд. Відносний шлях переписує CssConfig, тому він і резолвиться зі   */
+/* зібраного файлу в cache/css/.                                                */
 
-/* The empty row is painted by a pseudo-element, NOT by a mask on the box       */
-/* itself. A CSS mask clips the element AND its descendants as one group, so    */
-/* an outline stencil on .rating_starOff reduced the nested solid              */
-/* .rating_starOn to the intersection - the same outline - and the filled row   */
-/* never rendered at any rating. Measured on a 4.7 product before the fix: all  */
-/* five star centres sampled rgb(245,245,246), i.e. bare page background.       */
-/* A pseudo-element is a sibling of the child in the paint tree, not an         */
-/* ancestor, so its mask stops at itself.                                       */
+/* Порожній ряд малює псевдоелемент, а НЕ маска на самій коробці: CSS-маска    */
+/* обрізає елемент РАЗОМ із нащадками як одну групу, тож контурний трафарет    */
+/* звів би вкладений залитий ряд до того самого контуру, і залитий не          */
+/* намалювався б за жодного рейтингу. Псевдоелемент у дереві малювання —       */
+/* сусід дитини, а не предок, тож його маска зупиняється на ньому самому.      */
 
 .rating_starOff {
 	position: relative;
@@ -9229,12 +9060,10 @@ body.hc-nav-open {
 }
 
 /* ---------------------------------------------------------------- account */
-/* Below 768px every .tab is visible and each one is a fn_switch accordion;      */
-/* from 768px okay.js's .tabs script shows one at a time and the rail is the     */
-/* switcher. Both presentations are declared here, which is what let the legacy  */
-/* sheets that used to supply them be deleted in Task 8. The generic .tabs*      */
-/* defaults at the top of this file cover the same contract for a module         */
-/* template that renders it without the .vs-account__* names.                    */
+/* На вузькому екрані видно кожну вкладку і кожна є акордеоном; від 768px       */
+/* скрипт okay.js показує одну за раз, а бічний список стає перемикачем. Обидві */
+/* подачі оголошені тут. Загальні .tabs* на початку файлу закривають той самий  */
+/* контракт для шаблону модуля, що рендерить це без імен .vs-account__*.        */
 
 .vs-account {
 	padding-bottom: var(--vs-space-9);
@@ -9293,13 +9122,10 @@ body.hc-nav-open {
 	white-space: nowrap;
 }
 
-/* The rail is a vertical list of links, not the horizontal strip the generic   */
-/* .tabs__navigation draws, so the strip's underline is removed here. The link  */
-/* rules below are three classes deep on purpose: the legacy sheet styled       */
-/* .tabs__navigation--user .tabs__link at 0,3,0 - height, hairline, padding and */
-/* a .selected colour that is near-black in this shop and therefore invisible   */
-/* on the picked row - and the weight was matched so the restatement wins on    */
-/* order. It now also outranks the generic .tabs__link by specificity.          */
+/* Тут вертикальний список посилань, а не горизонтальна смуга загального        */
+/* .tabs__navigation, тож підкреслення смуги знімається. Правила посилань нижче */
+/* навмисно три класи завглибшки — це те, що дає їм перевагу над загальним      */
+/* .tabs__link за специфічністю, а не за порядком.                              */
 
 .vs-account__nav {
 	display: flex;
@@ -9967,49 +9793,32 @@ body.hc-nav-open {
 		gap: var(--vs-space-4);
 	}
 
-/* Banner captions on a phone. Variants 3 and 4 stack the caption and the image */
-/* as two 100%-height flex children of one slide, so inside a fixed-ratio box    */
-/* only half of each would ever be visible - the caption has to come out of      */
-/* flow one way or the other.                                                    */
-/*                                                                               */
-/* Measured on a 375 slide (361x203.1), all y slide-relative: the prev/next       */
-/* arrows are 44x44 at y 71.5-115.5 at BOTH edges, and the pagination dots span   */
-/* the full width at y 169.8-193.1. (Page-relative on the shipped homepage those  */
-/* are 152.5-196.5 and 250.8-274.1; slide-relative is the number that stays put   */
-/* when the header above the carousel changes height.) What is                    */
-/* left is a band roughly 361x70 - one clamped line - which holds less than the   */
-/* page the slide already links to and covers the photograph to say it. So the   */
-/* caption is suppressed rather than overlaid, and the headline still reaches     */
-/* assistive tech through .banner_group__link's aria-label.                       */
-/*                                                                               */
-/* Scoped to variants 3 and 4, and at 0,3,0. The earlier blanket                  */
-/* `.main_banner .banner_group__content` was 0,2,0 and LOST on source order to    */
-/* the module's own `.banner_group__variant3 .banner_group__content{display:flex}`*/
-/* - banners.css is emitted after components.css in the compiled bundle - so the  */
-/* caption in fact rendered in dark ink straight over the photograph while its    */
-/* 0,3,0 companion pinned the image behind it. Variant 1 the module hides itself; */
-/* variant 2's caption is the module's own designed overlay on a translucent      */
-/* plate and is legible over any photograph, so it is left alone.                 */
+/* Підписи банерів на телефоні. Варіанти 3 і 4 кладуть підпис і зображення як   */
+/* дві флекс-дитини на всю висоту слайда, тож у коробці фіксованого             */
+/* співвідношення видно було б половину кожного — підпис так чи інакше має      */
+/* вийти з потоку.                                                              */
+/*                                                                             */
+/* Того, що лишається після стрілок і крапок, менше, ніж на сторінці, куди      */
+/* слайд і так веде, а платою було б закрите фото. Тому підпис не накладається, */
+/* а гаситься; заголовок доходить до допоміжних технологій через aria-label     */
+/* посилання.                                                                   */
+/*                                                                             */
+/* Обмежено варіантами 3 і 4 і трьома класами: banners.css модуля йде після     */
+/* нашого бандла, тож правило меншої специфічності програвало б за порядком.    */
+/* Варіант 1 модуль ховає сам, а підпис варіанта 2 — його власна накладка на    */
+/* напівпрозорій плашці, читабельна над будь-яким фото.                         */
 
-/* Scoped to slides that carry a link, which is the whole of the argument above:  */
-/* the headline reaches assistive tech through the link's aria-label and the      */
-/* image's alt, and the destination is one tap away. The Banners module emits no  */
-/* <a class="banner_group__link"> at all when a slide has no URL - the shipped     */
-/* data has one, variant 4 - and for that slide the paragraph above stops being    */
-/* true: there is nothing to tap and nothing but the alt text left, so a sighted   */
-/* shopper on a phone gets a photograph and no words. Measured at 375 before this  */
-/* fix: innerText of that slide was the empty string.                              */
-/*                                                                                 */
-/* :has() is the first use of the selector in this theme - Chrome 105+,             */
-/* Safari 15.4+, Firefox 121+. On an older engine BOTH rules below fail to parse    */
-/* and neither the scoped suppression nor the unlinked fallback matches, so the     */
-/* caption reverts to exactly the state described three paragraphs up: the          */
-/* module's own two-child column flex, i.e. dark ink straight over the photograph.  */
-/* That is the illegible rendering Task 7.5 was written to remove, not a neutral    */
-/* one - the degradation is a step backwards on those browsers, not a no-op. It is  */
-/* accepted because the alternative is a JS class hook for a caption on two banner  */
-/* variants at one breakpoint, and because the copy is still readable as the        */
-/* image's alt text.                                                                */
+/* Обмежено слайдами з посиланням — на цьому й тримається аргумент вище:        */
+/* заголовок доходить через aria-label і alt, а ціль за один дотик. Коли URL    */
+/* немає, модуль не віддає посилання зовсім, і для такого слайда лишається сам  */
+/* alt — тобто зряча людина на телефоні бачила б фото без жодного слова.        */
+/*                                                                             */
+/* :has() — перше використання цього селектора в темі. На старішому рушії ОБИДВА */
+/* правила нижче не розберуться, і підпис повернеться рівно до того стану, який */
+/* тут прибирається: темне чорнило просто поверх фотографії. Тобто це крок      */
+/* назад на таких браузерах, а не нейтральна деградація. Прийнято свідомо:      */
+/* альтернативою був би JS-хук заради підпису двох варіантів банера на одному   */
+/* брейкпойнті, а текст лишається читабельним як alt зображення.                */
 
 	.main_banner .banner_group__variant3:has(> .banner_group__link) .banner_group__content,
 	.main_banner .banner_group__variant4:has(> .banner_group__link) .banner_group__content {
@@ -10106,15 +9915,11 @@ body.hc-nav-open {
 /* Lazy load placeholder                                                        */
 /* ============================================================================ */
 
-/* Every lazy image in the theme ships images/xloading.svg in its src until     */
-/* lazyload.min.js swaps the real photo in, so the placeholder state is exactly */
-/* `.lazy` without `.loaded`. That class is the right hook rather than a timer: */
-/* lazyload adds it from the image's own load event (class_loaded defaults to   */
-/* "loaded"), and a failed image gets `error` instead, so a broken photo keeps  */
-/* the placeholder rather than falling back to the full-bleed state this rule   */
-/* exists to prevent. It never lands on the <source> elements inside a          */
-/* <picture> - lazyload only attaches load listeners to IMG, IFRAME and VIDEO - */
-/* but a <source> is not rendered, so that costs nothing.                       */
+/* Кожне ліниве зображення теми несе плейсхолдер у src, поки lazyload не        */
+/* підставить справжнє фото, тож стан плейсхолдера — це саме `.lazy` без        */
+/* `.loaded`. Цей клас правильніший за таймер: бібліотека ставить його з події  */
+/* load самого зображення, а зображенню з помилкою дає інший клас — тож         */
+/* зламане фото лишається плейсхолдером, а не переходить у стан на всю ширину.  */
 
 /* scale-down is the whole fix. The placeholder is intrinsically 24x24, and     */
 /* scale-down paints the smaller of `none` and `contain`: 24x24 in a large slot */
@@ -10139,49 +9944,32 @@ img.lazy:not(.loaded) {
 /* LEGACY CLASS CONTRACT                                                        */
 /* ============================================================================ */
 
-/* Task 8 deleted okay.css, theme.css and media.css. Most of what they carried  */
-/* had already been reimplemented on .vs-* classes by Tasks 1-7, but three      */
-/* groups of rules had not, because the markup that needs them is not ours to   */
-/* rename:                                                                      */
-/*                                                                              */
-/*   1. Module templates. Banners, FAQ, FastOrder and the four payment gateways */
-/*      render .block, .boxed, .button, .form__*, .popup, .swiper-button-* and  */
-/*      friends from Okay/Modules/**, which C9 forbids this theme to edit.      */
-/*   2. Admin-authored WYSIWYG. .block__description .table / .table__row /      */
-/*      .table__cell is a two-column layout helper the editor emits; without it */
-/*      a paired article collapses into one full-bleed column.                  */
-/*   3. A handful of this theme's own elements that were still leaning on the   */
-/*      legacy sheets - the scroll-to-top button, the two add-to-list toasts    */
-/*      and the readmore collapse.                                              */
-/*                                                                              */
-/* Everything below was found by diffing the computed style of every element on */
-/* 26 pages before and after the deletion, not by reading the old sheets and    */
-/* guessing. Where the legacy look conflicted with this theme it was restated   */
-/* on tokens rather than reproduced: no nested white cards (C11), no cyan       */
-/* gradient on the toasts, no font-awesome glyphs, no button glare sweep.       */
-/*                                                                              */
-/* Not every generic name lives here. The ones this file ALSO refines under a   */
-/* .vs-* name on the same element - .swiper-button-* and the .tabs* family -    */
-/* are in LEGACY GENERIC DEFAULTS at the top of the file instead, because a     */
-/* block here would be the later rule and would quietly outrank the theme.      */
-/* Add a name here only if no .vs-* rule in this file touches the same element. */
+/* Загальні імена класів, які тема мусить підтримувати, бо розмітка не наша:    */
+/*                                                                             */
+/*   1. Шаблони модулів — Banners, FAQ, FastOrder і платіжні шлюзи рендерять    */
+/*      .block, .boxed, .button, .form__*, .popup, .swiper-button-* з           */
+/*      Okay/Modules/**, які темі редагувати заборонено.                        */
+/*   2. Контент з WYSIWYG адмінки — .block__description .table і його рядки:    */
+/*      без них парна стаття згортається в одну колонку на всю ширину.          */
+/*   3. Кілька власних елементів теми, що ще спираються на ці імена: кнопка     */
+/*      «вгору», два тости додавання до списку й згортання довгого опису.       */
+/*                                                                             */
+/* Не кожне загальне імʼя живе тут. Ті, які цей файл ТАКОЖ уточнює під .vs-*    */
+/* іменем на тому самому елементі, лежать у LEGACY GENERIC DEFAULTS на початку  */
+/* файлу — блок тут був би пізнішим правилом і тихо перебивав би тему. Додавати */
+/* сюди імʼя можна лише тоді, коли жодне .vs-* правило файлу того елемента не   */
+/* торкається.                                                                  */
 
 /* ------------------------------------------------------------ banner group */
 
-/* The banner group is a bare .swiper-container; the home sections own their     */
-/* own rhythm, so its bottom margin is zeroed here. The arrows and bullets the   */
-/* same module renders are styled in LEGACY GENERIC DEFAULTS at the top of this  */
-/* file, because the theme refines them under .vs-gallery__nav and               */
-/* .vs-compare__nav at equal specificity and has to be the later rule.           */
-/*                                                                              */
-/* The class is doubled because the module's own banners.css declares            */
-/* `.banner_group { margin-bottom: 15px }` and lands AFTER this file in the      */
-/* bundle - 216484 bytes in against 205855 - so a single-class rule here lost    */
-/* and the margin stayed. That mattered visually: .main_banner carries the       */
-/* radius and the overflow, so a container 15px taller than its own image put    */
-/* the two rounded bottom corners in an empty strip below the photograph and     */
-/* the banner read as square-bottomed. Doubling rather than scoping to           */
-/* .main_banner keeps it true for banner groups placed anywhere.                 */
+/* Група банерів — голий .swiper-container; ритм задають самі домашні секції,   */
+/* тож її нижній відступ обнуляється. Стрілки й крапки того ж модуля стилізовані */
+/* в LEGACY GENERIC DEFAULTS на початку файлу.                                  */
+/*                                                                             */
+/* Клас подвоєно, бо banners.css модуля задає власний margin-bottom і потрапляє */
+/* в бандл ПІСЛЯ цього файлу — правило з одним класом програвало б. Це помітно: */
+/* .main_banner несе радіус і обрізання, тож контейнер, вищий за власне         */
+/* зображення, лишав би два округлі кути в порожній смузі під фотографією.      */
 
 .banner_group.banner_group {
 	margin-bottom: 0;
@@ -10223,15 +10011,11 @@ img.lazy:not(.loaded) {
 	border-color: var(--vs-border-strong);
 }
 
-/* The sticky buy bar and this button are both fixed at the same z-layer and   */
-/* both anchor near the bottom-left on phones - harmless while the bar was a   */
-/* full-bleed strip this button was flush against, but once the bar floats as  */
-/* an inset pill the two collide directly on top of the price. The class      */
-/* alone isn't a safe guard: vibe.js's IntersectionObserver sets is-visible at */
-/* every width, with no matchMedia guard, while the bar itself only renders    */
-/* below 992px. Without this breakpoint the button would lift to clear a bar   */
-/* that isn't even on screen above 992px. So the lift is scoped to the same    */
-/* width the bar renders at, and only applies while the bar is actually shown. */
+/* Липка смуга покупки й ця кнопка обидві фіксовані на одному шарі й тримаються */
+/* низу — коли смуга стала плаваючою пігулкою, вони почали накладатись просто   */
+/* поверх ціни. Самого класу для захисту мало: vibe.js ставить is-visible на    */
+/* будь-якій ширині, а смуга рендериться лише нижче 992px, тож без цієї межі    */
+/* кнопка піднімалася б, обходячи смугу, якої на екрані немає.                  */
 @media (max-width: 991px) {
 	body:has(.vs-sticky-buy.is-visible) .to_top {
 		bottom: calc(var(--vs-space-3) + env(safe-area-inset-bottom) + var(--vs-sticky-buy-h) + var(--vs-space-3));
@@ -10399,17 +10183,10 @@ img.lazy:not(.loaded) {
 
 /* -------------------------------------------------------- generic button */
 
-/* Rendered by the Fondy, LiqPay, RozetkaPay and WayForPay checkout forms,      */
-/* which post to the gateway from a template this theme may not edit. Sized and */
-/* coloured like .vs-btn--primary so a redirect button does not arrive as an    */
-/* unstyled <input>. .button--blick is the module's glare-sweep hook: the class */
-/* is honoured, the sweep is not - a 0.75s white diagonal across a CTA is not   */
-/* a motion this theme makes.                                                   */
-/*                                                                              */
-/* .btn_order, .button--second, .button--small and .button--big were carried    */
-/* over with it in Task 8 and are gone: grepped across every .tpl in the repo,  */
-/* every installed module and the description columns of the live database,     */
-/* each has zero emitters. .button and .button--blick both do, so both stay.    */
+/* Рендериться формами платіжних шлюзів, які постять на шлюз із шаблону, що     */
+/* темі редагувати не можна. Розмір і колір як у .vs-btn--primary, щоб кнопка   */
+/* переходу не приходила нестилізованим <input>. .button--blick — хук модуля    */
+/* для світлового пробігу: клас шанується, самого пробігу немає.                */
 
 .button {
 	display: inline-flex;
@@ -10449,17 +10226,14 @@ img.lazy:not(.loaded) {
 
 /* ------------------------------------------------ generic form and popup */
 
-/* The FastOrder module's one-click order form. It is included on every page,  */
-/* hidden, and fancybox lifts it into a lightbox from the rocket button on a   */
-/* product card - so it is the one legacy form still reaching shoppers.        */
+/* Форма замовлення в один клік від модуля FastOrder. Включена на кожній        */
+/* сторінці, прихована, і fancybox піднімає її в лайтбокс — це остання застаріла */
+/* форма, що доходить до покупців.                                              */
 /*                                                                             */
-/* .form__placeholder is a <span> that FOLLOWS its input in the DOM. The legacy */
-/* sheet floated it over the field; this layer used to pin it inside a 56px     */
-/* box. It is now a plain caption above a 44px field - the same shape           */
-/* .vs-form__label and .vs-field already have - so the checkout stops showing   */
-/* two different kinds of input on one screen. The span keeps its DOM position  */
-/* and is lifted visually by `order`, which is what keeps the                   */
-/* `.form__input.error ~ .form__placeholder` selector working.                  */
+/* .form__placeholder — це <span>, який ІДЕ ПІСЛЯ свого поля в DOM. Тут він     */
+/* звичайний підпис над полем, як .vs-form__label. Позицію в DOM span зберігає, */
+/* а візуально піднімається через `order` — саме це лишає робочим селектор      */
+/* `.form__input.error ~ .form__placeholder`.                                   */
 
 .form {
 	position: relative;
@@ -10720,14 +10494,10 @@ img.lazy:not(.loaded) {
 
 /* ------------------------------------------------------------- readmore */
 
-/* readmore.min.js collapses a long category, brand, blog or author            */
-/* description and injects its own toggle link after it. The plugin embeds the  */
-/* mechanism itself (overflow, height transition); only the collapsed height,   */
-/* the fade over the cut and the toggle's look are the theme's. This shop has   */
-/* no description long enough to trigger it, so it is restated from the legacy  */
-/* rules rather than measured - the fade is the one part that had to change,    */
-/* since the legacy gradient was written `linear-gradient(top, ...)`, which is  */
-/* invalid modern syntax that only rendered through the -webkit- prefix.        */
+/* readmore.min.js згортає довгий опис і сам вставляє посилання-перемикач.      */
+/* Механіку несе плагін; тема задає лише згорнуту висоту, згасання над зрізом   */
+/* і вигляд перемикача. Градієнт довелося переписати: у застарілому вигляді він */
+/* був невалідним сучасним синтаксисом і працював лише через -webkit- префікс.  */
 
 .fn_readmore[data-readmore] {
 	display: block;
@@ -10786,20 +10556,13 @@ img.lazy:not(.loaded) {
 
 /* ------------------------------------------------------ navigation weight */
 
-/* okay.css's reset carried `ol li, ul li { font-weight: 500 }`. Because this   */
-/* theme builds almost everything out of lists, that one bare-element rule was  */
-/* setting a medium weight on roughly 20,000 elements per page - breadcrumbs,   */
-/* card names, filter labels, prose bullets, the lot - and every component      */
-/* written in Tasks 1-7 inherited it without ever asking for it. It is not      */
-/* restated: base.css declares the body weight as 400 and each component states */
-/* the weight it wants, so the rest of the site now renders at the weight it    */
-/* was actually written for.                                                    */
-/*                                                                              */
-/* The navigation is the exception. Its labels are small and sit next to the    */
-/* wordmark and the dark catalogue button, and at 400 they read thin against    */
-/* them; 500 is the weight the header was reviewed and signed off at. Stated    */
-/* here on the three nav components rather than on `li`, so it reaches the      */
-/* header bar, the footer menus and the off-canvas clone and nothing else.      */
+/* Насиченість списків тут НЕ відновлюється: base.css задає вагу тексту, а      */
+/* кожен компонент — свою власну.                                               */
+/*                                                                             */
+/* Навігація — виняток: її підписи дрібні й стоять поруч із логотипом і темною  */
+/* кнопкою каталогу, де тонка вага читається блякло. Задано на трьох            */
+/* компонентах навігації, а не на `li`, щоб дістати лише шапку, меню підвалу й  */
+/* off-canvas клон.                                                             */
 
 .vs-menu__item,
 .vs-menu__link,
@@ -10809,17 +10572,14 @@ img.lazy:not(.loaded) {
 
 /* --------------------------------------------------------- bare accordion */
 
-/* .accordion__item / __title / __content are okay.js's disclosure contract.   */
-/* Every instance in this theme also carries a .vs-* class that owns its look   */
-/* (.vs-disclosure-row__* on the product page, .vs-tabs__* below it), so these  */
-/* rules exist for a module template that emits the bare names on their own.    */
-/*                                                                              */
-/* Deliberately no `display: none` on __content, even though okay.css had one.  */
-/* These selectors are one class deep, the same weight as .vs-tabs__panel, and  */
-/* they come later in the file - so a display rule here would win and collapse  */
-/* the product description, specification and review panels for any visitor     */
-/* without scripting. Tasks 5 and 7 made those panels open by default on        */
-/* purpose and let vibe.js do the collapsing; visibility stays the script's job. */
+/* .accordion__item / __title / __content — контракт розкриття okay.js. Кожен   */
+/* екземпляр у темі несе ще й .vs-* клас, що володіє виглядом, тож ці правила   */
+/* існують для шаблону модуля, який віддає голі імена.                          */
+/*                                                                             */
+/* Навмисно без `display: none` на __content: селектори тут один клас           */
+/* завглибшки, тобто рівні .vs-tabs__panel, і стоять пізніше — правило display  */
+/* виграло б і згорнуло опис, характеристики й відгуки для відвідувача без      */
+/* скриптів. Ці панелі відкриті за задумом, згортає їх vibe.js.                 */
 
 /* The wrapper the stock markup puts around a set of items. Nothing in this     */
 /* theme or in the sixteen installed modules renders it today, but it is one of */
@@ -10853,18 +10613,16 @@ img.lazy:not(.loaded) {
 /* SHORT VIEWPORT                                                               */
 /* ============================================================================ */
 
-/* A phone held sideways is 844x390: a tablet's width on a third of a phone's   */
-/* height. Every width breakpoint above has already fired and handed it the     */
-/* tablet layout, so the correction cannot key off width - it keys off height.  */
+/* Телефон на боці має ширину планшета й третину висоти телефона. Усі ширинні   */
+/* брейкпойнти вище вже спрацювали й видали йому планшетну розкладку, тож       */
+/* виправлення не може ключитись на ширину — воно ключиться на висоту.          */
 /*                                                                             */
-/* 500px is the threshold because no tablet reaches it (an iPad sideways is     */
-/* 1180x820) and every phone in landscape is under it (844x390, 800x360,        */
-/* 736x414). It also catches a short desktop window and a tablet in split view, */
-/* which want the same treatment for the same reason.                          */
+/* Поріг обрано так, щоб жоден планшет його не досягав, а кожен телефон у       */
+/* горизонталі був під ним. Він же ловить низьке вікно на десктопі й планшет у  */
+/* розділеному екрані, яким потрібне те саме.                                   */
 /*                                                                             */
-/* Placed after every width block and before TOUCH TARGETS, which stays last:   */
-/* these rules and the min-width rules they correct carry equal specificity, so */
-/* source order is what decides them.                                          */
+/* Стоїть після всіх ширинних блоків і перед TOUCH TARGETS, який лишається      */
+/* останнім: специфічність тут рівна, тож вирішує порядок у файлі.              */
 
 @media (max-height: 500px) {
 
@@ -10941,15 +10699,12 @@ img.lazy:not(.loaded) {
 		margin-bottom: var(--vs-space-1);
 	}
 
-/* Below 360px of height the frame trim is not enough - the box is 373 and even  */
-/* 320px-tall phones exist sideways - so the fields go two-up. A lightbox is     */
-/* about 460px wide, which is room for two 210px fields, and the height that     */
-/* buys is a whole row: 373 down to 285.                                         */
-/*                                                                              */
-/* Safe as a grid because the three hidden inputs and the error div in this      */
-/* body are all display: none and so generate no grid items - verified, not      */
-/* assumed. The product name is the one real child that must not sit in a        */
-/* column, so it spans.                                                          */
+/* За зовсім малої висоти обрізання рамки вже не рятує, тож поля стають у два   */
+/* стовпці — це заощаджує цілий рядок.                                          */
+/*                                                                             */
+/* Сітка тут безпечна, бо приховані поля й блок помилки — display: none і       */
+/* елементів сітки не створюють (перевірено, не припущено). Назва товару —      */
+/* єдина справжня дитина, яка не має стояти в колонці, тож вона розтягується.   */
 
 	.fancybox-content .form__body {
 		display: grid;
@@ -10990,15 +10745,11 @@ img.lazy:not(.loaded) {
 		margin-top: var(--vs-space-3);
 	}
 
-/* The promo field goes below the button. It is 106px of the summary and it sat  */
-/* first, between the title and the totals, because .vs-summary__coupon is       */
-/* display: contents and .vs-coupon therefore lands at order 0 in the explicit   */
-/* sequence above. On a 390px screen that 106px is what kept the order button    */
-/* under the fold; moved to the end it puts the button at 292 with its bottom at */
-/* 344, so the total and the button are both on the first screen. Nothing is     */
-/* hidden - a shopper with a code scrolls one panel for it, a shopper without    */
-/* one stops needing to scroll at all. The divider moves to the top edge so it   */
-/* still separates the block from the button now above it.                       */
+/* Поле промокоду йде під кнопку. Воно стояло першим, бо .vs-summary__coupon —  */
+/* display: contents, і .vs-coupon потрапляв на початок явної послідовності. На */
+/* телефоні саме ці ~100px тримали кнопку замовлення за межею екрана. Нічого не */
+/* приховано: покупець із кодом гортає одну панель, покупець без коду не гортає */
+/* зовсім. Роздільник переїжджає на верхній край, щоб і далі відділяти блок.    */
 
 	.vs-checkout .vs-coupon {
 		order: 6;
@@ -11099,17 +10850,14 @@ img.lazy:not(.loaded) {
 		margin-top: 0;
 	}
 
-/* The checkout, same trade again. .vs-cart already has exactly two children -   */
-/* the fields and the summary - and a two-column shape from 992px up, so nothing */
-/* new has to be built: the existing tracks just never reached a phone on its    */
-/* side. Stacked, the summary sat 2043px down a 2561px page, which put the total */
-/* and the order button six screens from the top. Beside the fields they are on  */
-/* the first screen instead.                                                     */
-/*                                                                              */
-/* Deliberately NOT sticky here, unlike the 992px rule. The summary is 385px     */
-/* tall and the viewport is 390: pinned at a 16px offset its own bottom - the    */
-/* submit button - would sit below the fold and stay there however far the page  */
-/* scrolled. In the right column's normal flow it is visible from the start.     */
+/* Оформлення — той самий обмін. .vs-cart уже має рівно двох дітей і            */
+/* двоколонкову форму від 992px, тож нічого нового будувати не треба: наявні    */
+/* доріжки просто не діставали телефона на боці. Стосом підсумок опинявся за    */
+/* кілька екранів від верху, поруч із полями — на першому.                      */
+/*                                                                             */
+/* Навмисно БЕЗ sticky, на відміну від правила 992px: підсумок майже такої ж    */
+/* висоти, як вікно, тож приклеєний він тримав би власну кнопку відправки під   */
+/* межею екрана скільки б сторінку не гортали.                                  */
 
 	.vs-cart {
 		grid-template-columns: minmax(0, 1fr) 280px;
@@ -11141,37 +10889,22 @@ img.lazy:not(.loaded) {
 /* TRANSLUCENT CHROME                                                           */
 /* ============================================================================ */
 
-/* The blur is the visible part but the translucency is the actual change:      */
-/* backdrop-filter does nothing behind an opaque background, and both of these  */
-/* were fully opaque.                                                          */
+/* Розмиття видиме, але справжня зміна — напівпрозорість: backdrop-filter не    */
+/* робить нічого за непрозорим тлом.                                            */
 /*                                                                             */
-/* The colour cannot be a literal rgba. --vs-surface is var(--okay-boxed-color),*/
-/* the shade the shop owner sets in the admin panel, so the translucent value   */
-/* is mixed from whatever they chose. By the time the browser sees it the token */
-/* holds a plain colour, so color-mix resolves normally.                       */
+/* Колір не може бути літералом: --vs-surface іде за відтінком, який власник    */
+/* задає в адмінці, тож напівпрозоре значення змішується з обраного ним.        */
 /*                                                                             */
-/* Both properties live inside @supports together on purpose. A browser without */
-/* backdrop-filter must keep the opaque surface: giving it the translucency     */
-/* alone would be a see-through bar with no blur, worse contrast than today.    */
+/* Обидві властивості лежать усередині @supports разом навмисно: браузер без    */
+/* backdrop-filter має лишитись із непрозорою поверхнею, бо сама лише           */
+/* напівпрозорість дала б просвітну смугу без розмиття, тобто гірший контраст.  */
 /*                                                                             */
-/* Placed here and not beside .vs-header__main, for the same reason the two     */
-/* blocks below it are: .vs-sticky-buy sets its own background-color at equal   */
-/* specificity further down the file, so a copy of this rule up in the header   */
-/* section loses the cascade on the buy bar and leaves it opaque with a blur    */
-/* that has nothing to blur. Measured that way first: bg stayed opaque          */
-/* rgb(255, 255, 255). TOUCH TARGETS still stays last.                         */
+/* Стоїть тут, а не біля .vs-header__main: .vs-sticky-buy задає власний фон на  */
+/* рівній специфічності нижче в файлі, тож копія цього правила в секції шапки   */
+/* програла б каскад на смузі покупки.                                          */
 /*                                                                             */
-/* .vs-header has to give up its own fill or the whole thing is invisible on a  */
-/* phone, which is the only place it matters. Below 992px .vs-header is the     */
-/* element that pins (position: sticky, from the max-width: 991 block) and      */
-/* .vs-header__utility is display: none, so the two boxes are the same 390x61   */
-/* rectangle - and an opaque parent is exactly what a child's backdrop-filter   */
-/* samples. Computed style read color(srgb 1 1 1 / 0.82) and blur(12px) while   */
-/* the rendered band was a flat 255,255,255 at every scroll offset tested.      */
-/* Above 992px .vs-header goes back to being ordinary flow content that scrolls */
-/* away (sticky.min.js pins .vs-header__main itself, data-sticky-for="991"), so */
-/* the only thing it was still painting for is the utility strip, which now     */
-/* carries the surface colour on its own rule and keeps it opaque.              */
+/* .vs-header мусить віддати власну заливку, інакше на телефоні ефекту не видно */
+/* зовсім: непрозорий предок — це саме те, що семплить backdrop-filter дитини.  */
 
 /* Bounded at 991px, which is where it earns its keep. On a phone the bar is     */
 /* narrow and content runs under it continuously, so it reads as frosted glass.  */
@@ -11222,22 +10955,14 @@ img.lazy:not(.loaded) {
 /* POINTER TARGETS                                                              */
 /* ============================================================================ */
 
-/* 44px is the floor for a finger and the block below raises everything to it,   */
-/* but only up to 991px. WCAG 2.5.8 AA asks 24x24 of a POINTER too, and three    */
-/* links stayed under it at every width from 992 up - measured at 992, 1180,     */
-/* 1200 and 1440, identical each time, so this was never the 1180x820 case it    */
-/* was first filed as. All three are real links, none of them inline in a         */
-/* sentence, so neither of the exceptions applies:                               */
-/*                                                                              */
-/* - .vs-copyright__mark, an <a> to the CMS with an SVG and no text, 11x16 -     */
-/*   the smallest target on the site;                                            */
-/* - .vs-post-card__author, a standalone byline link, 4px short at 20;            */
-/* - .vs-cart__name, the product title in a cart line, 18 tall.                  */
-/*                                                                              */
-/* 24 rather than 44: with a mouse the extra 20px would push the footer mark     */
-/* out of its row and give a byline the height of a button. This range is         */
-/* disjoint from the block below, so their source order cannot matter and TOUCH   */
-/* TARGETS still stays last.                                                     */
+/* Поріг для пальця піднімає блок нижче, але лише до 991px. WCAG 2.5.8 AA       */
+/* вимагає 24x24 і для ВКАЗІВНИКА, а три посилання лишались під ним на всіх     */
+/* ширинах від 992: знак CMS у підвалі, підпис автора допису й назва товару в   */
+/* рядку кошика. Жодне не є інлайновим у реченні, тож винятки не застосовні.    */
+/*                                                                             */
+/* Саме 24, а не 44: з мишею зайві пікселі виштовхнули б знак підвалу з рядка,  */
+/* а підпису автора дали б висоту кнопки. Діапазон не перетинається з блоком    */
+/* нижче, тож їхній порядок не має значення.                                    */
 
 @media (min-width: 992px) {
 	.vs-copyright__mark {
@@ -11262,18 +10987,16 @@ img.lazy:not(.loaded) {
 /* TOUCH TARGETS                                                                */
 /* ============================================================================ */
 
-/* Task 9, Step 3. Everything below was measured under 44x44 at 375 and is       */
-/* raised here rather than at the component, because the component's own rule    */
-/* is the height the DESIGN wants and several of them are correct at 1440 with   */
-/* a mouse. Last block in the file, so it wins on source order at equal weight.  */
-/*                                                                              */
-/* Three things are deliberately NOT raised, and the report says so:             */
-/* - links inside .vs-prose, which are inline in a sentence (WCAG 2.5.8 exempts  */
-/*   those explicitly, and boxing them would break the line box);                */
-/* - <label for> on a text field, whose job is to focus a 44px input next to it; */
-/* - .vs-crumbs__item a, measured 34x44 because 34px is the whole width of the   */
-/*   word - there is no target to grow into without inventing padding that       */
-/*   would push the trail off a 375 screen.                                      */
+/* Цілі дотику піднімаються тут, а не в самому компоненті: власне правило       */
+/* компонента задає ту висоту, якої хоче ДИЗАЙН, і частина з них коректна на    */
+/* десктопі з мишею. Останній блок файлу, тож виграє за порядком.                */
+/*                                                                             */
+/* Три речі свідомо НЕ піднімаються:                                            */
+/* - посилання всередині .vs-prose — вони інлайнові в реченні (WCAG 2.5.8 їх    */
+/*   прямо виключає, а коробка навколо зламала б рядок);                        */
+/* - <label for> текстового поля, чия робота — сфокусувати поле поруч;          */
+/* - посилання хлібних крихт: ширина цілі дорівнює ширині самого слова, і рости */
+/*   нікуди без відступів, які виштовхнули б увесь слід за екран.               */
 
 @media (max-width: 991px) {
 
@@ -11369,17 +11092,13 @@ img.lazy:not(.loaded) {
 		min-height: 44px;
 	}
 
-/* hc-offcanvas-nav's own top row. The library ships the logo link at the height   */
-/* of the mark (20px) and okay.js builds the markup, so the height has to come     */
-/* from here. The logo link is a real link to the homepage on every page but the   */
-/* homepage itself, where the template emits href="javascript:;".                  */
-/*                                                                                 */
-/* Written as `ul.top-nav .mobile__link` on purpose. The stripping rule that       */
-/* takes the generic nav-item chrome off this row is                               */
-/* `.hc-offcanvas-nav ul.top-nav .mobile__link { min-height: 0 }` at 0,3,1; a bare  */
-/* `.hc-offcanvas-nav .mobile__link` is 0,2,0 and loses to it however late it       */
-/* appears. Matching its weight and sitting later in the file is what makes the     */
-/* 44px land.                                                                       */
+/* Верхній рядок самої hc-offcanvas-nav. Бібліотека віддає посилання логотипа   */
+/* заввишки зі сам знак, а розмітку будує okay.js, тож висота має прийти звідси. */
+/*                                                                             */
+/* Записано як `ul.top-nav .mobile__link` навмисно: правило, яке знімає з цього */
+/* рядка загальний хром, має три класи, і коротший селектор програв би йому,    */
+/* хоч би як пізно стояв. Рівна вага плюс пізніша позиція — це те, що дає       */
+/* потрібній висоті спрацювати.                                                 */
 
 	.hc-offcanvas-nav ul.top-nav .mobile__link {
 		display: inline-flex;
@@ -11387,17 +11106,12 @@ img.lazy:not(.loaded) {
 		min-height: 44px;
 	}
 
-/* The header search button. .vs-search is display: none below 768px, so the    */
-/* 375 portrait pass never rendered this control at all - not exempt, just      */
-/* invisible where that pass looked. From 768 up it is inline and 44x38, the    */
-/* 38 coming from a 3px inset on both sides of a 44px-tall .vs-search. Growing   */
-/* it here keeps the fix inside the 60px header bar with room to spare, and     */
-/* leaves the >991 desktop bar untouched, same as every other rule above.       */
+/* Кнопка пошуку в шапці. .vs-search — display: none на вузьких екранах, тож    */
+/* портретний прохід її просто не бачив: вона не виняток, вона там невидима.    */
 /*                                                                             */
-/* 44px does not fit between a 3px top and a 3px bottom inset of a 44px field,  */
-/* and min-height wins that argument, so the button grew downwards and hung 3px */
-/* below the field it sits in. Centring instead of insetting is what makes a    */
-/* 44px control coincide with a 44px field exactly.                             */
+/* Повна ціль не вміщається між верхнім і нижнім відступом поля, а min-height   */
+/* цей спір виграє — кнопка росла вниз і звисала під полем. Центрування замість */
+/* відступів — це те, що змушує контрол і поле збігтися точно.                  */
 
 	.vs-search__submit {
 		top: 50%;
@@ -11407,29 +11121,23 @@ img.lazy:not(.loaded) {
 	}
 }
 
-/* The carousel dots. 30x6 of paint, and the paint is the design - so the hit     */
-/* area is grown with a transparent overlay instead, asked for at 44px tall and   */
-/* exactly as wide as the dot. Vertical only: the dots sit on a 38px pitch, so a  */
-/* 44px-wide overlay would swallow six pixels of its neighbour and hand slide 2   */
-/* the taps meant for slide 3.                                                    */
-/*                                                                                */
-/* What actually lands on the homepage banner is 30 x 41.3, not 30 x 44: the      */
-/* overlay is centred on a dot whose centre sits 19.3px above the bottom edge of  */
-/* .banner_group, which is overflow: hidden, so the lower 2.7px is clipped.       */
-/* Probed with elementFromPoint at 1px steps from the dot centre, the bullet is   */
-/* returned for dy -22 .. +19 and .main_banner for +20. Left as measured: the     */
-/* clip comes from the module's own ratio box, opening it up would let the slide  */
-/* bleed, and 30 x 41.3 on a 38px pitch still clears WCAG 2.5.8 by the spacing    */
-/* rule (24px circles centred on each dot never intersect).                       */
+/* Крапки каруселі. Сама фарба і є дизайном, тож зона натискання росте          */
+/* прозорою накладкою, і лише по вертикалі: крапки стоять щільно, і ширша       */
+/* накладка забирала б частину сусідньої й віддавала слайду 2 дотики, призначені */
+/* слайду 3.                                                                    */
+/*                                                                             */
+/* Фактична висота трохи менша за задану: накладка центрована на крапці, чий    */
+/* центр близько до нижнього краю .banner_group, а той обрізає вміст. Лишено    */
+/* як є — обрізання йде з власної коробки співвідношення модуля, і відкрити її  */
+/* означало б дати слайду розтікатись. Правило відстані WCAG 2.5.8 виконано.    */
 
-/* The product rails carry no dots. They only ever rendered below 992px - the    */
-/* desktop rule already hid them - and the owner asked for them gone: four grey  */
-/* dots under every rail read as debris rather than as a control. Scoped to      */
-/* .fn_products_slide so the main banner keeps its own, which is a different     */
-/* thing: that one paginates full-bleed slides with nothing else to show them.   */
-/* Worth stating plainly, because it is the cost: with two of five cards in      */
-/* view, overflow: hidden and no peeking third card, the rail now gives no       */
-/* visual sign that it scrolls at all.                                           */
+/* Стрічки товарів крапок не мають: чотири сірі крапки під кожною стрічкою      */
+/* читаються як сміття, а не як контрол. Обмежено .fn_products_slide, щоб       */
+/* головний банер зберіг власні — там вони гортають слайди на всю ширину, і     */
+/* показати їх більше нічим.                                                    */
+/*                                                                             */
+/* Варто сказати прямо, бо це ціна рішення: стрічка тепер не подає жодного      */
+/* візуального знаку, що вона взагалі прокручується.                            */
 
 .fn_products_slide .swiper-pagination {
 	display: none;

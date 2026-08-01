@@ -373,17 +373,12 @@ class Design
             }
         }
 
-        // Smarty 4 deprecates static class access in templates unless the class is
-        // registered. Templates reference these classes by their full name.
-        //
-        // The lookup is on the literal token as written in the template
-        // (smarty_internal_templateparser.php yy_r99), so "\Okay\Core\Phone" and
-        // "Okay\Core\Phone" are different keys and both forms have to be listed
-        // for a class templates write either way.
-        //
-        // Module classes are included because their templates reference them and
-        // the module owns no hook into this method; registerClass() throws on a
-        // missing class, so each is guarded rather than assumed present.
+        // Smarty 4 забороняє статичний доступ до незареєстрованого класу.
+        // Пошук іде за літеральним токеном, як його написано в шаблоні, тож
+        // "\Okay\Core\Phone" і "Okay\Core\Phone" — різні ключі, і обидві форми
+        // треба перелічити. Класи модулів включені, бо їхні шаблони на них
+        // посилаються, а власного хука сюди модуль не має; registerClass() кидає
+        // виняток на відсутньому класі, тому кожен під перевіркою.
         $staticClasses = [
             \Okay\Core\UserReferer\UserReferer::class,
             \Okay\Core\Phone::class,
