@@ -142,11 +142,15 @@
                             <div class="okay_list_heading okay_list_close"></div>
                             {get_design_block block="menu_items_head_row"}
                         </div>
-                        {assign var="index" value=1}
-                        {function name=menu_items}
+                        {* Наскрізна нумерація: контролер розкладає пункти в масив за index,
+                           тож повтор індексу мовчки затирає пункт. Лічильник має бути
+                           {counter}, а не змінна: присвоєння всередині {function} не
+                           виходить за межі виклику, тож у вкладеному меню нумерація
+                           почалась би спочатку. *}
+                        {counter name=menu_index start=0 assign=index}{function name=menu_items}
                             <div class="okay_list_body categories_wrap sortable fn_sub_rows submenu_level_{$level}" data-level="{$level}">
                                 {foreach $menu_items as $menu_item}
-                                    <div class="fn_row okay_list_body_item" data-index="{$index}">
+                                    {counter name=menu_index assign=index}<div class="fn_row okay_list_body_item" data-index="{$index}">
                                         <div class="okay_list_row fn_sort_item">
                                             <input type="hidden" name="menu_items[id][]" value="{$menu_item->id}"/>
                                             <input type="hidden" name="menu_items[index][]" value="{$index}"/>
@@ -195,12 +199,12 @@
                                                 </a>
                                             </div>
                                         </div>
-                                        {menu_items menu_items=$menu_item->submenus level=$level+1 parent_index=$index++}
+                                        {menu_items menu_items=$menu_item->submenus level=$level+1 parent_index=$index}
                                     </div>
                                 {/foreach}
                             </div>
                         {/function}
-                        {menu_items menu_items=$menu_items level=0 parent_index=0}
+                        {menu_items menu_items=$menu_items level=0 parent_index=0}{* далі $index - наступний вільний індекс, із нього JS нумерує додані рядки *}{counter name=menu_index assign=index}
                         <div class="fn_row fn_new_menuitem okay_list_body_item" data-index="-1">
                             <div class="okay_list_row fn_sort_item">
                                 <input type="hidden" name="menu_items[id][]" value="0"/>
