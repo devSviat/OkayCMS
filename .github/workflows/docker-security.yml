@@ -86,7 +86,7 @@ jobs:
       # `apt-get upgrade` у стадії base його підтягує, а гейт перевіряє, що
       # підтягнув усе.
       - name: Trivy gate (app image)
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: okaycms:ci
           format: table
@@ -100,7 +100,7 @@ jobs:
       # одній ітерації CI на образ.
       - name: Trivy gate (nginx image)
         if: always()
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: okaycms-nginx:ci
           format: table
