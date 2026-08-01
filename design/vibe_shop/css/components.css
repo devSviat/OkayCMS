@@ -20,35 +20,21 @@
 /* LEGACY GENERIC DEFAULTS                                                      */
 /* ============================================================================ */
 
-/* Read the LEGACY CLASS CONTRACT header at the end of this file first - it     */
-/* explains why these generic names are styled at all. What separates the two   */
-/* sections is only the cascade: every name here is ALSO carried by an element  */
-/* that this theme styles under a .vs-* name of the same specificity, so a      */
-/* generic block at the end of the file would silently outrank the theme's own  */
-/* rule on the properties the two have in common. Placed here, the .vs-* rule   */
-/* is later and wins, and a bare instance from a module template still gets a   */
-/* complete look.                                                               */
+/* Чому ці загальні імена взагалі стилізуються — див. LEGACY CLASS CONTRACT     */
+/* наприкінці файлу. Сюди винесені ті, які тема ще й уточнює під .vs-* іменем   */
+/* тієї ж специфічності: наприкінці файлу загальне правило мовчки виграло б     */
+/* у власного правила теми на спільних властивостях.                            */
 
-/* No bare `.table` block lives here, and that is deliberate. The two elements   */
-/* that carry the class in this codebase are user.tpl's                          */
-/* <table class="table vs-table">, fully styled by .vs-table, and the Banners     */
-/* advantage strip's <div class="table">, which the WYSIWYG emits as a flex row   */
-/* and which is not a table at all. A generic `.table { font-size: ... }` reaches */
-/* the second one on every property `.block__description .table` does not itself  */
-/* declare, and shrank the advantage strip by one type step. The class name is    */
-/* still carried by a real rule set - `.block__description .table` - so the       */
-/* legacy contract is met without inventing a look for an element nothing renders.*/
+/* Голого `.table` тут немає навмисно: клас несуть лише таблиця акаунта (її     */
+/* повністю стилізує .vs-table) і смуга переваг Banners, яку WYSIWYG віддає як  */
+/* флекс-рядок, а не таблицю. Загальне правило дотяглося б до другої і зменшило */
+/* б їй кегль. Контракт закриває `.block__description .table`.                   */
 
 /* ------------------------------------------------ swiper navigation default */
 
-/* The Banners module builds its own Swiper and renders bare .swiper-button-*   */
-/* and .swiper-pagination with no theme class on them. vendor.css carries only  */
-/* their placement, so without this they are 30x60 invisible boxes - which is   */
-/* exactly what the homepage slider had once the legacy sheets came out. Same   */
-/* plate and same border-drawn chevron as .vs-gallery__nav, so every arrow pair */
-/* in the theme matches. The theme's two instances (.vs-gallery__nav and        */
-/* .vs-compare__nav) restate every one of these properties further down and     */
-/* therefore own their own look completely.                                     */
+/* Banners будує власний Swiper і віддає голі .swiper-button-* без класів теми, */
+/* а vendor.css несе лише їх розташування — без цього правила вони невидимі.    */
+/* Власні пари теми перевизначають усе це нижче й мають власний вигляд.         */
 
 .swiper-button-prev,
 .swiper-button-next {
@@ -260,10 +246,8 @@
 /* похідна від --vs-surface: та йде за кольором картки власника, і поле мусить   */
 /* лишатись відрізнюваним ВІД картки за будь-якого тону.                         */
 
-/* --vs-border, not --vs-hairline: the fill is --vs-n-25 on a --vs-n-0 card, a  */
-/* 1.04:1 step, so the outline is the only thing that says "field here" and     */
-/* WCAG 1.4.11 asks 3:1 of it. Measured on the hairline it used to carry:       */
-/* 1.32:1 against the card and 1.26:1 against its own fill.                     */
+/* --vs-border, а не --vs-hairline: заливка майже не відрізняється від картки,  */
+/* тож межа — єдине, що каже «тут поле», і WCAG 1.4.11 вимагає від неї 3:1.     */
 
 .vs-field {
 	min-height: 44px;
@@ -311,15 +295,12 @@
 
 /* -------------------------------------------------------------- page shell */
 
-/* Skip link. First focusable node in the document, off-screen until it takes   */
-/* focus, then a plain ink plate pinned to the top-left. It is the only route   */
-/* past the header for a keyboard user: measured before it existed, reaching    */
-/* the first product on a category page took 34 Tab presses, all of them        */
-/* through chrome that repeats on every page.                                   */
+/* Skip link — перший фокусований вузол документа і єдиний шлях повз шапку для  */
+/* клавіатури.                                                                  */
 /*                                                                              */
-/* Not .vs-sr-only + :focus - that utility clips to 1px and un-clipping it would */
-/* need every one of its declarations restated. Off-canvas left is simpler and   */
-/* keeps the element measurable at all times.                                    */
+/* Не .vs-sr-only + :focus: та утиліта обрізає до 1px, і зняття обрізки          */
+/* вимагало б повторити кожну її декларацію. Винесення за екран лишає елемент   */
+/* вимірюваним у будь-який момент.                                              */
 
 .vs-skip {
 	position: absolute;
@@ -342,13 +323,9 @@
 	left: var(--vs-space-2);
 }
 
-/* index.tpl puts `d-flex flex-column` on <body>, so .main is a flex item and   */
-/* the footer is the one after it. okay.css supplied the growth that keeps the  */
-/* footer at the bottom of a short page; Task 8 deleted the sheet, so it is     */
-/* restated here rather than left to be rediscovered the first time anything    */
-/* gives <body> a min-height. `position: relative` comes with it: .main was the */
-/* containing block every absolutely positioned descendant resolved against     */
-/* while Tasks 1-7 were built and reviewed.                                     */
+/* index.tpl ставить `d-flex flex-column` на <body>, тож .main — флекс-елемент, */
+/* і саме його ріст тримає підвал унизу короткої сторінки. `position: relative` */
+/* іде разом: .main — блок, відносно якого позиціонуються всі абсолютні нащадки. */
 
 .main {
 	position: relative;
@@ -356,25 +333,18 @@
 	flex: 1 0 auto;
 }
 
-/* Page content used to start on the exact                                     */
-/* pixel the header ended (measured at 1440: header bottom 124, .main top 124) */
-/* so the homepage banner butted straight against the chrome and read as part  */
-/* of it. Only the catalogue looked right, and only because the breadcrumb     */
-/* happened to supply air. The spacing belongs here, once, so every page gets  */
-/* it. /cart is the one exception: it renders no site header, and its own       */
-/* full-bleed bar is meant to sit flush against the top of the viewport - a     */
-/* canvas strip above it just reads as a mis-scrolled page.                      */
+/* Відступ тут один раз на всі сторінки, інакше банер головної впирається в     */
+/* шапку і читається як її частина. Виняток — /cart: він не рендерить шапку     */
+/* сайту, і його власна смуга має лежати впритул до верху вікна.                */
 
 body:not(.cart_page) .main {
 	padding-top: var(--vs-space-5);
 }
 
-/* index.tpl labels the body main_page / cart_page / other_page, so the three    */
-/* cases are addressable without a per-controller rule. An interior page needs   */
-/* more air than the home page even though the header above it is identical:     */
-/* the home page's first element is a full-width banner plate, a mass big        */
-/* enough to be read as a new region on its own, whereas an interior page opens  */
-/* with a 13px breadcrumb, and 20px above that reads as no gap at all.           */
+/* index.tpl мітить <body> як main_page / cart_page / other_page, тож три       */
+/* випадки адресуються без правила на кожен контролер. Внутрішній сторінці      */
+/* потрібно більше повітря: головна відкривається банером на всю ширину, який   */
+/* сам читається як окрема область, а внутрішня — дрібними хлібними крихтами.   */
 
 body.other_page .main {
 	padding-top: var(--vs-space-7);
@@ -392,14 +362,9 @@ body.other_page .main {
 	border-bottom: 1px solid var(--vs-hairline);
 }
 
-/* The bar is white on a near-white canvas, so this hairline is the only thing  */
-/* that ends the chrome. It was one ramp step darker than the generic hairline  */
-/* so it would still read where the first thing under it is another white       */
-/* surface - but --vs-n-300 drew a visible grey rule across the top of every    */
-/* page, which is louder than a chrome edge should be. Back on --vs-hairline,   */
-/* matching every other divider in the theme. It sits on __main rather than on  */
-/* .vs-header so it travels with the bar when the bar sticks, and the sticky    */
-/* shadow below is what separates the bar once the page scrolls under it.       */
+/* Смуга біла на майже білому полотні, тож ця тонка лінія — єдине, що завершує  */
+/* хром. Лежить на __main, а не на .vs-header, щоб їхати разом зі смугою, коли  */
+/* та липне; після початку прокрутки смугу відділяє тінь нижче.                 */
 
 .vs-header__main {
 	background-color: var(--vs-surface);
@@ -415,11 +380,9 @@ body.other_page .main {
 	position: relative;
 }
 
-/* The bar's height is min-height PLUS its own padding, never a fixed height:    */
-/* the hairline is drawn on the parent, so anything that makes the parent        */
-/* shorter than this box draws the line through the logo instead of under it.    */
-/* The padding is the guarantee - whatever the shop owner uploads as a logo, and */
-/* whatever a module drops into the informer row, keeps this much air below it.  */
+/* Висота — min-height ПЛЮС власний padding, ніколи не фіксована: лінію малює   */
+/* батько, тож усе, що зробить його нижчим за цю коробку, проведе лінію крізь   */
+/* логотип, а не під ним. Padding — гарантія повітря під будь-яким логотипом.   */
 
 .vs-header__bar {
 	position: relative;
@@ -522,14 +485,10 @@ body.other_page .main {
 
 /* ------------------------------------------------------------ utility bar */
 
-/* This strip and everything in it is hidden below 992px, so it is only ever    */
-/* driven by a mouse and the theme's 44x44 touch floor does not apply. The      */
-/* pills are 32px tall - visibly shorter than a touch target, comfortably past  */
-/* the 24x24 WCAG 2.5.8 AA floor, and still tall enough that the wide hover     */
-/* background reads as a deliberate pill rather than shrink-wrapped text.       */
-/* The bar is the pill plus 6px of canvas above and below: any less and every   */
-/* hover background runs edge to edge and the row reads as a stack of boxes     */
-/* rather than as a line of links.                                             */
+/* Смуга прихована нижче 992px, тож керується лише мишею і поріг дотику 44x44   */
+/* тут не діє — досить WCAG 2.5.8 (24x24). Висота смуги — пігулка плюс поле     */
+/* згори й знизу: без нього кожен hover-фон іде від краю до краю і рядок        */
+/* читається як стос коробок, а не як лінія посилань.                          */
 
 .vs-utility {
 	display: flex;
@@ -746,11 +705,8 @@ body.other_page .main {
 	right: 0;
 	z-index: var(--vs-z-dropdown);
 	display: none;
-	/* Only the two switchers use this panel, and each row holds one word. The */
-	/* old 170px floor padded both out with nothing - the widest row needs     */
-	/* 109px in the language menu and 81px in the currency one. Tying the      */
-	/* floor to the trigger keeps the panel from ever being narrower than the  */
-	/* button it drops out of, and needs no number of its own.                 */
+	/* Ширина привʼязана до тригера, а не до числа: панель ніколи не буває    */
+	/* вужчою за кнопку, з якої випадає, і не набирає порожнього поля.        */
 	min-width: 100%;
 	padding: var(--vs-space-1-5);
 	background-color: var(--vs-surface);
@@ -884,27 +840,14 @@ body.other_page .main {
 	height: 20px;
 }
 
-/* Third member of the header dropdown family (nav fly-out, locale switchers,   */
-/* search suggestions): same hairline, same radius, same 6px of outer padding    */
-/* around a list of 8px-radius rows. The catalogue mega menu is deliberately     */
-/* NOT in this family - it is a full-width pane on its own scale (24/32 padding, */
-/* radius-lg, shadow-3), not a row list.                                          */
+/* Третій із сімʼї випадних панелей шапки: та сама лінія, радіус і поле навколо */
+/* списку рядків. Мега-меню каталогу навмисно НЕ в цій сімʼї — це панель на всю  */
+/* ширину і власного масштабу, а не список рядків.                              */
 
-/* The panel and the rows inside it are devbridge's own published class names   */
-/* (jquery.autocomplete-min.js is vendored and never edited); the row markup    */
-/* is assembled by okay.js's formatResult and is equally out of bounds. So each */
-/* row arrives as a bare <div><img></div><a>name</a><span>price</span> and is   */
-/* laid out from here.                                                          */
-/*                                                                             */
-/* Everything below was written to outrank css/okay.css, which registered       */
-/* earlier in css.php until Task 8 deleted it and built the same widget as an   */
-/* HTML table: display:table on the panel, table-row on the rows, table-cell    */
-/* plus 1px rgb(219 219 219) cell borders on the three children, and an         */
-/* rgb(233 233 233) band on the selected row at .autocomplete-suggestions       */
-/* .autocomplete-selected, two classes, which is why the old one-class rule     */
-/* here never won and that band survived. Same specificity, later source, no    */
-/* !important. The overrides are kept: they are what the widget's own look is   */
-/* made of now, not merely a counterweight to a sheet that is gone.             */
+/* Панель і рядки — власні опубліковані імена класів devbridge (бібліотека      */
+/* вендорена й не редагується), розмітку рядка збирає formatResult в okay.js і  */
+/* вона так само поза межами. Тож рядок приходить голим                         */
+/* <div><img></div><a>назва</a><span>ціна</span> і розкладається звідси.        */
 
 .autocomplete-suggestions {
 	display: block;
@@ -967,13 +910,9 @@ body.other_page .main {
 	cursor: pointer;
 }
 
-/* okay.css styled `.autocomplete-suggestion div` as a product thumbnail cell   */
-/* - width:50px !important, display:table-cell, hairlines on two sides - and it */
-/* could not tell a thumbnail from a city name. Undoing it here is what stops a */
-/* city being clipped to a 50px box. flex:1 1 0% is the part that beats the     */
-/* !important without a second one: a definite flex-basis means the flex item   */
-/* never consults width for its main size, so the row is free to fill the       */
-/* panel. Wrapping, not ellipsis: the whole complaint was a truncated name.     */
+/* flex:1 1 0% тут навмисно: певний flex-basis означає, що елемент не дивиться  */
+/* на width для головного розміру — рядок вільно заповнює панель. Перенос, а не */
+/* трикрапка: сенс саме в тому, щоб назва не обрізалась.                        */
 
 .autocomplete-suggestion > div {
 	display: block;
@@ -993,20 +932,10 @@ body.other_page .main {
 	min-height: 56px;
 }
 
-/* okay.js hands this autocomplete `appendTo: "#fn_search"` and .vs-search is  */
-/* the same element's theme class, so the whole panel lives inside the header  */
-/* form and nothing else on the page can match. The scope is the class and not */
-/* the id: a JS hook is never load-bearing for presentation here, which is C5's */
-/* point even though C5 names only classes. Same reason for .vs-summary__coupon */
-/* and .vs-summary__row--delivery on the cart. That is                          */
-/* the scope, rather than :has(img), because okay.js emits an empty <div></div> */
-/* for a product with no photo: :has(img) would silently drop the plate on      */
-/* exactly those rows and step their names out of line with the rest. It also   */
-/* keeps every assumption about row shape on our side of the fence - the module */
-/* may render whatever it likes in a suggestion and none of this reaches it.    */
-/*                                                                             */
-/* flex-basis again answered okay.css's width:50px !important, this time to pin */
-/* the cell at 40px rather than to release it.                                  */
+/* Обмежено класом, а не id: JS-хук ніколи не несе тут презентацію. І саме      */
+/* класом, а не :has(img) — okay.js віддає порожній <div></div> для товару без  */
+/* фото, тож :has(img) мовчки зняв би плашку рівно з цих рядків і вибив би їхні */
+/* назви з лінії решти.                                                         */
 
 .vs-search .autocomplete-suggestion > div {
 	display: flex;
@@ -1077,24 +1006,14 @@ body.other_page .main {
 }
 
 /* ---------------------------------------------------------------- select2 */
-/* select2 is vendored (css/select2.min.css) and skinned here rather than      */
-/* patched. It is the control the product page hands a multi-variant select    */
-/* to, and the control the NovaposhtaCost module builds its warehouse chooser  */
-/* from - and that module's markup is out of bounds, so this sheet is the only */
-/* place both can be brought onto the theme. Every selector below is one of    */
-/* select2's own published class names, not a guess at its internals.          */
+/* select2 вендорений і саме скінується тут, а не патчиться. Кожен селектор     */
+/* нижче — власне опубліковане імʼя класу select2, не здогад про його нутрощі.  */
 /*                                                                            */
-/* The open list is the fourth member of the dropdown family (nav fly-out,     */
-/* locale switchers, search suggestions): --vs-surface on a hairline, radius-md,*/
-/* shadow-2, 6px of outer padding around 8px-radius rows. The row under the     */
-/* cursor takes --vs-surface-subtle - the same treatment .vs-switcher__link and */
-/* .autocomplete-selected use - in place of select2's system blue, and          */
-/* the row that is actually selected is marked by weight, so the two states     */
-/* stay distinguishable from each other and neither rests on colour alone.      */
+/* Рядок під курсором і рядок, який справді вибрано, розрізняються заливкою й   */
+/* насиченістю — жоден зі станів не спирається лише на колір.                   */
 /*                                                                            */
-/* The dropdown is appended to <body>, outside every theme wrapper, so these    */
-/* rules cannot be scoped to a block. That is the right answer anyway: one      */
-/* widget, one skin.                                                            */
+/* Панель додається до <body>, поза всіма обгортками теми, тож ці правила не    */
+/* можна обмежити блоком.                                                       */
 
 .select2-container--default .select2-selection--single {
 	height: 44px;
