@@ -91,7 +91,12 @@ class BackendUsersHelper
     {
         $ordersEntity = $this->entityFactory->get(OrdersEntity::class);
         $user = $this->usersEntity->get($id);
-        $user->orders = $ordersEntity->find(['user_id'=>$user->id]);
+        // Сторінка створення користувача відкривається без id, тож get() віддає
+        // false - і звернення до властивості клало її фаталом. user.tpl уже вміє
+        // порожнього користувача, треба лише не чіпати неіснуючий обʼєкт.
+        if (!empty($user)) {
+            $user->orders = $ordersEntity->find(['user_id' => $user->id]);
+        }
         return ExtenderFacade::execute(__METHOD__, $user, func_get_args());
     }
     
