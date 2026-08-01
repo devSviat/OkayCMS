@@ -1,19 +1,16 @@
 #!/usr/bin/env bash
 # Smoke-перевірки dev-оточення OkayCMS.
 # Запуск у будь-який момент після `docker compose up -d`: dev/bin/smoke.sh
-# Скрипт сам чекає, поки кожен healthchecked-сервіс стане healthy (wait_for_healthy
-# нижче), тож викликати перед ним `sleep` не потрібно.
+# Сам чекає, поки healthchecked-сервіси стануть healthy — `sleep` перед ним
+# не потрібен.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
 # shellcheck disable=SC1091
 set -a; . ./.env; set +a
 
-# wait_for_healthy: блокує виконання, поки кожен сервіс із healthcheck у
-# змерджованому compose-конфігу не стане "healthy", або падає з таймаутом.
-#
-# db-init свідомо не чекається тут: це одноразовий сервіс, який виконується й
-# виходить з кодом 0, тож "healthy" він не покаже ніколи.
+# Чекає, поки кожен сервіс із healthcheck стане "healthy". db-init тут не
+# чекається — він одноразовий і "healthy" не покаже ніколи.
 wait_for_healthy() {
     local timeout=120 waited=0 services svc cid status all_healthy
 
@@ -56,10 +53,8 @@ wait_for_healthy() {
 
 wait_for_healthy
 
-# wait_for_db_init: db-init не має healthcheck і wait_for_healthy його
-# пропускає, але перевірка "admin manager exists" нижче залежить від того, що
-# він уже завершився. Опитує контейнер до виходу й падає з логами та кодом
-# виходу, якщо той не встиг за таймаут або завершився не з 0.
+# db-init не має healthcheck, а перевірка "admin manager exists" нижче
+# залежить від його завершення.
 wait_for_db_init() {
     local timeout=120 waited=0 cid status exit_code
 
@@ -116,10 +111,9 @@ expect_contains() {
     shift 2
     local out
     out=$("$@" 2>&1) || true
-    # Порівняння шаблоном bash, а не `printf | grep -q`: під `set -o pipefail`
-    # grep -q виходить одразу після збігу, printf отримує SIGPIPE, і весь
-    # конвеєр вважається невдалим саме тоді, коли голку знайдено — і тим
-    # частіше, чим більший вивід команди.
+    # Шаблоном bash, а не `printf | grep -q`: під pipefail grep -q виходить на
+    # першому збігу, printf ловить SIGPIPE — і конвеєр падає саме тоді, коли
+    # голку знайдено.
     if [[ "$out" == *"$needle"* ]]; then
         printf '  ok    %s\n' "$desc"
     else
@@ -169,22 +163,14 @@ done
 echo
 echo "Database"
 mariadb_cid=$(docker compose ps -q mariadb)
-# Дивимось саме на монтування в /var/lib/mysql, а не на «чи є серед монтувань
-# хоч один том»: mariadb має ще й том сідового дампа, тож грубіша перевірка
-# пройшла б навіть якщо сама база лежить у bind mount. Це вже повністю
-# покриває "не bind mount": {{.Type}} для /var/lib/mysql може бути лише
-# "volume", "bind" або "tmpfs", тож "volume" виключає bind. Окрема перевірка
-# "bind більше не змонтований" тут раніше не мала сенсу: Go-шаблон друкував
-# лише {{.Source}} {{.Destination}} (без {{.Type}}), тож підрядок "bind" міг
-# з'явитись лише якщо він був у самому шляху — `grep bind` завжди повертав
-# порожній вивід і expect_missing проходив незалежно від реального стану.
+# Саме монтування в /var/lib/mysql, а не "чи є хоч один том": mariadb має ще
+# том сідового дампа, тож грубіша перевірка пройшла б і з базою в bind mount.
+# {{.Type}} тут може бути лише volume/bind/tmpfs, тож "volume" виключає bind.
 expect_contains "the database is on a named volume, not a bind mount" \
     "volume" \
     docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/mysql"}}{{.Type}}{{end}}{{end}}' "$mariadb_cid"
-# Перевіряємо, що пароль справді підходить, а не що в базі лежить конкретний
-# хеш. OkayCMS перехешовує застарілі формати після успішного входу
-# (Okay\Core\Security\PasswordHasher), тож звірка з рядком із сідового дампа
-# ламалась після першого ж входу в адмінку.
+# Що пароль підходить, а не що в базі конкретний хеш: OkayCMS перехешовує
+# застарілі формати після входу, і звірка з рядком дампа ламалась.
 admin_hash=$(docker compose exec -T mariadb sh -c \
     'mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT password FROM ok_managers WHERE login = \"admin\";"' \
     2>/dev/null | tr -d '\r\n')
@@ -193,11 +179,8 @@ expect_contains "admin still authenticates with the default password" \
     docker compose exec -T php85 php -r \
     'require "/var/www/html/vendor/autoload.php"; $h = new Okay\Core\Security\PasswordHasher(); echo $h->verify("1234", $argv[1]) ? "OK" : "FAIL";' \
     -- "$admin_hash"
-# Реальний запит клієнта з хоста, а не просто TCP-хендшейк: саме це потрібно
-# DBeaver/PHPStorm. Регресує мовчки, якщо mariadb колись втратить (dev-only)
-# приєднання до frontend або опублікований порт — жодна перевірка всередині
-# контейнера цього не побачить. Див. коментар mariadb.networks у
-# docker-compose.override.yml.
+# Реальний запит з хоста, а не TCP-хендшейк: саме це потрібно DBeaver. Зсередини
+# контейнера втрату dev-приєднання до frontend не видно.
 expect_contains "mariadb is reachable from the host, not just from inside a container" \
     "ok_managers" \
     docker run --rm --network host mariadb:10.11 mariadb \
@@ -206,13 +189,8 @@ expect_contains "mariadb is reachable from the host, not just from inside a cont
 
 echo
 echo "Network segmentation"
-# Ім'я мережі рахується з APP_NAME (.env), а НЕ вичитується з самого
-# контейнера mariadb: Compose іменує мережі як <lowercase(project)>_<key>
-# (див. docker-compose.yml, networks.backend), тож це джерело незалежне від
-# того, що перевіряється нижче. Раніше backend_net брався з мережевого
-# списку самого mariadb-контейнера, а потім перевірялось, що той самий
-# список містить те саме значення — тавтологія, яка не могла впасти навіть
-# якби mariadb взагалі відключили від backend.
+# Ім'я мережі рахується з APP_NAME, а не вичитується з самого контейнера —
+# інакше перевірка звіряла б список сам із собою і не могла б упасти.
 backend_net="$(printf '%s' "${APP_NAME:?err}" | tr '[:upper:]' '[:lower:]')_backend"
 expect_contains "the backend network is internal (no route off the host)" \
     "true" \
@@ -220,11 +198,8 @@ expect_contains "the backend network is internal (no route off the host)" \
 expect_contains "mariadb is attached to the backend network" \
     "$backend_net" \
     docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$mariadb_cid"
-# mariadb у dev додатково приєднана до frontend (docker-compose.override.yml),
-# інакше опублікований порт вище був би тихим no-op'ом: internal:true означає,
-# що Docker не створює NAT-правило для контейнера без маршруту назовні. У
-# прод (docker-compose.prod.yml) mariadb лишається лише в backend і нічого не
-# публікує.
+# У dev mariadb додатково у frontend, інакше опублікований порт був би тихим
+# no-op'ом: для internal-мережі Docker не створює NAT. У прод — лише backend.
 expect_contains "nginx (frontend-only) can still resolve php85 over the frontend network" \
     "php85" \
     docker compose exec -T nginx getent hosts php85
@@ -246,10 +221,8 @@ echo "Logging"
 expect_contains "nginx access logs reach docker compose logs" \
     "GET /" \
     sh -c "curl -sS -o /dev/null -H 'Host: ${VIRTUAL_HOST}' http://127.0.0.1:${HTTP_PORT}/ ; sleep 1 ; docker compose logs --tail=20 nginx"
-# Перевірка результату, а не конфігу: робимо запит з унікальним маркером і
-# шукаємо його в усьому робочому дереві. Якщо nginx кудись пише файлом, маркер
-# там опиниться — на відміну від грепання конкретного файлу конфігу, перевірка
-# не залежить від його імені чи шляху.
+# Результат, а не конфіг: запит з унікальним маркером, потім пошук маркера в
+# усьому дереві — не залежить від імені й шляху лог-файлу.
 log_marker="smoke-nolog-$$"
 curl -sS -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
     "http://127.0.0.1:${HTTP_PORT}/${log_marker}" 2>/dev/null || true
@@ -271,11 +244,8 @@ expect_contains "the SMTP settings point at Mailpit" \
     "mailpit" \
     docker compose exec -T mariadb sh -c \
     'mariadb -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT value FROM ok_settings WHERE param = \"smtp_server\";"'
-# Mailpit накопичує всі повідомлення до перестворення контейнера, тож "total"
-# зростає між прогонами, а не скидається щоразу. Фіксоване значення пройшло б
-# лише на щойно створеному стеку й падало б на кожному наступному прогоні.
-# Тому фіксуємо лічильник до відправки, відправляємо, і звіряємо, що він
-# зріс — результат, а не абсолютне число.
+# Mailpit накопичує листи між прогонами, тож звіряється приріст лічильника, а
+# не абсолютне число.
 mailpit_total() {
     curl -sS "http://127.0.0.1:${MAILPIT_PORT:-8025}/api/v1/messages?limit=1" \
         | grep -o '"total":[0-9]*' | head -1 | grep -o '[0-9]*'
@@ -296,11 +266,8 @@ fi
 
 echo
 echo "Web"
-# Навмисно з Host: localhost, а не просто звернення на 127.0.0.1: образ nginx
-# має власний default.conf із `server_name localhost`, і саме рядок "localhost"
-# є точним збігом для нього — так заходить людина в браузері. Без цього
-# заголовка перевірка не відтворила б регрес, коли штатний default.conf
-# виграє в нашого віртуального хоста і показує заглушку "Welcome to nginx!".
+# Саме з Host: localhost — це точний збіг для штатного default.conf образу.
+# Без заголовка регрес "заглушка Welcome to nginx" не відтворюється.
 expect_missing "http://localhost/ is not the stock nginx placeholder" \
     "Welcome to nginx" \
     curl -sS -H "Host: localhost" "http://127.0.0.1:${HTTP_PORT}/"
@@ -311,13 +278,10 @@ expect_contains "the virtual host still serves the storefront" \
     "OkayCMS" \
     curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/"
 
-# dev працює з error_reporting = E_ALL, тож будь-який Notice чи Deprecated
-# друкується прямо в сторінку — і робить це ДО заголовків, тобто ламає
-# редіректи, а не лише псує вигляд.
+# У dev error_reporting = E_ALL, тож Notice друкується в сторінку до
+# заголовків і ламає редіректи, а не лише псує вигляд.
 #
-# Межа цих перевірок: вони роблять лише GET і покривають рендеринг сторінок.
-# Логіку, що виконується лише при відправці форми (наприклад оформлення
-# замовлення), вони не покривають — для цього потрібен браузерний сценарій.
+# Покривають лише GET-рендеринг: логіку відправки форм — ні.
 for pg in "/" "/cart" "/blog" "/brands"; do
     expect_missing "no PHP diagnostics leak into the page: ${pg}" \
         "Deprecated:" \

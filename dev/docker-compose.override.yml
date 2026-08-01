@@ -1,42 +1,32 @@
-# Dev-оверрайди. Compose підключає цей файл автоматично, тож звичайний
-# `docker compose up -d` і так дає dev-оточення.
-#
-# Для особистих правок створіть docker-compose.local.yml (у .gitignore) і
-# підключіть його явно: docker compose -f docker-compose.yml \
-#   -f docker-compose.override.yml -f docker-compose.local.yml up -d
+# Dev-оверрайди. Compose підключає цей файл сам, тож звичайний
+# `docker compose up -d` уже дає dev-оточення. Особисті правки —
+# у гітігнорований docker-compose.local.yml, підключати явно.
 
 services:
   php85:
     environment:
-      # Xdebug 3 читає цю змінну, і вона має пріоритет над ini-файлом — режим
-      # можна перемикати без перезбирання образу.
+      # Xdebug 3 читає цю змінну і вона важливіша за ini — режим перемикається
+      # без перезбирання образу.
       XDEBUG_MODE: ${XDEBUG_MODE:-off}
       PHP_IDE_CONFIG: serverName=${VIRTUAL_HOST:?err}
     volumes:
       - '..:/var/www/html'
-      # Базовий файл дає php85 іменовані томи на ці самі цілі (щоб прод їх
-      # зберігав між деплоями). Іменований том, змонтований поверх
-      # bind-mount, перекриває вміст bind'у — без цього перевизначення файли
-      # робочого дерева були б невидимі всередині контейнера. Bind на тій же
-      # цілі замінює том базового файлу (Compose мерджить volumes за ціллю).
+      # Іменований том поверх bind-mount перекриває його вміст, тож томи
+      # базового файлу треба замінити bind'ами на ті самі цілі — інакше файли
+      # робочого дерева невидимі в контейнері.
       - '../files:/var/www/html/files'
       - '../backend/files:/var/www/html/backend/files'
       - '../cache:/var/www/html/cache'
       - '../Okay/log:/var/www/html/Okay/log'
-    # tmpfs для compiled/ — прод-оптимізація; у dev вимикаємо. tmpfs щоразу
-    # порожній, і теку теми створює той процес, що звернувся першим: команди
-    # через `docker compose exec` виконуються від root, після чого php-fpm під
-    # www-data у неї вже не запише. У dev ці теки лежать у прив'язаному
-    # робочому дереві з правильним власником.
+    # У dev ці теки лежать у робочому дереві з правильним власником. З tmpfs
+    # теку теми створює перший процес, що звернувся — і якщо це root через
+    # `exec`, php-fpm під www-data у неї вже не запише.
     tmpfs: !reset null
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  # Той самий образ і код, що й у php85 — потребує того самого перевизначення
-  # (див. коментар вище). Список має повністю збігатися з php85: обидва
-  # діляться якорем x-app-volumes у базовому файлі, тож будь-яка
-  # неперевизначена тут ціль лишиться іменованим томом і перекриє робоче
-  # дерево планувальника.
+  # Список має повністю збігатися з php85: обидва діляться якорем x-app-volumes,
+  # тож неперевизначена тут ціль лишиться томом і перекриє робоче дерево.
   scheduler:
     volumes:
       - '..:/var/www/html'
@@ -54,18 +44,15 @@ services:
       - '..:/var/www/html'
 
   mariadb:
-    # Базовий файл лишає mariadb лише в `backend` (internal: true) —
-    # правильно для прода, але тоді опублікований нижче порт нічого не дає:
-    # Docker не створює NAT-правило для контейнера без маршруту назовні. У dev
-    # потрібен доступ із DBeaver/PHPStorm тощо, тож тут mariadb додатково
-    # приєднана до `frontend`. Прод (docker-compose.prod.yml) це не зачіпає.
+    # У базовому файлі mariadb лише в internal-мережі, і опублікований порт там
+    # нічого не дав би — Docker не створює NAT для контейнера без маршруту
+    # назовні. У dev потрібен доступ із DBeaver, тож додається frontend.
     networks:
       - backend
       - frontend
     ports:
       - '${BIND_IP:-127.0.0.1}:${MYSQL_PORT:?err}:3306'
     volumes:
-      # Лише читання: це сідовий дамп, і в нього не можна писати.
       - '../1DB_changes/okay_clean.sql:/docker-entrypoint-initdb.d/init.sql:ro'
 
   db-init:
@@ -78,9 +65,8 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?err}
       MYSQL_DATABASE: ${MYSQL_DATABASE:?err}
       DB_INIT_SMTP: ${DB_INIT_SMTP:-1}
-    # Потрібен лише доступ до mariadb. Базовий файл замінив мережу `default`
-    # на `frontend`/`backend`, тож сервіс без явного `networks:` опиниться в
-    # автостворюваній `default` — ізольовано від mariadb. Тому вказано явно.
+    # Явно, бо мережі `default` тут немає: без цього сервіс опинився б в
+    # автостворюваній `default`, ізольовано від mariadb.
     networks:
       - backend
     volumes:
@@ -92,13 +78,10 @@ services:
     restart: unless-stopped
     environment:
       TZ: ${TZ:-Europe/Kyiv}
-      # Okay/Core/Notify.php:92 завжди вмикає SMTPAuth, тож Mailpit має
-      # приймати AUTH-команду навіть на незахищеному з'єднанні. Обидва
-      # прапори dev-only, як і сам сервіс.
+      # Okay\Core\Notify завжди вмикає SMTPAuth, тож Mailpit має приймати AUTH
+      # і на незахищеному з'єднанні. Обидва прапори dev-only.
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
-    # Та сама причина, що й у db-init: мережі `default` більше немає, тож
-    # потрібна явна мережа. frontend достатньо — php85 (звідки йде пошта) є і там.
     networks:
       - frontend
     ports:

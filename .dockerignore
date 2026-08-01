@@ -1,26 +1,13 @@
-# Root-level .dockerignore, not dev/docker/Dockerfile.dockerignore: the
-# per-Dockerfile ignore file is a BuildKit-only convention. With
-# DOCKER_BUILDKIT=0 (classic builder) it is silently ignored, and Docker falls
-# back to looking for exactly this file at the context root. This file is the
-# one every builder actually honours, BuildKit or not — verify both ways:
-#   DOCKER_BUILDKIT=1 docker build ...
-#   DOCKER_BUILDKIT=0 docker build ...
-#
-# Keeps developer credentials and local state out of the build context, and
-# therefore out of the production image. config/config.local.php is gitignored,
-# but a build context reads the filesystem rather than git — without this line
-# the dev database password would be baked into a pushed image.
+# У корені контексту, а не поруч із Dockerfile: per-Dockerfile ignore-файл
+# читає лише BuildKit, класичний білдер його мовчки ігнорує.
+
+# Гітігнорений, але контекст читає файлову систему, а не git — без цього рядка
+# пароль дев-бази запікся б в образ.
 config/config.local.php
 
-# Legacy path, kept as a defensive ignore: an earlier revision of
-# docker-compose.prod.yml read the MariaDB root/app passwords from files
-# under dev/secrets/ (Docker secrets). That mechanism was removed — the
-# passwords now come from env vars — and dev/secrets/ no longer exists, but
-# there is no cost to still excluding the name if it ever comes back.
+# Механізму Docker secrets тут уже немає, ігнор лишається на випадок повернення.
 dev/secrets
 
-# Gitignored personal compose overrides (docker-compose.override.yml's own
-# header comment) — may hold local-only values that should never ship either.
 dev/docker-compose.local.yml
 
 .git
