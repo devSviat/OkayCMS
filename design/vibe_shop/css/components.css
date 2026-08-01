@@ -1154,10 +1154,9 @@ body.other_page .main {
 }
 
 /* ---------------------------------------------------- catalogue mega menu */
-/* One pane, not a two-pane fly-out: every root category and its children    */
-/* are laid out in balanced columns, so the drop-down is full the moment it  */
-/* opens and its height is its content's height - it can never render as an  */
-/* empty plane waiting for a hover, and every link is one tap away.          */
+/* Одна панель, а не двопанельний виліт: усі корені та їхні діти розкладені  */
+/* збалансованими колонками, тож меню повне одразу і ніколи не показує       */
+/* порожню площину в очікуванні наведення.                                   */
 
 .vs-catalog {
 	position: absolute;
@@ -1175,16 +1174,9 @@ body.other_page .main {
 	box-shadow: var(--vs-shadow-3);
 }
 
-/* Multi-column, and it has to be: this shop's tree is extremely uneven -        */
-/* measured on the demo data, twelve root categories, one of them ("Меблі для    */
-/* дому") with four children and seven shoppable grandchildren, five with no     */
-/* children at all. A CSS grid was tried here first and measured worse, which    */
-/* is worth writing down: a grid row is as tall as its tallest cell, so the deep */
-/* branch made row one 378px whatever the eleven short categories beside it      */
-/* needed, and the panel went from 598px to the 630px cap and started            */
-/* scrolling. Multi-column balances by flow height instead, which is the         */
-/* behaviour this data wants. What actually made the old layout bad was not the  */
-/* column algorithm but the row rhythm below it - see the link rules.            */
+/* Саме multi-column, а не grid: дерево категорій дуже нерівне, а рядок grid    */
+/* заввишки з найвищу комірку — одна глибока гілка розтягнула б увесь рядок і   */
+/* панель пішла б у прокрутку. Multi-column балансує за висотою потоку.         */
 
 .vs-catalog__list {
 	columns: 220px;
@@ -1206,13 +1198,10 @@ body.other_page .main {
 	padding-bottom: var(--vs-space-5);
 }
 
-/* 44px is the touch floor, and this menu never sees touch: its toggle is        */
-/* display: none below 992px, where the off-canvas nav takes over instead.       */
-/* Charging every row 44px is what made depth so expensive - a branch of one     */
-/* root, four children and seven grandchildren spent 528px on link boxes alone.  */
-/* The root keeps 44 because it carries the icon and is the primary target; the   */
-/* two levels under it get the rhythm below, both still clear of WCAG 2.5.8's    */
-/* 24px minimum for a pointer.                                                   */
+/* 44px — поріг дотику, а це меню дотику не бачить ніколи: нижче 992px його     */
+/* перемикач display:none, там працює off-canvas. Корінь лишає 44, бо несе      */
+/* іконку і є основною ціллю; два рівні під ним щільніші, але вище мінімуму     */
+/* WCAG 2.5.8 для вказівника.                                                   */
 
 .vs-catalog__link {
 	display: flex;
@@ -1296,13 +1285,11 @@ body.other_page .main {
 }
 
 .vs-catalog__link--2:hover,
-/* Underline-on-hover rules across this sheet name the two longhands rather    */
-/* than the text-decoration shorthand. The shorthand resets                    */
-/* text-decoration-color to currentColor, which silently overrode base.css's   */
-/* a:hover accent underline - spec 5.1's second job for the brand colour       */
-/* reached one link in the whole shop until this was fixed. The colour is      */
-/* repeated here instead of left to base.css because several of these rules    */
-/* sit against a rest rule of equal specificity, where the later sheet wins.   */
+/* Підкреслення на hover скрізь у цьому файлі задається двома окремими          */
+/* властивостями, а не скороченням text-decoration: скорочення скидає колір на  */
+/* currentColor і мовчки перебиває акцентне підкреслення з base.css. Колір      */
+/* повторюється тут, бо частина цих правил стоїть проти правила спокою тієї ж   */
+/* специфічності, де виграє пізніший файл.                                      */
 
 .vs-catalog__link--3:hover {
 	color: var(--vs-heading);
@@ -1349,12 +1336,11 @@ body.other_page .main {
 }
 
 /* ------------------------------------------------------- sheet primitives */
-/* WARNING for Tasks 4-5 and anyone else reusing .vs-sheet: put the sheet    */
-/* and its backdrop as direct children of <body>, never inside .vs-header.   */
-/* .vs-header sets position: relative + z-index: var(--vs-z-sticky), which   */
-/* opens a stacking context: a nested sheet would be clamped to the header's */
-/* z-index and paint UNDER page content, whatever --vs-z-modal says.         */
-/* The same applies to any other positioned, z-indexed ancestor.             */
+/* УВАГА при повторному використанні .vs-sheet: панель і її підкладка мають    */
+/* бути прямими дітьми <body>, ніколи всередині .vs-header. Той відкриває      */
+/* контекст накладання, і вкладена панель малювалась би ПІД контентом, хоч би  */
+/* що казав --vs-z-modal. Те саме з будь-яким позиціонованим предком із        */
+/* z-index.                                                                    */
 
 /* Geometry is the bottom sheet: pinned to the bottom edge, translated out of  */
 /* sight and made inert with visibility so its controls leave the tab order    */
@@ -1401,10 +1387,8 @@ body.other_page .main {
 }
 
 /* --------------------------------------- off-canvas mobile navigation skin */
-/* Structural rules ported from mobile_menu.css, which this replaced and     */
-/* which Task 8 deleted.                                                     */
-/* The markup is generated at runtime by mobile_menu.js (hc-offcanvas-nav)   */
-/* and cannot be renamed; only the presentation is ours.                     */
+/* Розмітку генерує в рантаймі mobile_menu.js (hc-offcanvas-nav) і перейменувати */
+/* її не можна — наша тут лише презентація.                                     */
 
 html.hc-nav-yscroll {
 	overflow-y: scroll;
@@ -1497,11 +1481,9 @@ body.hc-nav-open {
 	text-decoration: none;
 }
 
-/* Currency, language, phone and email were 13px and muted while the rows      */
-/* above them were 15px and full contrast. Same height, same rail, dimmer text  */
-/* reads as disabled rather than as secondary - and none of them is secondary   */
-/* to "Бренди". They carry no size/color rule of their own now, so they fall    */
-/* back to this rule's color and font-size like every other row.                */
+/* Валюта, мова, телефон і пошта власного розміру й кольору не мають: та сама   */
+/* висота й та сама напрямна з приглушеним текстом читалися б як вимкнений      */
+/* рядок, а не як другорядний.                                                  */
 
 .hc-offcanvas-nav .nav-item {
 	position: relative;
@@ -1534,42 +1516,32 @@ body.hc-nav-open {
 	object-fit: contain;
 }
 
-/* One text edge for the whole menu. A row with a leading 20px glyph starts its  */
-/* text at 52px (20px padding + 20px glyph + 12px gap); a row without one starts */
-/* at 20px, which split the menu into two ragged columns. Rows with no glyph     */
-/* reserve the rail instead of sliding under it.                                 */
+/* Один край тексту на все меню: рядки без гліфа тримають напрямну, а не        */
+/* зʼїжджають під неї — інакше меню розпадається на дві рвані колонки.          */
 /*                                                                              */
-/* The test is first-child, NOT :has(svg). The CMS row "Клієнтам" contains an    */
-/* svg - its submenu chevron, nested in a trailing .vs-menu__chevron span. Keyed */
-/* on :has(svg) that one row would count as railed and its four siblings would   */
-/* not, making the edge worse than leaving it alone.                             */
+/* Перевірка саме на first-child, НЕ на :has(svg): рядок CMS містить svg своєї  */
+/* шеврон-стрілки підменю, тож за :has(svg) він один вважався б із напрямною, а */
+/* його сусіди — ні.                                                            */
 /*                                                                              */
-/* hc-offcanvas-nav also injects an empty, absolutely-positioned <label> as the  */
-/* real first child of any row it turns into a checkbox-driven submenu toggle -  */
-/* here that is "Категорії" plus both switcher rows, since they now carry a      */
-/* glyph and already had a nested <ul>. The label costs no visible space, but it */
-/* does own the DOM :first-child slot, so a bare :has(> svg:first-child) stops   */
-/* seeing the glyph on exactly those three rows and wrongly re-rails them. The   */
-/* extra :not() clauses below recognise a glyph sitting right after that label - */
-/* directly, when hc-offcanvas-nav reuses the source <a> ("Категорії"), or one   */
-/* level deeper inside the wrapper <span> it builds around a source <span> row   */
-/* (the currency and language switchers).                                       */
+/* hc-offcanvas-nav ще й вставляє порожній <label> першою дитиною кожного рядка, */
+/* який перетворює на перемикач підменю. Місця він не займає, але володіє       */
+/* слотом :first-child, тож голий :has(> svg:first-child) перестає бачити гліф  */
+/* рівно на цих рядках. Клаузи :not() нижче впізнають гліф одразу після цього   */
+/* label — і напряму, і на рівень глибше в обгортці, яку бібліотека будує.      */
 /*                                                                              */
-/* .bottom-nav is excluded: its social links are pills on their own row, not     */
-/* rail items.                                                                   */
+/* .bottom-nav виключено: його соцпосилання — пігулки власного рядка.           */
 
 .hc-offcanvas-nav .nav-content > ul:not(.bottom-nav) > li > .nav-item:not(:has(> svg:first-child)):not(:has(> img:first-child)):not(:has(> .nav-icon:first-child)):not(:has(> label:first-child + svg)):not(:has(> label:first-child + img)):not(:has(> label:first-child + .nav-icon)):not(:has(> label:first-child + span > svg:first-child)):not(:has(> label:first-child + span > img:first-child)) {
 	padding-left: calc(var(--vs-space-5) + 20px + var(--vs-space-3));
 }
 
-/* The CMS rows reserve the rail but have nothing to put in it, so they read as */
-/* children of the row above rather than as peers. A dot fills the slot without */
-/* asserting a meaning: these pages are named by the shop owner, so any real    */
-/* glyph would claim to know what they are. A list marker claims only that they */
-/* are items, which is true.                                                     */
+/* Рядки CMS тримають напрямну, але класти в неї нічого — без маркера вони      */
+/* читаються як діти рядка вище. Крапка заповнює місце, нічого не стверджуючи:  */
+/* ці сторінки називає власник магазину, тож будь-який справжній гліф удавав би, */
+/* що знає, про що вони.                                                        */
 /*                                                                              */
-/* Scoped inside .hc-offcanvas-nav because menu.tpl is shared with the desktop  */
-/* menu, which has no rail and must not grow bullets.                            */
+/* Обмежено .hc-offcanvas-nav, бо menu.tpl спільний із десктопним меню, де      */
+/* напрямної немає і маркери зайві.                                             */
 
 .hc-offcanvas-nav .nav-content > ul > li > .vs-menu__link.nav-item::before {
 	position: absolute;
@@ -1583,12 +1555,9 @@ body.hc-nav-open {
 	content: "";
 }
 
-/* The wrapper span from the paragraph above (currency and language) keeps the   */
-/* glyph and the value text as its own two children, once removed from          */
-/* .nav-item - so .nav-item's own flex/gap never reaches them and the two sit    */
-/* with only a collapsed-whitespace gap instead of the rail's 12px. Restating    */
-/* the same flex row here on that inner span lines its text up with every other  */
-/* glyph row's 52px edge.                                                       */
+/* У перемикачах валюти й мови гліф і текст лежать на рівень глибше, тож flex і */
+/* gap із .nav-item до них не дістають. Повторення того самого флекс-рядка на   */
+/* внутрішньому span вирівнює їх по спільному краю тексту.                      */
 
 .hc-offcanvas-nav .nav-item > label:first-child + span:has(> svg:first-child) {
 	display: flex;
@@ -1827,19 +1796,12 @@ body.hc-nav-open {
 	width: auto;
 }
 
-/* The panel header: brand on the left, close on the right. hc-offcanvas-nav    */
-/* puts the close item in the first list, so top-nav becomes that header row.    */
-/* flex-direction is restated here: the earlier ul.top-nav rule above sets it   */
-/* to column for the single-<li> header it used to be; that declaration is not  */
-/* touched by this rule's cascade unless repeated, and column would stack the   */
-/* logo and the close button instead of placing them side by side.              */
+/* Шапка панелі: бренд ліворуч, закриття праворуч. flex-direction повторюється  */
+/* тут навмисно — правило ul.top-nav вище ставить column, і без повтору логотип */
+/* із кнопкою стали б один під одним.                                           */
 
-/* The panel scrolls (.nav-wrapper-0 > .nav-content, above) and this header row */
-/* was position: static inside it, so at short landscape heights the row - and  */
-/* the only close control the menu has - scrolled out of view with the rest of  */
-/* the list. sticky keeps it pinned to the top of the scroll container instead; */
-/* the earlier ul.top-nav rule already sets an opaque background-color, so the  */
-/* rows scrolling underneath do not show through.                               */
+/* Панель прокручується, тож без sticky цей рядок — а з ним і єдина кнопка      */
+/* закриття — їде вгору разом зі списком на низьких альбомних екранах.          */
 
 .hc-offcanvas-nav ul.top-nav {
 	display: flex;
@@ -1857,34 +1819,26 @@ body.hc-nav-open {
 	flex: none;
 }
 
-/* The logo is optional (mobile_menu.tpl:3 wraps it in an {if}), but the {if}    */
-/* sits inside the <li>, not around it - the template cannot drop the <li>      */
-/* itself without also losing the row hc-offcanvas-nav needs to place the close */
-/* control in. With no logo the library still builds a row for that empty <li>: */
-/* it emits `<span class="nav-item">` rather than emitting nothing, and that    */
-/* span then picks up .nav-item's min-height and border-bottom as a bare grey   */
-/* stub. Hiding it here is the fix; the row really is :empty, since the         */
-/* library's content collector already drops whitespace-only text nodes.       */
+/* Логотип необовʼязковий, але {if} шаблону сидить усередині <li>, а не навколо */
+/* нього — прибрати сам <li> не можна, бо саме в цей рядок бібліотека кладе     */
+/* кнопку закриття. Без логотипа вона все одно будує рядок, і той підхоплює     */
+/* min-height та лінію .nav-item як голий сірий обрубок.                        */
 
 .hc-offcanvas-nav ul.top-nav .nav-item:empty {
 	display: none;
 }
 
-/* The shop can run with no logo configured (mobile_menu.tpl:3 wraps it in an   */
-/* {if}) - then the close item is the row's only child, and space-between pins  */
-/* a lone flex child to flex-start, moving the x to the left. margin-left: auto  */
-/* anchors it to the end on its own, independent of how many items precede it,  */
-/* so the x stays right whether or not the logo renders.                        */
+/* Без логотипа кнопка закриття лишається єдиною дитиною, а space-between       */
+/* притискає самотній флекс-елемент до початку. margin-left: auto тримає її     */
+/* праворуч незалежно від кількості сусідів.                                    */
 
 .hc-offcanvas-nav ul.top-nav li.nav-close {
 	margin-left: auto;
 }
 
-/* This build has no ariaLabels option and emits the label as a bare text node  */
-/* inside the anchor, so it cannot be wrapped from the template. text-indent    */
-/* moves it off screen while leaving it in the accessibility tree; the glyph is  */
-/* drawn by the span the library already emits. Setting labelClose to an empty  */
-/* string instead would leave the button with no accessible name at all.        */
+/* Бібліотека віддає підпис голим текстовим вузлом усередині посилання, тож     */
+/* обгорнути його з шаблону не можна. text-indent виносить його за екран,       */
+/* лишаючи в дереві доступності; порожній labelClose позбавив би кнопку імені.  */
 
 .hc-offcanvas-nav li.nav-close a {
 	position: relative;
@@ -1913,24 +1867,13 @@ body.hc-nav-open {
 	text-indent: 0;
 }
 
-/* NO group separators here, and that is a decision rather than an omission.     */
-/* The panel holds thirteen rows in three jobs - the shop's own navigation, the  */
-/* CMS pages, its settings and contacts - distinguished only by their marker: an */
-/* icon for the first and third, a hollow dot for the middle. Two attempts at    */
-/* marking the boundaries were both rejected on a real phone, and both for the   */
-/* same underlying reason: every .nav-item draws its own bottom hairline, so the */
-/* boundary already HAS a line and it belongs to the row above it.               */
+/* Роздільників між групами тут НЕМАЄ навмисно: кожен .nav-item і так малює     */
+/* власну нижню лінію, тож межа вже має лінію, і належить вона рядку вище.      */
+/* Рамка на групі домалювала б другу лінію поруч, а відступ вийшов би           */
+/* однобоким, бо лінія лишається приклеєною до верхнього рядка.                 */
 /*                                                                              */
-/* A border on the group therefore drew a second line a few pixels under the     */
-/* first. Replacing it with space made the gap one-sided, because the line stays */
-/* glued to the row above while the row below gains all of the room. Splitting   */
-/* the space collapses to one margin and moves the asymmetry rather than curing  */
-/* it; centring the line for real means stripping the last row's border in each  */
-/* group and rebuilding the divider, which trades an even 52px rhythm for a      */
-/* grouping the dot already carries.                                             */
-/*                                                                              */
-/* So the rhythm wins. If this is revisited, the lever is the marker or a group   */
-/* heading - not a rule and not a gap.                                           */
+/* Якщо повертатись до цього — важелем є маркер або заголовок групи, не лінія   */
+/* і не проміжок.                                                                */
 
 .hc-offcanvas-nav ul.bottom-nav {
 	display: flex;
@@ -2166,11 +2109,9 @@ body.hc-nav-open {
 	gap: var(--vs-space-2);
 }
 
-/* A glyph in a 44px circle, the same control the mobile menu's social row is,     */
-/* rather than the network's name in a pill. The name is not gone - it is in the    */
-/* title attribute and in a .vs-sr-only span, which is what keeps the link with an  */
-/* accessible name. font-size: 0 so the whitespace between the glyph and that span  */
-/* cannot widen the circle by a space character.                                   */
+/* Гліф у колі, а не назва мережі в пігулці. Назва нікуди не зникла — вона в    */
+/* title і в .vs-sr-only, саме це лишає посилання з доступним іменем.           */
+/* font-size: 0, щоб пробіл між гліфом і тим span не розширював коло.           */
 
 .vs-social__link {
 	display: inline-flex;
@@ -2243,14 +2184,11 @@ body.hc-nav-open {
 	margin: 0;
 }
 
-/* height is fixed and width is derived, so this row is sized by the image.     */
-/* images/xloading.svg is intrinsically square, so while the logo is loading    */
-/* width:auto resolves to 22px and the placeholder is a 22px mark rather than   */
-/* the whole row. The cap is 60px: index.tpl resizes these logos to 80x30, so   */
-/* at 22px tall a real logo is never wider than 58.7px, which means the cap is  */
-/* a guard against an oversized upload and nothing else. contain rather than    */
-/* the default fill so a logo that does exceed it letterboxes instead of being  */
-/* squashed.                                                                    */
+/* Висота фіксована, ширина похідна — рядок розмірює зображення. Плейсхолдер    */
+/* завантаження квадратний, тож поки логотип вантажиться, він займає позначку   */
+/* по висоті рядка, а не весь рядок. Обмеження ширини — сторож від завеликого   */
+/* завантаженого файлу; contain, а не fill, щоб такий логотип отримав поля, а   */
+/* не був сплющений.                                                            */
 
 .vs-payments__item img {
 	display: block;
@@ -2261,14 +2199,11 @@ body.hc-nav-open {
 }
 
 /* ----------------------------------------------------------- product card */
-/* Card host for the product lists this branch has not rebuilt yet - the home  */
-/* page swipers, related products, wishlist, comparison and the user cabinet,  */
-/* all still on `.products_list.row` + `.product_item.col-*`. The legacy grid   */
-/* pins .product_item to a fixed 340px/299px height because the old card was    */
-/* itself fixed-height, and a content-sized card is clipped by it. The          */
-/* catalogue no longer emits either class: it has a real grid (.vs-catalogue__  */
-/* grid) further down. Tasks 5 and 7 retire the rest, and this block with them. */
-/* The swiper containers are excluded: Swiper owns their display.               */
+/* Хост картки для списків товарів, які ще живуть на старих класах              */
+/* `.products_list.row` + `.product_item.col-*`. Стара сітка тримала            */
+/* .product_item на фіксованій висоті, і картка, розмірена контентом, у ній     */
+/* обрізається. Каталог цих класів уже не віддає — у нього власна сітка нижче.  */
+/* Swiper-контейнери виключені: їхнім display керує сам Swiper.                 */
 
 .products_list:not(.swiper-container) {
 	display: flex;
@@ -2318,20 +2253,14 @@ body.hc-nav-open {
 	min-width: 0;
 }
 
-/* A fixed ratio keeps rows from jumping as photography loads, and `contain` on */
-/* a plate is what makes uneven shop photography line up on a common baseline.  */
-/* Square, not 4/5: the demo catalogue is packed-shot product photography that  */
-/* is itself square or landscape, so a portrait box spent a fifth of every card */
-/* on empty plate above and below the goods and pushed the price below the      */
-/* fold on a phone. A square box is also the ratio that changes least when the  */
-/* grid reflows from two columns to five.                                        */
+/* Фіксоване співвідношення не дає рядкам стрибати, поки вантажаться фото, а    */
+/* contain на плашці вирівнює різнокаліберну зйомку по спільній базі. Квадрат,  */
+/* а не портрет: товарна зйомка сама квадратна або горизонтальна, і портретна   */
+/* коробка витрачала б частину картки на порожню плашку.                        */
 /*                                                                              */
-/* No border. The plate is white on a white card, so the hairline drew a box    */
-/* inside a box on every card in the grid and, on the ~90% of shop photography  */
-/* shot on a white sweep, boxed the sweep rather than the product. What bounds  */
-/* the media now is the card's own border and the gap to the title - the plate  */
-/* fill and the radius stay so a dark or full-bleed photograph is still clipped */
-/* to the same shape. Treat the plate, never the photograph.                    */
+/* Без рамки: плашка біла на білій картці, тож лінія малювала б коробку в       */
+/* коробці, а на білій зйомці обводила б фон, а не товар. Межу тепер задає      */
+/* власна рамка картки. Оформлюємо плашку, ніколи не фотографію.                */
 
 .vs-card__media {
 	position: relative;
@@ -2403,14 +2332,10 @@ body.hc-nav-open {
 	pointer-events: none;
 }
 
-/* The 48px the badge column gives up is .vs-card__tools' own 44px plus a 4px    */
-/* gap - they sit in the same corner and must not overlap. It was 60px, which    */
-/* reserved 16px for nothing and clipped "Топ продажів" mid-glyph: 97px of text  */
-/* into an 89px box, and the default text-overflow is clip, not ellipsis.        */
-/* text-overflow is not the fix here either - this is a flex container, so the   */
-/* text is an anonymous flex item and the property has nothing to act on. Where  */
-/* the words still do not fit beside the tools the sticker wraps instead; see    */
-/* the phone block.                                                              */
+/* Місце, яке віддає колонка стікера, — це ширина .vs-card__tools плюс проміжок: */
+/* вони в одному куті й не мають накладатись. text-overflow тут не зарадив би —  */
+/* це флекс-контейнер, текст у ньому анонімний флекс-елемент, і властивості      */
+/* нема на що діяти. Де слова все одно не влазять, стікер переноситься.          */
 
 .vs-badge {
 	display: inline-flex;
@@ -2429,13 +2354,9 @@ body.hc-nav-open {
 	white-space: nowrap;
 }
 
-/* --vs-text-2xs and not --vs-text-xs. The owner wanted the badge smaller on a    */
-/* small phone, where "Топ продажів" and a discount sit on the same photo, and    */
-/* moving the xs step down to 0.7rem did that - but xs also carries the struck    */
-/* comparison price, stock lines, chips, crumbs, post meta and spec hints, so     */
-/* every one of them shrank with it. A step below xs costs one token and leaves   */
-/* the scale intact; the badge is the only thing on it, and the 600 weight is     */
-/* what keeps it legible at 11.2px.                                              */
+/* Власний крок нижче xs, а не зменшений xs: той несе ще й перекреслену ціну,   */
+/* рядки наявності, чипи, крихти й підказки — усі вони поїхали б разом. Стікер  */
+/* тут єдиний споживач, а насиченість 600 тримає його читабельним.               */
 
 .vs-badge--sale {
 	background-color: var(--vs-sale-500);
@@ -2455,29 +2376,18 @@ body.hc-nav-open {
 	max-height: 36px;
 }
 
-/* Wishlist and comparison. One mechanism at every width and on every pointer   */
-/* type, replacing two that competed: a hover reveal on pointer devices plus a  */
-/* permanent 44px opaque disc under (hover: none), with comparison hidden below */
-/* 576px because two of those discs would not fit. Measured before the change:  */
-/* the pair covered 4048px of a 51529px media box at 1440 (7.9%, and 40.5% of   */
-/* its height) and the single surviving disc covered 1936px of 23870px at 375   */
-/* (8.1%). That opaque white plate on the photograph is what the shop owner     */
-/* objected to.                                                                 */
+/* Обране й порівняння — один механізм на будь-якій ширині й будь-якому         */
+/* вказівнику. У спокої це сам гліф, без заливки, тіні й рамки: нічого          */
+/* непрозорого на фотографії, і обидві дії доступні без наведення. Підкладка —  */
+/* ::before, що зʼявляється лише на hover, фокусі й у вибраному стані; зона     */
+/* натискання лишається повною завжди.                                          */
 /*                                                                              */
-/* The resting control is now the glyph alone - no fill, no shadow, no border - */
-/* so nothing opaque sits on the photograph and both actions are visible and    */
-/* tappable without a pointer. The backing is a 36px ::before disc that paints  */
-/* only on hover, on focus and in the picked state; the hit area stays the full */
-/* 44x44 regardless. Laid out in a row, not a column, so the pair spans one     */
-/* glyph height rather than two - which is also what lets comparison come back  */
-/* below 576px instead of being hidden there.                                   */
+/* У рядок, а не в колонку: пара займає одну висоту гліфа замість двох — саме   */
+/* це й дозволяє лишити порівняння на вузьких екранах, а не ховати його.        */
 /*                                                                              */
-/* The glyph carries a plate-coloured halo: the media box is a white plate, but */
-/* a square photograph fills it corner to corner, and --vs-text ink on a dark   */
-/* photograph would otherwise disappear. Over the plate the halo is invisible.  */
-/*                                                                              */
-/* A picked control still reads as a filled ink disc - a change of form, not of */
-/* hue - and the wishlist glyph swaps outline for solid on top of that.         */
+/* Гліф несе ореол кольору плашки: квадратне фото заповнює коробку від краю до  */
+/* краю, і темне чорнило на темному фото інакше зникало б. Над плашкою ореол    */
+/* невидимий.                                                                    */
 
 .vs-card__tools {
 	position: absolute;
@@ -2487,11 +2397,9 @@ body.hc-nav-open {
 	flex-direction: column;
 }
 
-/* The glyph sits in the corner, the 44px hit area stays 44px. The button fills  */
-/* the corner box either way; centring its glyph inside it put the heart 12px    */
-/* down and 12px in from the photo's corner while the sticker opposite it was    */
-/* flush, so the two corners of the same photo were set differently. Aligning    */
-/* the content instead of moving the box is what keeps the touch target.         */
+/* Гліф у куті, зона натискання лишається повною. Вирівнюємо вміст, а не рухаємо */
+/* коробку — інакше або гліф не сходиться зі стікером у протилежному куті, або  */
+/* втрачається ціль для дотику.                                                  */
 
 .vs-card__tool {
 	position: relative;
@@ -2509,14 +2417,10 @@ body.hc-nav-open {
 /* an unpositioned in-flow child. Giving the child position: relative puts both */
 /* in the same paint step, where tree order puts the glyph on top.              */
 
-/* Anchored to the glyph, not to the button. The plate used to be centred in the */
-/* 44px hit area, which was right while the glyph was centred too - but the glyph */
-/* moved to the corner and the plate stayed put, so hovering drew a grey disc     */
-/* 12px down and to the left of the heart it was supposed to be behind. The glyph */
-/* is 20px flush with the padding box's top right corner, so -8px on both sides   */
-/* is (20 - 36) / 2: the plate ends up concentric with it. That leaves 7px of the  */
-/* plate outside the photo, on the card's own 12px of padding, where nothing clips */
-/* it - .vs-card and .vs-card__inner are both overflow: visible.                  */
+/* Прив'язано до гліфа, а не до кнопки: гліф стоїть у куті, тож підкладка,      */
+/* відцентрована в зоні натискання, малювалась би збоку від нього. Відʼємні     */
+/* відступи роблять її співвісною з гліфом; частина підкладки виходить за фото  */
+/* на власне поле картки, де її ніщо не обрізає — обидва предки overflow:visible. */
 
 .vs-card__tool::before {
 	content: "";
@@ -2547,13 +2451,9 @@ body.hc-nav-open {
 /* - because it covers the photograph it sits on, and it sits there whether or  */
 /* not the shopper is looking at the corner.                                    */
 
-/* The state moves onto the glyph: muted at rest, full text ink once picked,    */
-/* and the wishlist heart swaps outline for solid on top of that. Tabler's      */
-/* filled scale was tried for comparison and rejected on sight - at 24px it is  */
-/* a dense blob next to five other outline glyphs - so that control carries the */
-/* tone change alone. The jump from #6b6b71 to #1c1c20 is a lightness step, not */
-/* a hue one, and the title attribute states the state in words for anyone who  */
-/* is not reading tone at all.                                                  */
+/* Стан переходить на сам гліф: приглушений у спокої, повне чорнило після       */
+/* вибору, а серце обраного ще й міняє контур на заливку. Перехід — крок за     */
+/* світлотою, не за відтінком, і title дублює стан словами.                     */
 
 /* A plate still paints on hover and focus, where it means "you are pointing at */
 /* this" rather than "this is on", and disappears with the pointer.             */
@@ -2614,18 +2514,13 @@ body.hc-nav-open {
 	font-size: var(--vs-text-xs);
 }
 
-/* The card states the rating read-only: no fn_rating, no data-rating_post_url,  */
-/* because scripts.tpl:504 turns .fn_rating into a ballot (hover, click, AJAX)    */
-/* and a card in a grid is not a place to vote from. Same shape comparison.tpl    */
-/* already draws.                                                                 */
-/*                                                                                */
-/* The row is reserved whether or not the product has votes, exactly like the     */
-/* discount tier below it: price and availability have to sit at the same y in    */
-/* neighbouring cards, and a row that appears only on rated products is what      */
-/* breaks that.                                                                   */
-/*                                                                                */
-/* nowrap on the whole row is what holds the reserved height - a second line of   */
-/* text would push the block past the height the grid row is aligned to.          */
+/* Картка показує рейтинг лише для читання — без fn_rating, бо той клас робить  */
+/* із блоку бюлетень (наведення, клік, AJAX), а картка в сітці не місце для     */
+/* голосування.                                                                  */
+/*                                                                              */
+/* Рядок зарезервований незалежно від наявності оцінок, як і ярус знижки нижче: */
+/* ціна й наявність мають стояти на одному рівні в сусідніх картках. nowrap     */
+/* тримає цю зарезервовану висоту — другий рядок тексту вибив би блок за неї.   */
 
 .vs-card__rating {
 	display: flex;
@@ -2637,27 +2532,19 @@ body.hc-nav-open {
 	white-space: nowrap;
 }
 
-/* 60x12, not the 90x18 of the product page and the comparison table. The         */
-/* narrowest card this theme produces is the two-up grid at 360px, whose content  */
-/* box is 134px (measured, see the 575px block below), and it also has to hold    */
-/* the counter - the demo database reaches five digits. At 60px the row is about  */
-/* 100px and the count can grow without the card ever being the thing that gives. */
-/*                                                                                */
-/* The multiplier is recomputed in the template - product_list.tpl emits          */
-/* rating*60/5 - rather than the box being scaled with transform: the inline      */
-/* width IS the value, and transform would leave a 90px layout box behind while   */
-/* painting 60, pushing the counter 30px out. The two numbers are tied: move one, */
-/* move the other. Nothing reads them back - the rater in scripts.tpl binds to    */
-/* .fn_rating only, which this row deliberately is not.                           */
-/*                                                                                */
-/* These win on specificity, not order: 0,2,0 and 0,2,1 against the 0,1,0 and     */
-/* 0,1,1 of the base rating section further down the file. Only mask-size and     */
-/* mask-position are overridden - the mask shorthand with its url() stays base,   */
-/* so the reference to images/rating.svg lives in exactly one place.              */
-/*                                                                                */
-/* flex: none is load-bearing. This is a flex item with a fixed 60px, and were it */
-/* allowed to shrink, the inline width would measure itself against a smaller box */
-/* - the card would state someone else's rating rather than a clipped one.        */
+/* Вужча шкала, ніж на сторінці товару: найтісніша картка теми має ще вмістити  */
+/* лічильник, який у демо-базі доходить до пʼяти цифр.                          */
+/*                                                                              */
+/* Множник перераховує шаблон, а не transform: інлайнова ширина ТУТ і є         */
+/* значенням, а transform лишив би позаду коробку старого розміру й відсунув    */
+/* лічильник. Два числа звʼязані — міняєте одне, міняйте й друге.               */
+/*                                                                              */
+/* Виграють специфічністю, не порядком. Перевизначаються лише mask-size і       */
+/* mask-position — саме скорочення mask з url() лишається базовим, тож посилання */
+/* на файл зірок живе рівно в одному місці.                                     */
+/*                                                                              */
+/* flex: none несуче: якби елемент міг стискатись, інлайнова ширина міряла б    */
+/* себе проти меншої коробки, і картка показала б чужий рейтинг, а не обрізаний. */
 
 .vs-card__rating .rating_starOff {
 	flex: none;
@@ -2692,13 +2579,11 @@ body.hc-nav-open {
 	text-overflow: ellipsis;
 }
 
-/* The short annotation. Off by default and off for good on a touch device -    */
-/* a hover-only affordance is unreachable there, so nothing may live only in    */
-/* it, and this text is a truncated copy of what the product page states in     */
-/* full. On a pointer device it slides up over the foot of the plate rather     */
-/* than taking a place in the card body: in flow it cost every card two         */
-/* permanent lines of small grey type, and revealing it in flow would resize    */
-/* the whole grid row under the pointer.                                        */
+/* Коротка анотація. Вимкнена на дотику назавжди: те, що показується лише на    */
+/* наведення, там недосяжне, тож жити тільки в ньому не може нічого — цей текст */
+/* є скороченою копією того, що сторінка товару каже повністю. На вказівнику    */
+/* виїжджає поверх низу плашки, а не займає місце в тілі картки: у потоці вона  */
+/* коштувала б кожній картці два постійні рядки й перебудовувала б рядок сітки. */
 
 .vs-card__annotation {
 	display: none;
@@ -2745,17 +2630,11 @@ body.hc-nav-open {
 	font-variant-numeric: tabular-nums;
 }
 
-/* The reserved comparison tier, above the current price. Its min-height is the   */
-/* tallest thing that can sit in it, taken from the scale rather than from a      */
-/* measurement that would rot the first time a token moves. The leading is        */
-/* tightened to 1.25 from the body's 1.55 deliberately: on a card without a       */
-/* discount this line is empty, and every point of leading in it is dead air the  */
-/* owner asked to get back. 15.2px reserved instead of 20.                        */
-/*                                                                              */
-/* That tallest thing is now the sale badge - its own type plus the 2px of        */
-/* vertical padding it was given - and not the struck price's line box, which is  */
-/* 15. Reserving the badge's box is what keeps a card with a discount and a card  */
-/* without one exactly the same height.                                          */
+/* Зарезервований ярус порівняльної ціни над поточною. min-height береться зі   */
+/* шкали, а не з виміру, який протух би при першій зміні токена. Міжрядковий    */
+/* стиснутий навмисно: на картці без знижки цей рядок порожній, і кожна його    */
+/* частка — мертве повітря. Резервується коробка стікера знижки, бо саме вона   */
+/* найвища — це й тримає картки зі знижкою і без неї однакової висоти.          */
 
 .vs-card__price_second {
 	display: flex;
