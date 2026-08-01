@@ -231,7 +231,7 @@
                                         <span>{$btr->general_category|escape}</span>
                                     </div>
                                     <div id="product_cats" class="clearfix">
-                                        {assign var ='first_category' value=reset($post_categories)}
+                                        {assign var ='first_category' value=$post_categories|first}
                                         <select class="selectpicker form-control  mb-1 fn_post_category fn_meta_categories" data-live-search="true">
                                             <option value="0" selected="" disabled="" data-category_name="">{$btr->product_select_category}</option>
                                             {function name=category_select level=0}
