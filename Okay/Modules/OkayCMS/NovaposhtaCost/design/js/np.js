@@ -242,6 +242,13 @@ function changeDeliveryType()
     return false;
 }
 
+// Без цього невдалий розрахунок лишав "Вычисляем..." назавжди: у рядку доставки
+// показуємо причину, а в підсумку - прочерк, бо там очікується сума.
+function show_calc_error(price_elem) {
+    price_elem.text(okay.np_cart_calculate_error);
+    $('#fn_total_delivery_price').text('—');
+}
+
 function calc_delivery_price(e) {
     if (e !== undefined && e.target.name === 'novaposhta_redelivery') {
         update_np_payments();
@@ -281,17 +288,17 @@ function calc_delivery_price(e) {
             data: {city: city_ref, redelivery: redelivery, delivery_id: delivery_id},
             dataType: 'json',
             success: function(data) {
-                if (data.hasOwnProperty('price_response')) {
-                    if (data.price_response.success) {
-                        price_elem.text(data.price_response.price_formatted);
-                        delivery_block.find('input[name="novaposhta_delivery_price"]').val(data.price_response.price);
-                        delivery_block.find('input[name="delivery_id"]').data('total_price', data.price_response.cart_total_price)
-                            .data('delivery_price', data.price_response.price);
+                if (data.hasOwnProperty('price_response') && data.price_response.success) {
+                    price_elem.text(data.price_response.price_formatted);
+                    delivery_block.find('input[name="novaposhta_delivery_price"]').val(data.price_response.price);
+                    delivery_block.find('input[name="delivery_id"]').data('total_price', data.price_response.cart_total_price)
+                        .data('delivery_price', data.price_response.price);
 
-                        okay.change_payment_method();
-                    }
+                    okay.change_payment_method();
+                } else {
+                    show_calc_error(price_elem);
                 }
-                
+
                 if (data.hasOwnProperty('term_response') && data.term_response.success) {
                     delivery_block.find('input[name="novaposhta_delivery_term"]').val(data.term_response.term);
                     term_elem.text(data.term_response.term);
@@ -301,6 +308,9 @@ function calc_delivery_price(e) {
                 }
 
                 update_np_payments();
+            },
+            error: function() {
+                show_calc_error(price_elem);
             }
         });
     }

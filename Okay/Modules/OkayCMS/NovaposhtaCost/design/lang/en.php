@@ -16,6 +16,7 @@ $lang['np_cart_error_house'] = "Please enter the delivery house number";
 $lang['np_cart_select_warehouse'] = "Please select a shipping office";
 $lang['np_cart_error_warehouse'] = "Please select a shipping office";
 $lang['np_cart_calculate'] = "Calculating...";
+$lang['np_cart_calculate_error'] = "Could not calculate the delivery cost. Please try again.";
 $lang['np_form_enter_city'] = 'Select a city';
 $lang['np_form_enter_street'] = 'Enter Street';
 $lang['np_form_novaposhta_house'] = 'Enter house number';
