@@ -1,24 +1,15 @@
 /**
-* vibe_shop design tokens.
-* The only file in this theme that may contain raw colour, shadow, radius,
-* duration or font-stack values.
+* vibe_shop design tokens. Єдиний файл теми, де дозволені сирі значення кольору,
+* тіні, радіуса, тривалості й шрифтового стека.
 *
-* Dark-theme rule sets, if ever added, belong HERE and never in
-* theme-settings.css: CssConfig flattens every rule set in that file into one
-* variable map, so the admin panel would overwrite both themes at once.
+* Темна тема, якщо колись зʼявиться, живе САМЕ ТУТ і ніколи в
+* theme-settings.css: CssConfig зливає всі набори правил того файлу в одну мапу
+* змінних, тож збереження з адмінки перезаписало б обидві теми одразу.
 */
 
-/* The ramp is only as long as the theme uses. --vs-n-600, -700, -800, -900 and
-* -950 and --vs-warn-50 were declared through Tasks 1-9 and never referenced by
-* a single rule - counted across every authored sheet, zero var() consumers
-* each - so they are gone. The darks they held are still in the theme; they
-* arrive through theme-settings.css as --okay-second-company and
-* --okay-button-color, which is where an owner can actually change them.
-*
-* --vs-n-50 has no consumer either, and stays: it is the value --okay-bg ships
-* with, and the grey note below quotes it as one of the four backgrounds
-* --vs-border was measured against. Deleting it would leave that measurement
-* referring to a name the file no longer defines. */
+/* Рампа рівно така, як тема використовує. Темні відтінки приходять через
+* theme-settings.css (--okay-second-company, --okay-button-color) — саме там їх
+* може змінити власник магазину. */
 
 :root {
 	--vs-n-0: #ffffff;
@@ -37,28 +28,12 @@
 	--vs-ok-600: #047857;
 	--vs-warn-600: #b45309;
 
-/* Which of these the shop owner can actually change, verified against the code
-* rather than against the names. backend/design/html/settings_theme.tpl renders a
-* swatch for an --okay-* variable ONLY when a settings_theme_<name> translation
-* exists in backend/lang/. Nine keys exist, so Settings -> Design shows nine
-* swatches: okay-button-color, okay-button-text, okay-button-color-hover,
-* okay-button-text-hover, okay-basic-company, okay-second-company,
-* okay-basic-company-text, okay-second-company-text, okay-bg.
-*
-* theme-settings.css declares seventeen, so the other EIGHT - okay-boxed-color,
-* okay-boxed-text, okay-button-second-color, okay-button-second-text,
-* okay-shadow-color, okay-border-color, okay-body-text and okay-body-heading -
-* have no translation key and so no form control. This comment said "six" and
-* omitted the last two until the final review, which is the pair that matters
-* most: they are mapped onto --vs-text and --vs-heading four lines below, i.e.
-* every word on every page. An owner reading Settings -> Design and seeing no
-* body-colour control is seeing the truth - the theme's text colour is not
-* reachable from the admin panel at all.
-*
-* They are editable only by hand. CssConfig::updateCssVariables()
-* re-renders theme-settings.css from its own parse and assigns only the rules the
-* form posted, so a save from the design screen leaves all eight exactly as they
-* are. That is what holds --vs-border at its 3:1 value; see the grey note below. */
+/* Налаштування -> Дизайн показує свотч для --okay-* лише за наявності
+* settings_theme_<name> у backend/lang/. Таких ключів дев'ять, а
+* theme-settings.css оголошує сімнадцять — решта вісім (зокрема
+* --okay-border-color, --okay-body-text, --okay-body-heading, тобто колір
+* кожного слова на сторінці) з адмінки недосяжні й правляться лише руками.
+* Збереження форми їх не зачіпає — саме це й тримає --vs-border на 3:1. */
 
 	--vs-canvas: var(--okay-bg);
 	--vs-surface: var(--okay-boxed-color);
@@ -75,44 +50,29 @@
 	--vs-cta-2: var(--okay-button-second-color);
 	--vs-cta-2-text: var(--okay-button-second-text);
 
-/* Aliases, not repeats. Each of these five carried the literal a second (and
-* for #6b6b71 a third) time until the final fix wave, so the same colour was
-* written under two names and a change to the ramp silently moved only one of
-* them. The semantic name still says what the value is for; the ramp says what
-* the value is. */
+/* Псевдоніми, не копії: семантична назва каже для чого, рампа — що саме.
+* Літерал тут повторювати не можна, інакше зміна рампи зрушить лише одне з двох. */
 
 	--vs-surface-subtle: var(--vs-n-100);
 	--vs-plate: var(--vs-n-0);
 	--vs-hairline: var(--vs-n-200);
 
-/* Three greys, three jobs, and only one of them is free to be pretty.
+/* Три сірих, три ролі:
 *
-* --vs-hairline (#e0e0e2) is decoration: the rule between two rows, the outline
-* of a card. It divides, it never identifies a control, so 1.32:1 on white is
-* allowed and deliberate.
+* --vs-hairline — декорація (лінія між рядками, контур картки). Нічого не
+* ідентифікує, тож контраст не нормується.
 *
-* --vs-border (--okay-border-color, #88888b since Task 9) is the resting
-* boundary of a control that has no fill of its own to be seen by: the
-* secondary button, the chip, the pagination link, the stepper, the option
-* card, the text field. WCAG 1.4.11 asks 3:1 of it. Measured: 3.53:1 on
-* --vs-n-0, 3.39 on --vs-n-25, 3.24 on --vs-n-50, 3.02 on --vs-n-100 - which is
-* every light background this theme paints a control on. It was #dcdcde and
-* measured 1.37:1 until Task 9. Anything lighter than #88888b re-breaks the
-* floor - and nothing in the admin panel can lower it, see the note above the
-* --okay-* map. The floor is reachable only by hand-editing theme-settings.css.
+* --vs-border — спокійна межа контрола без власної заливки (вторинна кнопка,
+* чип, пагінація, степер, поле вводу). WCAG 1.4.11 вимагає 3:1 на кожному
+* світлому тлі теми; світліше за #88888b ламає цей поріг. Знизити його з
+* адмінки неможливо — див. нотатку над мапою --okay-*.
 *
-* --vs-border-strong (#6b6b71) is the same boundary under emphasis - hover, the
-* checkbox and radio ring, the slider handle. It has to stay darker than
-* --vs-border or hover would read as a step backwards; it was #a5a5aa (2.45:1)
-* and so was both too light to qualify and, after --vs-border moved, lighter
-* than the state it was emphasising.
+* --vs-border-strong — та сама межа під акцентом (hover, кільце чекбокса,
+* ручка слайдера). Має лишатись темнішою за --vs-border, інакше hover читається
+* як крок назад.
 *
-* --vs-glyph (#a5a5aa) is what --vs-border-strong used to be, kept for the
-* things that were never boundaries at all and only borrowed the value: the
-* no-image placeholder glyphs, the breadcrumb separator, the empty-state icon,
-* the 404 illustration, the gallery scrollbar, the blockquote rule and the
-* resting underline colour of a link. They are decorative or redundant to
-* adjacent text, so they keep their exact Task 1-8 rendering. */
+* --vs-glyph — для того, що межею ніколи не було: плейсхолдери без зображення,
+* роздільник хлібних крихт, іконка порожнього стану, скролбар галереї. */
 
 	--vs-border-strong: var(--vs-n-500);
 	--vs-glyph: var(--vs-n-400);
@@ -148,11 +108,8 @@
 	--vs-space-11: 5rem;
 	--vs-space-12: 6rem;
 
-/* Height of the bar that sticks, measured not estimated: from 992px
-   .vs-header__bar is 86px (a 46px logo cap plus 20px of air per side, which is
-   also its min-height floor) and .vs-header__main adds a 1px hairline. Anything
-   else that sticks below the header offsets by this so it does not slide
-   underneath. Keep it in step with .vs-header__bar in the >=992px block. */
+/* Висота липкої шапки. Усе, що липне нижче, відступає на це значення. Тримати
+   в синхроні з .vs-header__bar у блоці >=992px. */
 	--vs-header-h: 87px;
 
 	--vs-radius-sm: 0.5rem;
@@ -161,11 +118,9 @@
 	--vs-radius-xl: 1.5rem;
 	--vs-radius-full: 999px;
 
-/* A single shadow, not a list: filter: drop-shadow() takes one shadow, so
-   --vs-shadow-1 and its siblings cannot be used there. It is the plate colour
-   rather than an ink colour because its job is the opposite of a shadow's -
-   it separates a dark glyph FROM a dark photograph, and vanishes on the white
-   plate the glyph normally sits on. */
+/* Одна тінь, не список: filter: drop-shadow() приймає лише одну, тож
+   --vs-shadow-* тут не годяться. Колір плашки, а не чорнила — задача зворотна
+   до тіні: відділити темний гліф ВІД темного фото. */
 	--vs-halo-plate: 0 0 3px var(--vs-plate);
 
 	--vs-shadow-1: 0 1px 2px rgb(23 23 26 / .06), 0 1px 3px rgb(23 23 26 / .04);

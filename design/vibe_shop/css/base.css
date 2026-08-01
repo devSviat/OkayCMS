@@ -1,10 +1,6 @@
-/* The margin and padding zeroing came from okay.css until Task 8 deleted it.  */
-/* It is restated here rather than reasoned away: every component built in     */
-/* Tasks 1-7 was authored on top of it and states the spacing it wants, so     */
-/* handing the user-agent stylesheet back its defaults would put a margin on   */
-/* every heading, paragraph, list, fieldset and form control in the theme.     */
-/* Measured before this was restored: 40px of UA padding returned to each nav  */
-/* <ul>, and 16px of margin to every <li>.                                     */
+/* Кожен компонент теми написаний поверх цього обнулення і задає власні */
+/* відступи сам. Повернути дефолти user-agent означає додати margin кожному */
+/* заголовку, абзацу, списку й контролу форми. */
 
 *,
 *::before,
@@ -19,9 +15,7 @@ html {
 	text-size-adjust: 100%;
 }
 
-/* Navigation lists are structure, not prose. Every other list keeps its       */
-/* marker: the only unstyled lists left in the theme are inside .vs-prose,     */
-/* which restores the indent the reset above took away.                        */
+/* Навігаційні списки — структура, не текст. Решта списків маркери зберігають. */
 
 nav ul {
 	list-style: none;
@@ -38,10 +32,8 @@ body {
 	-webkit-font-smoothing: antialiased;
 }
 
-/* h5 and h6 joined the list in Task 8. They are rare outside .vs-prose, which  */
-/* sizes its own, but okay.css styled all six and admin-authored content can    */
-/* emit any of them - left out, they would have fallen back to the user-agent's */
-/* bold serif-metric defaults.                                                   */
+/* Усі шість: контент з адмінки може віддати будь-який рівень, а без правила він */
+/* впав би на дефолти user-agent. */
 
 h1,
 h2,
@@ -78,18 +70,13 @@ a {
 	transition: text-decoration-color var(--vs-dur-1) var(--vs-ease);
 }
 
-/* Link hover is one of the two jobs spec 5.1 gives the owner's brand colour.   */
-/* It is the underline that takes the accent, never the text: the underline is  */
-/* decoration, so it carries no contrast floor and stays safe at every value    */
-/* --okay-basic-company can be set to, while the words keep --vs-text. Out of   */
-/* the box the accent ships as ink, so this renders as the near-black it was.   */
-/* The only link in the theme on an ink plate is .vs-skip, which sets           */
-/* text-decoration: none and so has no underline to colour.                     */
-/* This rule alone is not enough and must not be relied on alone: any later     */
-/* rule using the text-decoration SHORTHAND resets text-decoration-color to     */
-/* currentColor, and the theme's hover underlines all live in components.css    */
-/* after this file. Those rules therefore name text-decoration-line and         */
-/* text-decoration-color separately - see the note above .vs-catalog__link--3.  */
+/* Акцент бере підкреслення, а не текст: підкреслення декоративне, тож не має */
+/* порога контрасту і безпечне за будь-якого значення --okay-basic-company. */
+/* */
+/* Саме на це правило покладатись не можна: будь-яке пізніше використання */
+/* СКОРОЧЕННЯ text-decoration скидає колір на currentColor, а всі hover-правила */
+/* теми лежать у components.css після цього файлу. Тому там text-decoration-line */
+/* і text-decoration-color задаються окремо. */
 
 a:hover {
 	text-decoration-color: var(--vs-accent);
@@ -101,9 +88,8 @@ img {
 	border-style: none;
 }
 
-/* Every lazy image ships a placeholder in src, so an image with no src at all */
-/* is a template that failed to fill one in - it must not draw a broken-image  */
-/* glyph in the middle of a product grid.                                       */
+/* Зображення зовсім без src — це шаблон, який не підставив значення. Не має */
+/* малювати іконку «зображення зламане» посеред сітки товарів. */
 
 img:not([src]) {
 	visibility: hidden;
@@ -155,16 +141,10 @@ hr {
 	background-color: var(--vs-hairline);
 }
 
-/* The ring is an outline, not a box-shadow, and that is the whole point.       */
-/* It was built from box-shadow until the final review: base.css loads before   */
-/* components.css, so every later rule of equal specificity that declared       */
-/* box-shadow - for elevation, which is what this theme uses box-shadow for -   */
-/* silently deleted the ring while leaving outline: none in force. Measured on  */
-/* /all-products: 72 .vs-card__tool elements focused with outline none AND      */
-/* box-shadow none, i.e. no focus indicator at all. outline cannot collide      */
-/* with elevation because nothing else in the theme declares it, and modern     */
-/* engines follow the element's own border-radius, so the radius restatement    */
-/* that used to force ~15 controls to change shape under focus is gone too.     */
+/* Саме outline, а не box-shadow: тема використовує box-shadow для підняття, і */
+/* будь-яке пізніше правило рівної специфічності мовчки стирало б кільце фокуса, */
+/* лишаючи outline: none чинним. Outline ні з чим не конфліктує, а сучасні рушії */
+/* самі слідують border-radius елемента. */
 
 :focus-visible {
 	outline: 2px solid var(--vs-ink);
@@ -183,11 +163,9 @@ textarea {
 	font-variant-numeric: tabular-nums;
 }
 
-/* Present to assistive tech, absent to the eye. grid.css - the one utility     */
-/* sheet this theme inherited - ships no equivalent, so it is defined here      */
-/* rather than a fifth time next to each caller. The 1px clipped box, not       */
-/* display:none and not visibility:hidden: both of those take the element out   */
-/* of the accessibility tree, which is the opposite of what is wanted.          */
+/* Видиме для допоміжних технологій, невидиме оку. Саме обрізана коробка 1px, а */
+/* не display:none чи visibility:hidden — обидва прибирають елемент з дерева */
+/* доступності, тобто роблять протилежне потрібному. */
 
 .vs-sr-only {
 	position: absolute;
