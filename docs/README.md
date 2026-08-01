@@ -27,4 +27,5 @@
 * [Импорт](./import.md)
 * [Экспорт](./export.md)
 * [Модификация tpl файлов](./tpl_modifiers.md)
+* [Перенесення теми на цей форк](./theme-porting.md)
 * [Работа со скидками](./discounts_management.md)

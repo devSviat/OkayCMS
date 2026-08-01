@@ -95,6 +95,8 @@ function okayCsrfToken() {
 **Читання параметрів:** `wishlist`, `comparison` і `cartAjax` раніше брали параметри з `$_GET`.
 Тепер вони читають їх з `$_POST`.
 
+Повний перелік того, що це вимагає від теми — [theme-porting.md](theme-porting.md).
+
 ---
 
 ## 3. Паролі перехешовуються прозоро
