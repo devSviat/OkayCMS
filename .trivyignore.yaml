@@ -1,25 +1,18 @@
 # Свідомо прийняті CVE для .github/workflows/docker-security.yml.
 #
-# Кожен запис обов'язково має statement (чому прийнято) і expired_at (коли
-# Trivy знову почне на нього падати). Allowlist без терміну придатності
-# протухає мовчки: CVE давно виправлено, а гейт його вже не бачить.
+# Глушити — останній варіант: спершу спробуйте оновитись (apt-get upgrade у
+# стадії base, composer update). Кожен запис потребує statement і expired_at,
+# інакше allowlist протухає мовчки.
 #
-# Глушити тут — останній варіант. Спершу перевірте, чи не закривається знахідка
-# оновленням: базовий шар образу пропатчується `apt-get upgrade` у стадії base
-# (dev/docker/Dockerfile), а composer-залежності — звичайним composer update.
-#
-# purls тут не працюють: у Trivy 0.72 вони мовчки не збігаються навіть у точній
-# формі з qualifiers. Працює лише id (+ paths для звуження).
+# purls тут не працюють — Trivy 0.72 мовчки їх не збігає. Тільки id (+ paths).
 vulnerabilities:
   - id: CVE-2024-21907
     paths:
       - "var/www/html/vendor/snowplow/referer-parser/dotnet/RefererParser/packages.config"
       - "var/www/html/vendor/snowplow/referer-parser/dotnet/RefererParser.Tests/packages.config"
     statement: >
-      Newtonsoft.Json 5.0.x у .NET-підпроєкті пакета snowplow/referer-parser.
-      Репозиторій пакета містить реалізації однією й тією ж логікою кількома
-      мовами; composer тягне його цілком, але Okay\Core\UserReferer використовує
-      лише каталог php/. .NET-код в образі ніколи не виконується — там немає
-      середовища для нього. Виправити на місці неможливо: версія зафіксована
-      всередині залежності. Переглянути при оновленні snowplow/referer-parser.
+      Newtonsoft.Json у .NET-підпроєкті пакета snowplow/referer-parser. Composer
+      тягне репозиторій цілком, але використовується лише каталог php/ — .NET-код
+      в образі не виконується. Версія зафіксована всередині залежності, виправити
+      на місці неможливо. Переглянути при оновленні snowplow/referer-parser.
     expired_at: 2027-02-01

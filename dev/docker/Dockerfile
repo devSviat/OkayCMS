@@ -8,11 +8,8 @@ ARG PHP_VERSION=8.5
 # ─────────────────────────────── base ───────────────────────────────
 FROM php:${PHP_VERSION}-fpm AS base
 
-# Образи php:*-fpm перезбираються рідше, ніж Debian випускає security-оновлення,
-# тож на момент білду базовий шар уже відстає. Приклад, який це і виявив:
-# linux-libc-dev 6.12.96-1 в образі проти 6.12.100-1 у trixie-security — вісім
-# HIGH-CVE, які закриваються самим лише оновленням. Стоїть найпершим шаром, щоб
-# усе, що ставиться нижче, лягало вже на пропатчену базу.
+# Образи php:*-fpm перезбираються рідше, ніж Debian патчить пакети. Першим
+# шаром — щоб усе нижче лягало на пропатчену базу.
 RUN apt-get update \
  && apt-get upgrade -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
@@ -110,10 +107,8 @@ USER www-data
 # можуть розійтись між собою.
 FROM nginx:1.29-alpine AS nginx-prod
 
-# Та сама причина, що й `apt-get upgrade` у стадії base: образ nginx:1.29-alpine
-# перезбирається рідше, ніж Alpine патчить пакети, тож на момент білду везе
-# виправні CVE в libssl3/libxml2/expat/nghttp2. Сам nginx лишається на своїй
-# версії — він ставиться з репозиторію nginx.org, а не з alpine/main.
+# Те саме, що й apt-get upgrade у base. Сам nginx не рухається — він
+# ставиться з репозиторію nginx.org, а не з alpine/main.
 RUN apk upgrade --no-cache
 
 COPY --from=prod /var/www/html /var/www/html
