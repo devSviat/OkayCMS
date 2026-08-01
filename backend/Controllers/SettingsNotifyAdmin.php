@@ -33,6 +33,16 @@ class SettingsNotifyAdmin extends IndexAdmin
 
     public function testSMTP(Notify $notify)
     {
+        // Метод перезаписував налаштування даними з POST, не перевіряючи методу
+        // запиту. Звичайний GET сюди - і вся конфігурація SMTP стиралась
+        // порожніми значеннями; CSRF-гард такий запит не ловить, бо
+        // Request::checkSession() пропускає все з порожнім $_POST.
+        if (!$this->request->method('POST')) {
+            return $this->response->setContent(json_encode([
+                'status'  => false,
+                'message' => 'POST required',
+            ]), RESPONSE_JSON);
+        }
 
         $this->settings->set('smtp_server', $this->request->post('smtp_server'));
         $this->settings->set('smtp_port', $this->request->post('smtp_port'));

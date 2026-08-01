@@ -98,6 +98,12 @@ class FeedAdmin extends IndexAdmin
         $feedId = $feedsRequest->getId();
         $feed = $backendFeedsHelper->getFeed($feedId);
 
+        // Без id фіда findOne() віддає false, і читання ->preset друкувало
+        // Warning просто у відповідь ajax-у.
+        if (empty($feed)) {
+            return $this->response->setContent(json_encode(['success' => false]), RESPONSE_JSON);
+        }
+
         $backendFeedsHelper->registerSettingsBlocks($feed->preset);
 
         $result = [];
@@ -110,7 +116,8 @@ class FeedAdmin extends IndexAdmin
             $result['success'] = true;
             $result['cats'] = $this->design->fetch("feed_tabs/categories_ajax.tpl");
         } else {
-            $result['success ']= false;
+            // Ключ був "success " з пробілом, тож JS ніколи не бачив цієї відмови.
+            $result['success'] = false;
         }
 
         $this->response->setContent(json_encode($result), RESPONSE_JSON);
@@ -123,6 +130,10 @@ class FeedAdmin extends IndexAdmin
     ) {
         $feedId = $feedsRequest->getId();
         $feed = $backendFeedsHelper->getFeed($feedId);
+
+        if (empty($feed)) {
+            return $this->response->setContent(json_encode(['success' => false]), RESPONSE_JSON);
+        }
 
         $backendFeedsHelper->registerSettingsBlocks($feed->preset);
 

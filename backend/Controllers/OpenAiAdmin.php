@@ -19,7 +19,9 @@ class OpenAiAdmin extends IndexAdmin
         $name = $this->request->get('name');
         $entityId = $this->request->get('entityId', 'int');
         $format = $this->request->get('format', 'string') == 'true';
-        $aiRequest = $openAiEntityHelper->getRequest($entity, $entityId, $name);
+        // Без параметра entity запит приходив як null у типізований string і
+        // клав ендпойнт фаталом. Порожня сутність - це просто "нічого генерувати".
+        $aiRequest = $openAiEntityHelper->getRequest((string)$entity, $entityId, $name);
         if (!$aiRequest) {
             return $this->response->setContent("event: stop\ndata: stopped\n\n", RESPONSE_GPT_STREAM);
         }
