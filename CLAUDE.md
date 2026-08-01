@@ -61,7 +61,7 @@ Local env config lives in `dev/.env` (copy from `dev/.env-example`). On containe
 
 Admin panel: `http://<VIRTUAL_HOST>/admin`, login `admin`, password `1234`.
 
-App config: `config/config.php` + `config/config.local.php` (INI format; `dev_mode`, `debug_mode`, `smarty_force_compile` live here).
+App config: `config/config.php` + `config/config.local.php` (INI format; `dev_mode`, `debug_mode`, `smarty_force_compile` live here). `debug_bar = true` вмикає phpdebugbar на вітрині — лише в парі з `debug_mode = true`; шаблон із поясненням у `config/config.local-example.php`.
 
 ---
 
