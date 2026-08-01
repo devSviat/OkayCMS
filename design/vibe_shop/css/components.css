@@ -6099,6 +6099,16 @@ body.hc-nav-open {
 		padding-bottom: var(--vs-space-2);
 	}
 
+/* Дропнувши лінію під тулбаром без сортування, правило вище дропає і відступ,  */
+/* тож на брендах кнопка фільтра лягала впритул на плитки. Умова та сама, що    */
+/* показує саму кнопку (див. .vs-filters__open вище): без груп фільтрів тулбар  */
+/* порожній і відступ був би смугою під нічим. На десктопі кнопка hidden-lg-up, */
+/* тому правило живе лише в мобільному запиті.                                  */
+
+	.vs-catalogue__layout:has(.vs-filter-group:not(.vs-filter-group--cats)) .vs-catalogue__toolbar:not(:has(.vs-sort__group)) {
+		padding-bottom: var(--vs-space-4);
+	}
+
 	.vs-catalogue__region {
 		padding-top: var(--vs-space-2);
 	}
