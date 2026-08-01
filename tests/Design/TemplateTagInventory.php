@@ -82,8 +82,16 @@ final class TemplateTagInventory
      */
     public static function phpFunctionModifiers(): array
     {
-        return (new \ReflectionClass(Design::class))
-            ->getDefaultProperties()['allowedPhpFunctions'] ?? [];
+        $properties = (new \ReflectionClass(Design::class))->getDefaultProperties();
+
+        if (!isset($properties['allowedPhpFunctions'])) {
+            throw new \RuntimeException(
+                'Design::$allowedPhpFunctions не знайдено. Інвентар мовчки став би порожнім, '
+                . 'а шаблони посипались би з незрозумілим "unknown modifier".'
+            );
+        }
+
+        return $properties['allowedPhpFunctions'];
     }
 
     public static function isSmarty5(): bool
@@ -102,12 +110,9 @@ final class TemplateTagInventory
      *
      * @param string[] $templateDirs
      */
-    public static function createSmarty(array $templateDirs, string $compileDir, bool $security = false)
+    public static function createSmarty(array $templateDirs, string $compileDir)
     {
-        // Шаблони звертаються до констант застосунку просто як {CANONICAL_FIRST_PAGE}.
-        // Smarty розбирає це лише коли константа визначена, а bootstrap тестів —
-        // це самий лише vendor/autoload.php.
-        require_once self::rootDir() . 'Okay/Core/config/constants.php';
+        self::loadApplicationConstants();
 
         $smartyClass = self::smartyClass();
         $smarty = new $smartyClass();
@@ -119,7 +124,10 @@ final class TemplateTagInventory
 
         $phpFunctions = self::phpFunctionModifiers();
 
-        if ($security) {
+        if (!self::isSmarty5()) {
+            // У v4 нативну функцію пускає політика безпеки, а не реєстрація, тож
+            // без неї той самий список не був би тут білим списком і тест утратив
+            // би сенс. У v5 ці властивості прибрані, і білим списком є реєстрація.
             $smarty->enableSecurity();
             $smarty->security_policy->secure_dir = [
                 self::rootDir() . 'design',
@@ -127,25 +135,11 @@ final class TemplateTagInventory
                 self::rootDir() . 'Okay/Modules',
                 self::rootDir() . 'Okay/xml',
             ];
-        }
-
-        if (!self::isSmarty5()) {
-            // У v4 нативну функцію пускає ще й політика безпеки, тож без неї той
-            // самий список не був би тут білим списком і тест утратив би сенс.
-            if (!$security) {
-                $smarty->enableSecurity();
-                $smarty->security_policy->secure_dir = [
-                    self::rootDir() . 'design',
-                    self::rootDir() . 'backend/design',
-                    self::rootDir() . 'Okay/Modules',
-                    self::rootDir() . 'Okay/xml',
-                ];
-            }
             $smarty->security_policy->php_modifiers = $phpFunctions;
             $smarty->security_policy->php_functions = $phpFunctions;
         }
 
-        foreach (Design::STATIC_CLASSES as $staticClass) {
+        foreach (self::staticClasses() as $staticClass) {
             $className = ltrim($staticClass, '\\');
             if (!isset($smarty->registered_classes[$staticClass]) && class_exists($className)) {
                 $smarty->registerClass($staticClass, $className);
@@ -193,6 +187,27 @@ final class TemplateTagInventory
             : static function ($params, $template = null) {
                 return '';
             });
+    }
+
+    /**
+     * Шаблони звертаються до констант застосунку просто як {CANONICAL_FIRST_PAGE}.
+     * Smarty розбирає це лише коли константа визначена, а bootstrap тестів - це
+     * самий лише vendor/autoload.php.
+     */
+    private static function loadApplicationConstants(): void
+    {
+        require_once self::rootDir() . 'Okay/Core/config/constants.php';
+    }
+
+    /**
+     * Константа приватна навмисно: рефлексія читає її й так, а публічною вона
+     * розширювала б API класу лише заради тесту.
+     *
+     * @return string[]
+     */
+    private static function staticClasses(): array
+    {
+        return (new \ReflectionClass(Design::class))->getConstant('STATIC_CLASSES');
     }
 
     public static function rootDir(): string

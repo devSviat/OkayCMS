@@ -40,6 +40,8 @@ class TemplateCompileTest extends TestCase
      */
     public function testTemplateCompiles(string $surface, string $relativePath): void
     {
+        $this->expectNotToPerformAssertions();
+
         $smarty = $this->smartyFor($surface);
 
         try {
@@ -53,21 +55,50 @@ class TemplateCompileTest extends TestCase
                 $e->getMessage()
             ));
         }
-
-        $this->assertTrue(true);
     }
 
-    public function templateProvider(): array
+    /**
+     * Провайдер кладе кейси в масив за ключем, тож однойменні шаблони двох поверхонь
+     * колись затирали одне одного, і гейт мовчки недобирав пʼять файлів. Число
+     * кейсів виглядало повним, бо ні з чим не звірялось - тепер звіряється.
+     */
+    public function testEveryTemplateInTheRepositoryIsCovered(): void
+    {
+        $root = TemplateTagInventory::rootDir();
+
+        $onDisk = [];
+        foreach (self::findTemplates(rtrim($root, '/')) as $absolute) {
+            $relative = substr($absolute, strlen($root));
+            if (strpos($relative, 'vendor/') === 0 || strpos($relative, '/compiled/') !== false) {
+                continue;
+            }
+            $onDisk[] = $relative;
+        }
+
+        $covered = [];
+        foreach (self::surfaces() as $surfaceDirs) {
+            foreach (self::findTemplates($root . $surfaceDirs['templates']) as $absolute) {
+                $covered[] = substr($absolute, strlen($root));
+            }
+        }
+
+        $this->assertSame(
+            [],
+            array_values(array_diff($onDisk, array_unique($covered))),
+            'Шаблони є в репозиторії, але не потрапляють у жодну поверхню гейта'
+        );
+    }
+
+    public static function templateProvider(): array
     {
         $root = TemplateTagInventory::rootDir();
         $cases = [];
 
-        foreach (self::surfaces() as $surface => $dirs) {
-            foreach ($dirs['templates'] as $templateDir) {
-                foreach (self::findTemplates($root . $templateDir) as $absolute) {
-                    $relative = substr($absolute, strlen($root . $templateDir) + 1);
-                    $cases["{$surface}: {$relative}"] = [$surface, $relative];
-                }
+        foreach (self::surfaces() as $surface => $surfaceDirs) {
+            $templateDir = $surfaceDirs['templates'];
+            foreach (self::findTemplates($root . $templateDir) as $absolute) {
+                $relative = substr($absolute, strlen($root . $templateDir) + 1);
+                $cases["{$surface}: {$relative}"] = [$surface, $relative];
             }
         }
 
@@ -78,7 +109,11 @@ class TemplateCompileTest extends TestCase
      * Списки template_dir дзеркалять Design::setSmartyTemplatesDir(): шаблон модуля
      * шукається спершу в перевизначенні теми, далі у самому модулі, далі в темі.
      *
-     * Обидві теми додані в хвіст модульних поверхонь, бо тема, під якою рендериться
+     * Фронтова й бекендова теки модуля - окремі поверхні навмисно. Однойменні файли
+     * в них інакше дають однаковий ключ провайдера, другий затирає перший, і
+     * компілюється лише той, що першим стоїть у template_dir.
+     *
+     * Обидві теми в хвості фронтових поверхонь, бо тема, під якою рендериться
      * модуль, залежить від налаштувань у БД, недоступних тесту.
      */
     private static function surfaces(): array
@@ -87,19 +122,25 @@ class TemplateCompileTest extends TestCase
 
         foreach (['okay_shop', 'vibe_shop'] as $theme) {
             $surfaces[$theme] = [
-                'templates' => ["design/{$theme}/html"],
+                'templates' => "design/{$theme}/html",
                 'dirs'      => ["design/{$theme}/html"],
             ];
         }
 
         $surfaces['backend'] = [
-            'templates' => ['backend/design/html'],
+            'templates' => 'backend/design/html',
             'dirs'      => ['backend/design/html'],
         ];
 
         $surfaces['opensearch'] = [
-            'templates' => ['Okay/xml'],
+            'templates' => 'Okay/xml',
             'dirs'      => ['Okay/xml'],
+        ];
+
+        // Єдиний шаблон поза теками html/: підказки в адмінці.
+        $surfaces['admintooltip'] = [
+            'templates' => 'backend/design/js/admintooltip',
+            'dirs'      => ['backend/design/js/admintooltip', 'backend/design/html'],
         ];
 
         $root = TemplateTagInventory::rootDir();
@@ -107,25 +148,26 @@ class TemplateCompileTest extends TestCase
             $relative = substr($moduleDir, strlen($root));
             [$vendor, $module] = array_slice(explode('/', $relative), 2);
 
-            $templateDirs = array_values(array_filter([
-                "{$relative}/design/html",
-                "{$relative}/Backend/design/html",
-            ], static function ($dir) use ($root) {
-                return is_dir($root . $dir);
-            }));
-
-            if ($templateDirs === []) {
-                continue;
+            $front = "{$relative}/design/html";
+            if (is_dir($root . $front)) {
+                $surfaces["module {$vendor}/{$module} (front)"] = [
+                    'templates' => $front,
+                    'dirs'      => [
+                        "design/okay_shop/modules/{$vendor}/{$module}/html",
+                        $front,
+                        'design/okay_shop/html',
+                        'design/vibe_shop/html',
+                    ],
+                ];
             }
 
-            $surfaces["module {$vendor}/{$module}"] = [
-                'templates' => $templateDirs,
-                'dirs'      => array_merge(
-                    ["design/okay_shop/modules/{$vendor}/{$module}/html"],
-                    $templateDirs,
-                    ['backend/design/html', 'design/okay_shop/html', 'design/vibe_shop/html']
-                ),
-            ];
+            $backend = "{$relative}/Backend/design/html";
+            if (is_dir($root . $backend)) {
+                $surfaces["module {$vendor}/{$module} (backend)"] = [
+                    'templates' => $backend,
+                    'dirs'      => [$backend, 'backend/design/html'],
+                ];
+            }
         }
 
         return $surfaces;

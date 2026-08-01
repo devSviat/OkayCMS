@@ -5,6 +5,7 @@
     <file>Okay</file>
     <file>backend</file>
     <file>ok</file>
+    <file>tests</file>
 
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/compiled/*</exclude-pattern>
