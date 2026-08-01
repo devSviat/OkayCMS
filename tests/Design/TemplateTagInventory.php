@@ -17,14 +17,24 @@ use Okay\Core\SmartyPlugins\Modifier;
  */
 final class TemplateTagInventory
 {
+    /** @var array{function: string[], modifier: string[]}|null */
+    private static $pluginTags;
+
     /**
      * Дослівна транскрипція Plugin::register(): тип виводиться з базового класу,
      * тег — з властивості $tag або з імені класу в нижньому регістрі.
+     *
+     * Результат кешується: інвентар незмінний у межах прогону, а тести з
+     * @dataProvider питають його на кожен шаблон.
      *
      * @return array{function: string[], modifier: string[]}
      */
     public static function pluginTags(): array
     {
+        if (self::$pluginTags !== null) {
+            return self::$pluginTags;
+        }
+
         $tags = ['function' => [], 'modifier' => []];
 
         foreach (self::pluginClasses() as $class) {
@@ -47,7 +57,7 @@ final class TemplateTagInventory
         sort($tags['function']);
         sort($tags['modifier']);
 
-        return $tags;
+        return self::$pluginTags = $tags;
     }
 
     /**
