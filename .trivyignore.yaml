@@ -1,0 +1,18 @@
+# Свідомо прийняті CVE для .github/workflows/docker-security.yml.
+#
+# Глушити — останній варіант: спершу спробуйте оновитись (apt-get upgrade у
+# стадії base, composer update). Кожен запис потребує statement і expired_at,
+# інакше allowlist протухає мовчки.
+#
+# purls тут не працюють — Trivy 0.72 мовчки їх не збігає. Тільки id (+ paths).
+vulnerabilities:
+  - id: CVE-2024-21907
+    paths:
+      - "var/www/html/vendor/snowplow/referer-parser/dotnet/RefererParser/packages.config"
+      - "var/www/html/vendor/snowplow/referer-parser/dotnet/RefererParser.Tests/packages.config"
+    statement: >
+      Newtonsoft.Json у .NET-підпроєкті пакета snowplow/referer-parser. Composer
+      тягне репозиторій цілком, але використовується лише каталог php/ — .NET-код
+      в образі не виконується. Версія зафіксована всередині залежності, виправити
+      на місці неможливо. Переглянути при оновленні snowplow/referer-parser.
+    expired_at: 2027-02-01

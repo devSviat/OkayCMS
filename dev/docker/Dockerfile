@@ -8,6 +8,12 @@ ARG PHP_VERSION=8.5
 # ─────────────────────────────── base ───────────────────────────────
 FROM php:${PHP_VERSION}-fpm AS base
 
+# Образи php:*-fpm перезбираються рідше, ніж Debian патчить пакети. Першим
+# шаром — щоб усе нижче лягало на пропатчену базу.
+RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/*
+
 # install-php-extensions сам підтягує потрібні системні бібліотеки й прибирає
 # за собою після встановлення кожного розширення.
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
@@ -100,4 +106,9 @@ USER www-data
 # Статика береться з того самого білду, що й PHP-код, тож контейнери не
 # можуть розійтись між собою.
 FROM nginx:1.29-alpine AS nginx-prod
+
+# Те саме, що й apt-get upgrade у base. Сам nginx не рухається — він
+# ставиться з репозиторію nginx.org, а не з alpine/main.
+RUN apk upgrade --no-cache
+
 COPY --from=prod /var/www/html /var/www/html
