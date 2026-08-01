@@ -9,7 +9,7 @@
 <article class="vs-card fn_product">
     <div class="fn_transfer vs-card__inner">
         <div class="vs-card__media">
-            <a class="vs-card__media-link" aria-label="{$product->name|escape}" href="{if $controller=='Comparison'}{$product->image->filename|resize:800:600:w}{else}{url_generator route='product' url=$product->url}{/if}" {if $controller=='Comparison'}data-fancybox="group" data-caption="{$product->name|escape}"{/if}>
+            <a class="vs-card__media-link" aria-label="{$product->name|escape}" href="{if $controller=='ComparisonController'}{$product->image->filename|resize:800:600:w}{else}{url_generator route='product' url=$product->url}{/if}" {if $controller=='ComparisonController'}data-fancybox="group" data-caption="{$product->name|escape}"{/if}>
                 {if $product->image->filename}
                     <picture>
                         {if $settings->increased_image_size}

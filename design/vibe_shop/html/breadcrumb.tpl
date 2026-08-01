@@ -128,31 +128,8 @@
                 <meta itemprop="position" content="{$level++}" />
             </li>
 
-        {* Password remind page *}
-        {elseif $controller == "LoginController" && $smarty.get.action == "password_remind"}
-            <li itemprop="itemListElement" itemscope
-                itemtype="https://schema.org/ListItem" class="vs-crumbs__item">
-                <span itemprop="name" data-language="breadcrumbs_password_remind">{$lang->breadcrumbs_password_remind}</span>
-                <meta itemprop="position" content="{$level++}" />
-            </li>
-
-        {* Login page *}
-        {elseif $controller == "LoginController"}
-            <li itemprop="itemListElement" itemscope
-                itemtype="https://schema.org/ListItem" class="vs-crumbs__item">
-                <span itemprop="name" data-language="breadcrumbs_enter">{$lang->breadcrumbs_enter}</span>
-                <meta itemprop="position" content="{$level++}" />
-            </li>
-
-        {* Register page *}
-        {elseif $controller == "RegisterController"}
-            <li itemprop="itemListElement" itemscope
-                itemtype="https://schema.org/ListItem" class="vs-crumbs__item">
-                <span itemprop="name" data-language="breadcrumbs_registration">{$lang->breadcrumbs_registration}</span>
-                <meta itemprop="position" content="{$level++}" />
-            </li>
-
-        {* User account page *}
+        {* User account page. Login, register and password remind are routes of this
+           same controller - they are handled by $route_name below. *}
         {elseif $controller == "UserController"}
             {if $route_name == 'login'}
                 <li itemprop="itemListElement" itemscope

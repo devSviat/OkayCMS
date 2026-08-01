@@ -3,7 +3,7 @@
     <div class="fn_transfer clearfix">
         <div class="product_preview__center">
             <div class="d-flex product_preview__image">
-                <a class="d-flex align-items-center justify-content-center" aria-label="{$product->name|escape}" href="{if $controller=='Comparison'}{$product->image->filename|resize:800:600:w}{else}{url_generator route='product' url=$product->url}{/if}" {if $controller=='Comparison'}data-fancybox="group" data-caption="{$product->name|escape}"{/if}>
+                <a class="d-flex align-items-center justify-content-center" aria-label="{$product->name|escape}" href="{if $controller=='ComparisonController'}{$product->image->filename|resize:800:600:w}{else}{url_generator route='product' url=$product->url}{/if}" {if $controller=='ComparisonController'}data-fancybox="group" data-caption="{$product->name|escape}"{/if}>
                     {if $product->image->filename}
                         <picture>
                             {if $settings->increased_image_size}
