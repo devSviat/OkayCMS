@@ -74,8 +74,8 @@ class NPApiHelper
             "calledMethod" => "getWarehouses",
             "methodProperties" => [
                 "TypeOfWarehouseRef" => $warehouseType,
-                "Page" => $page,
-                "Limit" => $limit,
+                "Page" => (string)$page,
+                "Limit" => (string)$limit,
             ]
         ];
 
@@ -118,8 +118,10 @@ class NPApiHelper
             "modelName" => "Address",
             "calledMethod" => "getCities",
             "methodProperties" => [
-                "Page" => $page,
-                "Limit" => $limit,
+                // getCities відхиляє числовий Page з "Page is invalid format",
+                // тож пагінацію скрізь передаємо рядками.
+                "Page" => (string)$page,
+                "Limit" => (string)$limit,
             ],
         ];
 

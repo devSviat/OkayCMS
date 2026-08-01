@@ -13,6 +13,8 @@ use Okay\Modules\OkayCMS\NovaposhtaCost\Init\Init;
 
 class NPCacheHelper
 {
+    private const START_UPDATE_TIME_TTL = 1800;
+
     private NPApiHelper $apiHelper;
     private EntityFactory $entityFactory;
     private Languages $languages;
@@ -186,8 +188,14 @@ class NPCacheHelper
             do {
                 $pagesNum = $this->updateWarehousesCache($warehouseTypeDTO->getTypeRef(), $page++, 1000);
             } while ($pagesNum !== null && $page <= $pagesNum);
+
+            // Підчищаємо тільки той тип, який справді оновився: removeRedundant()
+            // видаляє все, що старіше за час старту, тож після збою API воно
+            // вимело б увесь робочий кеш.
+            if ($this->isUpdateComplete($pagesNum)) {
+                $this->removeRedundant(Init::UPDATE_TYPE_WAREHOUSES, $warehouseTypeDTO->getTypeRef());
+            }
         }
-        $this->removeRedundant(Init::UPDATE_TYPE_WAREHOUSES);
     }
 
     public function cronUpdateCitiesCache()
@@ -197,7 +205,19 @@ class NPCacheHelper
         do {
             $pagesNum = $this->updateCitiesCache($page++, 1000);
         } while ($pagesNum !== null && $page <= $pagesNum);
-        $this->removeRedundant(Init::UPDATE_TYPE_CITIES);
+
+        if ($this->isUpdateComplete($pagesNum)) {
+            $this->removeRedundant(Init::UPDATE_TYPE_CITIES);
+        }
+    }
+
+    /**
+     * null - запит до API впав; 0 - відповідь без totalCount, тобто імпортована
+     * лише перша сторінка. В обох випадках кеш неповний і чистити його не можна.
+     */
+    private function isUpdateComplete(?int $pagesNum): bool
+    {
+        return $pagesNum !== null && $pagesNum > 0;
     }
 
     /**
@@ -253,8 +273,10 @@ class NPCacheHelper
             return null;
         }
 
-        // Якщо дату запуску оновлення зберігали більше 30 хв тому, на неї не орієнтуємось
-        if (date_diff(new \DateTime(), new \DateTime($startTime))->format('%i') > 30) {
+        // Якщо дату запуску оновлення зберігали більше 30 хв тому, на неї не орієнтуємось.
+        // Рахуємо різницю в секундах: %i дає лише хвилинну складову інтервалу,
+        // тож для 3 год 10 хв воно поверне 10 і перевірка пропустить старий старт.
+        if (time() - strtotime($startTime) > self::START_UPDATE_TIME_TTL) {
             return null;
         }
         return $startTime;
