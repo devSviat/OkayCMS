@@ -266,6 +266,38 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
   `database:deploy`. Міграції модулів після оновлення коду — окремо, див.
   `docs/modules/table_migrate.md`.
 
+## Сканування образів на CVE
+
+`.github/workflows/docker-security.yml` збирає стадії `prod` і `nginx-prod` і
+проганяє по них Trivy. Сканується зібраний образ, а не базовий тег, тож у той
+самий прогін потрапляють і Debian-пакети, і composer-залежності з `vendor/`.
+
+Коли: на кожен PR, на push у `main` і щопонеділка о 05:17 UTC. Розклад тут
+головний — CVE проти незмінного `php:8.5-fpm` з'являються без наших комітів.
+Прогін за розкладом збирає образ без кешу, інакше він пересканував би те саме,
+що й минулого тижня. Ручний запуск — вкладка Actions, кнопка Run workflow.
+
+Червоніє на `HIGH`/`CRITICAL`, для яких **є виправлення** (`--ignore-unfixed`).
+CVE без патча в апстрімі не гейтяться: полагодити їх нічим, а постійно червоний
+CI привчає ігнорувати червоне.
+
+Перше, що варто спробувати на новій знахідці, — не глушити її, а оновитись:
+базовий шар патчиться `apt-get upgrade` у стадії `base`, залежності —
+`composer update`. Якщо виправити неможливо, запис іде в `.trivyignore.yaml`
+(корінь репозиторію) з обов'язковими `statement` і `expired_at`.
+
+Той самий прогін локально, без GitHub Actions:
+
+```bash
+docker build -f dev/docker/Dockerfile --target prod -t okaycms:ci .
+docker run --rm \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v "$PWD/.trivyignore.yaml:/work/.trivyignore.yaml:ro" -w /work \
+    aquasec/trivy:0.72.0 image \
+    --severity HIGH,CRITICAL --ignore-unfixed \
+    --ignorefile /work/.trivyignore.yaml --exit-code 1 okaycms:ci
+```
+
 ## Обмеження
 
 - **Немає TLS, немає бекапів.** Перед оточенням мається на увазі проксі, що
