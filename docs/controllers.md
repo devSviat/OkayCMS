@@ -90,7 +90,7 @@ class CartController extends AbstractController
 
 Контроллеры модулей стоит размещать в директории `Okay/Modules/Vendor/Module/Controllers`, в остальном, они ничем не
 отличаются от [стандартных фронт-контроллеров](#frontControllers). Роут к ним также прописывается в [файле 
-`Init/routes.php`](./modules/README.md#configuratinFiles).
+`Init/routes.php`](./modules/frontend.md#сторінка-вітрини).
 
 ### Бек-контроллеры модулей <a name="backendControllersModules"></a>
 

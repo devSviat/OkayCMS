@@ -245,9 +245,9 @@
 ## 3.1. Регистрация знака скидки
 
 Предварительно, скидку необходимо зарегистрировать в системе. Регистрация происходит через вызов методов
-[registerPurchaseDiscountSign()](./modules/init.md#registerPurchaseDiscountSign) (для позиции) или
-[registerCartDiscountSign()](./modules/init.md#registerCartDiscountSign) (для корзины) в методе `init()` класса
-[Init](./modules/init.md).
+[registerPurchaseDiscountSign()](./modules/init-reference.md#знижки) (для позиции) или
+[registerCartDiscountSign()](./modules/init-reference.md#знижки) (для корзины) в методе `init()` класса
+[Init](./modules/init-reference.md).
 Необходимо указать знак скидки, название и описание для страницы управления скидками. Название и описание должны задаваться
 через языковую переменную в файлах переводов. Для этого, в файлах backend переводов создайте новый перевод, а его
 название используйте в качестве названия скидки при регистрации.

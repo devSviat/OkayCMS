@@ -57,7 +57,7 @@ OkayCMS — PHP-платформа електронної комерції з м
 6. **`debug_mode`** вмикає `display_errors` і `error_reporting(E_ALL)` (`index.php:48-51`).
 7. **Модулі.** `Modules::startEnabledModules()` (`index.php:80`) реєструє параметри, сервіси,
    маршрути й Smarty-плагіни кожного увімкненого модуля та викликає його `Init::init()` —
-   [modules/init.md](modules/init.md).
+   [modules/lifecycle.md](modules/lifecycle.md).
 8. **Маршрутизація.** `Router::run()` (`index.php:82`) перебирає маршрути, будує з `slug`
    регулярний вираз і віддає збіг у `bramus/router` — [routes.md](routes.md).
 9. **Контролер.** `Router::createControllerInstance()` створює контролер **без ін'єкції в
@@ -89,7 +89,7 @@ OkayCMS — PHP-платформа електронної комерції з м
    входу рендериться до появи сесії менеджера.
 
 Контролер модуля адресується як `?controller=Vendor.Module.ControllerName` —
-[modules/README.md](modules/README.md).
+[modules/backend.md](modules/backend.md).
 
 ## Межі безпеки форку
 

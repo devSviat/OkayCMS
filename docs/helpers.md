@@ -134,4 +134,4 @@ class FeedbackController extends AbstractController
 #### Хелперы модулей <a name="modulesHelpers"></a>
 Модуль также может содержать свои хелперы. Рекомендуется по возможности, все логические части кода выносить в хелперы.
 Это обеспечит более гибкое взаимодействие между модулями. Хелперы модуля регистрируются также как и 
-[сервисы модуля](./modules/README.md#Initservices)
+[сервисы модуля](./modules/structure.md#initservicesphp)

@@ -7,7 +7,7 @@
 #### Меню админ-части
 
 Для добавления пункта меню в админ-панеле, нужно воспользоваться методом 
-[extendBackendMenu()](./modules/init.md#extendBackendMenu), 
+[extendBackendMenu()](./modules/init-reference.md#extendbackendmenu), 
 Чтобы посмотреть существующие группы меню, нужно включить режим разработчика, и в админ-части к группам меню будет 
 добавлено, красным цветом, название группы.
 
@@ -31,6 +31,6 @@
 
 ![Пример шорт-блоков](./images/admin_short_blocks.png)
 
-Чтобы добавить шорт-блок, нужно воспользоваться методом [Init::addBackendBlock()](./modules/init.md#addBackendBlock) или
-[Init::addFrontBlock()](./modules/init.md#addFrontBlock).
+Чтобы добавить шорт-блок, нужно воспользоваться методом [Init::addBackendBlock()](./modules/init-reference.md#addbackendblock) или
+[Init::addFrontBlock()](./modules/init-reference.md#addfrontblock).
 

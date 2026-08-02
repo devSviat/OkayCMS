@@ -94,9 +94,13 @@ Service wiring is centralized: core services in `Okay/Core/config/services.php` 
 | Routes | `docs/routes.md` |
 | Business logic (helpers) | `docs/helpers.md` |
 | Collecting POST data | `docs/requests.md` |
-| Creating / structuring a module | `docs/modules/quick_start.md`, `docs/modules/README.md`, `docs/modules/init.md` |
+| Creating / structuring a module | `docs/modules/README.md` (section index), `docs/modules/quick-start.md`, `docs/modules/structure.md` |
+| Module lifecycle: `install()` / `init()` / `update_x_y_z()` | `docs/modules/lifecycle.md` |
+| Full `AbstractInit` method reference | `docs/modules/init-reference.md` |
 | Extending helpers/requests from a module | `docs/modules/extenders.md` |
-| DB migrations | `docs/modules/table_migrate.md` |
+| DB migrations | `docs/modules/migrations.md` |
+| Admin section from a module | `docs/modules/backend.md` |
+| Storefront page from a module | `docs/modules/frontend.md` |
 | Modifying a `.tpl` without editing it | `docs/tpl_modifiers.md` |
 | JS/CSS files | `docs/js_css_files.md` |
 | Smarty plugins | `docs/smarty_plugins.md` |
