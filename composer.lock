@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "09c16f1c5b006abbe5fc9ee63adbfb1f",
+    "content-hash": "c7a3bf550825e04ccf9999c4bdafc8e1",
     "packages": [
         {
             "name": "aura/sql",
@@ -66,33 +66,29 @@
         },
         {
             "name": "aura/sqlquery",
-            "version": "2.8.1",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/auraphp/Aura.SqlQuery.git",
-                "reference": "33a6283a0bc987d6b12e91c73486937ce1047366"
+                "reference": "6f71a3b82d7018dff437cdd316f3eb851fd3713c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/auraphp/Aura.SqlQuery/zipball/33a6283a0bc987d6b12e91c73486937ce1047366",
-                "reference": "33a6283a0bc987d6b12e91c73486937ce1047366",
+                "url": "https://api.github.com/repos/auraphp/Aura.SqlQuery/zipball/6f71a3b82d7018dff437cdd316f3eb851fd3713c",
+                "reference": "6f71a3b82d7018dff437cdd316f3eb851fd3713c",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.9"
+                "php": ">=5.6"
             },
             "require-dev": {
-                "yoast/phpunit-polyfills": "~1.0"
+                "ext-pdo_sqlite": "*",
+                "yoast/phpunit-polyfills": "^1.0"
             },
             "suggest": {
-                "aura/sql": "Provides an extension to the native PDO along with a profiler and connection locator. Use version 2.*."
+                "aura/sql": "Provides an extension to the native PDO along with a profiler and connection locator."
             },
             "type": "library",
-            "extra": {
-                "aura": {
-                    "type": "library"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "Aura\\SqlQuery\\": "src/"
@@ -100,7 +96,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD-2-Clause"
+                "MIT"
             ],
             "authors": [
                 {
@@ -131,9 +127,9 @@
             ],
             "support": {
                 "issues": "https://github.com/auraphp/Aura.SqlQuery/issues",
-                "source": "https://github.com/auraphp/Aura.SqlQuery/tree/2.8.1"
+                "source": "https://github.com/auraphp/Aura.SqlQuery/tree/3.0.0"
             },
-            "time": "2023-04-25T13:25:37+00:00"
+            "time": "2023-04-25T13:21:16+00:00"
         },
         {
             "name": "axy/backtrace",

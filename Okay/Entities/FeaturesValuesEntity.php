@@ -136,7 +136,7 @@ class FeaturesValuesEntity extends Entity
             'value_id',
         ])
             ->from('__products_features_values')
-            ->where('value_id IN (?)', $valuesIds)
+            ->where('value_id IN (:values_ids)', ['values_ids' => $valuesIds])
             ->groupBy(['value_id']);
         
         $this->db->query($select);
@@ -183,7 +183,10 @@ class FeaturesValuesEntity extends Entity
                 "feature_id_features_subquery_{$featureId}" => $featureId,
             ]);
             
-            $this->select->where("(fv.feature_id =:feature_id_{$featureId} OR p.id IN (?))", $subQuery);
+            $this->select->where(
+                "(fv.feature_id =:feature_id_{$featureId} OR p.id IN (:products_subquery_{$featureId}))",
+                ["products_subquery_{$featureId}" => $subQuery]
+            );
             $this->select->bindValue("feature_id_{$featureId}", $featureId);
         }
     }
@@ -483,15 +486,15 @@ class FeaturesValuesEntity extends Entity
         $binds = [];
 
         foreach ($selectedFeatures as $featureId => $featureValuesTranslits) {
-            $statements[] = "fv.feature_id = ? AND l.translit IN (?)";
-            $binds = array_merge($binds, [
-                $featureId,
-                $featureValuesTranslits
-            ]);
+            // Номер усередині імені, а не в кінці: масиви aura підставляє через str_replace,
+            // і :sel_4_translits інакше зіпсував би :sel_43_translits.
+            $statements[] = "fv.feature_id = :sel_{$featureId}_id AND l.translit IN (:sel_{$featureId}_translits)";
+            $binds["sel_{$featureId}_id"] = $featureId;
+            $binds["sel_{$featureId}_translits"] = (array)$featureValuesTranslits;
         }
 
         $statement = '((' . implode(') OR (', $statements) . '))';
 
-        $this->select->where($statement, ...$binds);
+        $this->select->where($statement, $binds);
     }
 }
