@@ -3,7 +3,7 @@
 Date: 2026-08-02
 Scope: `docs/` (everything except `docs/superpowers/**`, `docs/images/`, `docs/nginx/`)
 Branch: a branch per logical block, off `main`
-Status: design approved, implementation in progress
+Status: implemented across six stacked PRs
 
 ## Problem
 

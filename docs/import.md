@@ -1,29 +1,47 @@
-# Импорт (Import)
+# Імпорт
 
-Из csv файлов можно призводить импорт товаров, категорий и свойств товаров.
-Также можно импортировать данные для [модуля](./modules/README.md). 
+З CSV-файлів імпортуються товари, категорії та властивості товарів. Модуль може додати до
+імпорту власні поля.
 
-### Расширение импорта из модуля
-Для того чтобы дополнить список импортируемх полей, которые выводятся перечнем при запуске импорта, полем из модуля необходимо использовать шортблок import_fields_association.
-Для того чтобы считать из импортируемого файла необходимую информацию можно в [модуле](./modules/README.md) реализовать [экстендер](./modules/extenders.md), который будет расширять метод parseProductData() класса BackendImportHelper.
-В методе экстендера принять вторым аргументом $itemFromCsv и считать необходимую информацию.
+Уся логіка — в `Okay\Admin\Helpers\BackendImportHelper`.
 
-Пример:
+## Своє поле в імпорті
+
+### 1. Показати поле в зіставленні колонок
+
+Перелік полів, який виводиться при запуску імпорту, розширюється через блок дизайну
+`import_fields_association`:
+
+```php
+public function init()
+{
+    $this->addBackendBlock('import_fields_association', 'import_fields_association.tpl');
+}
+```
+
+### 2. Прочитати значення з файлу
+
+Розширенням `BackendImportHelper::parseProductData()` (для товару) або `parseVariantData()`
+(для варіанта). Другим аргументом приходить рядок CSV:
 
 ```php
 public function extendParseProductData($product, $itemFromCsv)
 {
     if (!empty($itemFromCsv['supplier'])) {
-        //...abstract
+        // …
     }
+
+    return $product;
 }
 ```
 
+Обидва методи оголошені `private`, і це не заважає: тригер розширення спрацьовує зсередини
+самого методу.
 
-Для того чтобы поля модуля при импорте не добавлялись в качестве новых свойств необходимо расширить метод getModulesColumnsNames() класса BackendImportHelper.
-Метод экстендера принимает в качестве аргумента массив полей из модулей и добавляет свои поля.
+### 3. Не дати перетворити поле на властивість товару
 
-Пример:
+Колонка, якої система не знає, потрапляє в товар як нова властивість. Щоб цього не сталось,
+поле треба оголосити в `BackendImportHelper::getModulesColumnsNames()`:
 
 ```php
 public function extendModulesColumnsNames($modulesColumnsNames)
@@ -32,5 +50,16 @@ public function extendModulesColumnsNames($modulesColumnsNames)
     return $modulesColumnsNames;
 }
 ```
- 
-Для того чтобы из модуля внести изменения после импорта, необходимо расширить метод afterImportProductProcedure() класса BackendImportHelper. 
+
+### 4. Доробити після імпорту
+
+Розширенням `BackendImportHelper::afterImportProductProcedure()` — воно отримує товар,
+варіант і перелік категорій. Метод нічого не повертає, тож це **чергове** розширення
+([modules/extenders.md](modules/extenders.md#чергове-розширення)).
+
+## Реальний приклад
+
+`OkayCMS/NovaposhtaCost` додає в імпорт об'єм варіанта: блок `import_fields_association`,
+розширення `parseVariantData` і поле в `getModulesColumnsNames()`.
+
+Експорт — [export.md](export.md).

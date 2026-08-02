@@ -110,6 +110,45 @@ $this->extendBackendMenu('left_faq_title', [
 Контролер, зареєстрований без власного пункту меню, автоматично прив'язується до розділу
 «Модулі» — щоб під час роботи з ним активним лишався хоч якийсь пункт.
 
+### Лічильник подій
+
+Біля пункту меню можна показати кількість нових подій. Лічильник додається розширенням
+`Okay\Admin\Helpers\BackendMainHelper::evensCounters()`, а до групи меню він піднімається
+автоматично:
+
+```php
+class BackendExtender implements ExtensionInterface
+{
+    private $managerMenu;
+    private $entityFactory;
+
+    public function __construct(ManagerMenu $managerMenu, EntityFactory $entityFactory)
+    {
+        $this->managerMenu   = $managerMenu;
+        $this->entityFactory = $entityFactory;
+    }
+
+    public function setNewEventsProcedure()
+    {
+        $someEntity = $this->entityFactory->get(SomeEntity::class);
+        $this->managerMenu->addCounter(
+            'left_custom_form_data_title',
+            $someEntity->count(['processed' => 0])
+        );
+    }
+}
+```
+
+```php
+$this->registerQueueExtension(
+    [BackendMainHelper::class, 'evensCounters'],
+    [BackendExtender::class, 'setNewEventsProcedure']
+);
+```
+
+Перший аргумент `addCounter()` — ключ перекладу пункту меню, той самий, що в
+`extendBackendMenu()`.
+
 ## Меню швидкого редагування
 
 ```php

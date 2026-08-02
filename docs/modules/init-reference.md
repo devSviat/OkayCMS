@@ -319,7 +319,7 @@ public function registerCartDiscountSign(string $sign, string $name, string $des
 ```
 
 **`init()`.** Реєструють ознаку знижки на товар у замовленні й на все замовлення відповідно —
-[../discounts_management.md](../discounts_management.md).
+[../discounts.md](../discounts.md).
 
 ---
 

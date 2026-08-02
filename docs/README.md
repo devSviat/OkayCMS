@@ -3,9 +3,8 @@
 Довідник описує **цей форк**, а не апстрім. Почніть із [architecture.md](architecture.md) —
 там стек, карта каталогів і життєвий цикл запиту.
 
-> **Розділ переписується.** Документи, позначені 🇷🇺, успадковані від апстріму й ще не
-> звірені з кодом цього форку — місцями вони описують поведінку, якої тут уже немає. План
-> переписування — [superpowers/specs/2026-08-02-docs-rewrite-design.md](superpowers/specs/2026-08-02-docs-rewrite-design.md).
+Кожне твердження тут звірене з кодом. Історія переписування —
+[superpowers/specs/2026-08-02-docs-rewrite-design.md](superpowers/specs/2026-08-02-docs-rewrite-design.md).
 
 ## Хочу зробити X
 
@@ -22,6 +21,7 @@
 | Підключити CSS чи JS | [assets.md](assets.md) |
 | Перенести свою тему на форк | [theme-porting.md](theme-porting.md) |
 | Зрозуміти, що змінила ітерація безпеки | [UPGRADE-security.md](UPGRADE-security.md) |
+| **Щось зламалось, і воно мовчить** | [troubleshooting.md](troubleshooting.md) |
 
 ## Довідник
 
@@ -29,7 +29,7 @@
 
 * [Як влаштований цей форк](architecture.md) — стек, каталоги, життєвий цикл запиту, межі безпеки
 * [Налаштування](configuration.md) — `config.php` / `config.local.php`, `dev_mode`, `debug_mode`, панель відладки
-* [Ядро системи (Core)](core/README.md) 🇷🇺
+* [Симптом → причина](troubleshooting.md) — покажчик тихих поломок
 
 ### Застосунок
 
@@ -64,9 +64,9 @@
 
 * [Консоль і планувальник](cli.md) — `./ok`, власні команди, задачі за розкладом
 * [Тести й статичний аналіз](testing.md) — phpunit, phpstan, phpcs, `smoke.sh`
-* [Імпорт](import.md) 🇷🇺
-* [Експорт](export.md) 🇷🇺
-* [Робота зі знижками](discounts_management.md) 🇷🇺
+* [Імпорт](import.md) — CSV-імпорт і власні поля з модуля
+* [Експорт](export.md) — CSV-експорт, власні колонки й критерії
+* [Знижки](discounts.md) — набори, знаки, власна знижка з модуля
 * [Приклад конфігурації Nginx](nginx/nginx.conf)
 
 ### Безпека
