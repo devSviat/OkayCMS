@@ -49,7 +49,7 @@ OkayCMS — PHP-платформа електронної комерції з м
    `SessionNames::startFrontend()` (`index.php:18-21`). Простори сесій вітрини й адмінки
    розділені, тож порядок тут важливий: одночасно активною може бути лише одна.
 3. **DI-контейнер** збирається з `Okay/Core/config/container.php` (`index.php:24`), з нього
-   береться `Config` — [di_container.md](di_container.md).
+   береться `Config` — [di.md](di.md).
 4. **Панель відладки** піднімається, якщо `debug_bar` **і** `debug_mode` увімкнені
    (`index.php:32-34`).
 5. **Мова.** `Router::resolveCurrentLanguage()` (`index.php:46`) визначає мову з префікса URL
@@ -114,7 +114,7 @@ OkayCMS — PHP-платформа електронної комерції з м
 | ----- | ------ |
 | Написати модуль | [modules/README.md](modules/README.md) |
 | Робота з базою, ORM | [entities.md](entities.md) |
-| Зареєструвати сервіс, дістати залежність | [di_container.md](di_container.md) |
+| Зареєструвати сервіс, дістати залежність | [di.md](di.md) |
 | Маршрути й контролери | [routes.md](routes.md), [controllers.md](controllers.md) |
 | Налаштування, режими відладки | [configuration.md](configuration.md) |
 | Шаблони, плагіни, CSS/JS | [tpl_modifiers.md](tpl_modifiers.md), [js_css_files.md](js_css_files.md) |

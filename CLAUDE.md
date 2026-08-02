@@ -89,7 +89,7 @@ Service wiring is centralized: core services in `Okay/Core/config/services.php` 
 | Understand the fork: stack, layout, request lifecycle | `docs/architecture.md` |
 | Config directives, `dev_mode` / `debug_mode` / debug bar | `docs/configuration.md` |
 | Database operations / ORM | `docs/entities.md` |
-| DI container, service registration | `docs/di_container.md`, `docs/service_locator.md` |
+| DI container, service registration, ServiceLocator | `docs/di.md` |
 | Controllers (front/backend) | `docs/controllers.md` |
 | Routes | `docs/routes.md` |
 | Business logic (helpers) | `docs/helpers.md` |
@@ -129,7 +129,7 @@ Do not edit core files, theme `.tpl` files, or another module's files. Extend be
 ### Entity (ORM)
 
 - Never write raw SQL for `get`, `find`, `insert`, `update`, `delete` — the base `Entity` class handles them. Do not write raw SQL for CRUD at all.
-- Default SELECT limit is 100 rows. Use `noLimit()` only when necessary.
+- There is no implicit row cap: `find([])` emits **no** `LIMIT` at all. The 100-row default is the page size and only applies when `page` is passed without `limit`. Pass `limit` explicitly; `noLimit()` is rarely needed. See `docs/entities.md`.
 - Language fields (`$langFields`) live in `__lang_{table}` and are joined automatically.
 - Custom filter inside an Entity → declare a protected `filter__<name>($val, $filter)` method.
 - To add a filter/field to another Entity from a module → `registerEntityFilter()` / `registerEntityField()` in `Init::init()`.

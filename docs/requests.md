@@ -1,67 +1,103 @@
 # Requests
 
-Классы реквестов предназначены для сбора сгруппированных данных из запроса (в частности POST).
-Реквесты регистрируются, также как и стандартные [сервисы ядра](./di_container.md#serviceRegister)
-и могут [расширяться из модуля](./modules/extenders.md).
+Клас-запит збирає згруповані дані з HTTP-запиту (переважно з POST) і віддає їх готовим
+об'єктом. Це прошарок між `$_POST` і бізнес-логікою: контролер не розбирає поля форми сам, а
+хелпер не знає, звідки взялися дані.
 
-Название всех сервисов реквестов заканчиваются на ключевое слово Request.
-По умолчанию все реквесты хранятся в директории Okay/Requests/ и backend/Requests/.
+Живуть в `Okay/Requests/` (вітрина) і `backend/Requests/` (адмінка), імена класів
+закінчуються на `Request`. Реєструються в `Okay/Core/config/requests.php` як звичайні сервіси
+([di.md](di.md)); модуль оголошує свої в `Init/services.php`.
 
-Реквесты обязательно должны возвращать результат (даже пустой). Но результат выполнения должен возвращаться не напрямую,
-а через ExtenderFacade::execute();.
-Метод execute() принимает три параметра:
-* имя метода (строка или массив) в котором он запускается,
-* данные которые нужно вернуть, 
-* массив аргументов данного метода.
-
-Пример:
 ```php
+// Okay/Core/config/requests.php
+BackendProductsRequest::class => [
+    'class' => BackendProductsRequest::class,
+    'arguments' => [
+        new SR(Request::class),
+    ],
+],
+```
+
+## Приклад
+
+```php
+// Okay/Requests/CommonRequest.php
+namespace Okay\Requests;
+
+use Okay\Core\Modules\Extender\ExtenderFacade;
 use Okay\Core\Request;
-//...abstract
+
 class CommonRequest
 {
-    //...abstract
-    /** @var Request  */
     private $request;
-    //...abstract
+
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
 
     public function postComment()
     {
         $comment = null;
         if ($this->request->post('comment')) {
             $comment = new \stdClass;
-            $comment->name = $this->request->post('name');
+            $comment->name  = $this->request->post('name');
             $comment->email = $this->request->post('email');
-            $comment->text = $this->request->post('text');
+            $comment->text  = $this->request->post('text');
         }
-    
+
         return ExtenderFacade::execute(__METHOD__, $comment, func_get_args());
     }
 }
 ```
 
-Таким образом, данный метод реквеста возвращает данные полученные из $_POST. Также этот метод можно
-[расширить из модуля](./modules/extenders.md).
+Використання в контролері:
 
-Пример использования:
 ```php
-use Okay\Requests\CommonRequest;
-//...abstract
-
-class FeedbackController extends AbstractController
+public function render(CommonRequest $commonRequest)
 {
-    
-    //...abstract
-
-    public function render(
-        //...abstract
-        CommonRequest $commonRequest
-    ) {
-        if (($feedback = $commonRequest->postFeedback()) !== null) {
-            //...abstract
-        }
-        //...abstract
+    if (($feedback = $commonRequest->postFeedback()) !== null) {
+        // …
     }
 }
 ```
 
+## Контракт
+
+**Метод запиту зобов'язаний повертати результат через `ExtenderFacade::execute()`** — навіть
+порожній. Інакше модуль не зможе його розширити, а саме заради розширюваності цей шар і існує.
+
+```php
+return ExtenderFacade::execute(__METHOD__, $result, func_get_args());
+```
+
+Три аргументи: ім'я методу, значення, яке повертаємо, і аргументи самого методу. У трейтах і
+базових класах замість `__METHOD__` беруть `[static::class, __FUNCTION__]` —
+[modules/extenders.md](modules/extenders.md).
+
+## `Okay\Core\Request`
+
+Низькорівневий доступ до запиту, яким користуються самі класи-запити:
+
+```php
+public function get($name, $type = null, $default = null, $stripTags = true)
+public function post($name = null, $type = null, $default = null)
+public function files($name, $name2 = null)
+public function method($method = null)
+public function isPost()
+```
+
+`$type` приймає `string`, `integer`/`int`, `float`, `boolean`/`bool`. Тип `string` не просто
+приводить до рядка, а **вирізає все, крім літер, цифр, пробілів і `_ - . %`** — для тексту з
+розділовими знаками він не підходить.
+
+`get()` за замовчуванням ще й рекурсивно прибирає HTML-теги; `post()` цього не робить.
+`post()` без імені повертає сире тіло запиту (`php://input`) — так читають JSON.
+
+`files('myfile', 'name')` дістає елемент двовимірного `$_FILES`.
+
+## Мутації вітрини
+
+Клас-запит нічого не перевіряє щодо безпеки — це робить контролер. Будь-який запит вітрини, що
+змінює стан, зобов'язаний першим ділом викликати `requireCustomerCsrf()`
+([controllers.md](controllers.md#мутації-вітрини)).

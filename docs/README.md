@@ -17,8 +17,8 @@
 | Написати модуль | [modules/quick-start.md](modules/quick-start.md) |
 | Змінити чужий шаблон, не редагуючи його | [tpl_modifiers.md](tpl_modifiers.md) 🇷🇺 |
 | Вклинитись у чужу логіку з модуля | [modules/extenders.md](modules/extenders.md) |
-| Працювати з базою | [entities.md](entities.md) 🇷🇺 |
-| Додати сторінку вітрини | [routes.md](routes.md) 🇷🇺, [controllers.md](controllers.md) 🇷🇺 |
+| Працювати з базою | [entities.md](entities.md) |
+| Додати сторінку вітрини | [routes.md](routes.md), [controllers.md](controllers.md) |
 | Підключити CSS чи JS | [js_css_files.md](js_css_files.md) 🇷🇺 |
 | Перенести свою тему на форк | [theme-porting.md](theme-porting.md) |
 | Зрозуміти, що змінила ітерація безпеки | [UPGRADE-security.md](UPGRADE-security.md) |
@@ -34,13 +34,12 @@
 
 ### Застосунок
 
-* [Контролери](controllers.md) 🇷🇺
-* [Маршрути](routes.md) 🇷🇺
-* [Сутності (Entities)](entities.md) 🇷🇺
-* [Helpers](helpers.md) 🇷🇺
-* [Requests](requests.md) 🇷🇺
-* [DI-контейнер](di_container.md) 🇷🇺
-* [Service Locator](service_locator.md) 🇷🇺
+* [Контролери](controllers.md) — фронтові й бекендові, порядок викликів, `Response`
+* [Маршрути](routes.md) — опис, параметри, генерація URL
+* [Сутності (Entity)](entities.md) — ORM, фільтри, багатомовність
+* [Helpers](helpers.md) — бізнес-логіка й контракт розширюваності
+* [Requests](requests.md) — збирання даних із запиту
+* [DI-контейнер і Service Locator](di.md) — сервіси, параметри, ін'єкція залежностей
 
 ### Дизайн і шаблони
 
