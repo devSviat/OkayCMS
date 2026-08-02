@@ -272,26 +272,39 @@ class CssConfig
                 continue;
             }
 
-            // Проверяем что мы не в блоке комментариев
-            $clearLine = $line;
-            if (($posComment = strpos($line, '/*')) !== false) {
+            // Вирізаємо блокові коментарі, зберігаючи код по обидва боки від них:
+            // у мініфікованому файлі банер ліцензії стоїть посеред рядка, і все,
+            // що перед ним, — це теж CSS.
+            $clearLine = '';
+            $offset = 0;
+            $lineLength = strlen($line);
+            while ($offset < $lineLength) {
+                if ($blockComment === true) {
+                    if (($posComment = strpos($line, '*/', $offset)) === false) {
+                        break;
+                    }
+                    $blockComment = false;
+                    $offset = $posComment + 2;
+                    continue;
+                }
+
+                if (($posComment = strpos($line, '/*', $offset)) === false) {
+                    $clearLine .= substr($line, $offset);
+                    break;
+                }
+                $clearLine .= substr($line, $offset, $posComment - $offset);
                 $blockComment = true;
-                $clearLine = substr($line, 0, $posComment);
+                $offset = $posComment + 2;
             }
 
-            if ($blockComment === true && ($posComment = strpos($line, '*/')) !== false) {
-                $blockComment = false;
-                $clearLine = substr($line, $posComment+2);
-            }
-
-            $line = $clearLine;
-            $line = rtrim($line);
+            $line = rtrim($clearLine);
 
             if (strtolower(pathinfo($fullFilePath, PATHINFO_EXTENSION)) == 'css') {
                 $line = $this->setCssVariables($line, $fullFilePath);
             }
 
-            if ($blockComment === false) {
+            // Рядок, який відкрив коментар, усе одно міг принести код перед ним.
+            if ($blockComment === false || $line !== '') {
 
                 $lenPre = strlen($line);
                 $line = ltrim($line);
