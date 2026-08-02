@@ -5,6 +5,7 @@ namespace Okay\Admin\Controllers;
 
 
 use Giggsey\Locale\Locale;
+use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use Okay\Admin\Helpers\BackendSettingsHelper;
 use Okay\Core\BackendTranslations;
@@ -37,7 +38,20 @@ class SettingsGeneralAdmin extends IndexAdmin
         $phoneUtil = PhoneNumberUtil::getInstance();
 
         // Передаем пример номера телефона для указанной страны
-        $this->design->assign('phone_example', $phone->getPhoneExample());
+        $phoneExample = $phone->getPhoneExample();
+        $this->design->assign('phone_example', $phoneExample);
+
+        // Формати телефону: з libphonenumber 9 PhoneNumberFormat — енум, тож шаблон
+        // більше не звертається до нього напряму, а отримує пари значення-приклад.
+        $phoneFormats = [];
+        foreach (PhoneNumberFormat::cases() as $format) {
+            $phoneFormats[] = (object)[
+                'value'   => $format->value,
+                'example' => $phoneExample ? Phone::format($phoneExample, $format) : $format->name,
+            ];
+        }
+        $this->design->assign('phone_formats', $phoneFormats);
+
         $this->design->assign('phone_regions', $phoneUtil->getSupportedRegions());
         $this->design->assign('phone_regions_names', $countries);
         

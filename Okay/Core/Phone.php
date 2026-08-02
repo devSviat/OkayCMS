@@ -150,6 +150,20 @@ class Phone
         }
 
         $phoneObject = $phoneUtil->parse($phoneNumber, $defaultRegion);
-        return $phoneUtil->format($phoneObject, $numberFormat);
+        return $phoneUtil->format($phoneObject, self::resolveFormat($numberFormat));
+    }
+
+    /**
+     * З libphonenumber 9 PhoneNumberFormat — енум, а не набір int-констант.
+     * Налаштування phone_default_format зберігається числом, і числом же приходить
+     * з шаблонів через модифікатор |phone.
+     */
+    public static function resolveFormat($numberFormat): PhoneNumberFormat
+    {
+        if ($numberFormat instanceof PhoneNumberFormat) {
+            return $numberFormat;
+        }
+
+        return PhoneNumberFormat::tryFrom((int)$numberFormat) ?? PhoneNumberFormat::E164;
     }
 }
