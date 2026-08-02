@@ -226,7 +226,10 @@
                         </div>
                     </div>
 
-                    <button id="select_all_categories" type="submit" class="btn btn_small btn-secondary mb-1">
+                    {* type="button", а не submit: обробник нижче лише позначає всі
+                       пункти списку. Кнопка всередині форми, тож із submit вона
+                       одразу зберігала властивість у всі категорії. *}
+                    <button id="select_all_categories" type="button" class="btn btn_small btn-secondary mb-1">
                         {include file='svg_icon.tpl' svgId='checked'}
                         <span>{$btr->feature_select_all_categories|escape}</span>
                     </button>
