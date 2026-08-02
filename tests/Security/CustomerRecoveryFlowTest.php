@@ -11,7 +11,7 @@ class CustomerRecoveryFlowTest extends TestCase
     {
         $source = $this->source();
 
-        $this->assertStringContainsString('RecoveryToken', $source);
+        $this->assertMatchesRegularExpression('~(?<![\w-])RecoveryToken(?![\w-])~', $source);
         $this->assertStringNotContainsString("\$_SESSION['user_id'] = \$user->id;", $source);
         $this->assertStringNotContainsString("find(['remind_code'=>\$code", $source);
     }
