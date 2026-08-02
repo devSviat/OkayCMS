@@ -2,9 +2,9 @@
 
 Усі методи, які `Init/Init.php` може викликати. Клас — `Okay\Core\Modules\AbstractInit`.
 
-Позначка **`install()`** / **`init()`** каже, у якому методі метод має сенс. Викликати
-міграцію в `init()` означає ходити в базу на кожному запиті; реєструвати розширення в
-`install()` означає, що воно спрацює один раз і більше ніколи.
+Позначка **`install()`** / **`init()`** каже, звідки метод належить викликати. Міграція в
+`init()` — це похід у базу на кожному запиті; розширення в `install()` спрацює один раз і
+більше ніколи.
 
 ## Зміст
 
@@ -184,23 +184,13 @@ protected function addBackendControllerPermission($controllerClass, $permission)
 protected function extendBackendMenu($firstLevelName, array $menuItemsByControllers, $icon = null)
 ```
 
-**`init()`.** Додає пункти в ліве меню адмінки.
-
-```php
-$this->extendBackendMenu('left_faq_title', [
-    'left_faq_title' => ['FAQsAdmin', 'FAQAdmin'],
-]);
-```
-
-- `$firstLevelName` — ключ перекладу кореневого пункту. Наявний ключ означає, що пункти
-  допишуться в кінець наявної групи.
-- Ключі масиву — ключі перекладу пунктів, значення — короткі імена контролерів (метод сам
-  перетворює їх на `Vendor.Module.Controller`).
-- `$icon` — шлях до файлу відносно каталогу модуля **або** сам текст SVG.
+**`init()`.** Додає пункти в ліве меню адмінки. `$firstLevelName` — ключ перекладу групи,
+ключі масиву — ключі перекладу пунктів, значення — короткі імена контролерів. `$icon` —
+шлях до файлу відносно каталогу модуля або текст SVG.
 
 Дубль пари «група → пункт» кидає `Menu item by path … already in use`.
 
-Щоб побачити наявні імена груп, увімкніть `dev_mode` — [../configuration.md](../configuration.md#dev_mode).
+Приклад і те, як дізнатись імена наявних груп — [backend.md](backend.md#пункт-меню).
 
 ### `addFastMenuItem`
 
@@ -210,7 +200,8 @@ protected function addFastMenuItem($dataProperty, ...$menuItems)
 
 **`init()`.** Меню швидкого редагування, що спливає при наведенні на елемент з атрибутом
 `data-<dataProperty>`. Кожен пункт — масив із обов'язковими `controller` і `translation` та
-необов'язковими `params` і `action` (`add` або `edit`).
+необов'язковими `params` і `action` (`add` або `edit`) —
+[backend.md](backend.md#меню-швидкого-редагування).
 
 ### `extendUpdateObject`
 
@@ -251,23 +242,10 @@ protected function addFrontBlock($blockName, $blockTplFile, $callback = null)
 **`init()`.** Те саме для вітрини, але з підміною темою: спершу шукається
 `design/<тема>/modules/<Vendor>/<Module>/html/<файл>`, і лише потім `design/html/` модуля.
 
-`$callback` виконується перед відмальовуванням блоку; його аргументи резолвляться через DI за
-тайп-хінтом:
+`$callback` виконується перед відмальовуванням блоку, його аргументи резолвляться через DI.
+Імена доступних блоків показує `dev_mode`.
 
-```php
-$this->addBackendBlock(
-    'notification_counters',
-    'counter_block.tpl',
-    function (Design $design, CurrenciesEntity $currenciesEntity) {
-        if (!$currenciesEntity->findOne(['code' => 'UAH'])) {
-            $design->assign('uahCurrencyError', true);
-        }
-    }
-);
-```
-
-Імена доступних блоків показує `dev_mode`. Докладно — [backend.md](backend.md#блоки-дизайну)
-і [frontend.md](frontend.md#блоки-дизайну).
+Приклади — [backend.md](backend.md#блоки-дизайну) і [frontend.md](frontend.md#блоки-дизайну).
 
 ## Інше
 
