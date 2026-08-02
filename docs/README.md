@@ -3,7 +3,7 @@
 Довідник описує **цей форк**, а не апстрім. Почніть із [architecture.md](architecture.md) —
 там стек, карта каталогів і життєвий цикл запиту.
 
-> **Розділ переписується.** Документи, позначені 🇷🇺, успадковані від апстріму й ще не
+> **Розділ переписується.** Документи з позначкою «не переписано» успадковані від апстріму й ще не
 > звірені з кодом цього форку — місцями вони описують поведінку, якої тут уже немає. План
 > переписування — [superpowers/specs/2026-08-02-docs-rewrite-design.md](superpowers/specs/2026-08-02-docs-rewrite-design.md).
 
@@ -15,11 +15,11 @@
 | Підняти локальне оточення | [`dev/README.md`](../dev/README.md) |
 | Увімкнути відладку, розібратись із директивами | [configuration.md](configuration.md) |
 | Написати модуль | [modules/quick-start.md](modules/quick-start.md) |
-| Змінити чужий шаблон, не редагуючи його | [tpl_modifiers.md](tpl_modifiers.md) 🇷🇺 |
+| Змінити чужий шаблон, не редагуючи його | [tpl_modifiers.md](tpl_modifiers.md) (не переписано) |
 | Вклинитись у чужу логіку з модуля | [modules/extenders.md](modules/extenders.md) |
-| Працювати з базою | [entities.md](entities.md) 🇷🇺 |
-| Додати сторінку вітрини | [routes.md](routes.md) 🇷🇺, [controllers.md](controllers.md) 🇷🇺 |
-| Підключити CSS чи JS | [js_css_files.md](js_css_files.md) 🇷🇺 |
+| Працювати з базою | [entities.md](entities.md) (не переписано) |
+| Додати сторінку вітрини | [routes.md](routes.md) (не переписано), [controllers.md](controllers.md) (не переписано) |
+| Підключити CSS чи JS | [js_css_files.md](js_css_files.md) (не переписано) |
 | Перенести свою тему на форк | [theme-porting.md](theme-porting.md) |
 | Зрозуміти, що змінила ітерація безпеки | [UPGRADE-security.md](UPGRADE-security.md) |
 
@@ -29,24 +29,24 @@
 
 * [Як влаштований цей форк](architecture.md) — стек, каталоги, життєвий цикл запиту, межі безпеки
 * [Налаштування](configuration.md) — `config.php` / `config.local.php`, `dev_mode`, `debug_mode`, панель відладки
-* [Ядро системи (Core)](core/README.md) 🇷🇺
-* [Режим розробника](dev_mode.md) 🇷🇺 — увійшло в [configuration.md](configuration.md), файл лишається до переписування розділу модулів
+* [Ядро системи (Core)](core/README.md) — не переписано
+* [Режим розробника](dev_mode.md) — не переписано, увійшло в [configuration.md](configuration.md), файл лишається до переписування розділу модулів
 
 ### Застосунок
 
-* [Контролери](controllers.md) 🇷🇺
-* [Маршрути](routes.md) 🇷🇺
-* [Сутності (Entities)](entities.md) 🇷🇺
-* [Helpers](helpers.md) 🇷🇺
-* [Requests](requests.md) 🇷🇺
-* [DI-контейнер](di_container.md) 🇷🇺
-* [Service Locator](service_locator.md) 🇷🇺
+* [Контролери](controllers.md) — не переписано
+* [Маршрути](routes.md) — не переписано
+* [Сутності (Entities)](entities.md) — не переписано
+* [Helpers](helpers.md) — не переписано
+* [Requests](requests.md) — не переписано
+* [DI-контейнер](di_container.md) — не переписано
+* [Service Locator](service_locator.md) — не переписано
 
 ### Дизайн і шаблони
 
-* [Модифікація tpl-файлів](tpl_modifiers.md) 🇷🇺
-* [Smarty-плагіни](smarty_plugins.md) 🇷🇺
-* [Підключення зовнішніх файлів дизайну](js_css_files.md) 🇷🇺
+* [Модифікація tpl-файлів](tpl_modifiers.md) — не переписано
+* [Smarty-плагіни](smarty_plugins.md) — не переписано
+* [Підключення зовнішніх файлів дизайну](js_css_files.md) — не переписано
 * [Перенесення теми на цей форк](theme-porting.md)
 
 ### Модулі
@@ -63,10 +63,10 @@
 
 ### Експлуатація
 
-* [Планувальник](scheduler.md) 🇷🇺
-* [Імпорт](import.md) 🇷🇺
-* [Експорт](export.md) 🇷🇺
-* [Робота зі знижками](discounts_management.md) 🇷🇺
+* [Планувальник](scheduler.md) — не переписано
+* [Імпорт](import.md) — не переписано
+* [Експорт](export.md) — не переписано
+* [Робота зі знижками](discounts_management.md) — не переписано
 * [Приклад конфігурації Nginx](nginx/nginx.conf)
 
 ### Безпека
