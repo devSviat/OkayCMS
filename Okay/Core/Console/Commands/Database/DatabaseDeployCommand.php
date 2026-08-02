@@ -7,12 +7,11 @@ use Okay\Core\Config;
 use Okay\Core\Console\Command;
 use Okay\Core\DataCleaner;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'database:deploy', description: 'Deploys a clean database.')]
 class DatabaseDeployCommand extends Command
 {
-    protected static $defaultName = 'database:deploy';
-    protected static $defaultDescription = 'Deploys a clean database.';
-
     protected function configure(): void
     {
         $this

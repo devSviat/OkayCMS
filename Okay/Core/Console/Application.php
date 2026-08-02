@@ -35,6 +35,6 @@ class Application extends SymfonyApplication
         if (!($class = new $commandClass()) instanceof Command) {
             throw new \Exception("Command must be an instance of ".Command::class.".");
         }
-        $this->add(new $class());
+        $this->addCommand(new $class());
     }
 }
