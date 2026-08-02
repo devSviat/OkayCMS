@@ -4,6 +4,11 @@
 
 product
 
+## Themes
+
+The repository ships two storefront themes. Everything below describes **`design/vibe_shop`**
+unless a section says otherwise; `design/okay_shop` has its own section at the end of this file.
+
 ## Users
 
 Two audiences, and they are not the same person.
@@ -78,3 +83,57 @@ warmth comes from typography, rhythm and tactile feedback — never from a beige
 - Touch targets ≥44×44px. Controls revealed on hover have a permanently visible fallback under
   `(hover: none)`.
 - Every animation has a `prefers-reduced-motion: reduce` alternative.
+
+---
+
+# `design/okay_shop`
+
+The stock OkayCMS 4.5.2 theme, kept in the repository and currently being redesigned. A clean
+database starts on it (`theme = okay_shop` in the seed dump), so it is the first thing anyone
+sees after deploying the fork.
+
+**This section is written as the work proceeds.** What is settled is below; the positioning is
+not, and it is the first thing the redesign has to decide.
+
+## Users
+
+The same two audiences as `vibe_shop` — shoppers on phones with little patience, and shop
+owners running the theme without a designer. What differs is not who they are but why they
+would pick this theme over the other one.
+
+## Product Purpose
+
+Settled:
+
+- **The theme is visually dated** — that is the reason for the work. Dense navigation, competing
+  colours, desktop-first layout.
+- **It targets this fork only.** Compatibility with stock OkayCMS 4.5.2 is deliberately dropped;
+  `docs/theme-porting.md` covers the other direction, taking a theme to a stock engine. Markup
+  is not preserved for the sake of upstream.
+- **The engine's contract still binds.** Mutating forms carry `customer_csrf_token` and use POST,
+  not GET — cart, wishlist, comparison, feedback, subscription. This is a fork requirement, not
+  a compatibility one, and it survives any redesign (`docs/UPGRADE-security.md`).
+- **Colour cues may be drawn from the official site**, https://okay-cms.com/ua.
+
+Open, to be answered in the brainstorm and written back here:
+
+- What this theme is *for* once it is no longer the dated default — who chooses it over
+  `vibe_shop`, and on what grounds. Without that answer the redesign has no brief and will drift
+  into a second `vibe_shop`.
+- Whether it keeps the current information architecture or gets a new one.
+
+## Brand Personality
+
+Not decided. It should not simply repeat `vibe_shop`'s "clear, fast, quiet" — two themes with
+one personality is one theme with two skins.
+
+## Anti-references
+
+The `vibe_shop` list applies, with one addition specific to this work: **`vibe_shop` itself.**
+Copying its components produces a duplicate rather than an alternative.
+
+## Accessibility & Inclusion
+
+The bar above applies unchanged: WCAG 2.1 AA contrast, keyboard operability with a visible
+focus ring, colour never the sole carrier of meaning, touch targets ≥44×44px, a
+`prefers-reduced-motion` path for every animation.
