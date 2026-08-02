@@ -72,7 +72,7 @@ class Init extends AbstractInit
 1. у `ok_modules` з'являється рядок із `enabled = 1` і версією з `module.json`;
 2. викликається `Init::install()`;
 3. викликаються всі `update_x_y_z()` від `1.0.0` до версії з маніфеста — **так, і на чистій
-   інсталяції теж** ([lifecycle.md](lifecycle.md#оновлення)).
+   інсталяції теж** ([lifecycle.md](lifecycle.md#встановлення)).
 
 Кнопка встановлення — єдина точка входу: `install()` із консолі не викликається.
 
