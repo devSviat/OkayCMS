@@ -150,7 +150,11 @@
                 </div>
 
                 <div class="details_boxed__item">
-                    <form class="fn_variants" action="{url_generator route="cart"}">
+                    {* POST і токен - для роботи без JS. З увімкненим JS okay.js
+                       перехоплює сабміт і збирає власний ajax-запит, тож ці два
+                       атрибути на нього не впливають. *}
+                    <form class="fn_variants" method="post" action="{url_generator route="cart"}">
+                        <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
 
                         {* Product variants *}
                         <div class="details_boxed__select">

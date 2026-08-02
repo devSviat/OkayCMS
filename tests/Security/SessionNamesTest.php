@@ -177,6 +177,66 @@ class SessionNamesTest extends TestCase
         }
     }
 
+    /**
+     * Вихід менеджера. Досі це перевірялось лише грепом по backend/index.php на
+     * наявність рядка 'destroyBackend()' - тобто що виклик існує, а не що він
+     * щось робить.
+     *
+     * Найважливіше тут - третє твердження: дані мають зникнути СІ СХОВИЩА, а не
+     * лише з масиву в пам'яті. Інакше вкрадену куку можна відтворити після
+     * виходу, і сесія ожила б із тим самим 'admin'.
+     */
+    #[RunInSeparateProcess]
+    public function testDestroyBackendWipesTheSessionFromStorage()
+    {
+        $sessionId = $this->createBackendSession('some_manager_login');
+
+        // Спершу доводимо, що сесія справді була: інакше порожньо "після"
+        // нічого не означало б - невідомий id теж дає порожній масив.
+        session_id($sessionId);
+        session_name(SessionNames::BACKEND);
+        session_start();
+        $this->assertSame('some_manager_login', $_SESSION['admin'] ?? null);
+
+        SessionNames::destroyBackend();
+
+        $this->assertSame([], $_SESSION, 'дані сесії мають бути стерті');
+        $this->assertNotSame(
+            PHP_SESSION_ACTIVE,
+            session_status(),
+            'сесія має бути закрита, а не просто спорожнена'
+        );
+
+        session_id($sessionId);
+        session_name(SessionNames::BACKEND);
+        session_start();
+
+        $this->assertArrayNotHasKey(
+            'admin',
+            $_SESSION,
+            'старий ідентифікатор сесії не має відновлювати привілеї менеджера'
+        );
+
+        $revived = session_id();
+        session_write_close();
+        $this->destroySessionFile($revived);
+        $this->destroySessionFile($sessionId);
+    }
+
+    /**
+     * Викликається з backend/index.php на кожному виході, зокрема тоді, коли
+     * сесії вже немає. Фатал тут перетворив би вихід на білу сторінку.
+     */
+    #[RunInSeparateProcess]
+    public function testDestroyBackendIsSafeWithoutAnActiveSession()
+    {
+        $this->assertSame(PHP_SESSION_NONE, session_status());
+
+        SessionNames::destroyBackend();
+
+        $this->assertSame(PHP_SESSION_NONE, session_status());
+    }
+
     private function createBackendSession(string $login): string
     {
         session_name(SessionNames::BACKEND);

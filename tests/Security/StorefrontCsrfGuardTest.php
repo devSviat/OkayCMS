@@ -22,12 +22,73 @@ class StorefrontCsrfGuardTest extends TestCase
     public static function guardedControllerProvider()
     {
         return [
-            'cart'       => ['Okay/Controllers/CartController.php', 3],
+            'cart'       => ['Okay/Controllers/CartController.php', 4],
             'wishlist'   => ['Okay/Controllers/WishListController.php', 1],
             'comparison' => ['Okay/Controllers/ComparisonController.php', 1],
             'subscribe'  => ['Okay/Controllers/SubscribeController.php', 1],
             'feedback'   => ['Okay/Controllers/FeedbackController.php', 1],
         ];
+    }
+
+    /**
+     * Лічильник вище рахує виклики в цілому файлі, і саме цього виявилось замало:
+     * CartController містив три виклики й проходив, поки render() додавав товар
+     * у кошик із $_GET взагалі без охорони. Тобто GET /cart?variant=17 наповнював
+     * кошик відвідувача з чужої сторінки.
+     *
+     * Тому перевірка тут інша: у ТІЛІ конкретного методу виклик охорони має йти
+     * РАНІШЕ за мутацію. Це перевірка порядку в коді, не в рантаймі -
+     * requireCustomerCsrf() завершується через exit, тож викликати його в тесті
+     * не можна. Але саме порядку бракувало.
+     */
+    #[DataProvider('guardOrderProvider')]
+    public function testGuardRunsBeforeTheMutation($class, $method, $mutation)
+    {
+        $body = $this->methodBody($class, $method);
+
+        $guardAt = strpos($body, '$this->requireCustomerCsrf(');
+        $this->assertNotFalse($guardAt, "$class::$method() мутує без виклику охорони");
+
+        $mutationAt = strpos($body, $mutation);
+        $this->assertNotFalse($mutationAt, "у $class::$method() не знайдено $mutation - тест застарів");
+
+        $this->assertLessThan(
+            $mutationAt,
+            $guardAt,
+            "$class::$method() виконує $mutation до перевірки токена"
+        );
+    }
+
+    public static function guardOrderProvider()
+    {
+        $cart = \Okay\Controllers\CartController::class;
+
+        return [
+            'cart page: add without JS' => [$cart, 'render', '$cart->addItem('],
+            'cart ajax'                 => [$cart, 'cartAjax', '$cart->updateItem('],
+            'cart remove'               => [$cart, 'removeItem', '$cart->deleteItem('],
+            'cart add'                  => [$cart, 'addItem', '$cart->addItem('],
+            'wishlist' => [
+                \Okay\Controllers\WishListController::class, 'ajaxUpdate', '$wishList->addItem(',
+            ],
+            'comparison' => [
+                \Okay\Controllers\ComparisonController::class, 'ajaxUpdate', '$comparison->addItem(',
+            ],
+        ];
+    }
+
+    /**
+     * Тіло методу за межами, які дає рефлексія: сигнатури тут багатослівні
+     * (DI через типи аргументів), тож регулярка по файлу різала б не там.
+     */
+    private function methodBody($class, $method)
+    {
+        $reflection = new \ReflectionMethod($class, $method);
+        $file = file($reflection->getFileName());
+        $start = $reflection->getStartLine() - 1;
+        $length = $reflection->getEndLine() - $start;
+
+        return implode('', array_slice($file, $start, $length));
     }
 
     public function testAbstractControllerExposesTheGuardAndTheToken()
@@ -56,7 +117,13 @@ class StorefrontCsrfGuardTest extends TestCase
         return [
             'cart' => [
                 'Okay/Controllers/CartController.php',
-                ["\$request->get('action')", "\$request->get('variant_id', 'integer')"],
+                [
+                    "\$request->get('action')",
+                    "\$request->get('variant_id', 'integer')",
+                    // Додавання в кошик зі сторінки /cart: читалось із $_GET,
+                    // тож будь-який <img src> наповнював чужий кошик.
+                    "\$request->get('variant', 'integer')",
+                ],
             ],
             'wishlist' => [
                 'Okay/Controllers/WishListController.php',

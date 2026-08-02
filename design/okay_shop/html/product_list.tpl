@@ -83,7 +83,10 @@
             </div>
         </div>
         <div class="product_preview__bottom">
-            <form class="fn_variants preview_form" action="{url_generator route="cart"}">
+            {* POST і токен - для роботи без JS; okay.js перехоплює сабміт і на
+               ці атрибути не спирається. *}
+            <form class="fn_variants preview_form" method="post" action="{url_generator route="cart"}">
+                <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                 <div class="d-flex align-items-center justify-content-between product_preview__buttons">
                     {if !$settings->is_preorder}
                             {* Out of stock *}

@@ -201,7 +201,10 @@
                 <span class="vs-stock__label">{if $product->variant->stock < 1}{$lang->out_of_stock}{elseif $product->variant->stock le 5}{$lang->product_low_stock}{else}{$lang->product_in_stock}{/if}</span>
             </p>
 
-            <form class="fn_variants vs-card__form" action="{url_generator route="cart"}">
+            {* POST and a token so the no-JS path is not CSRF-able; okay.js
+               intercepts the submit and does not rely on either attribute. *}
+            <form class="fn_variants vs-card__form" method="post" action="{url_generator route="cart"}">
+                <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                 {* Value carrier only: always hidden, never given fn_select2. okay.js
                    reads it on submit with $(this).find("select[name=variant]").val(),
                    which does not care that the element is display:none. *}
