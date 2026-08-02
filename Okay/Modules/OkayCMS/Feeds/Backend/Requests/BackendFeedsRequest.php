@@ -83,6 +83,14 @@ class BackendFeedsRequest
     {
         $id = $this->request->get('id', 'integer');
 
+        // Сторінка фіда має id у власному URL, а ajax модуля шле його як feed_id
+        // (так само його читає updateEntitySettings). Без цього getAllCategories
+        // і getSubCategories не знаходили фід і завжди відповідали success:false -
+        // дерево категорій у фіді не розгорталось узагалі.
+        if (empty($id)) {
+            $id = $this->request->get('feed_id', 'integer');
+        }
+
         return ExtenderFacade::execute(__METHOD__, $id, func_get_args());
     }
 
