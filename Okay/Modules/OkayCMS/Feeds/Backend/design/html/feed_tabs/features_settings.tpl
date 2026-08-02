@@ -64,7 +64,7 @@
 
                 let formData = new FormData(form);
                 formData.append('preset', $('select.fn_preset_select').val());
-                formData.append('feed_id', {/literal}{$smarty.get.id}{literal});
+                formData.append('feed_id', {/literal}{$smarty.get.id|intval}{literal});
                 formData.append('entity', 'feature');
                 formData.append('session_id', '{/literal}{$smarty.session.id}{literal}');
 

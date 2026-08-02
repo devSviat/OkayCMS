@@ -56,7 +56,7 @@
                     formData.append($(el).attr('name'), $(el).val());
                 });
                 formData.append('preset', $('select.fn_preset_select').val());
-                formData.append('feed_id', {/literal}{$smarty.get.id}{literal});
+                formData.append('feed_id', {/literal}{$smarty.get.id|intval}{literal});
                 formData.append('entity', 'category');
                 formData.append('session_id', '{/literal}{$smarty.session.id}{literal}');
 
@@ -82,7 +82,7 @@
                     dataType: 'json',
                     url: "{/literal}{url controller='OkayCMS.Feeds.FeedAdmin@getAllCategories'}{literal}",
                     data: {
-                        feed_id: {/literal}{$smarty.get.id}{literal}
+                        feed_id: {/literal}{$smarty.get.id|intval}{literal}
                     },
                     success: function(data){
                         var msg = "";
@@ -124,7 +124,7 @@
                         url: "{/literal}{url controller='OkayCMS.Feeds.FeedAdmin@getSubCategories'}{literal}",
                         data: {
                             category_id: category_id,
-                            feed_id: {/literal}{$smarty.get.id}{literal}
+                            feed_id: {/literal}{$smarty.get.id|intval}{literal}
                         },
                         success: function(data){
                             var msg = "";
