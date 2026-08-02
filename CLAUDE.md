@@ -82,8 +82,6 @@ Service wiring is centralized: core services in `Okay/Core/config/services.php` 
 
 `docs/` is the authoritative reference for each component. Read the relevant doc **before** working with an unfamiliar component. Start from `docs/README.md`, which is the index.
 
-**Caveat:** the reference is being rewritten for this fork (see `docs/superpowers/specs/2026-08-02-docs-rewrite-design.md`). Documents marked "не переписано" in `docs/README.md` are still inherited from upstream and are known to contradict the code in places — verify against the source before relying on them.
-
 | What you need to do | Where to look |
 | ------------------- | ------------- |
 | Understand the fork: stack, layout, request lifecycle | `docs/architecture.md` |
