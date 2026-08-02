@@ -13,7 +13,7 @@
         <div class="alert alert--icon">
             <div class="alert__content">
                 <div class="alert__title">{$btr->alert_description|escape}</div>
-                <p>Описание модуля <a href="https://github.com/OkayCMS/Okay3/tree/master/docs/discounts_management.md" target="_blank">Docs</a></p>
+                <p><a href="https://github.com/devSviat/OkayCMS/blob/main/docs/discounts.md" target="_blank">docs/discounts.md</a></p>
             </div>
         </div>
     </div>

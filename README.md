@@ -1,11 +1,36 @@
-OkayCMS v4.5.2
+OkayCMS (fork of v4.5.2)
 ----------------------
 
-OkayCMS is a PHP CMS for creating backend and frontend applications.
+OkayCMS is a PHP CMS for creating backend and frontend applications. This repository is a fork —
+what it changes is listed under "About this fork" below.
 
- - Homepage:        [https://okay-cms.com](https://okay-cms.com)
- - Documentation:   [https://github.com/OkayCMS/OkayCMS/tree/master/docs](https://github.com/OkayCMS/OkayCMS/tree/master/docs)
- - Repository:      [https://github.com/OkayCMS/OkayCMS](https://github.com/OkayCMS/OkayCMS)
+ - **Documentation:** [`docs/README.md`](docs/README.md) — written for this fork, in Ukrainian.
+   The upstream docs describe upstream behaviour and no longer match this code.
+ - **Running it:** [`dev/README.md`](dev/README.md) — the Docker environment, dev and production.
+   No other way of deploying the fork is documented.
+
+Upstream: [homepage](https://okay-cms.com) ·
+[repository](https://github.com/OkayCMS/OkayCMS) ·
+[its documentation](https://github.com/OkayCMS/OkayCMS/tree/master/docs)
+
+### Quick start
+
+```bash
+cd dev
+cp .env-example .env
+sed -i "s/^APP_UID=.*/APP_UID=$(id -u)/;s/^APP_GID=.*/APP_GID=$(id -g)/" .env
+cp ../config/config.local-example.php ../config/config.local.php
+
+echo "127.0.0.1 okaycms.loc" | sudo tee -a /etc/hosts   # nothing resolves the host otherwise
+
+docker compose up -d
+./bin/smoke.sh
+```
+
+Requires Docker Compose ≥ 2.24.0. `smoke.sh` waits for the containers and checks the environment
+came up correctly — it addresses nginx by IP with a `Host:` header, so it passes with or without
+the `/etc/hosts` line; a browser needs it. The storefront is then on `http://okaycms.loc`
+(`VIRTUAL_HOST` in `dev/.env`), the admin panel on `/admin` — login `admin`, password `1234`.
 
 OkayCMS is released under the LGPL license.
 
