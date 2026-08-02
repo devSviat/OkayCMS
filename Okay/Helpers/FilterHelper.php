@@ -393,7 +393,17 @@ class FilterHelper
                 $paramValues = mb_substr($v, strlen($paramName) + 1);
 
                 $prices = explode('_', $paramValues);
-                $currentPrices = ['min' => reset($prices), 'max' => end($prices)];
+                $min = reset($prices);
+                $max = end($prices);
+
+                // Тема віддає в розмітку посилання-заглушку /price-min_max, яке JS
+                // підміняє реальними числами. Нечислові межі доходили до Money::convert()
+                // і клали сторінку на "string * string", тож такий фільтр просто ігноруємо.
+                if (!is_numeric($min) || !is_numeric($max)) {
+                    continue;
+                }
+
+                $currentPrices = ['min' => $min, 'max' => $max];
             }
         }
 
