@@ -672,6 +672,7 @@ $lang['user_name'] = 'Введіть ім\'я користувача';
 $lang['user_not_in_group'] = 'Не входить в групу';
 $lang['user_options'] = 'Параметри користувача';
 $lang['user_orders'] = 'Замовлення користувача';
+$lang['user_added'] = 'Користувач доданий';
 $lang['user_updated'] = 'Користувач відредагований';
 $lang['user_user'] = 'Користувач:';
 $lang['users_by_date'] = 'за датою';

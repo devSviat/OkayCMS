@@ -76,6 +76,17 @@ class BackendUsersHelper
         return ExtenderFacade::execute(__METHOD__, $usersSort, func_get_args());
     }
 
+    public function prepareAdd($user)
+    {
+        return ExtenderFacade::execute(__METHOD__, $user, func_get_args());
+    }
+
+    public function add($user)
+    {
+        $insertId = $this->usersEntity->add($user);
+        return ExtenderFacade::execute(__METHOD__, $insertId, func_get_args());
+    }
+
     public function prepareUpdate($user)
     {
         return ExtenderFacade::execute(__METHOD__, $user, func_get_args());
