@@ -1,224 +1,165 @@
-# Extenders
+# Розширення
 
-Классы-расширители нужны чтобы расширять функциональность стандартных [хелперов](./../helpers.md),
-[реквестов](./../requests.md), [Entities](./../entities.md) или [сервисов ядра](./../core/README.md).
-Расширять можно те методы, в которых есть вызов метода `Okay\Core\Modules\Extender\ExtenderFacade::execute()`.
-Хелперы и реквесты покрыты максимальным количеством экстендеров. Entities по умолчанию покрыты только стандартные
-CRUD операции (у некоторых Entities могут быть дополнительные методы покрыты экстендерами). Классы ядра покрыты 
-небольшим количеством экстендеров, только там, где может потребоваться вмешательство из модуля
+Розширення — головний спосіб змінити чужу поведінку, не редагуючи чужий код. Модуль
+підв'язується до методу ядра, хелпера, запиту чи навіть іншого модуля й отримує керування
+щоразу, коли той метод повертає значення.
 
-Экстендеры могу работать как в режиме ChainExtender (цепочный вызов)так и QueueExtender (поочерёдный вызов).
+## Що можна розширити
 
-Экстендеры, которые работают в режиме Chain, передают друг другу модифицированный результат.
-Они ОБЯЗАТЕЛЬНО должны возвращать результат, который передал вышестоящий хелпер или экстендер.
+Метод, який віддає результат так:
 
-Например: есть метод CommentsHelper::getList(), он возвращает массив комментариев.
-Есть два модуля, которые расширяют функциональность этого метода.
-Сразу отработает метод CommentsHelper::getList(), который возвращает результат.
-Затем отработает Module1Extender::getList($result), который может изменить данные в $result и ОБЯЗАТЕЛЬНО
-должен вернуть $result, чтобы он передался в Module2Extender::getList($result) и соответственно вернулся
-в место, где его вызвали (чаще всего в контроллере).
-
-Экстендеры работающие в режиме Queue, ничего не возвращают. Они просто вызываются по очереди.
-В них можно описывать какие-то процедуры, которые не модифицируют данные возвращаемые хелпером.
-
-### Аргументы экстендера
-
-В экстендере аргументы нужно принимать по типу 1+N. Т.е. первым аргументом экстендера будет значение, возвращаемое
-хелпером, вторым аргументом экстендера будет первый аргумент хелпера (или реквеста, одно и то же).
-
-Если в хелпере аргумент объявлен как не обязательный, в экстендере его тоже нужно объявлять необязательным. 
-
-Пример хелпера:
 ```php
-use Okay\Core\Validator;
-//...abstract
-class ValidateHelper
+// Okay/Helpers/AuthorsHelper.php
+return ExtenderFacade::execute(__METHOD__, $result, func_get_args());
+```
+
+У репозиторії таких місць близько 1400 — практично весь публічний API хелперів, запитів,
+сутностей і чималої частини ядра. Хелпери й запити покриті найповніше; у сутностей покриті
+CRUD-операції.
+
+Друга форма трапляється в трейтах і базових класах:
+
+```php
+// Okay/Core/Entity/CRUD.php
+return ExtenderFacade::execute([static::class, __FUNCTION__], $result, func_get_args());
+```
+
+Вона там обов'язкова, бо `__METHOD__` у трейті дав би ім'я трейта. Для вас це означає, що
+тригером буде **конкретний клас** — `Okay\Entities\ProductsEntity::find`, а не
+`Okay\Core\Entity\CRUD::find`.
+
+Розширюване не все: `Entity::getSelect()` навмисно віддає результат без хука, як і
+`Entity::flush()`.
+
+## Два види
+
+| | Ланцюгове (`chain`) | Чергове (`queue`) |
+| --- | --- | --- |
+| Навіщо | змінити результат | побічна дія: лист, лог, запис у базу |
+| Повертає значення | **мусить** | ігнорується |
+| Що отримує | результат попереднього розширення в ланцюгу | остаточний результат ланцюга |
+| Коли виконується | першим | після всіх ланцюгових |
+
+Спершу відпрацьовують усі ланцюгові — кожен наступний отримує результат попереднього.
+Отримане значення повертається викликачу **і** передається всім черговим.
+
+## Аргументи
+
+Метод розширення отримує:
+
+1. **першим аргументом** — значення, що розширюється;
+2. **далі** — усі аргументи, з якими викликали початковий метод.
+
+```php
+// розширюємо DeliveriesHelper::prepareDeliveryPriceInfo($delivery, $cart)
+public function setCartDeliveryPrice($deliveryPriceInfo, $delivery, $cart)
 {
-
-    //...abstract 
-    /** @var Validator  */
-    private $validator;
-    //...abstract 
-
-    public function getFeedbackValidateError($feedback)
-    {
-        $error = null;
-        if (!$this->validator->isName($feedback->name, true)) {
-            $error = 'empty_name';
-        } elseif (!$this->validator->isEmail($feedback->email, true)) {
-            $error = 'empty_email';
-        } else {
-            //...abstract 
-        }
-    
-        return ExtenderFacade::execute(__METHOD__, $error, func_get_args());
-    }
+    // …
+    return $deliveryPriceInfo;   // обов'язково для ланцюгового
 }
 ```
-Он принимает как аргумент $feedback, который сформировал [CommonRequest](./../requests.md) и возвращает строку,
-с именем ошибки.
 
-Пример экстендера для данного хелпера:
+Необов'язковий аргумент початкового методу має бути необов'язковим і в розширенні.
+
+## Ланцюгове розширення
+
 ```php
-namespace Okay\Modules\Vendor\Module\Extenders;
-
-use Okay\Core\Modules\Extender\ExtensionInterface;
-use Okay\Core\Request;use Okay\Core\Validator;
-
-class FrontExtender implements ExtensionInterface
+// Okay/Modules/OkayCMS/NovaposhtaCost/Init/Init.php
+public function init()
 {
-    
-    private $request;
-    private $validator;
-    
-    public function __construct(Request $request, Validator $validator)
-    {
-        $this->request = $request;
-        $this->validator = $validator;
-    }
-
-    public function getFeedbackValidateError($error, $feedback)
-    {
-        if ($error == 'empty_email' && $this->validator->isEmail($feedback->email)) { // Перевалидируем поле email
-            $error = '';
-        }
-
-        if (!$this->validator->isPhone($feedback->phone, true)) {
-            $error = 'empty_phone';
-        }
-        return $error;
-    }
+    $this->registerChainExtension(
+        [DeliveriesHelper::class, 'prepareDeliveryPriceInfo'],
+        [FrontExtender::class, 'setCartDeliveryPrice']
+    );
 }
 ```
-Допустим нам нужно сделать чтобы поле email стало необязательным, а телефон обязательным.
 
-Пример регистрации:
+## Чергове розширення
+
 ```php
 $this->registerQueueExtension(
-    ['class' => ValidateHelper::class, 'method' => 'getFeedbackValidateError'],
-    ['class' => FrontExtender::class, 'method' => 'getFeedbackValidateError']
+    [OrdersHelper::class, 'finalCreateOrderProcedure'],
+    [FrontExtender::class, 'setCartDeliveryDataProcedure']
 );
 ```
 
-### Регистрация экстендера <a name="registerExtender">
-Чтобы зарегистрировать экстендер, нужно описать его в классе.
-`Best practices: Описывать экстендеры в классах Okay\Modules\Vendor\Module\Extenders\FrontExtender 
-и Okay\Modules\Vendor\Module\Extenders\BackendExtender`
-Класс экстендера должен реализовывать интерфейс `Okay\Core\Modules\Extender\ExtensionInterface`.
-Если класс экстендера содержит зависимости,
-нужно его объявить как [сервис в DI контейнере](./../di_container.md#serviceRegister) или же использовать в методе
-экстендера [ServiceLocator](./../service_locator.md).
+Обидва методи приймають і довшу форму — `['class' => X::class, 'method' => 'y']`. Модулі
+репозиторію користуються короткою.
 
-Пример класса экстендера:
+## Клас розширення
+
+Живе в `Extenders/`, за домовленістю — `FrontExtender.php` і `BackendExtender.php`.
+**Мусить реалізовувати `Okay\Core\Modules\Extender\ExtensionInterface`** — це порожній
+інтерфейс-мітка, але без нього реєстрація кидає виняток.
+
 ```php
-namespace Okay\Modules\Vendor\Module\Extenders;
+// Okay/Modules/OkayCMS/Banners/Extenders/FrontExtender.php
+namespace Okay\Modules\OkayCMS\Banners\Extenders;
 
-use Okay\Core\Design;
 use Okay\Core\Modules\Extender\ExtensionInterface;
 
 class FrontExtender implements ExtensionInterface
 {
+    private $entityFactory;
     private $design;
-    
-    public function __construct(Design $design)
-    {
-        $this->design = $design;
-    }
 
-    public function extenderMethod()
+    public function __construct(EntityFactory $entityFactory, Design $design, Module $module, BannersHelper $bannersHelper)
     {
-        //...abstract
-        $this->design->assign('param', 'value');
+        $this->entityFactory = $entityFactory;
+        $this->design = $design;
+        // …
     }
 }
 ```
 
-Чтобы зарегистрировать экстендер к выполнению после определённого метода хелпера, нужно в методе Init::Init()
-вызвать метод registerChainExtension() или registerQueueExtension() в соответствии с нуждами.
+## Реєстрація
 
-Пример инициализации:
-```php
-$this->registerQueueExtension(
-    ['class' => MainHelper::class, 'method' => 'commonAfterControllerProcedure'],
-    ['class' => FrontExtender::class, 'method' => 'assignCurrentBanners']
-);
-```
-Теперь метод FrontExtender::assignCurrentBanners() будет выполняться 
-после метода MainHelper::commonAfterControllerProcedure().
+Потрібні **два** кроки:
 
-#### Как определить какой метод какого хелпера нужно расширять?
-Чтобы определить какой метод нужно расширять, нужно зайти в контроллер, и посмотреть какой хелпер используется в месте,
-которое вы хотите расширить.
-
-Пример задачи:
-При добавлении комментария пользователем на сайт, если пользователь залогинен в личном кабинете и у него в профиле
-указан номер телефона, нужно отправить ему сообщение в телеграмм "Спасибо за отзыв..."
-
-Решение:
-Смотрим на контроллер BlogController и ProductController, видим что для добавления комментария используется
-один и тот же хелпер CommentsHelper в котором вызывается метод addCommentProcedure().
+1. **`Init::init()`** — прив'язати тригер до обробника (приклади вище).
+2. **`Init/services.php`** — оголосити клас розширення сервісом:
 
 ```php
-$commentsHelper->addCommentProcedure('product', $product->id);
-```
-
-Следовательно в модуле нужно расширить метод addCommentProcedure() хелпера CommentsHelper;
-
-Пишем экстендер:
-```php
-namespace Okay\Modules\Vendor\Module\Extenders;
-
-use Okay\Core\Design;
-use Okay\Core\Modules\Extender\ExtensionInterface;
-
-class FrontExtender implements ExtensionInterface
-{
-    private $design;
-    private $telegramNotify;
-    
-    public function __construct(Design $design, TelegramNotify $telegramNotify)
-    {
-        $this->design = $design;
-        $this->telegramNotify = $telegramNotify;
-    }
-
-    public function sendTelegramMessage()
-    {
-        if (($user = $this->design->getVar('user')) && !empty($user->phone)) {
-            $this->telegramNotify->sendCommentsThanks($user->phone);
-        }
-    }
-}
-```
-Как внутренне будет устроен класс TelegramNotify и метод sendCommentsThanks() зависит уже от разработчика. Но пример его
-использования таков.
-
-Объявляем класс FrontExtender в Okay/Modules/Vendor/Module/services.php:
-```php
-namespace Okay\Modules\Vendor\Module;
-
-return [
-    Extenders\FrontExtender::class => [
-        'class' => Extenders\FrontExtender::class,
-        'arguments' => [
-            new SR(Design::class),
-            new SR(TelegramNotify::class),
-        ],
+FrontExtender::class => [
+    'class' => FrontExtender::class,
+    'arguments' => [
+        new SR(EntityFactory::class),
+        new SR(Design::class),
     ],
-    TelegramNotify::class => [
-        'class' => TelegramNotify::class,
-        'arguments' => [
-            //...abstract
-        ],
-    ],
-];
+],
 ```
 
-Далее инициализируем выполнения этого экстендера:
-```php
-$this->registerQueueExtension(
-    ['class' => CommentsHelper::class, 'method' => 'addCommentProcedure'],
-    ['class' => FrontExtender::class, 'method' => 'sendTelegramMessage']
-);
-```
+Другий крок формально необов'язковий: якщо сервіса немає, розширення створюється через
+`new $class()` **без аргументів**. Конструктор з обов'язковими параметрами в такому разі
+покладе запит — тобто без `services.php` розширення може мати лише порожній конструктор.
+
+## Що перевіряється під час реєстрації
+
+Реєстрація кидає виняток, якщо:
+
+- методу, який розширюють, не існує — `Expandable "Class::method()" is not a method`;
+- метод розширення не викликається — `Method Class::method is not callable`;
+- клас розширення не реалізує `ExtensionInterface`.
+
+Усі три спрацьовують в `init()`, тобто на кожному запиті — помилку видно одразу.
+
+## Порядок виконання
+
+Розширення виконуються в порядку реєстрації модулів, тобто за `ok_modules.position`. Якщо два
+модулі підв'язались ланцюгом до одного методу, другий отримає результат першого. Саме тому
+порядок модулів у списку значущий.
+
+## Застарілі методи
+
+`Okay/Core/config/deprecated_methods.php` дозволяє перенаправити розширення зі старого методу
+на новий: модуль, підв'язаний до застарілого імені, продовжує працювати, але отримує
+`E_USER_DEPRECATED`. Наразі мапа порожня; формат описаний у шапці самого файлу.
+
+## Коли розширення не підходить
+
+- Треба змінити розмітку чужого шаблону → блок `modifications` у `module.json`
+  ([../tpl-modifications.md](../tpl-modifications.md)).
+- Треба вставити свою розмітку у відведене місце → блоки дизайну
+  ([backend.md](backend.md#блоки-дизайну), [frontend.md](frontend.md#блоки-дизайну)).
+- Треба додати умову у вибірку чужої сутності → фільтр сутності
+  ([init-reference.md](init-reference.md#registerentityfilter)).

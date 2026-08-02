@@ -5,7 +5,7 @@
  * Якщо файл лежить не в стандартному місці (design/theme_name/js/),
  * треба вказати нове місце: викликати метод setDir() і передати шлях до файла відносно кореня сайта (DOCUMENT_ROOT)
  * Також можна викликати метод setPosition() і вказати head або footer (типово head)
- * @link https://github.com/OkayCMS/Okay3/blob/master/docs/js_css_files.md
+ * @link ../../docs/assets.md
  */
 
 use Okay\Core\TemplateConfig\Js;

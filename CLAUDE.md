@@ -82,26 +82,30 @@ Service wiring is centralized: core services in `Okay/Core/config/services.php` 
 
 `docs/` is the authoritative reference for each component. Read the relevant doc **before** working with an unfamiliar component. Start from `docs/README.md`, which is the index.
 
-**Caveat:** the reference is being rewritten for this fork (see `docs/superpowers/specs/2026-08-02-docs-rewrite-design.md`). Documents marked "не переписано" in `docs/README.md` are still inherited from upstream and are known to contradict the code in places — verify against the source before relying on them.
-
 | What you need to do | Where to look |
 | ------------------- | ------------- |
 | Understand the fork: stack, layout, request lifecycle | `docs/architecture.md` |
 | Config directives, `dev_mode` / `debug_mode` / debug bar | `docs/configuration.md` |
 | Database operations / ORM | `docs/entities.md` |
-| DI container, service registration | `docs/di_container.md`, `docs/service_locator.md` |
+| DI container, service registration, ServiceLocator | `docs/di.md` |
 | Controllers (front/backend) | `docs/controllers.md` |
 | Routes | `docs/routes.md` |
 | Business logic (helpers) | `docs/helpers.md` |
 | Collecting POST data | `docs/requests.md` |
-| Creating / structuring a module | `docs/modules/quick_start.md`, `docs/modules/README.md`, `docs/modules/init.md` |
+| Creating / structuring a module | `docs/modules/README.md` (section index), `docs/modules/quick-start.md`, `docs/modules/structure.md` |
+| Module lifecycle: `install()` / `init()` / `update_x_y_z()` | `docs/modules/lifecycle.md` |
+| Full `AbstractInit` method reference | `docs/modules/init-reference.md` |
 | Extending helpers/requests from a module | `docs/modules/extenders.md` |
-| DB migrations | `docs/modules/table_migrate.md` |
-| Modifying a `.tpl` without editing it | `docs/tpl_modifiers.md` |
-| JS/CSS files | `docs/js_css_files.md` |
-| Smarty plugins | `docs/smarty_plugins.md` |
-| Scheduler | `docs/scheduler.md` |
-| Discounts | `docs/discounts_management.md` |
+| DB migrations | `docs/modules/migrations.md` |
+| Admin section from a module | `docs/modules/backend.md` |
+| Storefront page from a module | `docs/modules/frontend.md` |
+| Templates, themes, Smarty 5 pitfalls | `docs/templates.md` |
+| Modifying a `.tpl` without editing it | `docs/tpl-modifications.md` |
+| JS/CSS files | `docs/assets.md` |
+| Smarty plugins | `docs/smarty-plugins.md` |
+| CLI commands, scheduler | `docs/cli.md` |
+| Tests, phpstan, phpcs, smoke checks | `docs/testing.md` |
+| Discounts | `docs/discounts.md` |
 | Security boundaries and upgrade notes | `docs/UPGRADE-security.md` |
 | Porting a theme to this fork | `docs/theme-porting.md` |
 | Import / Export | `docs/import.md`, `docs/export.md` |
@@ -125,7 +129,7 @@ Do not edit core files, theme `.tpl` files, or another module's files. Extend be
 ### Entity (ORM)
 
 - Never write raw SQL for `get`, `find`, `insert`, `update`, `delete` — the base `Entity` class handles them. Do not write raw SQL for CRUD at all.
-- Default SELECT limit is 100 rows. Use `noLimit()` only when necessary.
+- There is no implicit row cap: `find([])` emits **no** `LIMIT` at all. The 100-row default is the page size and only applies when `page` is passed without `limit`. Pass `limit` explicitly; `noLimit()` is rarely needed. See `docs/entities.md`.
 - Language fields (`$langFields`) live in `__lang_{table}` and are joined automatically.
 - Custom filter inside an Entity → declare a protected `filter__<name>($val, $filter)` method.
 - To add a filter/field to another Entity from a module → `registerEntityFilter()` / `registerEntityField()` in `Init::init()`.
