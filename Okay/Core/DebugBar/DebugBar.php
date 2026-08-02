@@ -3,18 +3,18 @@
 namespace Okay\Core\DebugBar;
 
 use Aura\Sql\ExtendedPdo;
-use DebugBar\Bridge\MonologCollector;
+use DebugBar\Bridge\Monolog\MonologCollector;
 use DebugBar\DataCollector\DataCollectorInterface;
 use DebugBar\DataCollector\MemoryCollector;
 use DebugBar\DataCollector\MessagesCollector;
-use DebugBar\DataCollector\PDO\PDOCollector;
 use DebugBar\DataCollector\PDO\TraceablePDO;
 use DebugBar\DataCollector\PhpInfoCollector;
 use DebugBar\DataCollector\RequestDataCollector;
+use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DebugBar as LibDebugBar;
 use Monolog\Logger;
 use Okay\Core\DebugBar\DataCollectors\ConfigCollector;
-use Okay\Core\DebugBar\DataCollectors\TimeDataCollector;
+use Okay\Core\DebugBar\DataCollectors\PDOCollector;
 use Okay\Core\ServiceLocator;
 use Psr\Log\LoggerInterface;
 
@@ -25,6 +25,17 @@ class DebugBar
 
     /** @var ServiceLocator */
     private static $serviceLocator;
+
+    /**
+     * Значення конфіга, прочитані до init().
+     *
+     * index.php мусить знати debug_bar, перш ніж вмикати панель, тож увесь основний
+     * конфіг завантажується раніше за колектори — без буфера вкладка Config показувала
+     * тільки те, що дочитувалось потім (конфіги модулів).
+     *
+     * @var list<array{name: string, value: mixed, source: string}>
+     */
+    private static array $bufferedConfigValues = [];
 
     public static function init()
     {
@@ -56,6 +67,11 @@ class DebugBar
             $extendedPdo = self::$serviceLocator->getService(ExtendedPdo::class);
             $traceablePdo = new TraceablePDO($extendedPdo);
             DebugBar::addCollector(new PDOCollector($traceablePdo));
+
+            foreach (self::$bufferedConfigValues as $buffered) {
+                self::$debugBar['config']->set($buffered['name'], $buffered['value'], $buffered['source']);
+            }
+            self::$bufferedConfigValues = [];
         }
     }
 
@@ -69,8 +85,9 @@ class DebugBar
     public static function getCollector($name)
     {
         if (!is_null(self::$debugBar)) {
-            self::$debugBar->getCollector($name);
+            return self::$debugBar->getCollector($name);
         }
+        return null;
     }
 
     public static function stackData()
@@ -89,9 +106,12 @@ class DebugBar
 
     public static function setConfigValue($name, $value, $source)
     {
-        if (!is_null(self::$debugBar)) {
-            self::$debugBar['config']->set($name, $value, $source);
+        if (is_null(self::$debugBar)) {
+            self::$bufferedConfigValues[] = ['name' => $name, 'value' => $value, 'source' => $source];
+            return;
         }
+
+        self::$debugBar['config']->set($name, $value, $source);
     }
 
     public static function getRenderer()
@@ -102,10 +122,38 @@ class DebugBar
         return null;
     }
 
-    public static function startMeasure($name, $label = null, $collector = null, $aggregate = false)
+    /**
+     * Inline-асети панелі (стилі й скрипти symfony/var-dumper) готовими тегами.
+     *
+     * JavascriptRenderer::render() їх не виводить, а у файли вони не потрапляють —
+     * HtmlDataFormatter віддає їх лише як inline_css/inline_js.
+     */
+    public static function getInlineAssets(): string
+    {
+        if (($renderer = self::getRenderer()) === null) {
+            return '';
+        }
+
+        $assets = $renderer->getAssets(null);
+        $html = '';
+
+        foreach ($assets['inline_css'] as $content) {
+            $html .= '<style>' . $content . '</style>' . "\n";
+        }
+        foreach ($assets['inline_js'] as $content) {
+            $html .= '<script type="text/javascript">' . $content . '</script>' . "\n";
+        }
+        foreach ($assets['inline_head'] as $content) {
+            $html .= $content . "\n";
+        }
+
+        return $html;
+    }
+
+    public static function startMeasure($name, $label = null, $collector = null, $group = null)
     {
         if (!is_null(self::$debugBar)) {
-            self::$debugBar['time']->startMeasure($name, $label, $collector, $aggregate);
+            self::$debugBar['time']->startMeasure($name, $label, $collector, $group);
         }
     }
 
@@ -200,7 +248,7 @@ class DebugBar
             $vendorName = preg_replace('~Okay\\\\Modules\\\\([a-zA-Z0-9]+)\\\\([a-zA-Z0-9]+)\\\\?.*~', '$1', $extension->class);
             $moduleName = preg_replace('~Okay\\\\Modules\\\\([a-zA-Z0-9]+)\\\\([a-zA-Z0-9]+)\\\\?.*~', '$2', $extension->class);
 
-            self::startMeasure("$vendorName/$moduleName", "Module $vendorName/$moduleName", null, true);
+            self::startMeasure("$vendorName/$moduleName", "Module $vendorName/$moduleName", null, "$vendorName/$moduleName");
         }
     }
 
@@ -220,7 +268,7 @@ class DebugBar
             $vendorName = preg_replace('~Okay/Modules/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)/?.*~', '$1', $blockTplFile);
             $moduleName = preg_replace('~Okay/Modules/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)/?.*~', '$2', $blockTplFile);
 
-            self::startMeasure("$vendorName/$moduleName", "Module $vendorName/$moduleName", null, true);
+            self::startMeasure("$vendorName/$moduleName", "Module $vendorName/$moduleName", null, "$vendorName/$moduleName");
         }
     }
 
