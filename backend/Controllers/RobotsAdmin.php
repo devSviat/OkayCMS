@@ -31,7 +31,11 @@ class RobotsAdmin extends IndexAdmin
         if ($type == 'write') {
             $perms = is_writable('robots.txt');
             if ($perms) {
-                file_put_contents('robots.txt', strip_tags($data), LOCK_EX);
+                // Браузер шле вміст textarea з CRLF - так вимагає HTML. Без
+                // нормалізації кожне збереження переписувало весь файл у
+                // windows-переноси, навіть якщо в ньому нічого не міняли.
+                $content = str_replace(["\r\n", "\r"], "\n", strip_tags($data));
+                file_put_contents('robots.txt', $content, LOCK_EX);
                 $this->design->assign('message_success', 'updated');
             } else {
                 $this->design->assign('message_error','write_error');

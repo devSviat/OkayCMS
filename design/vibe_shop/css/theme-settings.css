@@ -5,20 +5,20 @@
 
 :root {
 	--okay-button-color: #17171a;
-	--okay-button-text: #ffffff;
+	--okay-button-text: #fff;
 	--okay-button-color-hover: #2b2b2f;
-	--okay-button-text-hover: #ffffff;
+	--okay-button-text-hover: #fff;
 	--okay-basic-company: #17171a;
 	--okay-second-company: #17171a;
-	--okay-basic-company-text: #ffffff;
+	--okay-basic-company-text: #fff;
 	--okay-second-company-text: #f5f5f6;
 	--okay-bg: #f5f5f6;
 	--okay-body-text: #1c1c20;
 	--okay-body-heading: #1c1c20;
-	--okay-boxed-color: #ffffff;
+	--okay-boxed-color: #fff;
 	--okay-boxed-text: #1c1c20;
-	--okay-button-second-color: #ffffff;
+	--okay-button-second-color: #fff;
 	--okay-button-second-text: #1c1c20;
-	--okay-shadow-color: 0 2px 4px rgba(23,23,26,.05), 0 8px 16px -4px rgba(23,23,26,.08);
+	--okay-shadow-color: 0 2px 4px rgba(23, 23, 26, .05), 0 8px 16px -4px rgba(23, 23, 26, .08);
 	--okay-border-color: #88888b;
 }
