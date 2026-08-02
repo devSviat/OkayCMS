@@ -93,8 +93,8 @@ class CssConfig
         }
 
         $resultFile = '/**' . PHP_EOL;
-        $resultFile .= '* Файл стилей для настройки шаблона.' . PHP_EOL;
-        $resultFile .= '* Регистрировать этот файл для подключения в шаблоне не нужно' . PHP_EOL;
+        $resultFile .= '* Файл стилів для налаштування шаблону.' . PHP_EOL;
+        $resultFile .= '* Реєструвати цей файл для підключення в шаблоні не потрібно' . PHP_EOL;
         $resultFile .= '*/' . PHP_EOL . PHP_EOL;
 
         // The parser keeps the comments it read, and the renderer emits them again -

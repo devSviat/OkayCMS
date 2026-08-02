@@ -13,7 +13,10 @@ use PHPUnit\Framework\TestCase;
  */
 class CssConfigSettingsFileTest extends TestCase
 {
-    private const HEADER_MARKER = 'Файл стилей для настройки шаблона';
+    private const HEADER_MARKER = 'Файл стилів для налаштування шаблону';
+
+    /** Шапка, з якою файл приїхав від апстріму: має зникати при першому ж збереженні. */
+    private const LEGACY_HEADER_MARKER = 'Файл стилей для настройки шаблона';
 
     /** @var string */
     private $settingsFile;
@@ -55,7 +58,8 @@ CSS
 
     public function testRepeatedSavesKeepExactlyOneHeader(): void
     {
-        $this->assertSame(1, $this->headerCount(), 'fixture should start with one header');
+        // Файл-фікстура має стару шапку - так виглядає тема на наявному сайті.
+        $this->assertSame(0, $this->headerCount(), 'fixture starts with the legacy header');
 
         foreach (['#00a7ef', '#ff0000', '#00a7ef'] as $colour) {
             // A fresh instance per save: the admin builds one per request, and the
@@ -63,6 +67,12 @@ CSS
             $this->makeConfig()->updateCssVariables(['--okay-basic-company' => $colour]);
             $this->assertSame(1, $this->headerCount(), 'each save must leave exactly one header');
         }
+
+        $this->assertStringNotContainsString(
+            self::LEGACY_HEADER_MARKER,
+            file_get_contents($this->settingsFile),
+            'the legacy header must not survive a save'
+        );
     }
 
     public function testTheSubmittedValueIsWritten(): void
