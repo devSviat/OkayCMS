@@ -673,6 +673,7 @@ $lang['user_name'] = 'Enter user name';
 $lang['user_not_in_group'] = 'Not in the group';
 $lang['user_options'] = 'User Options';
 $lang['user_orders'] = 'User orders';
+$lang['user_added'] = 'User added';
 $lang['user_updated'] = 'User updated';
 $lang['user_user'] = 'User:';
 $lang['users_by_date'] = 'by date';

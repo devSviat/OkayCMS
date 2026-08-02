@@ -25,8 +25,21 @@ class UserAdmin extends IndexAdmin
             if ($error = $backendValidateHelper->getUsersValidateError($user)) {
                 $this->design->assign('message_error', $error);
             } else {
-                $preparedUser = $backendUsersHelper->prepareUpdate($user);
-                $backendUsersHelper->update($preparedUser->id, $preparedUser);
+                // Сторінка відкривається і без id - як форма створення покупця.
+                // update() з порожнім id не оновлює жодного рядка, тож новий
+                // покупець просто зникав: ні запису, ні повідомлення.
+                if (empty($user->id)) {
+                    $preparedUser = $backendUsersHelper->prepareAdd($user);
+                    $preparedUser->id = $backendUsersHelper->add($preparedUser);
+
+                    $this->postRedirectGet->storeMessageSuccess('added');
+                    $this->postRedirectGet->storeNewEntityId($preparedUser->id);
+                } else {
+                    $preparedUser = $backendUsersHelper->prepareUpdate($user);
+                    $backendUsersHelper->update($preparedUser->id, $preparedUser);
+
+                    $this->postRedirectGet->storeMessageSuccess('updated');
+                }
 
                 $this->postRedirectGet->redirect();
             }

@@ -21,7 +21,9 @@
             <div class="alert alert--center alert--icon alert--success">
                 <div class="alert__content">
                     <div class="alert__title">
-                    {if $message_success=='updated'}
+                    {if $message_success=='added'}
+                        {$btr->user_added|escape}
+                    {elseif $message_success=='updated'}
                         {$btr->user_updated|escape}
                     {else}
                         {$message_success|escape}
