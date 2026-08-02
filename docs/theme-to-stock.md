@@ -30,7 +30,12 @@
 
 ## Що переїжджає без жодної правки
 
-Перевірено звіркою з `origin/master` (дзеркало `OkayCMS/OkayCMS@master`).
+Усе нижче звірено з `OkayCMS/OkayCMS@master`, коміт `8e1e0075`. Відтворити звірку:
+
+```bash
+git remote add upstream https://github.com/OkayCMS/OkayCMS.git   # один раз
+git fetch upstream
+```
 
 **Усі теги й модифікатори, які тема використовує, у стоковій є.** Тема вживає
 `convert`, `resize`, `webp`, `read_svg`, `plural`, `phone`, `json_ld_text`, `date`, `time`,
