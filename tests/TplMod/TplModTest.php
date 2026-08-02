@@ -10,12 +10,14 @@ use Okay\Core\TplMod\Nodes\BaseNode;
 use Okay\Core\TplMod\Nodes\HtmlNode;
 use Okay\Core\TplMod\Parser;
 use Okay\Core\TplMod\TplMod;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class TplModTest extends \PHPUnit\Framework\TestCase
 {
 
     protected BaseNode $baseNode;
-    public function __construct(?string $name = null, array $data = [], $dataName = '')
+    // TestCase::__construct() у PHPUnit 10+ final, дерево будується перед кожним тестом.
+    protected function setUp(): void
     {
         $this->baseNode = new BaseNode('document');
         $divFoo = new HtmlNode('<div class="foo">', '</div>');
@@ -26,28 +28,26 @@ class TplModTest extends \PHPUnit\Framework\TestCase
         $body->append($divBar);
         $html->append($body);
         $this->baseNode->append($html);
-
-        parent::__construct($name, $data, $dataName);
     }
 
     /**
      * @param TplChangeDTO $changeDTO
      * @param string $expectedResult
      * @param bool $debug
-     * @dataProvider applyModDataProvider
      * @throws \Exception
      */
+    #[DataProvider('applyModDataProvider')]
     public function testApplyMod(TplChangeDTO $changeDTO, string $expectedResult, bool $debug = false)
     {
-        $parserStub = $this->getMockBuilder(Parser::class)->getMock();
-        $configStub = $this->getMockBuilder(Config::class)->disableOriginalConstructor()->getMock();
+        $parserStub = $this->createStub(Parser::class);
+        $configStub = $this->createStub(Config::class);
         $configStub->method('get')
-            ->will($this->returnValueMap([
+            ->willReturnMap([
                 [
                     'dev_mode',
                     $debug
                 ],
-            ]));
+            ]);
         $tplMod = new TplMod($parserStub, $configStub);
 
         $baseNode = clone $this->baseNode;
@@ -68,7 +68,7 @@ class TplModTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expectedResult, $resultHtml);
     }
     
-    public function applyModDataProvider(): array
+    public static function applyModDataProvider(): array
     {
         return [
             [

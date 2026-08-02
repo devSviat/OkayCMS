@@ -3,6 +3,7 @@
 namespace Security;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Ця ітерація не змінює схему БД. Тест тримає цю властивість:
@@ -25,9 +26,7 @@ class NoDatabaseChangeTest extends TestCase
         $this->assertSame($baseline, $current, 'A file was added to or removed from 1DB_changes/');
     }
 
-    /**
-     * @dataProvider ddlKeywordProvider
-     */
+    #[DataProvider('ddlKeywordProvider')]
     public function testSecurityCodeContainsNoDdl($keyword)
     {
         $root = dirname(__DIR__, 2);
@@ -43,7 +42,7 @@ class NoDatabaseChangeTest extends TestCase
         $this->assertSame([], $offenders, $keyword . ' found in Okay/Core/Security');
     }
 
-    public function ddlKeywordProvider()
+    public static function ddlKeywordProvider()
     {
         return [
             'alter table'  => ['ALTER TABLE'],

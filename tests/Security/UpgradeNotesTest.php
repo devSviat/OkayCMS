@@ -3,18 +3,17 @@
 namespace Security;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class UpgradeNotesTest extends TestCase
 {
-    /**
-     * @dataProvider requiredTopicProvider
-     */
+    #[DataProvider('requiredTopicProvider')]
     public function testUpgradeNotesCoverEveryBreakingChange($topic)
     {
         $this->assertStringContainsString($topic, $this->notes());
     }
 
-    public function requiredTopicProvider()
+    public static function requiredTopicProvider()
     {
         return [
             'frontend session'  => ['okay_sid'],
@@ -33,14 +32,14 @@ class UpgradeNotesTest extends TestCase
     /**
      * Пропущені дефекти мають лишатися видимими, а не зникнути тихо.
      *
-     * @dataProvider knownOpenProvider
      */
+    #[DataProvider('knownOpenProvider')]
     public function testKnownOpenDefectsAreDocumented($topic)
     {
         $this->assertStringContainsString($topic, $this->notes());
     }
 
-    public function knownOpenProvider()
+    public static function knownOpenProvider()
     {
         return [
             'wayforpay'  => ['WayForPay'],

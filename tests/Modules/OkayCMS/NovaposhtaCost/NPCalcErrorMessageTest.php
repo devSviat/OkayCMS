@@ -3,6 +3,7 @@
 namespace Modules\OkayCMS\NovaposhtaCost;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Невдалий розрахунок доставки не показував нічого - напис "Вычисляем..."
@@ -15,9 +16,7 @@ class NPCalcErrorMessageTest extends TestCase
 
     private const MODULE = __DIR__ . '/../../../../Okay/Modules/OkayCMS/NovaposhtaCost';
 
-    /**
-     * @dataProvider languageProvider
-     */
+    #[DataProvider('languageProvider')]
     public function testEveryLanguageDefinesTheMessage(string $language): void
     {
         $lang = [];
@@ -27,7 +26,7 @@ class NPCalcErrorMessageTest extends TestCase
         $this->assertNotSame('', trim($lang[self::KEY]));
     }
 
-    public function languageProvider(): array
+    public static function languageProvider(): array
     {
         return ['ua' => ['ua'], 'ru' => ['ru'], 'en' => ['en']];
     }

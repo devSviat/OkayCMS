@@ -7,14 +7,15 @@ namespace Core\Modules\Extender;
 use Okay\Core\Modules\Extender\AbstractExtender;
 use Okay\Core\Modules\Extender\ExtensionInterface;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class AbstractExtenderTest extends TestCase
 {
     /**
      * @param $path
      * @param $expectedResult
-     * @dataProvider deprecatedMethodsDataProvider
      */
+    #[DataProvider('deprecatedMethodsDataProvider')]
     public function testLoadDeprecatedMethods($config, $expectedResult)
     {
         /** @var AbstractExtender $abstractExtender */
@@ -31,15 +32,15 @@ class AbstractExtenderTest extends TestCase
 
     /**
      * @param $deprecated
-     * @dataProvider newExtensionsDataProvider
      */
+    #[DataProvider('newExtensionsDataProvider')]
     public function testNewExtension($deprecated, $expectedResult)
     {
         $abstractExtenderBuilder = $this
             ->getMockBuilder(AbstractExtender::class)
             ->onlyMethods(['checkAndCorrectDeprecatedMethod', 'validateExtension']);
 
-        $abstractExtender = $abstractExtenderBuilder->getMockForAbstractClass();
+        $abstractExtender = $abstractExtenderBuilder->getMock();
         if ($deprecated) {
             $abstractExtender
                 ->expects($this->once())
@@ -85,8 +86,8 @@ class AbstractExtenderTest extends TestCase
     /**
      * @param $trigger
      * @param $expectedResult
-     * @dataProvider correctDeprecatedMethodsDataProvider
      */
+    #[DataProvider('correctDeprecatedMethodsDataProvider')]
     public function testCheckAndCorrectDeprecatedMethod($trigger, $error, $expectedResult)
     {
         /** @var AbstractExtender $abstractExtender */
@@ -133,8 +134,8 @@ class AbstractExtenderTest extends TestCase
      * @param $classExtender
      * @param $exception
      * @param $exceptionMessage
-     * @dataProvider extensionsValidateDataProvider
      */
+    #[DataProvider('extensionsValidateDataProvider')]
     public function testValidateExtension($classExpandable, $classExtender, $exceptionMessage)
     {
         /** @var AbstractExtender $abstractExtender */
@@ -155,27 +156,24 @@ class AbstractExtenderTest extends TestCase
 
     /**
      * @param $trigger
-     * @dataProvider triggersDataProvider
      */
+    #[DataProvider('triggersDataProvider')]
     public function testExtensionLog($trigger, $expectedResult)
     {
-        $abstractExtender = $this
-            ->getMockBuilder(AbstractExtender::class)
-            ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
-
-        $reflector = new \ReflectionClass($abstractExtender);
+        // extensionLog() статичний, а PHPUnit 10+ не викликає статичні методи на моках —
+        // та мок тут і не потрібен, звертаємось до класу напряму.
+        $reflector = new \ReflectionClass(AbstractExtender::class);
         $property = $reflector->getProperty('triggers');
         $property->setValue(null, [
             'Okay\TestClass::testMethod' => ['test']
         ]);
 
-        $actualResult = $abstractExtender::extensionLog($trigger);
+        $actualResult = AbstractExtender::extensionLog($trigger);
 
         $this->assertEquals($actualResult, $expectedResult);
     }
 
-    public function deprecatedMethodsDataProvider()
+    public static function deprecatedMethodsDataProvider()
     {
         return [
             'Not empty config' => [
@@ -207,7 +205,7 @@ class AbstractExtenderTest extends TestCase
         ];
     }
 
-    public function newExtensionsDataProvider()
+    public static function newExtensionsDataProvider()
     {
         return [
             'With deprecated method' => [
@@ -235,7 +233,7 @@ class AbstractExtenderTest extends TestCase
         ];
     }
 
-    public function extensionsValidateDataProvider()
+    public static function extensionsValidateDataProvider()
     {
         return [
             'Wrong expandable method' => [
@@ -303,7 +301,7 @@ class AbstractExtenderTest extends TestCase
         ];
     }
 
-    public function triggersDataProvider()
+    public static function triggersDataProvider()
     {
         return [
             'Correct string trigger' => [
@@ -324,7 +322,7 @@ class AbstractExtenderTest extends TestCase
         ];
     }
 
-    public function correctDeprecatedMethodsDataProvider()
+    public static function correctDeprecatedMethodsDataProvider()
     {
         return [
             'Deprecated method with replace' => [

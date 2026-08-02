@@ -4,6 +4,7 @@ namespace Security;
 
 use Okay\Core\Security\Filemanager\PathResolver;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class FilemanagerPathResolverTest extends TestCase
 {
@@ -38,9 +39,7 @@ class FilemanagerPathResolverTest extends TestCase
         $this->assertSame(realpath($this->root), $resolver->resolve('.'));
     }
 
-    /**
-     * @dataProvider rejectedPathProvider
-     */
+    #[DataProvider('rejectedPathProvider')]
     public function testRejectsUnsafePaths($path)
     {
         $resolver = new PathResolver($this->root);
@@ -48,7 +47,7 @@ class FilemanagerPathResolverTest extends TestCase
         $this->assertNull($resolver->resolve($path));
     }
 
-    public function rejectedPathProvider()
+    public static function rejectedPathProvider()
     {
         return [
             'traversal'         => ['../../etc/passwd'],
@@ -72,15 +71,13 @@ class FilemanagerPathResolverTest extends TestCase
         $this->assertSame(realpath($this->root), $resolver->root());
     }
 
-    /**
-     * @dataProvider safeRequestPathProvider
-     */
+    #[DataProvider('safeRequestPathProvider')]
     public function testSafeRequestPathsPass($value)
     {
         $this->assertTrue(PathResolver::isSafeRelativePath($value), var_export($value, true));
     }
 
-    public function safeRequestPathProvider()
+    public static function safeRequestPathProvider()
     {
         return [
             'empty'      => [''],
@@ -92,15 +89,13 @@ class FilemanagerPathResolverTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider unsafeRequestPathProvider
-     */
+    #[DataProvider('unsafeRequestPathProvider')]
     public function testUnsafeRequestPathsAreRejected($value)
     {
         $this->assertFalse(PathResolver::isSafeRelativePath($value), var_export($value, true));
     }
 
-    public function unsafeRequestPathProvider()
+    public static function unsafeRequestPathProvider()
     {
         return [
             'traversal'      => ['../etc/passwd'],

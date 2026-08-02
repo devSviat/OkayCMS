@@ -4,6 +4,7 @@ namespace Security;
 
 use Okay\Core\Security\SvgSanitizer;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class SvgSanitizerTest extends TestCase
 {
@@ -94,15 +95,13 @@ class SvgSanitizerTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider rejectedInputProvider
-     */
+    #[DataProvider('rejectedInputProvider')]
     public function testNonSvgInputIsRejected($input)
     {
         $this->assertNull((new SvgSanitizer())->sanitize($input));
     }
 
-    public function rejectedInputProvider()
+    public static function rejectedInputProvider()
     {
         return [
             'empty'      => [''],

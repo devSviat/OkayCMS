@@ -5,6 +5,7 @@ namespace Design;
 
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 require_once __DIR__ . '/SmartyTagScanner.php';
 
@@ -19,9 +20,7 @@ class NoByReferenceModifiersTest extends TestCase
 {
     private const BY_REFERENCE = ['reset', 'key', 'next', 'prev', 'end', 'each'];
 
-    /**
-     * @dataProvider templateProvider
-     */
+    #[DataProvider('templateProvider')]
     public function testTemplateHasNoByReferenceModifiers(string $relativePath): void
     {
         $source = file_get_contents(dirname(__DIR__, 2) . '/' . $relativePath);
@@ -47,7 +46,7 @@ class NoByReferenceModifiersTest extends TestCase
         $this->assertSame([], $found, "{$relativePath}: передача параметра за посиланням");
     }
 
-    public function templateProvider(): array
+    public static function templateProvider(): array
     {
         $root = dirname(__DIR__, 2) . '/';
         $cases = [];

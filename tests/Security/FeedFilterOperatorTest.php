@@ -3,12 +3,11 @@
 namespace Security;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class FeedFilterOperatorTest extends TestCase
 {
-    /**
-     * @dataProvider runtimeAdapterProvider
-     */
+    #[DataProvider('runtimeAdapterProvider')]
     public function testRuntimeAdaptersNormalizeOperators($file)
     {
         $source = $this->read($file);
@@ -26,9 +25,7 @@ class FeedFilterOperatorTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider backendAdapterProvider
-     */
+    #[DataProvider('backendAdapterProvider')]
     public function testBackendAdaptersNormalizePostedOperators($file)
     {
         $source = $this->read($file);
@@ -46,9 +43,7 @@ class FeedFilterOperatorTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider baseAdapterProvider
-     */
+    #[DataProvider('baseAdapterProvider')]
     public function testAllowlistIsNarrow($file)
     {
         $source = $this->read($file);
@@ -84,9 +79,9 @@ class FeedFilterOperatorTest extends TestCase
         $this->assertSame([], array_values(array_unique($offenders)));
     }
 
-    public function runtimeAdapterProvider()
+    public static function runtimeAdapterProvider()
     {
-        return $this->rows('Okay/Modules/OkayCMS/Feeds/Core/Presets/Adapters/', [
+        return self::rows('Okay/Modules/OkayCMS/Feeds/Core/Presets/Adapters/', [
             'FacebookAdapter.php',
             'GoogleMerchantAdapter.php',
             'HotlineAdapter.php',
@@ -97,9 +92,9 @@ class FeedFilterOperatorTest extends TestCase
         ]);
     }
 
-    public function backendAdapterProvider()
+    public static function backendAdapterProvider()
     {
-        return $this->rows('Okay/Modules/OkayCMS/Feeds/Backend/Core/Presets/Adapters/', [
+        return self::rows('Okay/Modules/OkayCMS/Feeds/Backend/Core/Presets/Adapters/', [
             'BackendFacebookAdapter.php',
             'BackendGoogleMerchantAdapter.php',
             'BackendHotlineAdapter.php',
@@ -110,7 +105,7 @@ class FeedFilterOperatorTest extends TestCase
         ]);
     }
 
-    public function baseAdapterProvider()
+    public static function baseAdapterProvider()
     {
         return [
             'runtime' => ['Okay/Modules/OkayCMS/Feeds/Core/Presets/AbstractPresetAdapter.php'],
@@ -118,7 +113,7 @@ class FeedFilterOperatorTest extends TestCase
         ];
     }
 
-    private function rows($dir, array $files)
+    private static function rows($dir, array $files)
     {
         $rows = [];
         foreach ($files as $file) {

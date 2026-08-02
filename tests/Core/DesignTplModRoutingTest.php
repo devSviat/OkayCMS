@@ -6,6 +6,7 @@ use Okay\Core\Design;
 use Okay\Core\Modules\Modules;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Модулі змінюють .tpl через modifications у module.json, а Design обирає набір
@@ -20,13 +21,11 @@ class DesignTplModRoutingTest extends TestCase
 {
     private const ROOT = '/var/www/html/';
 
-    /**
-     * @dataProvider filepathProvider
-     */
+    #[DataProvider('filepathProvider')]
     public function testRoutesByTemplatePath($filepath, string $expected): void
     {
         $used = null;
-        $modules = $this->createMock(Modules::class);
+        $modules = $this->createStub(Modules::class);
         $modules->method('getBackendModulesTplModifications')
             ->willReturnCallback(function () use (&$used) {
                 $used = 'backend';
@@ -47,7 +46,7 @@ class DesignTplModRoutingTest extends TestCase
         $this->assertSame($expected, $used);
     }
 
-    public function filepathProvider(): array
+    public static function filepathProvider(): array
     {
         return [
             'шаблон адмінки' => [self::ROOT . 'backend/design/html/index.tpl', 'backend'],
@@ -60,7 +59,7 @@ class DesignTplModRoutingTest extends TestCase
 
     public function testContentIsReturnedUnchangedWhenNothingMatches(): void
     {
-        $modules = $this->createMock(Modules::class);
+        $modules = $this->createStub(Modules::class);
         $modules->method('getFrontModulesTplModifications')->willReturn([]);
 
         $design = (new ReflectionClass(Design::class))->newInstanceWithoutConstructor();

@@ -8,6 +8,7 @@ use Okay\Core\Modules\DTO\ModuleParamsDTO;
 use Okay\Core\Modules\Module;
 use Okay\Core\Modules\VersionControl;
 use Okay\Entities\ModulesEntity;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,9 +16,12 @@ use PHPUnit\Framework\TestCase;
  * Це давало два симптоми на сторінці модулів: "Deprecated: version_compare():
  * Passing null" у списку і кнопку оновлення, яка мовчки нічого не робила.
  *
- * convertDeprecationsToExceptions у phpunit.xml робить ці тести чутливими:
+ * failOnDeprecation у phpunit.xml робить ці тести чутливими:
  * повернення null у version_compare() або explode() завалить їх само собою.
  */
+// Тут потрібен саме частковий мок: onlyMethods([]) лишає справжні реалізації,
+// а стаб повернув би заглушки замість того, що перевіряється.
+#[AllowMockObjectsWithoutExpectations]
 class ModuleVersionNullTest extends TestCase
 {
     public function testVersionCompareSurvivesNull(): void
@@ -77,7 +81,7 @@ class ModuleVersionNullTest extends TestCase
     {
         $updated = null;
 
-        $modulesEntity = $this->createMock(ModulesEntity::class);
+        $modulesEntity = $this->createStub(ModulesEntity::class);
         $modulesEntity->method('findOne')->willReturn($module);
         $modulesEntity->method('update')->willReturnCallback(
             function ($id, $object) use (&$updated) {
@@ -85,10 +89,10 @@ class ModuleVersionNullTest extends TestCase
             }
         );
 
-        $entityFactory = $this->createMock(EntityFactory::class);
+        $entityFactory = $this->createStub(EntityFactory::class);
         $entityFactory->method('get')->willReturn($modulesEntity);
 
-        $params = $this->createMock(ModuleParamsDTO::class);
+        $params = $this->createStub(ModuleParamsDTO::class);
         $params->method('getVersion')->willReturn('1.2.0');
         $params->method('getMathVersion')->willReturn(101102100);
 

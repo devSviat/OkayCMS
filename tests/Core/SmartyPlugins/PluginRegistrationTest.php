@@ -5,6 +5,7 @@ namespace Core\SmartyPlugins;
 
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Клас плагіна в Plugins/ і його запис у масиві DI - дві різні зміни, і забути
@@ -43,9 +44,7 @@ class PluginRegistrationTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider moduleProvider
-     */
+    #[DataProvider('moduleProvider')]
     public function testEveryModulePluginIsRegisteredInItsInit(string $moduleDir): void
     {
         $root = self::rootDir();
@@ -74,7 +73,7 @@ class PluginRegistrationTest extends TestCase
         );
     }
 
-    public function moduleProvider(): array
+    public static function moduleProvider(): array
     {
         $root = self::rootDir();
         $cases = [];

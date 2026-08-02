@@ -8,6 +8,7 @@ use Okay\Core\SmartyPlugins\Plugins\Date;
 use Okay\Entities\LanguagesEntity;
 use Okay\Entities\TranslationsEntity;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Okay\Core\SmartyPlugins\Plugins\Date treated a strtotime() result of 0 as a
@@ -27,10 +28,10 @@ class DatePluginTest extends TestCase
         // that branch is where the front-end fatal was raised (date('N', ...)),
         // so the language and translation entities are stubbed rather than left
         // null - otherwise the interesting path cannot be exercised at all.
-        $languagesEntity = $this->createMock(LanguagesEntity::class);
+        $languagesEntity = $this->createStub(LanguagesEntity::class);
         $languagesEntity->method('get')->willReturn((object)['label' => 'ua']);
 
-        $translationsEntity = $this->createMock(TranslationsEntity::class);
+        $translationsEntity = $this->createStub(TranslationsEntity::class);
         $translationsEntity->method('find')->willReturnCallback(static function () {
             $rows = [];
             foreach (['D', 'l'] as $token) {
@@ -46,14 +47,14 @@ class DatePluginTest extends TestCase
             return $rows;
         });
 
-        $entityFactory = $this->createMock(EntityFactory::class);
+        $entityFactory = $this->createStub(EntityFactory::class);
         $entityFactory->method('get')->willReturnCallback(
             static function ($class) use ($languagesEntity, $translationsEntity) {
                 return $class === LanguagesEntity::class ? $languagesEntity : $translationsEntity;
             }
         );
 
-        $languages = $this->createMock(Languages::class);
+        $languages = $this->createStub(Languages::class);
         $languages->method('getLangId')->willReturn(1);
 
         return new Date($entityFactory, $languages);
@@ -100,9 +101,7 @@ class DatePluginTest extends TestCase
         $this->assertSame('2019-07-06', $plugin->run('2019-07-06 21:00:00'));
     }
 
-    /**
-     * @dataProvider unparseableDates
-     */
+    #[DataProvider('unparseableDates')]
     public function testUnparseableInputIsReturnedRatherThanFataling(string $input): void
     {
         $plugin = $this->makePlugin();
@@ -111,7 +110,7 @@ class DatePluginTest extends TestCase
         $this->assertSame($input, $plugin->run($input));
     }
 
-    public function unparseableDates(): array
+    public static function unparseableDates(): array
     {
         return [
             'empty string' => [''],
