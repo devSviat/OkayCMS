@@ -1,12 +1,12 @@
-# Ядро системы (Core)
+# Ядро системи (Core)
 
-Классы ядра располагаются в директории `Okay/Core/`.
-Все их инстансы (экземпляры) содержатся в [DI контейнере](./../di.md "Dependency injection container").
+Класи ядра лежать у каталозі `Okay/Core/`. Їхні екземпляри живуть у
+[DI-контейнері](./../di.md "Dependency injection container").
 
-Этот раздел постепенно расходится по тематическим справочникам: `Response` описан
-в [controllers.md](./../controllers.md), планировщик — в [scheduler.md](./../scheduler.md).
+Цей розділ поступово розходиться по тематичних довідниках: `Response` описаний
+у [controllers.md](./../controllers.md), планувальник — у [scheduler.md](./../scheduler.md).
 
-### Основные классы ядра
+### Основні класи ядра
 
 * [ManagerMenu](./ManagerMenu.md)
 * [Phone](./Phone.md)
