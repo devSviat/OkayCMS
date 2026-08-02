@@ -9,6 +9,7 @@ use Okay\Core\SmartyPlugins\Func;
 use Okay\Core\SmartyPlugins\Modifier;
 use Okay\Core\SmartyPlugins\Plugin;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 require_once __DIR__ . '/../../Design/TemplateTagInventory.php';
 
@@ -62,9 +63,7 @@ class PluginTypeResolutionTest extends TestCase
         $this->assertSame(Plugin::resolveType($plugin), Plugin::resolveType(get_class($plugin)));
     }
 
-    /**
-     * @dataProvider pluginProvider
-     */
+    #[DataProvider('pluginProvider')]
     public function testEveryShippedPluginResolvesToAType(string $class): void
     {
         $this->assertContains(

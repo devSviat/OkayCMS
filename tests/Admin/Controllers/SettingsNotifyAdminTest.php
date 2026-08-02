@@ -51,19 +51,29 @@ class SettingsNotifyAdminTest extends TestCase
     {
         $captured = null;
 
-        // Request має власний метод method(), тож білдер PHPUnit доводиться
-        // брати через expects() - інакше виклик іде в мок, а не в налаштування.
-        $request = $this->createMock(Request::class);
-        $request->expects($this->any())->method('method')->willReturnCallback(
-            static fn ($wanted) => strtoupper((string)$wanted) === $method
-        );
-        $request->expects($this->any())->method('post')->willReturn('');
+        // Request має власний метод method(), а PHPUnit 10+ відмовляється дублювати
+        // класи з таким іменем методу — звідси заглушка руками.
+        $request = new class($method) extends Request {
+            public function __construct(private string $requestMethod)
+            {
+            }
 
-        $response = $this->createMock(Response::class);
-        $response->expects($this->any())->method('setContent')->willReturnCallback(
+            public function method($method = null)
+            {
+                return strtoupper((string)$method) === $this->requestMethod;
+            }
+
+            public function post($name = null, $type = null, $default = null)
+            {
+                return '';
+            }
+        };
+
+        $response = $this->createStub(Response::class);
+        $response->method('setContent')->willReturnCallback(
             function ($content) use (&$captured) {
                 $captured = $content;
-                return $this->createMock(Response::class);
+                return $this->createStub(Response::class);
             }
         );
 

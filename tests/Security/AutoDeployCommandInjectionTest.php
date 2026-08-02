@@ -4,6 +4,7 @@ namespace Security;
 
 use Okay\Modules\OkayCMS\AutoDeploy\Helpers\DeployHelper;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class AutoDeployCommandInjectionTest extends TestCase
 {
@@ -12,8 +13,8 @@ class AutoDeployCommandInjectionTest extends TestCase
      * потрапляло в командний рядок. Перевіряємо, що після екранування
      * ін'єкція лишається частиною аргументу, а не стає окремою командою.
      *
-     * @dataProvider injectionProvider
      */
+    #[DataProvider('injectionProvider')]
     public function testInjectionPayloadStaysInsideASingleArgument($branch)
     {
         $command = DeployHelper::buildDeployCommand('/srv/module', '/usr/bin/', $branch);
@@ -28,7 +29,7 @@ class AutoDeployCommandInjectionTest extends TestCase
         $this->assertSame('-Dbranch=' . $branch, $argv[4]);
     }
 
-    public function injectionProvider()
+    public static function injectionProvider()
     {
         return [
             'quote and semicolon' => ['x" ; id ; echo "'],
@@ -53,9 +54,7 @@ class AutoDeployCommandInjectionTest extends TestCase
         $this->assertSame("/usr/bin/'; id; 'php", $argv[0]);
     }
 
-    /**
-     * @dataProvider rejectedChannelProvider
-     */
+    #[DataProvider('rejectedChannelProvider')]
     public function testGetBranchRejectsAnythingOutsideTheWhitelist($channel)
     {
         $helper = self::helperWithoutConstructor();
@@ -63,7 +62,7 @@ class AutoDeployCommandInjectionTest extends TestCase
         $this->assertNull($helper->getBranch($channel));
     }
 
-    public function rejectedChannelProvider()
+    public static function rejectedChannelProvider()
     {
         return [
             'injection'  => ['x" ; id ; echo "'],
@@ -77,9 +76,7 @@ class AutoDeployCommandInjectionTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider acceptedChannelProvider
-     */
+    #[DataProvider('acceptedChannelProvider')]
     public function testGetBranchAcceptsKnownChannels($channel)
     {
         $helper = self::helperWithoutConstructor();
@@ -87,7 +84,7 @@ class AutoDeployCommandInjectionTest extends TestCase
         $this->assertSame($channel, $helper->getBranch($channel));
     }
 
-    public function acceptedChannelProvider()
+    public static function acceptedChannelProvider()
     {
         return [
             'dev'        => ['dev'],

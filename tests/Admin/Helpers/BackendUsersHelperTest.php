@@ -6,6 +6,7 @@ use Okay\Admin\Helpers\BackendUsersHelper;
 use Okay\Core\EntityFactory;
 use Okay\Entities\OrdersEntity;
 use Okay\Entities\UsersEntity;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -24,6 +25,8 @@ class BackendUsersHelperTest extends TestCase
         $this->assertFalse($helper->getUser(0));
     }
 
+    // Той самий OrdersEntity сусідній тест перевіряє через expects(), тож це мок.
+    #[AllowMockObjectsWithoutExpectations]
     public function testExistingUserGetsItsOrders(): void
     {
         $helper = $this->helperFor((object)['id' => 7], $ordersEntity);
@@ -40,12 +43,12 @@ class BackendUsersHelperTest extends TestCase
      */
     private function helperFor($found, &$ordersEntity): BackendUsersHelper
     {
-        $usersEntity = $this->createMock(UsersEntity::class);
+        $usersEntity = $this->createStub(UsersEntity::class);
         $usersEntity->method('get')->willReturn($found);
 
         $ordersEntity = $this->createMock(OrdersEntity::class);
 
-        $entityFactory = $this->createMock(EntityFactory::class);
+        $entityFactory = $this->createStub(EntityFactory::class);
         $entityFactory->method('get')->willReturn($ordersEntity);
 
         $helper = (new ReflectionClass(BackendUsersHelper::class))->newInstanceWithoutConstructor();

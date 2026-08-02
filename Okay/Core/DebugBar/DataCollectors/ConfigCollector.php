@@ -1,56 +1,65 @@
 <?php
 
-
 namespace Okay\Core\DebugBar\DataCollectors;
 
+use DebugBar\DataFormatter\DataFormatter;
 
+/**
+ * Показує підсумкове значення кожного параметра конфіга і те, звідки воно прийшло.
+ *
+ * Конфіг збирається з кількох файлів (config.php, config.local.php), тому колектор тримає
+ * історію присвоєнь на ключ і сплющує її у рядок для рідного VariableListWidget.
+ */
 class ConfigCollector extends \DebugBar\DataCollector\ConfigCollector
 {
-    protected $useHtmlVarDumper = false;
+    /** @var array<string, list<array{value: mixed, source: string}>> новіше присвоєння першим */
+    private array $history = [];
 
-    public function set($name, $value, $source = '')
+    public function __construct(array $data = [], string $name = 'config')
     {
-        if (!isset($this->data[$name])) {
-            $this->data[$name] = [];
+        parent::__construct($data, $name);
+
+        // Значення ми складаємо в рядок самі, а віджет виводить його через textContent —
+        // sf-dump розмітка від дефолтного HtmlDataFormatter тут показалась би як текст.
+        $this->setDataFormatter(new DataFormatter());
+    }
+
+    public function set(string $name, mixed $value, string $source = ''): void
+    {
+        if (!isset($this->history[$name])) {
+            $this->history[$name] = [];
         }
 
-        array_unshift($this->data[$name], [
-            'value' => $value,
-            'source' => $source
+        array_unshift($this->history[$name], [
+            'value'  => $value,
+            'source' => $source,
         ]);
     }
 
-    public function collect()
+    public function reset(): void
     {
-        $data = array();
-        foreach ($this->data as $name => $changes) {
-            foreach ($changes as $i => $params) {
-                if ($this->isHtmlVarDumperUsed()) {
-                    $params['value'] = $this->getVarDumper()->renderVar($params['value']);
-                } else if (!is_string($params['value'])) {
-                    $params['value'] = $this->getDataFormatter()->formatVar($params['value']);
-                }
-                $data[$name][$i] = $params;
+        $this->history = [];
+    }
+
+    public function collect(): array
+    {
+        $data = [];
+        foreach ($this->history as $name => $changes) {
+            $parts = [];
+            foreach ($changes as $change) {
+                $value = $this->hideMaskedValues([$name => $change['value']])[$name];
+                $value = $this->getDataFormatter()->formatVar($value);
+
+                $parts[] = $change['source'] === '' ? $value : "$value ← {$change['source']}";
+            }
+
+            $data[$name] = array_shift($parts);
+            if ($parts !== []) {
+                $data[$name] .= ' (перекрито: ' . implode(', ', $parts) . ')';
             }
         }
         ksort($data);
 
         return $data;
-    }
-
-    public function getWidgets()
-    {
-        $name = $this->getName();
-        $widget = $this->isHtmlVarDumperUsed()
-            ? "PhpDebugBar.Widgets.HtmlVariableListWidget"
-            : "PhpDebugBar.Widgets.OkayVariableListWidget";
-        return array(
-            "$name" => array(
-                "icon" => "gear",
-                "widget" => $widget,
-                "map" => "$name",
-                "default" => "{}"
-            )
-        );
     }
 }

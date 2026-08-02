@@ -3,12 +3,11 @@
 namespace Security;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class CookieAttributesTest extends TestCase
 {
-    /**
-     * @dataProvider cookieFileProvider
-     */
+    #[DataProvider('cookieFileProvider')]
     public function testEverySetcookieUsesTheOptionsArrayForm($file)
     {
         $source = $this->read($file);
@@ -31,8 +30,8 @@ class CookieAttributesTest extends TestCase
      * Жодну з цих кук не читає JavaScript, тому всі вони httponly.
      * Виняток лише okay_csrf — він має власний тест.
      *
-     * @dataProvider cookieFileProvider
      */
+    #[DataProvider('cookieFileProvider')]
     public function testStorefrontAndAdminCookiesAreHttpOnly($file)
     {
         $source = $this->read($file);
@@ -40,7 +39,7 @@ class CookieAttributesTest extends TestCase
         $this->assertStringNotContainsString("'httponly' => false", $source, $file);
     }
 
-    public function cookieFileProvider()
+    public static function cookieFileProvider()
     {
         return [
             'browsed products' => ['Okay/Core/BrowsedProducts.php'],

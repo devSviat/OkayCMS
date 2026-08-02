@@ -5,6 +5,7 @@ namespace Design;
 
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 require_once __DIR__ . '/TemplateTagInventory.php';
 
@@ -21,9 +22,7 @@ require_once __DIR__ . '/TemplateTagInventory.php';
  */
 class NoCrossScopeFunctionVariableTest extends TestCase
 {
-    /**
-     * @dataProvider templateProvider
-     */
+    #[DataProvider('templateProvider')]
     public function testAssignmentInsideFunctionDoesNotLeakWithoutScope(string $relativePath): void
     {
         $source = file_get_contents(TemplateTagInventory::rootDir() . $relativePath);

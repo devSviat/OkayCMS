@@ -6,6 +6,7 @@ namespace Core\SmartyPlugins;
 
 use Design\TemplateTagInventory;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 require_once __DIR__ . '/../../Design/TemplateTagInventory.php';
 
@@ -17,9 +18,7 @@ require_once __DIR__ . '/../../Design/TemplateTagInventory.php';
  */
 class PluginSignatureTest extends TestCase
 {
-    /**
-     * @dataProvider pluginProvider
-     */
+    #[DataProvider('pluginProvider')]
     public function testRunDoesNotTypeHintASmartyClass(string $class): void
     {
         $run = (new \ReflectionClass($class))->getMethod('run');

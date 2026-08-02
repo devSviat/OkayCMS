@@ -6,6 +6,7 @@ use Okay\Core\Entity\CRUD;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use stdClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * CRUD::add()/update() iterate the object's fields and run strtolower() on each
@@ -17,9 +18,7 @@ use stdClass;
  */
 class CrudTest extends TestCase
 {
-    /**
-     * @dataProvider methodProvider
-     */
+    #[DataProvider('methodProvider')]
     public function testNullFieldDoesNotTriggerDeprecation(string $method): void
     {
         $entity = $this->makeEntity();
@@ -41,7 +40,7 @@ class CrudTest extends TestCase
         $this->expectNotToPerformAssertions();
     }
 
-    public function methodProvider(): array
+    public static function methodProvider(): array
     {
         return [
             'add'    => ['add'],

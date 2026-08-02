@@ -7,12 +7,11 @@ use Okay\Core\Modules\Modules;
 use Okay\Core\Scheduler\Scheduler;
 use Okay\Core\Scheduler\Task;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'scheduler:list', description: 'Show the list of scheduler task')]
 class SchedulerListCommand extends Command
 {
-    protected static $defaultName = 'scheduler:list';
-    protected static $defaultDescription = 'Show the list of scheduler task';
-
     protected function configure(): void
     {
         $this->setHelp('This command shows a list of all scheduled tasks.');

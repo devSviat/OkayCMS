@@ -634,8 +634,11 @@ class FrontTemplateConfig
     {
         /** @var JavascriptRenderer $debugBarRenderer */
         if ($debugBarRenderer = DebugBar::getRenderer()) {
-            // Регистрируем css файлы из библиотеки
-            foreach ($debugBarRenderer->getAssets('css', $debugBarRenderer::RELATIVE_PATH) as $cssFilePath) {
+            // Файлові асети бібліотеки. Inline-асети сюди не потрапляють — їх віддає
+            // DebugBar::getInlineAssets() прямо в шаблон.
+            $assets = $debugBarRenderer->getAssets($debugBarRenderer::RELATIVE_PATH);
+
+            foreach ($assets['css'] as $cssFilePath) {
                 $this->cssConfig->register(
                     (new Css('debug_bar_'.pathinfo($cssFilePath, PATHINFO_BASENAME)))
                         ->setPosition('footer')
@@ -644,8 +647,7 @@ class FrontTemplateConfig
                 );
             }
 
-            // Регистрируем js файлы из библиотеки
-            foreach ($debugBarRenderer->getAssets('js', $debugBarRenderer::RELATIVE_PATH) as $jsFilePath) {
+            foreach ($assets['js'] as $jsFilePath) {
                 $this->jsConfig->register(
                     (new Js('debug_bar_'.pathinfo($jsFilePath, PATHINFO_BASENAME)))
                         ->setPosition('footer')
@@ -653,14 +655,6 @@ class FrontTemplateConfig
                     $jsFilePath
                 );
             }
-
-            // Регистрируем js файлы из ядра
-            $this->jsConfig->register(
-                (new Js('debug_bar_core_widgets.js'))
-                    ->setPosition('footer')
-                    ->setIndividual(true),
-                'Okay/Core/DebugBar/Resources/js/widgets.js'
-            );
         }
     }
 

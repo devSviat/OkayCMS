@@ -7,6 +7,7 @@ namespace TplMod;
 use Okay\Core\Config;
 use Okay\Core\TplMod\Parser;
 use Okay\Core\TplMod\TplMod;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Шаблон, який модифікує якийсь модуль, проходить через TplMod: той розбирає файл
@@ -24,9 +25,7 @@ class ThemeTemplatesTplModTest extends \PHPUnit\Framework\TestCase
 {
     private const EXCERPT_LENGTH = 80;
 
-    /**
-     * @dataProvider templatesDataProvider
-     */
+    #[DataProvider('templatesDataProvider')]
     public function testTemplateSurvivesTplModRoundTrip(string $relativePath)
     {
         $original = file_get_contents(self::rootDir() . DIRECTORY_SEPARATOR . $relativePath);
@@ -54,7 +53,7 @@ class ThemeTemplatesTplModTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($originalText, $rebuiltText);
     }
 
-    public function templatesDataProvider(): array
+    public static function templatesDataProvider(): array
     {
         $rootDir = self::rootDir();
 
@@ -74,7 +73,7 @@ class ThemeTemplatesTplModTest extends \PHPUnit\Framework\TestCase
 
     private function rebuild(string $template): string
     {
-        $configStub = $this->getMockBuilder(Config::class)->disableOriginalConstructor()->getMock();
+        $configStub = $this->createStub(Config::class);
         $tplMod = new TplMod(new Parser(), $configStub);
 
         $methodBuild = (new \ReflectionClass(TplMod::class))->getMethod('build');

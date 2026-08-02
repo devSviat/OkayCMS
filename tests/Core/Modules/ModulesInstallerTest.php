@@ -9,6 +9,7 @@ use Okay\Core\Modules\Installer;
 use Okay\Core\Modules\Module;
 use Okay\Entities\ModulesEntity;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class ModulesInstallerTest extends TestCase
 {
@@ -41,10 +42,10 @@ class ModulesInstallerTest extends TestCase
         ],
     ];
     
-    public function __construct($name = null, array $data = [], $dataName = '')
+    protected function setUp(): void
     {
-        parent::__construct($name, $data, $dataName);
-        require_once 'StubModuleInitClass.php';
+        // TestCase::__construct() у PHPUnit 10+ final, тож заглушка підключається тут.
+        require_once __DIR__ . '/StubModuleInitClass.php';
     }
 
     /**
@@ -52,17 +53,17 @@ class ModulesInstallerTest extends TestCase
      * @param int $moduleInstallMathVersion
      * @param $expectedResult
      * @throws \ReflectionException
-     * @dataProvider getUpdateMethodsDataProvider
      */
+    #[DataProvider('getUpdateMethodsDataProvider')]
     public function testGetUpdateMethods(int $moduleCurrentMathVersion, int $moduleInstallMathVersion, $expectedResult)
     {
         
         
-        $entityFactoryStub = $this->getMockBuilder(EntityFactory::class)->disableOriginalConstructor()->getMock();
-        $moduleStub = $this->getMockBuilder(Module::class)->disableOriginalConstructor()->getMock();
+        $entityFactoryStub = $this->createStub(EntityFactory::class);
+        $moduleStub = $this->createStub(Module::class);
 
         // настраиваем ModuleStub
-        $moduleStub->method('getMathVersion')->will($this->returnValueMap($this->versionReturnMap));
+        $moduleStub->method('getMathVersion')->willReturnMap($this->versionReturnMap);
         
         // Т.к. метод приватный, доступ к нему получаем через рефлексию
         $reflector = new \ReflectionClass(Installer::class);
@@ -95,15 +96,15 @@ class ModulesInstallerTest extends TestCase
      * @param string $installedVersion
      * @param array $callUpdateMethods
      * @param string $newVersion
-     * @dataProvider updateDataProvider
      */
+    #[DataProvider('updateDataProvider')]
     public function testUpdate(int $moduleId, string $installedVersion, array $callUpdateMethods, string $newVersion)
     {
-        $entityFactoryStub = $this->getMockBuilder(EntityFactory::class)->disableOriginalConstructor()->getMock();
-        $moduleStub = $this->getMockBuilder(Module::class)->disableOriginalConstructor()->getMock();
+        $entityFactoryStub = $this->createStub(EntityFactory::class);
+        $moduleStub = $this->createStub(Module::class);
 
         // настраиваем ModuleStub
-        $moduleStub->method('getMathVersion')->will($this->returnValueMap($this->versionReturnMap));
+        $moduleStub->method('getMathVersion')->willReturnMap($this->versionReturnMap);
 
         $newMathVersion = $moduleStub->getMathVersion($newVersion);
 
@@ -118,12 +119,10 @@ class ModulesInstallerTest extends TestCase
         $moduleStub->method('getInitClassName')->willReturn(StubModuleInitClass::class);
         
         // настраиваем ModulesEntityStub
-        $modulesEntityStub = $this->getMockBuilder(ModulesEntity::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $modulesEntityStub = $this->createStub(ModulesEntity::class);
 
         $modulesEntityStub->method('findOne')
-            ->will($this->returnValueMap([
+            ->willReturnMap([
                 [
                     ['id' => 1],
                     (object)[
@@ -137,7 +136,7 @@ class ModulesInstallerTest extends TestCase
                     ['id' => 2],
                     false,
                 ],
-            ]));
+            ]);
 
         $modulesEntityStub->method('update')->willReturn(true);
 
@@ -146,7 +145,7 @@ class ModulesInstallerTest extends TestCase
         ];
         
         $entityFactoryStub->method('get')
-            ->will($this->returnValueMap($entityFactoryMap));
+            ->willReturnMap($entityFactoryMap);
 
         // Экстендим через анонимный класс наш установщик, чтобы передать ему мок класса Init
         // он там нужен для контроля вызова методов апдейтов
@@ -190,19 +189,19 @@ class ModulesInstallerTest extends TestCase
      * @param array $callUpdateMethods
      * @param string $newInstalledVersion
      * @throws \Exception
-     * @dataProvider installDataProvider
      */
+    #[DataProvider('installDataProvider')]
     public function testInstall(string $fullModuleName, array $callUpdateMethods, string $newInstalledVersion)
     {
-        $entityFactoryStub = $this->getMockBuilder(EntityFactory::class)->disableOriginalConstructor()->getMock();
-        $moduleStub = $this->getMockBuilder(Module::class)->disableOriginalConstructor()->getMock();
+        $entityFactoryStub = $this->createStub(EntityFactory::class);
+        $moduleStub = $this->createStub(Module::class);
 
         // настраиваем ModuleStub
         $moduleStub->method('getModuleDirectory')->willReturn($fullModuleName);
 
         $moduleStub->method('getInitClassName')->willReturn(StubModuleInitClass::class);
         
-        $moduleStub->method('getMathVersion')->will($this->returnValueMap($this->versionReturnMap));
+        $moduleStub->method('getMathVersion')->willReturnMap($this->versionReturnMap);
 
         $newMathVersion = $moduleStub->getMathVersion($newInstalledVersion);
 
@@ -215,16 +214,14 @@ class ModulesInstallerTest extends TestCase
             ->willReturn($modulesParamsDTO);
         
         // настраиваем ModulesEntityStub
-        $modulesEntityStub = $this->getMockBuilder(ModulesEntity::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $modulesEntityStub = $this->createStub(ModulesEntity::class);
 
         $modulesEntityStub->method('cols')->willReturnSelf();
 
         $modulesEntityStub->method('add')->willReturn(3);
         
         $modulesEntityStub->method('find')
-            ->will($this->returnValueMap([
+            ->willReturnMap([
                 [
                     [
                         'vendor' => 'OkayCMS',
@@ -245,7 +242,7 @@ class ModulesInstallerTest extends TestCase
                     ],
                     [],
                 ],
-            ]));
+            ]);
 
         if ($fullModuleName == 'OkayCMS/Banners') {
             $this->expectException(Exception::class);
@@ -256,7 +253,7 @@ class ModulesInstallerTest extends TestCase
         ];
 
         $entityFactoryStub->method('get')
-            ->will($this->returnValueMap($entityFactoryMap));
+            ->willReturnMap($entityFactoryMap);
 
         // Экстендим через анонимный класс наш установщик, чтобы передать ему мок класса Init
         // он там нужен для контроля вызова методов апдейтов
@@ -296,7 +293,7 @@ class ModulesInstallerTest extends TestCase
         
     }
 
-    public function updateDataProvider() : array
+    public static function updateDataProvider() : array
     {
         return [
             [
@@ -337,7 +334,7 @@ class ModulesInstallerTest extends TestCase
         ];
     }
     
-    public function installDataProvider() : array
+    public static function installDataProvider() : array
     {
         return [
             [
@@ -358,7 +355,7 @@ class ModulesInstallerTest extends TestCase
         ];
     }
     
-    public function getUpdateMethodsDataProvider() : array
+    public static function getUpdateMethodsDataProvider() : array
     {
         return [
             [

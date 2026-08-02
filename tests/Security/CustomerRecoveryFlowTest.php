@@ -3,6 +3,7 @@
 namespace Security;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class CustomerRecoveryFlowTest extends TestCase
 {
@@ -84,9 +85,7 @@ class CustomerRecoveryFlowTest extends TestCase
         $this->assertStringContainsString('autocomplete="new-password"', $template);
     }
 
-    /**
-     * @dataProvider languageFileProvider
-     */
+    #[DataProvider('languageFileProvider')]
     public function testNewLanguageKeysExistInEveryLanguage($file)
     {
         $source = file_get_contents(dirname(__DIR__, 2) . '/design/okay_shop/lang/' . $file);
@@ -104,7 +103,7 @@ class CustomerRecoveryFlowTest extends TestCase
         }
     }
 
-    public function languageFileProvider()
+    public static function languageFileProvider()
     {
         return [
             'ru' => ['ru.php'],

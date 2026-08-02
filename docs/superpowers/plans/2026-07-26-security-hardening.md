@@ -13,7 +13,7 @@
 - Security work only. No dependency upgrades (Smarty 5, Symfony 8, PHPMailer 7, Intervention Image, `wikimedia/minify` are all out of scope).
 - No `strict_types` declarations added to existing files. New files in `Okay/Core/Security/` also omit it, to match the surrounding codebase.
 - PHPUnit is 9.6 — use `/** @dataProvider */` docblock annotations, never PHP 8 attributes.
-- `phpunit.xml` sets `convertDeprecationsToExceptions`, `convertNoticesToExceptions` and `convertWarningsToExceptions` to `true`. Any PHP warning raised during a test fails that test. This is deliberate — several tasks rely on it.
+- `phpunit.xml` sets `failOnDeprecation`, `failOnNotice` and `failOnWarning` to `true` (before PHPUnit 10 the same job was done by `convertDeprecationsToExceptions` and friends). Any PHP warning raised during a test fails that test. This is deliberate — several tasks rely on it.
 - **No database changes of any kind.** No `ALTER TABLE`, no `CREATE TABLE`, no new columns, no index changes, no new file in `1DB_changes/`. This is a hard requirement, not a preference — Task 0 installs a guard test that fails the build if a migration file appears or DDL lands in new code, and Task 24 diffs the live schema against a baseline taken before the work starts. (Module `update_x_y_z()` methods are a legitimate part of the architecture and are not restricted; the schema diff is what catches one that actually changes the database.) Every value the plan writes fits a column that already exists:
 
   | Column | Type | Largest value written | Fits |

@@ -3,12 +3,11 @@
 namespace Okay\Core\Console\Commands\Module;
 
 use Okay\Core\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'module:create', description: 'Creates a file structure for a new module.')]
 class ModuleCreateCommand extends Command
 {
-    protected static $defaultName = 'module:create';
-    protected static $defaultDescription = 'Creates a file structure for a new module.';
-
     private $modulesDirectory;
 
     protected function configure(): void

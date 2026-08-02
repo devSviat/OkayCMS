@@ -5,6 +5,7 @@ namespace Core\Classes;
 use Okay\Core\Classes\Discount;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * DiscountsHelper::buildFromDB() assigns $id and $position on a Discount; they
@@ -13,9 +14,7 @@ use ReflectionClass;
  */
 class DiscountTest extends TestCase
 {
-    /**
-     * @dataProvider declaredPropertyProvider
-     */
+    #[DataProvider('declaredPropertyProvider')]
     public function testDeclaresProperty(string $property): void
     {
         $this->assertTrue(
@@ -24,7 +23,7 @@ class DiscountTest extends TestCase
         );
     }
 
-    public function declaredPropertyProvider(): array
+    public static function declaredPropertyProvider(): array
     {
         return [
             'id'       => ['id'],

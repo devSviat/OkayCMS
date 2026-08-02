@@ -4,18 +4,17 @@ namespace Security;
 
 use Okay\Core\Security\SafeFileName;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class SafeFileNameTest extends TestCase
 {
-    /**
-     * @dataProvider traversalProvider
-     */
+    #[DataProvider('traversalProvider')]
     public function testTraversalIsStrippedToASingleSegment($input, $expected)
     {
         $this->assertSame($expected, SafeFileName::basename($input));
     }
 
-    public function traversalProvider()
+    public static function traversalProvider()
     {
         return [
             // Саме ця форма пробивала trim($name, '.'): крайніх крапок немає,
@@ -32,15 +31,13 @@ class SafeFileNameTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider rejectedProvider
-     */
+    #[DataProvider('rejectedProvider')]
     public function testUnusableValuesBecomeEmptyString($input)
     {
         $this->assertSame('', SafeFileName::basename($input));
     }
 
-    public function rejectedProvider()
+    public static function rejectedProvider()
     {
         return [
             'nul byte'    => ["logo.png\0.php"],
@@ -54,15 +51,13 @@ class SafeFileNameTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider themeNameProvider
-     */
+    #[DataProvider('themeNameProvider')]
     public function testThemeNameKeepsOnlyASingleSafeSegment($input, $expected)
     {
         $this->assertSame($expected, SafeFileName::themeName($input));
     }
 
-    public function themeNameProvider()
+    public static function themeNameProvider()
     {
         return [
             // dirDelete('design/' . '../..') рекурсивно стирало каталоги поза design/.

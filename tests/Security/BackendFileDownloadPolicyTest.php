@@ -4,14 +4,15 @@ namespace Security;
 
 use Okay\Core\Security\BackendFileDownloadPolicy;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class BackendFileDownloadPolicyTest extends TestCase
 {
     /**
      * Цілі рівно ті, що переписує nginx (dev/config/nginx/okay.conf).
      *
-     * @dataProvider knownTargetProvider
      */
+    #[DataProvider('knownTargetProvider')]
     public function testKnownTargetsMapToSpecificPermissions($folder, $file, $ext, $permission)
     {
         $policy = new BackendFileDownloadPolicy();
@@ -19,7 +20,7 @@ class BackendFileDownloadPolicyTest extends TestCase
         $this->assertSame($permission, $policy->permissionFor($folder, $file, $ext));
     }
 
-    public function knownTargetProvider()
+    public static function knownTargetProvider()
     {
         return [
             'products export' => ['export', 'export', 'csv', 'export'],
@@ -42,9 +43,7 @@ class BackendFileDownloadPolicyTest extends TestCase
         $this->assertSame('export', $policy->permissionFor('export', 'export', 'CSV'));
     }
 
-    /**
-     * @dataProvider deniedProvider
-     */
+    #[DataProvider('deniedProvider')]
     public function testUnknownCombinationsAreDenied($folder, $file, $ext)
     {
         $policy = new BackendFileDownloadPolicy();
@@ -52,7 +51,7 @@ class BackendFileDownloadPolicyTest extends TestCase
         $this->assertNull($policy->permissionFor($folder, $file, $ext));
     }
 
-    public function deniedProvider()
+    public static function deniedProvider()
     {
         return [
             'unknown file'      => ['export', 'unknown', 'csv'],

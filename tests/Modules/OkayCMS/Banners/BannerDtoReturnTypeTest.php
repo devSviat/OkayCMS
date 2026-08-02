@@ -3,6 +3,7 @@
 namespace Modules\OkayCMS\Banners;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * The Banners backup/settings DTOs implement JsonSerializable. PHP 8.1 emits a
@@ -13,9 +14,7 @@ use PHPUnit\Framework\TestCase;
  */
 class BannerDtoReturnTypeTest extends TestCase
 {
-    /**
-     * @dataProvider dtoProvider
-     */
+    #[DataProvider('dtoProvider')]
     public function testHasNoTentativeReturnTypeDeprecation(string $fqcn): void
     {
         $vendorDir = dirname((new \ReflectionClass(\Composer\Autoload\ClassLoader::class))->getFileName(), 2);
@@ -39,7 +38,7 @@ class BannerDtoReturnTypeTest extends TestCase
         );
     }
 
-    public function dtoProvider(): array
+    public static function dtoProvider(): array
     {
         $ns = 'Okay\Modules\OkayCMS\Banners\DTO\\';
         return [
