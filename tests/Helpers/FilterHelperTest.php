@@ -45,6 +45,29 @@ class FilterHelperTest extends TestCase
         $this->assertSame([''], $result);
     }
 
+    /**
+     * Тема друкує в розмітку посилання-заглушку /price-min_max, яке JS підміняє
+     * числами. Нечислові межі доходили до Money::convert() і клали сторінку
+     * фатальною помилкою "Unsupported operand types: string * string".
+     */
+    public function testNonNumericPriceRangeIsIgnored(): void
+    {
+        /** @var FilterHelper $helper */
+        $helper = (new ReflectionClass(FilterHelper::class))->newInstanceWithoutConstructor();
+
+        $this->assertSame([], $helper->getCurrentPrices('price-min_max'));
+        $this->assertSame([], $helper->getCurrentPrices('price-_'));
+        $this->assertSame([], $helper->getCurrentPrices('price-100_abc'));
+    }
+
+    public function testNumericPriceRangeStillPassesThrough(): void
+    {
+        /** @var FilterHelper $helper */
+        $helper = (new ReflectionClass(FilterHelper::class))->newInstanceWithoutConstructor();
+
+        $this->assertSame(['min' => '100', 'max' => '5000'], $helper->getCurrentPrices('price-100_5000'));
+    }
+
     public function testHasNoImplicitNullableDeprecation(): void
     {
         $vendorDir = dirname((new \ReflectionClass(\Composer\Autoload\ClassLoader::class))->getFileName(), 2);

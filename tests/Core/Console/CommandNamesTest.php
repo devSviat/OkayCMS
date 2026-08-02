@@ -3,6 +3,7 @@
 namespace Core\Console;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 /**
@@ -30,7 +31,7 @@ class CommandNamesTest extends TestCase
         return $classes;
     }
 
-    /** @dataProvider commandClassProvider */
+    #[DataProvider('commandClassProvider')]
     public function testEveryCommandDeclaresItsNameThroughTheAttribute(string $class): void
     {
         $reflection = new \ReflectionClass($class);
@@ -40,7 +41,7 @@ class CommandNamesTest extends TestCase
         $this->assertNotEmpty($attributes[0]->newInstance()->name, "$class must have a command name");
     }
 
-    /** @dataProvider commandClassProvider */
+    #[DataProvider('commandClassProvider')]
     public function testNoCommandReliesOnTheRemovedStaticProperty(string $class): void
     {
         $source = file_get_contents((new \ReflectionClass($class))->getFileName());
