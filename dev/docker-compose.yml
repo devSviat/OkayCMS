@@ -58,7 +58,7 @@ services:
       retries: 3
       start_period: 10s
 
-  # Запускає `./ok scheduler:run` за розкладом — див. docs/scheduler.md.
+  # Запускає `./ok scheduler:run` за розкладом — див. docs/cli.md.
   scheduler:
     build: *php-build
     # tini — PID 1, обробляє сигнали й зомбі. -no-reap: tini вже це робить.

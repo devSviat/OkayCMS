@@ -1,137 +1,151 @@
 # Helpers
 
-Хелперы предназначены для того, чтобы вынести часть логики (бизнес логики, или логики приложения) из контроллера.
-Методы хелперов могут переиспользоваться в различных частях системы. Например Okay\Helpers\ProductsHelper::getProductList.
-Также методы любого хелпера могут [расширяться из модуля](./modules/extenders.md).
+Хелпер виносить логіку з контролера. Його метод перевикористовується в кількох місцях і, що
+важливіше, **може бути розширений модулем**. Звідси правило: усе, що складніше за передачу
+даних у шаблон, живе в хелпері, а не в контролері.
 
-Название всех сервисов хелперов заканчиваются на ключевое слово Helper.
-По умолчанию все хелперы хранятся в директории Okay/Helpers/ и backend/Helpers/.
+Живуть в `Okay/Helpers/` (вітрина) і `backend/Helpers/` (адмінка), імена класів закінчуються
+на `Helper`. Реєструються в `Okay/Core/config/helpers.php` як звичайні сервіси
+([di.md](di.md)); модуль оголошує свої в `Init/services.php`.
 
-Хелперы могут возвращать результат выполнения. Но результат выполенния дложен возвращаться не напрямую,
-а через ExtenderFacade::execute();.
-Метод execute() принимает три параметра, имя метода (строка или массив), в котором он запускается, данные которые нужно вернуть
-и массив аргументов данного метода.
+```php
+// Okay/Core/config/helpers.php
+BackendProductsHelper::class => [
+    'class' => BackendProductsHelper::class,
+    'arguments' => [
+        new SR(EntityFactory::class),
+        new SR(QueryFactory::class),
+        new SR(Database::class),
+        new SR(Image::class),
+        new SR(Config::class),
+        new SR(Request::class),
+    ],
+],
+```
 
-Пример возвращения результата в хелпером:
+## Контракт
+
+**Метод хелпера зобов'язаний повертати результат через `ExtenderFacade::execute()`.** Метод,
+що повертає значення напряму, з модуля не розширюється — а це і є єдина причина, чому шар
+хелперів існує.
+
 ```php
 return ExtenderFacade::execute(__METHOD__, $result, func_get_args());
-return ExtenderFacade::execute([static::class, __FUNCTION__], $result, func_get_args());
 ```
 
-Пример хелпера:
+Три аргументи: ім'я методу, значення, аргументи методу. У трейтах і базових класах —
+`[static::class, __FUNCTION__]`, бо `__METHOD__` там дав би ім'я трейта
+([modules/extenders.md](modules/extenders.md)).
+
+Повертати треба **на кожній гілці**, включно з ранніми виходами:
+
 ```php
-class BrandsHelper
+// Okay/Helpers/ProductsHelper.php
+public function getProductList($filter = [])
 {
+    $productsEntity = $this->entityFactory->get(ProductsEntity::class);
 
-    //...abstract 
-
-    public function getBrandsList($filter = [])
-    {
-        /** @var BrandsEntity $brandsEntity */
-        $brandsEntity = $this->entityFactory->get(BrandsEntity::class);
-        $brands = $brandsEntity->find($filter);
-        return ExtenderFacade::execute(__METHOD__, $brands, func_get_args());
+    if ($this->settings->get('missing_products') === MISSING_PRODUCTS_HIDE) {
+        $filter['in_stock'] = true;
     }
-}
-```
-Данный хелпер достает из базы список брендов. По большому счёту, это можно считать декоратором к методу 
-BrandsEntity::find().
 
-Более интересный пример:
-```php
-class ProductsHelper
-{
+    $products = $productsEntity->mappedBy('id')->find($filter);
 
-    //...abstract 
-    
-    public function getProductList($filter = [])
-    {
-        /** @var ProductsEntity $productsEntity */
-        $productsEntity = $this->entityFactory->get(ProductsEntity::class);
-        
-        if ($this->settings->get('missing_products') === MISSING_PRODUCTS_HIDE) {
-            $filter['in_stock'] = true;
-        }
-    
-        $products = $productsEntity->mappedBy('id')->find($filter);
-    
-        if (empty($products)) {
-            return ExtenderFacade::execute(__METHOD__, [], func_get_args());
-        }
-    
-        $products = $this->attachVariants($products);
-    
-        return ExtenderFacade::execute(__METHOD__, $products, func_get_args());
+    if (empty($products)) {
+        return ExtenderFacade::execute(__METHOD__, [], func_get_args());
     }
-}
-```
-данный хелпер не только достает список товаров, а и добавляет к ним варианты, тем самым декорируя результат 
-ProductsEntity::find().
 
-### ValidateHelper
+    $products = $this->attachVariants($products);
 
-Хелпер валидации требует отдельного внимания.
-Если все хелперы подроблены каждый под свою сущность, то хелпер валидации собрал 
-в себе валидации всех [реквестов](./requests.md).
-Методы там называются от обратного getFeedbackValidateError() и подобные.
-
-Пример: 
-```php
-use Okay\Core\Validator;
-//...abstract
-class ValidateHelper
-{
-
-    //...abstract 
-    /** @var Validator  */
-    private $validator;
-    //...abstract 
-
-    public function getFeedbackValidateError($feedback)
-    {
-        $captchaCode =  $this->request->post('captcha_code', 'string');
-        
-        $error = null;
-        if (!$this->validator->isName($feedback->name, true)) {
-            $error = 'empty_name';
-        } elseif (!$this->validator->isEmail($feedback->email, true)) {
-            $error = 'empty_email';
-        } elseif (!$this->validator->isComment($feedback->message, true)) {
-            $error = 'empty_text';
-        } elseif ($this->settings->get('captcha_feedback') && !$this->validator->verifyCaptcha('captcha_feedback', $captchaCode)) {
-            $error = 'captcha';
-        }
-    
-        return ExtenderFacade::execute(__METHOD__, $error, func_get_args());
-    }
+    return ExtenderFacade::execute(__METHOD__, $products, func_get_args());
 }
 ```
 
-Пример использования:
+Хелпер тут не просто дістає товари, а декорує результат `ProductsEntity::find()` — додає
+варіанти й враховує налаштування магазину. Такий хелпер має сенс; хелпер, що лише
+перенаправляє виклик у сутність, — переважно ні.
+
+## Використання
+
 ```php
-use Okay\Helpers\ValidateHelper;
-//...abstract
-class FeedbackController extends AbstractController
+public function render(BrandsHelper $brandsHelper)
 {
-    //...abstract
-    public function render(
-        //...abstract
-        CommonRequest $commonRequest,
-        ValidateHelper $validateHelper
-    ) {
-        if (($feedback = $commonRequest->postFeedback()) !== null) {
-            if ($error = $validateHelper->getFeedbackValidateError($feedback)) {
-                // Обработка ошибки
-            } else {
-                //...abstract
-            }
+    $brands = $brandsHelper->getList(['visible' => 1], 'name');
+    $this->design->assign('brands', $brands);
+}
+```
+
+## `ValidateHelper`
+
+Виняток із правила «один хелпер — одна сутність»: `Okay\Helpers\ValidateHelper` збирає
+валідацію **всіх** [запитів](requests.md) вітрини. Методи називаються від зворотного —
+повертають помилку, а не ознаку успіху:
+
+```php
+public function getUserError($user, $currentUserId): ?string
+public function getUserRegisterError($user): ?string
+public function getUserLoginError($email, $password): ?string
+public function getFeedbackValidateError($feedback): ?string
+public function getCartValidateError($order): ?string
+public function getCallbackValidateError($callback): ?string
+public function getCommentValidateError($comment): ?string
+public function getSubscribeValidateError($subscribe): ?string
+```
+
+```php
+// Okay/Helpers/ValidateHelper.php
+public function getFeedbackValidateError($feedback): ?string
+{
+    $captchaCode = $this->request->post('captcha_code', 'string');
+
+    $error = null;
+    if (!$this->validator->isName($feedback->name, true)) {
+        $error = 'empty_name';
+    } elseif (!$this->validator->isEmail($feedback->email, true)) {
+        $error = 'empty_email';
+    } elseif (!$this->validator->isComment($feedback->message, true)) {
+        $error = 'empty_text';
+    } elseif ($this->settings->get('captcha_feedback')
+        && !$this->validator->verifyCaptcha('captcha_feedback', $captchaCode)) {
+        $error = 'captcha';
+    }
+
+    return ExtenderFacade::execute(__METHOD__, $error, func_get_args());
+}
+```
+
+Типовий зв'язок «запит → валідація → дія» в контролері:
+
+```php
+public function render(CommonRequest $commonRequest, ValidateHelper $validateHelper)
+{
+    if (($feedback = $commonRequest->postFeedback()) !== null) {
+        $this->requireCustomerCsrf();
+
+        if ($error = $validateHelper->getFeedbackValidateError($feedback)) {
+            $this->design->assign('error', $error);
+        } else {
+            // …
         }
-        //...abstract
     }
 }
 ```
 
-#### Хелперы модулей <a name="modulesHelpers"></a>
-Модуль также может содержать свои хелперы. Рекомендуется по возможности, все логические части кода выносить в хелперы.
-Это обеспечит более гибкое взаимодействие между модулями. Хелперы модуля регистрируются также как и 
-[сервисы модуля](./modules/README.md#Initservices)
+## Застарілі методи
+
+Частина методів позначена як застаріла й лишена заради сумісності — вони викликають
+`trigger_error(..., E_USER_DEPRECATED)` і делегують новому методу:
+
+```php
+// Okay/Helpers/BrandsHelper.php
+public function getBrandsList($filter = [], $sort = null)   // → getList()
+```
+
+Перед тим як брати метод із прикладу в старому тексті, варто зазирнути в сам клас: у
+`phpunit.xml` увімкнено `failOnDeprecation`, тож у тестах такий виклик валить збірку.
+
+## Хелпери модуля
+
+Модуль може мати власні хелпери — і це рекомендований спосіб організації його коду: винесена в
+хелпер логіка стає доступною іншим модулям через розширення. Реєструються так само, як решта
+сервісів модуля ([modules/structure.md](modules/structure.md#initservicesphp)).

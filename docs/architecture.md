@@ -49,7 +49,7 @@ OkayCMS — PHP-платформа електронної комерції з м
    `SessionNames::startFrontend()` (`index.php:18-21`). Простори сесій вітрини й адмінки
    розділені, тож порядок тут важливий: одночасно активною може бути лише одна.
 3. **DI-контейнер** збирається з `Okay/Core/config/container.php` (`index.php:24`), з нього
-   береться `Config` — [di_container.md](di_container.md).
+   береться `Config` — [di.md](di.md).
 4. **Панель відладки** піднімається, якщо `debug_bar` **і** `debug_mode` увімкнені
    (`index.php:32-34`).
 5. **Мова.** `Router::resolveCurrentLanguage()` (`index.php:46`) визначає мову з префікса URL
@@ -57,7 +57,7 @@ OkayCMS — PHP-платформа електронної комерції з м
 6. **`debug_mode`** вмикає `display_errors` і `error_reporting(E_ALL)` (`index.php:48-51`).
 7. **Модулі.** `Modules::startEnabledModules()` (`index.php:80`) реєструє параметри, сервіси,
    маршрути й Smarty-плагіни кожного увімкненого модуля та викликає його `Init::init()` —
-   [modules/init.md](modules/init.md).
+   [modules/lifecycle.md](modules/lifecycle.md).
 8. **Маршрутизація.** `Router::run()` (`index.php:82`) перебирає маршрути, будує з `slug`
    регулярний вираз і віддає збіг у `bramus/router` — [routes.md](routes.md).
 9. **Контролер.** `Router::createControllerInstance()` створює контролер **без ін'єкції в
@@ -89,7 +89,7 @@ OkayCMS — PHP-платформа електронної комерції з м
    входу рендериться до появи сесії менеджера.
 
 Контролер модуля адресується як `?controller=Vendor.Module.ControllerName` —
-[modules/README.md](modules/README.md).
+[modules/backend.md](modules/backend.md).
 
 ## Межі безпеки форку
 
@@ -114,9 +114,9 @@ OkayCMS — PHP-платформа електронної комерції з м
 | ----- | ------ |
 | Написати модуль | [modules/README.md](modules/README.md) |
 | Робота з базою, ORM | [entities.md](entities.md) |
-| Зареєструвати сервіс, дістати залежність | [di_container.md](di_container.md) |
+| Зареєструвати сервіс, дістати залежність | [di.md](di.md) |
 | Маршрути й контролери | [routes.md](routes.md), [controllers.md](controllers.md) |
 | Налаштування, режими відладки | [configuration.md](configuration.md) |
-| Шаблони, плагіни, CSS/JS | [tpl_modifiers.md](tpl_modifiers.md), [js_css_files.md](js_css_files.md) |
-| Планувальник | [scheduler.md](scheduler.md) |
+| Шаблони, плагіни, CSS/JS | [templates.md](templates.md), [smarty-plugins.md](smarty-plugins.md), [assets.md](assets.md) |
+| Планувальник | [cli.md](cli.md) |
 | Перенести тему на форк | [theme-porting.md](theme-porting.md) |
