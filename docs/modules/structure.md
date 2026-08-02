@@ -82,7 +82,7 @@ preview.(jpg|jpeg|png|gif|svg)   картинка для списку модул
 - `math_version` — ключ парситься, але одразу перезаписується обчисленим значенням із `version`.
 - `moduleName` — трапляється в реальних файлах, але код його не читає взагалі.
 
-Синтаксис блоку `modifications` — [../tpl_modifiers.md](../tpl_modifiers.md).
+Синтаксис блоку `modifications` — [../tpl-modifications.md](../tpl-modifications.md).
 
 ## Версія модуля
 

@@ -182,7 +182,7 @@ $lang['faq_add'] = 'Додати FAQ';
 
 ## Стилі й скрипти
 
-`Backend/design/css.php` і `Backend/design/js.php` — [../js_css_files.md](../js_css_files.md).
+`Backend/design/css.php` і `Backend/design/js.php` — [../assets.md](../assets.md).
 Прямі теги `<script>` і `<link>` у шаблонах не використовуються.
 
 ## CSRF

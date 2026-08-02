@@ -101,9 +101,10 @@ Service wiring is centralized: core services in `Okay/Core/config/services.php` 
 | DB migrations | `docs/modules/migrations.md` |
 | Admin section from a module | `docs/modules/backend.md` |
 | Storefront page from a module | `docs/modules/frontend.md` |
-| Modifying a `.tpl` without editing it | `docs/tpl_modifiers.md` |
-| JS/CSS files | `docs/js_css_files.md` |
-| Smarty plugins | `docs/smarty_plugins.md` |
+| Templates, themes, Smarty 5 pitfalls | `docs/templates.md` |
+| Modifying a `.tpl` without editing it | `docs/tpl-modifications.md` |
+| JS/CSS files | `docs/assets.md` |
+| Smarty plugins | `docs/smarty-plugins.md` |
 | Scheduler | `docs/scheduler.md` |
 | Discounts | `docs/discounts_management.md` |
 | Security boundaries and upgrade notes | `docs/UPGRADE-security.md` |

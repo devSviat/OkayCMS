@@ -33,7 +33,7 @@
 | Додати сторінку вітрини | [frontend.md](frontend.md#сторінка-вітрини) |
 | Додати розділ в адмінку | [backend.md](backend.md) |
 | Вставити свою розмітку в чужу сторінку | [frontend.md](frontend.md#блоки-дизайну), [backend.md](backend.md#блоки-дизайну) |
-| Змінити чужий `.tpl`, не редагуючи його | [../tpl_modifiers.md](../tpl_modifiers.md) |
+| Змінити чужий `.tpl`, не редагуючи його | [../tpl-modifications.md](../tpl-modifications.md) |
 | Додати фільтр до чужої сутності | [init-reference.md](init-reference.md#registerentityfilter) |
 | Запустити періодичну задачу | [init-reference.md](init-reference.md#registerschedule) |
 | Написати модуль оплати чи доставки | [structure.md](structure.md#settingsxml--налаштування-оплати-й-доставки) |

@@ -158,7 +158,7 @@ FrontExtender::class => [
 ## Коли розширення не підходить
 
 - Треба змінити розмітку чужого шаблону → блок `modifications` у `module.json`
-  ([../tpl_modifiers.md](../tpl_modifiers.md)).
+  ([../tpl-modifications.md](../tpl-modifications.md)).
 - Треба вставити свою розмітку у відведене місце → блоки дизайну
   ([backend.md](backend.md#блоки-дизайну), [frontend.md](frontend.md#блоки-дизайну)).
 - Треба додати умову у вибірку чужої сутності → фільтр сутності

@@ -15,11 +15,11 @@
 | Підняти локальне оточення | [`dev/README.md`](../dev/README.md) |
 | Увімкнути відладку, розібратись із директивами | [configuration.md](configuration.md) |
 | Написати модуль | [modules/quick-start.md](modules/quick-start.md) |
-| Змінити чужий шаблон, не редагуючи його | [tpl_modifiers.md](tpl_modifiers.md) 🇷🇺 |
+| Змінити чужий шаблон, не редагуючи його | [tpl-modifications.md](tpl-modifications.md) |
 | Вклинитись у чужу логіку з модуля | [modules/extenders.md](modules/extenders.md) |
 | Працювати з базою | [entities.md](entities.md) |
 | Додати сторінку вітрини | [routes.md](routes.md), [controllers.md](controllers.md) |
-| Підключити CSS чи JS | [js_css_files.md](js_css_files.md) 🇷🇺 |
+| Підключити CSS чи JS | [assets.md](assets.md) |
 | Перенести свою тему на форк | [theme-porting.md](theme-porting.md) |
 | Зрозуміти, що змінила ітерація безпеки | [UPGRADE-security.md](UPGRADE-security.md) |
 
@@ -43,9 +43,10 @@
 
 ### Дизайн і шаблони
 
-* [Модифікація tpl-файлів](tpl_modifiers.md) 🇷🇺
-* [Smarty-плагіни](smarty_plugins.md) 🇷🇺
-* [Підключення зовнішніх файлів дизайну](js_css_files.md) 🇷🇺
+* [Шаблони](templates.md) — теми, `Design`, пастки Smarty 5, статичні класи
+* [Модифікація `.tpl` з модуля](tpl-modifications.md) — зміна чужої розмітки без її редагування
+* [Smarty-плагіни](smarty-plugins.md) — власні теги в шаблонах
+* [CSS і JS](assets.md) — конвеєр асетів, налаштування теми, пастки CSS-компілятора
 * [Перенесення теми на цей форк](theme-porting.md)
 
 ### Модулі

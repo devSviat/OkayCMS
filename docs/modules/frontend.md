@@ -125,7 +125,7 @@ $this->addFrontBlock(
 ```
 
 Значення операції може бути як розміткою, так і **іменем файлу** з `design/html/` модуля — як
-тут. Синтаксис і пастки — [../tpl_modifiers.md](../tpl_modifiers.md).
+тут. Синтаксис і пастки — [../tpl-modifications.md](../tpl-modifications.md).
 
 Після зміни `modifications` треба почистити `compiled/`. Для налагодження зручний
 `smarty_force_compile = true`.
@@ -145,7 +145,7 @@ return [
 
 Файли беруться з `design/js/` і `design/css/` модуля, і тема може їх перевизначити тим самим
 способом, що й шаблони. Прямі теги `<script>` і `<link>` не використовуються —
-[../js_css_files.md](../js_css_files.md).
+[../assets.md](../assets.md).
 
 ## Переклади вітрини
 
@@ -169,7 +169,7 @@ return [
 
 Клас плагіна успадковує `Okay\Core\SmartyPlugins\Func` або `Modifier`; тег береться з
 властивості `$tag` або з імені класу в нижньому регістрі. Докладно —
-[../smarty_plugins.md](../smarty_plugins.md).
+[../smarty-plugins.md](../smarty-plugins.md).
 
 **Плагін вимкненого модуля не зникає — він підміняється заглушкою**, що повертає порожній
 рядок. Шаблон, який його викликає, не ламається, а мовчки нічого не друкує.
