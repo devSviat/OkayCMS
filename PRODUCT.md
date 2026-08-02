@@ -88,52 +88,44 @@ warmth comes from typography, rhythm and tactile feedback — never from a beige
 
 # `design/okay_shop`
 
-The stock OkayCMS 4.5.2 theme, kept in the repository and currently being redesigned. A clean
-database starts on it (`theme = okay_shop` in the seed dump), so it is the first thing anyone
-sees after deploying the fork.
+The stock OkayCMS 4.5.2 theme, carried in this repository with the fork's security contract
+applied to it. A clean database starts on it (`theme = okay_shop` in the seed dump), so it is
+the first thing anyone sees after deploying the fork.
 
-**This section is written as the work proceeds.** What is settled is below; the positioning is
-not, and it is the first thing the redesign has to decide.
-
-## Users
-
-The same two audiences as `vibe_shop` — shoppers on phones with little patience, and shop
-owners running the theme without a designer. What differs is not who they are but why they
-would pick this theme over the other one.
+**It is not a design project.** A visual redesign was scoped and cancelled on 2026-08-02; this
+section describes the theme as it actually is. `vibe_shop` is where this fork's design work
+lives.
 
 ## Product Purpose
 
-Settled:
+Two jobs, both practical:
 
-- **The theme is visually dated** — that is the reason for the work. Dense navigation, competing
-  colours, desktop-first layout.
-- **It targets this fork only.** Compatibility with stock OkayCMS 4.5.2 is deliberately dropped;
-  `docs/theme-porting.md` covers the other direction, taking a theme to a stock engine. Markup
-  is not preserved for the sake of upstream.
-- **The engine's contract still binds.** Mutating forms carry `customer_csrf_token` and use POST,
-  not GET — cart, wishlist, comparison, feedback, subscription. This is a fork requirement, not
-  a compatibility one, and it survives any redesign (`docs/UPGRADE-security.md`).
-- **Colour cues may be drawn from the official site**, https://okay-cms.com/ua.
+1. **A working default.** A fresh install has a complete, functioning storefront without anyone
+   choosing a theme first.
+2. **A worked example of the porting contract.** It is stock plus exactly the changes the fork
+   requires, so anyone bringing their own theme across can read the diff instead of the prose:
+   `git diff upstream/master main -- design/okay_shop`.
 
-Open, to be answered in the brainstorm and written back here:
+That second job is why it stays close to stock. The delta is 20 files and no file was added or
+removed — 8 of them are the security contract, 6 are the Smarty 5 migration, 2 are upstream
+bugs fixed here, 4 are housekeeping. `docs/theme-porting.md` walks through it.
 
-- What this theme is *for* once it is no longer the dated default — who chooses it over
-  `vibe_shop`, and on what grounds. Without that answer the redesign has no brief and will drift
-  into a second `vibe_shop`.
-- Whether it keeps the current information architecture or gets a new one.
+**The engine's contract binds.** Mutating forms carry `customer_csrf_token` and use POST, not
+GET — cart, wishlist, comparison, feedback, subscription (`docs/UPGRADE-security.md`). Taking
+this theme, or `vibe_shop`, onto a stock engine is covered by `docs/theme-to-stock.md`.
 
-## Brand Personality
+## What this theme is not
 
-Not decided. It should not simply repeat `vibe_shop`'s "clear, fast, quiet" — two themes with
-one personality is one theme with two skins.
+It is not held to the design or accessibility bar stated above for `vibe_shop`, and it does not
+meet it. Measured, not assumed:
 
-## Anti-references
+- zero `:focus-visible`, zero `prefers-reduced-motion`, zero `(hover: none)` fallbacks in its
+  stylesheets (`vibe_shop` has 6, 1 and 2);
+- its `#dbdbdb` borders give **1.24:1** against the `#f2f2f2` canvas, against the 3:1 WCAG
+  1.4.11 floor for UI components;
+- `theme.css` is 4739 lines with no `@media` at all; responsiveness lives in a separate
+  desktop-first `media.css`.
 
-The `vibe_shop` list applies, with one addition specific to this work: **`vibe_shop` itself.**
-Copying its components produces a duplicate rather than an alternative.
-
-## Accessibility & Inclusion
-
-The bar above applies unchanged: WCAG 2.1 AA contrast, keyboard operability with a visible
-focus ring, colour never the sole carrier of meaning, touch targets ≥44×44px, a
-`prefers-reduced-motion` path for every animation.
+This is a known and accepted gap, not an oversight. Anyone who needs the bar met should use
+`vibe_shop`. Anyone editing `okay_shop` should keep changes minimal and in service of the two
+jobs above — the value of this theme is that its distance from stock is small and legible.
