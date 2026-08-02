@@ -147,7 +147,7 @@ class BackendExportHelper
         }
 
         if($page == 1) {
-            fputcsv($f, $columnsNames, $columnDelimiter, '"', '\\');
+            fputcsv($f, self::toWindows1251($columnsNames), $columnDelimiter, '"', '\\');
         }
 
         fclose($f);
@@ -300,7 +300,7 @@ class BackendExportHelper
                             $res[$internalName] = '';
                         }
                     }
-                    fputcsv($f, $res, $columnDelimiter, '"', '\\');
+                    fputcsv($f, self::toWindows1251($res), $columnDelimiter, '"', '\\');
                 }
             }
         }
@@ -312,15 +312,29 @@ class BackendExportHelper
             return ['end' => false, 'page' => $page, 'totalpages' => $totalProducts/$productsCount];
         }
 
-        $data = ['end' => true, 'page' => $page, 'totalpages' => $totalProducts/$productsCount];
+        return ['end' => true, 'page' => $page, 'totalpages' => $totalProducts/$productsCount];
+    }
 
+    /**
+     * Рядки переводимо в cp1251 по одному, а не весь файл на останній сторінці.
+     * Файл накопичується між сторінками, тож конвертація цілого файла спрацьовувала
+     * б удруге на кожен повторний запит останньої сторінки (подвійний клік, повтор
+     * після таймауту, два експорти водночас) - і кирилиця, вже однобайтова, губилась
+     * би разом із розбивкою на колонки.
+     *
+     * @param array $values
+     * @return array
+     */
+    private static function toWindows1251(array $values)
+    {
         mb_substitute_character('none');
-        file_put_contents(
-            $exportFilesDir.$filename,
-            mb_convert_encoding(file_get_contents($exportFilesDir.$filename), 'Windows-1251')
-        );
 
-        return $data;
+        return array_map(
+            static function ($value) {
+                return mb_convert_encoding((string)$value, 'Windows-1251', 'UTF-8');
+            },
+            $values
+        );
     }
 
     public function getBrandsForExportFilter($brandsCount)
