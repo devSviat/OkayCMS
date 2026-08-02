@@ -1,19 +1,19 @@
-OkayCMS (fork of v4.5.2)
+OkayCMS (форк v4.5.2)
 ----------------------
 
-OkayCMS is a PHP CMS for creating backend and frontend applications. This repository is a fork —
-what it changes is listed under "About this fork" below.
+OkayCMS — PHP-платформа електронної комерції. Цей репозиторій — форк; що саме в ньому змінено,
+описано нижче, у розділі «Про цей форк».
 
- - **Documentation:** [`docs/README.md`](docs/README.md) — written for this fork, in Ukrainian.
-   The upstream docs describe upstream behaviour and no longer match this code.
- - **Running it:** [`dev/README.md`](dev/README.md) — the Docker environment, dev and production.
-   No other way of deploying the fork is documented.
+ - **Документація:** [`docs/README.md`](docs/README.md) — написана під цей форк. Апстрімний
+   довідник описує апстрім і цьому коду вже не відповідає.
+ - **Запуск:** [`dev/README.md`](dev/README.md) — оточення Docker, для розробки й для продакшну.
+   Інших способів розгортання форк не описує.
 
-Upstream: [homepage](https://okay-cms.com) ·
-[repository](https://github.com/OkayCMS/OkayCMS) ·
-[its documentation](https://github.com/OkayCMS/OkayCMS/tree/master/docs)
+Апстрім: [сайт](https://okay-cms.com) ·
+[репозиторій](https://github.com/OkayCMS/OkayCMS) ·
+[його документація](https://github.com/OkayCMS/OkayCMS/tree/master/docs)
 
-### Quick start
+### Швидкий старт
 
 ```bash
 cd dev
@@ -21,41 +21,41 @@ cp .env-example .env
 sed -i "s/^APP_UID=.*/APP_UID=$(id -u)/;s/^APP_GID=.*/APP_GID=$(id -g)/" .env
 cp ../config/config.local-example.php ../config/config.local.php
 
-echo "127.0.0.1 okaycms.loc" | sudo tee -a /etc/hosts   # nothing resolves the host otherwise
+echo "127.0.0.1 okaycms.loc" | sudo tee -a /etc/hosts   # інакше хост нікуди не резолвиться
 
 docker compose up -d
 ./bin/smoke.sh
 ```
 
-Requires Docker Compose ≥ 2.24.0. `smoke.sh` waits for the containers and checks the environment
-came up correctly — it addresses nginx by IP with a `Host:` header, so it passes with or without
-the `/etc/hosts` line; a browser needs it. The storefront is then on `http://okaycms.loc`
-(`VIRTUAL_HOST` in `dev/.env`), the admin panel on `/admin` — login `admin`, password `1234`.
+Потрібен Docker Compose ≥ 2.24.0. `smoke.sh` дочекається контейнерів і перевірить, що оточення
+піднялось; він звертається до nginx за IP із заголовком `Host`, тож проходить і без рядка в
+`/etc/hosts` — потрібен той рядок саме браузеру. Далі вітрина на `http://okaycms.loc`
+(`VIRTUAL_HOST` у `dev/.env`), адмінка на `/admin`, логін `admin`, пароль `1234`.
 
-OkayCMS is released under the LGPL license.
+OkayCMS поширюється за ліцензією LGPL.
 
 Copyright 2015-2024 OkayCMS
 
-About this fork
+Про цей форк
 ----------------------
 
-Three things this fork adds on top of upstream OkayCMS v4.5.2:
+Три речі, які форк додає до апстрімної OkayCMS v4.5.2:
 
- - **PHP 8.4 and 8.5.** `composer.json` requires `php ^8.4`; CI runs the test suite on both 8.4 and
-   8.5, and PHPStan on 8.5. The local Docker environment ships a single `php85` service - the
-   legacy PHP 7.4 one is gone.
- - **`vibe_shop`, a new storefront theme.** A full redesign of the shop front, responsive on phones
-   and tablets in both orientations. It is the theme this fork ships enabled; the stock `okay_shop`
-   is untouched and can be selected back at any time in the admin panel under Design.
- - **A security hardening pass.** CSRF protection and POST-only mutations on the storefront,
-   Argon2id password hashing, `HttpOnly` cookies, path-traversal fixes in the admin theme editors
-   and the file manager, and more. It changes behaviour a custom theme or module can depend on -
-   [`docs/UPGRADE-security.md`](docs/UPGRADE-security.md) states what breaks and what to do about
-   it. No database migrations.
+ - **PHP 8.4 і 8.5.** `composer.json` вимагає `php ^8.4`; CI ганяє тести на 8.4 і 8.5, PHPStan —
+   на 8.5. У локальному оточенні лишився один сервіс `php85`, старого на PHP 7.4 більше немає.
+ - **`vibe_shop` — нова тема вітрини.** Повний редизайн, адаптивний на телефонах і планшетах в
+   обох орієнтаціях. Саме ця тема увімкнена в поставці; стокова `okay_shop` не змінена, і в
+   адмінці, у розділі «Дизайн», її можна повернути будь-коли.
+ - **Ітерація безпеки.** CSRF-захист і мутації вітрини лише через POST, хешування паролів
+   Argon2id, куки `HttpOnly`, закриті обходи шляхів у редакторах теми адмінки й у файловому
+   менеджері та інше. Це змінює поведінку, на яку могли покладатись стороння тема чи модуль:
+   [`docs/UPGRADE-security.md`](docs/UPGRADE-security.md) перелічує, що ламається і що з цим
+   робити. Міграцій бази немає.
 
-The dependency work that came with PHP 8.5 support also cleared advisories the fork had inherited:
-`composer audit` reported 11 across four packages on the pre-fork lock file and reports 2 today. Six
-of the eleven were in Smarty 3.1.40 - the template engine that runs on every request - including PHP
-code injection (CVE-2024-35226, CVE-2022-29221) and a sandbox escape (CVE-2021-29454). The two that
-remain are in `maximebf/debugbar`, a `require-dev` package that never ships to production. The
-"Залежності" section of the same document has the package-by-package list.
+Робота із залежностями, яка прийшла разом із підтримкою PHP 8.5, заодно закрила вразливості, що
+форк успадкував: на дофорковому lock-файлі `composer audit` показував 11 у чотирьох пакетах,
+сьогодні — 2. Шість з одинадцяти були в Smarty 3.1.40, шаблонізаторі, який виконується на кожному
+запиті: серед них ін'єкція PHP-коду (CVE-2024-35226, CVE-2022-29221) і вихід із пісочниці
+(CVE-2021-29454). Дві, що лишились, — у `maximebf/debugbar`, це `require-dev`-пакет, він ніколи не
+потрапляє в продакшн. Пакет за пакетом — розділ
+[«Залежності»](docs/UPGRADE-security.md#залежності) того самого документа.
