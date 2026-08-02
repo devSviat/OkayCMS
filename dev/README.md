@@ -265,7 +265,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
 
 - *Наявний магазин* — відновити свій бекап у контейнер `mariadb` замість
   `database:deploy`. Міграції модулів після оновлення коду — окремо, див.
-  `docs/modules/table_migrate.md`.
+  `docs/modules/migrations.md`.
 
 ## Сканування образів на CVE
 
