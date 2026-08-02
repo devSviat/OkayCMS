@@ -49,8 +49,8 @@ class SafeRotatingFileHandlerTest extends TestCase
         $logger = new Logger('test');
         $logger->pushHandler(new SafeRotatingFileHandler($this->dir . '/blocker/app.log', 2));
 
-        $logger->error('must not escalate into a fatal');
+        $this->expectNotToPerformAssertions();
 
-        $this->assertTrue(true);
+        $logger->error('must not escalate into a fatal');
     }
 }

@@ -43,7 +43,11 @@ class NPCalcErrorMessageTest extends TestCase
     {
         $js = file_get_contents(self::MODULE . '/design/js/np.js');
 
-        $this->assertStringContainsString('okay.' . self::KEY, $js, 'np.js має читати експортований рядок');
+        $this->assertMatchesRegularExpression(
+            '~okay\.' . preg_quote(self::KEY, '~') . '(?![\w-])~',
+            $js,
+            'np.js має читати експортований рядок'
+        );
         $this->assertMatchesRegularExpression(
             '~\berror:\s*function~',
             $js,

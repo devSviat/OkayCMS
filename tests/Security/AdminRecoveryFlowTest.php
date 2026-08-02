@@ -10,7 +10,7 @@ class AdminRecoveryFlowTest extends TestCase
     {
         $source = $this->source();
 
-        $this->assertStringContainsString('AdminRecoveryToken', $source);
+        $this->assertMatchesRegularExpression('~(?<![\w-])AdminRecoveryToken(?![\w-])~', $source);
         $this->assertStringNotContainsString("\$this->request->post('new_login')", $source);
         $this->assertStringNotContainsString("\$managersEntity->add(['login'", $source);
         $this->assertStringNotContainsString("\$_SESSION['admin_password_recovery_code']", $source);

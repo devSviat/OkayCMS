@@ -60,7 +60,7 @@ class UnserializeHardeningTest extends TestCase
         );
         $this->assertIsString($source);
 
-        $this->assertStringContainsString('isSafeRelativePath', $source);
+        $this->assertMatchesRegularExpression('~(?<![\w-])isSafeRelativePath(?![\w-])~', $source);
     }
 
     private function scannedDirs()

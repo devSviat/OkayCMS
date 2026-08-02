@@ -10,7 +10,11 @@ class UpgradeNotesTest extends TestCase
     #[DataProvider('requiredTopicProvider')]
     public function testUpgradeNotesCoverEveryBreakingChange($topic)
     {
-        $this->assertStringContainsString($topic, $this->notes());
+        $this->assertMatchesRegularExpression(
+            self::wholeToken($topic),
+            $this->notes(),
+            "docs/UPGRADE-security.md не згадує \"{$topic}\" як окремий токен"
+        );
     }
 
     public static function requiredTopicProvider()
@@ -31,12 +35,15 @@ class UpgradeNotesTest extends TestCase
 
     /**
      * Пропущені дефекти мають лишатися видимими, а не зникнути тихо.
-     *
      */
     #[DataProvider('knownOpenProvider')]
     public function testKnownOpenDefectsAreDocumented($topic)
     {
-        $this->assertStringContainsString($topic, $this->notes());
+        $this->assertMatchesRegularExpression(
+            self::wholeToken($topic),
+            $this->notes(),
+            "docs/UPGRADE-security.md не згадує відкритий дефект \"{$topic}\""
+        );
     }
 
     public static function knownOpenProvider()
@@ -52,7 +59,16 @@ class UpgradeNotesTest extends TestCase
         $claude = file_get_contents(dirname(__DIR__, 2) . '/CLAUDE.md');
         $this->assertIsString($claude);
 
-        $this->assertStringContainsString('UPGRADE-security.md', $claude);
+        $this->assertStringContainsString('docs/UPGRADE-security.md', $claude);
+    }
+
+    /**
+     * Кордон забороняє й дефіс: `\b` після "Options" задовольняється дефісом
+     * у "X-Frame-Options-ZZ".
+     */
+    private static function wholeToken(string $topic): string
+    {
+        return '~(?<![\w-])' . preg_quote($topic, '~') . '(?![\w-])~';
     }
 
     private function notes()
