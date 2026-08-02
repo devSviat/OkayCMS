@@ -35,10 +35,12 @@ security boundaries, themes and the Docker environment, so a blind merge would u
 ## Stack
 
 - PHP `^8.4` (verified on 8.4–8.5)
-- Smarty `^4.5` (templating)
+- Smarty `^5.8` (templating) — `\Smarty_Internal_Template` is gone; plugins must not type-hint the template object
 - Custom DI container (`Okay\Core\OkayContainer`)
 - Custom ORM (`Okay\Core\Entity\Entity`)
-- Symfony Console (the `./ok` CLI), Aura.Sql / Aura.SqlQuery (DB layer)
+- Symfony Console `^8.0` (the `./ok` CLI) — commands declare their name via `#[AsCommand]`
+- Aura.Sql `^6.0` / Aura.SqlQuery `^3.0` (DB layer)
+- PHPUnit `^13.2`, PHPStan `^2.2`, PHP_CodeSniffer `^3.7` (dev)
 
 ## Commands
 
@@ -78,10 +80,14 @@ The codebase is split into three top-level code areas plus modules:
 
 Service wiring is centralized: core services in `Okay/Core/config/services.php` (and sibling `routes.php`, `helpers.php`, `requests.php`, `parameters.php`, `container.php`); each module wires its own services/routes in `Init/services.php`, `Init/routes.php`, `Init/parameters.php`.
 
-`docs/` is the authoritative reference for each component. Read the relevant doc **before** working with an unfamiliar component.
+`docs/` is the authoritative reference for each component. Read the relevant doc **before** working with an unfamiliar component. Start from `docs/README.md`, which is the index.
+
+**Caveat:** the reference is being rewritten for this fork (see `docs/superpowers/specs/2026-08-02-docs-rewrite-design.md`). Documents marked 🇷🇺 in `docs/README.md` are still inherited from upstream and are known to contradict the code in places — verify against the source before relying on them.
 
 | What you need to do | Where to look |
 | ------------------- | ------------- |
+| Understand the fork: stack, layout, request lifecycle | `docs/architecture.md` |
+| Config directives, `dev_mode` / `debug_mode` / debug bar | `docs/configuration.md` |
 | Database operations / ORM | `docs/entities.md` |
 | DI container, service registration | `docs/di_container.md`, `docs/service_locator.md` |
 | Controllers (front/backend) | `docs/controllers.md` |
@@ -150,7 +156,7 @@ Do not edit core files, theme `.tpl` files, or another module's files. Extend be
 
 ### JS / CSS
 
-- Don't include files via raw `<script>` / `<link>` tags. Use `design/js.php`, `design/css.php`, or the `{js}` / `{css}` Smarty plugins.
+- Don't include files via raw `<script>` / `<link>` tags. Use the theme's `design/<theme>/js.php` and `design/<theme>/css.php` (a module uses its own `design/js.php` / `design/css.php`), or the `{js}` / `{css}` Smarty plugins.
 
 ### Controllers
 
