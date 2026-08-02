@@ -108,6 +108,7 @@ Service wiring is centralized: core services in `Okay/Core/config/services.php` 
 | Discounts | `docs/discounts.md` |
 | Security boundaries and upgrade notes | `docs/UPGRADE-security.md` |
 | Porting a theme to this fork | `docs/theme-porting.md` |
+| Taking a theme from here to stock OkayCMS | `docs/theme-to-stock.md` |
 | Import / Export | `docs/import.md`, `docs/export.md` |
 
 > Path notation in docs: `Okay\Core\Response` = namespace (backslash); `Okay/Core/Response.php` = filesystem path (forward slash).
