@@ -30,7 +30,6 @@
 * [Як влаштований цей форк](architecture.md) — стек, каталоги, життєвий цикл запиту, межі безпеки
 * [Налаштування](configuration.md) — `config.php` / `config.local.php`, `dev_mode`, `debug_mode`, панель відладки
 * [Ядро системи (Core)](core/README.md) 🇷🇺
-* [Режим розробника](dev_mode.md) 🇷🇺 — увійшло в [configuration.md](configuration.md), файл лишається до переписування розділу модулів
 
 ### Застосунок
 
@@ -63,7 +62,8 @@
 
 ### Експлуатація
 
-* [Планувальник](scheduler.md) 🇷🇺
+* [Консоль і планувальник](cli.md) — `./ok`, власні команди, задачі за розкладом
+* [Тести й статичний аналіз](testing.md) — phpunit, phpstan, phpcs, `smoke.sh`
 * [Імпорт](import.md) 🇷🇺
 * [Експорт](export.md) 🇷🇺
 * [Робота зі знижками](discounts_management.md) 🇷🇺

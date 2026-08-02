@@ -5,10 +5,9 @@
 
 Этот раздел постепенно расходится по тематическим справочникам: `Response` описан
 в [controllers.md](./../controllers.md), `Phone` — в [templates.md](./../templates.md),
-планировщик — в [scheduler.md](./../scheduler.md).
+планировщик — в [cli.md](./../cli.md).
 
 ### Основные классы ядра
 
 * [ManagerMenu](./ManagerMenu.md)
 * [Discount](./Discount.md)
-* [Schedule](./Schedule.md)

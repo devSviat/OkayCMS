@@ -118,5 +118,5 @@ OkayCMS — PHP-платформа електронної комерції з м
 | Маршрути й контролери | [routes.md](routes.md), [controllers.md](controllers.md) |
 | Налаштування, режими відладки | [configuration.md](configuration.md) |
 | Шаблони, плагіни, CSS/JS | [templates.md](templates.md), [smarty-plugins.md](smarty-plugins.md), [assets.md](assets.md) |
-| Планувальник | [scheduler.md](scheduler.md) |
+| Планувальник | [cli.md](cli.md) |
 | Перенести тему на форк | [theme-porting.md](theme-porting.md) |

@@ -105,7 +105,8 @@ Service wiring is centralized: core services in `Okay/Core/config/services.php` 
 | Modifying a `.tpl` without editing it | `docs/tpl-modifications.md` |
 | JS/CSS files | `docs/assets.md` |
 | Smarty plugins | `docs/smarty-plugins.md` |
-| Scheduler | `docs/scheduler.md` |
+| CLI commands, scheduler | `docs/cli.md` |
+| Tests, phpstan, phpcs, smoke checks | `docs/testing.md` |
 | Discounts | `docs/discounts_management.md` |
 | Security boundaries and upgrade notes | `docs/UPGRADE-security.md` |
 | Porting a theme to this fork | `docs/theme-porting.md` |
