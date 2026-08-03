@@ -30,6 +30,13 @@ return [
         'file' => __DIR__ . '/../../log/app.log',
         'max_files_rotation' => 10,
     ],
+    // Лічильник невдалих спроб для ендпойнтів без сесії. Живе в cache/,
+    // бо це runtime-артефакт: директорія вже цілком у .gitignore.
+    'attempt_limiter' => [
+        'dir' => __DIR__ . '/../../../cache/attempts',
+        'max_attempts' => 10,
+        'window_seconds' => 300,
+    ],
     'db' => [
         'driver'   => '{$db_driver}',
         'dsn'      => '{$db_driver}:host={$db_server};dbname={$db_name};charset={$db_charset}',
