@@ -1,0 +1,27 @@
+{
+    "search": {
+        "Google": {
+            "domains": ["www.google.com"]
+        }
+    },
+    "social": {
+        "Facebook": {
+            "domains": ["www.facebook.com"]
+        }
+    },
+    "email": {
+        "Gmail": {
+            "domains": ["mail.google.com"]
+        }
+    },
+    "paid": {
+        "Google Ads": {
+            "domains": ["googleads.g.doubleclick.net"]
+        }
+    },
+    "chatbot": {
+        "ChatGPT": {
+            "domains": ["chatgpt.com"]
+        }
+    }
+}

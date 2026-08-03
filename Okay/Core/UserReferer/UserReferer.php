@@ -39,26 +39,18 @@ class UserReferer
         );
 
         if ($referer->isKnown()) {
-            switch ($referer->getMedium()) {
-                case self::CHANNEL_EMAIL :
-                    $userReferer = [
-                        'medium' => self::CHANNEL_EMAIL,
-                        'source' => $referer->getSource(),
-                    ];
-                    break;
-                case self::CHANNEL_SEARCH :
-                    $userReferer = [
-                        'medium' => self::CHANNEL_SEARCH,
-                        'source' => $referer->getSource(),
-                    ];
-                    break;
-                case self::CHANNEL_SOCIAL :
-                    $userReferer = [
-                        'medium' => self::CHANNEL_SOCIAL,
-                        'source' => $referer->getSource(),
-                    ];
-                    break;
+            $medium = $referer->getMedium();
+
+            // ok_orders.referer_channel - ENUM із п'яти значень, а довідник знає
+            // ще paid і chatbot: усе поза трьома каналами лягає в referral.
+            if (!in_array($medium, [self::CHANNEL_EMAIL, self::CHANNEL_SEARCH, self::CHANNEL_SOCIAL], true)) {
+                $medium = self::CHANNEL_REFERRAL;
             }
+
+            $userReferer = [
+                'medium' => $medium,
+                'source' => $referer->getSource(),
+            ];
         } elseif (($referer = Request::getReferer()) && !$this->isInternalUrl($referer)) {
             $userReferer = [
                 'medium' => self::CHANNEL_REFERRAL,
