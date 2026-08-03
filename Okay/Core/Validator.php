@@ -121,7 +121,7 @@ class Validator
     }
 
     /**
-     * @param string $src
+     * @param mixed $src значення з POST: масив приходить із delivery_fields[]
      * @param bool $is_required
      * if $src is empty AND $is_required return false
      * @return bool
