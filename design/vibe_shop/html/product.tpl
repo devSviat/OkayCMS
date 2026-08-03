@@ -194,7 +194,11 @@
                it nothing to slide along, and the price would scroll away while
                the specification was still being read. *}
             <div class="vs-buybox__pin">
-                <form id="vs_buy_form" class="fn_variants vs-buybox__form" action="{url_generator route="cart"}">
+                {* POST and a token so the no-JS path is not CSRF-able. With JS,
+                   okay.js intercepts the submit and builds its own ajax payload,
+                   so neither attribute reaches that path. *}
+                <form id="vs_buy_form" class="fn_variants vs-buybox__form" method="post" action="{url_generator route="cart"}">
+                    <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                     {* Price first, then the choice, then the action. The photograph
                        and the price are what the shopper came to check, and the
                        price is what the variant chooser then changes. *}

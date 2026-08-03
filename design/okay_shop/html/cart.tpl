@@ -46,6 +46,11 @@
                     
                     <div class="block__body">
                         <form id="captcha_id" method="post" name="cart" class="fn_validate_cart">
+                            {* Токен явно тут, а не лише у вкладеній формі видалення.
+                               Той інпут потрапляв у цю форму лише тому, що парсер
+                               розчиняє вкладений <form>, і зникав би разом з
+                               порожнім кошиком. *}
+                            <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                             <div class="f_row flex-column align-items-start flex-lg-row">
                                 <div class="position_sticky f_col f_col-lg-6 f_col-xl-5">
                                     {* The list of products in the cart *}

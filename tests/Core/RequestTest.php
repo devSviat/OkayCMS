@@ -51,4 +51,50 @@ class RequestTest extends TestCase
 
         $this->assertSame('', $result);
     }
+
+    /**
+     * get() згортав масив до першого елемента, post() - ні, і віддавав його
+     * просто в intval(). А intval(['9999']) - це 1, мовчки. Тобто
+     * variant[]=9999 клало в кошик варіант 1.
+     *
+     * Обидва методи мають поводитись однаково: хто просить скаляр, той не має
+     * отримати результат розбору масиву.
+     */
+    public function testPostCollapsesArraysWhenAScalarTypeIsRequested(): void
+    {
+        /** @var Request $request */
+        $request = (new ReflectionClass(Request::class))->newInstanceWithoutConstructor();
+
+        $_POST['php85_array_param'] = ['9999', '7'];
+        $_GET['php85_array_param']  = ['9999', '7'];
+
+        try {
+            $this->assertSame(9999, $request->post('php85_array_param', 'integer'));
+            $this->assertSame(
+                $request->get('php85_array_param', 'integer'),
+                $request->post('php85_array_param', 'integer'),
+                'post() і get() мають однаково зводити масив до скаляра'
+            );
+        } finally {
+            unset($_POST['php85_array_param'], $_GET['php85_array_param']);
+        }
+    }
+
+    /**
+     * Без типу масиви мають проходити як були: на цьому тримається
+     * post('amounts') у кошику.
+     */
+    public function testPostKeepsArraysWhenNoTypeIsRequested(): void
+    {
+        /** @var Request $request */
+        $request = (new ReflectionClass(Request::class))->newInstanceWithoutConstructor();
+
+        $_POST['php85_amounts'] = ['10' => '3', '11' => '5'];
+
+        try {
+            $this->assertSame(['10' => '3', '11' => '5'], $request->post('php85_amounts'));
+        } finally {
+            unset($_POST['php85_amounts']);
+        }
+    }
 }

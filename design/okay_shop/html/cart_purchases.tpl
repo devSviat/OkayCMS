@@ -104,13 +104,17 @@
                     <div class="purchase__group_content">{$purchase->meta->total_price|convert} <span class="currency">{$currency->sign}</span></div>
                 </div>
             </div>
-            {* Remove button *}
-            <form class="purchase__remove_form" method="post" action="{url_generator route="cart_remove_item" variantId=$purchase->variant->id}">
-                <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
-                <button type="submit" class="purchase__remove" onclick="ajax_remove({$purchase->variant->id});return false;" title="{$lang->cart_remove}">
-                    {include file='svg.tpl' svgId='remove_icon'}
-                </button>
-            </form>
+            {* Кнопка видалення. Свідомо НЕ власна <form>: цей блок рендериться
+               всередині форми оформлення, а браузер викидає вкладений
+               відкривальний тег і закриває вкладеним </form> зовнішню форму -
+               тобто все, що оголошене нижче, включно з кнопкою «Оформити»,
+               лишалось без форми, і оформлення без JS не працювало взагалі.
+               formaction відправляє форму оформлення на адресу видалення, якій
+               потрібен лише токен, а решту полів вона ігнорує. З увімкненим JS
+               інлайновий обробник повертає false і нічого не надсилається. *}
+            <button type="submit" class="purchase__remove" formmethod="post" formnovalidate formaction="{url_generator route="cart_remove_item" variantId=$purchase->variant->id}" onclick="ajax_remove({$purchase->variant->id});return false;" title="{$lang->cart_remove}">
+                {include file='svg.tpl' svgId='remove_icon'}
+            </button>
         </div>
     </div>
 {/foreach}

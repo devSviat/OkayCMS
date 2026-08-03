@@ -179,10 +179,17 @@ class Request
      */
     public function method($method = null)
     {
+        // ?? '' - бо в CLI та в тестах REQUEST_METHOD немає, і без цього
+        // strtolower(null) дає Deprecated, а phpunit.xml падає на ньому.
+        // Відповідь при цьому правильна: жодному методу порожній рядок не
+        // дорівнює, тож охорона лишається закритою.
+        $current = $_SERVER['REQUEST_METHOD'] ?? '';
+
         if (!empty($method)) {
-            return strtolower($_SERVER['REQUEST_METHOD']) == strtolower($method);
+            return strtolower($current) == strtolower($method);
         }
-        return $_SERVER['REQUEST_METHOD'];
+
+        return $current;
     }
 
     public function isPost()
@@ -271,6 +278,14 @@ class Request
             $val = $_POST[$name];
         } elseif (empty($name)) {
             $val = file_get_contents('php://input');
+        }
+
+        // Те саме, що робить get(): коли просять скаляр, масив згортається до
+        // першого елемента. Без цього intval(['9999']) мовчки давав 1, тож
+        // variant[]=9999 клав у кошик варіант 1. Без $type масиви проходять
+        // як були - на цьому тримається post('amounts').
+        if (!empty($type) && is_array($val)) {
+            $val = reset($val);
         }
 
         if (empty($val) && $default !== null) {

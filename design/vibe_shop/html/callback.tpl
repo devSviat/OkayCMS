@@ -2,6 +2,12 @@
 <div class="hidden">
     <form id="fn_callback" class="popup_animated fn_validate_callback vs-form vs-modal-form" method="post">
 
+        {* The callback writes a row and mails the shop, so it is a mutation and
+           carries the token like every other one. It also posts to whatever page
+           it sits on - including /cart, where the guard would otherwise reject
+           it after CommonHelper had already saved the row. *}
+        <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
+
         {if $settings->captcha_type == "v3"}
             <input type="hidden" class="fn_recaptcha_token fn_recaptchav3" name="recaptcha_token" />
         {/if}
