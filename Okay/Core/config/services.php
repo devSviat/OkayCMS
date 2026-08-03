@@ -49,6 +49,7 @@ use Okay\Core\UserReferer\UserReferer;
 use Snowplow\RefererParser\Parser;
 use Okay\Core\TplMod\Parser as TplParser;
 use Okay\Core\Security\AdminRecoveryToken;
+use Okay\Core\Security\AttemptLimiter;
 use Okay\Core\Security\RecoveryToken;
 
 $services = [
@@ -318,6 +319,14 @@ $services = [
     ],
     RecoveryToken::class => [
         'class' => RecoveryToken::class,
+    ],
+    AttemptLimiter::class => [
+        'class' => AttemptLimiter::class,
+        'arguments' => [
+            new PR('attempt_limiter.dir'),
+            new PR('attempt_limiter.max_attempts'),
+            new PR('attempt_limiter.window_seconds'),
+        ],
     ],
     Translit::class => [
         'class' => Translit::class,

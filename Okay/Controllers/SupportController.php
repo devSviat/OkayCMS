@@ -4,24 +4,42 @@
 namespace Okay\Controllers;
 
 
+use Okay\Core\Security\AttemptLimiter;
 use Okay\Entities\SupportInfoEntity;
+use Psr\Log\LoggerInterface;
 
 class SupportController extends AbstractController
 {
-    public function checkDomain(SupportInfoEntity $supportInfoEntity) {
-        $info = $supportInfoEntity->getInfo();
-        if (empty($info)) {
-            $this->response->setContent(json_encode(['success' => 0, 'error' => 'empty_local_info']), RESPONSE_JSON);
-            return;
+    /**
+     * Ендпойнт публічний і без авторизації, а за збігом ключа перезаписує
+     * private_key і public_key, тобто передає канал підтримки іншому власнику.
+     */
+    public function checkDomain(
+        SupportInfoEntity $supportInfoEntity,
+        AttemptLimiter $attemptLimiter,
+        LoggerInterface $logger
+    ) {
+        if (!$this->request->method('POST')) {
+            return $this->refuse($logger, 'method_not_allowed', 405);
         }
 
-        $data = $this->request->post();
-        $data = json_decode($data);
+        $client = $this->clientKey();
+
+        if ($attemptLimiter->tooManyAttempts($client)) {
+            return $this->refuse($logger, 'too_many_attempts', 429);
+        }
+
+        $info = $supportInfoEntity->getInfo();
+        if (empty($info)) {
+            return $this->reply(['success' => 0, 'error' => 'empty_local_info']);
+        }
+
+        $data = $this->decodeBody();
 
         $invalidResult = $this->preValidateData($data);
         if (!empty($invalidResult)) {
-            $this->response->setContent(json_encode($invalidResult), RESPONSE_JSON);
-            return;
+            $attemptLimiter->registerFailure($client);
+            return $this->reply($invalidResult);
         }
 
         $result = ['success' => 0];
@@ -32,10 +50,10 @@ class SupportController extends AbstractController
                     $result['error'] = 'rule_1';
                     break;
                 }
-                if ($info->temp_key != $data->temp_key) {
+                if (!$this->keysMatch($info->temp_key, $data->temp_key ?? null)) {
                     $result['error'] = 'rule_2';
                     break;
-                }                
+                }
 
                 $info->temp_time = strtotime($info->temp_time);
                 $supportInfoEntity->updateInfo([
@@ -50,7 +68,7 @@ class SupportController extends AbstractController
                 break;
             }
             case 'receive_info': {
-                if (empty($data->key) || empty($info->public_key) || $data->key != $info->public_key) {
+                if (empty($info->public_key) || !$this->keysMatch($info->public_key, $data->key ?? null)) {
                     $result['error'] = 'wrong_key';
                     break;
                 }
@@ -61,6 +79,65 @@ class SupportController extends AbstractController
                 $result = ['success' => 1];
                 break;
             }
+        }
+
+        if (empty($result['success'])) {
+            $attemptLimiter->registerFailure($client);
+            $logger->warning('Support endpoint: refused, ' . ($result['error'] ?? 'unknown') . ', client ' . $client);
+        } else {
+            // Успіх знімає лічильник, інакше рідкісна серія помилок у
+            // легітимного викликача накопичувалась би до блокування.
+            $attemptLimiter->reset($client);
+        }
+
+        return $this->reply($result);
+    }
+
+    /** != зрівнював "0" і "0.0" і не був constant-time. */
+    private function keysMatch($known, $supplied)
+    {
+        if (!is_string($known) || !is_string($supplied) || $known === '' || $supplied === '') {
+            return false;
+        }
+
+        return hash_equals($known, $supplied);
+    }
+
+    private function decodeBody()
+    {
+        $raw = $this->request->post();
+        if (!is_string($raw) || $raw === '') {
+            return null;
+        }
+
+        $decoded = json_decode($raw);
+
+        // Саме об'єкт: JSON-масив теж валідний, але полів дії в нього немає.
+        return is_object($decoded) ? $decoded : null;
+    }
+
+    /**
+     * Лічильник ведеться за адресою викликача. Проксі-заголовкам довіри
+     * немає - їх підставляє клієнт, і ліміт обходився б одним рядком.
+     */
+    private function clientKey()
+    {
+        $address = $_SERVER['REMOTE_ADDR'] ?? '';
+
+        return $address !== '' ? $address : 'unknown';
+    }
+
+    private function refuse(LoggerInterface $logger, $error, $statusCode)
+    {
+        $logger->warning('Support endpoint: refused, ' . $error . ', client ' . $this->clientKey());
+
+        return $this->reply(['success' => 0, 'error' => $error], $statusCode);
+    }
+
+    private function reply(array $result, $statusCode = 200)
+    {
+        if ($statusCode !== 200) {
+            $this->response->setStatusCode($statusCode);
         }
 
         $this->response->setContent(json_encode($result), RESPONSE_JSON);
