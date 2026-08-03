@@ -40,10 +40,6 @@ class UploadedContentIsInertTest extends TestCase
         ];
     }
 
-    /**
-     * Порожній рядок у списку означає "файл без розширення" і проходить повз
-     * будь-яку перевірку за розширенням.
-     */
     #[DataProvider('everyAllowlistProvider')]
     public function testExtensionlessFilesAreNotAllowed($key)
     {
@@ -63,10 +59,7 @@ class UploadedContentIsInertTest extends TestCase
         ];
     }
 
-    /**
-     * SVG лишається дозволеним для завантаження - його чистить SvgSanitizer -
-     * але не для створення й редагування текстом, бо там санітайзер не діє.
-     */
+    /** Санітайзер діє на завантаженні, але не на створенні файлу текстом. */
     public function testSvgIsUploadableAsAnImageOnly()
     {
         $this->assertContains('svg', $this->allowlist('ext_img'));
@@ -94,10 +87,6 @@ class UploadedContentIsInertTest extends TestCase
         $this->assertSame([], $broken, $file . ': ^ без /, правило не збігається ніколи');
     }
 
-    /**
-     * Саме правило теж має існувати - анкер можна полагодити, а список
-     * розширень загубити.
-     */
     #[DataProvider('nginxConfigProvider')]
     public function testUploadDirectoriesDenyActiveContent($file)
     {
@@ -117,8 +106,8 @@ class UploadedContentIsInertTest extends TestCase
     }
 
     /**
-     * Значення читається з літерала в config.php: сам файл підключати не
-     * можна - він тягне Request і залежить від оточення веб-запиту.
+     * З літерала, а не через include: config.php тягне Request і залежить
+     * від оточення веб-запиту.
      *
      * @return string[]
      */

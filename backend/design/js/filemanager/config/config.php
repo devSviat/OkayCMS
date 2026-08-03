@@ -383,10 +383,8 @@ $config = array(
     //Allowed extensions (lowercase insert)
     //**********************
     'ext_img'                                 => array( 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'ico' ), //Images
-    // Без html/xhtml/xml/css і без порожнього рядка: перші рендеряться
-    // браузером як активний контент, останній пропускає файл без розширення
-    // повз будь-яку перевірку. svg лишається тільки в ext_img - там його
-    // чистить SvgSanitizer.
+    // Без html/xhtml/xml/css і без порожнього рядка: перше браузер рендерить,
+    // друге пропускає файл без розширення повз перевірку.
     'ext_file'                                => array( 'doc', 'docx', 'rtf', 'pdf', 'xls', 'xlsx', 'txt', 'csv', 'psd', 'log', 'fla', 'ade', 'adp', 'mdb', 'accdb', 'ppt', 'pptx', 'odt', 'ots', 'ott', 'odb', 'odg', 'otp', 'otg', 'odf', 'ods', 'odp', 'ai', 'kmz','dwg', 'dxf', 'hpgl', 'plt', 'spl', 'step', 'stp', 'iges', 'igs', 'sat', 'cgm', 'tiff'), //Files
     'ext_video'                               => array( 'mov', 'mpeg', 'm4v', 'mp4', 'avi', 'mpg', 'wma', "flv", "webm" ), //Video
     'ext_music'                               => array( 'mp3', 'mpga', 'm4a', 'ac3', 'aiff', 'mid', 'ogg', 'wav' ), //Audio
