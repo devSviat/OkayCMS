@@ -160,14 +160,20 @@ server {
         # .env) не повинно потрапляти в контекст збірки взагалі — див.
         # кореневий .dockerignore.
 
-        location ~* ^design/.+/(.+\.(phtml|php|php3|php4|php5|php6|phps|cgi|exe|pl|asp|aspx|shtml|shtm|fcgi|fpl|jsp|htm|html|wml)) {
+        # Анкер саме ^/, а не ^: nginx зіставляє регулярку з URI, а URI завжди
+        # починається зі слеша, тому ^design/ і ^files/ не збігаються ніколи.
+        # Правило нижче має стояти перед блоком, що віддає .php у fastcgi.
+        location ~* ^/design/.+/(.+\.(phtml|php|php3|php4|php5|php6|phps|cgi|exe|pl|asp|aspx|shtml|shtm|fcgi|fpl|jsp|htm|html|wml)) {
             return 404;
         }
-        
-        location ~* ^files/(.+\.(phtml|php|php3|php4|php5|php6|phps|cgi|exe|pl|asp|aspx|shtml|shtm|fcgi|fpl|jsp|htm|html|wml))$ {
+
+        # Директорія завантажень файлового менеджера. Крім виконуваного —
+        # ще й те, що браузер рендерить як HTML: інакше завантажений .html
+        # дає stored XSS на домені магазину.
+        location ~* ^/files/.+\.(phtml|php|php3|php4|php5|php6|phps|cgi|exe|pl|asp|aspx|shtml|shtm|fcgi|fpl|jsp|htm|html|xhtml|xml|xsl|wml)$ {
             return 404;
         }
-        
+
         location ~ [^/]\.ph(p\d*|tml)$ {
             try_files /does_not_exists @php;
         }
