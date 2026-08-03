@@ -675,13 +675,7 @@ parameters:
 		-
 			message: '#^Cannot access property \$email on object\|string\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: Okay/Core/Notify.php
-
-		-
-			message: '#^Cannot access property \$email on object\|string\|false\.$#'
-			identifier: property.nonObject
-			count: 2
+			count: 3
 			path: Okay/Core/Notify.php
 
 		-
@@ -691,7 +685,7 @@ parameters:
 			path: Okay/Core/Notify.php
 
 		-
-			message: '#^Cannot access property \$object_id on object\|string\|false\.$#'
+			message: '#^Cannot access property \$object_id on object\|string\.$#'
 			identifier: property.nonObject
 			count: 2
 			path: Okay/Core/Notify.php
@@ -703,19 +697,19 @@ parameters:
 			path: Okay/Core/Notify.php
 
 		-
-			message: '#^Cannot access property \$post on object\|string\|false\.$#'
+			message: '#^Cannot access property \$post on object\|string\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: Okay/Core/Notify.php
 
 		-
-			message: '#^Cannot access property \$product on object\|string\|false\.$#'
+			message: '#^Cannot access property \$product on object\|string\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: Okay/Core/Notify.php
 
 		-
-			message: '#^Cannot access property \$type on object\|string\|false\.$#'
+			message: '#^Cannot access property \$type on object\|string\.$#'
 			identifier: property.nonObject
 			count: 2
 			path: Okay/Core/Notify.php
@@ -724,18 +718,6 @@ parameters:
 			message: '#^Cannot access property \$type_obj on object\|string\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: Okay/Core/Notify.php
-
-		-
-			message: '#^Cannot access property \$type_obj on object\|string\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: Okay/Core/Notify.php
-
-		-
-			message: '#^Variable \$comment might not be defined\.$#'
-			identifier: variable.undefined
-			count: 10
 			path: Okay/Core/Notify.php
 
 		-
