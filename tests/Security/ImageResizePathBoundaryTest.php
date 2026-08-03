@@ -77,10 +77,6 @@ class ImageResizePathBoundaryTest extends TestCase
         $this->assertFalse($result);
     }
 
-    /**
-     * Гілка copy() для svg — єдина, що не потребує адаптера, тому саме на ній
-     * видно, що назовні нічого не копіюється.
-     */
     public function testTraversalCopiesNothing()
     {
         $this->image()->resize('../secret/private.100x100.svg', ['100x100'], 'orig/', 'resized/');
@@ -88,10 +84,6 @@ class ImageResizePathBoundaryTest extends TestCase
         $this->assertSame([], glob($this->root . '/resized/*') ?: []);
     }
 
-    /**
-     * getResizeParams() повертає false на імені без суфікса розміру, а
-     * результат розкладався через list() без перевірки.
-     */
     public function testUnparsableNameIsRefusedWithoutWarnings()
     {
         $result = $this->image()->resize('pic.svg', ['100x100'], 'orig/', 'resized/');
@@ -99,9 +91,6 @@ class ImageResizePathBoundaryTest extends TestCase
         $this->assertFalse($result);
     }
 
-    /**
-     * Головне, чого не можна зламати: звичайне ім'я має різатись як раніше.
-     */
     public function testOrdinaryNameStillResolves()
     {
         $result = $this->image()->resize('pic.100x100.svg', ['100x100'], 'orig/', 'resized/');

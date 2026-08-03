@@ -123,9 +123,7 @@ class Image
      */
     public function resize($filename, $imageSizes, $originalImagesDir = null, $resizedImagesDir = null)
     {
-        // Ім'я приходить з маршруту як (.+) і проходить rawurldecode(), тож
-        // getResizeParams() цілком може не розібрати його. Без цієї перевірки
-        // list() розкладав false і далі все трималось на випадковому збігу.
+        // Без цієї перевірки list() розкладав false.
         $resizeParams = $this->getResizeParams($filename);
         if ($resizeParams === false) {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
@@ -133,8 +131,8 @@ class Image
 
         list($sourceFile, $width , $height, $setWatermark, $cropParams, $pseudoWebp) = $resizeParams;
 
-        // До перевірки розміру: та відповідає 404 і робить exit(), тобто
-        // ворожий шлях уже не був би відхилений як ворожий.
+        // До перевірки розміру: та робить exit(), тож ворожий шлях не був би
+        // відхилений як ворожий.
         if (!$this->isRemoteSource($sourceFile) && !PathResolver::isSafeRelativePath($sourceFile)) {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
         }
@@ -167,8 +165,6 @@ class Image
         $resizedFile = $this->addResizeParams($originalFile, $width, $height, $setWatermark, $cropParams);
 
         // Обидва імені йдуть у file_exists(), copy() і в шлях запису прев'ю.
-        // downloadImage() повертає вже нормалізоване ім'я, але перевіряємо
-        // і його: далі результат використовується так само, як зовнішній.
         if (!PathResolver::isSafeRelativePath($originalFile)
             || !PathResolver::isSafeRelativePath($resizedFile)
         ) {
@@ -704,11 +700,7 @@ class Image
         return false;
     }
 
-    /**
-     * Віддалене джерело обмежене тим, що вже лежить у __images: сам факт
-     * завантаження перевіряє downloadImage() через fileIsNotExists(), тож
-     * довільна адреса сюди не доходить.
-     */
+    /** Довільна адреса сюди не доходить: downloadImage() звіряє її з __images. */
     private function isRemoteSource($filename)
     {
         return (bool)preg_match("~^https?://~", (string)$filename);
