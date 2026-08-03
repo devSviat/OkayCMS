@@ -27,12 +27,48 @@
   ================================================== */
 
 /********************************************************************** Шрифты */
-/*
-@import url('https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300i,700|Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i&subset=cyrillic,cyrillic-ext,latin-ext');
-*/
-
+/* Inter лежить локально: сторонніх запитів за шрифтами адмінка більше не робить.
+   Змінна накреслення одна на всі ваги, тож чотири файли покривають те, на що
+   раніше йшло десять накреслень Open Sans плюс три Open Sans Condensed.
+   Шлях '../fonts/' переписує CssConfig відносно cache/css/ - так само, як у
+   font-awesome.min.css. */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('../fonts/inter-cyrillic-ext.woff2') format('woff2-variations');
+    unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;
+}
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('../fonts/inter-cyrillic.woff2') format('woff2-variations');
+    unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('../fonts/inter-latin-ext.woff2') format('woff2-variations');
+    unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('../fonts/inter-latin.woff2') format('woff2-variations');
+    unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
 
 :root {
+    /* Одна сімʼя на весь інтерфейс замість чотирьох */
+    --ok-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
     /* Полотно і поверхні */
     --ok-canvas: #f5f6f7;
     --ok-surface: #ffffff;
@@ -43,10 +79,11 @@
     --ok-chrome-raised: #2c2928;
     --ok-chrome-ink-muted: #a9a4a1;
 
-    /* Текст. --ok-ink-muted дає 4.7:1 на білому - це нижня межа, не орієнтир. */
+    /* Текст. --ok-ink-muted міряне на полотні, а не на білому: полотно сіре,
+       і на ньому те саме значення дає менший контраст. 4.8:1 на --ok-canvas. */
     --ok-ink: #23272b;
     --ok-ink-soft: #545b62;
-    --ok-ink-muted: #6e757c;
+    --ok-ink-muted: #676e75;
 
     /* Межі */
     --ok-line: #e4e6e9;
@@ -68,6 +105,8 @@
     --ok-danger: #c8352c;
     --ok-danger-hover: #a92c25;
     --ok-danger-soft: #fbebea;
+    /* Той самий червоний на темному хромі дає 2.8:1, тож там світліший. */
+    --ok-danger-on-chrome: #f08b84;
 
     /* Радіуси - три кроки замість семи */
     --ok-radius-control: 6px;
@@ -102,7 +141,7 @@ html {
     min-width: 320px;*/
 }
 body {
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ok-font);
     font-size: 14px;
     min-height: 100%;
     line-height: 1.2;
@@ -242,18 +281,18 @@ body:not(.top-nav) header.navbar {
 .text_attention{color:  #e88100!important;}
 .text-primary,
 .text-info,
-.text_primary{color: RGB(39, 133, 226);}
+.text_primary{color: var(--ok-accent);}
 .text_dark{color: var(--ok-chrome-raised);}
 .text-white,
 .text_white{color: #e0e0e0;}
 .text-muted,
-.text_grey{color: #8d8d8d!important;}
+.text_grey{color: var(--ok-ink-muted)!important;}
 .text_white__bg{
     background-color: var(--ok-chrome);
 }
 
 .opensans{
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ok-font);
 }
 
 .bg_white{
@@ -424,7 +463,7 @@ body:not(.top-nav) header.navbar {
 
 /************************************************************************* Heading  */
 .heading_page{
-    font-family: 'Open Sans Condensed', sans-serif;
+    font-family: var(--ok-font);
     font-weight: 600;
     color: var(--ok-chrome-raised);
     font-size: 24px;
@@ -498,7 +537,7 @@ body:not(.top-nav) header.navbar {
     margin-left: 20px;
 }
 .heading_label{
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ok-font);
     font-weight: 500;
     color: rgb(149, 149, 149);
     font-size: 14px;
@@ -570,7 +609,7 @@ body:not(.top-nav) header.navbar {
     line-height: 18px;
 }
 .heading_normal{
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ok-font);
     font-weight: normal;
     color: #767676;
     font-size: 16px;
@@ -649,7 +688,7 @@ body:not(.top-nav) header.navbar {
 .okay_list_heading .sort_btn{
     background: transparent;
     border: none;
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ok-font);
     cursor: pointer;
 }
 .okay_list_heading .sort_btn svg,
@@ -676,7 +715,7 @@ body:not(.top-nav) header.navbar {
     fill: rgb(32, 168, 216);
 }
 .reset_sort.hint-anim{
-    font-family: 'Open Sans', sans-serif!important;
+    font-family: var(--ok-font)!important;
     text-transform: initial!important;
 }
 
@@ -794,7 +833,7 @@ a.link_white:hover{
 }
 
 .btn_openSans{
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ok-font);
 }
 .btn.btn_big svg{
     width: 20px;
@@ -1419,7 +1458,7 @@ a.link_white:hover{
     line-height: 1.3;
 }
 .alert__title {
-    font-family: 'Open Sans Condensed', sans-serif;
+    font-family: var(--ok-font);
     font-size: 18px;
     line-height: 24px;
     font-weight: 600;
@@ -1748,7 +1787,7 @@ opacity: 1;
     font-weight: 500;
     font-size: 16px;
     line-height: 1.4;
-    font-family: 'Open Sans', sans-serif !important;
+    font-family: var(--ok-font) !important;
 }
 .boxed_marketplace--bg .heading_page{ 
     font-size: 34px;
@@ -1772,7 +1811,7 @@ opacity: 1;
     position: relative;
     top: -20px;
     font-weight: 700;
-    font-family: 'Open Sans', sans-serif !important;
+    font-family: var(--ok-font) !important;
 }
 .marketplace_search{
     margin: 40px auto 20px;
@@ -2879,7 +2918,7 @@ label.switch_label i{
     -webkit-border-radius: 12px;
     -moz-border-radius: 12px;
     border: 1px solid var(--ok-line) !important;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: var(--ok-font);
     max-width: 100%;
     box-shadow: 0 4px 6px -1px rgba(31, 31, 31, 0.1), 0 2px 4px -2px rgba(31, 31, 31, 0.1) !important;
 }
@@ -3250,9 +3289,14 @@ label.switch_label i{
 }
 .okay_list .okay_list_head .okay_list_heading {
     font-weight: 600;
-    font-family: 'Open Sans Condensed', sans-serif;
-    text-transform: uppercase;
+    font-family: var(--ok-font);
+    /* Заголовки колонок були набрані вузьким Open Sans Condensed і переведені в
+       верхній регістр. Inter ширший, і "АКТИВНОСТЬ" разом зі стрілкою сортування
+       перестало влазити в колонку - слово рвалося посередині. Верхній регістр
+       кирилиці ширший і читається гірше, тож знято саме його, а не кегль. */
     font-size: 12px;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
 }
 .okay_list .okay_list_drag{
     width: 40px;
@@ -4236,7 +4280,7 @@ label.switch_label i{
     width: 100%!important;
 }
 .input-group--search .btn{
-    color: #878787;
+    color: var(--ok-ink-muted);
     display: flex;
     display: -webkit-box;
     display: -webkit-flex;
@@ -4472,7 +4516,7 @@ label.switch_label i{
 }
 .filter_date__item .filter_date__button{
     background: #fff;
-    color: #878787;
+    color: var(--ok-ink-muted);
     border: 1px solid transparent;
     -webkit-transition: all 0.12s ease;
     transition: all 0.12s ease;
@@ -4670,7 +4714,7 @@ label.switch_label i{
     -ms-flex-align: center;
     color: var(--ok-chrome-raised);
     font-weight: 600;
-    font-family: 'Open Sans Condensed', sans-serif;
+    font-family: var(--ok-font);
     text-transform: uppercase;
     font-size: 14px;
     background-color: var(--ok-canvas);
@@ -4906,7 +4950,7 @@ body.menu-pin .page-container {
     transition: transform 0.4s cubic-bezier(0.05,0.74,0.27,0.99);
     -webkit-backface-visibility: hidden;
     -webkit-perspective: 1000px;
-    font-family: "Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-family: var(--ok-font);
     -webkit-font-smoothing: antialiased;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
@@ -4971,7 +5015,7 @@ body.menu-pin .page-container {
     padding: 5px 0;
     font-size: 13px;
     white-space: normal;
-    color: #868686;
+    color: var(--ok-chrome-ink-muted);
 }
 #admin_catalog  .sidebar-menu .menu_items > li ul.submenu > li:hover > a,
 #admin_catalog  .sidebar-menu .menu_items > li ul.submenu > li:hover > .icon-thumbnail,
@@ -5036,7 +5080,7 @@ header.navbar .container-fluid{
     display: -ms-flexbox;
 }
 .admin_switches .adswitch{
-    font-family: Roboto;
+    font-family: var(--ok-font);
     font-size: 14px;
     font-weight: 500;
     color: var(--ok-accent);
@@ -5146,7 +5190,7 @@ header.navbar .container-fluid{
     display: block;
 }
 .admin_notification .counter{
-    background: #24970c;
+    background: var(--ok-success);
 }
 .admin_techsupport [data-hint]::after {
     width: 140px;
@@ -5863,7 +5907,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     color: #fff;
     background-color: var(--ok-chrome-raised);
     font-weight: 600;
-    font-family: 'Open Sans Condensed', sans-serif;
+    font-family: var(--ok-font);
     text-transform: uppercase;
     font-size: 14px;
     padding: 15px;
@@ -5953,7 +5997,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     color: #fff;
     background-color: var(--ok-chrome-raised);
     font-weight: 600;
-    font-family: 'Open Sans Condensed', sans-serif;
+    font-family: var(--ok-font);
     text-transform: uppercase;
     font-size: 14px;
     padding: 15px;
@@ -6977,7 +7021,7 @@ input[type=range]:focus::-ms-fill-upper {
     font-size: 16px;
     color: #83959d;
     margin-right: 20px;
-    position: relative;font-family: 'Open Sans Condensed', sans-serif;
+    position: relative;font-family: var(--ok-font);
     line-height: 22px;
     margin-bottom: 15px;
 }
@@ -7165,7 +7209,7 @@ input[type=range]:focus::-ms-fill-upper {
     background-color: #fff!important;
     margin: 10px 0 0!important;
     border: 1px solid var(--ok-line)!important;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif!important;
+    font-family: var(--ok-font)!important;
 }
 .chosen-container-active .chosen-choices {
     -webkit-box-shadow: none!important;
@@ -7189,7 +7233,7 @@ input[type=range]:focus::-ms-fill-upper {
     font-weight: 300!important;
     line-height: 18px!important;
     white-space: nowrap!important;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif!important;
+    font-family: var(--ok-font)!important;
 }
 .chosen-container-multi .chosen-drop .result-selected {
     display: list-item!important;
@@ -7667,7 +7711,7 @@ img.fnone {
     border-radius: 8px 8px 0 0;
 }
 .modal .heading_modal {
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ok-font);
     font-weight: 500;
     color: rgb(255, 255, 255);
     font-size: 22px;
@@ -7978,7 +8022,7 @@ div.tox-fullscreen {
     color: #fff;
     background-color: var(--ok-chrome-raised);
     font-weight: 600;
-    font-family: 'Open Sans Condensed', sans-serif;
+    font-family: var(--ok-font);
     text-transform: uppercase;
     font-size: 14px;
     padding: 15px;
@@ -8101,7 +8145,7 @@ div.tox-fullscreen {
     font-weight: 400!important;
     border-radius: 3px!important;
     padding: 8px 5px 7px!important;
-    font-family: 'Open Sans', sans-serif!important;
+    font-family: var(--ok-font)!important;
 }
 @media only screen and (max-width: 768px) {
     .tooltip_box:after,
@@ -8130,7 +8174,7 @@ div.tox-fullscreen {
     text-align: center;
 }
 .auth_heading_promo{
-    color: #8d8d8d;
+    color: var(--ok-ink-muted);
     font-style: italic;
     text-align: center;
     margin-bottom: 25px;
@@ -8183,7 +8227,7 @@ div.tox-fullscreen {
     margin-bottom: 40px;
 }
 .learning_card__inner {
-    font-family: 'Nunito', 'Open Sans', sans-serif;
+    font-family: var(--ok-font);
     position: relative;
     background: #fff;
     width: 100%;
@@ -8404,7 +8448,7 @@ div.tox-fullscreen {
     margin-right: 15px;
 }
 .progress-bar{
-    font-family: 'Nunito', 'Open Sans', sans-serif;
+    font-family: var(--ok-font);
     font-size: 16px;
     color: #fff;
     font-weight: bold;
@@ -8572,7 +8616,7 @@ div.tox-fullscreen {
 
 /******************** Left menu counter */
 .menu_counter {
-    background:#24970c;
+    background: var(--ok-success);
     color: #fff;
     display: -webkit-box;
     display: -webkit-flex;
@@ -8602,7 +8646,7 @@ ul.submenu .menu_counter {
     position: absolute;
     right: inherit;
     left: -110px;
-    color:#24970c;
+    color: var(--ok-success);
     top: -10px;
     font-size: 0.9em;
     font-weight: 700;
@@ -8779,7 +8823,7 @@ ul.submenu .menu_counter {
     color: rgb(255, 255, 255);
     background-color: var(--ok-chrome);
     font-weight: 600;
-    font-family: 'Open Sans Condensed', sans-serif;
+    font-family: var(--ok-font);
     text-transform: uppercase;
     font-size: 13px;
 }
@@ -9251,4 +9295,62 @@ input.error {
 
 .heading-divider::after {
     margin-left: .75em;
+}
+/************************************************************************* Фокус і рух */
+/* До цього в жодному стилі адмінки не було :focus-visible, зате 19 разів
+   траплявся outline: none. Клавіатурний обхід був невидимий. Кільце нижче
+   перекриває їх усі й показується тільки за клавіатурного фокуса, тож на
+   клік мишею нічого не змінюється. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible,
+[role="button"]:focus-visible {
+    outline: 2px solid var(--ok-accent);
+    outline-offset: 2px;
+    border-radius: var(--ok-radius-control);
+}
+/* На темному хромі синій акцент має замало контрасту, тож там кільце біле. */
+.sidebar a:focus-visible,
+.navbar a:focus-visible,
+.navbar button:focus-visible,
+.sidebar_header button:focus-visible {
+    outline-color: #fff;
+}
+/* Поля вводу вже показують стан рамкою, тож offset у них зайвий - він
+   відриває кільце від контролу. */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline-offset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms!important;
+        animation-iteration-count: 1!important;
+        transition-duration: 0.01ms!important;
+        scroll-behavior: auto!important;
+    }
+}
+
+/* Приглушений текст успадковується від body, а всередині темного хрому падав
+   до 3.2:1. У межах хрому приглушення і небезпека беруться з власних токенів. */
+.navbar,
+.sidebar,
+.sidebar_header {
+    color: var(--ok-chrome-ink-muted);
+}
+.navbar .text_warning,
+.sidebar .text_warning,
+#footer .text_warning {
+    color: var(--ok-danger-on-chrome)!important;
+}
+#footer {
+    color: var(--ok-chrome-ink-muted);
 }
