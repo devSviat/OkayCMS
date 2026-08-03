@@ -10,11 +10,12 @@ use Okay\Core\ServiceLocator;
 class Validator
 {
 
-    private $denied = [
-        "<script", "</script",
-        "<iframe", "</iframe",
-
-    ];
+    /**
+     * Форма відкриття тега: "<" одразу перед іменем, закриваючим слешем,
+     * "!" (коментар, doctype) або "?" (інструкція обробки). Саме так тег
+     * розпізнає браузер, тому "5 < 10" лишається звичайним текстом.
+     */
+    const TAG_SHAPE = '~<[a-z!/?]~i';
 
     private $settings;
     private $recaptcha;
@@ -125,18 +126,23 @@ class Validator
      * if $src is empty AND $is_required return false
      * @return bool
      */
+    /**
+     * Раніше тут був чорний список з "<script" і "<iframe". Він не ловив
+     * нічого, окрім двох цих тегів: <img onerror=...> проходив наскрізь.
+     */
     public function isSafe($src = "", $is_required = false)
     {
-        if (!empty($src)) {
-            foreach ($this->denied as $item) {
-                if (strpos($src, $item) !== false) {
-                    return false;
-                }
-            }
-        } elseif ($is_required) {
+        if (is_array($src) || is_object($src)) {
             return false;
         }
-        return true;
+
+        $src = (string)$src;
+
+        if ($src === '') {
+            return !$is_required;
+        }
+
+        return !preg_match(self::TAG_SHAPE, $src);
     }
 
     public function verifyCaptcha($form, $captcha_code = '')

@@ -8,6 +8,11 @@ use Okay\Core\Security\AdminCsrfToken;
 
 class Request
 {
+    /**
+     * Методи, які змінюють стан і тому потребують CSRF-перевірки.
+     */
+    const UNSAFE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
+
     private $langId;
     private $startTime;
 
@@ -394,7 +399,10 @@ class Request
      */
     public function checkSession()
     {
-        if (empty($_POST)) {
+        // За методом, а не за наповненістю $_POST: раніше порожнє тіло
+        // вважалось "не мутацією" і гард пропускав запит, не перевіривши
+        // нічого. POST без полів і PUT/PATCH/DELETE проходили наскрізь.
+        if (!in_array(strtoupper((string)$this->method()), self::UNSAFE_METHODS, true)) {
             return true;
         }
 
