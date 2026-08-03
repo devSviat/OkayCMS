@@ -103,12 +103,46 @@ $this->assertMatchesRegularExpression('~(?<![\w-])AdminRecoveryToken(?![\w-])~',
 
 ## PHPStan
 
-Конфіг — `phpstan.neon`, рівень **1**, аналізуються `Okay` і `backend` (не `tests`). Є
-`phpstan-baseline.neon` із зафіксованими давніми зауваженнями — нові помилки мають бути
-порожніми.
+Конфіг — `phpstan.neon`, рівень **5**, аналізуються `Okay` і `backend` (не `tests`). Легасі
+зафіксоване в `phpstan-baseline.neon` (947 записів) — новий код перевіряється по-справжньому,
+прогін має бути порожнім.
 
 ```bash
 php vendor/bin/phpstan analyse
+```
+
+### Baseline прив'язаний до стану дерева
+
+`reportUnmatchedIgnoredErrors: false` гасить запис, який більше ні на що не вказує, — правка,
+що зсуває рядки у вже описаному файлі, не має вимагати редагування конфіга.
+
+Зворотний бік цим **не** покривається: нова помилка в описаному файлі або перевищення записаної
+кількості — це звичайні помилки, і прогін впаде. Тому після злиття гілок, які правлять уже описані
+файли, baseline треба перегенерувати:
+
+```bash
+php vendor/bin/phpstan analyse --generate-baseline
+```
+
+### Локально зелено ≠ зелено в CI
+
+У раннері GitHub встановлені розширення, яких немає в нашому образі — зокрема `imagick`. PHPStan
+із завантаженим розширенням бере справжню рефлексію, без нього — власний стаб, і значення констант
+різняться. Запис baseline, що містить таке значення в тексті повідомлення, збігається локально й не
+збігається в CI.
+
+Одного разу це приховало справжній дефект. Шукати такі міни так:
+
+```bash
+grep -n "[0-9] given" phpstan-baseline.neon
+```
+
+Записи з символічними іменами (`PhoneNumberFormat::E164`) безпечні; небезпечні ті, де стоїть
+числове значення константи розширення. Після злиття дивіться на статус прогону, а не лише на
+локальний:
+
+```bash
+gh run list --repo devSviat/OkayCMS --branch main --limit 5 --json name,conclusion,headSha
 ```
 
 ## PHP_CodeSniffer
@@ -133,6 +167,25 @@ php vendor/bin/phpstan analyse
 
 Запускати з кореня репозиторію; `sleep` перед ним не потрібен — скрипт чекає сам.
 
+## Що робить CI
+
+`.github/workflows/ci.yml` — на кожен PR:
+
+| Крок | Що перевіряє |
+| ---- | ------------ |
+| `composer validate --strict` | коректність `composer.json` |
+| `composer audit --locked` | вразливості в залежностях; `--abandoned=report`, тобто покинутий пакет не валить збірку |
+| `vendor/bin/phpcs -q` | сумісність із версією PHP, на матриці 8.4 і 8.5 |
+| `vendor/bin/phpunit` | тести, на тій самій матриці |
+| `vendor/bin/phpstan analyse` | статичний аналіз, окремою джобою на 8.5 |
+| `gitleaks detect` | секрети по **всій** історії |
+
+Розібрані вручну спрацювання Gitleaks перелічені у `.gitleaksignore` поіменно — не звуженням
+області сканування, інакше новий секрет у тих самих файлах теж лишився б непоміченим.
+
+`.github/workflows/docker-security.yml` — Trivy по зібраних прод-образах; на PR не запускається,
+лише на push у `main` і за розкладом.
+
 ## Перед PR
 
 ```bash
@@ -141,3 +194,6 @@ cd dev && docker compose exec php85 php vendor/bin/phpcs
 cd dev && docker compose exec php85 php vendor/bin/phpstan analyse
 dev/bin/smoke.sh
 ```
+
+Після злиття — перевірте, що прогін у CI зелений: локальний і CI-прогін не еквівалентні, див.
+розділ про PHPStan вище.
