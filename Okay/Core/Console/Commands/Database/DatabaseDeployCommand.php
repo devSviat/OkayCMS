@@ -22,6 +22,15 @@ class DatabaseDeployCommand extends Command
                 InputOption::VALUE_REQUIRED,
                 'The database file path',
                 dirname(__DIR__, 5).'/1DB_changes/okay_clean.sql'
+            )
+            // Штатний --no-interaction тут не годиться: він повертає типову
+            // відповідь на підтвердження, а вона false, тобто розгортання
+            // просто скасовується. Потрібне явне "так".
+            ->addOption(
+                'yes',
+                'y',
+                InputOption::VALUE_NONE,
+                'Do not ask for confirmation (CI, provisioning scripts)'
             );
     }
 
@@ -29,7 +38,7 @@ class DatabaseDeployCommand extends Command
     {
         $this->output->writeln("\n***************************");
 
-        if (!$this->askConfirmation('Deploy clean database? ', false)) {
+        if (!$this->input->getOption('yes') && !$this->askConfirmation('Deploy clean database? ', false)) {
             return Command::FAILURE;
         }
 
