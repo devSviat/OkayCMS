@@ -1,0 +1,24 @@
+# Розібрані вручну спрацювання. Формат: commit:file:rule:line.
+#
+# Усі - в успадкованій історії апстріму, чинного секрету в дереві немає.
+# Перелічені поіменно, а не обійдені звуженням області сканування: інакше
+# новий секрет у тих самих файлах теж лишився б непоміченим.
+
+# Апстрімні коміти "Ai request object" (лютий 2024). У поточному файлі
+# ключа немає - лише посилання на класи OpenAiHelper.
+09820e3c9ffd77d8b7df9874a6a0bee8fcc0279c:Okay/Core/config/helpers.php:openai-api-key:694
+4d4fe1dd01b3cb3bc1e030d89fd1d66ab238c59d:Okay/Core/config/helpers.php:openai-api-key:695
+
+# Демо-дамп зі стокової поставки: newpost_key і deploy_build_key із
+# заповнювачами. Магазин, розгорнутий звідси без зміни deploy_build_key,
+# лишається з відомим ключем збірки - це до інсталяційного чек-листа.
+1b92498bcbf3d0615943243b33b6d92308e01b4d:1DB_changes/okay_clean.sql:generic-api-key:66871
+2489e922721eb7acf89eef6d0908a8959d503398:1DB_changes/okay_clean.sql:generic-api-key:140833
+6ac644ea88f2f4c7ea9459f551497f9abbb47b91:1DB_changes/okay_clean.sql:generic-api-key:42209
+aabad115f41de0b6a484837558f32b3e0b10484b:1DB_changes/okay_clean.sql:generic-api-key:67524
+adf4bddfc3d20ddd8ef91b25ea137fdb93b90d93:1DB_changes/okay_clean.sql:generic-api-key:2753
+d98d162edc00ad423648428b0c04dc36c8200a18:1DB_changes/okay_clean.sql:generic-api-key:66910
+e5ff388b0e981be3ce890380599068977a2e13b0:1DB_changes/okay_clean.sql:generic-api-key:66904
+
+# Приклад ключа всередині вендорної jsPDF у складі highcharts.
+6ac644ea88f2f4c7ea9459f551497f9abbb47b91:backend/design/js/highcharts/lib/jspdf.src.js:generic-api-key:13445

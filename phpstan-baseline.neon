@@ -1,6 +1,30 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Controllers/AuthorsController.php
+
+		-
+			message: '#^Cannot access property \$socials on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Controllers/AuthorsController.php
+
+		-
+			message: '#^Cannot access property \$url on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Controllers/AuthorsController.php
+
+		-
+			message: '#^Cannot access property \$visible on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Controllers/AuthorsController.php
+
+		-
 			message: '#^Undefined variable\: \$category$#'
 			identifier: variable.undefined
 			count: 1
@@ -11,6 +35,18 @@ parameters:
 			identifier: empty.variable
 			count: 1
 			path: Okay/Controllers/AuthorsController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between object and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: Okay/Controllers/BlogController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: Okay/Controllers/BlogController.php
 
 		-
 			message: '#^Variable \$category in empty\(\) always exists and is always falsy\.$#'
@@ -25,10 +61,178 @@ parameters:
 			path: Okay/Controllers/BlogController.php
 
 		-
+			message: '#^Strict comparison using \!\=\= between object and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: Okay/Controllers/BrandController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: Okay/Controllers/BrandController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between object and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: Okay/Controllers/CategoryController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: Okay/Controllers/CategoryController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between object and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: Okay/Controllers/PageController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: Okay/Controllers/PageController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between object and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: Okay/Controllers/ProductController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: Okay/Controllers/ProductController.php
+
+		-
+			message: '#^Parameter \#2 \$sortName of method Okay\\Helpers\\ProductsHelper\:\:getList\(\) expects null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Controllers/ProductsController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and false will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: Okay/Controllers/ResizeController.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Controllers/UserController.php
+
+		-
+			message: '#^Cannot access property \$remind_code on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Controllers/UserController.php
+
+		-
+			message: '#^Cannot access property \$remind_expire on object\|string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Controllers/UserController.php
+
+		-
+			message: '#^Comparison operation "\<\=" between int\<1, 256\> and 256 is always true\.$#'
+			identifier: smallerOrEqual.alwaysTrue
+			count: 1
+			path: Okay/Core/Adapters/Resize/GD.php
+
+		-
 			message: '#^Function imagegif invoked with 3 parameters, 1\-2 required\.$#'
 			identifier: arguments.count
 			count: 1
 			path: Okay/Core/Adapters/Resize/GD.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 5
+			path: Okay/Core/Adapters/Resize/GD.php
+
+		-
+			message: '#^Property Okay\\Core\\Adapters\\Resize\\AbstractResize\:\:\$imageQuality \(int\) does not accept float\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: Okay/Core/Adapters/Resize/GD.php
+
+		-
+			message: '#^Call to function is_object\(\) with Imagick will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: Okay/Core/Adapters/Resize/Imagick.php
+
+		-
+			message: '#^Parameter \#1 \$compression of method Imagick\:\:setImageCompression\(\) expects 0\|1\|2\|3\|4\|5\|6\|7\|8\|9\|10\|11\|12\|13\|14\|15\|16\|17\|18\|19\|20\|21\|22\|23\|24\|25, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Core/Adapters/Resize/Imagick.php
+
+		-
+			message: '#^Parameter \#5 \$channel of method Imagick\:\:compositeImage\(\) expects 0\|1\|2\|4\|8\|16\|23\|31\|32\|64\|128\|256\|512\|1024\|131072\|134217727, 18 given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Core/Adapters/Resize/Imagick.php
+
+		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 1
+			path: Okay/Core/BackendTranslations.php
+
+		-
+			message: '#^Call to function is_array\(\) with non\-empty\-list\<string\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: Okay/Core/BrowsedProducts.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Core/Cart.php
+
+		-
+			message: '#^Offset ''cart'' on non\-empty\-array in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: Okay/Core/Cart.php
+
+		-
+			message: '#^Offset ''shopping_cart'' on non\-empty\-array\<mixed\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: Okay/Core/Cart.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$purchase Purchase\)\: Unexpected token "\$purchase", expected type at offset 9 on line 1$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Core/Cart.php
+
+		-
+			message: '#^Property Okay\\Core\\Cart\:\:\$discountsCore is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/Cart.php
+
+		-
+			message: '#^Property Okay\\Core\\Cart\:\:\$entityFactory is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/Cart.php
+
+		-
+			message: '#^Property Okay\\Core\\Cart\:\:\$imagesEntity is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/Cart.php
 
 		-
 			message: '#^Variable \$items in empty\(\) always exists and is always falsy\.$#'
@@ -43,6 +247,24 @@ parameters:
 			path: Okay/Core/Cart.php
 
 		-
+			message: '#^Property Okay\\Core\\Classes\\Purchase\:\:\$amount \(int\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: Okay/Core/Classes/Purchase.php
+
+		-
+			message: '#^Property Okay\\Core\\Classes\\Purchase\:\:\$undiscounted_price \(int\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: Okay/Core/Classes/Purchase.php
+
+		-
+			message: '#^Result of && is always true\.$#'
+			identifier: booleanAnd.alwaysTrue
+			count: 1
+			path: Okay/Core/Classes/Purchase.php
+
+		-
 			message: '#^Variable \$signs in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
@@ -55,10 +277,280 @@ parameters:
 			path: Okay/Core/Comparison.php
 
 		-
+			message: '#^Call to an undefined method ReflectionType\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/Console/Command.php
+
+		-
+			message: '#^Dead catch \- PDOException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: Okay/Core/Console/Commands/Database/DatabaseDeployCommand.php
+
+		-
+			message: '#^Method Okay\\Core\\Console\\Commands\\Database\\DatabaseDeployCommand\:\:isComment\(\) should return string but returns bool\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Core/Console/Commands/Database/DatabaseDeployCommand.php
+
+		-
+			message: '#^Method Okay\\Core\\Console\\Commands\\Database\\DatabaseDeployCommand\:\:isQueryEnd\(\) should return string but returns bool\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Core/Console/Commands/Database/DatabaseDeployCommand.php
+
+		-
 			message: '#^Method Okay\\Core\\Console\\Commands\\Module\\ModuleCreateCommand\:\:formatCamelCase\(\) invoked with 2 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 1
 			path: Okay/Core/Console/Commands/Module/ModuleCreateCommand.php
+
+		-
+			message: '#^Offset ''function'' on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: Okay/Core/Database.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$str\)\: Unexpected token "\$str", expected type at offset 16 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Core/Database.php
+
+		-
+			message: '#^Property Okay\\Core\\Database\:\:\$result \(PDOStatement\) in empty\(\) is not falsy\.$#'
+			identifier: empty.property
+			count: 2
+			path: Okay/Core/Database.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:addLogger\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:addMessage\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:alert\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:critical\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:debug\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:emergency\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:error\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:hasStartedMeasure\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:info\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:log\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:notice\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:set\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:startMeasure\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:stopMeasure\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to an undefined method DebugBar\\DataCollector\\DataCollectorInterface\:\:warning\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to function is_null\(\) with DebugBar\\DebugBar will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 24
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 3
+			path: Okay/Core/DebugBar/DebugBar.php
+
+		-
+			message: '#^Call to function is_string\(\) with non\-falsy\-string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: Okay/Core/Design.php
+
+		-
+			message: '#^Method Okay\\Core\\Design\:\:getModuleNameByPath\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: Okay/Core/Design.php
+
+		-
+			message: '#^Method Okay\\Core\\Design\:\:getModuleVendorByPath\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: Okay/Core/Design.php
+
+		-
+			message: '#^Call to an undefined method ReflectionType\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/DesignBlocks.php
+
+		-
+			message: '#^Property Okay\\Core\\DesignBlocks\:\:\$SL is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/DesignBlocks.php
+
+		-
+			message: '#^Property Okay\\Core\\DesignBlocks\:\:\$entityFactory is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/DesignBlocks.php
+
+		-
+			message: '#^Property Okay\\Core\\Discounts\:\:\$discountsEntity is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/Discounts.php
+
+		-
+			message: '#^Argument of an invalid type stdClass supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 2
+			path: Okay/Core/Entity/Entity.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: Okay/Core/Entity/Entity.php
+
+		-
+			message: '#^PHPDoc tag @var above a method has no effect\.$#'
+			identifier: varTag.misplaced
+			count: 3
+			path: Okay/Core/Entity/Entity.php
+
+		-
+			message: '#^Property Okay\\Core\\Entity\\Entity\:\:\$mappedBy \(string\) does not accept null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: Okay/Core/Entity/Entity.php
+
+		-
+			message: '#^Return type \(string\|false\) of method Okay\\Core\\Entity\\Entity\:\:count\(\) should be compatible with return type \(int\) of method Okay\\Core\\Entity\\EntityInterface\:\:count\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: Okay/Core/Entity/Entity.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: Okay/Core/Entity/Entity.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$filter array\)\: Unexpected token "\$filter", expected type at offset 16 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Core/Entity/FilterPriorityInterface.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 4
+			path: Okay/Core/Entity/UrlUniqueValidator.php
+
+		-
+			message: '#^Call to function is_array\(\) with string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: Okay/Core/Image.php
+
+		-
+			message: '#^Method Okay\\Core\\Image\:\:isNotHttpsSource\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: Okay/Core/Image.php
+
+		-
+			message: '#^Method Okay\\Core\\Image\:\:responseSuccess\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: Okay/Core/Image.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: Okay/Core/Image.php
+
+		-
+			message: '#^Result of \|\| is always true\.$#'
+			identifier: booleanOr.alwaysTrue
+			count: 1
+			path: Okay/Core/Image.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and null will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 2
+			path: Okay/Core/Image.php
 
 		-
 			message: '#^Variable \$cropPositionX in empty\(\) always exists and is always falsy\.$#'
@@ -79,6 +571,168 @@ parameters:
 			path: Okay/Core/Image.php
 
 		-
+			message: '#^Call to preg_quote\(\) is missing delimiter / to be effective\.$#'
+			identifier: argument.invalidPregQuote
+			count: 1
+			path: Okay/Core/Import.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(array\)\: Unexpected token "\\n     \* ", expected variable at offset 23 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Core/Import.php
+
+		-
+			message: '#^PHPDoc tag @var above a method has no effect\.$#'
+			identifier: varTag.misplaced
+			count: 1
+			path: Okay/Core/Modules/AbstractInit.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: Okay/Core/Modules/EntityMigrator.php
+
+		-
+			message: '#^Variable \$entityField in PHPDoc tag @var does not exist\.$#'
+			identifier: varTag.variableNotFound
+			count: 1
+			path: Okay/Core/Modules/EntityMigrator.php
+
+		-
+			message: '#^Unsafe call to private method Okay\\Core\\Modules\\Extender\\ChainExtender\:\:isFirstExtension\(\) through static\:\:\.$#'
+			identifier: staticClassAccess.privateMethod
+			count: 1
+			path: Okay/Core/Modules/Extender/ChainExtender.php
+
+		-
+			message: '#^Unsafe call to private method Okay\\Core\\Modules\\Extender\\QueueExtender\:\:isValidTrigger\(\) through static\:\:\.$#'
+			identifier: staticClassAccess.privateMethod
+			count: 1
+			path: Okay/Core/Modules/Extender/QueueExtender.php
+
+		-
+			message: '#^Cannot access property \$module_name on object\|string\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: Okay/Core/Modules/Installer.php
+
+		-
+			message: '#^Cannot access property \$vendor on object\|string\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: Okay/Core/Modules/Installer.php
+
+		-
+			message: '#^Cannot access property \$version on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Core/Modules/Installer.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: Okay/Core/Modules/Installer.php
+
+		-
+			message: '#^Parameter \#3 \$value of function curl_setopt expects bool, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: Okay/Core/Modules/LicenseModulesTemplates.php
+
+		-
+			message: '#^Binary operation "\+\=" between string and 100 results in an error\.$#'
+			identifier: assignOp.invalid
+			count: 1
+			path: Okay/Core/Modules/Module.php
+
+		-
+			message: '#^Call to an undefined method Psr\\Log\\LoggerInterface\:\:addWarning\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/Modules/Module.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 2
+			path: Okay/Core/Modules/Modules.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 2
+			path: Okay/Core/Modules/Modules.php
+
+		-
+			message: '#^Property Okay\\Core\\Modules\\Modules\:\:\$module \(Okay\\Core\\Modules\\Module\) in empty\(\) is not falsy\.$#'
+			identifier: empty.property
+			count: 1
+			path: Okay/Core/Modules/Modules.php
+
+		-
+			message: '#^Cannot access property \$email on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Cannot access property \$email on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Cannot access property \$message on object\|string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Cannot access property \$object_id on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Cannot access property \$parent_id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Cannot access property \$post on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Cannot access property \$product on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Cannot access property \$type on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Cannot access property \$type_obj on object\|string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Cannot access property \$type_obj on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Core/Notify.php
+
+		-
 			message: '#^Variable \$comment might not be defined\.$#'
 			identifier: variable.undefined
 			count: 10
@@ -89,6 +743,336 @@ parameters:
 			identifier: empty.variable
 			count: 1
 			path: Okay/Core/Notify.php
+
+		-
+			message: '#^Static property Okay\\Core\\OkayContainer\\OkayContainer\:\:\$instance \(Okay\\Core\\OkayContainer\\OkayContainer\) in empty\(\) is not falsy\.$#'
+			identifier: empty.property
+			count: 1
+			path: Okay/Core/OkayContainer/OkayContainer.php
+
+		-
+			message: '#^Parameter \#2 \$numberFormat of static method Okay\\Core\\Phone\:\:format\(\) expects null, libphonenumber\\PhoneNumberFormat\:\:E164 given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Core/Phone.php
+
+		-
+			message: '#^Parameter \#2 \$numberFormat of static method Okay\\Core\\Phone\:\:format\(\) expects null, libphonenumber\\PhoneNumberFormat\:\:INTERNATIONAL given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Core/Phone.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and null will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: Okay/Core/Phone.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:from\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Delete.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:orWhere\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Delete.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:where\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Delete.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:addRow\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Insert.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:addRows\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Insert.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:col\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Insert.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:cols\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Insert.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:getLastInsertIdName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Insert.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:into\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Insert.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:set\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Insert.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:cols\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:distinct\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:forUpdate\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:from\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:fromRaw\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:fromSubSelect\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:getCols\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:getLimit\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:getOffset\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:getPage\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:getPaging\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:groupBy\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:hasCol\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:hasCols\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:having\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:innerJoin\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:isDistinct\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:join\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:joinSubSelect\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:leftJoin\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:limit\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:offset\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:orHaving\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:orWhere\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:orderBy\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:page\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:removeCol\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:reset\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:resetCols\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:resetGroupBy\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:resetHaving\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:resetOrderBy\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:resetTables\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:resetUnions\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:resetWhere\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:setPaging\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:union\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:unionAll\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:where\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Method Okay\\Core\\QueryFactory\\Select\:\:removeCol\(\) should return bool but returns \$this\(Okay\\Core\\QueryFactory\\Select\)\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
+
+		-
+			message: '#^Method Okay\\Core\\QueryFactory\\Select\:\:reset\(\) should return null but returns \$this\(Okay\\Core\\QueryFactory\\Select\)\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Core/QueryFactory/Select.php
 
 		-
 			message: '#^Method Okay\\Core\\QueryFactory\\SqlQuery\:\:getQuoteNamePrefix\(\) should return string but return statement is missing\.$#'
@@ -103,10 +1087,106 @@ parameters:
 			path: Okay/Core/QueryFactory/SqlQuery.php
 
 		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:col\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Update.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:cols\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Update.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:orWhere\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Update.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:set\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Update.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:table\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Update.php
+
+		-
+			message: '#^Call to an undefined method Aura\\SqlQuery\\QueryInterface\:\:where\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/QueryFactory/Update.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$captcha_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Core/Recaptcha.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$secret_recaptcha\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Core/Recaptcha.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$secret_recaptcha_invisible\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Core/Recaptcha.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$secret_recaptcha_v3\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Core/Recaptcha.php
+
+		-
+			message: '#^Method Okay\\Core\\Request\:\:method\(\) should return string but returns bool\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Core/Request.php
+
+		-
+			message: '#^PHPDoc tag @var above a method has no effect\.$#'
+			identifier: varTag.misplaced
+			count: 5
+			path: Okay/Core/Request.php
+
+		-
+			message: '#^Property Okay\\Core\\Request\:\:\$langId is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/Request.php
+
+		-
 			message: '#^Variable \$argv in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
 			path: Okay/Core/Request.php
+
+		-
+			message: '#^Call to an undefined method Okay\\Core\\Languages\:\:create\(\)\.$#'
+			identifier: method.notFound
+			count: 6
+			path: Okay/Core/Router.php
+
+		-
+			message: '#^Call to an undefined method ReflectionType\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/Router.php
+
+		-
+			message: '#^Static property Okay\\Core\\Router\:\:\$routeFactory \(Okay\\Core\\Languages\) does not accept Okay\\Core\\Routes\\RouteFactory\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: Okay/Core/Router.php
 
 		-
 			message: '#^Variable \$mappedCacheUrlSlugByUrl on left side of \?\? always exists and is not nullable\.$#'
@@ -115,10 +1195,346 @@ parameters:
 			path: Okay/Core/Routes/AbstractRoute.php
 
 		-
+			message: '#^Property Okay\\Core\\Routes\\Strategies\\AllProducts\\DefaultStrategy\:\:\$settings is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/Routes/Strategies/AllProducts/DefaultStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\BlogCategory\\NoPrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns mixed\.$#'
+			identifier: return.type
+			count: 2
+			path: Okay/Core/Routes/Strategies/BlogCategory/NoPrefixAndPathStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\BlogCategory\\NoPrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns string\.$#'
+			identifier: return.type
+			count: 3
+			path: Okay/Core/Routes/Strategies/BlogCategory/NoPrefixAndPathStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\BlogCategory\\PrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns mixed\.$#'
+			identifier: return.type
+			count: 2
+			path: Okay/Core/Routes/Strategies/BlogCategory/PrefixAndPathStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\BlogCategory\\PrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns string\.$#'
+			identifier: return.type
+			count: 3
+			path: Okay/Core/Routes/Strategies/BlogCategory/PrefixAndPathStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\Category\\NoPrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns mixed\.$#'
+			identifier: return.type
+			count: 2
+			path: Okay/Core/Routes/Strategies/Category/NoPrefixAndPathStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\Category\\NoPrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns string\.$#'
+			identifier: return.type
+			count: 3
+			path: Okay/Core/Routes/Strategies/Category/NoPrefixAndPathStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\Category\\PrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns mixed\.$#'
+			identifier: return.type
+			count: 2
+			path: Okay/Core/Routes/Strategies/Category/PrefixAndPathStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\Category\\PrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns string\.$#'
+			identifier: return.type
+			count: 3
+			path: Okay/Core/Routes/Strategies/Category/PrefixAndPathStrategy.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Core/Routes/Strategies/Post/NoPrefixAndCategoryStrategy.php
+
+		-
+			message: '#^Cannot access property \$main_category_id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Core/Routes/Strategies/Post/NoPrefixAndCategoryStrategy.php
+
+		-
+			message: '#^Cannot access property \$url on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Core/Routes/Strategies/Post/NoPrefixAndCategoryStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\Post\\NoPrefixAndCategoryStrategy\:\:generateSlugUrl\(\) should return null but returns mixed\.$#'
+			identifier: return.type
+			count: 2
+			path: Okay/Core/Routes/Strategies/Post/NoPrefixAndCategoryStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\Post\\NoPrefixAndCategoryStrategy\:\:generateSlugUrl\(\) should return null but returns string\.$#'
+			identifier: return.type
+			count: 2
+			path: Okay/Core/Routes/Strategies/Post/NoPrefixAndCategoryStrategy.php
+
+		-
+			message: '#^Cannot access property \$path_url on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: Okay/Core/Routes/Strategies/Post/NoPrefixAndPathStrategy.php
+
+		-
+			message: '#^Cannot access property \$url on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Core/Routes/Strategies/Post/NoPrefixAndPathStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\Post\\NoPrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns mixed\.$#'
+			identifier: return.type
+			count: 2
+			path: Okay/Core/Routes/Strategies/Post/NoPrefixAndPathStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\Post\\NoPrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns string\.$#'
+			identifier: return.type
+			count: 2
+			path: Okay/Core/Routes/Strategies/Post/NoPrefixAndPathStrategy.php
+
+		-
+			message: '#^Property Okay\\Core\\Routes\\Strategies\\Post\\NoPrefixAndPathStrategy\:\:\$settings is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/Routes/Strategies/Post/NoPrefixAndPathStrategy.php
+
+		-
+			message: '#^Cannot access property \$path_url on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: Okay/Core/Routes/Strategies/Post/PrefixAndPathStrategy.php
+
+		-
+			message: '#^Cannot access property \$url on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Core/Routes/Strategies/Post/PrefixAndPathStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\Post\\PrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns mixed\.$#'
+			identifier: return.type
+			count: 2
+			path: Okay/Core/Routes/Strategies/Post/PrefixAndPathStrategy.php
+
+		-
+			message: '#^Method Okay\\Core\\Routes\\Strategies\\Post\\PrefixAndPathStrategy\:\:generateSlugUrl\(\) should return null but returns string\.$#'
+			identifier: return.type
+			count: 2
+			path: Okay/Core/Routes/Strategies/Post/PrefixAndPathStrategy.php
+
+		-
+			message: '#^Return type \(string\) of method Okay\\Core\\Routes\\Strategies\\Product\\NoPrefixAndCategoryStrategy\:\:generateSlugUrl\(\) should be compatible with return type \(null\) of method Okay\\Core\\Routes\\Strategies\\AbstractRouteStrategy\:\:generateSlugUrl\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: Okay/Core/Routes/Strategies/Product/NoPrefixAndCategoryStrategy.php
+
+		-
+			message: '#^Property Okay\\Core\\Routes\\Strategies\\Product\\NoPrefixAndPathStrategy\:\:\$settings is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/Routes/Strategies/Product/NoPrefixAndPathStrategy.php
+
+		-
+			message: '#^Return type \(string\) of method Okay\\Core\\Routes\\Strategies\\Product\\NoPrefixAndPathStrategy\:\:generateSlugUrl\(\) should be compatible with return type \(null\) of method Okay\\Core\\Routes\\Strategies\\AbstractRouteStrategy\:\:generateSlugUrl\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: Okay/Core/Routes/Strategies/Product/NoPrefixAndPathStrategy.php
+
+		-
+			message: '#^Return type \(string\) of method Okay\\Core\\Routes\\Strategies\\Product\\PrefixAndPathStrategy\:\:generateSlugUrl\(\) should be compatible with return type \(null\) of method Okay\\Core\\Routes\\Strategies\\AbstractRouteStrategy\:\:generateSlugUrl\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: Okay/Core/Routes/Strategies/Product/PrefixAndPathStrategy.php
+
+		-
+			message: '#^Instanceof between array\|string and Closure will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: Okay/Core/Scheduler/Schedule.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: Okay/Core/Scheduler/Scheduler.php
+
+		-
+			message: '#^Call to an undefined method ReflectionType\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/Scheduler/Task.php
+
+		-
+			message: '#^Elseif condition is always true\.$#'
+			identifier: elseif.alwaysTrue
+			count: 1
+			path: Okay/Core/Scheduler/Task.php
+
+		-
+			message: '#^Instanceof between \*NEVER\* and Closure will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: Okay/Core/Scheduler/Task.php
+
+		-
+			message: '#^Method Okay\\Core\\Scheduler\\Task\:\:getId\(\) should return string but returns int\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Core/Scheduler/Task.php
+
+		-
+			message: '#^Parameter \#1 \$element of method Okay\\Core\\Security\\SvgSanitizer\:\:cleanElement\(\) expects DOMElement, DOMNode given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Core/Security/SvgSanitizer.php
+
+		-
+			message: '#^Call to function is_array\(\) with string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: Okay/Core/Settings.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function set_error_handler expects \(callable\(int, string, string, int\)\: bool\)\|null, Closure\(\)\: void given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Core/Settings.php
+
+		-
 			message: '#^Call to an undefined method \$this\(Okay\\Core\\SmartyPlugins\\Plugin\)&Okay\\Core\\SmartyPlugins\\Func\:\:run\(\)\.$#'
 			identifier: method.notFound
 			count: 2
 			path: Okay/Core/SmartyPlugins/Plugin.php
+
+		-
+			message: '#^Property Okay\\Core\\SmartyPlugins\\Plugins\\CheckoutPaymentForm\:\:\$rootDir is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/CheckoutPaymentForm.php
+
+		-
+			message: '#^Property Okay\\Core\\SmartyPlugins\\Plugins\\GetBrands\:\:\$brands is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/GetBrands.php
+
+		-
+			message: '#^Property Okay\\Core\\SmartyPlugins\\Plugins\\GetCaptcha\:\:\$design is unused\.$#'
+			identifier: property.unused
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/GetCaptcha.php
+
+		-
+			message: '#^Property Okay\\Core\\SmartyPlugins\\Plugins\\GetDiscountedProducts\:\:\$productsEntity is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/GetDiscountedProducts.php
+
+		-
+			message: '#^Call to method getList\(\) on an unknown class Okay\\Core\\SmartyPlugins\\Plugins\\Products\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/GetFeaturedProducts.php
+
+		-
+			message: '#^Property Okay\\Core\\SmartyPlugins\\Plugins\\GetFeaturedProducts\:\:\$productsEntity is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/GetFeaturedProducts.php
+
+		-
+			message: '#^Property Okay\\Core\\SmartyPlugins\\Plugins\\GetFeaturedProducts\:\:\$productsHelper \(Okay\\Core\\SmartyPlugins\\Plugins\\Products\) does not accept Okay\\Helpers\\ProductsHelper\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/GetFeaturedProducts.php
+
+		-
+			message: '#^Property Okay\\Core\\SmartyPlugins\\Plugins\\GetFeaturedProducts\:\:\$productsHelper has unknown class Okay\\Core\\SmartyPlugins\\Plugins\\Products as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/GetFeaturedProducts.php
+
+		-
+			message: '#^Parameter \#2 \$sortName of method Okay\\Helpers\\ProductsHelper\:\:getList\(\) expects null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/GetNewProducts.php
+
+		-
+			message: '#^Property Okay\\Core\\SmartyPlugins\\Plugins\\GetNewProducts\:\:\$productsEntity is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/GetNewProducts.php
+
+		-
+			message: '#^Property Okay\\Core\\SmartyPlugins\\Plugins\\GetPosts\:\:\$blogEntity is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/GetPosts.php
+
+		-
+			message: '#^Call to an undefined method Okay\\Core\\SmartyPlugins\\Plugins\\Phone\:\:format\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/Phone.php
+
+		-
+			message: '#^Property Okay\\Core\\SmartyPlugins\\Plugins\\Phone\:\:\$phone \(Okay\\Core\\SmartyPlugins\\Plugins\\Phone\) does not accept Okay\\Core\\Phone\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: Okay/Core/SmartyPlugins/Plugins/Phone.php
+
+		-
+			message: '#^Parameter \#3 \$value of function curl_setopt expects bool, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: Okay/Core/Support.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<mixed, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: Okay/Core/TemplateConfig/BackendTemplateConfig.php
+
+		-
+			message: '#^Property Okay\\Core\\TemplateConfig\\BackendTemplateConfig\:\:\$scriptsDefer is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Core/TemplateConfig/BackendTemplateConfig.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<mixed, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: Okay/Core/TemplateConfig/FrontTemplateConfig.php
+
+		-
+			message: '#^Variable \$debugBarRenderer in PHPDoc tag @var does not exist\.$#'
+			identifier: varTag.variableNotFound
+			count: 1
+			path: Okay/Core/TemplateConfig/FrontTemplateConfig.php
+
+		-
+			message: '#^Expression in empty\(\) is not falsy\.$#'
+			identifier: empty.expr
+			count: 1
+			path: Okay/Core/TplMod/Nodes/BaseNode.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 1
+			path: Okay/Core/TplMod/Parser.php
 
 		-
 			message: '#^Variable \$parentNode in empty\(\) always exists and is not falsy\.$#'
@@ -133,10 +1549,76 @@ parameters:
 			path: Okay/Core/Validator.php
 
 		-
+			message: '#^Call to function is_int\(\) with string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: Okay/Core/config/functions.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$original_authors_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/AuthorsEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$resized_authors_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/AuthorsEntity.php
+
+		-
+			message: '#^Cannot access property \$position on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Entities/AuthorsEntity.php
+
+		-
 			message: '#^Method Okay\\Entities\\AuthorsEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
 			identifier: return.missing
 			count: 1
 			path: Okay/Entities/AuthorsEntity.php
+
+		-
+			message: '#^Return type \(string\|false\) of method Okay\\Entities\\AuthorsEntity\:\:count\(\) should be compatible with return type \(int\) of method Okay\\Core\\Entity\\EntityInterface\:\:count\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: Okay/Entities/AuthorsEntity.php
+
+		-
+			message: '#^Cannot access property \$children on false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Entities/BlogCategoriesEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$original_blog_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/BlogEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$resized_blog_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/BlogEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$original_brands_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/BrandsEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$resized_brands_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/BrandsEntity.php
+
+		-
+			message: '#^Cannot access property \$position on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Entities/BrandsEntity.php
 
 		-
 			message: '#^Method Okay\\Entities\\BrandsEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
@@ -145,8 +1627,95 @@ parameters:
 			path: Okay/Entities/BrandsEntity.php
 
 		-
+			message: '#^Return type \(string\|false\) of method Okay\\Entities\\BrandsEntity\:\:count\(\) should be compatible with return type \(int\) of method Okay\\Core\\Entity\\EntityInterface\:\:count\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: Okay/Entities/BrandsEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$original_categories_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/CategoriesEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$resized_categories_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/CategoriesEntity.php
+
+		-
+			message: '#^Cannot access property \$children on false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Entities/CategoriesEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$original_deliveries_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/DeliveriesEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$resized_deliveries_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/DeliveriesEntity.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: Okay/Entities/DeliveriesEntity.php
+
+		-
+			message: '#^Cannot access property \$free_from on array\|object\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Entities/DeliveriesEntity.php
+
+		-
+			message: '#^Cannot access property \$price on array\|object\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Entities/DeliveriesEntity.php
+
+		-
 			message: '#^Method Okay\\Entities\\FeaturesEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
 			identifier: return.missing
+			count: 1
+			path: Okay/Entities/FeaturesEntity.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(\)\: Unexpected token "\\n     ", expected type at offset 184 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Entities/FeaturesEntity.php
+
+		-
+			message: '#^PHPDoc tag @var above a method has no effect\.$#'
+			identifier: varTag.misplaced
+			count: 1
+			path: Okay/Entities/FeaturesEntity.php
+
+		-
+			message: '''
+				#^PHPDoc tag @var has invalid value \(\$categoryId
+				Добавление связки категории и свойства\)\: Unexpected token "\$categoryId", expected type at offset 39 on line 3$#
+			'''
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Entities/FeaturesEntity.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$featureId \- id свойства\)\: Unexpected token "\$featureId", expected type at offset 16 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Entities/FeaturesEntity.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$featureId\)\: Unexpected token "\$featureId", expected type at offset 16 on line 2$#'
+			identifier: phpDoc.parseError
 			count: 1
 			path: Okay/Entities/FeaturesEntity.php
 
@@ -157,10 +1726,208 @@ parameters:
 			path: Okay/Entities/FeaturesEntity.php
 
 		-
+			message: '#^Return type \(string\|false\) of method Okay\\Entities\\FeaturesValuesAliasesValuesEntity\:\:count\(\) should be compatible with return type \(int\) of method Okay\\Core\\Entity\\EntityInterface\:\:count\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: Okay/Entities/FeaturesValuesAliasesValuesEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$original_images_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/ImagesEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$resized_images_dir\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Okay/Entities/ImagesEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$root_dir\.$#'
+			identifier: property.notFound
+			count: 3
+			path: Okay/Entities/ImagesEntity.php
+
+		-
+			message: '#^Parameter \#1 \$ids of method Okay\\Core\\Entity\\Entity\:\:delete\(\) expects array, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Entities/LanguagesEntity.php
+
+		-
 			message: '#^Variable \$langId in isset\(\) always exists and is not nullable\.$#'
 			identifier: isset.variable
 			count: 1
 			path: Okay/Entities/LanguagesEntity.php
+
+		-
+			message: '#^Method Okay\\Entities\\MenuItemsEntity\:\:update\(\) should return bool but returns int\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Entities/MenuItemsEntity.php
+
+		-
+			message: '#^Return type \(string\|false\) of method Okay\\Entities\\OrderLabelsEntity\:\:count\(\) should be compatible with return type \(int\) of method Okay\\Core\\Entity\\EntityInterface\:\:count\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: Okay/Entities/OrderLabelsEntity.php
+
+		-
+			message: '#^Method Okay\\Entities\\OrdersEntity\:\:update\(\) should return bool but returns array\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Entities/OrdersEntity.php
+
+		-
+			message: '#^Return type \(string\|false\) of method Okay\\Entities\\OrdersEntity\:\:count\(\) should be compatible with return type \(int\) of method Okay\\Core\\Entity\\EntityInterface\:\:count\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: Okay/Entities/OrdersEntity.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between int and ''all'' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: Okay/Entities/OrdersEntity.php
+
+		-
+			message: '#^Cannot access property \$position on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Entities/PagesEntity.php
+
+		-
+			message: '#^Method Okay\\Entities\\PagesEntity\:\:formattedUrl\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: Okay/Entities/PagesEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$original_payments_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/PaymentsEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$resized_payments_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/PaymentsEntity.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: Okay/Entities/PaymentsEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$original_images_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/ProductsEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$resized_images_dir\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Okay/Entities/ProductsEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$root_dir\.$#'
+			identifier: property.notFound
+			count: 3
+			path: Okay/Entities/ProductsEntity.php
+
+		-
+			message: '#^Cannot access property \$position on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Entities/ProductsEntity.php
+
+		-
+			message: '#^Parameter \#1 \$limit of method Okay\\Core\\QueryFactory\\Select\:\:limit\(\) expects int, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Entities/ReportStatEntity.php
+
+		-
+			message: '#^Return type \(string\|false\) of method Okay\\Entities\\ReportStatEntity\:\:count\(\) should be compatible with return type \(int\) of method Okay\\Core\\Entity\\EntityInterface\:\:count\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: Okay/Entities/ReportStatEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$root_dir\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Okay/Entities/SpecialImagesEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$special_images_dir\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Okay/Entities/SpecialImagesEntity.php
+
+		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 2
+			path: Okay/Entities/TranslationsEntity.php
+
+		-
+			message: '#^Property Okay\\Entities\\TranslationsEntity\:\:\$templateOnly is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Entities/TranslationsEntity.php
+
+		-
+			message: '#^Parameter \#1 \$ids of method Okay\\Core\\Entity\\Entity\:\:update\(\) expects array\|int, object\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Entities/UserCartItemsEntity.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Entities/UsersEntity.php
+
+		-
+			message: '#^Cannot access property \$password on object\|string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Entities/UsersEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$max_order_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/VariantsEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$units\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Entities/VariantsEntity.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between null and null will always evaluate to false\.$#'
+			identifier: notIdentical.alwaysFalse
+			count: 1
+			path: Okay/Helpers/AuthorsHelper.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between null and null will always evaluate to false\.$#'
+			identifier: notIdentical.alwaysFalse
+			count: 1
+			path: Okay/Helpers/BlogHelper.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and null will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: Okay/Helpers/BlogHelper.php
 
 		-
 			message: '#^Variable \$category in empty\(\) always exists and is not falsy\.$#'
@@ -175,10 +1942,70 @@ parameters:
 			path: Okay/Helpers/BlogHelper.php
 
 		-
+			message: '#^Strict comparison using \!\=\= between null and null will always evaluate to false\.$#'
+			identifier: notIdentical.alwaysFalse
+			count: 1
+			path: Okay/Helpers/BrandsHelper.php
+
+		-
 			message: '#^Variable \$brand in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
 			path: Okay/Helpers/BrandsHelper.php
+
+		-
+			message: '#^Cannot access property \$auto_submit on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Helpers/CartHelper.php
+
+		-
+			message: '#^Cannot access property \$email on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Helpers/CartHelper.php
+
+		-
+			message: '#^Cannot access property \$last_name on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Helpers/CartHelper.php
+
+		-
+			message: '#^Cannot access property \$module on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Helpers/CartHelper.php
+
+		-
+			message: '#^Cannot access property \$name on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Helpers/CartHelper.php
+
+		-
+			message: '#^Cannot access property \$phone on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Helpers/CartHelper.php
+
+		-
+			message: '#^Property Okay\\Helpers\\CartHelper\:\:\$cart is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Helpers/CartHelper.php
+
+		-
+			message: '#^Parameter \#1 \$num of function round expects float\|int, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: Okay/Helpers/CatalogHelper.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$postUrl$#'
+			identifier: parameter.notFound
+			count: 1
+			path: Okay/Helpers/CategoriesHelper.php
 
 		-
 			message: '#^Variable \$category in empty\(\) always exists and is not falsy\.$#'
@@ -187,10 +2014,154 @@ parameters:
 			path: Okay/Helpers/CategoriesHelper.php
 
 		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: Okay/Helpers/CommentsHelper.php
+
+		-
+			message: '#^Parameter \#2 \$sortName \(string\) of method Okay\\Helpers\\CommentsHelper\:\:getList\(\) should be compatible with parameter \$sortName \(null\) of method Okay\\Helpers\\GetListInterface\:\:getList\(\)$#'
+			identifier: method.childParameterType
+			count: 1
+			path: Okay/Helpers/CommentsHelper.php
+
+		-
+			message: '#^Property Okay\\Helpers\\CommonHelper\:\:\$userHelper is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Helpers/CommonHelper.php
+
+		-
+			message: '#^Property Okay\\Helpers\\ComparisonHelper\:\:\$entityFactory is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Helpers/ComparisonHelper.php
+
+		-
+			message: '#^Method Okay\\Helpers\\DeliveriesHelper\:\:isSeparateDelivery\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: Okay/Helpers/DeliveriesHelper.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$cart\)\: Unexpected token "\$cart", expected type at offset 16 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Helpers/DeliveriesHelper.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$paymentMethods\)\: Unexpected token "\$paymentMethods", expected type at offset 34 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Helpers/DeliveriesHelper.php
+
+		-
+			message: '#^Property Okay\\Helpers\\DeliveriesHelper\:\:\$logger is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Helpers/DeliveriesHelper.php
+
+		-
+			message: '#^Property Okay\\Helpers\\DeliveriesHelper\:\:\$module is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Helpers/DeliveriesHelper.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: Okay/Helpers/DiscountsHelper.php
+
+		-
+			message: '#^Property Okay\\Core\\Classes\\Discount\:\:\$description \(string\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: Okay/Helpers/DiscountsHelper.php
+
+		-
+			message: '#^Property Okay\\Core\\Classes\\Discount\:\:\$fromLastDiscount \(bool\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: Okay/Helpers/DiscountsHelper.php
+
+		-
+			message: '#^Property Okay\\Core\\Classes\\Discount\:\:\$name \(string\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: Okay/Helpers/DiscountsHelper.php
+
+		-
+			message: '#^Offset \(int\|string\) on non\-empty\-array\<non\-empty\-array\<string\>\> in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: Okay/Helpers/FilterHelper.php
+
+		-
+			message: '#^Method Okay\\Helpers\\MainHelper\:\:getLangUrl\(\) should return string but returns false\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Helpers/MainHelper.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(string \[\$subItemsName \= subcategories\]\)\: Unexpected token "\[", expected variable at offset 184 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Helpers/MainHelper.php
+
+		-
+			message: '#^PHPDoc tag @var above a method has no effect\.$#'
+			identifier: varTag.misplaced
+			count: 1
+			path: Okay/Helpers/MainHelper.php
+
+		-
+			message: '#^Call to function is_object\(\) with object will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: Okay/Helpers/MetaRobotsHelper.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: Okay/Helpers/MetadataHelpers/ProductMetadataHelper.php
+
+		-
+			message: '#^Cannot access property \$undiscounted_total_price on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Helpers/OrdersHelper.php
+
+		-
 			message: '#^Variable \$page in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
 			path: Okay/Helpers/PagesHelper.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$cart\)\: Unexpected token "\$cart", expected type at offset 16 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Helpers/PaymentsHelper.php
+
+		-
+			message: '#^Property Okay\\Helpers\\PaymentsHelper\:\:\$logger is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Helpers/PaymentsHelper.php
+
+		-
+			message: '#^Property Okay\\Helpers\\PaymentsHelper\:\:\$module is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Helpers/PaymentsHelper.php
+
+		-
+			message: '#^Property Okay\\Helpers\\ProductsHelper\:\:\$featuresEntity is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Helpers/ProductsHelper.php
 
 		-
 			message: '#^Variable \$product in empty\(\) always exists and is not falsy\.$#'
@@ -199,10 +2170,238 @@ parameters:
 			path: Okay/Helpers/ProductsHelper.php
 
 		-
+			message: '#^PHPDoc tag @var above a method has no effect\.$#'
+			identifier: varTag.misplaced
+			count: 4
+			path: Okay/Helpers/UserHelper.php
+
+		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 1
+			path: Okay/Modules/OkayCMS/AutoDeploy/Helpers/TranslationsHelper.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/Banners/Backend/Controllers/BannerAdmin.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$banners_images_dir\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Okay/Modules/OkayCMS/Banners/Entities/BannersImagesEntity.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$resized_banners_images_dir\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Okay/Modules/OkayCMS/Banners/Entities/BannersImagesEntity.php
+
+		-
+			message: '#^Property Okay\\Modules\\OkayCMS\\Banners\\Extenders\\FrontExtender\:\:\$entityFactory is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Modules/OkayCMS/Banners/Extenders/FrontExtender.php
+
+		-
+			message: '#^Property Okay\\Modules\\OkayCMS\\Banners\\Extenders\\FrontExtender\:\:\$module is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Modules/OkayCMS/Banners/Extenders/FrontExtender.php
+
+		-
+			message: '#^Call to an undefined method Okay\\Core\\Entity\\EntityInterface\:\:noLimit\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Modules/OkayCMS/Banners/Helpers/BannersBackupHelper.php
+
+		-
+			message: '#^Property Okay\\Modules\\OkayCMS\\Banners\\Helpers\\BannersImagesHelper\:\:\$db is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Modules/OkayCMS/Banners/Helpers/BannersImagesHelper.php
+
+		-
+			message: '#^Property Okay\\Modules\\OkayCMS\\Banners\\Helpers\\BannersImagesHelper\:\:\$queryFactory is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Modules/OkayCMS/Banners/Helpers/BannersImagesHelper.php
+
+		-
+			message: '#^Binary operation "/" between string\|false and 20\|string\|false results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: Okay/Modules/OkayCMS/FAQ/Backend/Controllers/FAQsAdmin.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Modules/OkayCMS/FastOrder/Controllers/FastOrderController.php
+
+		-
+			message: '#^Cannot access property \$url on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/FastOrder/Controllers/FastOrderController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Backend/Controllers/FeedsAdmin.php
+
+		-
+			message: '#^Call to function is_null\(\) with string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Backend/Core/Presets/AbstractBackendPresetAdapter.php
+
+		-
+			message: '#^Call to an undefined method ReflectionType\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Backend/Core/Presets/BackendPresetAdapterFactory.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Backend/Helpers/BackendFeedsHelper.php
+
+		-
+			message: '#^Call to an undefined method Okay\\Modules\\OkayCMS\\Feeds\\Backend\\Core\\Presets\\BackendPresetAdapterInterface\:\:postFeatureSettings\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Backend/Requests/BackendFeedsRequest.php
+
+		-
+			message: '#^Cannot access property \$enabled on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Controllers/FeedController.php
+
+		-
+			message: '#^Comparison operation "\>\=" between int\<80400, 80599\> and 80400 is always true\.$#'
+			identifier: greaterOrEqual.alwaysTrue
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Core/Presets/AbstractPresetAdapter.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\)\: Unexpected token "\*/", expected type at offset 9 on line 1$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Core/Presets/AbstractPresetAdapter.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 2
+			path: Okay/Modules/OkayCMS/Feeds/Core/Presets/Adapters/HotlineAdapter.php
+
+		-
+			message: '#^Call to an undefined method ReflectionType\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Core/Presets/PresetAdapterFactory.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Entities/ConditionsEntity.php
+
+		-
+			message: '#^Cannot access property \$position on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Modules/OkayCMS/Feeds/Entities/FeedsEntity.php
+
+		-
+			message: '#^Variable \$bBlocksEntity in PHPDoc tag @var does not match assigned variable \$conditionsEntity\.$#'
+			identifier: varTag.differentVariable
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Entities/FeedsEntity.php
+
+		-
+			message: '#^Property Okay\\Modules\\OkayCMS\\Feeds\\Helpers\\FeedsHelper\:\:\$mainHelper is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Modules/OkayCMS/Feeds/Helpers/FeedsHelper.php
+
+		-
+			message: '#^Parameter \#1 \$num of function round expects float\|int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/Fondy/Controllers/CallbackController.php
+
+		-
+			message: '#^Parameter \#1 \$num of function round expects float\|int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/Fondy/PaymentForm.php
+
+		-
+			message: '#^Cannot access property \$enabled on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/GoogleMerchant/Controllers/GoogleMerchantController.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Modules/OkayCMS/GoogleMerchant/Controllers/GoogleMerchantController.php
+
+		-
+			message: '#^Comparison operation "\>\=" between int\<80400, 80599\> and 80400 is always true\.$#'
+			identifier: greaterOrEqual.alwaysTrue
+			count: 1
+			path: Okay/Modules/OkayCMS/GoogleMerchant/Controllers/GoogleMerchantController.php
+
+		-
 			message: '#^Method Okay\\Modules\\OkayCMS\\GoogleMerchant\\Entities\\GoogleMerchantFeedsEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
 			identifier: return.missing
 			count: 1
 			path: Okay/Modules/OkayCMS/GoogleMerchant/Entities/GoogleMerchantFeedsEntity.php
+
+		-
+			message: '#^Property Okay\\Modules\\OkayCMS\\GoogleMerchant\\Extenders\\BackendExtender\:\:\$design is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Modules/OkayCMS/GoogleMerchant/Extenders/BackendExtender.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/GoogleMerchant/Helpers/BackendGoogleMerchantHelper.php
+
+		-
+			message: '#^Parameter \#1 \$ids of method Okay\\Modules\\OkayCMS\\GoogleMerchant\\Entities\\GoogleMerchantFeedsEntity\:\:delete\(\) expects array, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/GoogleMerchant/Helpers/BackendGoogleMerchantHelper.php
+
+		-
+			message: '#^Cannot access property \$enabled on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/Hotline/Controllers/HotlineController.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Modules/OkayCMS/Hotline/Controllers/HotlineController.php
+
+		-
+			message: '#^Comparison operation "\>\=" between int\<80400, 80599\> and 80400 is always true\.$#'
+			identifier: greaterOrEqual.alwaysTrue
+			count: 1
+			path: Okay/Modules/OkayCMS/Hotline/Controllers/HotlineController.php
 
 		-
 			message: '#^Method Okay\\Modules\\OkayCMS\\Hotline\\Entities\\HotlineFeedsEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
@@ -211,10 +2410,166 @@ parameters:
 			path: Okay/Modules/OkayCMS/Hotline/Entities/HotlineFeedsEntity.php
 
 		-
+			message: '#^Property Okay\\Modules\\OkayCMS\\Hotline\\Extenders\\BackendExtender\:\:\$design is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Modules/OkayCMS/Hotline/Extenders/BackendExtender.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/Hotline/Helpers/BackendHotlineHelper.php
+
+		-
+			message: '#^Parameter \#1 \$ids of method Okay\\Modules\\OkayCMS\\Hotline\\Entities\\HotlineFeedsEntity\:\:delete\(\) expects array, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/Hotline/Helpers/BackendHotlineHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$last_1c_orders_export_date\.$#'
+			identifier: property.notFound
+			count: 4
+			path: Okay/Modules/OkayCMS/Integration1C/Controllers/Integration1cController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Export/ExportFactory/ExportFactory.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$last_1c_orders_export_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Export/ExportOrders.php
+
+		-
+			message: '#^Parameter \#2 \$value of method SimpleXMLElement\:\:addChild\(\) expects string\|null, \(float\|int\) given\.$#'
+			identifier: argument.type
+			count: 3
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Export/ExportOrders.php
+
+		-
+			message: '#^Parameter \#2 \$value of method SimpleXMLElement\:\:addChild\(\) expects string\|null, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Export/ExportOrders.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 3
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportFactory/ImportFactory.php
+
+		-
+			message: '#^Parameter \#1 \$ids of method Okay\\Core\\Entity\\Entity\:\:update\(\) expects array\|int, object\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportOffers.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Okay\\Entities\\PurchasesEntity\:\:update\(\) expects array\|int, object\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportOrders.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$original_images_dir\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportProducts.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$root_dir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportProducts.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportProducts.php
+
+		-
+			message: '#^Cannot access property \$product_id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportProducts.php
+
+		-
+			message: '#^Method Okay\\Modules\\OkayCMS\\Integration1C\\Integration\\Import\\ImportProducts\:\:getFeatureValueId\(\) should return int\|null but returns object\|string\.$#'
+			identifier: return.type
+			count: 2
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportProducts.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Okay\\Entities\\FeaturesEntity\:\:update\(\) expects array\|int, object\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportProducts.php
+
+		-
+			message: '#^Parameter \#1 \$ids of method Okay\\Entities\\CategoriesEntity\:\:update\(\) expects array\|int, object\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportProducts.php
+
+		-
 			message: '#^Variable \$featureId in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
 			path: Okay/Modules/OkayCMS/Integration1C/Integration/Import/ImportProducts.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and false will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: Okay/Modules/OkayCMS/Integration1C/Integration/Integration1C.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 4
+			path: Okay/Modules/OkayCMS/LiqPay/Controllers/CallbackController.php
+
+		-
+			message: '#^Cannot access property \$paid on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/LiqPay/Controllers/CallbackController.php
+
+		-
+			message: '#^Cannot access property \$payment_method_id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/LiqPay/Controllers/CallbackController.php
+
+		-
+			message: '#^Cannot access property \$total_price on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/LiqPay/Controllers/CallbackController.php
+
+		-
+			message: '#^Parameter \#2 \$binary of function sha1 expects bool, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/LiqPay/Controllers/CallbackController.php
+
+		-
+			message: '#^Parameter \#2 \$binary of function sha1 expects bool, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/LiqPay/PaymentForm.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Controllers/NovaposhtaCostController.php
 
 		-
 			message: '#^Method Okay\\Modules\\OkayCMS\\NovaposhtaCost\\Entities\\NPCitiesEntity\:\:update\(\) should return bool but return statement is missing\.$#'
@@ -229,10 +2584,106 @@ parameters:
 			path: Okay/Modules/OkayCMS/NovaposhtaCost/Entities/NPWarehousesEntity.php
 
 		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Extenders/FrontExtender.php
+
+		-
+			message: '#^Parameter \#3 \$value of function curl_setopt expects bool, int given\.$#'
+			identifier: argument.type
+			count: 3
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Helpers/NPApiHelper.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Helpers/NPCacheHelper.php
+
+		-
+			message: '#^Method Okay\\Modules\\OkayCMS\\NovaposhtaCost\\Helpers\\NPCacheHelper\:\:updateCitiesCache\(\) should return int\|null but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Helpers/NPCacheHelper.php
+
+		-
+			message: '#^Method Okay\\Modules\\OkayCMS\\NovaposhtaCost\\Helpers\\NPCacheHelper\:\:updateWarehousesCache\(\) should return int\|null but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Helpers/NPCacheHelper.php
+
+		-
+			message: '#^Method Okay\\Modules\\OkayCMS\\NovaposhtaCost\\Helpers\\NPCalcHelper\:\:calcPrice\(\) should return int\|null but returns false\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Helpers/NPCalcHelper.php
+
+		-
+			message: '#^Method Okay\\Modules\\OkayCMS\\NovaposhtaCost\\Helpers\\NPCalcHelper\:\:calcTerm\(\) should return int\|null but returns false\.$#'
+			identifier: return.type
+			count: 1
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Helpers/NPCalcHelper.php
+
+		-
+			message: '#^Parameter \#1 \$num of function round expects float\|int, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Helpers/NPCalcHelper.php
+
+		-
+			message: '#^Call to an undefined method Okay\\Core\\Entity\\EntityInterface\:\:noLimit\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Okay/Modules/OkayCMS/NovaposhtaCost/Init/Init.php
+
+		-
+			message: '#^Cannot access property \$enabled on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/Rozetka/Controllers/RozetkaController.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: Okay/Modules/OkayCMS/Rozetka/Controllers/RozetkaController.php
+
+		-
+			message: '#^Comparison operation "\>\=" between int\<80400, 80599\> and 80400 is always true\.$#'
+			identifier: greaterOrEqual.alwaysTrue
+			count: 1
+			path: Okay/Modules/OkayCMS/Rozetka/Controllers/RozetkaController.php
+
+		-
 			message: '#^Method Okay\\Modules\\OkayCMS\\Rozetka\\Entities\\RozetkaFeedsEntity\:\:delete\(\) should return bool but return statement is missing\.$#'
 			identifier: return.missing
 			count: 1
 			path: Okay/Modules/OkayCMS/Rozetka/Entities/RozetkaFeedsEntity.php
+
+		-
+			message: '#^Property Okay\\Modules\\OkayCMS\\Rozetka\\Extenders\\BackendExtender\:\:\$design is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Modules/OkayCMS/Rozetka/Extenders/BackendExtender.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: Okay/Modules/OkayCMS/Rozetka/Helpers/BackendRozetkaHelper.php
+
+		-
+			message: '#^Parameter \#1 \$ids of method Okay\\Modules\\OkayCMS\\Rozetka\\Entities\\RozetkaFeedsEntity\:\:delete\(\) expects array, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/Rozetka/Helpers/BackendRozetkaHelper.php
+
+		-
+			message: '#^Parameter \#3 \$value of function curl_setopt expects bool, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/RozetkaPay/Models/Gateway/Client/HttpCurl.php
 
 		-
 			message: '#^Variable \$link in empty\(\) always exists and is not falsy\.$#'
@@ -241,10 +2692,178 @@ parameters:
 			path: Okay/Modules/OkayCMS/RozetkaPay/Models/Gateway/Client/HttpCurl.php
 
 		-
+			message: '#^Property Okay\\Modules\\OkayCMS\\RozetkaPay\\PaymentForm\:\:\$languages is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Modules/OkayCMS/RozetkaPay/PaymentForm.php
+
+		-
+			message: '#^Property Okay\\Modules\\OkayCMS\\RozetkaPay\\PaymentForm\:\:\$money is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Okay/Modules/OkayCMS/RozetkaPay/PaymentForm.php
+
+		-
+			message: '#^Parameter \#2 \$array of function array_key_exists expects array, object given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Okay/Modules/OkayCMS/WayForPay/Controllers/CallbackController.php
+
+		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: Okay/Modules/OkayCMS/WayForPay/PaymentForm.php
+
+		-
+			message: '#^Cannot access property \$email on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: backend/Controllers/AuthAdmin.php
+
+		-
+			message: '#^Cannot access property \$id on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: backend/Controllers/AuthAdmin.php
+
+		-
+			message: '#^Cannot access property \$password on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: backend/Controllers/AuthAdmin.php
+
+		-
+			message: '#^Expression in empty\(\) is not falsy\.$#'
+			identifier: empty.expr
+			count: 1
+			path: backend/Controllers/BlogCategoryAdmin.php
+
+		-
+			message: '#^Expression in empty\(\) is not falsy\.$#'
+			identifier: empty.expr
+			count: 1
+			path: backend/Controllers/BrandAdmin.php
+
+		-
+			message: '#^Expression in empty\(\) is not falsy\.$#'
+			identifier: empty.expr
+			count: 1
+			path: backend/Controllers/CategoryAdmin.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$cart_discount_sets\.$#'
+			identifier: property.notFound
+			count: 1
+			path: backend/Controllers/DiscountsSettingsAdmin.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$purchase_discount_sets\.$#'
+			identifier: property.notFound
+			count: 1
+			path: backend/Controllers/DiscountsSettingsAdmin.php
+
+		-
+			message: '#^Binary operation "/" between string\|false and 10\|string\|false results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: backend/Controllers/FeaturesAliasesAdmin.php
+
+		-
+			message: '#^Comparison operation "\<\=" between int\<240, 255\> and 255 is always true\.$#'
+			identifier: smallerOrEqual.alwaysTrue
+			count: 1
+			path: backend/Controllers/ImportAdmin.php
+
+		-
+			message: '#^Loose comparison using \=\= between 169\|185\|int\<128, 164\>\|int\<166, 167\>\|int\<171, 174\>\|int\<176, 177\>\|int\<181, 183\>\|int\<187, 190\> and 184 will always evaluate to false\.$#'
+			identifier: equal.alwaysFalse
+			count: 1
+			path: backend/Controllers/ImportAdmin.php
+
+		-
+			message: '#^Parameter \#1 \$from of function move_uploaded_file expects string, array\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: backend/Controllers/ImportAdmin.php
+
+		-
+			message: '#^Parameter \#2 \$locale of function setlocale expects array\|string\|null, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: backend/Controllers/ImportAdmin.php
+
+		-
 			message: '#^Variable \$page might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: backend/Controllers/ImportLogAdmin.php
+
+		-
+			message: '#^Parameter \#3 \$value of function curl_setopt expects bool, int given\.$#'
+			identifier: argument.type
+			count: 3
+			path: backend/Controllers/IndexAdmin.php
+
+		-
+			message: '#^Binary operation "/" between string\|false and string\|false results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: backend/Controllers/LearningAdmin.php
+
+		-
+			message: '#^Cannot access property \$module_name on object\|string\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: backend/Controllers/ModuleDesignAdmin.php
+
+		-
+			message: '#^Cannot access property \$vendor on object\|string\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: backend/Controllers/ModuleDesignAdmin.php
+
+		-
+			message: '#^Cannot access property \$version on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: backend/Controllers/ModulesAdmin.php
+
+		-
+			message: '#^Expression in empty\(\) is not falsy\.$#'
+			identifier: empty.expr
+			count: 1
+			path: backend/Controllers/PageAdmin.php
+
+		-
+			message: '#^Cannot access property \$name on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: backend/Controllers/ReportStatsAdmin.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: backend/Controllers/ReportStatsAdmin.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: backend/Controllers/SeoFilterPatternsAdmin.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$default_products_seo_pattern\.$#'
+			identifier: property.notFound
+			count: 1
+			path: backend/Controllers/SeoPatternsAdmin.php
+
+		-
+			message: '#^Parameter \#2 \$value of method Okay\\Core\\Settings\:\:update\(\) expects string, array\<string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: backend/Controllers/SeoPatternsAdmin.php
 
 		-
 			message: '#^Variable \$error in empty\(\) always exists and is not falsy\.$#'
@@ -253,10 +2872,52 @@ parameters:
 			path: backend/Controllers/SettingsCatalogAdmin.php
 
 		-
+			message: '#^Parameter \#2 \$numberFormat of static method Okay\\Core\\Phone\:\:format\(\) expects null, libphonenumber\\PhoneNumberFormat\:\:E164\|libphonenumber\\PhoneNumberFormat\:\:INTERNATIONAL\|libphonenumber\\PhoneNumberFormat\:\:NATIONAL\|libphonenumber\\PhoneNumberFormat\:\:RFC3966 given\.$#'
+			identifier: argument.type
+			count: 1
+			path: backend/Controllers/SettingsGeneralAdmin.php
+
+		-
+			message: '#^Elseif condition is always false\.$#'
+			identifier: elseif.alwaysFalse
+			count: 1
+			path: backend/Controllers/TranslationAdmin.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendAuthorsHelper\:\:\$db is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Helpers/BackendAuthorsHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendAuthorsHelper\:\:\$queryFactory is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Helpers/BackendAuthorsHelper.php
+
+		-
+			message: '#^Cannot access property \$children on object\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: backend/Helpers/BackendBlogHelper.php
+
+		-
 			message: '#^Cannot unset offset ''limit'' on array\{\}\.$#'
 			identifier: unset.offset
 			count: 1
 			path: backend/Helpers/BackendBlogHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$original_brands_dir\.$#'
+			identifier: property.notFound
+			count: 3
+			path: backend/Helpers/BackendBrandsHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$resized_brands_dir\.$#'
+			identifier: property.notFound
+			count: 2
+			path: backend/Helpers/BackendBrandsHelper.php
 
 		-
 			message: '#^Undefined variable\: \$category$#'
@@ -283,16 +2944,82 @@ parameters:
 			path: backend/Helpers/BackendCategoryStatsHelper.php
 
 		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 3
+			path: backend/Helpers/BackendDeliveriesHelper.php
+
+		-
 			message: '#^Cannot unset offset ''limit'' on array\{\}\.$#'
 			identifier: unset.offset
 			count: 1
 			path: backend/Helpers/BackendDeliveriesHelper.php
 
 		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendDeliveriesHelper\:\:\$request is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Helpers/BackendDeliveriesHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendFeaturesHelper\:\:\$categoriesEntity is unused\.$#'
+			identifier: property.unused
+			count: 1
+			path: backend/Helpers/BackendFeaturesHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendFeaturesHelper\:\:\$productsEntity is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Helpers/BackendFeaturesHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendFeaturesValuesHelper\:\:\$db is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Helpers/BackendFeaturesValuesHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendFeaturesValuesHelper\:\:\$featuresEntity is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Helpers/BackendFeaturesValuesHelper.php
+
+		-
 			message: '#^Variable \$addedFeatureValuesIds on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.variable
 			count: 1
 			path: backend/Helpers/BackendFeaturesValuesHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$notify_from_email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: backend/Helpers/BackendFeedbacksHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$notify_from_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: backend/Helpers/BackendFeedbacksHelper.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: backend/Helpers/BackendImportHelper.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''''\|''0'' and ''0\.0'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: backend/Helpers/BackendImportHelper.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''''\|''0'' and ''0\.00'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: backend/Helpers/BackendImportHelper.php
 
 		-
 			message: '#^Undefined variable\: \$itemFromCsv$#'
@@ -307,8 +3034,65 @@ parameters:
 			path: backend/Helpers/BackendImportHelper.php
 
 		-
+			message: '#^Cannot access property \$name on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: backend/Helpers/BackendOrderHistoryHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendOrderHistoryHelper\:\:\$ordersRequest is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Helpers/BackendOrderHistoryHelper.php
+
+		-
+			message: '#^Cannot access property \$is_close on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: backend/Helpers/BackendOrdersHelper.php
+
+		-
+			message: '#^Cannot access property \$rate_from on object\|string\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: backend/Helpers/BackendOrdersHelper.php
+
+		-
+			message: '#^Cannot access property \$rate_to on object\|string\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: backend/Helpers/BackendOrdersHelper.php
+
+		-
+			message: '#^Cannot access property \$undiscounted_total_price on object\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: backend/Helpers/BackendOrdersHelper.php
+
+		-
+			message: '''
+				#^PHPDoc tag @var has invalid value \(\$order
+				Метод заглушка, чтобы модули могли зацепиться\)\: Unexpected token "\$order", expected type at offset 16 on line 2$#
+			'''
+			identifier: phpDoc.parseError
+			count: 1
+			path: backend/Helpers/BackendOrdersHelper.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 3
+			path: backend/Helpers/BackendPaymentsHelper.php
+
+		-
 			message: '#^Cannot unset offset ''limit'' on array\{\}\.$#'
 			identifier: unset.offset
+			count: 1
+			path: backend/Helpers/BackendPaymentsHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendPaymentsHelper\:\:\$request is never read, only written\.$#'
+			identifier: property.onlyWritten
 			count: 1
 			path: backend/Helpers/BackendPaymentsHelper.php
 
@@ -317,6 +3101,96 @@ parameters:
 			identifier: empty.variable
 			count: 1
 			path: backend/Helpers/BackendProductsHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$design_images\.$#'
+			identifier: property.notFound
+			count: 1
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$root_dir\.$#'
+			identifier: property.notFound
+			count: 4
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Config\:\:\$watermark_file\.$#'
+			identifier: property.notFound
+			count: 5
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$watermark_offset_x\.$#'
+			identifier: property.notFound
+			count: 2
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Access to an undefined property Okay\\Core\\Settings\:\:\$watermark_offset_y\.$#'
+			identifier: property.notFound
+			count: 2
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Parameter \#1 \$from of function move_uploaded_file expects string, array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Parameter \#1 \$path of function pathinfo expects string, array\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Parameter \#3 \$pad_string of function str_pad expects string, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendSettingsHelper\:\:\$imageCore is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendSettingsHelper\:\:\$managers is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendSettingsHelper\:\:\$managersEntity is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Helpers/BackendSettingsHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Helpers\\BackendUserGroupsHelper\:\:\$request is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Helpers/BackendUserGroupsHelper.php
+
+		-
+			message: '#^Property Okay\\Admin\\Requests\\BackendAuthorsRequest\:\:\$translit is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Requests/BackendAuthorsRequest.php
+
+		-
+			message: '#^Property Okay\\Admin\\Requests\\BackendBrandsRequest\:\:\$translit is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Requests/BackendBrandsRequest.php
+
+		-
+			message: '#^Property Okay\\Admin\\Requests\\BackendFeaturesValuesRequest\:\:\$translit is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: backend/Requests/BackendFeaturesValuesRequest.php
 
 		-
 			message: '#^Variable \$menuItems might not be defined\.$#'
@@ -337,6 +3211,12 @@ parameters:
 			path: backend/ajax/export.php
 
 		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: backend/ajax/export_orders.php
+
+		-
 			message: '#^Variable \$DI might not be defined\.$#'
 			identifier: variable.undefined
 			count: 4
@@ -353,6 +3233,12 @@ parameters:
 			identifier: variable.undefined
 			count: 5
 			path: backend/ajax/export_orders.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: backend/ajax/export_stat.php
 
 		-
 			message: '#^Variable \$DI might not be defined\.$#'
@@ -379,6 +3265,12 @@ parameters:
 			path: backend/ajax/export_stat.php
 
 		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: backend/ajax/export_subscribes.php
+
+		-
 			message: '#^Variable \$DI might not be defined\.$#'
 			identifier: variable.undefined
 			count: 4
@@ -401,6 +3293,12 @@ parameters:
 			identifier: variable.undefined
 			count: 2
 			path: backend/ajax/export_subscribes.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: backend/ajax/export_users.php
 
 		-
 			message: '#^Variable \$DI might not be defined\.$#'
@@ -455,6 +3353,12 @@ parameters:
 			identifier: variable.undefined
 			count: 2
 			path: backend/ajax/get_features.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: backend/ajax/import.php
 
 		-
 			message: '#^Variable \$DI might not be defined\.$#'
@@ -869,3 +3773,9 @@ parameters:
 			identifier: variable.undefined
 			count: 2
 			path: backend/ajax/update_order.php
+
+		-
+			message: '#^Call to an undefined method ReflectionType\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: backend/index.php

@@ -30,6 +30,11 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      # --abandoned=report, а не fail: покинутий пакет вимагає рішення, а не
+      # зупинки збірки в день, коли автор поставив прапорець.
+      - name: Composer audit
+        run: composer audit --locked --abandoned=report
+
       # PHPCompatibility statically targets testVersion 8.2- regardless of the
       # runtime, so it is safe to run on every matrix entry.
       - name: PHPCompatibility
@@ -60,3 +65,30 @@ jobs:
 
       - name: PHPStan
         run: vendor/bin/phpstan analyse --no-progress
+
+  secrets:
+    runs-on: ubuntu-latest
+    name: Gitleaks
+    steps:
+      # Уся історія: прибраний наступним комітом секрет лишається чинним.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Бінарник з релізу, а не сторонній action: цьому кроку не потрібен
+      # доступ до токена збірки.
+      - name: Install Gitleaks
+        env:
+          GITLEAKS_VERSION: '8.30.1'
+        run: |
+          set -euo pipefail
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          curl -fsSL -o "/tmp/${archive}" "${base}/${archive}"
+          curl -fsSL -o /tmp/checksums.txt "${base}/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          cd /tmp && grep " ${archive}\$" checksums.txt | sha256sum -c -
+          tar -xzf "/tmp/${archive}" -C /tmp gitleaks
+          sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
+
+      - name: Scan for secrets
+        run: gitleaks detect --source . --redact --verbose
