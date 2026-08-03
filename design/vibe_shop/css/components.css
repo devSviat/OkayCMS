@@ -2522,12 +2522,16 @@ body.hc-nav-open {
 /* ціна й наявність мають стояти на одному рівні в сусідніх картках. nowrap     */
 /* тримає цю зарезервовану висоту — другий рядок тексту вибив би блок за неї.   */
 
+/* Рейтинг іде над назвою через order, а не через розмітку: картку малює один    */
+/* product_list.tpl, а на сторінці порівняння цього рядка немає взагалі.         */
+
 .vs-card__rating {
+	order: -1;
 	display: flex;
 	align-items: center;
 	gap: var(--vs-space-1);
 	min-height: calc(var(--vs-text-2xs) * 1.25);
-	margin-top: var(--vs-space-2);
+	margin-bottom: var(--vs-space-1);
 	line-height: 1.25;
 	white-space: nowrap;
 }
@@ -2626,7 +2630,7 @@ body.hc-nav-open {
 	align-items: baseline;
 	flex-direction: column;
 	gap: var(--vs-space-1);
-	margin-top: var(--vs-space-3);
+	margin-top: var(--vs-space-2);
 	font-variant-numeric: tabular-nums;
 }
 
@@ -2766,7 +2770,7 @@ body.hc-nav-open {
 
 .vs-card__form {
 	margin: 0;
-	padding-top: var(--vs-space-4);
+	padding-top: var(--vs-space-3);
 	margin-top: auto;
 }
 
@@ -5718,6 +5722,21 @@ body.hc-nav-open {
 	.vs-reviews {
 		grid-template-columns: minmax(0, 1fr) 380px;
 	}
+
+/* Квадратна плита — найвища частина картки: у колонці 250px вона коштує 250px   */
+/* висоти, здебільшого порожніх, бо фото товарів вписані з полями. 4:3 знімає    */
+/* близько чверті й нічого не обрізає — object-fit: contain лише зменшує кадр.   */
+/* На телефоні пропорція лишається квадратною: там картка вже вузька.            */
+
+	.vs-card__media {
+		aspect-ratio: 4 / 3;
+	}
+
+/* Скелет підміняє картку на час ajax-фільтра, тож його ряд іде за нею.          */
+
+	.vs-catalogue__region.is-loading .vs-catalogue__skeleton {
+		grid-auto-rows: 320px;
+	}
 }
 
 /* --------------------------------------------------------------- ≤ 991 px */
@@ -5821,6 +5840,13 @@ body.hc-nav-open {
 	.vs-pdp:last-child,
 	.vs-section:last-child {
 		padding-bottom: var(--vs-space-11);
+	}
+
+/* Рядок кнопок притискається до ціни щільніше, ніж на десктопі: на телефоні    */
+/* картка коштує половину екрана.                                               */
+
+	.vs-card__form {
+		padding-top: var(--vs-space-2);
 	}
 }
 
@@ -5936,13 +5962,12 @@ body.hc-nav-open {
 		font-size: var(--vs-text-xs);
 	}
 
-	/* .vs-buybox__buy is a wrapping flex row and .vs-buybox__submit sits on a      */
-	/* 160px basis, so at 390px it stays beside the stepper at about 200px wide -   */
-	/* half the screen for the page's primary action. A 100% basis makes it wrap    */
-	/* onto its own line without touching the row anywhere else.                    */
+	/* Кнопка стоїть поруч зі степером, поки лишається читабельною: базис — поріг   */
+	/* переносу в рядку з wrap. Заміряно: до 340px рядок один, від 330px кнопка     */
+	/* з'їжджає на власний, тобто всі телефони від 360px мають один рядок.          */
 
 	.vs-buybox__submit {
-		flex: 1 1 100%;
+		flex: 1 1 150px;
 	}
 
 	/* grid.css gives .container a 7px gutter inherited from Bootstrap. That is too  */
