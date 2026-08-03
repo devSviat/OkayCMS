@@ -17,6 +17,7 @@ use Okay\Entities\OrdersEntity;
 use Okay\Core\Request;
 use Okay\Core\Cart;
 use Okay\Core\Languages;
+use Okay\Core\Security\CheckoutToken;
 use Okay\Helpers\DeliveriesHelper;
 use Okay\Helpers\PaymentsHelper;
 use Okay\Helpers\ValidateHelper;
@@ -24,6 +25,43 @@ use Okay\Helpers\OrdersHelper;
 
 class CartController extends AbstractController
 {
+    /** Куди вести повторний сабміт: замовлення вже створене цим сеансом. */
+    const LAST_ORDER_URL = 'last_order_url';
+
+    /**
+     * Одноразовий токен - основний шлях, відбиток замовлення - запасний.
+     *
+     * Запасний потрібен темам, які ще не передають checkout_token: без нього
+     * стороння тема лишилась би зовсім без захисту від повтору. Він менш
+     * точний (навмисне повторне замовлення того самого набору за 10 хвилин
+     * теж відсіється), тому вмикається лише за відсутності токена.
+     */
+    private function acceptCheckout($order)
+    {
+        $token = $this->request->post('checkout_token');
+
+        if (CheckoutToken::isWellFormed($token)) {
+            return CheckoutToken::consume($token);
+        }
+
+        $cartItems = isset($_SESSION['shopping_cart']) && is_array($_SESSION['shopping_cart'])
+            ? $_SESSION['shopping_cart']
+            : [];
+
+        return CheckoutToken::consumeFingerprint(CheckoutToken::fingerprintOf($order, $cartItems));
+    }
+
+    private function lastOrderUrl()
+    {
+        $url = $_SESSION[self::LAST_ORDER_URL] ?? null;
+
+        if (is_string($url) && $url !== '') {
+            return Router::generateUrl('order', ['url' => $url], true);
+        }
+
+        return Router::generateUrl('cart', [], true);
+    }
+
     /*Отображение заказа*/
     public function render(
         DeliveriesEntity   $deliveriesEntity,
@@ -85,6 +123,11 @@ class CartController extends AbstractController
 
             if ($error = $validateHelper->getCartValidateError($order)) {
                 $this->design->assign('error', $error);
+            } elseif (!$this->acceptCheckout($order)) {
+                // Це не помилка покупця: перше замовлення вже створене. Ведемо
+                // на його сторінку, щоб друга вкладка показала те саме, що й
+                // перша, а не порожній кошик із незрозумілим текстом.
+                $this->response->redirectTo($this->lastOrderUrl(), 303);
             } else {
                 // Добавляем заказ в базу
                 $order->lang_id = $languages->getLangId();
@@ -117,6 +160,8 @@ class CartController extends AbstractController
                 $notify->emailOrderAdmin($order->id);
 
                 $cart->clear();
+
+                $_SESSION[self::LAST_ORDER_URL] = $order->url;
 
                 // Перенаправляем на страницу заказа или отправляем форму для автосабмита или урл заказа
                 if ($this->request->post('ajax')) {
@@ -160,7 +205,10 @@ class CartController extends AbstractController
         $this->design->assign('payment_methods', $paymentMethods);
         $this->design->assign('active_delivery', $activeDelivery);
         $this->design->assign('active_payment', $activePayment);
-        
+
+        // Форма оформлення: <input type="hidden" name="checkout_token" value="{$checkout_token|escape}">
+        $this->design->assign('checkout_token', CheckoutToken::get());
+
         if ($couponsEntity->count(['valid'=>1])>0) {
             $this->design->assign('coupon_request', true);
         }
