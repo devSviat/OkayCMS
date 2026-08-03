@@ -97,4 +97,39 @@ class RequestTest extends TestCase
             unset($_POST['php85_amounts']);
         }
     }
+
+    /**
+     * Нетипізований get() масив не згортає, і keyword[]=x доходив до
+     * strip_tags() фаталом. Хто просить рядок, той має отримати рядок.
+     */
+    public function testGetRawStringCollapsesArrays(): void
+    {
+        /** @var Request $request */
+        $request = (new ReflectionClass(Request::class))->newInstanceWithoutConstructor();
+
+        $_GET['php85_raw_param'] = ['divan', 'x'];
+
+        try {
+            $this->assertSame('', $request->getRawString('php85_raw_param'));
+        } finally {
+            unset($_GET['php85_raw_param']);
+        }
+    }
+
+    public function testGetRawStringKeepsScalarsAndTagsIntact(): void
+    {
+        /** @var Request $request */
+        $request = (new ReflectionClass(Request::class))->newInstanceWithoutConstructor();
+
+        $_GET['php85_raw_param'] = '<b>divan</b>';
+
+        try {
+            // Теги лишає на місці: точки виклику зачищають їх самі.
+            $this->assertSame('<b>divan</b>', $request->getRawString('php85_raw_param'));
+        } finally {
+            unset($_GET['php85_raw_param']);
+        }
+
+        $this->assertSame('', $request->getRawString('php85_raw_param'));
+    }
 }

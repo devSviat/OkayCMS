@@ -330,8 +330,8 @@ class CatalogHelper
 
         $filter['visible'] = 1;
 
-        $keyword = $this->request->get('keyword', null, null, false);
-        if ($keyword = strip_tags((string)$keyword)) {
+        $keyword = $this->request->getRawString('keyword');
+        if ($keyword = strip_tags($keyword)) {
             $filter['keyword'] = $keyword;
         }
 

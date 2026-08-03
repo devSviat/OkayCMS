@@ -866,8 +866,10 @@ class FilterHelper
             $resultString .= '/page-' . $resultArray['page'];
         }
 
+        // get() тут зі stripTags = true, тобто значення вже екрановане; на
+        // getRawString() не переводимо, щоб не міняти екранування в URL.
         $keyword = $this->request->get('keyword');
-        if (!empty($keyword)) {
+        if (!empty($keyword) && !is_array($keyword)) {
             $resultString .= '?keyword='.htmlspecialchars(strip_tags($keyword));
         }
         if ($smarty !== null) {
@@ -985,8 +987,8 @@ class FilterHelper
 
     public function getKeyword(): ?string
     {
-        $keyword = $this->request->get('keyword', null, null, false);
-        if ($keyword = strip_tags((string)$keyword)) {
+        $keyword = $this->request->getRawString('keyword');
+        if ($keyword = strip_tags($keyword)) {
             $result = $keyword;
         } else {
             $result = null;
