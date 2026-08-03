@@ -30,8 +30,6 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
-      # Перевіряє composer.lock проти бази вразливостей. Блокуючий: нова CVE
-      # в залежності — привід не зливати, а не привід читати попередження.
       # --abandoned=report, а не fail: покинутий пакет вимагає рішення, а не
       # зупинки збірки в день, коли автор поставив прапорець.
       - name: Composer audit
@@ -72,14 +70,13 @@ jobs:
     runs-on: ubuntu-latest
     name: Gitleaks
     steps:
-      # fetch-depth: 0 — секрет цікавий і тоді, коли його прибрали наступним
-      # комітом: в історії він лишається чинним.
+      # Уся історія: прибраний наступним комітом секрет лишається чинним.
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Бінарник з релізу зі звіркою контрольної суми, а не сторонній action:
-      # на цей крок не варто давати доступ до токена збірки.
+      # Бінарник з релізу, а не сторонній action: цьому кроку не потрібен
+      # доступ до токена збірки.
       - name: Install Gitleaks
         env:
           GITLEAKS_VERSION: '8.30.1'
