@@ -26,8 +26,12 @@ cd dev && docker compose exec php85 php ok <команда>
 ### `database:deploy`
 
 ```bash
-php ok database:deploy [--file_path=1DB_changes/okay_clean.sql]
+php ok database:deploy [--file_path=1DB_changes/okay_clean.sql] [--yes]
 ```
+
+`--yes` (`-y`) пропускає підтвердження — для CI, скриптів провізіонування й агентів. Штатний
+`--no-interaction` тут не годиться: він повертає **типову** відповідь на підтвердження, а вона
+`false`, тобто розгортання просто скасовується.
 
 Виконує SQL-дамп інструкція за інструкцією; може перезаписати доступи до бази в конфізі й
 почистити демо-вміст. **З механізмом модулів не пов'язаний**: він не викликає ані `Installer`,

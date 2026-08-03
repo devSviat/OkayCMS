@@ -106,13 +106,18 @@ Two jobs, both practical:
    requires, so anyone bringing their own theme across can read the diff instead of the prose:
    `git diff upstream/master main -- design/okay_shop`.
 
-That second job is why it stays close to stock. The delta is 20 files and no file was added or
-removed — 8 of them are the security contract, 6 are the Smarty 5 migration, 2 are upstream
-bugs fixed here, 4 are housekeeping. `docs/theme-porting.md` walks through it.
+That second job is why it stays close to stock. The delta is 23 files, all modifications — no
+file was added or removed. Most of it is the security contract and the Smarty 5 migration; the
+rest is upstream bugs fixed here and housekeeping. `docs/theme-porting.md` walks through it, and
+the diff itself is the authority — the per-category split is not worth maintaining as a number.
+
+Measure it: `git diff --stat upstream/master main -- design/okay_shop`.
 
 **The engine's contract binds.** Mutating forms carry `customer_csrf_token` and use POST, not
-GET — cart, wishlist, comparison, feedback, subscription (`docs/UPGRADE-security.md`). Taking
-this theme, or `vibe_shop`, onto a stock engine is covered by `docs/theme-to-stock.md`.
+GET — cart, wishlist, comparison, feedback, subscription. The checkout form additionally carries
+a one-shot `checkout_token` so a double submit cannot place a second order
+(`docs/UPGRADE-security.md`). Taking this theme, or `vibe_shop`, onto a stock engine is covered
+by `docs/theme-to-stock.md`.
 
 ## What this theme is not
 
