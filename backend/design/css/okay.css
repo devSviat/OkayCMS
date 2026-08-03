@@ -74,10 +74,15 @@
     --ok-surface: #ffffff;
     --ok-sunken: #fafbfc;
 
-    /* Хром: ліва панель, шапка, заголовки таблиць */
+    /* Хром: ліва панель, шапка, футер. Два рівні, не три. */
     --ok-chrome: #221f1f;
     --ok-chrome-raised: #2c2928;
     --ok-chrome-ink-muted: #a9a4a1;
+
+    /* Заголовок таблиці навмисно не хром: темна смуга посеред контенту
+       читалася як частина навігації й конкурувала з меню за увагу. */
+    --ok-thead: #eef0f2;
+    --ok-thead-line: #dfe3e7;
 
     /* Текст. --ok-ink-muted міряне на полотні, а не на білому: полотно сіре,
        і на ньому те саме значення дає менший контраст. 4.8:1 на --ok-canvas. */
@@ -88,14 +93,20 @@
     /* Межі */
     --ok-line: #e4e6e9;
     --ok-line-strong: #c8ccd0;
+    /* Межа контрола - не роздільник: WCAG 1.4.11 вимагає для неї 3:1.
+       3.9:1 на білому, 3.4:1 на світлому заголовку списку. */
+    --ok-control-line: #7d8288;
 
-    /* Акцент - єдиний. Первинна дія, поточний вибір, посилання. */
-    --ok-accent: #1268a0;
-    --ok-accent-hover: #0f5583;
-    --ok-accent-active: #0c4568;
-    --ok-accent-soft: #e9f2f8;
-    /* На темному хромі акцент дає 2.4:1, тож там світліший. */
-    --ok-accent-on-chrome: #7fc4ee;
+    /* Акцент - єдиний. Первинна дія, поточний вибір, посилання.
+       Береться з логотипа, а не вигадується: #005893 - власний темний синій
+       бренду (7.45:1 під білим текстом), #00a7ef - його головний блакитний,
+       який на темному хромі дає 5.34:1. Так логотип і інтерфейс нарешті
+       одного роду. */
+    --ok-accent: #005893;
+    --ok-accent-hover: #004876;
+    --ok-accent-active: #003b60;
+    --ok-accent-soft: #e6f0f7;
+    --ok-accent-on-chrome: #00a7ef;
 
     /* Семантика. Кольори тут щось означають і більше нічого не прикрашають. */
     --ok-success: #227d3a;
@@ -677,9 +688,14 @@ body:not(.top-nav) header.navbar {
     display: inline-block;
     vertical-align: middle;
 }
+.feature_value_name{
+    color: var(--ok-ink);
+}
+.okay_list_heading a{
+    color: var(--ok-ink);
+}
 .feature_value_name,
 .okay_list_heading a{
-    color: #fff;
     margin-left: 0;
     display: -webkit-box;
     display: -webkit-flex;
@@ -913,81 +929,31 @@ a.link_white:hover{
 }
 
 /* Button info and download */
+/* Вторинна дія. Була байт у байт як .btn_blue - дві назви, один вигляд.
+   Тепер тримає ту саму родину кольору, але не змагається з первинною. */
 .btn-info{
-    color: #fff;
-    background-color: var(--ok-accent);
-    border-color: var(--ok-accent);
+    color: var(--ok-accent);
+    background-color: var(--ok-accent-soft);
+    border-color: var(--ok-accent-soft);
 }
 
 .btn-info:hover{
-    color: #fff;
-    background-color: var(--ok-accent-hover);
-    border-color: var(--ok-accent-hover);
+    color: var(--ok-accent-hover);
+    background-color: #d6e6f2;
+    border-color: #d6e6f2;
 }
 
 .btn-info:focus{
-    color: #fff;
-    background-color: var(--ok-accent-hover);
-    border-color: var(--ok-accent-hover);
+    color: var(--ok-accent-hover);
+    background-color: #d6e6f2;
+    border-color: var(--ok-accent);
 }
 
 .btn-info:active{
-    color: #fff;
-    background-color: var(--ok-accent-hover);
-    border-color: var(--ok-accent-hover);
+    color: var(--ok-accent-active);
+    background-color: #c7dcec;
+    border-color: #c7dcec;
     background-image: none;
-}
-
-.btn-info:active:hover,
-.btn-info:active:focus{
-    color: #fff;
-    background-color: #1a662f;
-    border-color: #1a662f;
-}
-.btn-info:disabled:focus{
-    background-color: #b5d0bd;
-    border-color: #b5d0bd;
-}
-.btn-info:disabled:hover {
-    background-color: #b5d0bd;
-    border-color: #b5d0bd;
-}
-
-/* Button add*/
-.btn_yellow{
-    color: var(--ok-ink);
-    background-color: #ff9f29;
-    border-color: #ff9f29;
-}
-.btn_yellow:hover{
-    color: #fff;
-    background-color: #e68f1d;
-    border-color: #e68f1d;
-}
-.btn_yellow:focus{
-    color: #fff;
-    background-color: #e68f1d;
-    border-color: #e68f1d;
-}
-.btn_yellow:active {
-    color: #fff;
-    background-color: #d4881a;
-    border-color: #d4881a;
-    background-image: none;
-}
-.btn_yellow:active:hover,
-.btn_yellow:active:focus{
-    color: #fff;
-    background-color: #b87716;
-    border-color: #b87716;
-}
-.btn_yellow:disabled:focus{
-    background-color: #f4d88f;
-    border-color: #f4d88f;
-}
-.btn_yellow:disabled:hover {
-    background-color: #f4d88f;
-    border-color: #f4d88f;
 }
 
 /* Button comments*/
@@ -2210,9 +2176,12 @@ select{
 
 .okay_ckeckbox::before {
     cursor: pointer;
-    background: rgb(240, 240, 240);
+    /* Була світло-сіра заливка без рамки: на темному заголовку списку вона
+       читалася, а щойно заголовок став світлим — злилася з тлом. Рамка робить
+       контрол видимим на будь-якому тлі. */
+    background: #fff;
     color: #fff;
-    border: 1px solid transparent;
+    border: 1px solid var(--ok-control-line);
     border-radius: 4px;
     content: "";
     display: -webkit-box;
@@ -3165,9 +3134,10 @@ label.switch_label i{
     -webkit-box-align: center;
     -webkit-align-items: center;
     -ms-flex-align: center;
-    color: #fff;
-    background-color: #32302e;
-    border-radius: 6px 6px 0 0;
+    color: var(--ok-ink);
+    background-color: var(--ok-thead);
+    border-bottom: 1px solid var(--ok-thead-line);
+    border-radius: var(--ok-radius-panel) var(--ok-radius-panel) 0 0;
 }
 .okay_list .okay_list_footer{
     width: 100%;
@@ -4937,7 +4907,7 @@ body.menu-pin .page-container {
 }
 #admin_catalog  .icon-thumbnail{
     display: inline-block;
-    background: #32302e;
+    background: rgb(255 255 255 / .07);
     height: 40px;
     width: 40px;
     line-height: 46px;
@@ -9324,12 +9294,20 @@ summary:focus-visible,
 .sidebar_header button:focus-visible {
     outline-color: #fff;
 }
-/* Поля вводу вже показують стан рамкою, тож offset у них зайвий - він
-   відриває кільце від контролу. */
+/* У полів вводу контур поверх наявної рамки давав подвійну товсту коробку.
+   Замість нього рамка бере колір акценту, а навколо йде мʼяке гало — так
+   контрол лишається одним прямокутником. */
+/* .input-group .form-control:focus має специфічність 0,3,0 і гасить тінь,
+   тож перелік мусить її повторити — інакше гало не доживає до екрана. */
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
-    outline-offset: 0;
+textarea:focus-visible,
+.form-control:focus-visible,
+.variant_input:focus-visible,
+.input-group .form-control:focus-visible {
+    outline: none;
+    border-color: var(--ok-accent);
+    box-shadow: 0 0 0 3px var(--ok-accent-soft);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -9408,4 +9386,14 @@ textarea:focus-visible {
 .alert--error .heading_label,
 .alert--error .alert__content {
     color: var(--ok-danger-hover);
+}
+
+/* Кнопки й адони в адмінці — flex-контейнери з фіксованою шириною. Гліф
+   Font Awesome у них просто виходив за межі, а інлайновий SVG стискається:
+   лупа в пошуку схудла з 16px до 5px. Іконку треба вберегти від shrink. */
+.btn > svg,
+.input-group-addon > svg,
+.input-group-btn > .btn > svg,
+.btn > span > svg {
+    flex-shrink: 0;
 }
