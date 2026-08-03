@@ -128,7 +128,9 @@
                 </div>
             {/if}
 
-            {if $description}
+            {* На пошуку $description збирається з того самого «general_search +
+               keyword», що й заголовок h1, тож дублював його. *}
+            {if $description && !$keyword}
                 <div class="vs-catalogue__outro">
                     {* Table contents *}
                     {if !empty($table_of_content)}

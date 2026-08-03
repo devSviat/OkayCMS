@@ -3382,6 +3382,14 @@ body.hc-nav-open {
 	background-color: var(--vs-surface);
 }
 
+/* У каталозі й пошуку порожній результат — стан усієї сторінки, а не картка в   */
+/* колонці: 46ch лишали дві третини рядка порожніми.                             */
+
+.vs-catalogue__results .vs-empty {
+	max-width: none;
+	padding: var(--vs-space-9) var(--vs-space-7);
+}
+
 .vs-empty__title {
 	margin: 0;
 	color: var(--vs-heading);
@@ -3929,6 +3937,13 @@ body.hc-nav-open {
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: var(--vs-space-2);
 	margin: 0;
+}
+
+/* Без фільтрів блок іде стрічкою на всю ширину, де `repeat(3, 1fr)` дало б     */
+/* квадрати по третині екрана. На 260px-рейці лишається правило вище.           */
+
+.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))) .vs-filters__browsed .browsed__content {
+	grid-template-columns: repeat(auto-fill, minmax(64px, 72px));
 }
 
 .vs-filters__browsed .browsed__item {
@@ -5500,6 +5515,19 @@ body.hc-nav-open {
 		display: none;
 	}
 
+/* Rail, лишений заради переглянутих товарів, у схлопнутій сітці ставав банером  */
+/* над результатами. Тут він спускається під них звичайною стрічкою.             */
+
+	.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))) .vs-filters {
+		order: 2;
+		position: static;
+		max-height: none;
+	}
+
+	.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))) .vs-filters__scroll {
+		overflow: visible;
+	}
+
 /* Панель липне: групи фільтрів розгорнуті й тягнуться далеко вниз, тож без      */
 /* цього покупець біля двадцятої картки далеко від контрола, який звузив би      */
 /* список. Відступи обходять липку шапку, внутрішній скрол `auto` — коротка      */
@@ -5608,15 +5636,14 @@ body.hc-nav-open {
 		padding: var(--vs-space-5) var(--vs-space-6) var(--vs-space-6);
 	}
 
-/* row-gap is the air between the strip of pills and the line under it. There    */
-/* was none before, because row 1 and row 2 sat flush and nothing showed it;     */
-/* with a filled pill the line would otherwise touch its bottom edge.            */
+/* row-gap лишається нулем: підкреслення активної вкладки має лягати просто на   */
+/* лінію під смугою, а та лінія — верхня рамка панелі в наступному рядку.        */
 
 	.vs-tabs.is-enhanced {
 		display: grid;
 		grid-template-columns: repeat(3, max-content) minmax(0, 1fr);
-		column-gap: var(--vs-space-3);
-		row-gap: var(--vs-space-4);
+		column-gap: var(--vs-space-6);
+		row-gap: 0;
 	}
 
 	.vs-tabs.is-enhanced .vs-tabs__item {
@@ -5639,40 +5666,35 @@ body.hc-nav-open {
 		grid-column: 3;
 	}
 
-/* Стан «вибрано» тема вже має у формі пігулки — смуга вкладок позичає його, а   */
-/* не вигадує третій вигляд для того самого стану.                               */
-/*                                                                              */
-/* Колонки max-content розмірюють вкладку за підписом, тож короткий підпис дав   */
-/* би ціль, вужчу за поріг дотику; мінімум тримає ширину, а підпис центрується,  */
-/* щоб коротка вкладка не тулилась до краю власної пігулки.                      */
+/* Підкреслення малюється внутрішньою тінню кнопки, а не рамкою <h2>: <h2> —    */
+/* елемент сітки на всю висоту рядка, і рамка на ньому дала б лінію не під       */
+/* підписом. Колонки max-content міряють вкладку за підписом, тож мінімум тримає */
+/* ціль дотику.                                                                  */
 
 	.vs-tabs.is-enhanced .vs-tabs__btn {
 		justify-content: center;
 		min-width: 44px;
 		min-height: 44px;
-		padding: 0 var(--vs-space-5);
-		border-radius: var(--vs-radius-full);
+		padding: 0 var(--vs-space-2);
 		color: var(--vs-text-muted);
-		transition: background-color var(--vs-dur-2) var(--vs-ease), color var(--vs-dur-2) var(--vs-ease);
+		box-shadow: inset 0 -2px 0 transparent;
+		transition: color var(--vs-dur-2) var(--vs-ease), box-shadow var(--vs-dur-2) var(--vs-ease);
 	}
 
-/* Hover is offered only to a tab that is not already open: the active pill is  */
-/* filled, and a hover of its own would read as a second chosen state.          */
+/* Наведення тільки на неактивну: під активною вже є підкреслення, і друге       */
+/* читалося б як другий вибраний стан.                                          */
 
 	.vs-tabs.is-enhanced .vs-tabs__head:not(.active) .vs-tabs__btn:hover {
-		background-color: var(--vs-surface-subtle);
 		color: var(--vs-heading);
+		box-shadow: inset 0 -2px 0 var(--vs-border);
 	}
 
-/* The fill goes on the button, not on the <h2>: the <h2> is a grid item        */
-/* stretched across its whole row track, so filling it would paint a band the   */
-/* height of the row instead of a pill the size of the label. The state comes   */
-/* from .active on .vs-tabs__head, which okay.js and vibe.js both set; ARIA is  */
-/* deliberately not read here, because on mobile it is a different attribute.   */
+/* Стан беремо з .active на .vs-tabs__head — його ставлять і okay.js, і vibe.js. */
+/* ARIA свідомо не читаємо: на мобільному це інший атрибут.                      */
 
 	.vs-tabs.is-enhanced .vs-tabs__head.active .vs-tabs__btn {
-		background-color: var(--vs-ink);
-		color: var(--vs-ink-text);
+		color: var(--vs-heading);
+		box-shadow: inset 0 -2px 0 var(--vs-accent);
 	}
 
 	.vs-tabs.is-enhanced .vs-tabs__chevron {
@@ -5739,6 +5761,46 @@ body.hc-nav-open {
 
 	.vs-filters__browsed {
 		display: none;
+	}
+
+/* Виняток: без фільтрів шторки фактично не існує (кнопку до неї сховано вище),  */
+/* тож aside виходить у потік стрічкою під результатами. Нижче 992px розкладка   */
+/* не сітка — звідси flex заради order.                                          */
+
+	.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))) {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))) .vs-filters {
+		order: 2;
+		position: static;
+		max-height: none;
+		z-index: auto;
+		border-radius: 0;
+		background-color: transparent;
+		box-shadow: none;
+		visibility: visible;
+		transform: none;
+		transition: none;
+	}
+
+	.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))) .vs-filters__bar,
+	.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))) .vs-filters__foot {
+		display: none;
+	}
+
+/* Від'ємні поля тут ні до чого: підсвітки рядків фільтра немає, лишились би     */
+/* самі виступи за колонку.                                                      */
+
+	.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))) .vs-filters__scroll {
+		overflow: visible;
+		margin: 0;
+		padding: 0;
+	}
+
+	.vs-catalogue__layout:not(:has(.vs-filter-group:not(.vs-filter-group--cats))) .vs-filters__browsed {
+		display: block;
 	}
 
 /* Single column below 992px, so an uncapped square stage is as wide as the page: */
