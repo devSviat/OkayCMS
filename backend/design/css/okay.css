@@ -94,13 +94,18 @@
     --ok-accent-hover: #0f5583;
     --ok-accent-active: #0c4568;
     --ok-accent-soft: #e9f2f8;
+    /* На темному хромі акцент дає 2.4:1, тож там світліший. */
+    --ok-accent-on-chrome: #7fc4ee;
 
     /* Семантика. Кольори тут щось означають і більше нічого не прикрашають. */
     --ok-success: #227d3a;
     --ok-success-hover: #1b6430;
     --ok-success-soft: #eaf3ed;
+    /* Той самий зелений на темному хромі непотрібно темний. */
+    --ok-success-on-chrome: #6fd48b;
     --ok-warning: #a35a00;
     --ok-warning-hover: #874a00;
+    --ok-warning-disabled: #dcbb92;
     --ok-warning-soft: #fdf2e3;
     --ok-danger: #c8352c;
     --ok-danger-hover: #a92c25;
@@ -273,7 +278,7 @@ body:not(.top-nav) header.navbar {
 }
 /********************************************************* Text  */
 .text-success,
-.text_success{color: rgb(30, 202, 71)}
+.text_success{color: var(--ok-success)}
 .text-green,
 .text_green{color: green;}
 .text-danger,
@@ -539,7 +544,7 @@ body:not(.top-nav) header.navbar {
 .heading_label{
     font-family: var(--ok-font);
     font-weight: 500;
-    color: rgb(149, 149, 149);
+    color: var(--ok-ink-muted);
     font-size: 14px;
     margin-bottom: 2px;
     min-height: 22px;
@@ -950,7 +955,7 @@ a.link_white:hover{
 
 /* Button add*/
 .btn_yellow{
-    color: #fff;
+    color: var(--ok-ink);
     background-color: #ff9f29;
     border-color: #ff9f29;
 }
@@ -1015,12 +1020,12 @@ a.link_white:hover{
     border-color: var(--ok-warning-hover);
 }
 .btn-warning:disabled:focus{
-    background-color: #bcb2dd;
-    border-color: #bcb2dd;
+    background-color: var(--ok-warning-disabled);
+    border-color: var(--ok-warning-disabled);
 }
 .btn-warning:disabled:hover{
-    background-color: #bcb2dd;
-    border-color: #bcb2dd;
+    background-color: var(--ok-warning-disabled);
+    border-color: var(--ok-warning-disabled);
 }
 
 /* Button danger*/
@@ -1063,8 +1068,8 @@ a.link_white:hover{
 
 .btn-secondary {
     color: #fff;
-    background-color: #6e7c87;
-    border-color: #6e7c87;
+    background-color: #5b6770;
+    border-color: #5b6770;
 }
 .btn-secondary:hover{
     color: #fff;
@@ -1266,7 +1271,7 @@ a.link_white:hover{
     border-color: var(--ok-accent-hover);
 }
 .btn_border_yellow{
-    color: #ff9f29;
+    color: var(--ok-warning);
     background-image: none;
     background-color: transparent;
     border-color: #ff9f29;
@@ -1934,7 +1939,7 @@ opacity: 1;
     display: inline-flex;
     align-items: center;
     padding: 4px 16px;
-    background: RGB(57, 136, 180);
+    background: var(--ok-accent);
     color: rgb(255, 255, 255);
     font-size: 14px;
     transition: all .4s;
@@ -2049,7 +2054,6 @@ opacity: 1;
 .form-control:focus {
     border-color: #d0d0d0;
     background-color: var(--ok-sunken);
-    outline: 0 !important;
     -webkit-box-shadow: none;
     box-shadow: none;
     -webkit-transition: none !important;
@@ -2235,7 +2239,7 @@ select{
 input[type=checkbox]:checked + .okay_ckeckbox:before{
     content: '\f00c';
     font-family: "FontAwesome";
-    background: #2BB2EF;
+    background: var(--ok-accent);
     color: #fff;
 }
 .fn_user_complite{cursor: pointer;}
@@ -2573,9 +2577,9 @@ label.switch_label i{
 }
 .tag-ind_unknown {
     margin-right: 5px!important;
-    border: 1px solid #97B2B8;
+    border: 1px solid var(--ok-line-strong);
     background-color: #fff;
-    color: #97B2B8;
+    color: var(--ok-ink-muted);
 }
 .tag-ind_email {
     margin-right: 5px!important;
@@ -2588,7 +2592,7 @@ label.switch_label i{
     line-height: 1.3;
     font-size: 10px;
     background-color: RGB(252, 252, 252);
-    color: rgb(117, 117, 117);
+    color: var(--ok-ink-muted);
     margin: 0 !important;
     padding: 2px 5px 5px;
     font-weight: 500;
@@ -2599,7 +2603,7 @@ label.switch_label i{
     font-size: 13px;
     padding: 4px 8px;
     background-color: #DFFFEA;
-    color: #17C653;
+    color: var(--ok-success);
     text-transform: none;
 }
 .tag-not_licensed{
@@ -4328,7 +4332,6 @@ label.switch_label i{
 .input-group .form-control:focus {
     border-color: #d0d0d0;
     background-color: var(--ok-sunken);
-    outline: 0 !important;
     -webkit-box-shadow: none;
     box-shadow: none;
     -webkit-transition: none !important;
@@ -5663,7 +5666,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     font-size: 13px;
     display: inline-block;
     vertical-align: middle;
-    color: rgb(132, 132, 132);
+    color: var(--ok-ink-muted);
     font-weight: 500;
 }
 .box_labels_show svg{
@@ -6637,7 +6640,8 @@ input[type=range]:focus::-ms-fill-upper {
     line-height: normal;
     letter-spacing: normal;
     color: #ffffff;
-    background-color: rgba(112, 124, 134, 0.7);
+    /* Було rgba(112,124,134,.7): накладене на біле дає 2.6:1 під білим текстом. */
+    background-color: #5b6770;
     width: 35%;
     padding: 5px 10px;
     height: 34px;
@@ -6785,7 +6789,7 @@ input[type=range]:focus::-ms-fill-upper {
     align-items: center;
     padding: .5rem 1rem;
     font-size:16px;
-    color: rgb(149, 149, 149);
+    color: var(--ok-ink-muted);
     margin: 0 0 -1px;
 }
 .tab_navigation_link svg{
@@ -6856,7 +6860,7 @@ input[type=range]:focus::-ms-fill-upper {
     padding: 5px 5px;
     background: var(--ok-canvas);
     border-radius: 4px;
-    color: #83959d;
+    color: var(--ok-ink-muted);
     margin: 5px;
     position: relative;
     cursor: pointer;
@@ -6957,7 +6961,7 @@ input[type=range]:focus::-ms-fill-upper {
     padding: 15px;
     background: var(--ok-canvas);
     border-radius: 8px;
-    color: #83959d;
+    color: var(--ok-ink-muted);
     position: relative;
     border: 1px solid transparent;
     margin-bottom: 15px;
@@ -7019,7 +7023,7 @@ input[type=range]:focus::-ms-fill-upper {
     text-transform: uppercase;
     font-weight: 600;
     font-size: 16px;
-    color: #83959d;
+    color: var(--ok-ink-muted);
     margin-right: 20px;
     position: relative;font-family: var(--ok-font);
     line-height: 22px;
@@ -7048,7 +7052,7 @@ input[type=range]:focus::-ms-fill-upper {
     padding: 5px 5px;
     background: var(--ok-canvas);
     border-radius: 4px;
-    color: #83959d;
+    color: var(--ok-ink-muted);
     margin: 5px;
     position: relative;
     cursor: pointer;
@@ -9372,4 +9376,36 @@ textarea:focus-visible {
 }
 .fn_toggle_icon.is_open svg + svg {
     display: inline-block;
+}
+
+/* Поля вводу гасили системний контур через outline: 0 !important, і це
+   перебивало кільце фокуса. Тепер контур знімається лише тоді, коли
+   :focus-visible не спрацював, тобто на клік мишею. */
+.variant_input:focus:not(:focus-visible),
+.form-control:focus:not(:focus-visible),
+.input-group .form-control:focus:not(:focus-visible) {
+    outline: 0 !important;
+}
+
+/* Посилання у футері успадковували акцент, розрахований на світле полотно,
+   і давали на темному хромі 2.4:1. Селектор навмисно вузький: у шапці є
+   посилання з власним тлом (.btn_inner), і ширше правило перефарбовувало
+   їхній білий текст. */
+#footer a:not([class]),
+#footer a.text_white {
+    color: var(--ok-accent-on-chrome);
+}
+
+/* .text_success вживається і в темному футері, і на світлому полотні —
+   одне значення не покриває обидва. */
+#footer .text_success,
+.navbar .text_success {
+    color: var(--ok-success-on-chrome);
+}
+
+/* .heading_label приглушений під світле полотно; на кольоровому тлі алерта
+   він давав 4.2:1. */
+.alert--error .heading_label,
+.alert--error .alert__content {
+    color: var(--ok-danger-hover);
 }
