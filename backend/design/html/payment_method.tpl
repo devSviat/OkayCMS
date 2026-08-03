@@ -112,7 +112,7 @@
                 <div class="heading_box">
                     {$btr->general_additional_settings|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -146,7 +146,7 @@
                 <div class="heading_box">
                     {$btr->general_image|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -182,7 +182,7 @@
                 <div class="heading_box">
                     {$btr->payment_method_settings|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="row">
@@ -267,7 +267,7 @@
                 <div class="heading_box">
                     {$btr->payment_method_shipping|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -315,7 +315,7 @@
                         <a href="#tab1" class="tab_navigation_link">{$btr->payment_method_description|escape}</a>
                     </div>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="icon-arrow-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">

@@ -9354,3 +9354,22 @@ textarea:focus-visible {
 #footer {
     color: var(--ok-chrome-ink-muted);
 }
+
+/* Розкриття підкатегорій. Раніше плюс і мінус були одним гліфом Font Awesome,
+   який JS перемикав класом; тепер це дві інлайнові іконки, і видима — одна. */
+/* .okay_list_heading a svg тисне будь-яку іконку до 12px заради стрілок
+   сортування, а на такому розмірі плюс у квадраті читається як квадратик. */
+.okay_list_heading a .fn_toggle_icon svg,
+.fn_toggle_icon svg {
+    width: 17px;
+    height: 17px;
+}
+.fn_toggle_icon svg + svg {
+    display: none;
+}
+.fn_toggle_icon.is_open svg {
+    display: none;
+}
+.fn_toggle_icon.is_open svg + svg {
+    display: inline-block;
+}

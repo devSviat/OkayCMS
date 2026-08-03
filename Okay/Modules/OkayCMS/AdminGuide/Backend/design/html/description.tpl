@@ -538,7 +538,7 @@
                         <div class="heading_label">Phone</div>
                         <div class="input-group">
                             <input class="form-control" type="phone" placeholder="+375(099) 999-99-99">
-                            <span class="input-group-addon"><i class="fa fa-phone"></i></span>
+                            <span class="input-group-addon">{include file='svg_icon.tpl' svgId='phone'}</span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -546,7 +546,7 @@
                         <div class="input-group input-group--dabbl">
                             <span class="input-group-addon input-group-addon--left">URL</span>
                             <input name="url" class="form-control fn_url fn_disabled" type="text" value="https://okay-cms.com/" readonly="readonly">
-                            <span class="input-group-addon fn_disable_url"><i class="fa fa-lock"></i></span>
+                            <span class="input-group-addon fn_disable_url">{include file='svg_icon.tpl' svgId='lock_closed'}</span>
                         </div>
                     </div>
                 </div>
@@ -572,7 +572,7 @@
     <div class="heading_label">Phone</div>
     <div class="input-group">
         <input class="form-control" type="phone" placeholder="+375(099) 999-99-99">
-        <span class="input-group-addon"><i class="fa fa-phone"></i></span>
+        <span class="input-group-addon">{include file='svg_icon.tpl' svgId='phone'}</span>
     </div>
 </div>
 <div class="form-group">
@@ -580,7 +580,7 @@
     <div class="input-group input-group--dabbl">
         <span class="input-group-addon input-group-addon--left">URL</span>
         <input name="url" class="form-control fn_url fn_disabled" type="text" value="https://okay-cms.com/" readonly="readonly">
-        <span class="input-group-addon fn_disable_url"><i class="fa fa-lock"></i></span>
+        <span class="input-group-addon fn_disable_url">{include file='svg_icon.tpl' svgId='lock_closed'}</span>
     </div>
 </div>
                         </textarea>

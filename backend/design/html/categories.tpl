@@ -34,7 +34,7 @@
                 <div class="okay_list_head">
                     <div class="okay_list_heading okay_list_subicon">
                         <a href="javascript:;" class="fn_open_all">
-                            <i class="fa fa-plus-square"></i>
+                            {include file='svg_icon.tpl' svgId='square_plus'}
                         </a>
                     </div>
                     <div class="okay_list_heading okay_list_drag"></div>
@@ -153,7 +153,7 @@
                         elem.closest(".fn_row").find(".fn_ajax_categories").html(data.cats);
                         elem.closest(".fn_row").find(".fn_ajax_categories").addClass("sortable");
                         elem.data("toggle",1);
-                        elem.find("i").toggleClass("fa-minus-square");
+                        elem.find(".fn_toggle_icon").toggleClass("is_open");
                     } else {
                         toastr.error(msg, "Error");
                     }
@@ -187,7 +187,7 @@
             });
         } else {
             elem.closest(".fn_row").children(".fn_ajax_categories").slideToggle(500);
-            elem.find("i").toggleClass("fa-minus-square");
+            elem.find(".fn_toggle_icon").toggleClass("is_open");
         }
     });
 

@@ -63,7 +63,7 @@
                 <div class="heading_box">
                     {$btr->okaycms__rozetka_xml__params|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -221,7 +221,7 @@
                                                             <div class="input-group input-group--dabbl">
                                                                 <span class="input-group-addon input-group-addon--left">URL</span>
                                                                 <input class="form-control fn_url fn_disabled" type="text" name=feeds[{$feed->id}][url] value="{$feed->url|escape}" readonly="readonly">
-                                                                <span class="input-group-addon fn_disable_url"><i class="fa fa-lock"></i></span>
+                                                                <span class="input-group-addon fn_disable_url">{include file='svg_icon.tpl' svgId='lock_closed'}</span>
                                                             </div>
                                                         </div>
                                                     </div>

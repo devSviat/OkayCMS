@@ -150,7 +150,7 @@
                 <div class="heading_box visible_md">
                     {$btr->general_filter|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="boxed_sorting toggle_body_wrap off fn_card">
@@ -193,7 +193,7 @@
                             {/if}
                             <div class="input-group input-group--search">
                                 <input name="keyword" class="form-control" placeholder="{$btr->general_search|escape}" type="text" value="{$keyword|escape}" >
-                                <button type="submit" class="btn"><i class="fa fa-search"></i></button>
+                                <button type="submit" class="btn">{include file='svg_icon.tpl' svgId='search'}</button>
                             </div>
                         </form>
                     </div>
@@ -244,9 +244,9 @@
                                     <div class="okay_list_boding okay_list_order_number">
                                         <a class="text_600 mb-h" href="{url controller=OrderAdmin id=$order->id return=$smarty.server.REQUEST_URI}"><span class="hidden-sm-down">{$btr->orders_order|escape}</span> #{$order->id}</a>
                                         {if $order->last_update}
-                                            <span class="tag tag-update fn_history_toggle">{$btr->order_history_changed} {$order->last_update->date|date} {$order->last_update->date|time} <i class="fn_icon_arrow fa fa-angle-down fa-lg m-t-2 "></i></span>
+                                            <span class="tag tag-update fn_history_toggle">{$btr->order_history_changed} {$order->last_update->date|date} {$order->last_update->date|time} <span class="fn_icon_arrow m-t-2">{include file='svg_icon.tpl' svgId='chevron_down'}</span></span>
                                         {else}
-                                            <span class="tag tag-update fn_history_toggle">{$btr->order_history_created} {$order->date|date} {$order->date|time} <i class="fn_icon_arrow fa fa-angle-down fa-lg m-t-2 "></i></span>
+                                            <span class="tag tag-update fn_history_toggle">{$btr->order_history_created} {$order->date|date} {$order->date|time} <span class="fn_icon_arrow m-t-2">{include file='svg_icon.tpl' svgId='chevron_down'}</span></span>
                                         {/if}
                                         
                                         {if $order->paid}
@@ -303,7 +303,7 @@
                                         <span>{$order->purchases|count} {$btr->orders_unit|escape}</span>
                                         {if $order->purchases|count > 0}
                                             <span  class="fn_orders_toggle">
-                                                <i class="fn_icon_arrow fa fa-angle-down fa-lg m-t-2 "></i>
+                                                <span class="fn_icon_arrow m-t-2">{include file='svg_icon.tpl' svgId='chevron_down'}</span>
                                             </span>
                                         {/if}
                                     </div>

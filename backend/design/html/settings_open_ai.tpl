@@ -42,7 +42,7 @@
                 <div class="heading_box">
                     {$btr->settings_open_ai_integration_title|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -153,7 +153,7 @@
                 <div class="heading_box">
                     {$btr->settings_open_ai_products_title|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 {*Параметры элемента*}
@@ -207,7 +207,7 @@
                 <div class="heading_box">
                     {$btr->settings_open_ai_categories_title|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 {*Параметры элемента*}
@@ -261,7 +261,7 @@
                 <div class="heading_box">
                     {$btr->settings_open_ai_brands_title|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 {*Параметры элемента*}

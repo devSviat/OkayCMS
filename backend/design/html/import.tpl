@@ -138,7 +138,7 @@
                                 </div>
                                 <div class="okay_list_footer">
                                     <div class="col-lg-12 col-md-12 mt-1">
-                                        <button type="submit" name="import" value="1" class="btn btn_small btn_blue float-md-right"><i class="fa fa-upload"></i>&nbsp;{$btr->import_do_import}</button>
+                                        <button type="submit" name="import" value="1" class="btn btn_small btn_blue float-md-right">{include file='svg_icon.tpl' svgId='upload'}&nbsp;{$btr->import_do_import}</button>
                                     </div>
                                 </div>
                             </div>
@@ -160,7 +160,7 @@
                         <div class="heading_box">
                             {$btr->import_download|escape}
                             <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                                <a class="btn-minimize" href="javascript:;" ><i class="icon-arrow-down"></i></a>
+                                <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                             </div>
                         </div>
 

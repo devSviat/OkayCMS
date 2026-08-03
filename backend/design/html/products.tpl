@@ -38,7 +38,7 @@
             <div class="input-group input-group--search">
                 <input name="keyword" class="form-control" placeholder="{$btr->products_search|escape}" type="text" value="{$keyword|escape}" >
                 <span class="input-group-btn">
-                    <button type="submit" class="btn"><i class="fa fa-search"></i></button>
+                    <button type="submit" class="btn">{include file='svg_icon.tpl' svgId='search'}</button>
                 </span>
             </div>
             </form>
@@ -54,7 +54,7 @@
                 <div class="heading_box visible_md">
                     {$btr->general_filter|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="fn_step-0 boxed_sorting toggle_body_wrap off fn_card">
@@ -238,7 +238,7 @@
                                             {if $product->variants|count > 1}
                                                 <div class="fn_variants_toggle variants_toggle">
                                                     <span>{$btr->general_options|escape}</span>
-                                                    <i class="fn_icon_arrow fa fa-angle-down fa-lg m-t-2"></i>
+                                                    <span class="fn_icon_arrow m-t-2">{include file='svg_icon.tpl' svgId='chevron_down'}</span>
                                                 </div>
                                             {/if}
 

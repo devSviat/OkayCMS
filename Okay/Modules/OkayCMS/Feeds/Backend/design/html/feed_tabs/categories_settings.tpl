@@ -17,7 +17,7 @@
             <div class="okay_list_head">
                 <div class="okay_list_heading okay_list_subicon">
                     <a href="javascript:;" class="fn_open_all">
-                        <i class="fa fa-plus-square"></i>
+                        {include file='svg_icon.tpl' svgId='square_plus'}
                     </a>
                 </div>
                 <div class="okay_list_heading okay_list_photo hidden-sm-down">{$btr->general_photo|escape}</div>

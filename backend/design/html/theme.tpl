@@ -82,7 +82,7 @@
                         <div class="heading_box">
                             {$btr->theme_themes|escape}
                             <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                                <a class="btn-minimize" href="javascript:;" ><i class="icon-arrow-down"></i></a>
+                                <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                             </div>
                         </div>
                         <div class="toggle_body_wrap fn_card on">
@@ -97,7 +97,7 @@
                                                 </div>
                                                 <span class="theme_active_span font-weight-bold">{$t->name|escape|truncate:20:'...'} {if  $t->name == $theme->name}<span class="text_success">- {$btr->theme_current_item|escape} </span>{/if}</span>
                                                 {if  !$t->locked}
-                                                    <i class="fa fa-pencil fn_rename_theme rename_theme p-h" data-old_name="{$t->name|escape}"></i>
+                                                    <span class="fn_rename_theme rename_theme p-h" data-old_name="{$t->name|escape}">{include file='svg_icon.tpl' svgId='pencil'}</span>
                                                 {/if}
 
                                                 {if !$t@first}

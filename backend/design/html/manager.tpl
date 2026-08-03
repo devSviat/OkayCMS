@@ -74,7 +74,7 @@
                 <div class="heading_box">
                     {$btr->manager_basic|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -133,7 +133,7 @@
                 <div class="heading_box">
                     {$btr->manager_settings|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap fn_card on">
@@ -207,7 +207,7 @@
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                     {if $m->id != $manager->id}
                         <span class="font_14 text_600">{$btr->manager_all_access|escape}</span>
@@ -248,7 +248,7 @@
                         </button>
                         {if $m->cnt_try >= 10}
                             <button type="submit" name="unlock_manager" class="btn btn_small btn_blue">
-                                <i class="fa fa-magic"></i>
+                                {include file='svg_icon.tpl' svgId='magic'}
                             &nbsp;   {$btr->manager_unlock|escape}
                             </button>
                         {/if}
