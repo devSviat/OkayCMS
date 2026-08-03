@@ -1978,7 +1978,7 @@ body.hc-nav-open {
 }
 
 .vs-footer__body {
-	display: none;
+	display: block;
 	padding-bottom: var(--vs-space-5);
 }
 
@@ -2159,7 +2159,9 @@ body.hc-nav-open {
 }
 
 .vs-copyright__mark {
+	position: relative;
 	display: inline-flex;
+	align-items: center;
 	color: var(--vs-text-muted);
 	text-decoration: none;
 }
@@ -11097,14 +11099,18 @@ img.lazy:not(.loaded) {
 		min-height: 44px;
 	}
 
-/* 11x16 - the smallest target on the site. The row it sits in is 44px high      */
-/* already, so only the mark's own box changes.                                  */
+/* 11x16 - the smallest target on the site. The 44px area is an overlay rather   */
+/* than the element's own box: as a box it padded the mark with ~16px of dead     */
+/* space on each side, which pushed the glyph away from the line it belongs to.   */
 
-	.vs-copyright__mark {
-		align-items: center;
-		justify-content: center;
-		min-width: 44px;
-		min-height: 44px;
+	.vs-copyright__mark::after {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 44px;
+		height: 44px;
+		transform: translate(-50%, -50%);
 	}
 
 /* The sort strip. 36px is a comfortable mouse target and stays that at 992px     */

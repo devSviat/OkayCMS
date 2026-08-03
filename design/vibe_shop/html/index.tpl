@@ -176,7 +176,7 @@
                 <section class="vs-footer__col">
                     <h2 class="vs-footer__title">
                         <span data-language="index_contacts">{$lang->index_contacts}</span>
-                        <button type="button" class="fn_switch_parent vs-footer__toggle hidden-lg-up" aria-label="{$lang->index_contacts|escape}">{include file="svg.tpl" svgId="chevron"}</button>
+                        <button type="button" class="fn_switch_parent vs-footer__toggle hidden-lg-up down" aria-label="{$lang->index_contacts|escape}">{include file="svg.tpl" svgId="chevron"}</button>
                     </h2>
                     <div class="vs-footer__body">
                         {if $settings->site_phones}
@@ -217,7 +217,7 @@
                 <section class="vs-footer__col">
                     <h2 class="vs-footer__title">
                         <span data-language="index_about_store">{$lang->index_about_store}</span>
-                        <button type="button" class="fn_switch_parent vs-footer__toggle hidden-lg-up" aria-label="{$lang->index_about_store|escape}">{include file="svg.tpl" svgId="chevron"}</button>
+                        <button type="button" class="fn_switch_parent vs-footer__toggle hidden-lg-up down" aria-label="{$lang->index_about_store|escape}">{include file="svg.tpl" svgId="chevron"}</button>
                     </h2>
                     <div class="vs-footer__body vs-footer__menu">
                         {$menu_footer}
@@ -227,7 +227,7 @@
                 <section class="vs-footer__col">
                     <h2 class="vs-footer__title">
                         <span data-language="index_categories">{$lang->index_categories}</span>
-                        <button type="button" class="fn_switch_parent vs-footer__toggle hidden-lg-up" aria-label="{$lang->index_categories|escape}">{include file="svg.tpl" svgId="chevron"}</button>
+                        <button type="button" class="fn_switch_parent vs-footer__toggle hidden-lg-up down" aria-label="{$lang->index_categories|escape}">{include file="svg.tpl" svgId="chevron"}</button>
                     </h2>
                     <div class="fn_view_content vs-footer__body vs-footer__menu">
                         {$c_count = 0}
@@ -248,7 +248,7 @@
                 <section class="vs-footer__col">
                     <h2 class="vs-footer__title">
                         <span data-language="subscribe_heading">{$lang->subscribe_heading}</span>
-                        <button type="button" class="fn_switch_parent vs-footer__toggle hidden-lg-up" aria-label="{$lang->subscribe_heading|escape}">{include file="svg.tpl" svgId="chevron"}</button>
+                        <button type="button" class="fn_switch_parent vs-footer__toggle hidden-lg-up down" aria-label="{$lang->subscribe_heading|escape}">{include file="svg.tpl" svgId="chevron"}</button>
                     </h2>
                     <div id="subscribe_container" class="vs-footer__body">
                         <p class="vs-footer__promo">
