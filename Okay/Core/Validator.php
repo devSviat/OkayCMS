@@ -126,10 +126,6 @@ class Validator
      * if $src is empty AND $is_required return false
      * @return bool
      */
-    /**
-     * Раніше тут був чорний список з "<script" і "<iframe". Він не ловив
-     * нічого, окрім двох цих тегів: <img onerror=...> проходив наскрізь.
-     */
     public function isSafe($src = "", $is_required = false)
     {
         if (is_array($src) || is_object($src)) {

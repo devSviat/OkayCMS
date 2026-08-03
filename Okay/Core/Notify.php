@@ -479,9 +479,8 @@ class Notify
         /** @var BlogEntity $blogEntity */
         $blogEntity = $this->entityFactory->get(BlogEntity::class);
 
-        // Три окремі перевірки, а не одна складена: у складеній гілка з
-        // присвоєнням $comment не виконувалась при порожньому parent_id,
-        // а наступний доданок все одно читав $comment->email.
+        // Розділено: у складеній умові $comment не присвоювався при порожньому
+        // parent_id, але наступний доданок його читав.
         if (!($commentAnswer = $commentsEntity->findOne(['id' => intval($commentAnswerId)]))) {
             return false;
         }

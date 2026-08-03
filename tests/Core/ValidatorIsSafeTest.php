@@ -82,10 +82,6 @@ class ValidatorIsSafeTest extends TestCase
         $this->assertFalse($this->validator->isSafe(null, true));
     }
 
-    /**
-     * isSafe() — спільна передумова для isEmail/isPhone/isName/isDomain,
-     * тож розмітка має відсікатись і через них.
-     */
     public function testCallersInheritTheGuard()
     {
         $payload = '<img src=x onerror=alert(1)>';

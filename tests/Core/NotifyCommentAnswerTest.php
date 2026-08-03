@@ -59,9 +59,6 @@ class NotifyCommentAnswerTest extends TestCase
         $this->assertFalse($notify->emailCommentAnswerToUser(7));
     }
 
-    /**
-     * @param array<int, object|null> $commentsById
-     */
     private function notifyReturning(array $commentsById): Notify
     {
         $comments = $this->createStub(CommentsEntity::class);
