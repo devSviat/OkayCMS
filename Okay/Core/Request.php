@@ -8,6 +8,8 @@ use Okay\Core\Security\AdminCsrfToken;
 
 class Request
 {
+    const UNSAFE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
+
     private $langId;
     private $startTime;
 
@@ -394,7 +396,9 @@ class Request
      */
     public function checkSession()
     {
-        if (empty($_POST)) {
+        // За методом, а не за наповненістю $_POST: порожнє тіло вважалось
+        // "не мутацією" і проходило повз гард.
+        if (!in_array(strtoupper((string)$this->method()), self::UNSAFE_METHODS, true)) {
             return true;
         }
 

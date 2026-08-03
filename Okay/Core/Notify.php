@@ -479,11 +479,17 @@ class Notify
         /** @var BlogEntity $blogEntity */
         $blogEntity = $this->entityFactory->get(BlogEntity::class);
 
-        if(
-            !($commentAnswer = $commentsEntity->findOne(['id' => intval($commentAnswerId)]))
-            || (!empty($commentAnswer->parent_id) && !($comment = $commentsEntity->findOne(['id' => intval($commentAnswer->parent_id)])))
-            || !$comment->email
-        ) {
+        // Розділено: у складеній умові $comment не присвоювався при порожньому
+        // parent_id, але наступний доданок його читав.
+        if (!($commentAnswer = $commentsEntity->findOne(['id' => intval($commentAnswerId)]))) {
+            return false;
+        }
+
+        if (empty($commentAnswer->parent_id)) {
+            return false;
+        }
+
+        if (!($comment = $commentsEntity->findOne(['id' => intval($commentAnswer->parent_id)])) || !$comment->email) {
             return false;
         }
 
