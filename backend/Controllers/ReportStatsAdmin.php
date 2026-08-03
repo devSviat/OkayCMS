@@ -4,6 +4,7 @@
 namespace Okay\Admin\Controllers;
 
 
+use Okay\Core\Export\CsvWriter;
 use Okay\Entities\CategoriesEntity;
 use Okay\Entities\OrderStatusEntity;
 use Okay\Entities\ReportStatEntity;
@@ -116,7 +117,7 @@ class ReportStatsAdmin extends IndexAdmin
 
         $f = fopen($exportFilesDir.$filename, 'ab');
         if ($page == 1) {
-            fputcsv($f, $columnsNames, $columnDelimiter, '"', '\\');
+            CsvWriter::putHeader($f, $columnsNames, $columnDelimiter);
         }
 
         $filter = [];
@@ -182,7 +183,7 @@ class ReportStatsAdmin extends IndexAdmin
             foreach($columnsNames as $n=>$c) {
                 $str[] = $u->$n;
             }
-            fputcsv($f, $str, $columnDelimiter, '"', '\\');
+            CsvWriter::putRow($f, $str, $columnDelimiter);
         }
 
         $total = [
@@ -192,14 +193,9 @@ class ReportStatsAdmin extends IndexAdmin
             'amount'        => $totalAmount
         ];
 
-        fputcsv($f, $total, $columnDelimiter, '"', '\\');
+        CsvWriter::putRow($f, $total, $columnDelimiter);
         fclose($f);
 
-        mb_substitute_character('none');
-        file_put_contents(
-            $exportFilesDir.$filename,
-            mb_convert_encoding(file_get_contents($exportFilesDir.$filename), 'Windows-1251')
-        );
 
         if ($statCount*$page < $totalCount) {
             $data = ['end'=>false, 'page'=>$page, 'totalpages'=>$totalCount/$statCount];

@@ -1,6 +1,7 @@
 <?php
 
 
+use Okay\Core\Export\CsvWriter;
 use Okay\Core\Database;
 use Okay\Core\Managers;
 use Okay\Core\Response;
@@ -69,7 +70,7 @@ $f = fopen($exportFilesDir.$filename, 'ab');
 
 // Если начали сначала - добавим в первую строку названия колонок
 if ($page == 1) {
-    fputcsv($f, $columnsNames, $columnDelimiter, '"', '\\');
+    CsvWriter::putHeader($f, $columnsNames, $columnDelimiter);
 }
 
 $filter = [];
@@ -111,7 +112,7 @@ if (!empty($category)) {
     $categories_list = cat_tree($categories, $purchases);
 }
 foreach ($categories_list as $c) {
-    fputcsv($f, $c, $columnDelimiter, '"', '\\');
+    CsvWriter::putRow($f, $c, $columnDelimiter);
 }
 
 $total = [
@@ -120,14 +121,9 @@ $total = [
     'price'=>$totalPrice
 ];
 
-fputcsv($f, $total, $columnDelimiter, '"', '\\');
+CsvWriter::putRow($f, $total, $columnDelimiter);
 fclose($f);
 
-mb_substitute_character('none');
-file_put_contents(
-    $exportFilesDir.$filename,
-    mb_convert_encoding(file_get_contents($exportFilesDir.$filename), 'Windows-1251')
-);
 
 $data = true;
 

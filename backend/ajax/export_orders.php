@@ -1,6 +1,7 @@
 <?php
 
 
+use Okay\Core\Export\CsvWriter;
 use Okay\Entities\CurrenciesEntity;
 use Okay\Entities\ManagersEntity;
 use Okay\Entities\OrdersEntity;
@@ -92,7 +93,7 @@ if (!empty($toDate)) {
 }
 
 if($page == 1) {
-    fputcsv($f, $columnsNames, $columnDelimiter, '"', '\\');
+    CsvWriter::putHeader($f, $columnsNames, $columnDelimiter);
 }
 
 $mainCurrency =  $currenciesEntity->getMainCurrency();
@@ -105,7 +106,7 @@ if (!empty($orders)) {
         foreach($columnsNames as $n=>$c) {
             $str[] = $o->$n;
         }
-        fputcsv($f, $str, $columnDelimiter, '"', '\\');
+        CsvWriter::putRow($f, $str, $columnDelimiter);
     }
 }
 
@@ -118,11 +119,6 @@ if($ordersCount*$page < $totalOrders) {
 } else {
     $data = ['end'=>true, 'page'=>$page, 'totalpages'=>$totalOrders/$ordersCount];
 
-    mb_substitute_character('none');
-    file_put_contents(
-        $exportFilesDir.$filename,
-        mb_convert_encoding(file_get_contents($exportFilesDir.$filename), 'Windows-1251')
-    );
 }
 
 if($data) {
