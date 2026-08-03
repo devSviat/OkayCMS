@@ -14,11 +14,6 @@ class AttemptLimiter
     private $maxAttempts;
     private $windowSeconds;
 
-    /**
-     * @param string $dir директорія сховища; створюється за потреби
-     * @param int $maxAttempts скільки невдач у вікні ще дозволено
-     * @param int $windowSeconds ширина вікна в секундах
-     */
     public function __construct($dir, $maxAttempts = 10, $windowSeconds = 300)
     {
         $this->dir = rtrim((string)$dir, '/');
@@ -36,7 +31,6 @@ class AttemptLimiter
         $failures = $this->recentFailures($key);
         $failures[] = time();
 
-        // Обрізаємо: без цього довга серія невдач росла б у файлі без межі.
         if (count($failures) > $this->maxAttempts) {
             $failures = array_slice($failures, -$this->maxAttempts);
         }
@@ -52,9 +46,6 @@ class AttemptLimiter
         }
     }
 
-    /**
-     * @return int[] мітки часу невдач, що не вийшли за вікно
-     */
     private function recentFailures($key)
     {
         $file = $this->fileFor($key);
@@ -83,9 +74,6 @@ class AttemptLimiter
         return $recent;
     }
 
-    /**
-     * @param int[] $failures
-     */
     private function write($key, array $failures)
     {
         $file = $this->fileFor($key);

@@ -11,10 +11,8 @@ use Psr\Log\LoggerInterface;
 class SupportController extends AbstractController
 {
     /**
-     * Ендпойнт публічний і без авторизації: за збігом ключа він перезаписує
-     * private_key і public_key у базі, тобто передає канал підтримки іншому
-     * власнику. Тому - тільки POST, тільки JSON-об'єкт, звірка ключів
-     * constant-time і лічильник невдалих спроб.
+     * Ендпойнт публічний і без авторизації, а за збігом ключа перезаписує
+     * private_key і public_key, тобто передає канал підтримки іншому власнику.
      */
     public function checkDomain(
         SupportInfoEntity $supportInfoEntity,
@@ -95,10 +93,7 @@ class SupportController extends AbstractController
         return $this->reply($result);
     }
 
-    /**
-     * Порівняння сталого часу і без приведення типів: != зрівнював "0" і "0.0"
-     * та зливав довжину спільного префікса через час відповіді.
-     */
+    /** != зрівнював "0" і "0.0" і не був constant-time. */
     private function keysMatch($known, $supplied)
     {
         if (!is_string($known) || !is_string($supplied) || $known === '' || $supplied === '') {
@@ -108,9 +103,6 @@ class SupportController extends AbstractController
         return hash_equals($known, $supplied);
     }
 
-    /**
-     * @return object|null
-     */
     private function decodeBody()
     {
         $raw = $this->request->post();
