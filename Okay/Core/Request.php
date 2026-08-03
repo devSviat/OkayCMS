@@ -273,6 +273,14 @@ class Request
             $val = file_get_contents('php://input');
         }
 
+        // Те саме, що робить get(): коли просять скаляр, масив згортається до
+        // першого елемента. Без цього intval(['9999']) мовчки давав 1, тож
+        // variant[]=9999 клав у кошик варіант 1. Без $type масиви проходять
+        // як були - на цьому тримається post('amounts').
+        if (!empty($type) && is_array($val)) {
+            $val = reset($val);
+        }
+
         if (empty($val) && $default !== null) {
             $val = $default;
         }

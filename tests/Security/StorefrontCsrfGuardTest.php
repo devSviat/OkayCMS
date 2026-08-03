@@ -64,7 +64,13 @@ class StorefrontCsrfGuardTest extends TestCase
         $cart = \Okay\Controllers\CartController::class;
 
         return [
-            'cart page: add without JS' => [$cart, 'render', '$cart->addItem('],
+            // render() має ТРИ мутуючі гілки: додавання варіанта, оновлення
+            // кількостей і оформлення. Перевіряються всі три, бо strpos бачить
+            // лише перше входження, і один запис засвідчив би менше, ніж
+            // здається.
+            'cart page: add without JS'  => [$cart, 'render', '$cart->addItem('],
+            'cart page: update amounts'  => [$cart, 'render', '$cart->updateItem('],
+            'cart page: checkout'        => [$cart, 'render', '$ordersHelper->add('],
             'cart ajax'                 => [$cart, 'cartAjax', '$cart->updateItem('],
             'cart remove'               => [$cart, 'removeItem', '$cart->deleteItem('],
             'cart add'                  => [$cart, 'addItem', '$cart->addItem('],
@@ -176,18 +182,59 @@ class StorefrontCsrfGuardTest extends TestCase
     }
 
     #[DataProvider('tokenCarryingTemplateProvider')]
-    public function testThemeFormsCarryTheToken($template)
+    public function testThemeFormsCarryTheToken($theme, $template)
     {
-        $source = $this->read('design/okay_shop/html/' . $template);
+        $source = $this->read('design/' . $theme . '/html/' . $template);
 
-        $this->assertStringContainsString('name="customer_csrf_token"', $source, $template);
+        $this->assertStringContainsString(
+            'name="customer_csrf_token"',
+            $source,
+            "$theme/$template мутує без токена"
+        );
     }
 
     public static function tokenCarryingTemplateProvider()
     {
-        return [
-            'feedback' => ['feedback.tpl'],
-        ];
+        $cases = [];
+        foreach (['okay_shop', 'vibe_shop'] as $theme) {
+            foreach (['feedback.tpl', 'product.tpl', 'product_list.tpl', 'cart.tpl'] as $template) {
+                $cases["$theme/$template"] = [$theme, $template];
+            }
+        }
+
+        return $cases;
+    }
+
+    /**
+     * Форма fn_variants - це шлях додавання в кошик без JS. Якщо з неї зникне
+     * method="post", вона мовчки повернеться до GET: контролер її проігнорує,
+     * покупець отримає незмінений кошик без жодної помилки, а тест на токен
+     * лишиться зеленим - інпут же на місці.
+     */
+    #[DataProvider('buyFormProvider')]
+    public function testBuyFormsPostRatherThanGet($theme, $template)
+    {
+        $source = $this->read('design/' . $theme . '/html/' . $template);
+
+        preg_match_all('~<form[^>]*\bfn_variants\b[^>]*>~', $source, $matches);
+
+        $this->assertNotEmpty($matches[0], "$theme/$template: форму fn_variants не знайдено");
+
+        foreach ($matches[0] as $form) {
+            $this->assertStringContainsString('method="post"', $form, "$theme/$template: $form");
+        }
+    }
+
+    public static function buyFormProvider()
+    {
+        $cases = [];
+        foreach (['okay_shop', 'vibe_shop'] as $theme) {
+            foreach (['product.tpl', 'product_list.tpl'] as $template) {
+                $cases["$theme/$template"] = [$theme, $template];
+            }
+        }
+
+        return $cases;
     }
 
     private function read($file)

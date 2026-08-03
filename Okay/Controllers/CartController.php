@@ -44,8 +44,18 @@ class CartController extends AbstractController
         CartMetadataHelper $cartMetadataHelper
     ) {
 
+        // Кожен POST на /cart щось змінює: додає варіант, оновлює кількості,
+        // застосовує купон, оформлює замовлення. Тому охорона одна і на вході,
+        // а не по гілці - інакше наступна додана гілка знову лишиться голою.
+        //
+        // GET сюди приходить за самою сторінкою кошика, тож умова обов'язкова:
+        // requireCustomerCsrf() віддає 405 на будь-що, крім POST.
+        if ($request->method('post')) {
+            $this->requireCustomerCsrf();
+        }
+
         // Додавання в кошик без JS: сюди постить форма fn_variants з картки та
-        // сторінки товару. Читаємо з $_POST і перевіряємо токен ДО мутації.
+        // сторінки товару.
         //
         // Раніше гілка читала $_GET, і сторонній <img src="/cart?variant=17">
         // наповнював кошик відвідувача. Решту мутацій кошика форк закрив, а цю
@@ -54,7 +64,6 @@ class CartController extends AbstractController
         // 303, а не 301: 301 на POST кешується назавжди, тож повторне додавання
         // того самого варіанта більше не доходило б до сервера.
         if ($variantId = $request->post('variant', 'integer')) {
-            $this->requireCustomerCsrf();
             $cart->addItem($variantId, $request->post('amount', 'integer'));
             $this->response->redirectTo(Router::generateUrl('cart', [], true), 303);
         }
