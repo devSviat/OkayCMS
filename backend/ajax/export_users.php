@@ -1,6 +1,7 @@
 <?php
 
 
+use Okay\Core\Export\CsvWriter;
 use Okay\Entities\UsersEntity;
 use Okay\Core\QueryFactory;
 use Okay\Core\Managers;
@@ -54,7 +55,7 @@ if(empty($page) || $page==1) {
 
 $f = fopen($exportFilesDir.$filename, 'ab');
 if($page == 1) {
-    fputcsv($f, $columnsNames, $columnDelimiter, '"', '\\');
+    CsvWriter::putHeader($f, $columnsNames, $columnDelimiter);
 }
 
 $filter = [];
@@ -71,7 +72,7 @@ foreach($usersEntity->find($filter) as $u) {
     foreach($columnsNames as $n=>$c) {
         $str[] = $u->$n;
     }
-    fputcsv($f, $str, $columnDelimiter, '"', '\\');
+    CsvWriter::putRow($f, $str, $columnDelimiter);
 }
 
 fclose($f);
@@ -83,11 +84,6 @@ if($usersCount*$page < $totalUsers) {
 } else {
     $data = ['end'=>true, 'page'=>$page, 'totalpages'=>$totalUsers/$usersCount];
 
-    mb_substitute_character('none');
-    file_put_contents(
-        $exportFilesDir.$filename,
-        mb_convert_encoding(file_get_contents($exportFilesDir.$filename), 'Windows-1251')
-    );
 }
 
 if ($data) {
