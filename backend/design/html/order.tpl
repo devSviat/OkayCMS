@@ -561,13 +561,13 @@
                                             {include file='svg_icon.tpl' svgId='tag_search'} {$order->referer_channel|escape}
                                         </span>
                                     {elseif $order->referer_channel == Okay\Core\UserReferer\UserReferer::CHANNEL_SOCIAL}
-                                        <a href="{$order->referer_source|escape}" target="_blank" class="tag tag-chanel_social" title="{$order->referer_source|escape}">
+                                        <span class="tag tag-chanel_social" title="{$order->referer_source|escape}">
                                             {include file='svg_icon.tpl' svgId='tag_social'} {$order->referer_channel|escape}
-                                        </a>
+                                        </span>
                                     {elseif $order->referer_channel == Okay\Core\UserReferer\UserReferer::CHANNEL_REFERRAL}
-                                        <a href="{$order->referer_source|escape}" target="_blank" class="tag tag-chanel_referral" title="{$order->referer_source|escape}">
+                                        <span class="tag tag-chanel_referral" title="{$order->referer_source|escape}">
                                             {include file='svg_icon.tpl' svgId='tag_referral'} {$order->referer_channel|escape}
-                                        </a>
+                                        </span>
                                     {else}
                                         <span class="tag tag-chanel_unknown" title="{$order->referer_source|escape}">
                                             {include file='svg_icon.tpl' svgId='tag_unknown'} {$order->referer_channel|escape}
