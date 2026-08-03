@@ -129,18 +129,21 @@ class PurchasesEntity extends Entity
             
             $product = $productsEntity->get(intval($variant->product_id));
             if (empty($product)) {
-                ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
+                return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
             }
         }
         
+        // Без return виконання йшло далі з $order === null: нижче читалось
+        // $order->closed, а наприкінці метод оновлював $order->id неіснуючого
+        // замовлення. Сусідні охорони в цьому ж класі повертають значення.
         $order = $this->getOrder(intval($purchase->order_id));
         if (empty($order->id)) {
-            ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
+            return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
         }
         
         // Не допустить нехватки на складе
         if ($order->closed && !empty($purchase->amount) && !$variant->infinity && $variant->stock<$purchase->amount) {
-            ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
+            return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
         }
         
         if (!isset($purchase->product_id) && isset($variant)) {
