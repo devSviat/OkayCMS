@@ -5,6 +5,7 @@ namespace Okay\Admin\Controllers;
 
 
 use Okay\Core\Import;
+use Okay\Core\Import\CsvNormalizer;
 use Okay\Core\Request;
 use Okay\Core\QueryFactory;
 use Okay\Entities\FeaturesEntity;
@@ -113,6 +114,16 @@ class ImportAdmin extends IndexAdmin
     }
     
     private function convertFile($source, $dest) {
+        if (!$this->toUtf8($source, $dest)) {
+            return false;
+        }
+
+        // Далі імпорт читає файл із роздільником ";" і без огляду на BOM,
+        // тож приводимо джерело до цього вигляду тут, на вході.
+        return (new CsvNormalizer())->normalizeFile($dest) !== false;
+    }
+
+    private function toUtf8($source, $dest) {
         // Узнаем какая кодировка у файла
         $testString = file_get_contents($source, false, null, 0, 1000000);
 
