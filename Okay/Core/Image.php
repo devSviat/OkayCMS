@@ -7,6 +7,7 @@ namespace Okay\Core;
 use Okay\Core\Adapters\Resize\AbstractResize;
 use Okay\Core\Adapters\Resize\AdapterManager;
 use Okay\Core\Modules\Extender\ExtenderFacade;
+use Okay\Core\Security\Filemanager\PathResolver;
 use WebPConvert\WebPConvert;
 
 class Image
@@ -122,13 +123,28 @@ class Image
      */
     public function resize($filename, $imageSizes, $originalImagesDir = null, $resizedImagesDir = null)
     {
-        list($sourceFile, $width , $height, $setWatermark, $cropParams, $pseudoWebp) = $this->getResizeParams($filename);
+        // Ім'я приходить з маршруту як (.+) і проходить rawurldecode(), тож
+        // getResizeParams() цілком може не розібрати його. Без цієї перевірки
+        // list() розкладав false і далі все трималось на випадковому збігу.
+        $resizeParams = $this->getResizeParams($filename);
+        if ($resizeParams === false) {
+            return ExtenderFacade::execute(__METHOD__, false, func_get_args());
+        }
+
+        list($sourceFile, $width , $height, $setWatermark, $cropParams, $pseudoWebp) = $resizeParams;
+
+        // До перевірки розміру: та відповідає 404 і робить exit(), тобто
+        // ворожий шлях уже не був би відхилений як ворожий.
+        if (!$this->isRemoteSource($sourceFile) && !PathResolver::isSafeRelativePath($sourceFile)) {
+            return ExtenderFacade::execute(__METHOD__, false, func_get_args());
+        }
+
         $size = $width . 'x' . $height . ($setWatermark === true ? 'w' : '');
 
         if (!is_array($imageSizes)) {
             $imageSizes = explode('|', $imageSizes);
         }
-        
+
         if (!in_array($size, $imageSizes)){
             $this->response->setStatusCode(404)->sendHeaders();
             exit();
@@ -139,7 +155,7 @@ class Image
         $this->originalsDir = $originalImagesDir;
         
         // Если файл удаленный (https?://), зальем его себе
-        if (preg_match("~^https?://~", $sourceFile)) {
+        if ($this->isRemoteSource($sourceFile)) {
             // Имя оригинального файла
             if (!$originalFile = $this->downloadImage($sourceFile)) {
                 return ExtenderFacade::execute(__METHOD__, false, func_get_args());
@@ -147,9 +163,19 @@ class Image
         } else {
             $originalFile = $sourceFile;
         }
-        
+
         $resizedFile = $this->addResizeParams($originalFile, $width, $height, $setWatermark, $cropParams);
-        
+
+        // Обидва імені йдуть у file_exists(), copy() і в шлях запису прев'ю.
+        // downloadImage() повертає вже нормалізоване ім'я, але перевіряємо
+        // і його: далі результат використовується так само, як зовнішній.
+        if (!PathResolver::isSafeRelativePath($originalFile)
+            || !PathResolver::isSafeRelativePath($resizedFile)
+        ) {
+            return ExtenderFacade::execute(__METHOD__, false, func_get_args());
+        }
+
+
         if (!file_exists($originalsDir . $originalFile)) {
             // Намагаємось завантажити зображення з production сайта
             if (!empty($this->productionDomain)) {
@@ -676,6 +702,16 @@ class Image
         }
 
         return false;
+    }
+
+    /**
+     * Віддалене джерело обмежене тим, що вже лежить у __images: сам факт
+     * завантаження перевіряє downloadImage() через fileIsNotExists(), тож
+     * довільна адреса сюди не доходить.
+     */
+    private function isRemoteSource($filename)
+    {
+        return (bool)preg_match("~^https?://~", (string)$filename);
     }
 
     private function isNotHttpsSource($filename)
