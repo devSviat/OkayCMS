@@ -252,7 +252,18 @@ class Request
         
         return $val;
     }
-    
+
+    /**
+     * Сирий рядок GET-параметра. Нетипізований get() віддає масив як є, і
+     * keyword[]=x доходив до strip_tags() фаталом.
+     */
+    public function getRawString($name, $default = '')
+    {
+        $val = $_GET[$name] ?? $default;
+
+        return is_scalar($val) ? (string)$val : $default;
+    }
+
     private function recursiveStripTags($val)
     {
         if (is_array($val) || is_object($val)) {

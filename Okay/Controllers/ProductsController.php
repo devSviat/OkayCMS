@@ -190,8 +190,7 @@ class ProductsController extends AbstractController
     public function ajaxSearch(ProductsHelper $productsHelper, Image $image, Money $money, Router $router)
     {
 
-        $filter['keyword'] = $this->request->get('query', null, null, false);
-        $filter['keyword'] = strip_tags($filter['keyword']);
+        $filter['keyword'] = strip_tags($this->request->getRawString('query'));
         $filter['visible'] = true;
         $filter['limit'] = 10;
 
