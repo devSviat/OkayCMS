@@ -175,12 +175,6 @@ parameters:
 			path: Okay/Core/Adapters/Resize/Imagick.php
 
 		-
-			message: '#^Parameter \#5 \$channel of method Imagick\:\:compositeImage\(\) expects 0\|1\|2\|4\|8\|16\|23\|31\|32\|64\|128\|256\|512\|1024\|131072\|134217727, 18 given\.$#'
-			identifier: argument.type
-			count: 1
-			path: Okay/Core/Adapters/Resize/Imagick.php
-
-		-
 			message: '#^Empty array passed to foreach\.$#'
 			identifier: foreach.emptyArray
 			count: 1

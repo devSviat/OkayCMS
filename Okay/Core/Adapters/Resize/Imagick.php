@@ -64,7 +64,10 @@ class Imagick extends AbstractResize // todo протестить адапрер
             $thumb->adaptiveSharpenImage($sharpen, $sharpen);
 
             if(isset($overlay) && is_object($overlay)) {
-                $frame->compositeImage($overlay, \imagick::COMPOSITE_OVER, $watermarkX, $watermarkY, \imagick::COLOR_ALPHA);
+                // П'ятий аргумент - маска каналів, а тут стояла колірна
+                // константа COLOR_ALPHA. Для накладання водяного знака
+                // потрібні всі канали, тобто типове значення параметра.
+                $frame->compositeImage($overlay, \imagick::COMPOSITE_OVER, $watermarkX, $watermarkY);
             }
         }
 
