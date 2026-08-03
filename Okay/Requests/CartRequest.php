@@ -16,9 +16,6 @@ class CartRequest
         $this->request = $request;
     }
 
-    /**
-     * @return string значення поля, приведене до рядка; відсутнє поле дає ''
-     */
     private function text($name)
     {
         $value = $this->request->post($name);
@@ -31,11 +28,8 @@ class CartRequest
         $order = new \stdClass;
         $order->payment_method_id = $this->request->post('payment_method_id', 'integer');
         $order->delivery_id = $this->request->post('delivery_id', 'integer');
-        // Порожній рядок, а не null: name, email і comment у __orders оголошені
-        // NOT NULL, і явний null перебиває їхнє значення за замовчуванням.
-        // Форма теми ці поля шле завжди, тому видно це лише на клієнті, який
-        // їх не шле - модуль, інтеграція, стороння тема. Замовлення тоді не
-        // створюється, а слід лишається тільки в лозі.
+        // Порожній рядок, а не null: name, email і comment у __orders - NOT NULL,
+        // і явний null перебиває значення за замовчуванням.
         $order->name        = $this->text('name');
         $order->last_name   = $this->request->post('last_name');
         $order->email       = $this->text('email');

@@ -133,9 +133,7 @@ class PurchasesEntity extends Entity
             }
         }
         
-        // Без return виконання йшло далі з $order === null: нижче читалось
-        // $order->closed, а наприкінці метод оновлював $order->id неіснуючого
-        // замовлення. Сусідні охорони в цьому ж класі повертають значення.
+        // Без return виконання йшло далі з $order === null.
         $order = $this->getOrder(intval($purchase->order_id));
         if (empty($order->id)) {
             return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());

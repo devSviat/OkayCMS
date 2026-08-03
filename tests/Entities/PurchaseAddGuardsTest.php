@@ -115,8 +115,6 @@ class PurchaseAddGuardsTest extends TestCase
         $start = strpos($source, 'public function ' . $method . '(');
         $this->assertIsInt($start, $method . '() не знайдено');
 
-        // До наступного оголошення методу: цього досить, щоб не зачепити
-        // сусідні методи з такими самими викликами.
         $next = strpos($source, "\n    public function ", $start + 1);
 
         return substr($source, $start, $next === false ? null : $next - $start);
