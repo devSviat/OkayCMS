@@ -196,13 +196,48 @@ class StorefrontCsrfGuardTest extends TestCase
     public static function tokenCarryingTemplateProvider()
     {
         $cases = [];
+        $templates = [
+            'feedback.tpl',
+            'product.tpl',
+            'product_list.tpl',
+            'cart.tpl',
+            // Постить на ту сторінку, де стоїть, зокрема на /cart, де охорона
+            // вимагає токен. Без нього форма зберігала заявку і аж тоді
+            // отримувала 403.
+            'callback.tpl',
+        ];
+
         foreach (['okay_shop', 'vibe_shop'] as $theme) {
-            foreach (['feedback.tpl', 'product.tpl', 'product_list.tpl', 'cart.tpl'] as $template) {
+            foreach ($templates as $template) {
                 $cases["$theme/$template"] = [$theme, $template];
             }
         }
 
         return $cases;
+    }
+
+    /**
+     * Вкладена <form> у розмітці кошика непомітно ламає оформлення: браузер
+     * викидає вкладений відкривальний тег, а вкладений </form> закриває
+     * ЗОВНІШНЮ форму, і кнопка «Оформити» разом з усіма полями під нею лишається
+     * без форми. Сторінка при цьому виглядає цілою, тести зелені, а покупець без
+     * JS просто не може оформити замовлення.
+     */
+    #[DataProvider('themeProvider')]
+    public function testCartRowsDoNotNestAForm($theme)
+    {
+        $source = $this->read('design/' . $theme . '/html/cart_purchases.tpl');
+
+        // Коментарі {* *} відкидаються: саме в них пояснено, чому форми тут
+        // немає, і без цього тест ловив би власне пояснення.
+        $markup = preg_replace('~\{\*.*?\*\}~s', '', $source);
+
+        $this->assertSame(
+            0,
+            substr_count($markup, '<form'),
+            "$theme/cart_purchases.tpl рендериться всередині форми оформлення, " .
+            "тож власної форми мати не може - видалення робиться через formaction"
+        );
     }
 
     /**

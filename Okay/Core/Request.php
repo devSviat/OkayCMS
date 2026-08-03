@@ -179,10 +179,17 @@ class Request
      */
     public function method($method = null)
     {
+        // ?? '' - бо в CLI та в тестах REQUEST_METHOD немає, і без цього
+        // strtolower(null) дає Deprecated, а phpunit.xml падає на ньому.
+        // Відповідь при цьому правильна: жодному методу порожній рядок не
+        // дорівнює, тож охорона лишається закритою.
+        $current = $_SERVER['REQUEST_METHOD'] ?? '';
+
         if (!empty($method)) {
-            return strtolower($_SERVER['REQUEST_METHOD']) == strtolower($method);
+            return strtolower($current) == strtolower($method);
         }
-        return $_SERVER['REQUEST_METHOD'];
+
+        return $current;
     }
 
     public function isPost()

@@ -2,6 +2,12 @@
 <div class="hidden">
     <form id="fn_callback" class="form form--boxed popup popup_animated fn_validate_callback" method="post">
 
+        {* Зворотний дзвінок пише рядок у базу й шле лист, тобто це мутація, і
+           токен їй потрібен як і решті. Форма постить на ту сторінку, де стоїть,
+           зокрема на /cart, де охорона інакше відмовила б уже після того, як
+           CommonHelper зберіг заявку. *}
+        <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
+
         {if $settings->captcha_type == "v3"}
             <input type="hidden" class="fn_recaptcha_token fn_recaptchav3" name="recaptcha_token" />
         {/if}
