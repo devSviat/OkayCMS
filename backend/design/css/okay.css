@@ -1153,28 +1153,28 @@ a.link_white:hover{
 }
 
 .btn_border-info{
-    color: var(--ok-success);
+    color: var(--ok-accent);
     background-image: none;
     background-color: transparent;
-    border-color: var(--ok-success);
+    border-color: var(--ok-accent);
 }
 
 .btn_border-info:hover{
     color: #fff;
-    background-color: var(--ok-success);
-    border-color: var(--ok-success);
+    background-color: var(--ok-accent);
+    border-color: var(--ok-accent);
 }
 
 .btn_border-info:focus{
     color: #fff;
-    background-color: var(--ok-success-hover);
-    border-color: var(--ok-success-hover);
+    background-color: var(--ok-accent-hover);
+    border-color: var(--ok-accent-hover);
 }
 
 .btn_border-info:active{
     color: #fff;
-    background-color: var(--ok-success-hover);
-    border-color: var(--ok-success-hover);
+    background-color: var(--ok-accent-hover);
+    border-color: var(--ok-accent-hover);
 }
 
 .btn_border-info:active:hover,
