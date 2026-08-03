@@ -1,6 +1,6 @@
 # Перенесення теми звідси на стокову OkayCMS
 
-Вам сподобалась `design/vibe_shop` (або `design/okay_shop`) і ви хочете поставити її на
+Вам сподобалась `design/vibe_shop` і ви хочете поставити її на
 звичайну, нефоркнуту OkayCMS 4.5.2. Це можливо, і більша частина теми переїжджає без правок —
 але кілька речей доведеться зробити руками.
 
@@ -108,7 +108,7 @@ git fetch upstream
 
 Три шаблони несуть приховане поле токена:
 
-- `html/cart.tpl` (у `vibe_shop`) або `html/cart_purchases.tpl` (у `okay_shop`)
+- `html/cart.tpl`
 - `html/pop_up_cart.tpl`
 - `html/feedback.tpl`
 
