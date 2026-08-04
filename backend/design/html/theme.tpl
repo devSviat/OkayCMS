@@ -82,7 +82,7 @@
                         <div class="heading_box">
                             {$btr->theme_themes|escape}
                             <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                                <a class="btn-minimize" href="javascript:;" ><i class="icon-arrow-down"></i></a>
+                                <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                             </div>
                         </div>
                         <div class="toggle_body_wrap fn_card on">
@@ -97,7 +97,7 @@
                                                 </div>
                                                 <span class="theme_active_span font-weight-bold">{$t->name|escape|truncate:20:'...'} {if  $t->name == $theme->name}<span class="text_success">- {$btr->theme_current_item|escape} </span>{/if}</span>
                                                 {if  !$t->locked}
-                                                    <i class="fa fa-pencil fn_rename_theme rename_theme p-h" data-old_name="{$t->name|escape}"></i>
+                                                    <span class="fn_rename_theme rename_theme p-h" data-old_name="{$t->name|escape}">{include file='svg_icon.tpl' svgId='pencil'}</span>
                                                 {/if}
 
                                                 {if !$t@first}
@@ -212,7 +212,7 @@
         $('.fn_set_admin').on('click', function (e) {
             e.preventDefault();
             $("input[name=admin_theme]").val($(this).val()).attr('disabled', false);
-            $("form").submit();
+            $("input[name=theme]").closest('form').submit();
         });
 
         $('.fn_rename_theme').on('click',function(){
@@ -224,13 +224,13 @@
         $('.fn_set_theme').on('click',function(){
             $("input[name=action]").val('set_main_theme');
             $("input[name=theme]").val($(this).data('set_name'));
-            $("form").submit();
+            $("input[name=theme]").closest('form').submit();
         });
         // Клонировать текущую тему
         $('.fn_clone_theme').on('click',function(e){
             e.preventDefault();
             $("input[name=action]").val('clone_theme');
-            $("form").submit();
+            $("input[name=theme]").closest('form').submit();
         });
 
         $(".fn_remove_theme").on("click", function () {
@@ -238,9 +238,9 @@
             theme_name = $(this).data("theme_name");
         });
         $(".fn_submit_delete").on("click",function () {
-            $("form input[name=action]").val(action);
-            $("form input[name=theme]").val(theme_name);
-            $("form").submit();
+            $("input[name=action]").val(action);
+            $("input[name=theme]").val(theme_name);
+            $("input[name=theme]").closest('form').submit();
         });
         $(".fn_dismiss_delete").on("click",function () {
             $("form input[name=action]").val("");

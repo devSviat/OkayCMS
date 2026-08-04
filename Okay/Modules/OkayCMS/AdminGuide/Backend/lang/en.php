@@ -78,6 +78,8 @@ $lang['description_title2_add_images'] = 'File Download:';
 $lang['description_title3_add_images'] = 'Image upload:';
 $lang['description_info3_add_images'] = '<p>This method is used to upload photos to banners, products, categories, etc. You can upload multiple photos at once, delete them and move them in priority. To configure it, you must substitute your variables in <strong>&#123;foreach&#125;</strong> and in <strong>&#123;if&#125;</strong></p>';
 $lang['description_text_clip_clipboard'] = 'Click to copy to clipboard.';
-$lang['description_info_icons'] = '<p>The system uses icons <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">fontawesome</a> and the default svg konok set, which is located in <strong> svg_icon.tpl </strong>. In order to display a specific icon, you need to connect <strong> svg_icon.tpl </strong> with the parameter <strong> svgId = "" </strong>, in which we indicate the id of the desired icon.</p>
-                                   <p>For example, to display the basket icon, insert <strong>&#123;include file="svg_icon.tpl" svgId="trash"&#125;</strong> and in <strong>svgId</strong> specify the id of the basket icon..</p> Our icon:  {include file="svg_icon.tpl" svgId="trash"}';
-$lang['description_title2_icons'] = 'List of default icons:';
+$lang['description_info_icons'] = '<p>Interface icons are a set of inline SVGs that lives in <strong>svg_icon.tpl</strong>. The panel no longer ships a separate icon-font library.</p>
+                                   <p>To render an icon, include <strong>svg_icon.tpl</strong> and pass the <strong>svgId</strong> parameter — the id of the icon you need from the list below.</p>
+                                   <p>For example, the trash icon is rendered like this: <strong>&#123;include file="svg_icon.tpl" svgId="trash"&#125;</strong></p>';
+$lang['description_result_icons'] = 'Result:';
+$lang['description_title2_icons'] = 'Available icons:';

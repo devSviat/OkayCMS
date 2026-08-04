@@ -108,9 +108,9 @@
                                         <input type="checkbox" id="block_translit" class="hidden" value="1" {if $author->id}checked=""{/if}>
                                         <span class="input-group-addon fn_disable_url">
                                             {if $author->id}
-                                                <i class="fa fa-lock"></i>
+                                                {include file='svg_icon.tpl' svgId='lock_closed'}
                                             {else}
-                                                <i class="fa fa-lock fa-unlock"></i>
+                                                {include file='svg_icon.tpl' svgId='lock_open'}
                                             {/if}
                                         </span>
                                     </div>
@@ -157,7 +157,7 @@
                 <div class="heading_box">
                     {$btr->general_additional_settings|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -177,7 +177,7 @@
                 <div class="heading_box">
                     {$btr->general_image|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -214,16 +214,38 @@
                 <div class="heading_box">
                     {$btr->author_socials|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
-                <div class="toggle_body_wrap on fn_card"> 
+                <div class="toggle_body_wrap on fn_card">
+                    {* Іконка соцмережі обирається за доменом, який ввів користувач,
+                       тож потрібна і мапа, і фолбек на невідомий домен. *}
+                    {$social_icons = [
+                        'facebook'  => 'brand_facebook',
+                        'instagram' => 'brand_instagram',
+                        'twitter'   => 'brand_twitter',
+                        'x'         => 'brand_twitter',
+                        'youtube'   => 'brand_youtube',
+                        'telegram'  => 'brand_telegram',
+                        't'         => 'brand_telegram',
+                        'linkedin'  => 'brand_linkedin',
+                        'tiktok'    => 'brand_tiktok',
+                        'pinterest' => 'brand_pinterest'
+                    ] scope=global}
+                    {* Джерело для клонування з JS: та сама розмітка, що й на сервері,
+                       аби SVG не довелося дублювати ще й у скрипті. *}
+                    <div class="fn_social_icon_source hidden">
+                        {foreach $social_icons as $domain => $icon_id}
+                            <span data-domain="{$domain|escape}">{include file='svg_icon.tpl' svgId=$icon_id}</span>
+                        {/foreach}
+                        <span data-domain="">{include file='svg_icon.tpl' svgId='brand_unknown'}</span>
+                    </div>
                     <div class="features_wrap fn_socials_wrap">
                         {foreach $socials as $social}
                         <div class="fn_row form-group">
                             <div class="input-group input-group--dabbl">
                                     <span class="fn_social_image input-group-addon input-group-addon--left">
-                                        <i class="fa fa-{$social.domain|escape}"></i>
+                                        {include file='svg_icon.tpl' svgId=$social_icons[$social.domain]|default:'brand_unknown'}
                                     </span>
                                 <input class="fn_social_input form-control" type="text" name="socials[][url]" value="{$social.url|escape}"/>
                                 <button type="button" class="input-group-addon fn_delete_social">
@@ -234,7 +256,7 @@
                         {/foreach}
                         <div class="fn_new_social fn_row form-group">
                             <div class="input-group input-group--dabbl">
-                                <span class="fn_social_image input-group-addon input-group-addon--left"><i class="fa"></i></span>
+                                <span class="fn_social_image input-group-addon input-group-addon--left">{include file='svg_icon.tpl' svgId='brand_unknown'}</span>
                                 <input class="fn_social_input form-control" type="text" name="socials[][url]" value=""/>
                                 <button type="button" class="input-group-addon fn_delete_social">
                                     {include file='svg_icon.tpl' svgId='trash'}
@@ -264,7 +286,7 @@
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card row">
@@ -312,7 +334,7 @@
                         <a href="#tab1" class="tab_navigation_link">{$btr->general_full_description|escape}</a>
                     </div>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="icon-arrow-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -367,7 +389,11 @@
             domain = 'odnoklassniki';
         }
 
-        social_image_wrap.html('<i class="fa fa-' + domain + '"></i>')
+        var source = $(".fn_social_icon_source [data-domain='" + domain + "']");
+        if (!source.length) {
+            source = $(".fn_social_icon_source [data-domain='']");
+        }
+        social_image_wrap.html(source.html());
     });
     
 </script>

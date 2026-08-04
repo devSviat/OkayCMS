@@ -46,7 +46,7 @@
                         <div class="heading_box">
                             {$btr->images_images|escape}
                             <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                                <a class="btn-minimize" href="javascript:;" ><i class="icon-arrow-down"></i></a>
+                                <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                             </div>
                         </div>
                         {*Параметры элемента*}
@@ -61,7 +61,7 @@
                                                     <input type="text" class="form-control" name="new_name[]" value="{$image->name|escape}">
                                                 </div>
                                                 <span class="font-weight-bold">{$image->name|escape|truncate:20:'...'}</span>
-                                                <i class="fa fa-pencil fn_rename_theme rename_theme p-h" data-old_name="{$image->name|escape}"></i>
+                                                <span class="fn_rename_theme rename_theme p-h" data-old_name="{$image->name|escape}">{include file='svg_icon.tpl' svgId='pencil'}</span>
 
                                                 <button type="button" data-name="{$image->name|escape}" class="fn_delete_image btn_close float-xs-right">
                                                     {include file='svg_icon.tpl' svgId='delete'}

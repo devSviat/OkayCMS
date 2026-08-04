@@ -113,9 +113,9 @@
                                         <input type="checkbox" id="block_translit" class="hidden" value="1" {if $category->id}checked=""{/if}>
                                         <span class="input-group-addon fn_disable_url">
                                             {if $category->id}
-                                                <i class="fa fa-lock"></i>
+                                                {include file='svg_icon.tpl' svgId='lock_closed'}
                                             {else}
-                                                <i class="fa fa-lock fa-unlock"></i>
+                                                {include file='svg_icon.tpl' svgId='lock_open'}
                                             {/if}
                                         </span>
                                     </div>
@@ -155,7 +155,7 @@
                 <div class="heading_box">
                     {$btr->general_additional_settings|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -203,7 +203,7 @@
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -242,7 +242,7 @@
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="row">
@@ -295,7 +295,7 @@
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card row">
@@ -372,7 +372,7 @@
                         <a href="#tab2" class="fn_step9 tab_navigation_link">{$btr->general_full_description|escape}</a>
                     </div>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="icon-arrow-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card ">

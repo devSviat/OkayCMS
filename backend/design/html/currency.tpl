@@ -172,7 +172,7 @@
                                         </div>
                                         <div class="cur_settings">
                                             <button data-hint="{$btr->currency_cents_display|escape}" type="button" class="setting_icon setting_icon_yandex hint-bottom-middle-t-info-s-small-mobile hint-anim fn_ajax_action {if $c->cents}fn_active_class{/if}" data-controller="currency" data-action="cents" data-id="{$c->id}" name="cents">
-                                                <i class="fa fa-database fa-sm m-t-2"></i>
+                                                {include file='svg_icon.tpl' svgId='backup'}
                                             </button>
                                         </div>
                                         <div class="okay_list_boding okay_list_close">

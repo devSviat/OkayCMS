@@ -198,7 +198,7 @@
     $( ".fn_newpost_city_name" ).devbridgeAutocomplete( {
         serviceUrl: okay.router['OkayCMS_NovaposhtaCost_find_city'],
         minChars: 1,
-        maxHeight: 320,
+        maxHeight: 420,
         noCache: true,
         onSelect: function(suggestion) {
             $('input[name="novaposhta_warehouse_id"]').val(''); //  очищаем выбранное отделение другого города

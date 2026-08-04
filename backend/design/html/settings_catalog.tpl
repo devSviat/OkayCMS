@@ -57,7 +57,7 @@
                 <div class="heading_box">
                     {$btr->settings_catalog_catalog|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 {*Параметры элемента*}
@@ -160,7 +160,7 @@
                         </div>
                         <div class="fn_step-8 col-lg-4 col-md-6">
                             <div class="heading_label">
-                                {$btr->settings_catalog_features_cache_ttl|escape} <span style="color: red">Beta</span>
+                                {$btr->settings_catalog_features_cache_ttl|escape} <span class="text_warning">Beta</span>
                                 <i class="fn_tooltips" title="{$btr->tooltip_settings_catalog_features_cache_ttl|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
@@ -321,7 +321,7 @@
                 <div class="heading_box">
                     {$btr->title_truncate_table|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 {*Параметры элемента*}
@@ -436,7 +436,7 @@
                 <div class="heading_box">
                     {$btr->settings_catalog_watermark|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">

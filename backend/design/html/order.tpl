@@ -165,7 +165,7 @@
                         {/if}
                     </div>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -242,7 +242,7 @@
                                                     <div class="mt-h">
                                                         <span class="tag {if $purchase->discounts}tag-danger{else}tag-default{/if} fn_discounted_toggle">
                                                             <span>{$btr->general_discounts|escape}</span>
-                                                            <i class="fn_icon_arrow fa fa-angle-down fa-lg m-t-2 "></i>
+                                                            <span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -301,7 +301,7 @@
                                                 <div class="mt-h">
                                                     <span class="tag tag-default fn_discounted_toggle">
                                                         <span>{$btr->general_discounts|escape}</span>
-                                                        <i class="fn_icon_arrow fa fa-angle-down fa-lg m-t-2 "></i>
+                                                        <span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span>
                                                     </span>
                                                 </div>
                                             </div>
@@ -411,7 +411,7 @@
                 <div class="heading_box">
                     {$btr->order_parameters|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -513,7 +513,7 @@
                 <div class="heading_box">
                     {$btr->order_buyer_information|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><i class="fa fn_icon_arrow fa-angle-down"></i></a>
+                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
                     </div>
                 </div>
                 <div class="toggle_body_wrap on fn_card">
@@ -545,7 +545,7 @@
                             <textarea name="comment" class="form-control short_textarea">{$order->comment|escape}</textarea>
                         </div>
                          <div class="mb-1">
-                            <div class="heading_label boxes_inline">{$btr->order_ip|escape} {if $order->id}<a href="https://2ip.ua/ru/services/information-service/whois?a=act&ip={$order->ip|escape}" target="_blank"><i class="fa fa-map-marker"></i> whois</a>{/if}</div>
+                            <div class="heading_label boxes_inline">{$btr->order_ip|escape} {if $order->id}<a href="https://2ip.ua/ru/services/information-service/whois?a=act&ip={$order->ip|escape}" target="_blank">{include file='svg_icon.tpl' svgId='map_marker'} whois</a>{/if}</div>
                             <div class="boxes_inline text_dark text_600">{$order->ip|escape}</div>
                         </div>
                         {if $order->referer_channel}

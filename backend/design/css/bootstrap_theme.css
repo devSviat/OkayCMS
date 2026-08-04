@@ -418,8 +418,8 @@ header.navbar .navbar-nav .nav-link {
 }
 
 .card-primary {
-    background-color: #20a8d8;
-    border-color: #20a8d8;
+    background-color: var(--ok-accent);
+    border-color: var(--ok-accent);
 }
 
 .card-success {
@@ -444,7 +444,7 @@ header.navbar .navbar-nav .nav-link {
 
 .card-outline-primary {
     background-color: transparent;
-    border-color: #20a8d8;
+    border-color: var(--ok-accent);
 }
 
 .card-outline-secondary {
@@ -537,8 +537,8 @@ header.navbar .navbar-nav .nav-link {
 
 .card-header.card-header-primary {
     margin: -1px -1px 0;
-    background: #20a8d8;
-    border-bottom: 1px solid #20a8d8;
+    background: var(--ok-accent);
+    border-bottom: 1px solid var(--ok-accent);
 }
 
 .card-header.card-header-secondary {
@@ -605,7 +605,7 @@ header.navbar .navbar-nav .nav-link {
 }
 
 .card-primary {
-    background-color: #20a8d8;
+    background-color: var(--ok-accent);
 }
 
 .card-primary .card-header {
@@ -855,8 +855,8 @@ header.navbar .navbar-nav .nav-link {
     z-index: 2;
     color: #fff;
     cursor: default;
-    background-color: #20a8d8;
-    border-color: #20a8d8;
+    background-color: var(--ok-accent);
+    border-color: var(--ok-accent);
 }
 
 .page-item.disabled .page-link,
@@ -900,7 +900,7 @@ header.navbar .navbar-nav .nav-link {
     float: left;
     padding: 0.5rem 0.75rem;
     margin-left: -1px;
-    color: #20a8d8;
+    color: var(--ok-accent);
     text-decoration: none;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -912,7 +912,7 @@ header.navbar .navbar-nav .nav-link {
 .page-link:hover,
 .pagination-datatables li a:hover,
 .pagination li a:hover {
-    color: #167495;
+    color: var(--ok-accent-hover);
     background-color: #cfd8dc;
     border-color: #ddd;
 }
@@ -1096,8 +1096,8 @@ header.navbar .navbar-nav .nav-link {
     z-index: 2;
     color: #fff;
     text-decoration: none;
-    background-color: #20a8d8;
-    border-color: #20a8d8;
+    background-color: var(--ok-accent);
+    border-color: var(--ok-accent);
 }
 
 .list-group-item.active .list-group-item-text,
@@ -1250,7 +1250,7 @@ button.close {
     position: absolute;
     z-index: 1070;
     display: block;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--ok-font);
     font-style: normal;
     font-weight: normal;
     letter-spacing: normal;
@@ -1337,7 +1337,7 @@ button.close {
     display: block;
     max-width: 276px;
     padding: 1px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--ok-font);
     font-style: normal;
     font-weight: normal;
     letter-spacing: normal;
@@ -1437,7 +1437,7 @@ button.close {
 
 .bg-primary {
     color: #fff !important;
-    background-color: #20a8d8 !important;
+    background-color: var(--ok-accent) !important;
 }
 
 a.bg-primary:focus,
@@ -1564,7 +1564,7 @@ a.text-muted:hover {
 }
 
 .text-primary {
-    color: #20a8d8 !important;
+    color: var(--ok-accent) !important;
 }
 
 a.text-primary:focus,
@@ -1948,7 +1948,7 @@ body:not(.top-nav) .sidebar ul.nav li.nav-item a.nav-link {
 /*
 body:not(.top-nav) .sidebar ul.nav li.nav-item a.nav-link:hover {
     color: #fff !important;
-    background: #20a8d8 !important;
+    background: var(--ok-accent) !important;
 }
 */
 
@@ -1964,7 +1964,7 @@ body:not(.top-nav) .sidebar ul.nav li.nav-item a.nav-link.active {
 }
 
 body:not(.top-nav) .sidebar ul.nav li.nav-item a.nav-link.active i {
-    color: #20a8d8;
+    color: var(--ok-accent);
 }
 
 body:not(.top-nav) .sidebar ul.nav li.nav-item a.nav-link [class^="icon-"],
@@ -2234,12 +2234,12 @@ nav.top-nav ul.nav li.nav-item a.nav-link .tag {
 
 nav.top-nav ul.nav li.nav-item a.nav-link:hover {
     color: #fff;
-    background: #20a8d8;
+    background: var(--ok-accent);
 }
 
 nav.top-nav ul.nav li.nav-item a.nav-link.active {
     color: #fff;
-    background: #20a8d8;
+    background: var(--ok-accent);
 }
 
 nav.top-nav ul.nav li.nav-item ul {
@@ -2301,7 +2301,7 @@ nav.top-nav ul.nav li.nav-item:hover > ul {
 }
 
 .aside-menu .nav-tabs .nav-link.active {
-    color: #20a8d8;
+    color: var(--ok-accent);
     border-right-color: #cfd8dc;
     border-left-color: #cfd8dc;
 }
@@ -2352,7 +2352,7 @@ nav.top-nav ul.nav li.nav-item:hover > ul {
     z-index: 20002;
     width: 100%;
     height: 2px;
-    background: #20a8d8;
+    background: var(--ok-accent);
     border-top-right-radius: 1px;
     border-bottom-right-radius: 1px;
     -moz-transition: width 350ms;

@@ -121,7 +121,7 @@
                 <div class="mt-q">
                     <div class="fn_switch for_developer_toggle">
                         <span>{$btr->module_learn_more|escape}</span>
-                        <i class="fn_icon_arrow fa fa-angle-down fa-lg m-t-2 rotate_180"></i>
+                        <span class="fn_icon_arrow m-t-2 rotate_180">{include file='svg_icon.tpl' svgId='chevron_down'}</span>
                     </div>
     
                     <div style="display: none;">

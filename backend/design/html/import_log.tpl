@@ -25,7 +25,7 @@
             <div class="input-group input-group--search">
                 <input name="keyword" class="form-control" placeholder="{$btr->general_search|escape}" type="text" value="{$keyword|escape}" >
                 <span class="input-group-btn">
-                    <button type="submit" class="btn btn_blue"><i class="fa fa-search"></i> <span class="hidden-md-down"></span></button>
+                    <button type="submit" class="btn btn_blue">{include file='svg_icon.tpl' svgId='search'} <span class="hidden-md-down"></span></button>
                 </span>
             </div>
             </form>
@@ -106,9 +106,9 @@
                                         </div>
                                         <div class="okay_list_boding okay_list_log_status">
                                             {if $log->status == 'added'}
-                                                <i class="fa fa-plus font-2xl text-success" title="{$log->status|escape}"></i>
+                                                <span class="font-2xl text-success" title="{$log->status|escape}">{include file='svg_icon.tpl' svgId='plus'}</span>
                                             {elseif $log->status == 'updated'}
-                                                <i class="fa fa-refresh font-2xl text-info" title="{$log->status|escape}"></i>
+                                                <span class="font-2xl text-info" title="{$log->status|escape}">{include file='svg_icon.tpl' svgId='refresh_icon'}</span>
                                             {/if}
                                         </div>
                                     </div>

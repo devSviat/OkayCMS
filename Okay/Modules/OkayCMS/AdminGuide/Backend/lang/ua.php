@@ -12,7 +12,7 @@ $lang['description_title_switcher'] = 'Переключатель (switcher)';
 $lang['description_title_tabs'] = 'Вкладки (tabs)';
 $lang['description_title_add_images'] = 'Загрузка файлов и изображений';
 $lang['description_title_clipboard'] = 'Запись данных в буфер обмена';
-$lang['description_title_icons'] = 'Иконки';
+$lang['description_title_icons'] = 'Іконки';
 $lang['description_info_grid'] = '<p>Структура админки построена на bootstrap grid, которая соответствующим образом масштабируется до 12 столбцов при увеличении размера устройства или экрана просмотра. Она включает в себя предопределенные классы для упрощения компоновки разметки.</p>
                                   <p>Эта система сеток используется для создания блоков на странице через группы строк ( <strong>.row</strong> ) и столбцов ( <strong>.col-*</strong> ) в которых размещается контент.</p>
                                   <div class="alert alert--info">
@@ -78,6 +78,8 @@ $lang['description_title2_add_images'] = 'Загрузка файла:';
 $lang['description_title3_add_images'] = 'Загрузка изображений:';
 $lang['description_info3_add_images'] = '<p>Этот способ используется для загрузки фото к баннерам, товарам, категориям и т.д. Можно загружать несколько фото одновременно, удалять их и перемещать по приоритетности. Для его настройки необходимо подставить свои переменные в <strong>&#123;foreach&#125;</strong> и в <strong>&#123;if&#125;</strong></p>';
 $lang['description_text_clip_clipboard'] = 'Нажмите, чтобы скопировать в буфер обмена.';
-$lang['description_info_icons'] = '<p>В системе используется иконки <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">fontawesome</a> и дефолтный набор svg конок, который находится в <strong>svg_icon.tpl</strong>. Для того чтобы вывести определенную иконку, нужно подключить <strong>svg_icon.tpl</strong> с параметром <strong>svgId=""</strong>, в котором указываем id нужной иконки.</p>
-                                   <p>Для примера, чтобы вывести иконку корзины, вставляем <strong>&#123;include file="svg_icon.tpl" svgId="trash"&#125;</strong> и в <strong>svgId</strong> указываем id иконки корзины.</p> Наша иконка:  {include file="svg_icon.tpl" svgId="trash"}';
-$lang['description_title2_icons'] = 'Список дефолтных иконок:';
+$lang['description_info_icons'] = '<p>Іконки інтерфейсу — це набір inline-SVG, який лежить у <strong>svg_icon.tpl</strong>. Окремої бібліотеки шрифтових іконок у панелі більше немає.</p>
+                                   <p>Щоб вивести іконку, підключіть <strong>svg_icon.tpl</strong> і передайте параметр <strong>svgId</strong> — ідентифікатор потрібної іконки зі списку нижче.</p>
+                                   <p>Наприклад, кошик виводиться так: <strong>&#123;include file="svg_icon.tpl" svgId="trash"&#125;</strong></p>';
+$lang['description_result_icons'] = 'Результат:';
+$lang['description_title2_icons'] = 'Список доступних іконок:';

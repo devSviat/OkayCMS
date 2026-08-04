@@ -90,7 +90,7 @@ button.toast-close-button {
 }
 #toast-container {
   position: fixed;
-  z-index: 999999;
+  z-index: var(--ok-z-toast);
   pointer-events: none;
   /*overrides*/
 }

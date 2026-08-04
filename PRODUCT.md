@@ -4,10 +4,18 @@
 
 product
 
-## Themes
+## Surfaces
 
-The repository ships two storefront themes. Everything below describes **`design/vibe_shop`**
-unless a section says otherwise; `design/okay_shop` has its own section at the end of this file.
+Three designed surfaces, three different jobs:
+
+- **`design/vibe_shop`** — the fork's storefront theme. Everything up to the first horizontal
+  rule describes it.
+- **`design/okay_shop`** — the stock theme, deliberately kept close to upstream. Its own
+  section at the end of this file.
+- **The admin panel** (`backend/design`) — a separate design project with its own register and
+  palette. Section below the storefront ones.
+
+Unless a section says otherwise, what follows is about `vibe_shop`.
 
 ## Users
 
@@ -83,6 +91,66 @@ warmth comes from typography, rhythm and tactile feedback — never from a beige
 - Touch targets ≥44×44px. Controls revealed on hover have a permanently visible fallback under
   `(hover: none)`.
 - Every animation has a `prefers-reduced-motion: reduce` alternative.
+
+
+---
+
+# The admin panel
+
+`backend/design`. Refreshed in 2026-08; the token layer, icon set and typography below are the
+state of that work, not a plan.
+
+## Users
+
+**Shop managers**, not the shop's customers. They sit at a desk in daylight for hours,
+processing orders and editing product cards, on a desktop screen. They know the panel; they use
+it every day. What they need is legibility over eight hours and controls that behave the same
+way on every screen — not a first impression.
+
+That scene decides the theme: the canvas stays light, and the chrome — sidebar and top bar —
+stays dark as a second neutral layer that honestly separates furniture from work.
+
+## Register and strategy
+
+Product, Restrained. One accent (`#005893`, taken from the logo, not invented), semantic colour
+everywhere else, and nothing coloured for decoration.
+
+Before the refresh three accents competed — a blue-cyan, a green and a violet — and none of
+them meant anything in particular. Now green is success, red is danger, amber is a warning
+*state*, violet is a secondary action, teal is an explanatory one. A colour that appears twice
+in two meanings is a defect, and it has been one twice in review already.
+
+## Design Principles
+
+1. **A colour means one thing.** If two controls share a hue they share a role. Two ambers for
+   the same role, or two blues in the style guide, is the defect that gets caught first.
+2. **Chrome is furniture.** The dark panel holds navigation and nothing else. Dark plates in the
+   content area — panel headers, card headers — were pulled out of the chrome and onto the light
+   scale; one role, one appearance.
+3. **Every semantic colour has a chrome twin.** `--ok-accent` on the dark sidebar gives 1.4:1.
+   The `-on-chrome` variants exist so the rule "use the accent" never quietly produces
+   unreadable text.
+4. **The markup is not the place to fix design.** The refresh moved through CSS and the single
+   icon template. Point markup edits happen where CSS genuinely cannot reach, and they are
+   named as such.
+5. **Verify by looking as well as measuring.** A green contrast number on a visibly broken page
+   has happened here often enough to be a rule.
+
+## Accessibility
+
+- WCAG 2.1 AA on everything the fork controls: body text ≥4.5:1, UI components ≥3:1, measured
+  with alpha composited through ancestors — not eyeballed.
+- `:focus-visible` throughout, verified by real Tab traversal rather than programmatic
+  `.focus()`, which does not trigger the pseudo-class.
+- What remains below the bar is out of the fork's hands and stated plainly: order status and
+  label colours come from the database and are set by the shop owner; the CodeMirror Monokai
+  theme and the Highcharts credit line are vendor.
+
+## What this surface is not
+
+It is not a dark-theme project — that was scoped out, though the token layer is arranged so a
+single override file could add one. It is not responsive-first either: the panel works down to
+390px because the stock markup already collapsed there, not because phone use was designed for.
 
 ---
 

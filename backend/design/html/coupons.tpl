@@ -126,7 +126,7 @@
                                 <div class="input-group">
                                     <input class="form-control" type=text name="new_expire" value="">
                                     <div class="input-group-addon">
-                                        <i class="fa fa-calendar"></i>
+                                        {include file='svg_icon.tpl' svgId='calendar'}
                                     </div>
                                 </div>
                             </div>
@@ -303,7 +303,7 @@
                                 <div class="input-group">
                                     <input class="form-control" type=text name="new_expire" value="">
                                     <div class="input-group-addon">
-                                        <i class="fa fa-calendar"></i>
+                                        {include file='svg_icon.tpl' svgId='calendar'}
                                     </div>
                                 </div>
                             </div>

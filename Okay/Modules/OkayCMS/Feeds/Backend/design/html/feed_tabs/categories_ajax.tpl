@@ -8,7 +8,7 @@
                 {if $category->subcategories}
                     <div class="okay_list_heading okay_list_subicon">
                         <a href="javascript:;" class="fn_ajax_toggle" data-toggle="{if $isAllCategories || (!empty($smarty.get.category_id) && in_array($smarty.get.category_id, $category->children))}1{else}0{/if}" data-category_id="{$category->id}" >
-                            <i class="fa fa-plus-square{if $isAllCategories || (!empty($smarty.get.category_id) && in_array($smarty.get.category_id, $category->children))} fa-minus-square{/if}"></i>
+                            {if $isAllCategories || (!empty($smarty.get.category_id) && in_array($smarty.get.category_id, $category->children))}{include file='svg_icon.tpl' svgId='square_minus'}{else}{include file='svg_icon.tpl' svgId='square_plus'}{/if}
                         </a>
                     </div>
                 {else}

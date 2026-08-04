@@ -6,7 +6,7 @@
             {$field->name|escape}
             {if $field->value}
                 <a href="https://www.google.com/maps/search/{$field->value|escape}?hl=ru" target="_blank">
-                    <i class="fa fa-map-marker"></i> {$btr->df_order_on_map|escape}
+                    {include file='svg_icon.tpl' svgId='map_marker'} {$btr->df_order_on_map|escape}
                 </a>
             {/if}
         </div>
