@@ -79,10 +79,16 @@ if (!empty($_SESSION['admin_lang_id'])) {
     $_SESSION['admin_lang_id'] = $languages->getLangId();
 }
 
-// Оновлюємо кеш даних інформації по терміну доступу до оновлень модулів
+// Оновлюємо кеш даних інформації по терміну доступу до оновлень модулів.
+// Тільки для залогіненого менеджера: інакше анонімне звернення до /backend/
+// змушує сервер сходити на маркетплейс і записати два рядки в ok_settings.
+// $manager резолвиться нижче, а тут достатньо того самого $_SESSION['admin'] -
+// перенести виклик під нього не можна, бо кеш читається на 40 рядків нижче.
 /** @var BackendModulesHelper $backendModulesHelper */
 $backendModulesHelper = $DI->get(BackendModulesHelper::class);
-$backendModulesHelper->updateModulesAccessExpiresCache();
+if (!empty($_SESSION['admin'])) {
+    $backendModulesHelper->updateModulesAccessExpiresCache();
+}
 
 /** @var BackendTranslations $backendTranslations */
 $backendTranslations = $DI->get(BackendTranslations::class);

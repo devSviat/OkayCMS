@@ -149,7 +149,14 @@ class IndexAdmin
 
         $this->design->assign('rootUrl', $this->request->getRootUrl());
 
-        if (!isset($_SESSION['last_version_data'])) {
+        // Перевірка версії кешується на добу в ok_settings. Раніше кеш жив у
+        // $_SESSION, тож блокуючий запит на okay-cms.com припадав на перший
+        // запит кожної нової сесії (~0.3 с, а без інтернету - 3 с на
+        // CONNECTTIMEOUT). Сторінка логіну версію не показує, тому анонімний
+        // відвідувач нікуди не ходить.
+        $lastVersionData = $this->settings->get('last_version_data');
+        if (!empty($this->manager)
+            && $this->settings->get('last_version_check_date') != date('Y-m-d')) {
             $modulesEntity = $this->entityFactory->get(ModulesEntity::class);
             $modules = $modulesEntity->cols(['module_name'])->find();
             $themes = [];
@@ -173,27 +180,28 @@ class IndexAdmin
             curl_setopt($ch, CURLOPT_URL, 'https://okay-cms.com/last_version.json?' . $query);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HEADER, 0);
-            // Відповідь потрапляє в сесію і рендериться в адмінці, тому без
+            // Відповідь зберігається і рендериться в адмінці, тому без
             // перевірки сертифіката MITM підставляв туди свій вміст.
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 2);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+            // Перевірку версії ніхто не просив, і вона трапляється всередині
+            // чужого запиту, тож чекати на неї 10 с нема підстав. Здоровий
+            // сервіс відповідає за ~0.3 с.
+            curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
             $versionData = curl_exec($ch);
 
-            if ($versionData) {
-                $versionData = json_decode($versionData, true);
-                $_SESSION['last_version_data'] = $versionData;
-            } else {
-                $_SESSION['last_version_data'] = false;
-            }
+            // Порожній масив, а не false: Settings::set кастує скаляри в рядок,
+            // і false перетворився б на '', який не відрізнити від "не питали".
+            $lastVersionData = $versionData ? (array)json_decode($versionData, true) : [];
+            $this->settings->set('last_version_data', $lastVersionData);
+            $this->settings->set('last_version_check_date', date('Y-m-d'));
         }
-        
-        if (isset($_SESSION['last_version_data'])
-            && !empty($_SESSION['last_version_data'])
-            && $module->getMathVersion($_SESSION['last_version_data']['version']) > $module->getMathVersion($config->version)) {
-            $design->assign('has_new_version', $_SESSION['last_version_data']);
+
+        if (!empty($lastVersionData['version'])
+            && $module->getMathVersion($lastVersionData['version']) > $module->getMathVersion($config->version)) {
+            $design->assign('has_new_version', $lastVersionData);
         }
         
         $design->assign('manager', $this->manager);
