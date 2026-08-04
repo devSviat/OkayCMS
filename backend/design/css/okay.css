@@ -90,8 +90,12 @@
 
     /* Заголовок таблиці навмисно не хром: темна смуга посеред контенту
        читалася як частина навігації й конкурувала з меню за увагу. */
-    --ok-thead: #eef0f2;
-    --ok-thead-line: #dfe3e7;
+    /* Заголовок таблиці стоїть між полотном сторінки згори і білими рядками
+       знизу, а вони самі різняться лише на 1.07. Тон, що добре відділяється
+       від полотна, виходить важким на білому, тож смугу тримає помірний тон
+       (1.11 / 1.20), а межу списку - рамка панелі. */
+    --ok-thead: #e8ebee;
+    --ok-thead-line: #cdd4db;
 
     /* Текст. --ok-ink-muted міряне на полотні, а не на білому: полотно сіре,
        і на ньому те саме значення дає менший контраст. 4.8:1 на --ok-canvas. */
@@ -119,6 +123,8 @@
        де світло-сіра плашка зливається з фоном сторінки. */
     --ok-accent-band: #c9dcec;
     --ok-accent-on-chrome: #00a7ef;
+    /* Третій колір логотипа. Позначає поточну мову і більше нічого. */
+    --ok-brand-gold: #ffbf1a;
 
     /* Семантика. Кольори тут щось означають і більше нічого не прикрашають. */
     --ok-success: #227d3a;
@@ -767,8 +773,8 @@ body:not(.top-nav) header.navbar {
     position: relative;
     top: 0;
     /* Неактивна стрілка читалася лише поки заголовок був темним: на світлому
-       --ok-line-strong дає 1.6:1. Межа контрола тримає 3.4:1. */
-    fill: var(--ok-control-line);
+       --ok-line-strong дає 1.6:1. Приглушена фарба тримає 4.3:1. */
+    fill: var(--ok-ink-muted);
  }
 .okay_list_heading .main_image_id.active .left_s,
 .okay_list_heading .name.active .left_s,
@@ -784,6 +790,13 @@ body:not(.top-nav) header.navbar {
 .okay_list_heading .visible_desc.active svg .right_s{
     fill: var(--ok-accent);
 }
+/* Активним було лише вістря стрілки на 12px - надто дрібно, щоб побачити,
+   за якою колонкою відсортовано. Тепер підписується вся назва колонки. */
+.okay_list_heading a.active{
+    color: var(--ok-accent);
+    font-weight: 700;
+}
+
 .reset_sort.hint-anim{
     font-family: var(--ok-font)!important;
     text-transform: initial!important;
@@ -3232,10 +3245,11 @@ label.switch_label i{
 .okay_list{
     text-align: center;
     /* Частина списків лежить у білій .boxed, частина - просто на полотні. У
-       другому випадку шапка #eef0f2 зливалася з полотном #f5f6f7. Список сам
-       стає поверхнею, тож шапка читається однаково в обох випадках. */
+       другому випадку шапка зливалася з полотном. Список сам стає поверхнею,
+       а його край тримає рамка, помітна на полотні (1.49), - інакше довелось
+       би затемнювати саму шапку, і вона ставала важкою на білих рядках. */
     background-color: var(--ok-surface);
-    border: 1px solid var(--ok-line);
+    border: 1px solid var(--ok-line-strong);
     border-radius: var(--ok-radius-panel);
 }
 .ok_related_list{
@@ -5291,11 +5305,16 @@ header.navbar .container-fluid{
     display: inline-block;
     vertical-align: middle;
     margin-left: 5px;
-    color: #999;
+    color: var(--ok-chrome-ink-muted);
+    transition: color var(--ok-dur) var(--ok-ease);
 }
-.admin_languages a.focus,
+/* .focus - це поточна мова, а не фокус: золото з логотипа лишається її
+   позначкою. Ховер робимо білим, щоб дві ролі не збігалися в один колір. */
+.admin_languages a.focus{
+    color: var(--ok-brand-gold);
+}
 .admin_languages a:hover{
-    color: #f8c147;
+    color: var(--ok-ink-inverse);
 }
 .admin_languages a:before {
     margin-top: 10px;
@@ -5330,9 +5349,11 @@ header.navbar .container-fluid{
 .admin_techsupport a{
     color: var(--ok-ink-inverse);
 }
+/* Був --ok-accent (#005893): темно-синій на темному хромі дає 1.4:1, тобто
+   ховер практично не читався. На хромі акцент має світлий варіант. */
 .admin_notification .notification_title:hover,
 .admin_techsupport a:hover{
-    color: var(--ok-accent);
+    color: var(--ok-accent-on-chrome);
 }
 .admin_notification .counter,
 .admin_techsupport .counter{
@@ -9609,6 +9630,11 @@ textarea:focus-visible,
 #footer .text_success,
 .navbar .text_success {
     color: var(--ok-success-on-chrome);
+}
+/* На плашці заголовка --ok-success дає 4.32:1 - трохи нижче порога. */
+.banner_card_header .text_success,
+.system_header .text_success {
+    color: var(--ok-success-hover);
 }
 
 /* .heading_label приглушений під світле полотно; на кольоровому тлі алерта
