@@ -5,7 +5,7 @@
     content: attr(data-hint);
     text-align: center;
     white-space: nowrap;
-    z-index: 9999;
+    z-index: var(--ok-z-tooltip);
     background: #292929;
     padding: 3px 7px;
     border-radius: 2px;
@@ -23,7 +23,7 @@
 [data-hint]{position: relative;}
 [data-hint]:hover:after, [data-hint]:hover:before {visibility: visible; }
 
-[data-hint]:before {content: "";border: 5px solid transparent;z-index: 9998;}
+[data-hint]:before {content: "";border: 5px solid transparent;z-index: calc(var(--ok-z-tooltip) - 1);}
 
 [class*="hint-bottom"]:before {border-bottom-color: #292929;top: 100%;margin-top: 0px;}
 

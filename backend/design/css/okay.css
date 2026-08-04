@@ -108,6 +108,9 @@
     --ok-accent-hover: #004876;
     --ok-accent-active: #003b60;
     --ok-accent-soft: #e6f0f7;
+    /* Помітніша за --ok-thead: для шапок карток, що стоять просто на полотні,
+       де світло-сіра плашка зливається з фоном сторінки. */
+    --ok-accent-band: #c9dcec;
     --ok-accent-on-chrome: #00a7ef;
 
     /* Семантика. Кольори тут щось означають і більше нічого не прикрашають. */
@@ -1092,33 +1095,33 @@ a.link_white:hover{
 }
 .btn-danger:hover{
     color: var(--ok-ink-inverse);
-    background-color: #c0342c;
-    border-color: #c0342c;
+    background-color: var(--ok-danger);
+    border-color: var(--ok-danger);
 }
 .btn-danger:focus{
     color: var(--ok-ink-inverse);
-    background-color: #c0342c;
-    border-color: #c0342c;
+    background-color: var(--ok-danger);
+    border-color: var(--ok-danger);
 }
 .btn-danger:active{
     color: var(--ok-ink-inverse);
-    background-color: #a52b25;
-    border-color: #a52b25;
+    background-color: var(--ok-danger-hover);
+    border-color: var(--ok-danger-hover);
     background-image: none;
 }
 .btn-danger:active:hover,
 .btn-danger:active:focus{
     color: var(--ok-ink-inverse);
-    background-color: #a12a24;
-    border-color: #a12a24;
+    background-color: var(--ok-danger-hover);
+    border-color: var(--ok-danger-hover);
 }
 .btn-danger:disabled:focus{
-    background-color: #e3a3a1;
-    border-color: #e3a3a1;
+    background-color: var(--ok-danger-soft);
+    border-color: var(--ok-danger-soft);
 }
 .btn-danger:disabled:hover {
-    background-color: #e3a3a1;
-    border-color: #e3a3a1;
+    background-color: var(--ok-danger-soft);
+    border-color: var(--ok-danger-soft);
 }
 
 
@@ -1200,13 +1203,15 @@ a.link_white:hover{
     color: var(--ok-accent);
     background-image: none;
     background-color: transparent;
-    border-color: var(--ok-accent);
+    /* Була точною копією .btn_border_blue - у гайді дві кнопки виглядали
+       однаково. Пара повторює заливну: blue - акцентна, info - тиха. */
+    border-color: var(--ok-line-strong);
 }
 
 .btn_border-info:hover{
-    color: var(--ok-ink-inverse);
-    background-color: var(--ok-accent);
-    border-color: var(--ok-accent);
+    color: var(--ok-accent);
+    background-color: var(--ok-accent-soft);
+    border-color: var(--ok-accent-soft);
 }
 
 .btn_border-info:focus{
@@ -1224,16 +1229,16 @@ a.link_white:hover{
 .btn_border-info:active:hover,
 .btn_border-info:active:focus{
     color: var(--ok-ink-inverse);
-    background-color: #1a662f;
-    border-color: #1a662f;
+    background-color: var(--ok-accent-active);
+    border-color: var(--ok-accent-active);
 }
 .btn_border-info:disabled:focus{
-    background-color: #b5d0bd;
-    border-color: #b5d0bd;
+    background-color: var(--ok-accent-soft);
+    border-color: var(--ok-accent-soft);
 }
 .btn_border-info:disabled:hover {
-    background-color: #b5d0bd;
-    border-color: #b5d0bd;
+    background-color: var(--ok-accent-soft);
+    border-color: var(--ok-accent-soft);
 }
 .btn_border_dark{
     color: var(--ok-chrome);
@@ -1399,20 +1404,20 @@ a.link_white:hover{
 }
 .btn-outline-danger:active {
     color: var(--ok-ink-inverse);
-    background-color: #a52b25;
-    border-color: #a52b25;
+    background-color: var(--ok-danger-hover);
+    border-color: var(--ok-danger-hover);
 }
 .btn-outline-danger:active:hover,
 .btn-outline-danger:active:focus {
-    background-color: #a12a24;
-    border-color: #a12a24;
+    background-color: var(--ok-danger-hover);
+    border-color: var(--ok-danger-hover);
     color: var(--ok-ink-inverse);
 }
 .btn-outline-danger:disabled:focus {
-    border-color: #e3a3a1;
+    border-color: var(--ok-danger-soft);
 }
 .btn-outline-danger:disabled:hover {
-    border-color: #e3a3a1;
+    border-color: var(--ok-danger-soft);
 }
 .btn-outline-secondary{
     color: #b0bec5;
@@ -1648,7 +1653,7 @@ opacity: 1;
     font-weight: 500;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 6px -1px rgba(31, 31, 31, 0.05), 0 2px 4px -2px rgba(31, 31, 31, 0.05);
+    box-shadow: var(--ok-shadow-2);
 }
 .boxed__header{
     display: -webkit-box;
@@ -2478,7 +2483,7 @@ label.switch_label i{
     text-transform: uppercase;
     background-color: #af2f2f;
     border: none;
-    border-radius: 20px;
+    border-radius: var(--ok-radius-pill);
     -moz-transition: 0.15s ease-out;
     -o-transition: 0.15s ease-out;
     -webkit-transition: 0.15s ease-out;
@@ -2675,7 +2680,7 @@ label.switch_label i{
     font-weight: 600;
     font-size: 13px;
     padding: 4px 8px;
-    background-color: #DFFFEA;
+    background-color: var(--ok-success-soft);
     color: var(--ok-success);
     text-transform: none;
 }
@@ -2683,8 +2688,8 @@ label.switch_label i{
     font-weight: 600;
     font-size: 13px;
     padding: 4px 8px;
-    background-color: #FFEEF3;
-    color: #F8285A;
+    background-color: var(--ok-danger-soft);
+    color: var(--ok-danger);
     text-transform: none;
 }
 
@@ -2997,7 +3002,7 @@ label.switch_label i{
     border: 1px solid var(--ok-line) !important;
     font-family: var(--ok-font);
     max-width: 100%;
-    box-shadow: 0 4px 6px -1px rgba(31, 31, 31, 0.1), 0 2px 4px -2px rgba(31, 31, 31, 0.1) !important;
+    box-shadow: var(--ok-shadow-2) !important;
 }
 .autocomplete-suggestion {
     display: block;
@@ -3167,7 +3172,7 @@ label.switch_label i{
     color: var(--ok-ink);
     margin: 0 1px;
     font-size: 12px;
-    box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+    box-shadow: var(--ok-shadow-1);
 }
 
 .page-link:focus,
@@ -4260,6 +4265,18 @@ label.switch_label i{
     position: relative;
     color: var(--ok-ink-inverse);
 }
+/* Заголовки карток стали світлими, а хрестик лишався білим - на зображеннях і
+   темах його не було видно. Там, де плашка світла, і хрестик темний. */
+.banner_card_header .btn_close,
+.system_header .btn_close,
+.learning_card__header .btn_close{
+    color: var(--ok-ink-muted);
+}
+.banner_card_header .btn_close:hover,
+.system_header .btn_close:hover,
+.learning_card__header .btn_close:hover{
+    color: var(--ok-danger);
+}
 .btn_close:focus:not(:focus-visible){
     outline: none;
 }
@@ -4516,8 +4533,8 @@ label.switch_label i{
     border-bottom-right-radius: 6px
 }
 .ui-widget-shadow {
-    -webkit-box-shadow: 0 4px 6px -1px rgb(0 0 0 / .08), 0 2px 4px -2px rgb(0 0 0 / .08);
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / .08), 0 2px 4px -2px rgb(0 0 0 / .08);
+    -webkit-box-shadow: var(--ok-shadow-2);
+    box-shadow: var(--ok-shadow-2);
 }
 .card .input-group-addon {
     display: table-cell;
@@ -4808,7 +4825,7 @@ label.switch_label i{
     border: 1px solid var(--ok-line);
     border-bottom: none;
     height: auto;
-    box-shadow: 0px 1px 4px -1px rgba(16, 24, 40, 0.05);
+    box-shadow: var(--ok-shadow-1);
 }
 .purchases_table .purchases_head{
     width: 100%;
@@ -5505,8 +5522,8 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     border: 1px solid rgba(204, 204, 204, 0.2);
     padding: 0;
     background: var(--ok-surface);
-    -webkit-box-shadow: 0 4px 6px -1px rgba(136, 136, 136, 0.05), 0 2px 4px -2px rgba(136, 136, 136, 0.1);
-    box-shadow: 0 4px 6px -1px rgba(136, 136, 136, 0.05), 0 2px 4px -2px rgba(136, 136, 136, 0.1);
+    -webkit-box-shadow: var(--ok-shadow-2);
+    box-shadow: var(--ok-shadow-2);
     color: rgb(118, 118, 118);
     cursor: pointer;
     z-index: var(--ok-z-dropdown);
@@ -5629,7 +5646,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     padding: 5px;
     border-radius: 2px;
     position: absolute;
-    box-shadow: 0 2px 7px rgba(0,0,0,0.5);
+    box-shadow: var(--ok-shadow-3);
     left: 0;
     right: 0;
     top: 33px;
@@ -5897,13 +5914,19 @@ body.menu-pin .menu_switch .menu_hamburger::after {
 .fn_history_toggle{
     position: relative;
     cursor: pointer;
-    padding-right: 15px;
+    gap: 5px;
 }
 .fn_history_toggle .fn_icon_arrow{
-    position: absolute;
-    top: 6px;
-    right: 4px;
+    position: static;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0;
     color: var(--ok-ink);
+}
+.fn_history_toggle .fn_icon_arrow svg{
+    width: 14px;
+    height: 14px;
 }
 .fn_discounted_toggle {
     min-height: 24px;
@@ -5913,15 +5936,19 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     line-height: 1;
 }
 .fn_discounted_toggle > span {
-    padding-right: 15px;
+    padding-right: 0;
 }
 .fn_discounted_toggle .fn_icon_arrow{
+    position: static;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0;
     color: var(--ok-ink);
-    font-size: 14px;
-    line-height: 1;
-    position: absolute;
-    top: 6px;
-    right: 6px;
+}
+.fn_discounted_toggle .fn_icon_arrow svg{
+    width: 14px;
+    height: 14px;
 }
 .order_history_block{
     text-align: left!important;
@@ -6490,9 +6517,9 @@ body.menu-pin .menu_switch .menu_hamburger::after {
 }
 .product_image_item:hover{
     border: 1px solid var(--ok-success);
-    -webkit-box-shadow: 0 4px 6px -1px rgba(67, 145, 77, 0.05), 0 2px 4px -2px rgba(67, 145, 77, 0.05);
-    -moz-box-shadow: 0 4px 6px -1px rgba(67, 145, 77, 0.05), 0 2px 4px -2px rgba(67, 145, 77, 0.05);
-    box-shadow: 0 4px 6px -1px rgba(67, 145, 77, 0.05), 0 2px 4px -2px rgba(67, 145, 77, 0.05);
+    -webkit-box-shadow: var(--ok-shadow-2);
+    -moz-box-shadow: var(--ok-shadow-2);
+    box-shadow: var(--ok-shadow-2);
     margin-top: -2px;
 }
 
@@ -6637,7 +6664,7 @@ input[type=range]::-webkit-slider-thumb {
     width: 17px;
     height: 17px;
     background-color: var(--ok-accent);
-    box-shadow: 0 4px 6px -1px rgba(31, 31, 31, 0.1), 0 2px 4px -2px rgba(31, 31, 31, 0.3);
+    box-shadow: var(--ok-shadow-2);
     border-radius: 50%;
     margin-top: -5px;
     transition: all 0.2s ease-in-out;
@@ -6667,7 +6694,7 @@ input[type=range]::-moz-range-thumb {
      width: 17px;
     height: 17px;
     background-color: #4ccdc1;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: var(--ok-shadow-3);
     border-radius: 50%;
 }
 
@@ -7782,8 +7809,8 @@ img.fnone {
 .modal-content {
     position: relative;
     background-color: var(--ok-surface);
-    -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, 0.2);
-    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.2);
+    -webkit-box-shadow: var(--ok-shadow-2);
+    box-shadow: var(--ok-shadow-2);
     -webkit-background-clip: padding-box;
     background-clip: padding-box;
     outline: 0;
@@ -7865,8 +7892,8 @@ img.fnone {
         margin: 100px auto 30px;
     }
     .modal-content {
-        -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, 0.2);
-        box-shadow: 0 3px 9px rgba(0, 0, 0, 0.2);
+        -webkit-box-shadow: var(--ok-shadow-2);
+        box-shadow: var(--ok-shadow-2);
     }
     .modal-sm {
         width: 300px;
@@ -8048,7 +8075,7 @@ base::-moz-progress-bar,
     background-color: var(--ok-surface);
     border: 1px solid var(--ok-line);
     border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(31, 31, 31, 0.05), 0 2px 4px -2px rgba(31, 31, 31, 0.05);
+    box-shadow: var(--ok-shadow-2);
 }
 .card-block {padding: 20px;}
 .card-block img {max-width: 100%;}
@@ -8363,7 +8390,7 @@ div.tox-fullscreen {
     width: 100%;
     border: 2px solid rgba(0,0,0,0.07);
     border-bottom: none;
-    box-shadow: 0 2px 0 rgba(0,0,0,0.06);
+    box-shadow: var(--ok-shadow-1);
     border-radius: 5px 5px 4px 4px;
     display: block;
     min-height: 310px;
@@ -8388,10 +8415,15 @@ div.tox-fullscreen {
     left: 20px;
     right: 20px;
 }
-/* Чорна плашка хрому в контентній зоні виглядала чужою поруч зі світлими
-   заголовками таблиць. Тепер це акцентна шапка картки. */
+/* Спершу тут була чорна плашка хрому, потім акцентна - обидві надто гучні для
+   службової позначки розділу. Тепер це той самий світлий заголовок, що й у
+   таблиць і панелей системної інформації: одна роль - один вигляд. */
 .learning_card__header {
-    background-color: var(--ok-accent);
+    /* --ok-thead (#eef0f2) майже дорівнює полотну (#f5f6f7): у таблиці він
+       читається, бо оточений білими рядками, а тут стоїть на краю картки і
+       край зникав. М'який акцент відділяє шапку від полотна і від картки. */
+    background-color: var(--ok-accent-band);
+    border-bottom: 1px solid var(--ok-line-strong);
     position: absolute;
     top: 0;
     right: 0;
@@ -8403,17 +8435,17 @@ div.tox-fullscreen {
     flex-direction: row;
     justify-items: center;
     height: 54px;
-    color:rgb(255, 255, 255);
+    color: var(--ok-ink);
     font-size: 14px;
     padding: 0 30px;
-    transition: background-color 300ms 0s ease;
+    transition: background-color var(--ok-dur-slow) var(--ok-ease);
 }
 .icon_learning{
     display: flex;
     align-items: center;
     justify-content: start;
     margin-right: 15px;
-    color: var(--ok-ink-inverse);
+    color: var(--ok-ink-muted);
 }
 .learning_card__bookmark{
     position: absolute;
@@ -8441,6 +8473,11 @@ div.tox-fullscreen {
     width: 26px;
     margin-right: 10px;
 }
+/* Підпис розділу лежить усередині .icon_learning і успадковував приглушений
+   колір іконки - на світлій смузі заголовка це давало 3.67:1. */
+.learning_card__header-category {
+    color: var(--ok-ink);
+}
 .learning_card__body{
     height: 150px;
 }
@@ -8449,7 +8486,7 @@ div.tox-fullscreen {
     margin: 0 0 8px;
     line-height: 14px;
     font-size: 14px;
-    color: var(--ok-ink-muted);
+    color: var(--ok-ink);
     font-weight: 700;
 }
 .learning_card__title {
@@ -8541,7 +8578,7 @@ div.tox-fullscreen {
     width: 40px;
     cursor: pointer;
     height: 40px;
-    transition: all 300ms 0s ease;
+    transition: all var(--ok-dur-slow) var(--ok-ease);
 }
 .learning_card__done svg,
 .learning_card__video svg{

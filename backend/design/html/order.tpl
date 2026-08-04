@@ -242,7 +242,7 @@
                                                     <div class="mt-h">
                                                         <span class="tag {if $purchase->discounts}tag-danger{else}tag-default{/if} fn_discounted_toggle">
                                                             <span>{$btr->general_discounts|escape}</span>
-                                                            <span class="fn_icon_arrow m-t-2">{include file='svg_icon.tpl' svgId='chevron_down'}</span>
+                                                            <span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -301,7 +301,7 @@
                                                 <div class="mt-h">
                                                     <span class="tag tag-default fn_discounted_toggle">
                                                         <span>{$btr->general_discounts|escape}</span>
-                                                        <span class="fn_icon_arrow m-t-2">{include file='svg_icon.tpl' svgId='chevron_down'}</span>
+                                                        <span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span>
                                                     </span>
                                                 </div>
                                             </div>

@@ -218,7 +218,7 @@
 
                     <div class="orders_list okay_list products_list">
                         {*Шапка таблицы*}
-                        <div class="okay_list_head" style="border-left: 5px solid transparent">
+                        <div class="okay_list_head" style="border-left: 2px solid transparent">
                             <div class="okay_list_heading okay_list_check">
                                 <input class="hidden_check fn_check_all" type="checkbox" id="check_all_1" name="" value=""/>
                                 <label class="okay_ckeckbox" for="check_all_1"></label>
@@ -234,7 +234,7 @@
                         {*Параметры элемента*}
                         <div class="okay_list_body">
                             {foreach $orders as $order}
-                            <div class="fn_step-1 fn_row okay_list_body_item " style="border-left: 5px solid #{$order->status_color|escape};">
+                            <div class="fn_step-1 fn_row okay_list_body_item " style="border-left: 2px solid #{$order->status_color|escape};">
                                 <div class="okay_list_row">
                                     <div class="okay_list_boding okay_list_check">
                                         <input class="hidden_check" type="checkbox" id="id_{$order->id}" name="check[]" value="{$order->id}"/>
@@ -244,9 +244,9 @@
                                     <div class="okay_list_boding okay_list_order_number">
                                         <a class="text_600 mb-h" href="{url controller=OrderAdmin id=$order->id return=$smarty.server.REQUEST_URI}"><span class="hidden-sm-down">{$btr->orders_order|escape}</span> #{$order->id}</a>
                                         {if $order->last_update}
-                                            <span class="tag tag-update fn_history_toggle">{$btr->order_history_changed} {$order->last_update->date|date} {$order->last_update->date|time} <span class="fn_icon_arrow m-t-2">{include file='svg_icon.tpl' svgId='chevron_down'}</span></span>
+                                            <span class="tag tag-update fn_history_toggle">{$btr->order_history_changed} {$order->last_update->date|date} {$order->last_update->date|time} <span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></span>
                                         {else}
-                                            <span class="tag tag-update fn_history_toggle">{$btr->order_history_created} {$order->date|date} {$order->date|time} <span class="fn_icon_arrow m-t-2">{include file='svg_icon.tpl' svgId='chevron_down'}</span></span>
+                                            <span class="tag tag-update fn_history_toggle">{$btr->order_history_created} {$order->date|date} {$order->date|time} <span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></span>
                                         {/if}
                                         
                                         {if $order->paid}
@@ -303,7 +303,7 @@
                                         <span>{$order->purchases|count} {$btr->orders_unit|escape}</span>
                                         {if $order->purchases|count > 0}
                                             <span  class="fn_orders_toggle">
-                                                <span class="fn_icon_arrow m-t-2">{include file='svg_icon.tpl' svgId='chevron_down'}</span>
+                                                <span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span>
                                             </span>
                                         {/if}
                                     </div>
