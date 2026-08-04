@@ -81,7 +81,7 @@ Copyright 2015-2024 OkayCMS
    Стокова тема лишилась у комплекті, але не в стоковому вигляді: 8 файлів довелось привести до
    POST-мутацій і CSRF-токена, ще 12 розійшлись через міграцію на Smarty 5, два апстрімні баги
    й обслуговування форку. Свою тему сюди —
-   [`docs/theme-porting.md`](docs/theme-porting.md); тему звідси на нефоркнуту OkayCMS —
+   [`docs/theme-porting.md`](docs/theme-porting.md); тему звідси на нефоркнуту OkayCMS 4.5.2 —
    [`docs/theme-to-stock.md`](docs/theme-to-stock.md).
  - **Освіжена адмінка.** Іконки переведені з lucide на Tabler у єдиному джерелі
    `backend/design/html/svg_icon.tpl`, шрифт один і самохостом (сторонніх запитів за шрифтами
