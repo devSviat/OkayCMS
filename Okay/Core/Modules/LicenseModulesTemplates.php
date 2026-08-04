@@ -79,7 +79,9 @@ class LicenseModulesTemplates
         $url = $this->config->get('marketplace_url') . 'api/v2/modules/access/user';
         $retryCnt = $_SESSION['request_timeout_try_cnt'] ?? 0;
 
-        if (time() > ($_SESSION['request_timeout'] ?? 0) && ($response = $this->request($url, $request))) {
+        if (time() > ($_SESSION['request_timeout'] ?? 0)
+            && $this->licenseStorage->isRequestAllowed()
+            && ($response = $this->request($url, $request))) {
             $licenseDTO = new LicenseDTO();
             if (!empty($response->modules)) {
                 $licenseDTO->setModulesLicenses($response->modules);
@@ -96,6 +98,7 @@ class LicenseModulesTemplates
             $this->licenseStorage->saveLicense($licenseDTO);
             $this->licenseDTO = $licenseDTO;
             $_SESSION['request_timeout_try_cnt'] = 0;
+            $this->licenseStorage->allowRequests();
 
             return $licenseDTO;
         } elseif (($response ?? null) === false) {
@@ -104,6 +107,10 @@ class LicenseModulesTemplates
             }
             $_SESSION['request_timeout'] = time() + (self::REQUEST_TIMEOUT * $_SESSION['request_timeout_try_cnt']);
             $_SESSION['request_timeout_try_cnt'] = $retryCnt;
+            // Та сама пауза, але спільна для всіх відвідувачів. Сесійна вище
+            // лишається недоторканою: вона нічого не ламає, просто не діє для
+            // тих, хто не переносить сесію.
+            $this->licenseStorage->suppressRequestsFor(self::REQUEST_TIMEOUT);
         }
 
         return null;
@@ -113,6 +120,9 @@ class LicenseModulesTemplates
     {
         unset($_SESSION['request_timeout_try_cnt']);
         unset($_SESSION['request_timeout']);
+        // Адмін змінив пошту ліцензії й чекає результату негайно, тож спільна
+        // пауза теж має зніматись - інакше він побачить старі дані.
+        $this->licenseStorage->allowRequests();
     }
 
     public function isLicensedModule(string $vendor, string $moduleName): bool

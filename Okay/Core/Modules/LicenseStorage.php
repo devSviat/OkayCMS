@@ -53,11 +53,48 @@ class LicenseStorage
         return $licenseDTO;
     }
 
+    /**
+     * Чи дозволено зараз ходити за ліцензією.
+     *
+     * Ця пауза свідомо спільна для всіх відвідувачів, а не сесійна: при
+     * недоступному маркетплейсі невдалий запит не зберігає файл ліцензії, тож
+     * без спільної паузи кожен наступний запит вітрини знову чекав на curl.
+     * Анонімні відвідувачі й боти сесію не переносять, тож сесійна пауза для
+     * них не працює взагалі.
+     */
+    public function isRequestAllowed(): bool
+    {
+        $filename = $this->getRetryFilename();
+        if (!is_file($filename)) {
+            return true;
+        }
+
+        return time() >= (int)file_get_contents($filename);
+    }
+
+    public function suppressRequestsFor(int $seconds): void
+    {
+        file_put_contents($this->getRetryFilename(), (string)(time() + $seconds), LOCK_EX);
+    }
+
+    public function allowRequests(): void
+    {
+        $filename = $this->getRetryFilename();
+        if (is_file($filename)) {
+            unlink($filename);
+        }
+    }
+
     private function getLicenseFilename(): string
     {
         return sprintf('%s%s.license',
             $this->compileCodeDir,
             md5(Request::getDomain())
         );
+    }
+
+    private function getRetryFilename(): string
+    {
+        return $this->getLicenseFilename() . '-retry';
     }
 }
