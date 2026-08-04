@@ -723,21 +723,23 @@ body:not(.top-nav) header.navbar {
     flex-shrink: 0;
     position: relative;
     top: 0;
-    fill: var(--ok-line-strong);
+    /* Неактивна стрілка читалася лише поки заголовок був темним: на світлому
+       --ok-line-strong дає 1.6:1. Межа контрола тримає 3.4:1. */
+    fill: var(--ok-control-line);
  }
 .okay_list_heading .main_image_id.active .left_s,
 .okay_list_heading .name.active .left_s,
 .okay_list_heading .price.active .left_s,
 .okay_list_heading .stock.active .left_s,
 .okay_list_heading .visible.active .left_s{
-    fill: rgb(32, 168, 216);
+    fill: var(--ok-accent);
 }
 .okay_list_heading a.main_image_id_desc.active svg .right_s,
 .okay_list_heading .name_desc.active svg .right_s,
 .okay_list_heading .price_desc.active svg .right_s,
 .okay_list_heading .stock_desc.active svg .right_s,
 .okay_list_heading .visible_desc.active svg .right_s{
-    fill: rgb(32, 168, 216);
+    fill: var(--ok-accent);
 }
 .reset_sort.hint-anim{
     font-family: var(--ok-font)!important;
@@ -3161,8 +3163,8 @@ label.switch_label i{
 /***************************************************  Стилизация списков на всех страницах    */
 .okay_list{
     text-align: center;
-    border: 1px solid #f2f2f2;
-    border-radius: 6px;
+    border: 1px solid var(--ok-line);
+    border-radius: var(--ok-radius-panel);
 }
 .ok_related_list{
     border: none;
@@ -3193,7 +3195,7 @@ label.switch_label i{
     color: var(--ok-ink);
     background-color: var(--ok-thead);
     border-bottom: 1px solid var(--ok-thead-line);
-    border-radius: var(--ok-radius-panel) var(--ok-radius-panel) 0 0;
+    border-radius: calc(var(--ok-radius-panel) - 1px) calc(var(--ok-radius-panel) - 1px) 0 0;
 }
 .okay_list .okay_list_footer{
     width: 100%;
