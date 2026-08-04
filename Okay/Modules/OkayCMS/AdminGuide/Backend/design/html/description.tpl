@@ -17,7 +17,7 @@
         position: relative;
         margin-bottom: 5px;
         padding-left: 5px;
-        color: rgb(119, 117, 122);
+        color: var(--ok-ink-muted);
     }
     .list_styling li{
         position: relative;
@@ -28,7 +28,7 @@
     .navigation_secondary a {
         text-decoration: none;
         transition: all .185s ease;
-        color: #2785E2;
+        color: var(--ok-accent);
         line-height: 1.5;
         font-size: 14px;
         word-break: break-word;
@@ -36,18 +36,18 @@
     }
     .navigation_secondary a:hover {
         text-decoration: underline;
-        color: #2785E2;
+        color: var(--ok-accent);
     }
     .grid_example{
         margin-top: 20px;
         padding: 0px 15px;
-        border: 1px solid rgb(217, 221, 229);
+        border: 1px solid var(--ok-line);
     }
     .grid_example .row > [class^="col-"] {
         padding-top: .75rem;
         padding-bottom: .75rem;
         background-color: rgba(228, 231, 236, 0.4);
-        border: 1px solid rgb(217, 221, 229);
+        border: 1px solid var(--ok-line);
     }
     .grid_wrapper{
         display: flex;
@@ -1011,6 +1011,12 @@ $(window).on("load", function() {
             <div class="heading_box font_24 mb-2">{$btr->description_title_icons}</div>
             <div class="mb-2">
                 {$btr->description_info_icons}
+                {* Приклад раніше лежав усередині мовного рядка і виводився сирим
+                   текстом - Smarty не розбирає теги у значенні змінної. *}
+                <p class="d_flex align_items_center">
+                    <span class="mr-h">{$btr->description_result_icons}</span>
+                    {include file='svg_icon.tpl' svgId='trash'}
+                </p>
             </div>
             <div class="heading_box mb-2">{$btr->description_title2_icons}</div>
             <div class="grid_wrapper">

@@ -72,6 +72,8 @@
     /* Полотно і поверхні */
     --ok-canvas: #f5f6f7;
     --ok-surface: #ffffff;
+    /* Текст поверх темного: та сама біла, але інша роль. */
+    --ok-ink-inverse: #ffffff;
     --ok-sunken: #fafbfc;
 
     /* Хром: ліва панель, шапка, футер. Два рівні, не три. */
@@ -114,19 +116,41 @@
     --ok-success-soft: #eaf3ed;
     /* Той самий зелений на темному хромі непотрібно темний. */
     --ok-success-on-chrome: #6fd48b;
+    /* Бурштин лишається станом - протермінована ліцензія, попередження. Кнопки
+       .btn-warning ним більше не фарбуються: вони не попереджають, а виконують
+       другорядну дію, і для неї є --ok-attention. */
     --ok-warning: #a35a00;
     --ok-warning-hover: #874a00;
     --ok-warning-disabled: #dcbb92;
     --ok-warning-soft: #fdf2e3;
+
+    /* Другорядна дія поруч із синьою первинною: схвалити, обробити, оновити
+       модуль, подивитись демо. 7.18:1 під білим текстом. */
+    --ok-attention: #5b4a9f;
+    --ok-attention-hover: #4b3c85;
+    --ok-attention-active: #3f3270;
+    --ok-attention-disabled: #c3bbdf;
+    --ok-attention-soft: #efedf7;
     --ok-danger: #c8352c;
     --ok-danger-hover: #a92c25;
     --ok-danger-soft: #fbebea;
     /* Той самий червоний на темному хромі дає 2.8:1, тож там світліший. */
     --ok-danger-on-chrome: #f08b84;
 
+    /* Іконки сповіщень. Малюються маскою по currentColor, тож колір і далі
+       успадковується з варіанта .alert--*, як було з гліфами FontAwesome. */
+    --alert-icon-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3v4a1 1 0 0 0 1 1h4'/%3E%3Cpath d='M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2'/%3E%3Cpath d='M9 17h6'/%3E%3Cpath d='M9 13h6'/%3E%3C/svg%3E");
+    --alert-icon-error: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0'/%3E%3Cpath d='M12 8v4'/%3E%3Cpath d='M12 16h.01'/%3E%3C/svg%3E");
+    --alert-icon-success: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0'/%3E%3Cpath d='M9 12l2 2l4 -4'/%3E%3C/svg%3E");
+    --alert-icon-warning: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0'/%3E%3Cpath d='M12 16v.01'/%3E%3Cpath d='M12 13a2 2 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483'/%3E%3C/svg%3E");
+    --alert-icon-info: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0'/%3E%3Cpath d='M12 9h.01'/%3E%3Cpath d='M11 12h1v4h1'/%3E%3C/svg%3E");
+
     /* Пояснювальне сповіщення: не помилка, не попередження, не первинна дія.
        6.03:1 під білим текстом. */
     --ok-notice: #0b6f66;
+    --ok-notice-hover: #095951;
+    --ok-notice-active: #07463f;
+    --ok-notice-disabled: #a9c9c5;
 
     /* Радіуси - три кроки замість семи */
     --ok-radius-control: 6px;
@@ -144,12 +168,15 @@
     --ok-ease: cubic-bezier(.22, 1, .36, 1);
 
     /* z-index за ролями, а не довільними числами */
-    --ok-z-dropdown: 100;
-    --ok-z-sticky: 200;
-    --ok-z-backdrop: 300;
+    --ok-z-footer: 100;
+    --ok-z-dropdown: 200;
+    --ok-z-sticky: 300;
     --ok-z-modal: 400;
-    --ok-z-toast: 500;
-    --ok-z-tooltip: 600;
+    --ok-z-sidebar: 500;
+    --ok-z-overlay: 600;
+    --ok-z-toast: 700;
+    --ok-z-tooltip: 800;
+    --ok-z-backdrop: 900;
 }
 
 /************************************************************************* Общие стили  */
@@ -190,28 +217,28 @@ body.navbar-fixed {
     position: absolute;
     top: -9px;
     left: 15px;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     padding: 0 10px;
     box-sizing: border-box;
     font-size: 14px;
     line-height: 14px;
     font-weight: 700;
-    color: red;
+    color: var(--ok-danger);
     cursor: pointer;
-    z-index: 1000;
+    z-index: var(--ok-z-modal);
 }
 .fn_backend_menu_section {
-    z-index: 1000;
+    z-index: var(--ok-z-modal);
     position: absolute;
     left: 20px;
     transform: translateY(25px);
     opacity: 0.7;
-    color:#f71717;
+    color: var(--ok-danger);
     font-size: 0.85em;
     font-weight: 600;
 }
 .fn_design_block_name:hover {
-    z-index: 1100;
+    z-index: var(--ok-z-sidebar);
 }
 .main .container-fluid {
     padding: 0 15px 35px;
@@ -261,7 +288,7 @@ body.navbar-fixed {
 .border_img{
     background-color: rgb(255, 255, 255);
     background-image: none;
-    border: 1px solid rgb(204, 204, 204);
+    border: 1px solid var(--ok-line-strong);
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
 }
@@ -270,6 +297,12 @@ body.navbar-fixed {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
+}
+.align_items_center{
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
 }
 .flex_box{
     display: -webkit-box;
@@ -286,7 +319,7 @@ body.navbar-fixed {
 }
 
 body:not(.top-nav) header.navbar {
-    z-index: 200;
+    z-index: var(--ok-z-sticky);
 }
 .fn_tooltips{
     display: none;
@@ -298,7 +331,7 @@ body:not(.top-nav) header.navbar {
 .text_green{color: green;}
 .text-danger,
 .text_warning{color:  var(--ok-danger)!important;}
-.text_attention{color:  #e88100!important;}
+.text_attention{color:  var(--ok-warning)!important;}
 .text-primary,
 .text-info,
 .text_primary{color: var(--ok-accent);}
@@ -463,18 +496,18 @@ body:not(.top-nav) header.navbar {
 .table_default{
     width: 100%;
     background-color: rgb(255, 255, 255);
-    border: 1px solid rgb(204, 204, 204);
+    border: 1px solid var(--ok-line-strong);
     border-bottom: none;
     height: auto;
 }
 .table_default__row{
     background: rgb(255, 255, 255);
-    border-bottom: 1px solid rgb(204, 204, 204);
+    border-bottom: 1px solid var(--ok-line-strong);
     color: var(--ok-chrome);
 }
 .table_default__item{
     padding: 10px 10px;
-    border-right: 1px solid rgb(204, 204, 204);
+    border-right: 1px solid var(--ok-line-strong);
 }
 .table_default__row .table_default__item:last-child{
     padding: 10px 10px;
@@ -618,7 +651,7 @@ body:not(.top-nav) header.navbar {
 .button_meta__open_ai:hover {
     background: #8A7DBE;
     border-color: #8A7DBE;
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 .button_meta__open_ai svg{
     width: 15px;
@@ -762,7 +795,7 @@ a.link:hover{
     text-decoration: none;
 }
 a.link_white{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     text-decoration: underline;
 }
 a.link_white:focus,
@@ -807,27 +840,26 @@ a.link_white:hover{
     border: 1px solid rgb(255 255 255 / .28);
     padding: 6px 10px;
     transition: background-color var(--ok-dur) var(--ok-ease), border-color var(--ok-dur) var(--ok-ease);
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: rgb(255 255 255 / .08);
 }
 .btn_admin:focus,
 .btn_admin:hover{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: rgb(255 255 255 / .18);
     border-color: rgb(255 255 255 / .42);
 }
+/* Це посилання на відео-довідку, а не деструктивна дія. Власний червоний був
+   третім червоним у шапці одночасно; лишається хромовий вигляд .btn_admin. */
 .btn_vid_help{
-    border: 1px solid #d55959;
-    color: #fff;
-    background-color: #d55959;
     margin-left: 5px;
     margin-bottom: 5px;
 }
 .btn_vid_help:focus,
 .btn_vid_help:hover{
-    color: #fff;
-    background-color: #de3838;
-    border-color: #de3838;
+    color: var(--ok-ink-inverse);
+    background-color: rgb(255 255 255 / .18);
+    border-color: rgb(255 255 255 / .42);
 }
 
 .btn_version_new{
@@ -841,7 +873,7 @@ a.link_white:hover{
 }
 .btn_version_new:focus,
 .btn_version_new:hover{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-success-hover);
     border-color: var(--ok-success-hover);
 }
@@ -854,7 +886,7 @@ a.link_white:hover{
 }
 .btn_version_old:focus,
 .btn_version_old:hover{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #d9a405;
     border-color: #d9a405;
 }
@@ -885,7 +917,11 @@ a.link_white:hover{
 .btn:focus,
 .btn:hover {text-decoration: none;}
 .btn:active,
-.btn.active {background-image: none;outline: 0;}
+.btn.active {background-image: none;}
+/* outline: 0 тут знімав кільце і з .btn.active - а це стійкий стан, не мить
+   натискання. Тепер лише для фокуса мишею. */
+.btn:active:not(:focus-visible),
+.btn.active:not(:focus-visible) {outline: 0;}
 .btn.disabled,
 .btn:disabled {cursor: not-allowed;opacity: .65;}
 
@@ -908,20 +944,20 @@ a.link_white:hover{
 }
 /* Button save */
 .btn_blue {
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent);
     border-color: var(--ok-accent);
 }
 .btn_blue:active,
 .btn_blue:focus,
 .btn_blue:hover {
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent-hover);
     border-color: var(--ok-accent-hover);
 }
 .btn_blue:active:hover,
 .btn_blue:active:focus {
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent-hover);
     border-color: var(--ok-accent-hover);
 }
@@ -975,102 +1011,104 @@ a.link_white:hover{
     border-color: var(--ok-accent-soft);
 }
 
+/* Обидві кнопки були бурштиновими, але різними відтінками. Розведено за
+   ролями: yellow - пояснювальна дія (notice), warning - другорядна (attention). */
 .btn_yellow{
-    color: var(--ok-ink);
-    background-color: #ff9f29;
-    border-color: #ff9f29;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-notice);
+    border-color: var(--ok-notice);
 }
 .btn_yellow:hover{
-    color: var(--ok-ink);
-    background-color: #e68f1d;
-    border-color: #e68f1d;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-notice-hover);
+    border-color: var(--ok-notice-hover);
 }
 .btn_yellow:focus{
-    color: var(--ok-ink);
-    background-color: #e68f1d;
-    border-color: #e68f1d;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-notice-hover);
+    border-color: var(--ok-notice-hover);
 }
 .btn_yellow:active {
-    color: var(--ok-ink);
-    background-color: #d4881a;
-    border-color: #d4881a;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-notice-active);
+    border-color: var(--ok-notice-active);
     background-image: none;
 }
 .btn_yellow:active:hover,
 .btn_yellow:active:focus{
-    color: var(--ok-ink);
-    background-color: #c9811a;
-    border-color: #c9811a;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-notice-active);
+    border-color: var(--ok-notice-active);
 }
 .btn_yellow:disabled:focus,
 .btn_yellow:disabled:hover {
-    background-color: #f4d88f;
-    border-color: #f4d88f;
+    background-color: var(--ok-notice-disabled);
+    border-color: var(--ok-notice-disabled);
 }
 
 /* Button comments*/
 .btn-warning{
-    color: #fff;
-    background-color: var(--ok-warning);
-    border-color: var(--ok-warning);
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-attention);
+    border-color: var(--ok-attention);
 }
 .btn-warning:hover{
-    color: #fff;
-    background-color: var(--ok-warning-hover);
-    border-color: var(--ok-warning-hover);
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-attention-hover);
+    border-color: var(--ok-attention-hover);
 }
 .btn-warning:focus{
-    color: #fff;
-    background-color: var(--ok-warning-hover);
-    border-color: var(--ok-warning-hover);
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-attention-hover);
+    border-color: var(--ok-attention-hover);
 }
 .btn-warning.active,
 .btn-warning:active{
-    color: #fff;
-    background-color: var(--ok-warning-hover);
-    border-color: var(--ok-warning-hover);
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-attention-hover);
+    border-color: var(--ok-attention-hover);
 }
 .btn-warning.active:hover,
 .btn-warning:active:hover,
 .btn-warning:active:focus{
-    color: #fff;
-    background-color: var(--ok-warning-hover);
-    border-color: var(--ok-warning-hover);
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-attention-hover);
+    border-color: var(--ok-attention-hover);
 }
 .btn-warning:disabled:focus{
-    background-color: var(--ok-warning-disabled);
-    border-color: var(--ok-warning-disabled);
+    background-color: var(--ok-attention-disabled);
+    border-color: var(--ok-attention-disabled);
 }
 .btn-warning:disabled:hover{
-    background-color: var(--ok-warning-disabled);
-    border-color: var(--ok-warning-disabled);
+    background-color: var(--ok-attention-disabled);
+    border-color: var(--ok-attention-disabled);
 }
 
 /* Button danger*/
 .btn-danger{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-danger);
     border-color: var(--ok-danger);
 }
 .btn-danger:hover{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #c0342c;
     border-color: #c0342c;
 }
 .btn-danger:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #c0342c;
     border-color: #c0342c;
 }
 .btn-danger:active{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #a52b25;
     border-color: #a52b25;
     background-image: none;
 }
 .btn-danger:active:hover,
 .btn-danger:active:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #a12a24;
     border-color: #a12a24;
 }
@@ -1085,23 +1123,23 @@ a.link_white:hover{
 
 
 .btn-secondary {
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #5b6770;
     border-color: #5b6770;
 }
 .btn-secondary:hover{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #5c6973;;
     border-color: #5c6973;;
 }
 .btn-secondary:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #5c6973;
     border-color: #5c6973;
 }
 
 .btn-secondary:active{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #4a555d;
     border-color: #4a555d;
     background-image: none;
@@ -1109,7 +1147,7 @@ a.link_white:hover{
 
 .btn-secondary:active:hover,
 .btn-secondary:active:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #4a555d;
     border-color: #4a555d;
 }
@@ -1131,23 +1169,23 @@ a.link_white:hover{
     border-color: var(--ok-accent) ;
 }
 .btn_border_blue:hover{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent);
     border-color: var(--ok-accent);
 }
 .btn_border_blue:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent-hover);
     border-color: var(--ok-accent-hover);
 }
 .btn_border_blue:active{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent-hover);
     border-color: var(--ok-accent-hover);
 }
 .btn_border_blue:active:hover,
 .btn_border_blue:active:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent-hover);
     border-color: var(--ok-accent-hover);
 }
@@ -1166,26 +1204,26 @@ a.link_white:hover{
 }
 
 .btn_border-info:hover{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent);
     border-color: var(--ok-accent);
 }
 
 .btn_border-info:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent-hover);
     border-color: var(--ok-accent-hover);
 }
 
 .btn_border-info:active{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent-hover);
     border-color: var(--ok-accent-hover);
 }
 
 .btn_border-info:active:hover,
 .btn_border-info:active:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #1a662f;
     border-color: #1a662f;
 }
@@ -1204,23 +1242,23 @@ a.link_white:hover{
     border-color: var(--ok-chrome);
 }
 .btn_border_dark:hover{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-chrome);
     border-color: var(--ok-chrome);
 }
 .btn_border_dark:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-chrome);
     border-color: var(--ok-chrome);
 }
 .btn_border_dark:active{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-chrome);
     border-color: var(--ok-chrome);
 }
 .btn_border_dark:active:hover,
 .btn_border_dark:active:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: rgba(55, 55, 55,0.8);
     border-color: rgba(55, 55, 55,0.8);
 }
@@ -1232,22 +1270,22 @@ a.link_white:hover{
 }
 
 .btn_border_light{
-    background-color: RGB(252, 252, 252);
-    border: 1px solid RGB(228, 228, 228);
-    color: rgb(44, 44, 44);
+    background-color: var(--ok-sunken);
+    border: 1px solid var(--ok-line);
+    color: var(--ok-ink);
 }
 .btn_border_light:hover{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-chrome);
     border-color: var(--ok-chrome);
 }
 .btn_border_light:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-chrome);
     border-color: var(--ok-chrome);
 }
 .btn_border_light:active{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-chrome);
     border-color: var(--ok-chrome);
 }
@@ -1261,24 +1299,24 @@ a.link_white:hover{
 }
 .btn-outline-info.disabled,
 .btn-outline-info:hover {
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent);
     border-color: var(--ok-accent);
 }
 .btn-outline-info:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent);
     border-color: var(--ok-accent);
 }
 .btn-outline-info:active{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent-hover);
     border-color: var(--ok-accent-hover);
 }
 
 .btn-outline-info:active:hover,
 .btn-outline-info:active:focus{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent-hover);
     border-color: var(--ok-accent-hover);
 }
@@ -1289,64 +1327,64 @@ a.link_white:hover{
     border-color: var(--ok-accent-hover);
 }
 .btn_border_yellow{
-    color: var(--ok-warning);
+    color: var(--ok-notice);
     background-image: none;
     background-color: transparent;
-    border-color: #ff9f29;
+    border-color: var(--ok-notice);
 }
 .btn_border_yellow:focus,
 .btn_border_yellow:hover {
-    color: #fff;
-    background-color: #ff9f29;
-    border-color: #ff9f29;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-notice);
+    border-color: var(--ok-notice);
 }
 .btn_border_yellow:active{
-    color: #fff;
-    background-color: #d4881a;
-    border-color: #d4881a;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-notice-active);
+    border-color: var(--ok-notice-active);
 }
 .btn_border_yellow:active:hover,
 .btn_border_yellow:active:focus{
-    color: #fff;
-    background-color: #b87716;
-    border-color: #b87716;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-notice-active);
+    border-color: var(--ok-notice-active);
 }
 .btn_border_yellow:disabled:focus{
-    border-color: #f4d88f;
+    border-color: var(--ok-notice-disabled);
 }
 .btn_border_yellow:disabled:hover {
-    border-color: #f4d88f;
+    border-color: var(--ok-notice-disabled);
 }
 .btn-outline-warning{
-    color: var(--ok-warning);
+    color: var(--ok-attention);
     background-image: none;
     background-color: transparent;
-    border-color: var(--ok-warning);
+    border-color: var(--ok-attention);
 }
 .btn-outline-warning:focus,
 .btn-outline-warning:hover {
-    color: #fff;
-    background-color: var(--ok-warning);
-    border-color: var(--ok-warning);
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-attention);
+    border-color: var(--ok-attention);
 }
 .btn-outline-warning.active,
 .btn-outline-warning:active{
-    color: #fff;
-    background-color: var(--ok-warning);
-    border-color: var(--ok-warning);
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-attention);
+    border-color: var(--ok-attention);
 }
 .btn-outline-warning.active:hover,
 .btn-outline-warning:active:hover,
 .btn-outline-warning:active:focus{
-    color: #fff;
-    background-color: var(--ok-warning-hover);
-    border-color: var(--ok-warning-hover);
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-attention-hover);
+    border-color: var(--ok-attention-hover);
 }
 .btn-outline-warning:disabled:focus{
-    border-color: var(--ok-warning-hover);
+    border-color: var(--ok-attention-hover);
 }
 .btn-outline-warning:disabled:hover {
-    border-color: var(--ok-warning-hover);
+    border-color: var(--ok-attention-hover);
 }
 .btn-outline-danger {
     color: var(--ok-danger);
@@ -1355,12 +1393,12 @@ a.link_white:hover{
 }
 .btn-outline-danger:hover,
 .btn-outline-danger:focus {
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-danger);
     border-color: var(--ok-danger);
 }
 .btn-outline-danger:active {
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #a52b25;
     border-color: #a52b25;
 }
@@ -1368,7 +1406,7 @@ a.link_white:hover{
 .btn-outline-danger:active:focus {
     background-color: #a12a24;
     border-color: #a12a24;
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 .btn-outline-danger:disabled:focus {
     border-color: #e3a3a1;
@@ -1385,15 +1423,15 @@ a.link_white:hover{
 .btn-outline-secondary:hover{
     background-color: var(--ok-accent);
     border-color: var(--ok-accent);
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 .btn-outline-secondary.fn_active_class {
     background-color: var(--ok-accent);
     border-color: var(--ok-accent);
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 .btn-outline-secondary:active{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: #b0bec5;
     border-color: #b0bec5;
 }
@@ -1439,11 +1477,17 @@ a.link_white:hover{
     align-items: center !important;
 }
 .alert--icon:before {
-    content: "\f02d";
-    font: normal normal normal 14px/1 FontAwesome;
-    text-rendering: auto;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    content: "";
+    background-color: currentColor;
+    -webkit-mask: var(--alert-icon-default) no-repeat center;
+    mask: var(--alert-icon-default) no-repeat center;
+    -webkit-mask-size: 22px 22px;
+    mask-size: 22px 22px;
+    /* Висота дорівнює відступу .alert__content (15px) плюс рядок заголовка
+       (24px) плюс той самий відступ - тож центр маски лягає рівно на центр
+       першого рядка заголовка, а не вище нього. */
+    align-self: flex-start;
+    height: 54px;
     -webkit-box-flex: 0;
     -webkit-flex: 0 0 50px;
     -ms-flex: 0 0 50px;
@@ -1451,10 +1495,7 @@ a.link_white:hover{
     max-width: 50px;
     width: 50px;
     position: relative;
-    z-index: 999;
-    text-align: center;
-    padding: 18px 0;
-    font-size: 20px;
+    z-index: 1;
 }
 .alert__content {
     -ms-flex-preferred-size: 0;
@@ -1540,7 +1581,8 @@ opacity: 1;
     font-weight: 500;
 }
 .alert--icon.alert--error:before {
-    content: "\f06a";
+    -webkit-mask-image: var(--alert-icon-error);
+    mask-image: var(--alert-icon-error);
 }
 .alert--success {
     background-color: #d9fbd0;
@@ -1556,7 +1598,8 @@ opacity: 1;
     font-weight: 500;
 }
 .alert--icon.alert--success:before {
-    content:  "\f058";
+    -webkit-mask-image: var(--alert-icon-success);
+    mask-image: var(--alert-icon-success);
 }
 .alert--warning {
     background-color: #ffefca;
@@ -1572,7 +1615,8 @@ opacity: 1;
     font-weight: 500;
 }
 .alert--icon.alert--warning:before {
-    content: "\f059";
+    -webkit-mask-image: var(--alert-icon-warning);
+    mask-image: var(--alert-icon-warning);
 }
 .alert--info {
     background-color: #e5edff;
@@ -1588,14 +1632,15 @@ opacity: 1;
     font-weight: 500;
 }
 .alert--icon.alert--info:before {
-    content: "\f05a";
+    -webkit-mask-image: var(--alert-icon-info);
+    mask-image: var(--alert-icon-info);
 }
 
 
 
 
 .boxed{
-    background: #FFF;
+    background: var(--ok-surface);
     border-radius: 16px;
     border: 1px solid var(--ok-line);
     color: var(--ok-ink);
@@ -1642,12 +1687,12 @@ opacity: 1;
 .boxed--status{
     padding: 15px;
     text-align:center;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     color: var(--ok-ink);
-    border-color: rgb(39, 76, 183);
+    border-color: var(--ok-accent);
 }
 .boxed--status_start .status_start {
-    color: rgb(39, 76, 183);
+    color: var(--ok-accent);
     position: relative;
     top: 5px;
     left:-5px;
@@ -1655,23 +1700,23 @@ opacity: 1;
 
 .boxed_warning{
     background-color: var(--ok-danger);
-    color: #fff;
+    color: var(--ok-ink-inverse);
     border-color: var(--ok-danger);
 }
 .boxed_attention{
     background-color: var(--ok-notice);
-    color: #fff;
+    color: var(--ok-ink-inverse);
     border-color: var(--ok-notice);
 }
 .boxed_success{
     background-color: var(--ok-success);
     /* Було var(--ok-ink) на темній бірюзі — темне по темному. */
-    color: #fff;
+    color: var(--ok-ink-inverse);
     border-color: var(--ok-success);
 }
 .boxed_notify{
     background-color: var(--ok-accent);
-    color: #fff;
+    color: var(--ok-ink-inverse);
     border-color: var(--ok-accent);
 }
 .boxed_yellow{
@@ -1684,7 +1729,7 @@ opacity: 1;
 .boxed_warning .heading_box,
 .boxed_attention .heading_box{
     font-weight: 600;
-    color: #fff;
+    color: var(--ok-ink-inverse);
     text-shadow: none;
     font-size: 20px;
     margin: 0;
@@ -1697,7 +1742,7 @@ opacity: 1;
 .boxed_success .text_box,
 .boxed_warning .text_box,
 .boxed_attention .text_box{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     text-shadow: none;
     font-size: 15px;
     margin-top: 15px;
@@ -1754,7 +1799,7 @@ opacity: 1;
 }
 
 .boxed_success .btn_return{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-image: none;
     background-color: transparent;
     border: 2px solid #fff;
@@ -1766,7 +1811,7 @@ opacity: 1;
     margin-right: 5px;
 }
 .boxed_success .btn_return:hover{
-    background-color: #fff;
+    background-color: var(--ok-surface);
     border-color: transparent;
     color: #0A7C71;
 }
@@ -1774,14 +1819,15 @@ opacity: 1;
     position: relative;
     margin-top: 15px;
     text-align: center;
-    background: linear-gradient(118deg,rgba(132, 115, 196,1),rgba(132, 115, 196,.7)) !important;
+    background: linear-gradient(118deg, var(--ok-accent), var(--ok-accent-hover)) !important;
 }
+/* П'ятишаровий градієнт із background-blend-mode не мав нічого спільного з
+   рештою панелі. Той самий акцентний банер, що й на сторінці навчання. */
 .boxed_marketplace--bg{
     position: relative;
     margin-top: 15px;
     text-align: center;
-    background: linear-gradient( 125deg , RGB(0, 255, 87) 0%, rgb(1, 0, 51) 40%, rgb(70, 0, 67) 70%, RGB(240, 255, 197) 100%), linear-gradient( 55deg , RGB(0, 20, 201) 0%, rgb(65, 0, 96) 100%), linear-gradient( 300deg , RGB(255, 199, 0) 0%, RGB(0, 26, 255) 100%), radial-gradient(135% 215% at 115% 40%, rgb(57, 57, 57) 0%, rgb(57, 57, 57) 40%, rgb(132, 149, 97) calc(40% + 1px), rgb(132, 149, 97) 60%, RGB(238, 214, 144) calc(60% + 1px), RGB(238, 214, 144) 80%, RGB(236, 239, 216) calc(80% + 1px), RGB(236, 239, 216) 100%), linear-gradient( 125deg , RGB(40, 45, 79) 0%, RGB(40, 45, 79) 40%, RGB(35, 16, 58) calc(40% + 1px), RGB(35, 16, 58) 70%, RGB(160, 32, 76) calc(70% + 1px), RGB(160, 32, 76) 88%, RGB(255, 108, 0) calc(88% + 1px), RGB(255, 108, 0) 100%);
-    background-blend-mode: overlay, screen, overlay, overlay, normal;
+    background: linear-gradient(118deg, var(--ok-accent-active), var(--ok-accent)) !important;
 }
 .boxed_learning--bg:before{
     content: " ";
@@ -1807,12 +1853,12 @@ opacity: 1;
 .boxed_marketplace--bg .heading_box,
 .boxed_learning--bg .heading_page,
 .boxed_learning--bg .heading_box{
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 .boxed_marketplace--bg .heading_box,
 .boxed_learning--bg .heading_box { 
     margin-top: 20px;
-    color: #fff;
+    color: var(--ok-ink-inverse);
     font-weight: 500;
     font-size: 16px;
     line-height: 1.4;
@@ -1856,7 +1902,7 @@ opacity: 1;
 /************************************************************************* Form  */
 .variant_input,
 .form-control {
-    background-color: #fff;
+    background-color: var(--ok-surface);
     background-image: none;
     border: 1px solid var(--ok-line);
     -webkit-appearance: none;
@@ -2109,7 +2155,7 @@ input[type=search] {
 .form-group {
     margin-bottom: 15px
 }
-select.form-control:focus::-ms-value {color: #607d8b;background-color: #fff;}
+select.form-control:focus::-ms-value {color: #607d8b;background-color: var(--ok-surface);}
 select{
     width: 100%;
 }
@@ -2220,7 +2266,7 @@ select{
 }
 /*.okay_ckeckbox:before{
     cursor: pointer;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     border: 1px solid var(--ok-line-strong);
     border-radius: 10%;
     content: "";
@@ -2237,8 +2283,8 @@ select{
     /* Була світло-сіра заливка без рамки: на темному заголовку списку вона
        читалася, а щойно заголовок став світлим — злилася з тлом. Рамка робить
        контрол видимим на будь-якому тлі. */
-    background: #fff;
-    color: #fff;
+    background: var(--ok-surface);
+    color: var(--ok-ink-inverse);
     border: 1px solid var(--ok-control-line);
     border-radius: 4px;
     content: "";
@@ -2267,7 +2313,7 @@ input[type=checkbox]:checked + .okay_ckeckbox:before{
     content: '\f00c';
     font-family: "FontAwesome";
     background: var(--ok-accent);
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 .fn_user_complite{cursor: pointer;}
 .header_switcher > a{
@@ -2481,7 +2527,7 @@ label.switch_label i{
     left: 2px;
     width: 22px;
     height: 22px;
-    background: #fff;
+    background: var(--ok-surface);
     border: none;
     border-radius: 50%;
     -moz-transition: right 0.15s ease-out;
@@ -2507,7 +2553,7 @@ label.switch_label i{
 .wrap_tags{margin-bottom: -3px; margin-right: -2px;}
 .tag {
     line-height: 1.2;
-    color: #fff;
+    color: var(--ok-ink-inverse);
     border-radius: 6px;
     margin-right: 2px!important;
     margin-bottom: 2px!important;
@@ -2548,7 +2594,7 @@ label.switch_label i{
     background-color: #eff2f6;
     color: #3f4654;
 }
-.tag-primary {background-color: rgb(58, 143, 200);}
+.tag-primary {background-color: var(--ok-accent);}
 .tag-success {
     background-color: #d9fbd0;
     color: #045702;
@@ -2567,9 +2613,9 @@ label.switch_label i{
 }
 .tag-referer {
     margin-top: 3px;
-    background-color: #fff;
-    color: rgb(58, 143, 200);
-    border: 1px solid rgb(58, 143, 200);
+    background-color: var(--ok-surface);
+    color: var(--ok-accent);
+    border: 1px solid var(--ok-accent);
 }
 .tag-chanel_social {
     margin-right: 5px!important;
@@ -2599,26 +2645,26 @@ label.switch_label i{
 .tag-ind_phone {
     margin-right: 5px!important;
     border: 1px solid #E04853;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     color: #E04853;
 }
 .tag-ind_unknown {
     margin-right: 5px!important;
     border: 1px solid var(--ok-line-strong);
-    background-color: #fff;
+    background-color: var(--ok-surface);
     color: var(--ok-ink-muted);
 }
 .tag-ind_email {
     margin-right: 5px!important;
     border: 1px solid #5C5EB7;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     color: #5C5EB7;
 }
 .tag-update {
-    border: 1px solid RGB(228, 228, 228);
+    border: 1px solid var(--ok-line);
     line-height: 1.3;
     font-size: 10px;
-    background-color: RGB(252, 252, 252);
+    background-color: var(--ok-sunken);
     color: var(--ok-ink-muted);
     margin: 0 !important;
     padding: 2px 5px 5px;
@@ -2719,7 +2765,7 @@ label.switch_label i{
     width: 43px;
     height: 43px;
     display: block;
-    background-color: #ffffff;
+    background-color: var(--ok-surface);
     border: solid 1px #cfd8dc;
     line-height: 43px;
     text-align: center;
@@ -2794,8 +2840,8 @@ label.switch_label i{
     justify-content: center;
     margin-left: 15px;
     color: var(--ok-ink);
-    background-color: RGB(252, 252, 252);
-    border: 1px solid RGB(228, 228, 228);
+    background-color: var(--ok-sunken);
+    border: 1px solid var(--ok-line);
     border-radius: 8px;
     cursor: pointer;
     font-size: 32px;
@@ -2809,7 +2855,7 @@ label.switch_label i{
 .site_block_icon:hover,
 .print_block_icon:hover,
 .export_block:hover{
-    color: RGB(252, 252, 252);
+    color: var(--ok-sunken);
     background: var(--ok-ink);
 }
 .neighbors_orders .next_order svg,
@@ -2878,11 +2924,11 @@ label.switch_label i{
 /*}*/
 /*.print_block_icon:hover,*/
 /*.export_block:hover{*/
-/*    color: #fff;*/
+/*    color: var(--ok-ink-inverse);*/
 /*    background: var(--ok-warning-hover);*/
 /*}*/
 /*.export_block:hover{*/
-/*    color: #fff;*/
+/*    color: var(--ok-ink-inverse);*/
 /*    background: rgb(30, 113, 202);*/
 /*}*/
 
@@ -3068,7 +3114,7 @@ label.switch_label i{
 .pagination li.active a:hover {
     z-index: 2;
     border-radius: 8px;
-    color: #fff;
+    color: var(--ok-ink-inverse);
     cursor: default;
     background-color: var(--ok-accent);
     border-color: var(--ok-accent);
@@ -3104,7 +3150,7 @@ label.switch_label i{
     color: #b0bec5;
     pointer-events: none;
     cursor: not-allowed;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     border-color: var(--ok-line-strong);
 }
 
@@ -3115,7 +3161,7 @@ label.switch_label i{
     float: left;
     padding: 6px 12px;
     text-decoration: none;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     border: 1px solid var(--ok-line-strong);
     border-radius: 8px;
     color: var(--ok-ink);
@@ -3130,7 +3176,7 @@ label.switch_label i{
 .page-link:hover,
 .pagination-datatables li a:hover,
 .pagination li a:hover {
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-accent);
     border-color: var(--ok-accent);
 }
@@ -3163,6 +3209,10 @@ label.switch_label i{
 /***************************************************  Стилизация списков на всех страницах    */
 .okay_list{
     text-align: center;
+    /* Частина списків лежить у білій .boxed, частина - просто на полотні. У
+       другому випадку шапка #eef0f2 зливалася з полотном #f5f6f7. Список сам
+       стає поверхнею, тож шапка читається однаково в обох випадках. */
+    background-color: var(--ok-surface);
     border: 1px solid var(--ok-line);
     border-radius: var(--ok-radius-panel);
 }
@@ -3325,10 +3375,16 @@ label.switch_label i{
     /* Заголовки колонок були набрані вузьким Open Sans Condensed і переведені в
        верхній регістр. Inter ширший, і "АКТИВНОСТЬ" разом зі стрілкою сортування
        перестало влазити в колонку - слово рвалося посередині. Верхній регістр
-       кирилиці ширший і читається гірше, тож знято саме його, а не кегль. */
+       кирилиці ширший і читається гірше, тож знято саме його, а не кегль.
+
+       Рвалося воно через word-break: break-word вище. Саме його тут і знімаємо:
+       nowrap замість цього виштовхував усю сторінку в горизонтальну прокрутку,
+       щойно назва колонки була довша за саму колонку. */
     font-size: 12px;
     letter-spacing: 0.01em;
-    white-space: nowrap;
+    word-break: normal;
+    overflow-wrap: normal;
+    min-width: 0;
 }
 .okay_list .okay_list_drag{
     width: 40px;
@@ -3395,10 +3451,9 @@ label.switch_label i{
 .okay_list .okay_list_close.remove_variant .btn_close {
     background: none;
     border: none;
-    outline: none;
     cursor: pointer;
     position: relative;
-    color: red;
+    color: var(--ok-danger);
 }
 .okay_list .okay_list_close.remove_variant .btn_close svg{
     height: 16px;
@@ -3411,9 +3466,8 @@ label.switch_label i{
 .okay_list .okay_list_subicon a{
     display: block;
     font-size: 22px;
-    color: RGB(43, 178, 239);
+    color: var(--ok-accent);
     border: 0;
-    outline: 0;
     border-radius: 3px;
     line-height: 0;
 }
@@ -3430,7 +3484,7 @@ label.switch_label i{
     width: 80%;
     height: 80%;
     display: block;
-    background: #fff;
+    background: var(--ok-surface);
     position: absolute;
     top: 10%;
     z-index: 0;
@@ -3608,7 +3662,7 @@ label.switch_label i{
     /*text-align: center;*/
     /*line-height: 55px;*/
     /*margin: 0px auto;*/
-    /*background: #fff*/
+    /*background: var(--ok-surface)*/
 /*}*/
 .okay_list .okay_list_brands_photo a{
     border: 1px solid var(--ok-line);
@@ -3620,7 +3674,7 @@ label.switch_label i{
     text-align: center;
     line-height: 76px;
     margin: 0 auto;
-    background: #fff
+    background: var(--ok-surface)
 }
 .okay_list .okay_list_delivery_photo a{
     border: 1px solid var(--ok-line);
@@ -3631,7 +3685,7 @@ label.switch_label i{
     text-align: center;
     line-height: 76px;
     margin: 0 auto;
-    background: #fff
+    background: var(--ok-surface)
 }
 .okay_list .okay_list_photo img{
     max-width: 50px;
@@ -3820,14 +3874,14 @@ label.switch_label i{
     margin-left: 60px;
 }
 .okay_list .submenu_level_1 .okay_list_body_item {
-    border-bottom: 0 solid rgb(204, 204, 204);
+    border-bottom: 0 solid var(--ok-line-strong);
 }
 .okay_list .okay_list_boding .menu_icon_add{
-    color: RGB(16, 207, 189);
+    color: var(--ok-notice);
     margin-top: 4px;
 }
 .okay_list .okay_list_boding .menu_icon_add:hover{
-    color: RGB(16, 207, 189);
+    color: var(--ok-notice);
 }
 .okay_list .okay_list_menu_name{
     width: calc(100% - 400px);
@@ -3976,7 +4030,7 @@ label.switch_label i{
     right: 12px;
     top: 11px;
     line-height: 1.1;
-    color: #fff;
+    color: var(--ok-ink-inverse);
     text-align: center;
     vertical-align: baseline;
     border-radius: 5px;
@@ -3988,7 +4042,7 @@ label.switch_label i{
     display: inline-block;
     padding: 2px 1px 5px;
     text-transform: lowercase;
-    background-color: rgb(245, 87, 83);
+    background-color: var(--ok-accent);
     width: 55px;
 }
 .okay_list .okay_list_currency_exchange_item .cur_input_exchange{
@@ -4185,21 +4239,29 @@ label.switch_label i{
     text-align: left;
 }
 
+/* outline: none тут мав специфічність 0,3,0 і перебивав button:focus-visible
+   (0,1,1). Кільце зникало на 82 кнопках видалення в 38 шаблонах - тобто на
+   найдеструктивнішому контролі кожного списку. Тепер контур знімається лише
+   тоді, коли :focus-visible не спрацював. */
 .okay_list .okay_list_close .btn_close{
     background: none;
     border: none;
-    outline: none;
     cursor: pointer;
     position: relative;
     color: #8c8c8c;
 }
+.okay_list .okay_list_close .btn_close:focus:not(:focus-visible){
+    outline: none;
+}
 .btn_close{
     background: transparent;
     border: none;
-    outline: none;
     cursor: pointer;
     position: relative;
-    color: #fff;
+    color: var(--ok-ink-inverse);
+}
+.btn_close:focus:not(:focus-visible){
+    outline: none;
 }
 .btn_close svg,
 .okay_list .okay_list_close .btn_close svg{
@@ -4281,7 +4343,7 @@ label.switch_label i{
 .input-group.input-group--search .form-control{
     -moz-appearance: none;
     z-index: 0!important;
-    border-right: 1px solid RGB(228, 228, 228);
+    border-right: 1px solid var(--ok-line);
     border-radius: 8px;
     width: 100%;
     -webkit-box-flex: 0;
@@ -4298,7 +4360,7 @@ label.switch_label i{
     border-left: none;
 }
 .input-group.input-group--reset .form-control{
-    border-right: 1px solid RGB(228, 228, 228)!important;
+    border-right: 1px solid var(--ok-line)!important;
     -webkit-box-flex: 0!important;
     -webkit-flex: 0 0 calc(100% - 40px)!important;
     -ms-flex: 0 0 calc(100% - 40px)!important;
@@ -4306,7 +4368,7 @@ label.switch_label i{
     max-width: calc(100% - 40px)!important;
 }
 .input-group.input-group--reset .error{
-    border:1px solid  rgb(255, 0, 0)!important;
+    border:1px solid var(--ok-danger)!important;
 }
 .input-group--search{
     width: 100%!important;
@@ -4358,12 +4420,29 @@ label.switch_label i{
     border-collapse: separate;
 }
 .input-group .form-control:focus {
-    border-color: #d0d0d0;
+    border-color: var(--ok-line-strong);
     background-color: var(--ok-sunken);
     -webkit-box-shadow: none;
     box-shadow: none;
     -webkit-transition: none !important;
     color: var(--ok-ink);
+}
+/* Гало малювалось навколо самого <input>, а addon лишався поза кільцем - на
+   стику виходила світла смуга, яка різала контрол навпіл. Візуально контрол
+   тут один прямокутник, тож і кільце має бути одне, на всю групу. */
+.input-group:focus-within {
+    box-shadow: 0 0 0 3px var(--ok-accent-soft);
+    border-radius: 8px;
+}
+.input-group:focus-within > .form-control,
+.input-group:focus-within > .variant_input,
+.input-group:focus-within > .input-group-addon,
+.input-group:focus-within > .input-group-addon-date {
+    border-color: var(--ok-accent);
+}
+.input-group:focus-within > .form-control:focus,
+.input-group:focus-within > .variant_input:focus {
+    box-shadow: none;
 }
 .input-group .input-group-addon {
     -webkit-box-flex: 0;
@@ -4377,7 +4456,7 @@ label.switch_label i{
     font-size: 12px;
     font-weight: 500;
     line-height: 1.25;
-    color: rgb(98, 98, 98);
+    color: var(--ok-ink-muted);
     text-align: center;
     border: 1px solid var(--ok-line);
     background-color: var(--ok-sunken);
@@ -4450,7 +4529,7 @@ label.switch_label i{
     font-size: 0.875rem;
     font-weight: normal;
     line-height: 1.25;
-    color: rgb(98, 98, 98);
+    color: var(--ok-ink-muted);
     text-align: center;
     border-radius: 8px 0 0 8px;
 }
@@ -4504,7 +4583,7 @@ label.switch_label i{
 .card .input-group .form-control {
     width: 100%;
     max-width: 100%;
-    background: #fff;
+    background: var(--ok-surface);
     border-radius:  0 8px 8px 0 ;
 }
 .input-group--small .form-control {
@@ -4514,7 +4593,7 @@ label.switch_label i{
     padding: 5px 10px;
 }
 .input-group--left .form-control {
-    border-right: 1px solid rgb(204, 204, 204);
+    border-right: 1px solid var(--ok-line-strong);
     border-left: 0;
 }
 .filter_date__item .btn,
@@ -4546,7 +4625,7 @@ label.switch_label i{
     width: 12px;
 }
 .filter_date__item .filter_date__button{
-    background: #fff;
+    background: var(--ok-surface);
     color: var(--ok-ink-muted);
     border: 1px solid transparent;
     -webkit-transition: all 0.12s ease;
@@ -4658,14 +4737,14 @@ label.switch_label i{
 .okay_list_setting .setting_icon_yandex.fn_active_class{
     background: var(--ok-accent);
     border-color: var(--ok-accent);
-    color: #fff;
+    color: var(--ok-ink-inverse);
     font-weight: 600;
 }
 .okay_list_setting .setting_icon_featured.fn_active_class,
 .okay_list_setting .setting_icon_featured:hover{
     background: #F8D053;
     border-color: #F8D053;
-    color: #fff
+    color: var(--ok-ink-inverse)
 }
 .okay_list_setting .setting_icon_open svg{
     height: 26px;
@@ -4674,12 +4753,12 @@ label.switch_label i{
 .okay_list_setting .setting_icon_open:hover{
     background: #8A7DBE;
     border-color: #8A7DBE;
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 .okay_list_setting .setting_icon_copy:hover{
     background: #2B6A94;
     border-color: #2B6A94;
-    color: #fff
+    color: var(--ok-ink-inverse)
 }
 
 .okay_list_setting .setting_icon_extension svg{
@@ -4689,12 +4768,12 @@ label.switch_label i{
 .okay_list_setting .setting_icon_extension{
     background: #e88100;
     border-color: #e88100;
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 .okay_list_setting .setting_icon_extension:hover{
     background: #cf7402;
     border-color: #cf7402;
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 
 .okay_list_setting .setting_icon_setting svg,
@@ -4706,17 +4785,17 @@ label.switch_label i{
 .okay_list_setting .setting_icon_setting:hover{
     background: #7239EA;
     border-color: #7239EA;
-    color: #fff
+    color: var(--ok-ink-inverse)
 }
 .okay_list_setting .setting_icon_files:hover{
     background: #009ef7;
     border-color: #009ef7;
-    color: #fff
+    color: var(--ok-ink-inverse)
 }
 .okay_list_setting .setting_icon_extend:hover{
     background: #ffc700;
     border-color: #ffc700;
-    color: #fff
+    color: var(--ok-ink-inverse)
 }
 
 
@@ -4725,7 +4804,7 @@ label.switch_label i{
 /***************************************************  Стилизация списков 2 вариант   */
 .purchases_table{
     width: 100%;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     border: 1px solid var(--ok-line);
     border-bottom: none;
     height: auto;
@@ -4788,7 +4867,7 @@ label.switch_label i{
     -ms-flex-align: center;
 }
 .purchases_table .purchases_body_item{
-    background: #fff;
+    background: var(--ok-surface);
     border-bottom: 1px solid var(--ok-line);
     color: var(--ok-chrome-raised);
 }
@@ -4870,7 +4949,7 @@ body.menu-pin .page-container {
 #admin_catalog {
     width: 280px;
     background-color: var(--ok-chrome-raised);
-    z-index: 1100;
+    z-index: var(--ok-z-sidebar);
     left: -210px;
     position: fixed;
     bottom: 0;
@@ -4895,7 +4974,7 @@ body.menu-pin .page-container {
     line-height: 44px;
     background-color: var(--ok-chrome);
     border-bottom: 1px solid #232730;
-    color: #ffffff;
+    color: var(--ok-ink-inverse);
     width: 100%;
     padding: 0 10px 0 20px;
     clear: both;
@@ -4996,7 +5075,7 @@ body.menu-pin .page-container {
 #admin_catalog  .sidebar-menu .menu_items > li:hover > a.danger_counter .title,
 #admin_catalog  .sidebar-menu .menu_items > li.active > a.danger_counter .title,
 #admin_catalog  .sidebar-menu .menu_items > li:hover > .icon-thumbnail{
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 #admin_catalog  .sidebar-menu .menu_items > li > a > .title {
     float: left;
@@ -5054,7 +5133,7 @@ body.menu-pin .page-container {
 #admin_catalog  .sidebar-menu .menu_items > li ul.submenu > li:hover > .icon-thumbnail,
 #admin_catalog  .sidebar-menu .menu_items > li ul.submenu > li.active > a,
 #admin_catalog  .sidebar-menu .menu_items > li ul.submenu > li.active > .icon-thumbnail{
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 #admin_catalog  .sidebar-menu .menu_items > li ul.submenu > li .icon-thumbnail {
     width: 30px;
@@ -5094,7 +5173,7 @@ header.navbar {
     height: 55px;
     background-color: var(--ok-chrome);
     border-bottom: 1px solid #232730;
-    z-index: 1030;
+    z-index: var(--ok-z-sticky);
     padding: 0 0 0 70px;
 }
 header.navbar .container-fluid{
@@ -5122,12 +5201,12 @@ header.navbar .container-fluid{
     text-align: center;
 }
 .admin_switches .adswitch:hover{
-    background: #fff;
+    background: var(--ok-surface);
      color: var(--ok-accent);
 }
 .admin_switches .adswitch.active{
     background: var(--ok-accent);
-    color: #ffffff;
+    color: var(--ok-ink-inverse);
 }
 .admin_languages,
 .admin_notification,
@@ -5199,7 +5278,7 @@ header.navbar .container-fluid{
 }
 .admin_notification .notification_title,
 .admin_techsupport a{
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 .admin_notification .notification_title:hover,
 .admin_techsupport a:hover{
@@ -5208,7 +5287,7 @@ header.navbar .container-fluid{
 .admin_notification .counter,
 .admin_techsupport .counter{
     background: var(--ok-accent);
-    color: #ffffff;
+    color: var(--ok-ink-inverse);
     min-width: 16px;
     height: 16px;
     text-align: center;
@@ -5231,7 +5310,7 @@ header.navbar .container-fluid{
 }
 .admin_name a,
 .admin_exit a{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     padding-right: 15px;
     display: flex;
     align-items: center;
@@ -5255,7 +5334,7 @@ header.navbar .container-fluid{
     padding: 10px 15px 10px 8px;
     border: 0;
     background: none;
-    color: #fff;
+    color: var(--ok-ink-inverse);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -5339,7 +5418,7 @@ header.navbar .container-fluid{
 .menu_hamburger{
     width: 24px;
     height: 3px;
-    background: #fff;
+    background: var(--ok-surface);
     border-radius: 4px;
     transition: all 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
     position: relative;
@@ -5350,7 +5429,7 @@ header.navbar .container-fluid{
     display: block;
     width: 24px;
     height: 3px;
-    background: #fff;
+    background: var(--ok-surface);
     position: absolute;
     border-radius: 4px;
     transition: all 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -5425,12 +5504,12 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     visibility: hidden;
     border: 1px solid rgba(204, 204, 204, 0.2);
     padding: 0;
-    background: #fff;
+    background: var(--ok-surface);
     -webkit-box-shadow: 0 4px 6px -1px rgba(136, 136, 136, 0.05), 0 2px 4px -2px rgba(136, 136, 136, 0.1);
     box-shadow: 0 4px 6px -1px rgba(136, 136, 136, 0.05), 0 2px 4px -2px rgba(136, 136, 136, 0.1);
     color: rgb(118, 118, 118);
     cursor: pointer;
-    z-index: 200;
+    z-index: var(--ok-z-dropdown);
 }
 .notification_inner:hover > .notification_toggle,
 .notification_inner .notification_toggle:hover{
@@ -5508,7 +5587,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     background-color: var(--ok-chrome-raised);
     height: 35px;
     padding: 0 15px 0 0;
-    z-index: 100;
+    z-index: var(--ok-z-footer);
 }
 
 
@@ -5519,17 +5598,25 @@ body.menu-pin .menu_switch .menu_hamburger::after {
 .fixed-panel{
     position: fixed;
     top: 55px;
-    z-index: 2000;
+    z-index: var(--ok-z-overlay);
     transition: 0.5s all;
 }
 .variants_toggle{
     cursor: pointer;
     color: var(--ok-accent);
     font-size: 12px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     vertical-align: middle;
     margin-top: 3px;
     font-weight: 500;
+}
+/* Клас m-t-2 у розмітці зсував шеврон нижче базової лінії тексту. У flex-рядку
+   вертикаль тримає align-items, тож відступ тут зайвий. */
+.variants_toggle .fn_icon_arrow{
+    margin-top: 0;
+    display: inline-flex;
 }
 
 .products_variants_block{
@@ -5547,7 +5634,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     right: 0;
     top: 33px;
     width: 100%;
-    background: #fff;
+    background: var(--ok-surface);
 }
 .fn_show_icon_menu.show .tablet_icon_menu{
     display: block;
@@ -5635,7 +5722,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
 }
 .checkbox_email  .checkbox_label::before {
     cursor: pointer;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     border: 1px solid var(--ok-line-strong);
     border-radius: 10%;
     content: "";
@@ -5689,7 +5776,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
 }
  .box_labels_show:hover span,
  .box_labels_show:hover svg{
-     color: rgb(72, 176, 247)
+     color: var(--ok-accent)
 }
 .box_labels_show span,
 .box_labels_show svg{
@@ -5704,7 +5791,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     height: 12px;
 }
 .box_labels_hide{
-    background: #fff;
+    background: var(--ok-surface);
     border-radius: 12px;
     border: 1px solid #e4e7ec;
     border-bottom-color: #C4C9CC;
@@ -5753,7 +5840,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     margin-bottom: 10px;
     display: block;
     border-radius: 6px;
-    color: #fff;
+    color: var(--ok-ink-inverse);
     font-weight: 600;
     text-shadow: 0 0 1px rgba(0,0,0,.2),0 0 2px #000;
     text-align: left;
@@ -5775,7 +5862,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
 .option_labels_box .label_labels::before {
     content: "";
     display: inline-block;
-    color: #fff;
+    color: var(--ok-ink-inverse);
     text-shadow: 0 0 1px rgba(0,0,0,.2),0 0 2px #000;
     vertical-align: middle;
     left: inherit;
@@ -5937,13 +6024,14 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     vertical-align: middle;
 }
 .banner_card_header {
-    color: #fff;
-    background-color: var(--ok-chrome-raised);
+    color: var(--ok-ink);
+    background-color: var(--ok-thead);
+    border-bottom: 1px solid var(--ok-thead-line);
     font-weight: 600;
     font-family: var(--ok-font);
-    text-transform: uppercase;
-    font-size: 14px;
-    padding: 15px;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    padding: 12px 15px;
 }
 .img_bnr_c_head{
     min-height: 60px;
@@ -6023,17 +6111,18 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     margin-bottom: 20px;
     position: relative;
     display: block;
-    background-color: #fff;border: 1px solid var(--ok-line-strong);
+    background-color: var(--ok-surface);border: 1px solid var(--ok-line-strong);
     border-radius: 8px;
 }
 .banner_card_header{
-    color: #fff;
-    background-color: var(--ok-chrome-raised);
+    color: var(--ok-ink);
+    background-color: var(--ok-thead);
+    border-bottom: 1px solid var(--ok-thead-line);
     font-weight: 600;
     font-family: var(--ok-font);
-    text-transform: uppercase;
-    font-size: 14px;
-    padding: 15px;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    padding: 12px 15px;
     border-radius: 8px 8px 0 0;
 }
 .banner_card_block{
@@ -6186,14 +6275,14 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     border: none;
     border-radius: 0;
     font-size: 18px;
-    color: rgb(95, 95, 95);
+    color: var(--ok-ink-soft);
 }
 .banner_type__item input[type=radio]:checked + .okay_ckeckbox:before{
     content: "\f192";
 }
 .banner_type__item .okay_ckeckbox:hover,
 .banner_type__item input[type=radio]:checked + .okay_ckeckbox{
-    color: rgb(95, 95, 95);
+    color: var(--ok-ink-soft);
 }
 .banner_type__name_wrap,
 .banner_type__img_wrap {
@@ -6459,7 +6548,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     width: 15px;
     height: 15px;
     content: '✔';
-    color: #fff;
+    color: var(--ok-ink-inverse);
     position: absolute;
     top: 0;
     right: 3px;
@@ -6500,7 +6589,7 @@ body.menu-pin .menu_switch .menu_hamburger::after {
     text-rendering: auto;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: #fff;
+    color: var(--ok-ink-inverse);
     position: absolute;
     top: 4px;
     right: 4px;
@@ -6559,7 +6648,7 @@ input[type=range]:hover::-webkit-slider-thumb {
 input[type=range]:active::-webkit-slider-thumb {
     background-color: var(--ok-accent-hover);
 }
-input[type=range]:focus {
+input[type=range]:focus:not(:focus-visible) {
     outline: none;
 }
 input[type=range]:focus::-webkit-slider-runnable-track {
@@ -6669,7 +6758,7 @@ input[type=range]:focus::-ms-fill-upper {
     font-stretch: normal;
     line-height: normal;
     letter-spacing: normal;
-    color: #ffffff;
+    color: var(--ok-ink-inverse);
     /* Було rgba(112,124,134,.7): накладене на біле дає 2.6:1 під білим текстом. */
     background-color: #5b6770;
     width: 35%;
@@ -6682,7 +6771,7 @@ input[type=range]:focus::-ms-fill-upper {
     white-space: nowrap;
 }
 .feature_name a{
-    color: #ffffff;
+    color: var(--ok-ink-inverse);
 }
 .additional_values.feature_name {
     background: transparent;
@@ -6705,7 +6794,7 @@ input[type=range]:focus::-ms-fill-upper {
     font-weight: 400;
     font-size: 14px;
     color: #263238;
-    background: #fff;
+    background: var(--ok-surface);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
 }
 .new_feature_row .new_feature:first-child{
@@ -6746,19 +6835,20 @@ input[type=range]:focus::-ms-fill-upper {
 }
 .feature_input:focus {
     border-color: rgba(118, 118, 118, 0.7);
-    background: #fff;
+    background: var(--ok-surface);
     border-radius: 0;
 }
 .feature_value::-ms-expand {
     background-color: transparent;
     border: 0; }
 .feature_value:focus {
-    color: #607d8b;
-    background-color: #fff;
-    border-color: #66afe9;
-    outline: none; }
+    color: var(--ok-ink);
+    background-color: var(--ok-surface);
+    border-color: var(--ok-accent);
+    box-shadow: 0 0 0 3px var(--ok-accent-soft); }
+.feature_value:focus:not(:focus-visible) { outline: none; }
 .feature_value::placeholder {
-    color: #999;
+    color: var(--ok-ink-muted);
     opacity: 1; }
 .feature_value:disabled, .variant_input[readonly] {
     background-color: #cfd8dc;
@@ -6773,7 +6863,7 @@ input[type=range]:focus::-ms-fill-upper {
     font-size: 0.875rem;
     line-height: 1.25;
     color: #607d8b;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     background-image: none;
     background-clip: padding-box;
     border: 1px solid rgba(0, 0, 0, 0.15);
@@ -6781,9 +6871,12 @@ input[type=range]:focus::-ms-fill-upper {
     transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
 }
 .new_feature:focus{
-    color: #607d8b;
-    background-color: #fff;
-    border-color: #66afe9;
+    color: var(--ok-ink);
+    background-color: var(--ok-surface);
+    border-color: var(--ok-accent);
+    box-shadow: 0 0 0 3px var(--ok-accent-soft);
+}
+.new_feature:focus:not(:focus-visible){
     outline: none;
 }
 
@@ -6793,7 +6886,7 @@ input[type=range]:focus::-ms-fill-upper {
     display: none;
 }
 .tab_navigation{
-    border-bottom: 1px solid rgb(204, 204, 204);
+    border-bottom: 1px solid var(--ok-line-strong);
     display: -ms-flexbox;
     display: flex;
     -ms-flex-wrap: wrap;
@@ -6838,7 +6931,7 @@ input[type=range]:focus::-ms-fill-upper {
 }
 
 .tab_navigation--round .tab_navigation_link{
-    background: #FFF;
+    background: var(--ok-surface);
     border-radius: 8px;
     border: 1px solid rgb(238, 238, 238);
     color: var(--ok-ink);
@@ -6850,7 +6943,7 @@ input[type=range]:focus::-ms-fill-upper {
     line-height: 1.2;
 }
 .tab_navigation--round .tab_navigation_link.selected{
-    color: #fff;
+    color: var(--ok-ink-inverse);
     background-color: var(--ok-chrome);
     border-color: var(--ok-chrome);
     text-decoration: none;
@@ -6979,7 +7072,7 @@ input[type=range]:focus::-ms-fill-upper {
     display: block;
     line-height: 28px;
     background: var(--ok-success);
-    color: #fff;
+    color: var(--ok-ink-inverse);
     cursor: pointer;
     font-size: 14px;
     font-style: normal;
@@ -7110,7 +7203,7 @@ input[type=range]:focus::-ms-fill-upper {
 }
 .design_tabs .design_container .design_tab.focus:hover {
     background: var(--ok-success);
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 /************************************************************************* Delivery.tpl  */
 .payment_item{
@@ -7240,7 +7333,7 @@ input[type=range]:focus::-ms-fill-upper {
     box-shadow: 5px 5px rgba(102, 102, 102, .1)!important;
     text-shadow: none!important;
     padding: 0!important;
-    background-color: #fff!important;
+    background-color: var(--ok-surface)!important;
     margin: 10px 0 0!important;
     border: 1px solid var(--ok-line)!important;
     font-family: var(--ok-font)!important;
@@ -7271,7 +7364,7 @@ input[type=range]:focus::-ms-fill-upper {
 }
 .chosen-container-multi .chosen-drop .result-selected {
     display: list-item!important;
-    color: rgb(204, 204, 204)!important;
+    color: var(--ok-line-strong)!important;
     cursor: default!important;
 }
 .seo_cateogories_wrap{
@@ -7298,8 +7391,8 @@ input[type=range]:focus::-ms-fill-upper {
     height: 100%;
     text-align: center;
     opacity: 0.7;
-    background: #fff url(../images/ajax_preloader.gif) no-repeat center center;
-    z-index: 9999;
+    background: var(--ok-surface) url(../images/ajax_preloader.gif) no-repeat center center;
+    z-index: var(--ok-z-backdrop);
 }
 
 /***************************************************** select language  */
@@ -7378,7 +7471,7 @@ input[type=range]:focus::-ms-fill-upper {
     color: #7e7e7e;
     padding: 0 0 0 0;
     position: absolute;
-    background: #fff;
+    background: var(--ok-surface);
     display: block;
     width: 98%;
     height: 98%;
@@ -7454,7 +7547,7 @@ img.fnone {
     font-weight: normal;
     outline: 0;
     line-height: 1.42857143;
-    color: rgb(44, 44, 44);
+    color: var(--ok-ink);
     background-color: rgb(255, 255, 255);
     background-image: none;
     padding: 1px 25px 1px 6px;
@@ -7486,7 +7579,7 @@ img.fnone {
     overflow-y: auto;
     overflow-x: hidden;
     zoom: 1;
-    z-index: 9999
+    z-index: var(--ok-z-dropdown)
 }
 
 .ddcommon .ddChild li {
@@ -7549,7 +7642,7 @@ img.fnone {
     font-weight: 400;
     font-size: 14px;
     line-height: 1.42857143;
-    color: rgb(44, 44, 44);
+    color: var(--ok-ink);
 }
 
 .dd .ddArrow:hover {
@@ -7578,13 +7671,13 @@ img.fnone {
 
 .dd .ddChild {
     border: 1px solid var(--ok-line-strong);
-    background-color: #fff;
+    background-color: var(--ok-surface);
     left: -1px;
 }
 
 .dd .ddChild li {
     padding: 5px;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     border-bottom: 1px solid var(--ok-line-strong);
 }
 
@@ -7653,7 +7746,7 @@ img.fnone {
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: 1050;
+    z-index: var(--ok-z-modal);
     -webkit-overflow-scrolling: touch;
     outline: 0;
 }
@@ -7688,7 +7781,7 @@ img.fnone {
 
 .modal-content {
     position: relative;
-    background-color: #ffffff;
+    background-color: var(--ok-surface);
     -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, 0.2);
     box-shadow: 0 3px 9px rgba(0, 0, 0, 0.2);
     -webkit-background-clip: padding-box;
@@ -7946,13 +8039,13 @@ base::-moz-progress-bar,
 
 .d-table{display: table;height: 100%}
 .d-100vh-va-middle{display: table-cell;vertical-align: middle;}
-.d-table .input-group .form-control{border-right: 1px solid rgb(204, 204, 204);border-left: 0
+.d-table .input-group .form-control{border-right: 1px solid var(--ok-line-strong);border-left: 0
 }
 
 .card {
     position: relative;
     display: block;
-    background-color: #fff;
+    background-color: var(--ok-surface);
     border: 1px solid var(--ok-line);
     border-radius: 16px;
     box-shadow: 0 4px 6px -1px rgba(31, 31, 31, 0.05), 0 2px 4px -2px rgba(31, 31, 31, 0.05);
@@ -7965,7 +8058,7 @@ base::-moz-progress-bar,
     font-size: 14px;
 }
 .card-inverse .card-block--version{
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 .okay_bg {background: RGB(9, 26, 51);}
 .card-group {
@@ -7996,7 +8089,7 @@ base::-moz-progress-bar,
     padding: 10px;
     transition: 1s;
     display: none;
-    z-index: 1000;
+    z-index: var(--ok-z-sticky);
 }
 .fn_fast_save button {
     display: inline-flex;
@@ -8044,22 +8137,25 @@ base::-moz-progress-bar,
 .fn_delete_social,
 .fn_disable_url{cursor:pointer;}
 .fn_delete_social svg{width: 14px;height:14px;}
-.fn_delete_social:hover svg{color: rgb(248, 40, 40);}
+.fn_delete_social:hover svg{color: var(--ok-danger);}
 div.tox-fullscreen {
     top: 55px!important;
     height: calc(100% - 55px);
-    background: #fff!important;
+    background: var(--ok-surface)!important;
 }
-.colorpicker {z-index: 100!important;}
-#ui-datepicker-div{z-index: 100!important;}
+.colorpicker {z-index: var(--ok-z-dropdown)!important;}
+#ui-datepicker-div{z-index: var(--ok-z-dropdown)!important;}
+/* Заголовки таблиць уже світлі, а ці панелі лишались чорними плашками хрому
+   посеред контенту - одна роль, дві трактовки. Тепер як у заголовка списку. */
 .system_header{
-    color: #fff;
-    background-color: var(--ok-chrome-raised);
+    color: var(--ok-ink);
+    background-color: var(--ok-thead);
+    border-bottom: 1px solid var(--ok-thead-line);
     font-weight: 600;
     font-family: var(--ok-font);
-    text-transform: uppercase;
-    font-size: 14px;
-    padding: 15px;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    padding: 12px 15px;
     border-radius: 8px 8px 0 0;
 }
 .system_information{
@@ -8263,7 +8359,7 @@ div.tox-fullscreen {
 .learning_card__inner {
     font-family: var(--ok-font);
     position: relative;
-    background: #fff;
+    background: var(--ok-surface);
     width: 100%;
     border: 2px solid rgba(0,0,0,0.07);
     border-bottom: none;
@@ -8276,7 +8372,7 @@ div.tox-fullscreen {
 .learning_card__inner:after,
 .learning_card__inner:before {
     content: "";
-    background: #fff;
+    background: var(--ok-surface);
     height: 5px;
     display: block;
     box-shadow: 0 2px 0 rgba(0,0,0,0.07) inset, 0 2px 0 rgba(0,0,0,0.07);
@@ -8292,8 +8388,10 @@ div.tox-fullscreen {
     left: 20px;
     right: 20px;
 }
+/* Чорна плашка хрому в контентній зоні виглядала чужою поруч зі світлими
+   заголовками таблиць. Тепер це акцентна шапка картки. */
 .learning_card__header {
-    background-color: var(--ok-chrome);
+    background-color: var(--ok-accent);
     position: absolute;
     top: 0;
     right: 0;
@@ -8315,16 +8413,18 @@ div.tox-fullscreen {
     align-items: center;
     justify-content: start;
     margin-right: 15px;
-    color: #fff;
+    color: var(--ok-ink-inverse);
 }
 .learning_card__bookmark{
     position: absolute;
     top: -2px;
     right: 20px;
-    color: rgb(229, 71, 71);
+    /* Стрічка позначає «ще не пройдено», а не помилку - червоний тут завищував
+       тон. Це другорядна дія, на яку варто звернути увагу. */
+    color: var(--ok-attention);
 }
 .learning_card__bookmark--done{
-    color: rgb(79, 201, 104);
+    color: var(--ok-success);
 }
 .learning_card__bookmark svg{
     height: 45px;
@@ -8349,14 +8449,14 @@ div.tox-fullscreen {
     margin: 0 0 8px;
     line-height: 14px;
     font-size: 14px;
-    color:rgb(123, 139, 142);
+    color: var(--ok-ink-muted);
     font-weight: 700;
 }
 .learning_card__title {
     font-size: 20px;
     line-height: 24px;
     margin: 0 0 20px;
-    color:rgb(75, 86, 88);
+    color: var(--ok-ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -8368,7 +8468,7 @@ div.tox-fullscreen {
     font-size: 14px;
     overflow: hidden;
     margin: 0;
-    color: rgb(123, 139, 142);
+    color: var(--ok-ink-muted);
     display: -webkit-box;
     -webkit-line-clamp: 4;
     max-height: 90px;
@@ -8410,15 +8510,15 @@ div.tox-fullscreen {
     padding: 0 20px;
     font-weight: 600;
     line-height: 26px;
-    border: solid 2px rgb(132, 115, 196);
-    color:rgb(132, 115, 196);
+    border: solid 2px var(--ok-accent);
+    color: var(--ok-accent);
     background-color:transparent;
     font-size: 14px;
 }
 .learning_card__button:hover {
-    color: #fff;
-    background-color: rgb(132, 115, 196);
-    border-color: rgb(132, 115, 196);
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-accent);
+    border-color: var(--ok-accent);
 }
 .learning_card__informer{
     margin-left: 10px;
@@ -8434,7 +8534,7 @@ div.tox-fullscreen {
     position: relative;
     background-color: transparent;
     display: inline-block;
-    color:rgb(188, 193, 197);
+    color: var(--ok-control-line);
     padding: 0;
     text-align: center;
     line-height: 40px;
@@ -8449,11 +8549,11 @@ div.tox-fullscreen {
     left: 1px;
 }
 .learning_card__video:hover {
-    color: #FF0000;
+    color: var(--ok-danger);
 }
 .learning_card__done:hover{
-    border: 2px solid #576366;
-    color: #576366;
+    border: 2px solid var(--ok-ink-soft);
+    color: var(--ok-ink-soft);
 }
 .progress-bar__wrap{
     -ms-flex-negative: 0;
@@ -8484,10 +8584,10 @@ div.tox-fullscreen {
 .progress-bar{
     font-family: var(--ok-font);
     font-size: 16px;
-    color: #fff;
+    color: var(--ok-ink-inverse);
     font-weight: bold;
     text-align: center;
-    background: rgb(58, 154, 78);
+    background: var(--ok-success);
     background-image: -webkit-linear-gradient(135deg, rgba(255, 255, 255, 0.125) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.125) 50%, rgba(255, 255, 255, 0.125) 75%, transparent 75%, transparent);
     background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.125) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.125) 50%, rgba(255, 255, 255, 0.125) 75%, transparent 75%, transparent);
     background-size: 35px 35px;
@@ -8598,7 +8698,7 @@ div.tox-fullscreen {
 }
 .okay_type_radio::before {
     cursor: pointer;
-    background-color:#fff;
+    background-color:var(--ok-surface);
     display: inline-block;
     height: 20px;
     left: inherit;
@@ -8612,20 +8712,20 @@ div.tox-fullscreen {
     border: none;
     border-radius: 0;
     font-size: 18px;
-    color: rgb(95, 95, 95);
+    color: var(--ok-ink-soft);
 }
 .okay_type_radio_wrap input[type=radio]:checked + .okay_type_radio:before{
     content: "\f192";
 }
 .okay_type_radio:hover,
 .okay_type_radio_wrap input[type=radio]:checked + .okay_type_radio{
-    color: rgb(95, 95, 95);
+    color: var(--ok-ink-soft);
 }
 
 
 .okay_type_checkbox::before {
     cursor: pointer;
-    background-color:#fff;
+    background-color:var(--ok-surface);
     display: inline-block;
     height: 20px;
     left: inherit;
@@ -8639,7 +8739,7 @@ div.tox-fullscreen {
     border: none;
     border-radius: 0;
     font-size: 18px;
-    color: rgb(95, 95, 95);
+    color: var(--ok-ink-soft);
 }
 .okay_type_checkbox_wrap input[type=checkbox]:checked + .okay_type_checkbox:before{
     content: "\f046";
@@ -8651,7 +8751,7 @@ div.tox-fullscreen {
 /******************** Left menu counter */
 .menu_counter {
     background: var(--ok-success);
-    color: #fff;
+    color: var(--ok-ink-inverse);
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -8751,7 +8851,7 @@ ul.submenu .menu_counter {
     transform: translateY(3px);
     float: left;
     margin-right: 10px;
-    color: gray;
+    color: var(--ok-ink-muted);
 }
 
 .system_position {
@@ -8785,20 +8885,20 @@ ul.submenu .menu_counter {
     line-height: 36px;
     position: absolute;
     left: -19px;
-    color: rgb(47, 82, 222);
+    color: var(--ok-accent);
     font-size: 20px;
     margin-top: -10px;
     z-index: 1;
     top: 3px;
-    -webkit-box-shadow: 0 0 0 1px rgb(243, 246, 247);
-    box-shadow: 0 0 0 1px rgb(243, 246, 247);
-    background-color: rgb(243, 246, 247);
+    -webkit-box-shadow: 0 0 0 1px var(--ok-canvas);
+    box-shadow: 0 0 0 1px var(--ok-canvas);
+    background-color: var(--ok-canvas);
     -webkit-transform: rotate(45deg);
     transform: rotate(45deg);
     border-radius:4px;
 }
 .order_history__icon--success{
-    color: rgb(12, 194, 32);
+    color: var(--ok-success);
 }
 .order_history__icon--exchange{
     color: rgb(209, 118, 21);
@@ -8840,7 +8940,7 @@ ul.submenu .menu_counter {
 .match_order{
     width: 100%;
     border-radius: 4px;
-    border: 1px solid rgb(204, 204, 204);
+    border: 1px solid var(--ok-line-strong);
     overflow: hidden;
 }
 .match_order__head{
@@ -9139,7 +9239,7 @@ margin-right: 3px;
 .fn_social_image .fa-linkedin:before{content: "\f0e1";}
 
 input.error {
-    border-color: rgb(255, 0, 0);
+    border-color: var(--ok-danger);
 }
 
 
@@ -9156,7 +9256,7 @@ input.error {
     top: 10px;
 }
 .popup_bg {
-    color: #fff!important;
+    color: var(--ok-ink-inverse)!important;
   background: linear-gradient(to right, #00b4db, #0083b0)!important;
 }
 .popup__header{
@@ -9202,7 +9302,7 @@ input.error {
     user-select: none;
     padding: 0;
     color: #222;
-    background: #fff;
+    background: var(--ok-surface);
     overflow: hidden;
     z-index: 2;
     text-align: center;
@@ -9298,17 +9398,17 @@ input.error {
     border-radius: 8px;
     cursor: pointer;
     user-select: none;
-    border: 1px solid #b54843;
+    border: 1px solid var(--ok-danger);
     padding: 6px 10px;
     transition: all 0.2s ease-in-out;
-    color: #fff;
-    background-color: #b54843;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-danger);
 }
 .btn_inner:focus,
 .btn_inner:hover{
-    color: #fff;
-    background-color: #9e4944;
-    border-color: #9e4944;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-danger-hover);
+    border-color: var(--ok-danger-hover);
 }
 .heading-divider {
     display: flex;
@@ -9352,7 +9452,7 @@ summary:focus-visible,
 .navbar a:focus-visible,
 .navbar button:focus-visible,
 .sidebar_header button:focus-visible {
-    outline-color: #fff;
+    outline-color: var(--ok-ink-inverse);
 }
 /* У полів вводу контур поверх наявної рамки давав подвійну товсту коробку.
    Замість нього рамка бере колір акценту, а навколо йде мʼяке гало — так

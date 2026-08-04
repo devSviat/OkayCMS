@@ -78,6 +78,8 @@ $lang['description_title2_add_images'] = 'Загрузка файла:';
 $lang['description_title3_add_images'] = 'Загрузка изображений:';
 $lang['description_info3_add_images'] = '<p>Этот способ используется для загрузки фото к баннерам, товарам, категориям и т.д. Можно загружать несколько фото одновременно, удалять их и перемещать по приоритетности. Для его настройки необходимо подставить свои переменные в <strong>&#123;foreach&#125;</strong> и в <strong>&#123;if&#125;</strong></p>';
 $lang['description_text_clip_clipboard'] = 'Нажмите, чтобы скопировать в буфер обмена.';
-$lang['description_info_icons'] = '<p>В системе используется иконки <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">fontawesome</a> и дефолтный набор svg конок, который находится в <strong>svg_icon.tpl</strong>. Для того чтобы вывести определенную иконку, нужно подключить <strong>svg_icon.tpl</strong> с параметром <strong>svgId=""</strong>, в котором указываем id нужной иконки.</p>
-                                   <p>Для примера, чтобы вывести иконку корзины, вставляем <strong>&#123;include file="svg_icon.tpl" svgId="trash"&#125;</strong> и в <strong>svgId</strong> указываем id иконки корзины.</p> Наша иконка:  {include file="svg_icon.tpl" svgId="trash"}';
-$lang['description_title2_icons'] = 'Список дефолтных иконок:';
+$lang['description_info_icons'] = '<p>Иконки интерфейса — это набор inline-SVG, который лежит в <strong>svg_icon.tpl</strong>. Отдельной библиотеки шрифтовых иконок в панели больше нет.</p>
+                                   <p>Чтобы вывести иконку, подключите <strong>svg_icon.tpl</strong> и передайте параметр <strong>svgId</strong> — идентификатор нужной иконки из списка ниже.</p>
+                                   <p>Например, корзина выводится так: <strong>&#123;include file="svg_icon.tpl" svgId="trash"&#125;</strong></p>';
+$lang['description_result_icons'] = 'Результат:';
+$lang['description_title2_icons'] = 'Список доступных иконок:';
