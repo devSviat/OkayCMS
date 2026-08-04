@@ -119,9 +119,6 @@
     --ok-accent-hover: #004876;
     --ok-accent-active: #003b60;
     --ok-accent-soft: #e6f0f7;
-    /* Помітніша за --ok-thead: для шапок карток, що стоять просто на полотні,
-       де світло-сіра плашка зливається з фоном сторінки. */
-    --ok-accent-band: #c9dcec;
     --ok-accent-on-chrome: #00a7ef;
     /* Третій колір логотипа. Позначає поточну мову і більше нічого. */
     --ok-brand-gold: #ffbf1a;
@@ -137,7 +134,6 @@
        другорядну дію, і для неї є --ok-attention. */
     --ok-warning: #a35a00;
     --ok-warning-hover: #874a00;
-    --ok-warning-disabled: #dcbb92;
     --ok-warning-soft: #fdf2e3;
 
     /* Другорядна дія поруч із синьою первинною: схвалити, обробити, оновити
@@ -146,7 +142,6 @@
     --ok-attention-hover: #4b3c85;
     --ok-attention-active: #3f3270;
     --ok-attention-disabled: #c3bbdf;
-    --ok-attention-soft: #efedf7;
     --ok-danger: #c8352c;
     --ok-danger-hover: #a92c25;
     --ok-danger-soft: #fbebea;
@@ -1088,8 +1083,8 @@ a.link_white:hover{
 .btn-warning.active,
 .btn-warning:active{
     color: var(--ok-ink-inverse);
-    background-color: var(--ok-attention-hover);
-    border-color: var(--ok-attention-hover);
+    background-color: var(--ok-attention-active);
+    border-color: var(--ok-attention-active);
 }
 .btn-warning.active:hover,
 .btn-warning:active:hover,
@@ -8473,11 +8468,11 @@ div.tox-fullscreen {
    службової позначки розділу. Тепер це той самий світлий заголовок, що й у
    таблиць і панелей системної інформації: одна роль - один вигляд. */
 .learning_card__header {
-    /* --ok-thead (#eef0f2) майже дорівнює полотну (#f5f6f7): у таблиці він
-       читається, бо оточений білими рядками, а тут стоїть на краю картки і
-       край зникав. М'який акцент відділяє шапку від полотна і від картки. */
-    background-color: var(--ok-accent-band);
-    border-bottom: 1px solid var(--ok-line-strong);
+    /* Той самий заголовок, що й у таблиць. Раніше тут стояв акцентний тон, бо
+       --ok-thead був #eef0f2 і зливався з полотном; після того як плашку
+       посилили до #e8ebee, потреба в окремому кольорі відпала. */
+    background-color: var(--ok-thead);
+    border-bottom: 1px solid var(--ok-thead-line);
     position: absolute;
     top: 0;
     right: 0;
