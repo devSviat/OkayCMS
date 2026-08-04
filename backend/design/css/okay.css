@@ -1659,13 +1659,14 @@ opacity: 1;
     border-color: RGB(10, 124, 113);
 }
 .boxed_notify{
-    background-color: var(--ok-warning);
+    background-color: var(--ok-accent);
     color: #fff;
-    border-color: var(--ok-warning);
+    border-color: var(--ok-accent);
 }
 .boxed_yellow{
     background-color: #F8D053;
-    color: #fff;
+    /* Біла іконка на цьому жовтому давала 1.49:1. Темна дає 8.4:1. */
+    color: var(--ok-ink);
     border-color: #F8D053;
 }
 .boxed_success .heading_box,
@@ -4952,11 +4953,13 @@ body.menu-pin .page-container {
     color: rgb(180 180 180);
 }
 #admin_catalog  .icon-thumbnail{
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: rgb(255 255 255 / .07);
     height: 40px;
     width: 40px;
-    line-height: 46px;
+    line-height: 1;
     text-align: center;
     vertical-align: middle;
     position: relative;
@@ -5045,9 +5048,9 @@ body.menu-pin .page-container {
 #admin_catalog  .sidebar-menu .menu_items > li ul.submenu > li .icon-thumbnail {
     width: 30px;
     height: 30px;
-    line-height: 30px;
+    line-height: 1;
     margin: 0;
-    background-color: #2c2a28;
+    background-color: var(--ok-chrome-raised);
     font-size: 14px;
 }
 #admin_catalog  .scrollbar-inner > .scroll-element.scroll-y{
