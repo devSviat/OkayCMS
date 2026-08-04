@@ -124,6 +124,10 @@
     /* Той самий червоний на темному хромі дає 2.8:1, тож там світліший. */
     --ok-danger-on-chrome: #f08b84;
 
+    /* Пояснювальне сповіщення: не помилка, не попередження, не первинна дія.
+       6.03:1 під білим текстом. */
+    --ok-notice: #0b6f66;
+
     /* Радіуси - три кроки замість семи */
     --ok-radius-control: 6px;
     --ok-radius-panel: 10px;
@@ -1647,16 +1651,21 @@ opacity: 1;
     left:-5px;
 }
 
-.boxed_attention,
 .boxed_warning{
     background-color: var(--ok-danger);
     color: #fff;
     border-color: var(--ok-danger);
 }
+.boxed_attention{
+    background-color: var(--ok-notice);
+    color: #fff;
+    border-color: var(--ok-notice);
+}
 .boxed_success{
-    background-color: RGB(10, 124, 113);
-    color: var(--ok-ink);
-    border-color: RGB(10, 124, 113);
+    background-color: var(--ok-success);
+    /* Було var(--ok-ink) на темній бірюзі — темне по темному. */
+    color: #fff;
+    border-color: var(--ok-success);
 }
 .boxed_notify{
     background-color: var(--ok-accent);
