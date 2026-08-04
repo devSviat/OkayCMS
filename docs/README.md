@@ -20,6 +20,7 @@
 | Працювати з базою | [entities.md](entities.md) |
 | Додати сторінку вітрини | [routes.md](routes.md), [controllers.md](controllers.md) |
 | Підключити CSS чи JS | [assets.md](assets.md) |
+| Правити стилі адмінки | [admin-design.md](admin-design.md) |
 | Перенести свою тему на форк | [theme-porting.md](theme-porting.md) |
 | Перенести тему звідси на стокову OkayCMS | [theme-to-stock.md](theme-to-stock.md) |
 | Зрозуміти, що змінили ітерації безпеки | [UPGRADE-security.md](UPGRADE-security.md) |
@@ -49,6 +50,7 @@
 * [Модифікація `.tpl` з модуля](tpl-modifications.md) — зміна чужої розмітки без її редагування
 * [Smarty-плагіни](smarty-plugins.md) — власні теги в шаблонах
 * [CSS і JS](assets.md) — конвеєр асетів, налаштування теми, пастки CSS-компілятора
+* [Дизайн адмінки](admin-design.md) — токени, іконки, кільце фокуса, пари «на світлому / на темному»
 * [Перенесення теми на цей форк](theme-porting.md) — навіщо мутації пішли на POST і що змінити у своїй темі
 * [Перенесення теми звідси на стокову](theme-to-stock.md) — зворотний напрям: що переїде саме, а що руками
 
