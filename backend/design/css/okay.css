@@ -77,9 +77,16 @@
     --ok-sunken: #fafbfc;
 
     /* Хром: ліва панель, шапка, футер. Два рівні, не три. */
-    --ok-chrome: #221f1f;
-    --ok-chrome-raised: #2c2928;
-    --ok-chrome-ink-muted: #a9a4a1;
+    /* Шкала хрому в OKLCH з відтінком фірмового синього (H=248, той самий, що
+       в --ok-accent). Хрома навмисно мала (0.007-0.009): це має читатись як
+       сірий, а не як синій - при 0.024 панель ставала синьою. Три рівні
+       світлоти: заглиблення (підменю), база (шапка), підняття (сама панель).
+       Крок заглиблення навмисно малий (0.047 у OKLCH): при 0.100 підменю
+       читалось як провал, а не як вкладений рівень. */
+    --ok-chrome: #1c2023;
+    --ok-chrome-raised: #292d31;
+    --ok-chrome-sunken: #1e2225;
+    --ok-chrome-ink-muted: #95999c;
 
     /* Заголовок таблиці навмисно не хром: темна смуга посеред контенту
        читалася як частина навігації й конкурувала з меню за увагу. */
@@ -3004,10 +3011,17 @@ label.switch_label i{
     max-width: 100%;
     box-shadow: var(--ok-shadow-2) !important;
 }
-.autocomplete-suggestion {
-    display: block;
+/* Специфічність навмисно вища за одинарний клас: styles.css самої бібліотеки
+   вантажиться після okay.css і має .autocomplete-suggestion{padding:2px 5px},
+   через що рядок був заввишки 22px. */
+.autocomplete-suggestions .autocomplete-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     width: 100%;
-    padding: 5px 10px;
+    min-height: 32px;
+    padding: 6px 12px;
+    border-radius: 6px;
     cursor: pointer;
 }
 .autocomplete-suggestion:nth-child(even) {
@@ -3045,10 +3059,13 @@ label.switch_label i{
     font-weight: normal;
     color: var(--ok-accent);
 }
-.autocomplete-suggestion div {
+/* 45px - це колонка під мініатюру товару в автокомпліті замовлення. Автокомпліт
+   міст Нової Пошти загортає в <div> сам текст, і те правило його стискало. */
+.autocomplete-suggestion div:has(img) {
     width: 45px !important;
     text-align: center;
     margin-right: 5px;
+    flex-shrink: 0;
 }
 .autocomplete-suggestion div,
 .autocomplete-suggestions span,
@@ -5068,7 +5085,7 @@ body.menu-pin .page-container {
     color: #999;
 }
 #admin_catalog  .sidebar-menu .menu_items .danger_counter {
-    background-color: rgb(160 150 100 / 50%);
+    background-color: var(--ok-accent);
 }
 #admin_catalog  .sidebar-menu .menu_items > li > a.danger_counter .title{
     color: rgb(180 180 180);
@@ -5137,12 +5154,14 @@ body.menu-pin .page-container {
     transform: rotate(-90deg);
 }
 
+/* Панель — підняття, шапка з логотипом — база, відкрите підменю — заглиблення.
+   Три рівні світлоти замість двох близьких сірих. */
 #admin_catalog  .sidebar-menu .menu_items > li ul.submenu {
     display: none;
     list-style: none;
     clear: both;
     margin: 0 0 10px 0;
-    background-color: #201f1e;
+    background-color: var(--ok-chrome-sunken);
     padding: 10px 0 10px 0;
 }
 #admin_catalog  .sidebar-menu .menu_items > li.nav-dropdown.open > ul.submenu {

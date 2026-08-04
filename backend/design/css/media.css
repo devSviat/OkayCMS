@@ -11,7 +11,7 @@
         z-index: 1200;
         text-align: center;
         line-height: 84px;
-        background-color: #221f1f;
+        background-color: var(--ok-chrome);
         padding-left: 10px;
         top: 0;
         left: 0;
@@ -24,7 +24,7 @@
         background: url(../images/logo_img.png) no-repeat center center;
         background-size: cover;
         z-index: 1200;
-        background-color: #221f1f;
+        background-color: var(--ok-chrome);
     }
     body.menu-pin .page-container {padding-left: 280px;}
     body.menu-pin header.navbar {padding-left: 280px;}
@@ -714,7 +714,7 @@
         right: -285px;
         top: 0;
         width: 285px;
-        background: #262423;
+        background: var(--ok-chrome-raised);
         bottom: 0;
         z-index: 1000;
         box-shadow: 0 0 9px rgba(19, 19, 19, 0.1);
@@ -748,7 +748,7 @@
     .admin_techsupport a,
     .admin_languages .languages_title,
     .admin_exit a {
-        background: #262423;
+        background: var(--ok-chrome-raised);
         color: #c5c5c5;
         border-bottom: 1px solid rgba(0, 0, 0, 0.07);
         border-top: 1px solid rgba(0, 0, 0, 0.07);
@@ -807,7 +807,7 @@
         -ms-transform: translateX(0%);
         padding: 8px 15px 8px 10px;
         z-index: 200;
-        background: #201f1e;
+        background: var(--ok-chrome);
 
     }
     .notification_toggle .notif_item {
