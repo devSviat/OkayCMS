@@ -10,8 +10,25 @@ use Okay\Core\Settings;
 
 class BackendModulesHelper
 {
+    /** Основа експоненційного бекофу в request(), а не таймаут curl. */
     private const REQUEST_TIMEOUT = 10;
     private const MAX_RETRY = 4;
+
+    /**
+     * Таймаути для викликів, які ініціює сам адмін (пошук по маркетплейсу,
+     * список версій): чекати довго тут прийнятно, бо людина натиснула кнопку
+     * і бачить очікування.
+     */
+    private const CONNECT_TIMEOUT = 3;
+    private const TIMEOUT = 10;
+
+    /**
+     * Таймаути для фонового оновлення кешу: його ніхто не просив, і воно
+     * трапляється всередині чужого запиту. Здоровий маркетплейс відповідає за
+     * ~0.26 с, тож 3 с - десятикратний запас, а не економія.
+     */
+    private const BACKGROUND_CONNECT_TIMEOUT = 2;
+    private const BACKGROUND_TIMEOUT = 3;
     private $apiBaseUrl;
     private $marketplaceUrl;
     private $config;
@@ -58,8 +75,12 @@ class BackendModulesHelper
      */
     public function updateModulesAccessExpiresCache(): void
     {
-        if (empty($this->settings->get('email_for_module'))){
+        // Без пошти запитувати нема чого: email_request вийде base64 порожнього
+        // рядка. Раніше тут лише стирався кеш, і перевірка нижче після цього
+        // ніколи не спрацьовувала - маркетплейс опитувався на кожному запиті.
+        if (empty($this->settings->get('email_for_module'))) {
             $this->settings->set('modules_access_expires', '');
+            return;
         }
 
         // Перевіряємо чи валідний кеш
@@ -71,11 +92,15 @@ class BackendModulesHelper
             $this->settings->get('email_for_module')
         ));
 
-        $modulesExpiresResponse = $this->request(sprintf(
-            '%sv2/modules/access/expires/email?email_request=%s',
-            $this->apiBaseUrl,
-            $emailRequest
-        ));
+        $modulesExpiresResponse = $this->request(
+            sprintf(
+                '%sv2/modules/access/expires/email?email_request=%s',
+                $this->apiBaseUrl,
+                $emailRequest
+            ),
+            self::BACKGROUND_CONNECT_TIMEOUT,
+            self::BACKGROUND_TIMEOUT
+        );
 
         $modulesExpires = [];
         if ($modulesExpiresResponse && !empty($modulesExpiresResponse->data)) {
@@ -169,7 +194,7 @@ class BackendModulesHelper
         return $this->request($this->apiBaseUrl . 'v1/modules/list?' . http_build_query($query));
     }
     
-    public function request($url)
+    public function request($url, int $connectTimeout = self::CONNECT_TIMEOUT, int $timeout = self::TIMEOUT)
     {
         if (time() < ($_SESSION['modules_request_timeout'] ?? 0)) {
             return false;
@@ -177,8 +202,8 @@ class BackendModulesHelper
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $connectTimeout);
         $result = json_decode(curl_exec($ch));
 
         $retryCnt = $_SESSION['modules_request_timeout_try_cnt'] ?? 0;
