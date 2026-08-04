@@ -3550,11 +3550,25 @@ label.switch_label i{
 .feature_values_duplicate_item_match {
     background-color: #d2d2d2;
 }
+/* width: max-content робив меню завширшки з найдовший пункт. У списку відділень
+   Нової Пошти це 733px при полі 368px - меню вилазило за панель і накривало
+   сусідню колонку. Тепер воно рівно по ширині поля, а довгі назви переносяться
+   замість того, щоб розсовувати меню. */
 .additional_params .bootstrap-select.btn-group .dropdown-menu,
 .okay_list_option .bootstrap-select.btn-group .dropdown-menu,
 .bootstrap-select.btn-group .dropdown-menu{
-    max-width: inherit!important;
     width: max-content!important;
+    min-width: 100%!important;
+    /* Не ширше за поле - інакше меню вилазить за панель; але й не вужче за
+       320px, бо статус замовлення - поле на 80px, і його пункти інакше
+       переносилися б у два рядки. */
+    max-width: max(100%, 320px)!important;
+}
+.bootstrap-select.btn-group .dropdown-menu > li > a,
+.bootstrap-select.btn-group .dropdown-menu .dropdown-item{
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: anywhere;
 }
 .okay_list .okay_list_loc_pos{
     float: right;
