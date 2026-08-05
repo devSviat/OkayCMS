@@ -37,12 +37,15 @@ class CategoryStatsAdmin extends IndexAdmin
 
         $filter = $backendCategoryStatsHelper->buildFilter();
 
+        // У формі має лишитись те, що ввів адмін: у фільтрі дата вже з часом
+        // ("2026-08-01 00:00:01"), а <input type="date"> таке значення не
+        // приймає й показує порожнє поле. Так само робить ReportStatsAdmin.
         if (isset($filter['date_from'])) {
-            $this->design->assign('date_from', $filter['date_from']);
+            $this->design->assign('date_from', $this->request->getRawString('date_from'));
         }
 
         if (isset($filter['date_to'])) {
-            $this->design->assign('date_to', $filter['date_to']);
+            $this->design->assign('date_to', $this->request->getRawString('date_to'));
         }
 
         $categories_list = $backendCategoryStatsHelper->getStatistic($filter);

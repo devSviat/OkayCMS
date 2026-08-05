@@ -42,21 +42,27 @@ class BackendCategoryStatsHelper
     {
         $filter = [];
 
-        $dateFrom = $this->request->get('date_from');
-        $dateTo = $this->request->get('date_to');
+        // Перевірялись $date_from і $date_to, яких у методі немає, — обидва
+        // діапазони мовчки не доходили до вибірки, і сторінка завжди
+        // рахувала продажі за весь час.
+        $dateFrom = strtotime($this->request->getRawString('date_from'));
+        $dateTo = strtotime($this->request->getRawString('date_to'));
 
-        if (!empty($date_from)) {
-            $filter['date_from'] = date("Y-m-d 00:00:01", strtotime($dateFrom));
+        if ($dateFrom !== false) {
+            $filter['date_from'] = date("Y-m-d 00:00:01", $dateFrom);
         }
 
-        if (!empty($date_to)) {
-            $filter['date_to'] = date("Y-m-d 23:59:00", strtotime($dateTo));
+        if ($dateTo !== false) {
+            $filter['date_to'] = date("Y-m-d 23:59:00", $dateTo);
         }
 
         $categoryId = $this->request->get('category', 'integer');
         if (!empty($categoryId)) {
-            $category = $this->categoriesEntity->get($categoryId);
-            $filter['category_id'] = $category->children;
+            // get() на неіснуючу категорію віддає false, а звернення до
+            // властивості false — це Warning, тобто вивід перед заголовками.
+            if ($category = $this->categoriesEntity->get($categoryId)) {
+                $filter['category_id'] = $category->children;
+            }
         }
 
         $brandId = $this->request->get('brand', 'integer');

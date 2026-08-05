@@ -237,6 +237,15 @@ class ReportStatEntity extends Entity
         $this->db->query($select);
         $result = [];
         foreach ($this->db->results() as $v) {
+            // Покупка могла лишитись без категорії: товар видалили або він
+            // не прив'язаний до жодної категорії. LEFT JOIN дає category_id
+            // = NULL, GROUP BY зводить усі такі покупки в один рядок.
+            // Ключем масиву він стає порожнім рядком (PHP 8.5: Deprecated),
+            // а зіставити його з деревом категорій усе одно нема з чим.
+            if ($v->category_id === null) {
+                continue;
+            }
+
             $result[$v->category_id] = $v;
         }
 

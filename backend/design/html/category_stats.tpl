@@ -33,31 +33,23 @@
                             <div class="col-md-11 col-lg-11 col-xl-7 col-sm-12">
                                 <div class="date">
                                     {*Блок фильтров*}
-                                    <form class="date_filter row" method="get">
+                                    <form class="date_filter date_range" method="get">
                                         <input type="hidden" name="controller" value="CategoryStatsAdmin" />
-                                        <div class="col-md-5 col-lg-5 pr-0 pl-0">
-                                            <div class="input-group mobile_input-group input-group--date">
-                                                <span class=" input-group-addon-date">{$btr->general_from|escape}</span>
-                                                {if $is_mobile || $is_tablet}
-                                                    <input type="date" class="fn_from_date form-control" name="date_from" value="{$date_from}" autocomplete="off">
-                                                    {else}
-                                                    <input type="text" class="fn_from_date form-control" name="date_from" value="{$date_from}" autocomplete="off">
-                                                {/if}
+                                        <div class="date_range__field">
+                                            <label class="date_range__label" for="date_from">{$btr->general_from|escape}</label>
+                                            <div class="input-group input-group--date">
+                                                <input type="{if $is_mobile || $is_tablet}date{else}text{/if}" id="date_from" class="fn_from_date form-control" name="date_from" value="{$date_from}" autocomplete="off">
+                                                <span class="input-group--date__icon">{include file='svg_icon.tpl' svgId='calendar'}</span>
                                             </div>
                                         </div>
-                                        <div class="col-md-5 col-lg-5 pr-0 pl-0">
-                                            <div class="input-group mobile_input-group input-group--date">
-                                                <span class=" input-group-addon-date">{$btr->general_to|escape}</span>
-                                                {if $is_mobile || $is_tablet}
-                                                    <input type="date" class="fn_to_date form-control" name="date_to" value="{$date_to}" autocomplete="off">
-                                                    {else}
-                                                    <input type="text" class="fn_to_date form-control" name="date_to" value="{$date_to}" autocomplete="off">
-                                                {/if}
+                                        <div class="date_range__field">
+                                            <label class="date_range__label" for="date_to">{$btr->general_to|escape}</label>
+                                            <div class="input-group input-group--date">
+                                                <input type="{if $is_mobile || $is_tablet}date{else}text{/if}" id="date_to" class="fn_to_date form-control" name="date_to" value="{$date_to}" autocomplete="off">
+                                                <span class="input-group--date__icon">{include file='svg_icon.tpl' svgId='calendar'}</span>
                                             </div>
                                         </div>
-                                        <div class="col-md-2 pr-0 mobile_text_right">
-                                            <button class="btn btn_blue" type="submit">{$btr->general_apply|escape}</button>
-                                        </div>
+                                        <button class="btn btn_blue" type="submit">{$btr->general_apply|escape}</button>
                                     </form>
                                 </div>
                             </div>

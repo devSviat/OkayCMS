@@ -4351,7 +4351,6 @@ label.switch_label i{
     margin-top: -10px;
     margin-bottom: 10px;
 }
-.input-group-addon-date,
 .input-group-addon,
 .input-group > .variant_input,
 .input-group-btn,
@@ -4370,32 +4369,74 @@ label.switch_label i{
     flex-shrink: 1;
 
 }
-.input-group--date .form-control{
+/* Фільтр за періодом ("з ... по ..." у звітах).
+
+   Підписи "з" і "по" лежали всередині .input-group, тож кільце фокуса
+   охоплювало підпис разом із полем, а колонки йшли впритул (pr-0 pl-0) —
+   кільце одного поля налазило на підпис сусіднього. Плюс поле мало
+   заокруглення лише зліва, через що праворуч виглядало обрізаним.
+
+   Тепер підпис — окремий <label> поза групою, поля розведені проміжком,
+   а іконка календаря — той самий svg, що й решта іконок адмінки
+   (замість гліфа FontAwesome, вирахуваного у відсотках ширини).
+
+   Назва саме .date_range, а не .date_filter: у reportstats.tpl клас
+   .date_filter висить на зовнішній <form class="date_filter row">, і
+   display:flex на ньому перебив би bootstrap-івський .row разом із усією
+   сіткою сторінки. */
+.date_range {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+}
+.date_range__field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* Дата коротка — розтягувати поле на пів рядка нема сенсу, але
+       звужуватись на вузькому екрані воно мусить. */
+    flex: 0 1 240px;
+    min-width: 0;
+}
+.date_range__label {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    font-weight: normal;
+    line-height: 1.25;
+    color: var(--ok-ink-muted);
+}
+.input-group.input-group--date {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.input-group.input-group--date .form-control {
     -moz-appearance: none;
     z-index: 0!important;
-    border-right: 1px solid var(--ok-line-strong)!important;
+    flex: 0 0 100%;
+    max-width: 100%;
+    width: 100%;
+    border: 1px solid var(--ok-line-strong);
+    border-radius: 8px;
+    padding-right: 36px;
 }
 .input-group--search .form-control:hover,
 .input-group--date .form-control:hover {
     z-index: 0!important;
 }
-.input-group--date:after {
-    content: "\f073";
+.input-group--date__icon {
     position: absolute;
-    right: 0;
     top: 0;
+    right: 0;
     z-index: 1;
-    text-align: center;
-    width: 10%;
+    display: flex;
+    align-items: center;
     height: 100%;
+    padding-right: 12px;
     pointer-events: none;
-    box-sizing: border-box;
-    transition: 0.5s all;
-    display: inline-block;
-    font: normal normal normal 14px/1 FontAwesome;
-    font-size: inherit;
-    text-rendering: auto;
-    line-height: 35px;
+    color: var(--ok-ink-muted);
 }
 .input-group.input-group--search .form-control{
     -moz-appearance: none;
@@ -4493,8 +4534,7 @@ label.switch_label i{
 }
 .input-group:focus-within > .form-control,
 .input-group:focus-within > .variant_input,
-.input-group:focus-within > .input-group-addon,
-.input-group:focus-within > .input-group-addon-date {
+.input-group:focus-within > .input-group-addon {
     border-color: var(--ok-accent);
 }
 .input-group:focus-within > .form-control:focus,
@@ -4590,18 +4630,6 @@ label.switch_label i{
     text-align: center;
     border-radius: 8px 0 0 8px;
 }
-.input-group-addon-date {
-    min-width: 40px;
-    white-space: nowrap;
-    vertical-align: middle;
-    padding: 0.3rem 0.75rem;
-    margin-bottom: 0;
-    font-size: 0.875rem;
-    font-weight: normal;
-    line-height: 1.25;
-    color: var(--ok-ink);
-    text-align: center;
- }
 .input-group .form-control {
     position: relative;
     z-index: 2;
