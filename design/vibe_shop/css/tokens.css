@@ -1,0 +1,142 @@
+/**
+* vibe_shop design tokens. Єдиний файл теми, де дозволені сирі значення кольору,
+* тіні, радіуса, тривалості й шрифтового стека.
+*
+* Темна тема, якщо колись зʼявиться, живе САМЕ ТУТ і ніколи в
+* theme-settings.css: CssConfig зливає всі набори правил того файлу в одну мапу
+* змінних, тож збереження з адмінки перезаписало б обидві теми одразу.
+*/
+
+/* Рампа рівно така, як тема використовує. Темні відтінки приходять через
+* theme-settings.css (--okay-second-company, --okay-button-color) — саме там їх
+* може змінити власник магазину. */
+
+:root {
+	--vs-n-0: #ffffff;
+	--vs-n-25: #fafafa;
+	--vs-n-50: #f5f5f6;
+	--vs-n-100: #ededee;
+	--vs-n-200: #e0e0e2;
+	--vs-n-300: #cbcbce;
+	--vs-n-400: #a5a5aa;
+	--vs-n-500: #6b6b71;
+
+	--vs-sale-50: #fff1f4;
+	--vs-sale-500: #e11d48;
+	--vs-sale-600: #be1739;
+	--vs-ok-50: #ecfdf5;
+	--vs-ok-600: #047857;
+	--vs-warn-600: #b45309;
+
+/* Налаштування -> Дизайн показує свотч для --okay-* лише за наявності
+* settings_theme_<name> у backend/lang/. Таких ключів дев'ять, а
+* theme-settings.css оголошує сімнадцять — решта вісім (зокрема
+* --okay-border-color, --okay-body-text, --okay-body-heading, тобто колір
+* кожного слова на сторінці) з адмінки недосяжні й правляться лише руками.
+* Збереження форми їх не зачіпає — саме це й тримає --vs-border на 3:1. */
+
+	--vs-canvas: var(--okay-bg);
+	--vs-surface: var(--okay-boxed-color);
+	--vs-border: var(--okay-border-color);
+	--vs-text: var(--okay-body-text);
+	--vs-heading: var(--okay-body-heading);
+	--vs-ink: var(--okay-second-company);
+	--vs-ink-text: var(--okay-second-company-text);
+	--vs-accent: var(--okay-basic-company);
+	--vs-accent-text: var(--okay-basic-company-text);
+	--vs-cta: var(--okay-button-color);
+	--vs-cta-hover: var(--okay-button-color-hover);
+	--vs-cta-text: var(--okay-button-text);
+	--vs-cta-2: var(--okay-button-second-color);
+	--vs-cta-2-text: var(--okay-button-second-text);
+
+/* Псевдоніми, не копії: семантична назва каже для чого, рампа — що саме.
+* Літерал тут повторювати не можна, інакше зміна рампи зрушить лише одне з двох. */
+
+	--vs-surface-subtle: var(--vs-n-100);
+	--vs-plate: var(--vs-n-0);
+	--vs-hairline: var(--vs-n-200);
+
+/* Три сірих, три ролі:
+*
+* --vs-hairline — декорація (лінія між рядками, контур картки). Нічого не
+* ідентифікує, тож контраст не нормується.
+*
+* --vs-border — спокійна межа контрола без власної заливки (вторинна кнопка,
+* чип, пагінація, степер, поле вводу). WCAG 1.4.11 вимагає 3:1 на кожному
+* світлому тлі теми; світліше за #88888b ламає цей поріг. Знизити його з
+* адмінки неможливо — див. нотатку над мапою --okay-*.
+*
+* --vs-border-strong — та сама межа під акцентом (hover, кільце чекбокса,
+* ручка слайдера). Має лишатись темнішою за --vs-border, інакше hover читається
+* як крок назад.
+*
+* --vs-glyph — для того, що межею ніколи не було: плейсхолдери без зображення,
+* роздільник хлібних крихт, іконка порожнього стану, скролбар галереї. */
+
+	--vs-border-strong: var(--vs-n-500);
+	--vs-glyph: var(--vs-n-400);
+	--vs-text-muted: var(--vs-n-500);
+	--vs-scrim: rgb(23 23 26 / .44);
+
+	--vs-font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+	--vs-font-display: 'Montserrat', 'Inter', system-ui, sans-serif;
+
+	--vs-text-3xs: 0.65rem;
+	--vs-text-2xs: 0.7rem;
+	--vs-text-xs: 0.75rem;
+	--vs-text-sm: 0.8125rem;
+	--vs-text-base: 0.9375rem;
+	--vs-text-lg: 1.0625rem;
+	--vs-text-xl: clamp(1.125rem, 1rem + 0.6vw, 1.375rem);
+	--vs-text-2xl: clamp(1.375rem, 1.1rem + 1.2vw, 1.875rem);
+	--vs-text-3xl: clamp(1.75rem, 1.3rem + 2vw, 2.75rem);
+	--vs-leading-tight: 1.2;
+	--vs-leading-body: 1.55;
+
+	--vs-space-1: 0.25rem;
+	--vs-space-1-5: 0.375rem;
+	--vs-space-2: 0.5rem;
+	--vs-space-3: 0.75rem;
+	--vs-space-4: 1rem;
+	--vs-space-5: 1.25rem;
+	--vs-space-6: 1.5rem;
+	--vs-space-7: 2rem;
+	--vs-space-8: 2.5rem;
+	--vs-space-9: 3rem;
+	--vs-space-10: 4rem;
+	--vs-space-11: 5rem;
+	--vs-space-12: 6rem;
+
+/* Висота липкої шапки. Усе, що липне нижче, відступає на це значення. Тримати
+   в синхроні з .vs-header__bar у блоці >=992px. */
+	--vs-header-h: 87px;
+
+	--vs-radius-sm: 0.5rem;
+	--vs-radius-md: 0.75rem;
+	--vs-radius-lg: 1rem;
+	--vs-radius-xl: 1.5rem;
+	--vs-radius-full: 999px;
+
+/* Одна тінь, не список: filter: drop-shadow() приймає лише одну, тож
+   --vs-shadow-* тут не годяться. Колір плашки, а не чорнила — задача зворотна
+   до тіні: відділити темний гліф ВІД темного фото. */
+	--vs-halo-plate: 0 0 3px var(--vs-plate);
+
+	--vs-shadow-1: 0 1px 2px rgb(23 23 26 / .06), 0 1px 3px rgb(23 23 26 / .04);
+	--vs-shadow-2: 0 2px 4px rgb(23 23 26 / .05), 0 8px 16px -4px rgb(23 23 26 / .08);
+	--vs-shadow-3: 0 4px 8px rgb(23 23 26 / .06), 0 16px 32px -8px rgb(23 23 26 / .14);
+
+	--vs-dur-0: 0s;
+	--vs-dur-1: 120ms;
+	--vs-dur-2: 200ms;
+	--vs-dur-3: 320ms;
+	--vs-dur-loop: 1.4s;
+	--vs-ease: cubic-bezier(.2, .7, .3, 1);
+
+	--vs-z-dropdown: 100;
+	--vs-z-sticky: 200;
+	--vs-z-backdrop: 300;
+	--vs-z-modal: 400;
+	--vs-z-toast: 500;
+}

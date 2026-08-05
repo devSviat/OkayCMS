@@ -1,0 +1,191 @@
+/* Кожен компонент теми написаний поверх цього обнулення і задає власні */
+/* відступи сам. Повернути дефолти user-agent означає додати margin кожному */
+/* заголовку, абзацу, списку й контролу форми. */
+
+*,
+*::before,
+*::after {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+/* Навігаційні списки — структура, не текст. Решта списків маркери зберігають. */
+
+nav ul {
+	list-style: none;
+}
+
+body {
+	margin: 0;
+	background-color: var(--vs-canvas);
+	color: var(--vs-text);
+	font-family: var(--vs-font-ui);
+	font-size: var(--vs-text-base);
+	line-height: var(--vs-leading-body);
+	font-weight: 400;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* Усі шість: контент з адмінки може віддати будь-який рівень, а без правила він */
+/* впав би на дефолти user-agent. */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin: 0 0 var(--vs-space-4);
+	color: var(--vs-heading);
+	font-family: var(--vs-font-display);
+	font-weight: 600;
+	line-height: var(--vs-leading-tight);
+	letter-spacing: -0.01em;
+	text-wrap: balance;
+}
+
+h1 { font-size: var(--vs-text-3xl); }
+h2 { font-size: var(--vs-text-2xl); }
+h3 { font-size: var(--vs-text-xl); }
+h4 { font-size: var(--vs-text-lg); }
+h5 { font-size: var(--vs-text-base); }
+h6 { font-size: var(--vs-text-base); }
+
+p {
+	margin: 0 0 var(--vs-space-4);
+	text-wrap: pretty;
+	max-width: 70ch;
+}
+
+a {
+	color: inherit;
+	text-decoration-color: var(--vs-glyph);
+	text-underline-offset: 0.2em;
+	transition: text-decoration-color var(--vs-dur-1) var(--vs-ease);
+}
+
+/* Акцент бере підкреслення, а не текст: підкреслення декоративне, тож не має */
+/* порога контрасту і безпечне за будь-якого значення --okay-basic-company. */
+/* */
+/* Саме на це правило покладатись не можна: будь-яке пізніше використання */
+/* СКОРОЧЕННЯ text-decoration скидає колір на currentColor, а всі hover-правила */
+/* теми лежать у components.css після цього файлу. Тому там text-decoration-line */
+/* і text-decoration-color задаються окремо. */
+
+a:hover {
+	text-decoration-color: var(--vs-accent);
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+	border-style: none;
+}
+
+/* Зображення зовсім без src — це шаблон, який не підставив значення. Не має */
+/* малювати іконку «зображення зламане» посеред сітки товарів. */
+
+img:not([src]) {
+	visibility: hidden;
+}
+
+svg:not(:root) {
+	overflow: hidden;
+}
+
+[hidden] {
+	display: none;
+}
+
+b,
+strong {
+	font-weight: 600;
+}
+
+small {
+	font-size: 80%;
+}
+
+sub,
+sup {
+	position: relative;
+	font-size: 75%;
+	line-height: 0;
+	vertical-align: baseline;
+}
+
+sub {
+	bottom: -0.25em;
+}
+
+sup {
+	top: -0.5em;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+	background-color: transparent;
+}
+
+hr {
+	height: 1px;
+	margin: var(--vs-space-5) 0;
+	border: 0;
+	background-color: var(--vs-hairline);
+}
+
+/* Саме outline, а не box-shadow: тема використовує box-shadow для підняття, і */
+/* будь-яке пізніше правило рівної специфічності мовчки стирало б кільце фокуса, */
+/* лишаючи outline: none чинним. Outline ні з чим не конфліктує, а сучасні рушії */
+/* самі слідують border-radius елемента. */
+
+:focus-visible {
+	outline: 2px solid var(--vs-ink);
+	outline-offset: 2px;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+.vs-tabular {
+	font-variant-numeric: tabular-nums;
+}
+
+/* Видиме для допоміжних технологій, невидиме оку. Саме обрізана коробка 1px, а */
+/* не display:none чи visibility:hidden — обидва прибирають елемент з дерева */
+/* доступності, тобто роблять протилежне потрібному. */
+
+.vs-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
