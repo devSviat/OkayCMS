@@ -19,7 +19,10 @@
     <div class="row">
         <div class="col-lg-12 col-md-12 ">
             {* Форма для фильрации *}
-            <form class="date_filter row" method="get">
+            {* Без .row: єдина дитина форми — .fn_toggle_wrap, не колонка, тож
+               рядок тут не потрібен, а його від'ємні поля (-15px) зсували всю
+               картку фільтрів ліворуч від таблиці під нею. *}
+            <form class="date_filter" method="get">
                 <input type="hidden" name="controller" value="ReportStatsAdmin">
                 <div class="fn_toggle_wrap">
                     <div class="heading_box visible_md">
