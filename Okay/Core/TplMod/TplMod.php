@@ -50,18 +50,51 @@ class TplMod
     private function walkByFile(BaseNode $node, array $changes)
     {
         foreach ($changes as $changeDTO) {
-            if (!empty($changeDTO->getFind()) && strpos($node->getOriginalElement(), $changeDTO->getFind()) !== false) {
-                $this->applyMod($node, $changeDTO);
-            } elseif (!empty($changeDTO->getLike()) && preg_match('~'.$changeDTO->getLike().'~', $node->getOriginalElement())) {
+            if ($this->matches($node, $changeDTO)) {
                 $this->applyMod($node, $changeDTO);
             }
         }
-        
+
         if ($node->children()) {
             foreach ($node->children() as $child) {
                 $this->walkByFile($child, $changes);
             }
         }
+    }
+
+    /**
+     * Правило збігу анкера. Єдине місце, де воно живе: ним користуються і рендер,
+     * і ModificationChecker.
+     */
+    public function matches(BaseNode $node, TplChangeDTO $change): bool
+    {
+        if (!empty($change->getFind())) {
+            return strpos($node->getOriginalElement(), $change->getFind()) !== false;
+        }
+
+        if (!empty($change->getLike())) {
+            return (bool)preg_match('~'.$change->getLike().'~', $node->getOriginalElement());
+        }
+
+        return false;
+    }
+
+    /**
+     * @return BaseNode[] вузли, з якими збігся анкер, у порядку обходу
+     */
+    public function findMatches(BaseNode $node, TplChangeDTO $change): array
+    {
+        $matched = [];
+
+        if ($this->matches($node, $change)) {
+            $matched[] = $node;
+        }
+
+        foreach ($node->children() as $child) {
+            $matched = array_merge($matched, $this->findMatches($child, $change));
+        }
+
+        return $matched;
     }
 
     private function applyMod(BaseNode $node, TplChangeDTO $changeDTO)
