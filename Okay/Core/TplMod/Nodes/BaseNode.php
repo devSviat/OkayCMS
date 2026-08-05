@@ -126,7 +126,7 @@ class BaseNode
     }
 
     /**
-     * @return BaseNode
+     * @return BaseNode|null null на кореневому вузлі: батька йому ніхто не виставляв
      */
     public function parent()
     {

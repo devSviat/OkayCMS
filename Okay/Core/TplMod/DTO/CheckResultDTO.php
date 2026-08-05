@@ -39,6 +39,11 @@ class CheckResultDTO
         return $this->status;
     }
 
+    public function isFailure(): bool
+    {
+        return CheckStatus::isFailureOf($this->status);
+    }
+
     /** @return string[] */
     public function getMatchedFiles(): array
     {

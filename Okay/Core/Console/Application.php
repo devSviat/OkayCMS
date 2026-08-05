@@ -5,6 +5,7 @@ namespace Okay\Core\Console;
 
 
 use Okay\Core\Console\Commands\Database\DatabaseDeployCommand;
+use Okay\Core\Console\Commands\Module\ModuleCheckModificationsCommand;
 use Okay\Core\Console\Commands\Module\ModuleCreateCommand;
 use Okay\Core\Console\Commands\Scheduler\SchedulerListCommand;
 use Okay\Core\Console\Commands\Scheduler\SchedulerRunCommand;
@@ -16,6 +17,7 @@ class Application extends SymfonyApplication
     private $commands = [
         DatabaseDeployCommand::class,
         ModuleCreateCommand::class,
+        ModuleCheckModificationsCommand::class,
         SchedulerRunCommand::class,
         SchedulerTaskCommand::class,
         SchedulerListCommand::class,

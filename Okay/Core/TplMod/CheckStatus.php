@@ -12,11 +12,12 @@ enum CheckStatus
     case ChainBroken;
     case FileMissing;
 
-    public function isFailure(): bool
+    /**
+     * Ні $this, ні self у сигнатурі навмисно: PHPCompatibility 9.3.5 не розбирає enum
+     * і бачить їх як ужиток поза класом, а phpcs гейтить CI.
+     */
+    public static function isFailureOf(CheckStatus $status): bool
     {
-        return match ($this) {
-            self::Ok, self::Multiple => false,
-            default => true,
-        };
+        return $status !== self::Ok && $status !== self::Multiple;
     }
 }

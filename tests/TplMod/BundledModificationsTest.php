@@ -127,7 +127,7 @@ class BundledModificationsTest extends \PHPUnit\Framework\TestCase
 
         $failures = [];
         foreach ($this->checker()->check($module, $modifications, $roots) as $result) {
-            if ($result->getStatus()->isFailure()) {
+            if ($result->isFailure()) {
                 $failures[] = sprintf(
                     '  %s: %s -> %s',
                     $result->getStatus()->name,

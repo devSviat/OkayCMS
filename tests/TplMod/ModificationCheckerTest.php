@@ -55,7 +55,7 @@ class ModificationCheckerTest extends \PHPUnit\Framework\TestCase
         );
 
         $this->assertSame(CheckStatus::NoAnchor, $result->getStatus());
-        $this->assertTrue($result->getStatus()->isFailure());
+        $this->assertTrue($result->isFailure());
     }
 
     /** Рядок є у файлі, але не у вузлі: анкер мертвий, хоч grep його й знаходить. */
@@ -103,7 +103,7 @@ class ModificationCheckerTest extends \PHPUnit\Framework\TestCase
 
         $this->assertSame(CheckStatus::Multiple, $result->getStatus());
         $this->assertCount(2, $result->getMatchedFiles());
-        $this->assertFalse($result->getStatus()->isFailure());
+        $this->assertFalse($result->isFailure());
     }
 
     /** Листи лежать у html/email/, а в module.json вказані без каталогу. */
