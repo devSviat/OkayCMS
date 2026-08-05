@@ -4378,14 +4378,19 @@ label.switch_label i{
 
    Тепер підпис — окремий <label> поза групою, поля розведені проміжком,
    а іконка календаря — той самий svg, що й решта іконок адмінки
-   (замість гліфа FontAwesome, вирахуваного у відсотках ширини). */
-.date_filter {
+   (замість гліфа FontAwesome, вирахуваного у відсотках ширини).
+
+   Назва саме .date_range, а не .date_filter: у reportstats.tpl клас
+   .date_filter висить на зовнішній <form class="date_filter row">, і
+   display:flex на ньому перебив би bootstrap-івський .row разом із усією
+   сіткою сторінки. */
+.date_range {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 10px 16px;
 }
-.date_filter__field {
+.date_range__field {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -4394,7 +4399,7 @@ label.switch_label i{
     flex: 0 1 240px;
     min-width: 0;
 }
-.date_filter__label {
+.date_range__label {
     flex: 0 0 auto;
     margin-bottom: 0;
     font-size: 0.875rem;

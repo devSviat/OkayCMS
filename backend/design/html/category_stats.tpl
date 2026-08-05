@@ -33,17 +33,17 @@
                             <div class="col-md-11 col-lg-11 col-xl-7 col-sm-12">
                                 <div class="date">
                                     {*Блок фильтров*}
-                                    <form class="date_filter" method="get">
+                                    <form class="date_filter date_range" method="get">
                                         <input type="hidden" name="controller" value="CategoryStatsAdmin" />
-                                        <div class="date_filter__field">
-                                            <label class="date_filter__label" for="date_from">{$btr->general_from|escape}</label>
+                                        <div class="date_range__field">
+                                            <label class="date_range__label" for="date_from">{$btr->general_from|escape}</label>
                                             <div class="input-group input-group--date">
                                                 <input type="{if $is_mobile || $is_tablet}date{else}text{/if}" id="date_from" class="fn_from_date form-control" name="date_from" value="{$date_from}" autocomplete="off">
                                                 <span class="input-group--date__icon">{include file='svg_icon.tpl' svgId='calendar'}</span>
                                             </div>
                                         </div>
-                                        <div class="date_filter__field">
-                                            <label class="date_filter__label" for="date_to">{$btr->general_to|escape}</label>
+                                        <div class="date_range__field">
+                                            <label class="date_range__label" for="date_to">{$btr->general_to|escape}</label>
                                             <div class="input-group input-group--date">
                                                 <input type="{if $is_mobile || $is_tablet}date{else}text{/if}" id="date_to" class="fn_to_date form-control" name="date_to" value="{$date_to}" autocomplete="off">
                                                 <span class="input-group--date__icon">{include file='svg_icon.tpl' svgId='calendar'}</span>
