@@ -104,8 +104,7 @@ public function resolveTarget(BaseNode $node, TplChangeDTO $change): ?BaseNode;
 - Перелік модулів — `ModulesEntity::find()`: типово `['enabled' => 1]`, з `--all` — усі рядки.
   Свідомо **не** `Modules::getRunningModules()`: він заповнюється лише після
   `startModules()`, тобто вимагає підняти всі модулі заради читання `module.json`, і при
-  цьому мовчки викидає неліцензовані (`continue` до запису в `runningModules`) — рівно та
-  тиша, проти якої ця задача.
+  цьому частина рядків до нього не доходить із причин, не пов'язаних із модифікаціями.
 - Параметри модуля — `Module::getModuleParams($vendor, $name)`: повертає `ModificationDTO[]`
   окремо по кожному модулю, тобто дає атрибуцію, якої немає в
   `Modules::getFrontModulesTplModifications()`. Підстановка значень модифікаторів із файлів
