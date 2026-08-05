@@ -99,39 +99,10 @@ class TplMod
 
     private function applyMod(BaseNode $node, TplChangeDTO $changeDTO)
     {
-        // Вдруг запросили относительную ноду
-        if ($changeDTO->isParent()) {
-            $node = $node->parent();
+        if (($node = $this->resolveTarget($node, $changeDTO)) === null) {
+            return;
         }
-        
-        if (!empty($changeDTO->getClosestFind())) {
-            while ($node = $node->parent()) {
-                if (strpos($node->getOriginalElement(), $changeDTO->getClosestFind()) !== false) {
-                    break;
-                }
-            }
-        } elseif (!empty($changeDTO->getClosestLike())) {
-            while ($node = $node->parent()) {
-                if (preg_match('~'.$changeDTO->getClosestLike().'~', $node->getOriginalElement())) {
-                    break;
-                }
-            }
-        }
-        
-        if (!empty($changeDTO->getChildrenFind())) {
-            if ($childNode = $this->findChildNode($node, $changeDTO->getChildrenFind())) {
-                $node = $childNode;
-            } else {
-                return;
-            }
-        } elseif (!empty($changeDTO->getChildrenLike())) {
-            if ($childNode = $this->likeChildNode($node, $changeDTO->getChildrenLike())) {
-                $node = $childNode;
-            } else {
-                return;
-            }
-        }
-        
+
         if (!empty($changeDTO->getAppend())) {
             $userNode = new TextNode($changeDTO->getAppend());
             if ($this->debug === true && !empty($changeDTO->getComment())) {
@@ -202,6 +173,54 @@ class TplMod
         unset($node);
     }
     
+    /**
+     * Вузол, який зрештою буде змінено: parent -> closest* -> children*.
+     * null означає, що ланцюжок обірвався і вставляти немає куди.
+     */
+    public function resolveTarget(BaseNode $node, TplChangeDTO $change): ?BaseNode
+    {
+        if ($change->isParent()) {
+            if (($node = $node->parent()) === null) {
+                return null;
+            }
+        }
+
+        if (!empty($change->getClosestFind())) {
+            $find = $change->getClosestFind();
+            $node = $this->closestNode($node, static fn(BaseNode $candidate): bool
+                => strpos($candidate->getOriginalElement(), $find) !== false);
+        } elseif (!empty($change->getClosestLike())) {
+            $like = $change->getClosestLike();
+            $node = $this->closestNode($node, static fn(BaseNode $candidate): bool
+                => (bool)preg_match('~'.$like.'~', $candidate->getOriginalElement()));
+        }
+
+        if ($node === null) {
+            return null;
+        }
+
+        if (!empty($change->getChildrenFind())) {
+            return $this->findChildNode($node, $change->getChildrenFind()) ?: null;
+        }
+
+        if (!empty($change->getChildrenLike())) {
+            return $this->likeChildNode($node, $change->getChildrenLike()) ?: null;
+        }
+
+        return $node;
+    }
+
+    private function closestNode(BaseNode $node, callable $matches): ?BaseNode
+    {
+        while ($node = $node->parent()) {
+            if ($matches($node)) {
+                return $node;
+            }
+        }
+
+        return null;
+    }
+
     private function findChildNode(BaseNode $node, $search)
     {
         $result = false;
