@@ -306,23 +306,86 @@ done
 
 echo
 echo "Public surface"
-# Дерево залежностей не публічне. installed.json — 248 КБ із точними версіями
-# всіх залежностей; /vendor/bin/phpunit не має розширення, тож правила за
-# розширенням його не ловили; autoload.php під vendor/ ще й виконувався.
-for p in /vendor/composer/installed.json /vendor/autoload.php /vendor/bin/phpunit \
-         /vendor/composer/ClassLoader.php /vendor/smarty/smarty/src/Smarty.php; do
-    expect_status 404 "$p"
-done
-# Позитивний контроль: без нього блок вище проходив би і на повністю зламаному
-# сайті, де 404 віддається на все. Шлях береться з реальної сторінки, а не
-# зашивається — імена бандлів містять хеш вмісту.
+# Конфіг nginx — білий список: файл з диска віддається лише там, де є явний
+# location. Перевіряються обидві сторони — і що дозволене працює, і що решта
+# закрита. tests/Security/PublicSurfaceTest.php стереже це ж статично, у CI;
+# тут — реальні коди відповідей.
+
+# Позитивний контроль іде першим: без нього весь блок нижче проходив би і на
+# повністю зламаному сайті, який віддає 404 на все.
 expect_status 200 /
+expect_status 200 /robots.txt
+expect_status 302 /backend/
+# Шлях бандла береться з реальної сторінки, а не зашивається — в імені хеш вмісту.
 asset_path=$(curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/" 2>/dev/null \
     | grep -oE 'cache/(css|js)/[^"]+\.(css|js)' | head -1)
 if [ -n "$asset_path" ]; then
     expect_status 200 "/$asset_path"
 else
     printf '  FAIL  %s\n' "no compiled asset found on the storefront to check"
+    fails=$((fails + 1))
+fi
+# Те саме для решти дозволених дерев: шлях береться з диска, щоб перевірка не
+# розсипалась від перейменування теми чи модуля.
+for probe in \
+    "$(cd .. && ls design/*/css/*.css 2>/dev/null | head -1)" \
+    "$(cd .. && ls design/*/preview.png 2>/dev/null | head -1)" \
+    "$(cd .. && find js_libraries -name '*.js' 2>/dev/null | head -1)" \
+    "$(cd .. && find backend/design/css -name '*.css' 2>/dev/null | head -1)" \
+    "$(cd .. && find Okay/Modules -path '*design/images/*.png' 2>/dev/null | head -1)" \
+    "$(cd .. && ls Okay/Modules/*/*/preview.png 2>/dev/null | head -1)"; do
+    [ -n "$probe" ] && expect_status 200 "/$probe"
+done
+
+# Дерево залежностей не публічне. installed.json — 248 КБ із точними версіями
+# всіх залежностей; /vendor/bin/phpunit не має розширення, тож правила за
+# розширенням його не ловили; autoload.php під vendor/ ще й виконувався.
+for p in /vendor/composer/installed.json /vendor/autoload.php /vendor/bin/phpunit \
+         /vendor/composer/ClassLoader.php /vendor/smarty/smarty/src/Smarty.php \
+         /ok /composer.json /composer.lock /phpunit.xml /phpstan.neon /README.md \
+         /.env /.git/config /.htaccess \
+         /config/config.php /tests/bootstrap.php /docs/README.md /dev/docker-compose.yml \
+         /1DB_changes/okay_clean.sql \
+         /backend/design/js.php /backend/lang/ru.php \
+         /backend/design/js/filemanager/config/config.php \
+         /design/vibe_shop/js.php /design/vibe_shop/html/index.tpl \
+         /Okay/Core/Response.php; do
+    expect_status 404 "$p"
+done
+# Скомпільовані Smarty-шаблони виконувались як PHP і давали 500 з записом у лог.
+for d in compiled backend/design/compiled; do
+    tpl=$(cd .. && find "$d" -name '*.php' 2>/dev/null | head -1)
+    [ -n "$tpl" ] && expect_status 404 "/$tpl"
+done
+
+# Самооновний прохід: перебирає реальні записи кореня репозиторію й вимагає 404
+# від кожного, крім явно дозволених. Саме він ловить файл, доданий у корінь
+# завтра, — переліку доповнювати не треба.
+for entry in $(cd .. && ls); do
+    case "$entry" in
+        robots.txt) continue ;;
+        # index.php віддає 301 на /, це його штатна поведінка.
+        index.php)  expect_status 301 "/index.php"; continue ;;
+    esac
+    expect_status 404 "/$entry"
+done
+
+# Банер рушія і точна версія PHP не потрібні браузеру — лише тому, хто добирає
+# під них відомі вразливості.
+headers=$(curl -sSI -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/" 2>/dev/null)
+for h in "X-Powered-By" "X-Powered-CMS"; do
+    if printf '%s' "$headers" | grep -qi "^${h}:"; then
+        printf '  FAIL  header %s is still sent\n' "$h"
+        fails=$((fails + 1))
+    else
+        printf '  ok    header %s is not sent\n' "$h"
+    fi
+done
+# Контроль самого вимірювача: заголовок, який точно є, мусить знаходитись.
+if printf '%s' "$headers" | grep -qi "^Server:"; then
+    printf '  ok    the header check itself works (Server: is found)\n'
+else
+    printf '  FAIL  the header check found no Server: — it proves nothing\n'
     fails=$((fails + 1))
 fi
 

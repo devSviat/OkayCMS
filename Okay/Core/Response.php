@@ -85,10 +85,9 @@ class Response
         $this->adapterManager = $adapterManager;
         $this->type = RESPONSE_HTML;
 
-        // Точну версію не публікуємо: вона перетворює банер на готову
-        // ціль для сканерів.
-        $this->addHeader('X-Powered-CMS: OkayCMS');
-
+        // Банер CMS не віддається взагалі. Спершу з нього прибрали версію, але
+        // саме́ ім'я рушія теж не потрібне браузеру — воно потрібне лише тому,
+        // хто добирає відомі вразливості під конкретний рушій.
         foreach (SecurityHeaders::defaults() as $header) {
             $this->addHeader($header);
         }

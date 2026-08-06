@@ -26,12 +26,24 @@ class SecurityHeadersTest extends TestCase
         }
     }
 
-    public function testResponseNoLongerAdvertisesTheVersion()
+    /**
+     * Спершу з банера прибрали версію, тепер він не віддається взагалі: ім'я
+     * рушія потрібне не браузеру, а тому, хто добирає під нього вразливості.
+     */
+    public function testResponseDoesNotAdvertiseTheEngine()
     {
         $source = file_get_contents(dirname(__DIR__, 2) . '/Okay/Core/Response.php');
         $this->assertIsString($source);
 
-        $this->assertStringNotContainsString("'X-Powered-CMS: OkayCMS ' . \$version", $source);
+        $this->assertStringNotContainsString('X-Powered-CMS', $source);
         $this->assertStringContainsString('SecurityHeaders::defaults()', $source);
+    }
+
+    public function testDefaultsCarryNoEngineOrVersionBanner()
+    {
+        foreach (SecurityHeaders::defaults() as $header) {
+            $this->assertStringNotContainsStringIgnoringCase('X-Powered', $header);
+            $this->assertStringNotContainsStringIgnoringCase('OkayCMS', $header);
+        }
     }
 }

@@ -171,9 +171,56 @@ else
         expect_missing "nginx-prod: / is not the stock nginx placeholder" \
             "Welcome to nginx" \
             curl -sS -H "Host: ${VIRTUAL_HOST:-okaycms.loc}" "http://127.0.0.1:${nginx_port}/"
-        expect_contains "nginx-prod: /1DB_changes/okay_clean.sql is 404 (present in the image, denied by the vhost)" \
-            "404" \
-            sh -c "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/1DB_changes/okay_clean.sql"
+        # Білий список кореня, перевірений саме на прод-образі. Тут це важить
+        # найбільше: nginx-образ копіює дерево застосунку як є, разом із
+        # vendor/, тестами й дампом бази, — а конфіг успадковується з того
+        # самого шаблону, що й у dev.
+        #
+        # Перевіряється вміст, а не код відповіді. Після інверсії все, що не
+        # дозволене явно, іде у фронт-контролер, а він у цьому стенді без
+        # config.local.php віддає 500 — тобто «не 404, але й не файл». Значуще
+        # тут одне: вміст файлу назовні не поїхав. Маркер для кожного шляху —
+        # рядок, який у самому файлі точно є.
+        while IFS='|' read -r p marker; do
+            [ -z "$p" ] && continue
+            body=$(curl -sS -H "Host: ${VIRTUAL_HOST:-okaycms.loc}" \
+                "http://127.0.0.1:${nginx_port}$p" 2>&1)
+            code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${VIRTUAL_HOST:-okaycms.loc}" \
+                "http://127.0.0.1:${nginx_port}$p" 2>/dev/null)
+            if [ "$code" = "200" ] || [[ "$body" == *"$marker"* ]]; then
+                printf '  FAIL  nginx-prod: %s leaks (HTTP %s)\n' "$p" "$code"
+                dump_actual_output "$body"
+                fails=$((fails + 1))
+            else
+                printf '  ok    nginx-prod: %s does not leak (HTTP %s, no "%s" in body)\n' "$p" "$code" "$marker"
+            fi
+        done <<'PATHS'
+/1DB_changes/okay_clean.sql|CREATE TABLE
+/vendor/composer/installed.json|"packages"
+/vendor/autoload.php|ComposerAutoloader
+/vendor/bin/phpunit|PHPUnit
+/ok|ServiceLocator
+/composer.json|"require"
+/composer.lock|"content-hash"
+/phpunit.xml|testsuite
+/tests/bootstrap.php|require_once
+/docs/README.md|OkayCMS
+/config/config.php|db_server
+/dev/docker-compose.yml|services:
+/Okay/Core/Response.php|class Response
+/backend/lang/ru.php|<?php
+/design/okay_shop/js.php|<?php
+PATHS
+        # Контроль самого вимірювача: маркер публічного файлу мусить
+        # знаходитись, інакше «маркера немає» нічого не доводить.
+        expect_contains "nginx-prod: the leak check itself works (robots.txt content is found)" \
+            "User-agent" \
+            sh -c "curl -sS -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/robots.txt"
+        # Точна версія PHP у заголовку — джерело вимкнено в okay.ini, який
+        # потрапляє і в прод-образ; nginx ховає його другим рубежем.
+        expect_missing "nginx-prod: X-Powered-By is not sent" \
+            "X-Powered-By" \
+            sh -c "curl -sSI -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/robots.txt"
     fi
 fi
 
