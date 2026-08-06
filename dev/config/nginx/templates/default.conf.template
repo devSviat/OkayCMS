@@ -108,7 +108,7 @@ server {
     # Дозвіл описує і директорію, і розширення. Одного розширення мало:
     # у теми поруч із css/ лежать html/ з шаблонами, lang/ і js.php.
 
-    location ~ ^/design/[^/]+/(css|js|images|fonts)/.+\.(css|js|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot)$ {
+    location ~ ^/design/[^/]+/(css|js|images|fonts)/.+\.(?i:css|js|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot)$ {
         access_log off;
         expires max;
         add_header Cache-Control public;
@@ -116,21 +116,21 @@ server {
     }
 
     # Прев'ю теми — перемикач тем в адмінці бере його прямо звідси.
-    location ~ ^/design/[^/]+/preview\.(png|jpe?g)$ {
+    location ~ ^/design/[^/]+/preview\.(?i:png|jpe?g)$ {
         access_log off;
         expires max;
     }
 
     # Скомпільовані бандли css/js. Саме (css|js)/, а не весь cache/: поруч
     # лежить cache/codes/ і .map-файли з вихідними текстами бібліотек.
-    location ~ ^/cache/(css|js)/[^/]+\.(css|js)$ {
+    location ~ ^/cache/(css|js)/[^/]+\.(?i:css|js)$ {
         access_log off;
         expires max;
         add_header Cache-Control public;
         add_header Access-Control-Allow-Origin *;
     }
 
-    location ~ ^/js_libraries/.+\.(css|js|map|png|jpe?g|gif|svg|webp|woff2?|ttf|eot)$ {
+    location ~ ^/js_libraries/.+\.(?i:css|js|map|png|jpe?g|gif|svg|webp|woff2?|ttf|eot)$ {
         access_log off;
         expires max;
         add_header Cache-Control public;
@@ -140,14 +140,14 @@ server {
     # Асети модулів. Потрібні: шаблони адмінки LiqPay, RozetkaPay, WayForPay,
     # FAQ і AutoDeploy беруть картинки й css прямо з Okay/Modules/.
     # Решта дерева Okay/ — вихідний код — не віддається.
-    location ~ ^/Okay/Modules/[^/]+/[^/]+/(Backend/)?design/.+\.(css|js|png|jpe?g|gif|svg|webp|woff2?|ttf)$ {
+    location ~ ^/Okay/Modules/[^/]+/[^/]+/(Backend/)?design/.+\.(?i:css|js|png|jpe?g|gif|svg|webp|woff2?|ttf)$ {
         access_log off;
         expires max;
     }
 
     # Прев'ю модуля лежить у його корені, а не під design/ — сторінка «Модулі»
     # в адмінці бере картинку саме звідти.
-    location ~ ^/Okay/Modules/[^/]+/[^/]+/preview\.(png|jpe?g)$ {
+    location ~ ^/Okay/Modules/[^/]+/[^/]+/preview\.(?i:png|jpe?g)$ {
         access_log off;
         expires max;
     }
@@ -157,14 +157,25 @@ server {
     # браузер рендерить як HTML або віддає на виконання, тут дало б stored XSS
     # чи гірше на домені магазину.
     #
+    # svg у переліку лишається — без нього не працюють іконки й логотипи, —
+    # але сам по собі він небезпечний: відкритий прямою навігацією, SVG
+    # рендериться як документ і виконує вбудований <script>. Санітайзер
+    # (Okay\Core\Security\SvgSanitizer) підключений лише у файловому
+    # менеджері, а зображення товарів ідуть повз нього (Okay/Core/Image.php),
+    # тож покладатись на нього не можна. Скрипт усередині глушить CSP нижче:
+    # на <img src="...svg"> вона не впливає, бо там скрипти й так не
+    # виконуються.
+    #
     # try_files з переходом на index.php обов'язковий: files/resized/ — це
     # маршрут (Okay/Core/config/routes.php), зменшені копії створюються на
     # перший запит. Жорсткий 404 тут ламав би кожну ще не згенеровану картинку.
-    location ~ ^/files/(?!originals/).+\.(png|jpe?g|gif|svg|webp|ico|pdf|zip|xlsx?|docx?|csv|mp3|mp4|ogg|webm)$ {
+    location ~ ^/files/(?!originals/).+\.(?i:png|jpe?g|gif|svg|webp|ico|pdf|zip|xlsx?|docx?|csv|mp3|mp4|ogg|webm)$ {
         try_files $uri /index.php?$args;
         access_log off;
         expires max;
         add_header Cache-Control public;
+        add_header Content-Security-Policy "default-src 'none'; sandbox" always;
+        add_header X-Content-Type-Options nosniff always;
     }
 
     # ───────────────────────── Адмінка ─────────────────────────
@@ -181,6 +192,13 @@ server {
         }
 
         location ~ ^/backend/lang/ {
+            return 404;
+        }
+
+        # Класові дерева адмінки (PSR-4 Okay\Admin\ -> backend/) — не точки
+        # входу. Кожен із 184 файлів досі виконувався прямим запитом: більшість
+        # мовчки, AuthAdmin.php — фаталом і записом у лог.
+        location ~ ^/backend/(Controllers|Helpers|Requests|Entities)/ {
             return 404;
         }
 
@@ -214,8 +232,17 @@ server {
             try_files /does_not_exist @php;
         }
 
-        # Статика адмінки та її фронт-контролер.
-        try_files $uri $uri/ /backend/index.php?$args;
+        # Статика адмінки — лише під design/ і лише за розширенням. Без цього
+        # правила `try_files $uri` віддавав з диска все підряд: шаблони .tpl
+        # (109 файлів), .htaccess, а разом із ними README, .sh, .yml, .editorconfig
+        # і Thumbs.db зі складу вендорних JS-бібліотек.
+        location ~ ^/backend/design/.+\.(?i:css|js|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|html?|json)$ {
+            try_files $uri =404;
+        }
+
+        # Усе інше в адмінці — фронт-контролер, без віддачі файлу з диска.
+        # Той самий принцип, що й у кореневому location.
+        try_files /does_not_exist /backend/index.php?$args;
     }
 
     # ──────────────────── Фронт-контролер вітрини ────────────────────
