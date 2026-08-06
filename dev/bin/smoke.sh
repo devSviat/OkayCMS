@@ -105,6 +105,22 @@ dump_actual_output() {
     printf -- '        --- end actual output ---\n'
 }
 
+# expect_status <expected code> <path>: HTTP-код на шлях вітрини. Окремо від
+# expect_contains, бо тут перевіряється саме код, а не тіло — тіло сторінки 404
+# застосунку виглядає як звичайна сторінка й будь-яку перевірку тексту пройшло б.
+expect_status() {
+    local expected=$1 path=$2 actual
+    actual=$(curl -sS -o /dev/null -w '%{http_code}' \
+        -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}${path}" 2>/dev/null || echo "000")
+    if [ "$actual" = "$expected" ]; then
+        printf '  ok    %-3s %s\n' "$actual" "$path"
+    else
+        printf '  FAIL  %s\n' "$path"
+        printf '        expected HTTP %s, actual: %s\n' "$expected" "$actual"
+        fails=$((fails + 1))
+    fi
+}
+
 # expect_contains <description> <needle> <command...>
 expect_contains() {
     local desc=$1 needle=$2
@@ -287,6 +303,28 @@ for pg in "/" "/cart" "/blog" "/brands"; do
         "Deprecated:" \
         curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}${pg}"
 done
+
+echo
+echo "Public surface"
+# Дерево залежностей не публічне. installed.json — 248 КБ із точними версіями
+# всіх залежностей; /vendor/bin/phpunit не має розширення, тож правила за
+# розширенням його не ловили; autoload.php під vendor/ ще й виконувався.
+for p in /vendor/composer/installed.json /vendor/autoload.php /vendor/bin/phpunit \
+         /vendor/composer/ClassLoader.php /vendor/smarty/smarty/src/Smarty.php; do
+    expect_status 404 "$p"
+done
+# Позитивний контроль: без нього блок вище проходив би і на повністю зламаному
+# сайті, де 404 віддається на все. Шлях береться з реальної сторінки, а не
+# зашивається — імена бандлів містять хеш вмісту.
+expect_status 200 /
+asset_path=$(curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/" 2>/dev/null \
+    | grep -oE 'cache/(css|js)/[^"]+\.(css|js)' | head -1)
+if [ -n "$asset_path" ]; then
+    expect_status 200 "/$asset_path"
+else
+    printf '  FAIL  %s\n' "no compiled asset found on the storefront to check"
+    fails=$((fails + 1))
+fi
 
 echo
 if [ "$fails" -gt 0 ]; then

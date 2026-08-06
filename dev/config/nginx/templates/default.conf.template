@@ -87,7 +87,23 @@ server {
         location ~* docs/ {
             return 404;
         }
-        
+
+        # Дерево залежностей не є застосунковим шляхом: ані статикою, ані
+        # точкою входу. Досі воно віддавалось цілком — vendor/composer/
+        # installed.json (усі залежності з точними версіями, готовий вхід для
+        # добору CVE), vendor/bin/phpunit, і PHP під vendor/ ще й виконувався.
+        #
+        # ^~, а не регулярка: префіксний збіг виграє в усіх регулярок нижче,
+        # включно з блоком статики за розширенням — той стоїть першим і зараз
+        # перебиває навіть `location ~* Okay/`.
+        #
+        # Асети php-debugbar від цього не ламаються: JsConfig::
+        # compileRegisteredIndividual() читає їх із диска й пише в cache/, тож
+        # у браузер вони йдуть як /cache/js/…, а не /vendor/….
+        location ^~ /vendor/ {
+            return 404;
+        }
+
         location ~* /(\w+/)?(\w+/)?(.+\.(jpg|jpeg|gif|png|webp|svg|js|css|mp3|ogg|mpe?g|avi|zip|gz|bz2?|rar|swf|woff|woff2|ttf|xls|xlsx|doc|docx|pdf))$ {
             try_files $uri $uri/ /$2$3 /$3 /index.php?$args;
             allow all;
