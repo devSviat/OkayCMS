@@ -41,10 +41,20 @@ class PublicSurfaceTest extends TestCase
      * дозволене), а цьому тесту: щоб поява нового запису була помічена.
      */
     private const PRIVATE_ROOT_ENTRIES = [
-        '1DB_changes', 'backend', 'cache', 'CLAUDE.md', 'compiled', 'composer.json',
+        '1DB_changes', 'backend', 'CLAUDE.md', 'compiled', 'composer.json',
         'composer.lock', 'config', 'design', 'dev', 'docs', 'files', 'js_libraries',
         'LICENSE.md', 'ok', 'Okay', 'phpcs.xml.dist', 'phpstan-baseline.neon',
         'phpstan.neon', 'phpunit.xml', 'PRODUCT.md', 'README.md', 'tests', 'vendor',
+    ];
+
+    /**
+     * Створюються під час роботи, а не лежать у репозиторії, тож у свіжому
+     * клоні їх може не бути — у CI саме так і сталось із cache/. Класифіковані
+     * вони так само, як приватні; відрізняються лише тим, що перевірка
+     * застарілих записів їх не вимагає.
+     */
+    private const RUNTIME_ROOT_ENTRIES = [
+        'cache',
     ];
 
     private function repoRoot(): string
@@ -69,10 +79,18 @@ class PublicSurfaceTest extends TestCase
         return $entries;
     }
 
+    private function classifiedEntries(): array
+    {
+        return array_merge(
+            self::PUBLIC_ROOT_ENTRIES,
+            self::PRIVATE_ROOT_ENTRIES,
+            self::RUNTIME_ROOT_ENTRIES
+        );
+    }
+
     public function testEveryRootEntryIsClassified(): void
     {
-        $known = array_merge(self::PUBLIC_ROOT_ENTRIES, self::PRIVATE_ROOT_ENTRIES);
-        $unknown = array_values(array_diff($this->rootEntries(), $known));
+        $unknown = array_values(array_diff($this->rootEntries(), $this->classifiedEntries()));
 
         $this->assertSame(
             [],
@@ -90,8 +108,8 @@ class PublicSurfaceTest extends TestCase
      */
     public function testClassificationHasNoStaleEntries(): void
     {
-        $known = array_merge(self::PUBLIC_ROOT_ENTRIES, self::PRIVATE_ROOT_ENTRIES);
-        $stale = array_values(array_diff($known, $this->rootEntries()));
+        $expected = array_merge(self::PUBLIC_ROOT_ENTRIES, self::PRIVATE_ROOT_ENTRIES);
+        $stale = array_values(array_diff($expected, $this->rootEntries()));
 
         $this->assertSame([], $stale, 'у переліку лишились записи, яких немає в дереві');
     }
