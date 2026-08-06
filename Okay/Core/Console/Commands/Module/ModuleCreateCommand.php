@@ -22,7 +22,16 @@ class ModuleCreateCommand extends Command
         $vendor = $this->getVendorName();
         $module = $this->getModuleName($vendor);
 
-        $this->createModuleFiles($vendor, $module);
+        if (!$this->createModuleFiles($vendor, $module)) {
+            $this->output->writeln(sprintf(
+                '<error>Could not create the module files in %s/%s/%s</error>',
+                $this->modulesDirectory,
+                $vendor,
+                $module
+            ));
+
+            return Command::FAILURE;
+        }
 
         return Command::SUCCESS;
     }
@@ -101,10 +110,11 @@ class ModuleCreateCommand extends Command
         return strtolower(preg_replace('/([a-z])([A-Z]+)/', '$1_$2', $name));
     }
 
-    private function createModuleFiles(string $vendor, string $module)
+    private function createModuleFiles(string $vendor, string $module): bool
     {
-        if (!is_dir($this->modulesDirectory.'/'.$vendor)) {
-            mkdir($this->modulesDirectory.'/'.$vendor);
+        $vendorDir = $this->modulesDirectory.'/'.$vendor;
+        if (!is_dir($vendorDir) && !@mkdir($vendorDir, 0777, true) && !is_dir($vendorDir)) {
+            return false;
         }
 
         $moduleDir = $this->modulesDirectory.'/'.$vendor.'/'.$module;
@@ -116,12 +126,19 @@ class ModuleCreateCommand extends Command
         ];
 
         $this->recursiveCopy(__DIR__.'/ModuleCreateCommand/module', $moduleDir, $replacements);
+
+        // Каркас, недоскладений мовчки, гірший за помилку: модуль виглядає створеним,
+        // а частини файлів у ньому немає.
+        return is_file($moduleDir.'/Init/Init.php');
     }
 
     private function recursiveCopy(string $source, string $destination, array $replacements): void
     {
+        if (!is_dir($destination) && !@mkdir($destination, 0777, true) && !is_dir($destination)) {
+            return;
+        }
+
         $dir = opendir($source);
-        mkdir($destination);
         while(( $file = readdir($dir)) ) {
             if (( $file != '.' ) && ( $file != '..' )) {
                 if ( is_dir($source . '/' . $file) ) {
