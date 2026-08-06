@@ -46,15 +46,16 @@ failOnWarning="true"
 
 ## Що покрито
 
-Близько 80 тестових класів. Найбільші групи:
+105 тестових класів. Найбільші групи:
 
 | Каталог | Класів | Про що |
 | ------- | ------ | ------ |
-| `tests/Security/` | 28 | CSRF вітрини й адмінки, вхід і відновлення пароля, файловий менеджер, обхід шляхів, заголовки, куки, SVG |
-| `tests/Core/` | 28 | Design і Smarty-плагіни, TemplateConfig, консоль, QueryFactory, модулі, сутності |
+| `tests/Core/` | 38 | Design і Smarty-плагіни, TemplateConfig, консоль, QueryFactory, модулі, сутності |
+| `tests/Security/` | 35 | CSRF вітрини й адмінки, вхід і відновлення пароля, файловий менеджер, обхід шляхів, заголовки, куки, SVG |
+| `tests/TplMod/` | 7 | розбір і друк шаблонів, збіг анкерів `modifications` |
+| `tests/Admin/` | 7 | контролери адмінки |
 | `tests/Design/` | 5 | компіляція шаблонів тем і заборонені конструкції Smarty 5 |
-| `tests/TplMod/` | 3 | розбір і друк шаблонів |
-| `tests/Modules/`, `tests/Admin/`, `tests/Helpers/`, `tests/Seo/`, `tests/Entities/` | 15 | решта |
+| `tests/Modules/`, `tests/Helpers/`, `tests/Seo/`, `tests/Entities/` | 13 | решта |
 
 ### Тести-запобіжники
 
@@ -68,6 +69,9 @@ failOnWarning="true"
 | `Design/NoByReferenceModifiersTest` | `reset`, `key`, `next`, `prev`, `end` у шаблоні |
 | `Design/NoPluginTagInFunctionPositionTest` | писати тег-модифікатор у позиції виклику: `{date('Y-m-d')}` |
 | `TplMod/ThemeTemplatesTplModTest` | додати в шаблон конструкцію, на якій `TplMod` обрізає файл |
+| `TplMod/BundledModificationsTest` | правкою теми чи шаблонів адмінки знерухомити анкер `modifications` вбудованого модуля |
+| `Core/DesignCompileDirTest` | повернути мовчазний `mkdir()` каталогу компіляції — без нього не рендериться жодна сторінка |
+| `Admin/ThemeAdminDirCopyTest` | зробити копію теми, яка вдає успіх і перемикає вітрину на недокопійований каталог |
 | `Core/SmartyPlugins/PluginSignatureTest` | типізувати обʼєкт шаблону в плагіні |
 | `Core/Console/CommandNamesTest` | лишити команду без `#[AsCommand]` — це кладе весь `./ok` |
 | `Core/QueryFactory/NoPositionalBindsTest` | позиційні `?` у `where()`, яких aura 3 не вміє |
