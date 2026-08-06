@@ -50,13 +50,11 @@ class TplMod
     private function walkByFile(BaseNode $node, array $changes)
     {
         foreach ($changes as $changeDTO) {
-            if (!empty($changeDTO->getFind()) && strpos($node->getOriginalElement(), $changeDTO->getFind()) !== false) {
-                $this->applyMod($node, $changeDTO);
-            } elseif (!empty($changeDTO->getLike()) && preg_match('~'.$changeDTO->getLike().'~', $node->getOriginalElement())) {
+            if ($this->matches($node, $changeDTO)) {
                 $this->applyMod($node, $changeDTO);
             }
         }
-        
+
         if ($node->children()) {
             foreach ($node->children() as $child) {
                 $this->walkByFile($child, $changes);
@@ -64,41 +62,46 @@ class TplMod
         }
     }
 
+    /**
+     * Правило збігу анкера. Єдине місце, де воно живе: ним користуються і рендер,
+     * і ModificationChecker.
+     */
+    public function matches(BaseNode $node, TplChangeDTO $change): bool
+    {
+        // find і like - це АБО, а не пріоритет: коли задані обидва, like перевіряється
+        // й тоді, коли find не збігся.
+        if (!empty($change->getFind()) && strpos($node->getOriginalElement(), $change->getFind()) !== false) {
+            return true;
+        }
+
+        return !empty($change->getLike())
+            && (bool)preg_match('~'.$change->getLike().'~', $node->getOriginalElement());
+    }
+
+    /**
+     * @return BaseNode[] вузли, з якими збігся анкер, у порядку обходу
+     */
+    public function findMatches(BaseNode $node, TplChangeDTO $change): array
+    {
+        $matched = [];
+
+        if ($this->matches($node, $change)) {
+            $matched[] = $node;
+        }
+
+        foreach ($node->children() as $child) {
+            $matched = array_merge($matched, $this->findMatches($child, $change));
+        }
+
+        return $matched;
+    }
+
     private function applyMod(BaseNode $node, TplChangeDTO $changeDTO)
     {
-        // Вдруг запросили относительную ноду
-        if ($changeDTO->isParent()) {
-            $node = $node->parent();
+        if (($node = $this->resolveTarget($node, $changeDTO)) === null) {
+            return;
         }
-        
-        if (!empty($changeDTO->getClosestFind())) {
-            while ($node = $node->parent()) {
-                if (strpos($node->getOriginalElement(), $changeDTO->getClosestFind()) !== false) {
-                    break;
-                }
-            }
-        } elseif (!empty($changeDTO->getClosestLike())) {
-            while ($node = $node->parent()) {
-                if (preg_match('~'.$changeDTO->getClosestLike().'~', $node->getOriginalElement())) {
-                    break;
-                }
-            }
-        }
-        
-        if (!empty($changeDTO->getChildrenFind())) {
-            if ($childNode = $this->findChildNode($node, $changeDTO->getChildrenFind())) {
-                $node = $childNode;
-            } else {
-                return;
-            }
-        } elseif (!empty($changeDTO->getChildrenLike())) {
-            if ($childNode = $this->likeChildNode($node, $changeDTO->getChildrenLike())) {
-                $node = $childNode;
-            } else {
-                return;
-            }
-        }
-        
+
         if (!empty($changeDTO->getAppend())) {
             $userNode = new TextNode($changeDTO->getAppend());
             if ($this->debug === true && !empty($changeDTO->getComment())) {
@@ -169,6 +172,54 @@ class TplMod
         unset($node);
     }
     
+    /**
+     * Вузол, який зрештою буде змінено: parent -> closest* -> children*.
+     * null означає, що ланцюжок обірвався і вставляти немає куди.
+     */
+    public function resolveTarget(BaseNode $node, TplChangeDTO $change): ?BaseNode
+    {
+        if ($change->isParent()) {
+            if (($node = $node->parent()) === null) {
+                return null;
+            }
+        }
+
+        if (!empty($change->getClosestFind())) {
+            $find = $change->getClosestFind();
+            $node = $this->closestNode($node, static fn(BaseNode $candidate): bool
+                => strpos($candidate->getOriginalElement(), $find) !== false);
+        } elseif (!empty($change->getClosestLike())) {
+            $like = $change->getClosestLike();
+            $node = $this->closestNode($node, static fn(BaseNode $candidate): bool
+                => (bool)preg_match('~'.$like.'~', $candidate->getOriginalElement()));
+        }
+
+        if ($node === null) {
+            return null;
+        }
+
+        if (!empty($change->getChildrenFind())) {
+            return $this->findChildNode($node, $change->getChildrenFind()) ?: null;
+        }
+
+        if (!empty($change->getChildrenLike())) {
+            return $this->likeChildNode($node, $change->getChildrenLike()) ?: null;
+        }
+
+        return $node;
+    }
+
+    private function closestNode(BaseNode $node, callable $matches): ?BaseNode
+    {
+        while ($node = $node->parent()) {
+            if ($matches($node)) {
+                return $node;
+            }
+        }
+
+        return null;
+    }
+
     private function findChildNode(BaseNode $node, $search)
     {
         $result = false;

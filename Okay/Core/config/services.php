@@ -47,6 +47,7 @@ use Okay\Core\Modules\Extender\QueueExtender;
 use Okay\Core\Modules\Extender\ExtenderFacade;
 use Okay\Core\UserReferer\UserReferer;
 use Snowplow\RefererParser\Parser;
+use Okay\Core\TplMod\ModificationChecker;
 use Okay\Core\TplMod\Parser as TplParser;
 use Okay\Core\Security\AdminRecoveryToken;
 use Okay\Core\Security\AttemptLimiter;
@@ -550,6 +551,13 @@ $services = [
         'arguments' => [
             new SR(TplParser::class),
             new SR(Config::class),
+        ],
+    ],
+    ModificationChecker::class => [
+        'class' => ModificationChecker::class,
+        'arguments' => [
+            new SR(TplMod::class),
+            new SR(TplParser::class),
         ],
     ],
     TemplateConfig::class => [

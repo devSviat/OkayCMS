@@ -623,6 +623,7 @@ $lang['theme_copy'] = 'Create a copy of the template';
 $lang['theme_current_item'] = 'Current template';
 $lang['theme_current'] = 'Current template:';
 $lang['theme_exists'] = 'Template with this name already exists';
+$lang['theme_copy_failed'] = 'Could not copy the template. Check write permissions for the folder';
 $lang['theme_perform'] = 'Do you want to perform this action?';
 $lang['theme_perform_yes'] = 'Yes';
 $lang['theme_perform_no'] = 'No';

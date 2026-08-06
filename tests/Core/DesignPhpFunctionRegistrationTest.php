@@ -57,9 +57,7 @@ class DesignPhpFunctionRegistrationTest extends TestCase
 
     private function buildDesignAndGetSmarty(bool $security, array $modifiers = []): Smarty
     {
-        // Design робить mkdir() без рекурсії, тож дерево має вже існувати.
         $rootDir = sys_get_temp_dir() . '/okaycms-design-test/';
-        @mkdir($rootDir . 'compiled/vibe_shop', 0777, true);
 
         $frontTemplateConfig = $this->createStub(FrontTemplateConfig::class);
         $frontTemplateConfig->method('getTheme')->willReturn('vibe_shop');

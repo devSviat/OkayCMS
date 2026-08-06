@@ -47,14 +47,14 @@ class BackendTemplateConfig
         $this->compileCssDir = $compileCssDir;
         $this->compileJsDir = $compileJsDir;
 
-        if (!is_dir($this->compileCssDir)) {
-            mkdir($this->compileCssDir, 0777, true);
+        // Провал тут не критичний: кеш просто не запишеться, сторінка лишається робочою.
+        // Попередження придушуємо навмисно - інакше воно повторюється на кожному запиті.
+        foreach ([$this->compileCssDir, $this->compileJsDir] as $compileDir) {
+            if (!is_dir($compileDir)) {
+                @mkdir($compileDir, 0777, true);
+            }
         }
 
-        if (!is_dir($this->compileJsDir)) {
-            mkdir($this->compileJsDir, 0777, true);
-        }
-        
     }
 
 

@@ -13,8 +13,10 @@ class LicenseStorage
     {
         $this->compileCodeDir = $compileCodeDir;
 
+        // Провал тут ні на що не впливає: файл просто не запишеться. Попередження
+        // придушуємо навмисно - інакше воно повторюється на кожному запиті.
         if (!is_dir($this->compileCodeDir)) {
-            mkdir($this->compileCodeDir, 0777, true);
+            @mkdir($this->compileCodeDir, 0777, true);
         }
     }
 

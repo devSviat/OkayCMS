@@ -10,7 +10,7 @@
                 {$btr->theme_current|escape} {$theme->name|escape}
             </div>
             <div class="box_btn_heading theme_btn_heading">
-                <a class="fn_clone_theme btn btn_small btn-info" href="/">
+                <a class="fn_clone_theme btn btn_small btn-info" href="/" data-theme_name="{$theme->name|escape}">
                     {include file='svg_icon.tpl' svgId='plus'}
                     <span>{$btr->theme_copy|escape} {$settings->theme|escape}</span>
                 </a>
@@ -55,7 +55,9 @@
                 <div class="alert__content">
                     <div class="alert__title">
                     {if $message_error == 'permissions'}
-                        {$btr->general_permissionse|escape} {$themes_dir}
+                        {$btr->general_permissions|escape} {$themes_dir}
+                    {elseif $message_error == 'theme_copy_failed'}
+                        {$btr->theme_copy_failed|escape} {$themes_dir}
                     {elseif $message_error == 'name_exists'}
                         {$btr->theme_exists|escape}
                     {else}
@@ -230,6 +232,8 @@
         $('.fn_clone_theme').on('click',function(e){
             e.preventDefault();
             $("input[name=action]").val('clone_theme');
+            // Порожнє theme контролер відсіває разом з action - клон мовчки не відбувався.
+            $("input[name=theme]").val($(this).data('theme_name'));
             $("input[name=theme]").closest('form').submit();
         });
 

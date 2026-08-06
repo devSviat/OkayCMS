@@ -176,9 +176,15 @@ class Design
         $this->smarty->setCompileDir($rootDir.'compiled/'.$theme);
         $this->smarty->setTemplateDir($this->defaultTemplateDir);
 
-        // Создаем папку для скомпилированных шаблонов текущей темы
-        if (!is_dir($this->smarty->getCompileDir())) {
-            mkdir($this->smarty->getCompileDir(), 0777);
+        // Каталог створюється рекурсивно: compiled/ немає на свіжому клоні, і без
+        // recursive не створювалось нічого. Повторна перевірка is_dir після невдалого
+        // mkdir - гонка двох запитів: обидва бачать !is_dir, обидва створюють, один програє.
+        $compileDir = $this->smarty->getCompileDir();
+        if (!is_dir($compileDir) && !@mkdir($compileDir, 0777, true) && !is_dir($compileDir)) {
+            throw new \RuntimeException(sprintf(
+                'Cannot create the Smarty compile directory "%s". Without it no page can be rendered.',
+                $compileDir
+            ));
         }
         
         $this->smarty->setCacheDir('cache');

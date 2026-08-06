@@ -68,7 +68,11 @@ class TemplateCompileTest extends TestCase
         $onDisk = [];
         foreach (self::findTemplates(rtrim($root, '/')) as $absolute) {
             $relative = substr($absolute, strlen($root));
-            if (strpos($relative, 'vendor/') === 0 || strpos($relative, '/compiled/') !== false) {
+            // tests/ - фікстури інших тестів: вони мусять мати розширення .tpl,
+            // бо їх шукає перевірка, але в поставку не їдуть і не компілюються
+            if (strpos($relative, 'vendor/') === 0
+                || strpos($relative, 'tests/') === 0
+                || strpos($relative, '/compiled/') !== false) {
                 continue;
             }
             $onDisk[] = $relative;

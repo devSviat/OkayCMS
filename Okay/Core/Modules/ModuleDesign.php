@@ -152,7 +152,12 @@ class ModuleDesign
                 continue;
             }
 
-            mkdir($fullPathDir);
+            // Повторний is_dir: паралельний запит міг створити каталог між перевіркою
+            // й викликом. Якщо не створився - глибші рівні тим паче не створяться.
+            if (!@mkdir($fullPathDir, 0777, true) && !is_dir($fullPathDir)) {
+                return;
+            }
+
             chmod($fullPathDir, 0755);
         }
     }
