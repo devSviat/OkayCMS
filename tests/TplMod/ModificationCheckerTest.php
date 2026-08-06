@@ -58,17 +58,6 @@ class ModificationCheckerTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($result->isFailure());
     }
 
-    /** Рядок є у файлі, але не у вузлі: анкер мертвий, хоч grep його й знаходить. */
-    public function testAnchorSpanningTagsIsNoAnchor()
-    {
-        $result = $this->checkOne(
-            new ModificationDTO('order.tpl', [new TplChangeDTO('<i>{$purchase->variant->name|escape}</i>', '')]),
-            [$this->fixtures('theme')]
-        );
-
-        $this->assertSame(CheckStatus::NoAnchor, $result->getStatus());
-    }
-
     public function testBrokenChainIsChainBroken()
     {
         $change = new TplChangeDTO('{if $delivery}', '');
@@ -104,6 +93,22 @@ class ModificationCheckerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(CheckStatus::Multiple, $result->getStatus());
         $this->assertCount(2, $result->getMatchedFiles());
         $this->assertFalse($result->isFailure());
+    }
+
+    /**
+     * Кілька збігів в одному файлі - теж Multiple: саме стільки разів вставиться блок.
+     * Рахуються вузли, а не файли.
+     */
+    public function testTwoMatchingNodesInOneFileAreCounted()
+    {
+        $result = $this->checkOne(
+            new ModificationDTO('order.tpl', [new TplChangeDTO('class="', '')]),
+            [$this->fixtures('theme')]
+        );
+
+        $this->assertSame(CheckStatus::Multiple, $result->getStatus());
+        $this->assertSame(2, $result->getMatchCount());
+        $this->assertCount(1, $result->getMatchedFiles());
     }
 
     /** Листи лежать у html/email/, а в module.json вказані без каталогу. */

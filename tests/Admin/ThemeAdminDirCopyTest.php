@@ -37,12 +37,14 @@ class ThemeAdminDirCopyTest extends TestCase
 
     /**
      * Батько-файл, а не права: тести можуть іти від root, який права обходить.
+     *
+     * Каталог-джерело порожній навмисно: з файлами всередині провал помітив би й
+     * copy(), і перевірка mkdir лишилась би непокритою.
      */
     public function testCopyReportsFailureWhenDestinationCannotBeCreated()
     {
         $src = $this->tempPath('src');
         mkdir($src, 0755, true);
-        file_put_contents($src . '/style.css', 'body{}');
 
         $blocker = $this->tempPath('blocker');
         file_put_contents($blocker, 'not a directory');
