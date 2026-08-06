@@ -32,6 +32,19 @@ class BackendGoogleMerchantHelper
     /** @var GoogleMerchantRelationsEntity */
     private $relationsEntity;
 
+    /**
+     * Усі зв'язки фідів, прочитані один раз на запит.
+     *
+     * Сторінка адмінки викликає чотири публічні читання підряд, і кожне з них
+     * робило власний SELECT плюс окремий COUNT(*) заради ['limit' => count()].
+     * Різнився лише entity_type/include, тож замість чотирьох вибірок по
+     * непридатному індексу (провідна колонка feed_id, а фільтр без нього)
+     * читається вся таблиця один раз і ділиться в пам'яті.
+     *
+     * @var object[]|null
+     */
+    private $allRelations;
+
     public function __construct(
         EntityFactory  $entityFactory,
         QueryFactory   $queryFactory,
@@ -121,6 +134,8 @@ class BackendGoogleMerchantHelper
     {
         $this->relationsEntity->removeAllCategoriesByFeedId($feedId);
 
+        $this->forgetRelations();
+
         $select = $this->queryFactory->newSelect();
         $select ->from(CategoriesEntity::getTable())
             ->cols(['id']);
@@ -147,6 +162,8 @@ class BackendGoogleMerchantHelper
     public function updateRelatedCategories($relatedCategories)
     {
         $this->relationsEntity->removeAllCategories();
+
+        $this->forgetRelations();
 
         if (!empty($relatedCategories)) {
             $rows = [];
@@ -175,6 +192,8 @@ class BackendGoogleMerchantHelper
     {
         $this->relationsEntity->removeAllBrandsByFeedId($feedId);
 
+        $this->forgetRelations();
+
         $select = $this->queryFactory->newSelect();
         $select ->from(BrandsEntity::getTable())
             ->cols(['id']);
@@ -202,6 +221,8 @@ class BackendGoogleMerchantHelper
     {
         $this->relationsEntity->removeAllBrands();
 
+        $this->forgetRelations();
+
         if (!empty($relatedBrands)) {
             $rows = [];
             foreach ($relatedBrands as $feedId => $brandsIds) {
@@ -228,7 +249,9 @@ class BackendGoogleMerchantHelper
     {
         $this->relationsEntity->removeAllRelatedProducts();
 
-        $feeds = $this->feedsEntity->find(['limit' => $this->feedsEntity->count()]);
+        $this->forgetRelations();
+
+        $feeds = $this->feedsEntity->noLimit()->find();
 
         $rows = [];
         foreach ($feeds as $feed) {
@@ -258,7 +281,9 @@ class BackendGoogleMerchantHelper
     {
         $this->relationsEntity->removeAllNotRelatedProducts();
 
-        $feeds = $this->feedsEntity->find(['limit' => $this->feedsEntity->count()]);
+        $this->forgetRelations();
+
+        $feeds = $this->feedsEntity->noLimit()->find();
 
         $rows = [];
         foreach ($feeds as $feed) {
@@ -282,18 +307,87 @@ class BackendGoogleMerchantHelper
     }
 
     /**
+     * Уся таблиця зв'язків, прочитана один раз на запит.
+     *
+     * @return object[]
+     */
+    private function getAllRelations()
+    {
+        if ($this->allRelations === null) {
+            $this->allRelations = $this->relationsEntity->noLimit()->find();
+        }
+
+        return $this->allRelations;
+    }
+
+    /**
+     * Кеш живе рівно один запит. Скидається після кожного запису, щоб читання
+     * після збереження не показувало стан до нього.
+     */
+    private function forgetRelations()
+    {
+        $this->allRelations = null;
+    }
+
+    /**
+     * @param string $entityType
+     * @param int|null $include
+     * @return object[]
+     */
+    private function filterRelations($entityType, $include = null)
+    {
+        $filtered = [];
+        foreach ($this->getAllRelations() as $relation) {
+            if ($relation->entity_type !== $entityType) {
+                continue;
+            }
+            if ($include !== null && (int)$relation->include !== $include) {
+                continue;
+            }
+            $filtered[] = $relation;
+        }
+
+        return $filtered;
+    }
+
+    /**
+     * @param object[] $relations
+     * @return array
+     */
+    private function groupProductsByFeed(array $relations)
+    {
+        $ids = [];
+        foreach ($relations as $relation) {
+            $ids[] = $relation->entity_id;
+        }
+
+        // Порожній масив у фільтрі — це «нічого не закріплено», а не «фільтра
+        // немає». autoFilter() (Okay/Core/Entity/filter.php) мовчки викидає
+        // порожній масив, тож без цієї перевірки getList(['id' => []]) віддавав
+        // увесь каталог — а це стан свіжовстановленого модуля.
+        $products = empty($ids) ? [] : $this->productsHelper->getList(['id' => $ids]);
+
+        $grouped = [];
+        foreach ($relations as $relation) {
+            // Зв'язок переживає видалений товар: без перевірки в масив для
+            // шаблона потрапляв null, а PHP писав попередження.
+            if (!isset($products[$relation->entity_id])) {
+                continue;
+            }
+            $grouped[$relation->feed_id][] = $products[$relation->entity_id];
+        }
+
+        return $grouped;
+    }
+
+    /**
      * @return array
      * Достаем массив ids закрепённых категорий
      */
     public function getAllRelatedCategoriesIds()
     {
-        $allCategoriesRelations = $this->relationsEntity->find([
-            'limit' => $this->relationsEntity->count(),
-            'entity_type' => 'category'
-        ]);
-
         $relatedCategoriesIds = [];
-        foreach ($allCategoriesRelations as $categoryRelation) {
+        foreach ($this->filterRelations('category') as $categoryRelation) {
             $relatedCategoriesIds[$categoryRelation->feed_id][] = $categoryRelation->entity_id;
         }
 
@@ -306,13 +400,8 @@ class BackendGoogleMerchantHelper
      */
     public function getAllRelatedBrandsIds()
     {
-        $allBrandsRelations = $this->relationsEntity->find([
-            'limit' => $this->relationsEntity->count(),
-            'entity_type' => 'brand'
-        ]);
-
         $relatedBrandsIds = [];
-        foreach ($allBrandsRelations as $brandRelation) {
+        foreach ($this->filterRelations('brand') as $brandRelation) {
             $relatedBrandsIds[$brandRelation->feed_id][] = $brandRelation->entity_id;
         }
 
@@ -326,26 +415,9 @@ class BackendGoogleMerchantHelper
      */
     public function getAllRelatedProducts()
     {
-        $allRelatedProductsRelations = $this->relationsEntity->find([
-            'limit' => $this->relationsEntity->count(),
-            'entity_type' => 'product',
-            'include' => 1
-        ]);
-
-        $relatedProductsIds = [];
-        foreach ($allRelatedProductsRelations as $relation) {
-            $relatedProductsIds[] = $relation->entity_id;
-        }
-
-        $products = $this->productsHelper->getList(['id' => $relatedProductsIds]);
-
-        $relatedProducts = [];
-        foreach ($allRelatedProductsRelations as $relation) {
-            $relatedProducts[$relation->feed_id][] = $products[$relation->entity_id];
-        }
+        $relatedProducts = $this->groupProductsByFeed($this->filterRelations('product', 1));
 
         return ExtenderFacade::execute(__METHOD__, $relatedProducts, func_get_args());
-
     }
 
     /**
@@ -355,23 +427,7 @@ class BackendGoogleMerchantHelper
      */
     public function getAllNotRelatedProducts()
     {
-        $allNotRelatedProductsRelations = $this->relationsEntity->find([
-            'limit' => $this->relationsEntity->count(),
-            'entity_type' => 'product',
-            'include' => 0
-        ]);
-
-        $notRelatedProductsIds = [];
-        foreach ($allNotRelatedProductsRelations as $relation) {
-            $notRelatedProductsIds[] = $relation->entity_id;
-        }
-
-        $products = $this->productsHelper->getList(['id' => $notRelatedProductsIds]);
-
-        $notRelatedProducts = [];
-        foreach ($allNotRelatedProductsRelations as $relation) {
-            $notRelatedProducts[$relation->feed_id][] = $products[$relation->entity_id];
-        }
+        $notRelatedProducts = $this->groupProductsByFeed($this->filterRelations('product', 0));
 
         return ExtenderFacade::execute(__METHOD__, $notRelatedProducts, func_get_args());
     }

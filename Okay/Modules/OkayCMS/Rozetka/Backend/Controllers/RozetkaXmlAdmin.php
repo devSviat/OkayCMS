@@ -59,7 +59,7 @@ class RozetkaXmlAdmin extends IndexAdmin
 
         $allFeeds                = $feedsEntity->find();
         $allCategories           = $categoriesEntity->getCategoriesTree();
-        $allBrands               = $brandsEntity->find(['limit' => $brandsEntity->count()]);
+        $allBrands               = $brandsEntity->noLimit()->find();
         $allRelatedCategoriesIds = $backendRozetkaHelper->getAllRelatedCategoriesIds();
         $allRelatedBrandsIds     = $backendRozetkaHelper->getAllRelatedBrandsIds();
         $allRelatedProducts      = $backendRozetkaHelper->getAllRelatedProducts();

@@ -63,7 +63,7 @@ class HotlineAdmin extends IndexAdmin
 
         $allFeeds                = $feedsEntity->find();
         $allCategories           = $categoriesEntity->getCategoriesTree();
-        $allBrands               = $brandsEntity->find(['limit' => $brandsEntity->count()]);
+        $allBrands               = $brandsEntity->noLimit()->find();
         $allFeatures             = $featuresEntity->find();
         $allRelatedCategoriesIds = $backendHotlineHelper->getAllRelatedCategoriesIds();
         $allRelatedBrandsIds     = $backendHotlineHelper->getAllRelatedBrandsIds();
