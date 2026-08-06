@@ -33,13 +33,9 @@ class BackendHotlineHelper
     private $relationsEntity;
 
     /**
-     * Усі зв'язки фідів, прочитані один раз на запит.
-     *
-     * Сторінка адмінки викликає чотири публічні читання підряд, і кожне з них
-     * робило власний SELECT плюс окремий COUNT(*) заради ['limit' => count()].
-     * Різнився лише entity_type/include, тож замість чотирьох вибірок по
-     * непридатному індексу (провідна колонка feed_id, а фільтр без нього)
-     * читається вся таблиця один раз і ділиться в пам'яті.
+     * Усі зв'язки, прочитані один раз на запит. Чотири публічні читання
+     * відрізнялись лише entity_type/include, а індекс для таких вибірок
+     * непридатний — провідна колонка feed_id.
      *
      * @var object[]|null
      */
@@ -151,6 +147,35 @@ class BackendHotlineHelper
         }
 
         $this->relationsEntity->addRelations($rows);
+
+        return ExtenderFacade::execute(__METHOD__, null, func_get_args());
+    }
+
+    /**
+     * @param string|integer $feedId
+     * Снимаем все категории с фида
+     *
+     * Обгортка існує заради forgetRelations(): контролер знімав категорії
+     * прямим викликом на сутності, повз хелпер, і кеш лишався б чинним.
+     */
+    public function removeAllCategoriesByFeedId($feedId)
+    {
+        $this->relationsEntity->removeAllCategoriesByFeedId($feedId);
+
+        $this->forgetRelations();
+
+        return ExtenderFacade::execute(__METHOD__, null, func_get_args());
+    }
+
+    /**
+     * @param string|integer $feedId
+     * Снимаем все бренды с фида
+     */
+    public function removeAllBrandsByFeedId($feedId)
+    {
+        $this->relationsEntity->removeAllBrandsByFeedId($feedId);
+
+        $this->forgetRelations();
 
         return ExtenderFacade::execute(__METHOD__, null, func_get_args());
     }
@@ -306,11 +331,7 @@ class BackendHotlineHelper
         return ExtenderFacade::execute(__METHOD__, null, func_get_args());
     }
 
-    /**
-     * Уся таблиця зв'язків, прочитана один раз на запит.
-     *
-     * @return object[]
-     */
+    /** @return object[] */
     private function getAllRelations()
     {
         if ($this->allRelations === null) {
@@ -320,10 +341,7 @@ class BackendHotlineHelper
         return $this->allRelations;
     }
 
-    /**
-     * Кеш живе рівно один запит. Скидається після кожного запису, щоб читання
-     * після збереження не показувало стан до нього.
-     */
+    /** Кеш живе один запит; скидається після кожного запису. */
     private function forgetRelations()
     {
         $this->allRelations = null;
@@ -361,16 +379,13 @@ class BackendHotlineHelper
             $ids[] = $relation->entity_id;
         }
 
-        // Порожній масив у фільтрі — це «нічого не закріплено», а не «фільтра
-        // немає». autoFilter() (Okay/Core/Entity/filter.php) мовчки викидає
-        // порожній масив, тож без цієї перевірки getList(['id' => []]) віддавав
-        // увесь каталог — а це стан свіжовстановленого модуля.
+        // autoFilter() (Okay/Core/Entity/filter.php) мовчки викидає порожній
+        // масив, тож getList(['id' => []]) віддавав увесь каталог.
         $products = empty($ids) ? [] : $this->productsHelper->getList(['id' => $ids]);
 
         $grouped = [];
         foreach ($relations as $relation) {
-            // Зв'язок переживає видалений товар: без перевірки в масив для
-            // шаблона потрапляв null, а PHP писав попередження.
+            // Зв'язок переживає видалений товар.
             if (!isset($products[$relation->entity_id])) {
                 continue;
             }

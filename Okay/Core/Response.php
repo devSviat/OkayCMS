@@ -86,7 +86,7 @@ class Response
         $this->type = RESPONSE_HTML;
 
         // Точну версію не публікуємо: вона перетворює банер на готову
-        // ціль для сканерів.
+        // ціль для сканерів. Саме ім'я рушія лишається свідомо.
         $this->addHeader('X-Powered-CMS: OkayCMS');
 
         foreach (SecurityHeaders::defaults() as $header) {

@@ -7,9 +7,65 @@ ErrorDocument 404 /404
 RewriteEngine on
 #RewriteBase /
 
-# закрываем ненужные директорию от веба
+# Лістинг видає структуру дерева навіть там, де кожен файл закритий.
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
+
+# ───────────────────────── Білий список ─────────────────────────
+#
+# Той самий підхід, що й у docs/nginx/nginx.conf: перелічене віддається, решта
+# переписується на index.php — незалежно від того, чи файл є на диску. Раніше
+# фінальне правило ловило лише неіснуючі шляхи (`!-f`), тож усе, що фізично
+# лежить у дереві, віддавалось як є.
+#
+# Побічний ефект переписування: сторонній .php не виконується, бо mod_rewrite
+# відпрацьовує до вибору обробника.
+#
+# Умови зіставляються з $1, а не з %{REQUEST_URI}: інакше встановлення в
+# підкаталог (site.com/shop/) ламає кожне правило.
+
 RewriteRule .*(\.git/|\.idea|\.gitignore).* - [F]
 RewriteRule ^vendor/.* - [F]
+
+# Дерева адмінки, які не є ані статикою, ані точками входу. 404, а не
+# переписування: nginx тут теж віддає 404.
+RewriteRule ^backend/(Controllers|Helpers|Requests|Entities)/ - [R=404,L]
+RewriteRule ^backend/lang/ - [R=404,L]
+RewriteRule ^backend/design/compiled/ - [R=404,L]
+RewriteRule ^backend/design/js/filemanager/config/ - [R=404,L]
+
+# Під backend/design/ — лише статика за розширенням і .php двох точок входу.
+# Без цього віддавались .tpl, .htaccess і сміття вендорних JS-бібліотек.
+RewriteCond $1 !\.(css|js|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|html?|json)$ [NC]
+RewriteCond $1 !^backend/design/js/(filemanager|admintooltip)/.+\.php$ [NC]
+RewriteRule ^(backend/design/.*)$ index.php [L,QSA]
+
+# Вихідні файли до ресайзу не публічні.
+RewriteRule ^files/originals/ index.php [L,QSA]
+
+# Усе, що не збіглося з жодним дозволом нижче, — у фронт-контролер.
+RewriteCond $1 !^(robots\.txt|index\.php|favicon\.(ico|png|svg|gif|jpe?g|webp))$ [NC]
+RewriteCond $1 !^\.well-known/
+RewriteCond $1 !^backend/
+RewriteCond $1 !^design/[^/]+/(css|js|images|fonts)/.+\.(css|js|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot)$ [NC]
+RewriteCond $1 !^design/[^/]+/preview\.(png|jpe?g)$ [NC]
+RewriteCond $1 !^cache/(css|js)/[^/]+\.(css|js)$ [NC]
+RewriteCond $1 !^js_libraries/.+\.(css|js|map|png|jpe?g|gif|svg|webp|woff2?|ttf|eot)$ [NC]
+RewriteCond $1 !^Okay/Modules/[^/]+/[^/]+/(Backend/)?design/.+\.(css|js|png|jpe?g|gif|svg|webp|woff2?|ttf)$ [NC]
+RewriteCond $1 !^Okay/Modules/[^/]+/[^/]+/preview\.(png|jpe?g)$ [NC]
+RewriteCond $1 !^files/.+\.(png|jpe?g|gif|svg|webp|ico|pdf|zip|xlsx?|docx?|csv|mp3|mp4|ogg|webm)$ [NC]
+RewriteRule ^(.*)$ index.php [L,QSA]
+
+# SVG прямою навігацією рендериться як документ і виконує <script>.
+# Санітайзер є лише у файловому менеджері, тож глушимо заголовком.
+# На <img src="...svg"> це не впливає.
+<IfModule mod_headers.c>
+    <FilesMatch "\.svg$">
+        Header set Content-Security-Policy "default-src 'none'; sandbox"
+        Header set X-Content-Type-Options "nosniff"
+    </FilesMatch>
+</IfModule>
 
 # Редирект с повторяющихся слешей
 RewriteCond %{REQUEST_URI} ^(.*)/{2,}(.*)$
@@ -69,6 +125,8 @@ RewriteRule	^admin/?$  backend [L]
     RewriteRule .* - [E=REMOTE_USER:%{HTTP:Authorization}]
 </IfModule>
 
+# Лишається навмисно: після білого списку сюди доходять лише дозволені
+# шляхи, яких ще немає на диску — files/resized/ створюється на перший запит.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule .* index.php [E=REMOTE_USER:%{HTTP:Authorization},L,QSA]

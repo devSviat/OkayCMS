@@ -6,19 +6,15 @@ use Okay\Core\EntityFactory;
 use Okay\Core\QueryFactory;
 use Okay\Core\Request;
 use Okay\Helpers\ProductsHelper;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
- * BackendGoogleMerchantHelper, BackendHotlineHelper і BackendRozetkaHelper —
- * побайтово однакові, різняться лише іменами класів. Тому набір перевірок
- * спільний, а підкласи лише називають свої класи: інакше три копії тесту
- * розійшлися б із часом і дефект повернувся б у той модуль, який забули.
+ * Три хелпери побайтово однакові, тож набір перевірок спільний, а підкласи
+ * лише називають свої класи: три копії тесту розійшлися б із часом.
  *
- * Накриті два дефекти:
- *  - getList(['id' => []]) віддавав увесь каталог, бо autoFilter() мовчки
- *    викидає порожній масив (Okay/Core/Entity/filter.php);
- *  - одна сторінка адмінки читала таблицю зв'язків чотири рази, щоразу ще
- *    й із окремим COUNT(*) заради ['limit' => count()].
+ * Накриті два дефекти: getList(['id' => []]) віддавав увесь каталог, і одна
+ * сторінка читала таблицю зв'язків чотири рази з окремим COUNT(*) на кожен.
  */
 abstract class FeedRelationsReadingTestCase extends TestCase
 {
@@ -38,16 +34,28 @@ abstract class FeedRelationsReadingTestCase extends TestCase
     private array $getListCalls = [];
 
     /**
-     * Заглушки, а не моки з expects(): усі очікування виражені звичайними
-     * assert'ами по записаних викликах, тож видно і кількість, і аргументи.
+     * Обмеження на 100 рядків живе не у фільтрі, а в buildPagination(), тож
+     * заглушка його не бачить: без прямого підрахунку прибраний noLimit()
+     * лишив би тест зеленим.
+     *
+     * @var array<string,int>
      */
+    private array $noLimitCalls = [];
+
+    /** Заглушки, а не моки: очікування виражені assert'ами по записаних викликах. */
     protected function makeHelper(array $relations, array $products = [])
     {
         $this->findCalls = [];
         $this->getListCalls = [];
+        $this->noLimitCalls = ['relations' => 0, 'feeds' => 0];
 
         $relationsEntity = $this->createStub($this->relationsEntityClass());
-        $relationsEntity->method('noLimit')->willReturnSelf();
+        $relationsEntity->method('noLimit')->willReturnCallback(
+            function () use (&$relationsEntity) {
+                $this->noLimitCalls['relations']++;
+                return $relationsEntity;
+            }
+        );
         $relationsEntity->method('find')->willReturnCallback(
             function (array $filter = []) use ($relations) {
                 $this->findCalls[] = $filter;
@@ -56,7 +64,12 @@ abstract class FeedRelationsReadingTestCase extends TestCase
         );
 
         $feedsEntity = $this->createStub($this->feedsEntityClass());
-        $feedsEntity->method('noLimit')->willReturnSelf();
+        $feedsEntity->method('noLimit')->willReturnCallback(
+            function () use (&$feedsEntity) {
+                $this->noLimitCalls['feeds']++;
+                return $feedsEntity;
+            }
+        );
         $feedsEntity->method('find')->willReturn([]);
 
         $entityFactory = $this->createStub(EntityFactory::class);
@@ -76,9 +89,8 @@ abstract class FeedRelationsReadingTestCase extends TestCase
 
         $helperClass = $this->helperClass();
 
-        // Request не підміняється: у нього є власний метод method(), а PHPUnit
-        // не вміє дублювати класи з таким іменем методу. Справжній Request тут
-        // безпечний — перевіряються лише читання, які його не торкаються.
+        // Request не підміняється: PHPUnit не дублює класи з методом method().
+        // Справжній тут безпечний — читання його не торкаються.
         return new $helperClass(
             $entityFactory,
             $this->createStub(QueryFactory::class),
@@ -98,9 +110,8 @@ abstract class FeedRelationsReadingTestCase extends TestCase
     }
 
     /**
-     * Головний дефект: порожній перелік id — це «нічого не закріплено», а не
-     * «фільтра немає». Свіжовстановлений модуль не має жодного зв'язку типу
-     * product, тож обидва виклики вироджувались у повний прохід каталогу.
+     * Свіжовстановлений модуль не має жодного зв'язку типу product, тож обидва
+     * виклики вироджувались у повний прохід каталогу.
      */
     public function testNoProductRelationsMeansNoCatalogQuery(): void
     {
@@ -145,10 +156,7 @@ abstract class FeedRelationsReadingTestCase extends TestCase
         $this->assertSame([9], array_map(fn($p) => $p->id, $notRelated[1]));
     }
 
-    /**
-     * Зв'язок може пережити свій товар: до правки шаблон отримував null у
-     * масиві, а PHP — попередження про невизначений індекс.
-     */
+    /** Зв'язок може пережити свій товар. */
     public function testRelationsPointingAtAMissingProductAreSkipped(): void
     {
         $helper = $this->makeHelper(
@@ -177,10 +185,7 @@ abstract class FeedRelationsReadingTestCase extends TestCase
         $this->assertSame([1 => [20]], $helper->getAllRelatedBrandsIds());
     }
 
-    /**
-     * Чотири методи, які адмінка викликає підряд, мусять коштувати один запит,
-     * а не чотири SELECT плюс чотири COUNT.
-     */
+    /** Чотири методи підряд мусять коштувати один запит, а не чотири плюс COUNT. */
     public function testTheFourReadersShareOneRelationsQuery(): void
     {
         $helper = $this->makeHelper([$this->relation(1, 10, 'category')]);
@@ -193,10 +198,7 @@ abstract class FeedRelationsReadingTestCase extends TestCase
         $this->assertCount(1, $this->findCalls);
     }
 
-    /**
-     * ['limit' => $entity->count()] — це два запити замість одного, та ще й із
-     * вікном між ними, у яке паралельна вставка губить рядки.
-     */
+    /** ['limit' => count()] — два запити з вікном, у яке губляться рядки. */
     public function testRelationsAreReadWithoutACountBasedLimit(): void
     {
         $helper = $this->makeHelper([]);
@@ -206,10 +208,28 @@ abstract class FeedRelationsReadingTestCase extends TestCase
         $this->assertSame([[]], $this->findCalls);
     }
 
-    /**
-     * Кеш живе рівно один запит і не переживає запис: інакше сторінка після
-     * збереження показувала б стан до нього.
-     */
+    /** Порожній фільтр — половина справи: ліміт живе не в ньому, а в пагінації. */
+    public function testRelationsAreReadWithoutTheDefaultPageSize(): void
+    {
+        $helper = $this->makeHelper([$this->relation(1, 10, 'category')]);
+
+        $helper->getAllRelatedCategoriesIds();
+
+        $this->assertSame(1, $this->noLimitCalls['relations'], 'читання зв\'язків мусить іти через noLimit()');
+    }
+
+    /** Те саме для читання фідів у методах запису. */
+    public function testFeedsAreReadWithoutTheDefaultPageSize(): void
+    {
+        $helper = $this->makeHelper([]);
+
+        $helper->updateRelatedProducts();
+        $helper->updateNotRelatedProducts();
+
+        $this->assertSame(2, $this->noLimitCalls['feeds'], 'читання фідів мусить іти через noLimit()');
+    }
+
+    /** Кеш не переживає запис: інакше сторінка після збереження показує старе. */
     public function testAWriteInvalidatesTheCachedRelations(): void
     {
         $helper = $this->makeHelper([$this->relation(1, 10, 'category')]);
@@ -219,5 +239,29 @@ abstract class FeedRelationsReadingTestCase extends TestCase
         $helper->getAllRelatedCategoriesIds();
 
         $this->assertCount(2, $this->findCalls);
+    }
+
+    /**
+     * Контролер знімав категорії й бренди прямим викликом на сутності — повз
+     * скидання кешу. Тепер це методи хелпера, і вони мусять кеш скидати.
+     */
+    #[DataProvider('feedScopedRemovalProvider')]
+    public function testRemovingAFeedScopeInvalidatesTheCachedRelations(string $method): void
+    {
+        $helper = $this->makeHelper([$this->relation(1, 10, 'category')]);
+
+        $helper->getAllRelatedCategoriesIds();
+        $helper->$method(1);
+        $helper->getAllRelatedCategoriesIds();
+
+        $this->assertCount(2, $this->findCalls);
+    }
+
+    public static function feedScopedRemovalProvider(): array
+    {
+        return [
+            'categories' => ['removeAllCategoriesByFeedId'],
+            'brands'     => ['removeAllBrandsByFeedId'],
+        ];
     }
 }

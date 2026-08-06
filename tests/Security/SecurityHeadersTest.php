@@ -26,12 +26,17 @@ class SecurityHeadersTest extends TestCase
         }
     }
 
+    /**
+     * Ім'я рушія в банері лишається свідомо, а от версія — ні: саме вона
+     * перетворювала заголовок на готову ціль для сканерів.
+     */
     public function testResponseNoLongerAdvertisesTheVersion()
     {
         $source = file_get_contents(dirname(__DIR__, 2) . '/Okay/Core/Response.php');
         $this->assertIsString($source);
 
         $this->assertStringNotContainsString("'X-Powered-CMS: OkayCMS ' . \$version", $source);
+        $this->assertStringContainsString("'X-Powered-CMS: OkayCMS'", $source);
         $this->assertStringContainsString('SecurityHeaders::defaults()', $source);
     }
 }
