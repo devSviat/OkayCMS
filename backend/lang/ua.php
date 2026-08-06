@@ -622,6 +622,7 @@ $lang['theme_copy'] = 'Створити копію шаблону';
 $lang['theme_current_item'] = 'поточний шаблон';
 $lang['theme_current'] = 'Поточний шаблон:';
 $lang['theme_exists'] = 'Шаблон з таким ім\'ям уже існує';
+$lang['theme_copy_failed'] = 'Не вдалося скопіювати шаблон. Перевірте права на записування в теку';
 $lang['theme_perform'] = 'Виконати цю дію ?';
 $lang['theme_perform_yes'] = 'Так';
 $lang['theme_perform_no'] = 'Ні';

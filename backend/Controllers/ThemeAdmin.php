@@ -27,7 +27,8 @@ class ThemeAdmin extends IndexAdmin
             $admin_theme_managers = $this->request->post('admin_theme_managers');
             $this->settings->set('admin_theme_managers', $admin_theme_managers == 'all' ? '' : $admin_theme_managers);
 
-            $this->dirDelete($this->compiled_dir, false, ['.htaccess']);
+            // .keep_folder тримає compiled/ у git - той самий виняток, що в Design::clearCompiled()
+            $this->dirDelete($this->compiled_dir, false, ['.htaccess', '.keep_folder']);
             $old_names = $this->request->post('old_name');
             $new_names = $this->request->post('new_name');
             if (is_array($old_names)) {
@@ -86,7 +87,13 @@ class ThemeAdmin extends IndexAdmin
                             $new_name = $new_name.'_1';
                         }
                     }
-                    $this->dirCopy($this->themes_dir.$this->settings->get('theme'), $this->themes_dir.$new_name);
+                    // Тему перемикаємо лише після вдалої копії: інакше вітрина
+                    // йшла б на недокопійований каталог, і мовчки.
+                    if (!$this->dirCopy($this->themes_dir.$this->settings->get('theme'), $this->themes_dir.$new_name)) {
+                        $this->design->assign('message_error', 'theme_copy_failed');
+                        break;
+                    }
+
                     @unlink($this->themes_dir.$new_name.'/locked');
                     $this->settings->set('theme', $new_name);
                     $licenseModulesTemplates->setThemeName($new_name);
@@ -132,20 +139,31 @@ class ThemeAdmin extends IndexAdmin
         $this->response->setContent($this->design->fetch('theme.tpl'));
     }
 
-    private function dirCopy($src, $dst) {
+    private function dirCopy($src, $dst): bool {
         if(is_dir($src)) {
-            mkdir($dst, 0755);
+            // Повторний is_dir після невдалого mkdir - гонка двох запитів,
+            // та сама ідіома, що в AttemptLimiter.
+            if (!is_dir($dst) && !@mkdir($dst, 0755, true) && !is_dir($dst)) {
+                return false;
+            }
+
             $files = scandir($src);
             foreach ($files as $file) {
                 if ($file != "." && $file != "..") {
-                    $this->dirCopy("$src/$file", "$dst/$file");
+                    if (!$this->dirCopy("$src/$file", "$dst/$file")) {
+                        return false;
+                    }
                 }
             }
             @chmod($dst, 0755);
         } elseif(file_exists($src)) {
-            copy($src, $dst);
+            if (!@copy($src, $dst)) {
+                return false;
+            }
             @chmod($dst, 0664);
         }
+
+        return true;
     }
 
     private function dirDelete($path, $delete_self = true, $ignore = []) {
