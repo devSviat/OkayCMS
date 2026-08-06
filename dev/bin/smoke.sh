@@ -370,10 +370,11 @@ for entry in $(cd .. && ls); do
     expect_status 404 "/$entry"
 done
 
-# Банер рушія і точна версія PHP не потрібні браузеру — лише тому, хто добирає
-# під них відомі вразливості.
+# Точна версія PHP не потрібна браузеру — лише тому, хто добирає під неї
+# відомі вразливості. Банер X-Powered-CMS: OkayCMS лишається свідомо: версії
+# в ньому немає, а сам рушій ідентифікується й без нього.
 headers=$(curl -sSI -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/" 2>/dev/null)
-for h in "X-Powered-By" "X-Powered-CMS"; do
+for h in "X-Powered-By"; do
     if printf '%s' "$headers" | grep -qi "^${h}:"; then
         printf '  FAIL  header %s is still sent\n' "$h"
         fails=$((fails + 1))
@@ -381,6 +382,13 @@ for h in "X-Powered-By" "X-Powered-CMS"; do
         printf '  ok    header %s is not sent\n' "$h"
     fi
 done
+# Версія в банері CMS — окрема історія: її прибрали раніше й повертати не можна.
+if printf '%s' "$headers" | grep -qiE "^X-Powered-CMS: OkayCMS [0-9]"; then
+    printf '  FAIL  X-Powered-CMS carries a version again\n'
+    fails=$((fails + 1))
+else
+    printf '  ok    X-Powered-CMS carries no version\n'
+fi
 # Контроль самого вимірювача: заголовок, який точно є, мусить знаходитись.
 if printf '%s' "$headers" | grep -qi "^Server:"; then
     printf '  ok    the header check itself works (Server: is found)\n'

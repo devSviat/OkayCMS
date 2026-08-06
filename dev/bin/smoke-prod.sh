@@ -218,6 +218,7 @@ PATHS
             sh -c "curl -sS -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/robots.txt"
         # Точна версія PHP у заголовку — джерело вимкнено в okay.ini, який
         # потрапляє і в прод-образ; nginx ховає його другим рубежем.
+        # X-Powered-CMS: OkayCMS лишається свідомо — версії в ньому немає.
         expect_missing "nginx-prod: X-Powered-By is not sent" \
             "X-Powered-By" \
             sh -c "curl -sSI -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/robots.txt"
