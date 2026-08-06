@@ -58,6 +58,19 @@ class TplModMatchTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(2, $matches);
     }
 
+    /**
+     * Коли задані обидва ключі, like перевіряється й тоді, коли find не збігся:
+     * в оригінальному walkByFile() це був elseif, тобто АБО, а не пріоритет find.
+     */
+    public function testLikeIsCheckedWhenFindIsSetButDoesNotMatch()
+    {
+        $tree = (new Parser())->parse('<div class="foo"></div>');
+
+        $matches = $this->tplMod()->findMatches($tree, new TplChangeDTO('class="does-not-exist"', 'class="fo+"'));
+
+        $this->assertCount(1, $matches);
+    }
+
     public function testEmptyChangeMatchesNothing()
     {
         $tree = (new Parser())->parse('<div class="foo"></div>');

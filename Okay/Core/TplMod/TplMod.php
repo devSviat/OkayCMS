@@ -68,15 +68,14 @@ class TplMod
      */
     public function matches(BaseNode $node, TplChangeDTO $change): bool
     {
-        if (!empty($change->getFind())) {
-            return strpos($node->getOriginalElement(), $change->getFind()) !== false;
+        // find і like - це АБО, а не пріоритет: коли задані обидва, like перевіряється
+        // й тоді, коли find не збігся.
+        if (!empty($change->getFind()) && strpos($node->getOriginalElement(), $change->getFind()) !== false) {
+            return true;
         }
 
-        if (!empty($change->getLike())) {
-            return (bool)preg_match('~'.$change->getLike().'~', $node->getOriginalElement());
-        }
-
-        return false;
+        return !empty($change->getLike())
+            && (bool)preg_match('~'.$change->getLike().'~', $node->getOriginalElement());
     }
 
     /**
