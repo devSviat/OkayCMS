@@ -7,11 +7,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
- * PaymentForm клав private_key у data_array, а той рендериться у форму як
- * <input type="hidden" name="data"> у base64. Base64 — кодування, а не
- * шифрування, тож ключ читався з вихідного коду сторінки оплати. Тим самим
- * ключем рахується підпис колбека, отже маючи його можна було позначити
- * замовлення оплаченим, не заплативши.
+ * PaymentForm клав private_key у data_array, а той іде у форму як base64 —
+ * тобто ключ читався з вихідного коду сторінки оплати. Тим самим ключем
+ * підписується колбек.
  */
 class LiqPayProtocolTest extends TestCase
 {
@@ -24,10 +22,7 @@ class LiqPayProtocolTest extends TestCase
         $this->protocol = new LiqPayProtocol();
     }
 
-    /**
-     * Вектор порахований окремо, а не тим самим виразом, що в реалізації:
-     * інакше тест повторював би код і пройшов би з будь-якою формулою.
-     */
+    /** Вектор порахований окремо, а не тим самим виразом, що в реалізації. */
     public function testSignFollowsTheDocumentedFormula(): void
     {
         $data = 'eyJ2ZXJzaW9uIjozLCJwdWJsaWNfa2V5IjoiaTAwMDAwMDAwIiwiYWN0aW9uIjoicGF5In0=';
@@ -79,11 +74,7 @@ class LiqPayProtocolTest extends TestCase
         $this->assertSame($expected, $this->protocol->extractOrderId($liqPayOrderId));
     }
 
-    /**
-     * order_id має вигляд "<id замовлення>-<випадкове число>". Усе, що не
-     * має цієї форми, дає 0 — саме так поводився інлайновий substr/strpos,
-     * і саме на 0 замовлення не знаходиться й колбек відхиляється.
-     */
+    /** Усе, що не має форми "<id>-<число>", дає 0 — як і старий substr/strpos. */
     public static function orderIdProvider(): array
     {
         return [
@@ -96,10 +87,7 @@ class LiqPayProtocolTest extends TestCase
         ];
     }
 
-    /**
-     * Головний запобіжник: приватний ключ не потрапляє в payload у жодному
-     * вигляді — ні сирим рядком, ні в base64, ні в декодованому json.
-     */
+    /** Ключа немає в payload у жодному вигляді: ні сирим, ні в base64, ні в json. */
     public function testPayloadNeverCarriesThePrivateKey(): void
     {
         $payload = $this->protocol->payload('i00000000', [
@@ -118,10 +106,7 @@ class LiqPayProtocolTest extends TestCase
         $this->assertArrayNotHasKey('private_key', json_decode($decoded, true));
     }
 
-    /**
-     * Дефект повертається однією доданою парою ключ-значення у викликача,
-     * тому payload викидає private_key незалежно від того, що йому передали.
-     */
+    /** Дефект повертається однією парою ключ-значення, тож payload її викидає. */
     public function testPayloadDropsAPrivateKeyHandedInByTheCaller(): void
     {
         $payload = $this->protocol->payload('i00000000', [
@@ -144,10 +129,7 @@ class LiqPayProtocolTest extends TestCase
         $this->assertSame('pay', $decoded['action']);
     }
 
-    /**
-     * Кирилиця в описі замовлення мусить доїхати до LiqPay як текст, а не як
-     * \uXXXX-екранування: інакше опис у кабінеті мерчанта нечитабельний.
-     */
+    /** Кирилиця має доїхати текстом, а не \uXXXX: інакше опис нечитабельний. */
     public function testPayloadKeepsUnicodeReadable(): void
     {
         $payload = $this->protocol->payload('i00000000', ['description' => 'Оплата замовлення №12']);

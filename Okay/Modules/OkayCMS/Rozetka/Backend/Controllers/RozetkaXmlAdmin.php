@@ -8,7 +8,6 @@ use Okay\Admin\Controllers\IndexAdmin;
 use Okay\Entities\BrandsEntity;
 use Okay\Entities\CategoriesEntity;
 use Okay\Modules\OkayCMS\Rozetka\Entities\RozetkaFeedsEntity;
-use Okay\Modules\OkayCMS\Rozetka\Entities\RozetkaRelationsEntity;
 use Okay\Modules\OkayCMS\Rozetka\Helpers\BackendRozetkaHelper;
 
 class RozetkaXmlAdmin extends IndexAdmin
@@ -18,7 +17,6 @@ class RozetkaXmlAdmin extends IndexAdmin
         CategoriesEntity       $categoriesEntity,
         BrandsEntity           $brandsEntity,
         BackendRozetkaHelper   $backendRozetkaHelper,
-        RozetkaRelationsEntity $relationsEntity,
         RozetkaFeedsEntity     $feedsEntity
     ) {
         if ($this->request->method('post')) {
@@ -46,11 +44,11 @@ class RozetkaXmlAdmin extends IndexAdmin
                 } else if ($feedId = $this->request->post('add_all_categories')) {
                     $backendRozetkaHelper->addAllCategories($feedId);
                 } else if($feedId = $this->request->post('remove_all_categories')) {
-                    $relationsEntity->removeAllCategoriesByFeedId($feedId);
+                    $backendRozetkaHelper->removeAllCategoriesByFeedId($feedId);
                 } else if ($feedId = $this->request->post('add_all_brands')) {
                     $backendRozetkaHelper->addAllBrands($feedId);
                 } else if($feedId = $this->request->post('remove_all_brands')) {
-                    $relationsEntity->removeAllBrandsByFeedId($feedId);
+                    $backendRozetkaHelper->removeAllBrandsByFeedId($feedId);
                 }
 
                 $this->updateCheckboxes();

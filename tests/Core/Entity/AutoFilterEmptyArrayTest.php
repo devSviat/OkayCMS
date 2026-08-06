@@ -8,18 +8,12 @@ use PHPUnit\Framework\TestCase;
 /**
  * Фіксатор свідомо збереженої поведінки ядра, а не опис бажаного.
  *
- * autoFilter() (Okay/Core/Entity/filter.php) на порожньому масиві не додає
- * умову взагалі, тож find(['id' => []]) означає «фільтра по id немає», а не
- * «нічого не знайдено», і віддає всю таблицю. Це пастка: три модулі фідів
- * саме на ній вироджувались у повний прохід каталогу.
+ * autoFilter() на порожньому масиві не додає умову взагалі, тож
+ * find(['id' => []]) віддає всю таблицю. Лікувати вирішено викликачів:
+ * «порожній масив = порожній результат» зачіпає кожне місце, що передає масив
+ * у фільтр, а перелічити їх статично неможливо.
  *
- * Лікувати вирішено викликачів, а не ядро: «порожній масив = порожній
- * результат» зачіпає кожне місце, що передає масив у фільтр, а перелічити їх
- * статично неможливо — дев-база на 227 товарів такий регрес сховає.
- *
- * Тест стоїть тут, щоб наступна спроба змінити ядро впала й вимагала розмови,
- * а не пройшла тихо. Якщо поведінку колись міняють свідомо — цей тест мусить
- * бути переписаний у тій самій зміні, разом з інвентарем викликачів.
+ * Тест стоїть тут, щоб наступна спроба змінити ядро впала й вимагала розмови.
  */
 class AutoFilterEmptyArrayTest extends TestCase
 {
@@ -48,10 +42,7 @@ class AutoFilterEmptyArrayTest extends TestCase
         $this->assertSame(['t.id = :magic_filter_id'], $entity->conditions());
     }
 
-    /**
-     * Порожній рядок і 0 — не те саме, що порожній масив: вони умову додають.
-     * Викидається саме [], і лише воно.
-     */
+    /** Викидається саме [] — порожній рядок і 0 умову додають. */
     public function testFalsyScalarsStillAddACondition(): void
     {
         foreach (['', 0, '0'] as $value) {
@@ -66,6 +57,29 @@ class AutoFilterEmptyArrayTest extends TestCase
         }
     }
 
+    /**
+     * Без цієї перевірки можна було вимкнути «магічний фільтр» у buildFilter()
+     * цілком — і весь набір тестів лишався зеленим.
+     */
+    public function testBuildFilterReachesTheAutoFilter(): void
+    {
+        $entity = $this->makeEntity();
+        $entity->applyFilterThroughBuildFilter(['id' => [1, 2], 'name' => 'x']);
+
+        $this->assertSame(
+            ['t.id IN (:magic_filter_id)', 't.name = :magic_filter_name'],
+            $entity->conditions()
+        );
+    }
+
+    public function testBuildFilterDropsAnEmptyArrayToo(): void
+    {
+        $entity = $this->makeEntity();
+        $entity->applyFilterThroughBuildFilter(['id' => []]);
+
+        $this->assertSame([], $entity->conditions());
+    }
+
     public function testUnknownFieldIsIgnored(): void
     {
         $entity = $this->makeEntity();
@@ -74,10 +88,7 @@ class AutoFilterEmptyArrayTest extends TestCase
         $this->assertSame([], $entity->conditions());
     }
 
-    /**
-     * Мінімальний носій трейта: справжня Entity тягне контейнер і БД, а тут
-     * потрібен лише збір умов, які autoFilter() кладе в select.
-     */
+    /** Мінімальний носій трейта: справжня Entity тягне контейнер і БД. */
     private function makeEntity(): object
     {
         $select = new class {
@@ -87,14 +98,22 @@ class AutoFilterEmptyArrayTest extends TestCase
             public function bindValue($key, $value) { $this->bound[$key] = $value; return $this; }
         };
 
-        return new class($select) {
+        // Реєстр фільтрів від модулів: у справжньої Entity його дає
+        // ServiceLocator, тут достатньо «жодного модульного фільтра немає».
+        $modulesFilters = new class {
+            public function hasFilter($entityClass, $filterName) { return false; }
+        };
+
+        return new class($select, $modulesFilters) {
             use filter;
 
             private $select;
+            private $modulesFilters;
 
-            public function __construct($select)
+            public function __construct($select, $modulesFilters)
             {
                 $this->select = $select;
+                $this->modulesFilters = $modulesFilters;
             }
 
             public function applyFilter($name, $value): void
@@ -102,6 +121,18 @@ class AutoFilterEmptyArrayTest extends TestCase
                 // autoFilter() приватний у трейті, тож викликається зсередини
                 // носія — так само, як це робить buildFilter().
                 $this->autoFilter($name, $value);
+            }
+
+            /** Той самий шлях, яким ходить справжній find(). */
+            public function applyFilterThroughBuildFilter(array $filter): void
+            {
+                $this->buildFilter($filter);
+            }
+
+            // Колаборанти buildFilter(), які зазвичай дає клас Entity.
+            public function orderFilterByPriority(array $filter = [])
+            {
+                return $filter;
             }
 
             public function conditions(): array

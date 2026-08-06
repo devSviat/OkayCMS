@@ -6,40 +6,23 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Корінь сайту — весь репозиторій: nginx-образ копіює дерево застосунку як є.
- * Тому кожен файл, доданий у корінь, за замовчуванням опинявся б у мережі,
- * якби конфіг лишався чорним списком.
+ * Корінь сайту — весь репозиторій, тож новий файл там за замовчуванням
+ * опинявся б у мережі. Тест не питає nginx (у CI його немає), а перевіряє
+ * два інваріанти: кожен запис кореня класифікований явно, і всі три конфіги
+ * (dev-шаблон, приклад у docs/, .htaccess) тримають білий список.
  *
- * Цей тест — запобіжник саме проти такого регресу. Він не питає nginx (у CI
- * його немає), а перевіряє два інваріанти:
- *
- *  1. кожен запис у корені репозиторію класифікований явно. Новий файл валить
- *     тест, доки його не віднесуть до публічних або приватних;
- *  2. обидва конфіги — dev-шаблон і приклад у docs/ — тримають білий список:
- *     кореневий location не пробує віддати файл з диска, vendor/ закритий,
- *     скомпільовані шаблони адмінки не є точкою входу.
- *
- * Поведінку на живому оточенні перевіряє блок «Public surface» у
- * dev/bin/smoke.sh і dev/bin/smoke-prod.sh — там реальні коди відповідей.
+ * Поведінку перевіряють dev/bin/smoke.sh, smoke-prod.sh і smoke-apache.sh.
  */
 class PublicSurfaceTest extends TestCase
 {
-    /**
-     * Єдині записи кореня, які віддаються назовні.
-     *
-     * Додати сюди щось — свідоме рішення опублікувати файл. Для всього іншого
-     * достатньо додати запис у PRIVATE_ROOT_ENTRIES.
-     */
+    /** Єдині записи кореня, які віддаються назовні. */
     private const PUBLIC_ROOT_ENTRIES = [
         'robots.txt',
         // index.php — точка входу, а не файл: сам він віддає 301 на /.
         'index.php',
     ];
 
-    /**
-     * Решта кореня. Перелік потрібен не конфігу (той закриває все, що не
-     * дозволене), а цьому тесту: щоб поява нового запису була помічена.
-     */
+    /** Решта кореня. Перелік потрібен тесту, не конфігу. */
     private const PRIVATE_ROOT_ENTRIES = [
         '1DB_changes', 'backend', 'CLAUDE.md', 'compiled', 'composer.json',
         'composer.lock', 'config', 'design', 'dev', 'docs', 'files', 'js_libraries',
@@ -63,10 +46,8 @@ class PublicSurfaceTest extends TestCase
     }
 
     /**
-     * Крапкові записи (.git, .env, .github, .claude) не перелічуються, бо їх
-     * не треба закривати окремо: після інверсії конфіг не має під них жодного
-     * дозволу, як і під усе інше. Раніше для них існувало власне правило за
-     * формою шляху — з білим списком воно стало зайвим.
+     * Крапкові записи не перелічуються: після інверсії під них немає жодного
+     * дозволу, як і під усе інше.
      */
     private function rootEntries(): array
     {
@@ -131,11 +112,7 @@ class PublicSurfaceTest extends TestCase
         return $source;
     }
 
-    /**
-     * Серце інверсії. `try_files $uri` у кореневому location означав би, що
-     * nginx знову пробує віддати з диска будь-який запитаний шлях, і білий
-     * список перестав би бути білим списком.
-     */
+    /** Серце інверсії: `try_files $uri` тут повернув би віддачу з диска. */
     #[DataProvider('configProvider')]
     public function testRootLocationNeverServesFilesFromDisk(string $path): void
     {
@@ -169,10 +146,7 @@ class PublicSurfaceTest extends TestCase
         );
     }
 
-    /**
-     * Приклад із docs/ — те, що копіюють до себе на власний хостинг. Якщо він
-     * відстає від dev-шаблону, порада з документації відкриває магазин.
-     */
+    /** Приклад із docs/ копіюють на власний хостинг — він не має відставати. */
     #[DataProvider('allowedTreeProvider')]
     public function testDocsExampleAllowsTheSameTreesAsTheDevTemplate(string $tree): void
     {
@@ -199,20 +173,16 @@ class PublicSurfaceTest extends TestCase
     }
 
     /**
-     * На звичайному хостингу (Apache + mod_php) кореневий .htaccess — єдиний
-     * важіль: доступу до конфігу віртуального хоста там немає. Він мусить
-     * тримати ту саму інверсію, що й nginx.
-     *
-     * Ключове — переписування на index.php БЕЗ умови `!-f`: доки воно
-     * стосувалось лише неіснуючих шляхів, усе, що фізично лежить у дереві,
-     * віддавалось як є — дамп бази, composer.lock, ./ok, README.
+     * На звичайному хостингу .htaccess — єдиний важіль. Ключове тут —
+     * переписування на index.php без умови `!-f`: доки воно стосувалось лише
+     * неіснуючих шляхів, усе з дерева віддавалось як є.
      */
     public function testHtaccessRoutesEverythingUnknownToTheFrontController(): void
     {
         $source = $this->config('.htaccess');
 
         $this->assertMatchesRegularExpression(
-            '#RewriteCond \$1 !\^\(robots\\\\\.txt\|favicon\\\\\.ico\|index\\\\\.php\)\$#',
+            '#RewriteCond \$1 !\^\(robots\\\\\.txt\|index\\\\\.php\|favicon#',
             $source,
             'кореневий .htaccess мусить перелічувати дозволене, а не заборонене'
         );
@@ -220,18 +190,13 @@ class PublicSurfaceTest extends TestCase
         $this->assertStringContainsString('RewriteRule ^files/originals/ index.php', $source);
     }
 
-    /**
-     * Умови зіставляються зі шляхом відносно каталогу ($1), а не з
-     * %{REQUEST_URI}: інакше встановлення в підкаталог (site.com/shop/) ламало
-     * б кожне правило, і магазин віддавав би 404 на все.
-     */
+    /** Умови мусять іти по $1: з %{REQUEST_URI} ламається установка в підкаталог. */
     public function testHtaccessRulesSurviveASubdirectoryInstall(): void
     {
         $source = $this->config('.htaccess');
 
-        // Перевіряється саме блок білого списку — суцільна низка RewriteCond
-        // просто над фінальним переписуванням. Інші правила файлу (наприклад
-        // згортання повторних слешів) працюють з %{REQUEST_URI} правомірно.
+        // Саме блок білого списку: інші правила файлу (згортання слешів)
+        // працюють з %{REQUEST_URI} правомірно.
         $lines = explode("\n", $source);
         $ruleIndex = null;
         foreach ($lines as $i => $line) {
@@ -255,10 +220,7 @@ class PublicSurfaceTest extends TestCase
         $this->assertGreaterThan(5, $conditions, 'білий список мусить перелічувати дозволені дерева');
     }
 
-    /**
-     * Приклад не повинен указувати на шлях, якого в цьому форку немає: з
-     * /application/public конфіг не працює взагалі, і це помічають не одразу.
-     */
+    /** З /application/public конфіг не працює взагалі, і це помічають не одразу. */
     public function testDocsExamplePointsAtTheRealRoot(): void
     {
         $source = $this->config('docs/nginx/nginx.conf');

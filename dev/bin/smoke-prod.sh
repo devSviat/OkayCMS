@@ -187,7 +187,14 @@ else
                 "http://127.0.0.1:${nginx_port}$p" 2>&1)
             code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${VIRTUAL_HOST:-okaycms.loc}" \
                 "http://127.0.0.1:${nginx_port}$p" 2>/dev/null)
-            if [ "$code" = "200" ] || [[ "$body" == *"$marker"* ]]; then
+            # 000 — curl не достукався. Без цієї гілки недоступний контейнер
+            # давав би "ok" на кожному шляху: тіло з тексту помилки curl із
+            # маркером не збігається ніколи.
+            if [ "$code" = "000" ]; then
+                printf '  FAIL  nginx-prod: %s unreachable (curl failed)\n' "$p"
+                dump_actual_output "$body"
+                fails=$((fails + 1))
+            elif [ "$code" = "200" ] || [[ "$body" == *"$marker"* ]]; then
                 printf '  FAIL  nginx-prod: %s leaks (HTTP %s)\n' "$p" "$code"
                 dump_actual_output "$body"
                 fails=$((fails + 1))

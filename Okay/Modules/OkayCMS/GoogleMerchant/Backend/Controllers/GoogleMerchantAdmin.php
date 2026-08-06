@@ -9,7 +9,6 @@ use Okay\Entities\BrandsEntity;
 use Okay\Entities\CategoriesEntity;
 use Okay\Entities\FeaturesEntity;
 use Okay\Modules\OkayCMS\GoogleMerchant\Entities\GoogleMerchantFeedsEntity;
-use Okay\Modules\OkayCMS\GoogleMerchant\Entities\GoogleMerchantRelationsEntity;
 use Okay\Modules\OkayCMS\GoogleMerchant\Helpers\BackendGoogleMerchantHelper;
 
 class GoogleMerchantAdmin extends IndexAdmin
@@ -20,7 +19,6 @@ class GoogleMerchantAdmin extends IndexAdmin
         BrandsEntity                  $brandsEntity,
         FeaturesEntity                $featuresEntity,
         GoogleMerchantFeedsEntity     $feedsEntity,
-        GoogleMerchantRelationsEntity $relationsEntity,
         BackendGoogleMerchantHelper   $backendGoogleMerchantHelper
     ) {
         if ($this->request->method('post')) {
@@ -48,11 +46,11 @@ class GoogleMerchantAdmin extends IndexAdmin
                 } else if ($feedId = $this->request->post('add_all_categories')) {
                     $backendGoogleMerchantHelper->addAllCategories($feedId);
                 } else if($feedId = $this->request->post('remove_all_categories')) {
-                    $relationsEntity->removeAllCategoriesByFeedId($feedId);
+                    $backendGoogleMerchantHelper->removeAllCategoriesByFeedId($feedId);
                 } else if ($feedId = $this->request->post('add_all_brands')) {
                     $backendGoogleMerchantHelper->addAllBrands($feedId);
                 } else if($feedId = $this->request->post('remove_all_brands')) {
-                    $relationsEntity->removeAllBrandsByFeedId($feedId);
+                    $backendGoogleMerchantHelper->removeAllBrandsByFeedId($feedId);
                 }
 
                 $this->updateCheckboxes();

@@ -7,46 +7,36 @@ ErrorDocument 404 /404
 RewriteEngine on
 #RewriteBase /
 
-# Лістинги директорій не потрібні ніде: вони видають структуру дерева навіть
-# там, де кожен окремий файл закритий.
+# Лістинг видає структуру дерева навіть там, де кожен файл закритий.
 <IfModule mod_autoindex.c>
     Options -Indexes
 </IfModule>
 
 # ───────────────────────── Білий список ─────────────────────────
 #
-# Корінь сайту — усе дерево застосунку. На звичайному хостингу (Apache +
-# mod_php) цей файл — єдиний важіль: доступу до конфігу віртуального хоста
-# там немає. Тому логіка та сама, що й у docs/nginx/nginx.conf: перелічується
-# те, що віддається, а не те, що заборонено.
+# Той самий підхід, що й у docs/nginx/nginx.conf: перелічене віддається, решта
+# переписується на index.php — незалежно від того, чи файл є на диску. Раніше
+# фінальне правило ловило лише неіснуючі шляхи (`!-f`), тож усе, що фізично
+# лежить у дереві, віддавалось як є.
 #
-# Ключове — останнє правило блоку: усе, що не збіглося з жодним дозволом,
-# переписується на index.php НЕЗАЛЕЖНО від того, чи файл існує на диску. До
-# цього фінальне правило файлу віддавало у фронт-контролер лише неіснуючі
-# шляхи (`!-f`), тож усе, що фізично лежить у дереві, віддавалось як є:
-# 1DB_changes/okay_clean.sql, dev/.env, composer.json, ./ok, Okay/**, tests/**.
+# Побічний ефект переписування: сторонній .php не виконується, бо mod_rewrite
+# відпрацьовує до вибору обробника.
 #
-# Переписування на index.php ще й не дає виконатись стороннім .php: mod_rewrite
-# відпрацьовує на етапі відображення URL у файл, до вибору обробника, тож
-# compiled/*.tpl.php і Okay/**.php до mod_php не доходять.
-#
-# Умови зіставляються з $1 — шляхом відносно каталогу з цим .htaccess, а не з
-# %{REQUEST_URI}: інакше встановлення в підкаталог (site.com/shop/) ламало б
-# кожне правило.
+# Умови зіставляються з $1, а не з %{REQUEST_URI}: інакше встановлення в
+# підкаталог (site.com/shop/) ламає кожне правило.
 
-# Дерево залежностей і службові каталоги — 403 одразу, без переписування.
 RewriteRule .*(\.git/|\.idea|\.gitignore).* - [F]
 RewriteRule ^vendor/.* - [F]
 
-# Дерева адмінки, які не є ані статикою, ані точками входу.
-RewriteRule ^backend/(Controllers|Helpers|Requests|Entities)/ index.php [L,QSA]
-RewriteRule ^backend/lang/ index.php [L,QSA]
-RewriteRule ^backend/design/compiled/ index.php [L,QSA]
-RewriteRule ^backend/design/js/filemanager/config/ index.php [L,QSA]
+# Дерева адмінки, які не є ані статикою, ані точками входу. 404, а не
+# переписування: nginx тут теж віддає 404.
+RewriteRule ^backend/(Controllers|Helpers|Requests|Entities)/ - [R=404,L]
+RewriteRule ^backend/lang/ - [R=404,L]
+RewriteRule ^backend/design/compiled/ - [R=404,L]
+RewriteRule ^backend/design/js/filemanager/config/ - [R=404,L]
 
-# Під backend/design/ з диска віддається лише статика за розширенням, плюс
-# .php двох справжніх точок входу. Без цього віддавались 109 шаблонів .tpl,
-# .htaccess і сміття вендорних JS-бібліотек (README, .sh, .yml, Thumbs.db).
+# Під backend/design/ — лише статика за розширенням і .php двох точок входу.
+# Без цього віддавались .tpl, .htaccess і сміття вендорних JS-бібліотек.
 RewriteCond $1 !\.(css|js|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|html?|json)$ [NC]
 RewriteCond $1 !^backend/design/js/(filemanager|admintooltip)/.+\.php$ [NC]
 RewriteRule ^(backend/design/.*)$ index.php [L,QSA]
@@ -55,7 +45,7 @@ RewriteRule ^(backend/design/.*)$ index.php [L,QSA]
 RewriteRule ^files/originals/ index.php [L,QSA]
 
 # Усе, що не збіглося з жодним дозволом нижче, — у фронт-контролер.
-RewriteCond $1 !^(robots\.txt|favicon\.ico|index\.php)$
+RewriteCond $1 !^(robots\.txt|index\.php|favicon\.(ico|png|svg|gif|jpe?g|webp))$ [NC]
 RewriteCond $1 !^\.well-known/
 RewriteCond $1 !^backend/
 RewriteCond $1 !^design/[^/]+/(css|js|images|fonts)/.+\.(css|js|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot)$ [NC]
@@ -67,9 +57,9 @@ RewriteCond $1 !^Okay/Modules/[^/]+/[^/]+/preview\.(png|jpe?g)$ [NC]
 RewriteCond $1 !^files/.+\.(png|jpe?g|gif|svg|webp|ico|pdf|zip|xlsx?|docx?|csv|mp3|mp4|ogg|webm)$ [NC]
 RewriteRule ^(.*)$ index.php [L,QSA]
 
-# SVG, відкритий прямою навігацією, рендериться як документ і виконує
-# вбудований <script>. Санітайзер підключений лише у файловому менеджері, тож
-# скрипт глушиться заголовком. На <img src="...svg"> це не впливає.
+# SVG прямою навігацією рендериться як документ і виконує <script>.
+# Санітайзер є лише у файловому менеджері, тож глушимо заголовком.
+# На <img src="...svg"> це не впливає.
 <IfModule mod_headers.c>
     <FilesMatch "\.svg$">
         Header set Content-Security-Policy "default-src 'none'; sandbox"
@@ -135,6 +125,8 @@ RewriteRule	^admin/?$  backend [L]
     RewriteRule .* - [E=REMOTE_USER:%{HTTP:Authorization}]
 </IfModule>
 
+# Лишається навмисно: після білого списку сюди доходять лише дозволені
+# шляхи, яких ще немає на диску — files/resized/ створюється на перший запит.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule .* index.php [E=REMOTE_USER:%{HTTP:Authorization},L,QSA]

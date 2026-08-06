@@ -9,7 +9,6 @@ use Okay\Entities\BrandsEntity;
 use Okay\Entities\CategoriesEntity;
 use Okay\Entities\FeaturesEntity;
 use Okay\Modules\OkayCMS\Hotline\Entities\HotlineFeedsEntity;
-use Okay\Modules\OkayCMS\Hotline\Entities\HotlineRelationsEntity;
 use Okay\Modules\OkayCMS\Hotline\Helpers\BackendHotlineHelper;
 
 class HotlineAdmin extends IndexAdmin
@@ -20,7 +19,6 @@ class HotlineAdmin extends IndexAdmin
         BrandsEntity           $brandsEntity,
         FeaturesEntity         $featuresEntity,
         BackendHotlineHelper   $backendHotlineHelper,
-        HotlineRelationsEntity $relationsEntity,
         HotlineFeedsEntity     $feedsEntity
     ) {
         if ($this->request->method('post')) {
@@ -50,11 +48,11 @@ class HotlineAdmin extends IndexAdmin
                 } else if ($feedId = $this->request->post('add_all_categories')) {
                     $backendHotlineHelper->addAllCategories($feedId);
                 } else if($feedId = $this->request->post('remove_all_categories')) {
-                    $relationsEntity->removeAllCategoriesByFeedId($feedId);
+                    $backendHotlineHelper->removeAllCategoriesByFeedId($feedId);
                 } else if ($feedId = $this->request->post('add_all_brands')) {
                     $backendHotlineHelper->addAllBrands($feedId);
                 } else if($feedId = $this->request->post('remove_all_brands')) {
-                    $relationsEntity->removeAllBrandsByFeedId($feedId);
+                    $backendHotlineHelper->removeAllBrandsByFeedId($feedId);
                 }
 
                 $this->updateCheckboxes();

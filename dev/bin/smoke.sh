@@ -334,7 +334,14 @@ for probe in \
     "$(cd .. && find backend/design/css -name '*.css' 2>/dev/null | head -1)" \
     "$(cd .. && find Okay/Modules -path '*design/images/*.png' 2>/dev/null | head -1)" \
     "$(cd .. && ls Okay/Modules/*/*/preview.png 2>/dev/null | head -1)"; do
-    [ -n "$probe" ] && expect_status 200 "/$probe"
+    # Порожній probe означає, що дерево переїхало, а не що все гаразд:
+    # мовчазний пропуск прибрав би покриття без жодного сигналу.
+    if [ -z "$probe" ]; then
+        printf '  FAIL  %s\n' "no sample file found for one of the allowed static trees"
+        fails=$((fails + 1))
+        continue
+    fi
+    expect_status 200 "/$probe"
 done
 
 # Дерево залежностей не публічне. installed.json — 248 КБ із точними версіями
