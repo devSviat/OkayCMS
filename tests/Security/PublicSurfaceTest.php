@@ -199,6 +199,63 @@ class PublicSurfaceTest extends TestCase
     }
 
     /**
+     * На звичайному хостингу (Apache + mod_php) кореневий .htaccess — єдиний
+     * важіль: доступу до конфігу віртуального хоста там немає. Він мусить
+     * тримати ту саму інверсію, що й nginx.
+     *
+     * Ключове — переписування на index.php БЕЗ умови `!-f`: доки воно
+     * стосувалось лише неіснуючих шляхів, усе, що фізично лежить у дереві,
+     * віддавалось як є — дамп бази, composer.lock, ./ok, README.
+     */
+    public function testHtaccessRoutesEverythingUnknownToTheFrontController(): void
+    {
+        $source = $this->config('.htaccess');
+
+        $this->assertMatchesRegularExpression(
+            '#RewriteCond \$1 !\^\(robots\\\\\.txt\|favicon\\\\\.ico\|index\\\\\.php\)\$#',
+            $source,
+            'кореневий .htaccess мусить перелічувати дозволене, а не заборонене'
+        );
+        $this->assertStringContainsString('RewriteRule ^(.*)$ index.php [L,QSA]', $source);
+        $this->assertStringContainsString('RewriteRule ^files/originals/ index.php', $source);
+    }
+
+    /**
+     * Умови зіставляються зі шляхом відносно каталогу ($1), а не з
+     * %{REQUEST_URI}: інакше встановлення в підкаталог (site.com/shop/) ламало
+     * б кожне правило, і магазин віддавав би 404 на все.
+     */
+    public function testHtaccessRulesSurviveASubdirectoryInstall(): void
+    {
+        $source = $this->config('.htaccess');
+
+        // Перевіряється саме блок білого списку — суцільна низка RewriteCond
+        // просто над фінальним переписуванням. Інші правила файлу (наприклад
+        // згортання повторних слешів) працюють з %{REQUEST_URI} правомірно.
+        $lines = explode("\n", $source);
+        $ruleIndex = null;
+        foreach ($lines as $i => $line) {
+            if (trim($line) === 'RewriteRule ^(.*)$ index.php [L,QSA]') {
+                $ruleIndex = $i;
+                break;
+            }
+        }
+        $this->assertNotNull($ruleIndex, 'фінального переписування на index.php не знайдено');
+
+        $conditions = 0;
+        for ($i = $ruleIndex - 1; $i >= 0 && str_starts_with(trim($lines[$i]), 'RewriteCond'); $i--) {
+            $conditions++;
+            $this->assertStringStartsWith(
+                'RewriteCond $1',
+                trim($lines[$i]),
+                'умова білого списку мусить зіставлятися з $1, а не з %{REQUEST_URI}'
+            );
+        }
+
+        $this->assertGreaterThan(5, $conditions, 'білий список мусить перелічувати дозволені дерева');
+    }
+
+    /**
      * Приклад не повинен указувати на шлях, якого в цьому форку немає: з
      * /application/public конфіг не працює взагалі, і це помічають не одразу.
      */
