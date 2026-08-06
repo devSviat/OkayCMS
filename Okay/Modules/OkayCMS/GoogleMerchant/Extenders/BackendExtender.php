@@ -37,7 +37,7 @@ class BackendExtender implements ExtensionInterface
         $this->feedsEntity     = $entityFactory->get(GoogleMerchantFeedsEntity::class);
         $this->relationsEntity = $entityFactory->get(GoogleMerchantRelationsEntity::class);
 
-        $this->currentFeeds = $this->feedsEntity->find(['limit' => $this->feedsEntity->count()]);
+        $this->currentFeeds = $this->feedsEntity->noLimit()->find();
     }
 
     public function parseProductData($product)

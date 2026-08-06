@@ -34,7 +34,11 @@ design/*/lang/local.*.php
 !*.keep_folder
 !*.htaccess
 .phpunit.result.cache
-robots.txt
+# robots.txt навмисно у репозиторії: статику в корені віддає nginx зі свого образу,
+# і smoke-prod.sh пробує саме цей файл, щоб довести, що дерево застосунку на місці.
+# Правило, яке ігнорувало його тут, було мертвим (файл уже відстежується), зате
+# приглушувало його в git-панелі редактора і зробило б випадкове
+# `git rm --cached` незворотним.
 dev/docker-compose.local.yml
 
 # Claude Code local settings

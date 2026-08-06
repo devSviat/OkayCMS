@@ -10,6 +10,7 @@ use Okay\Core\Notify;
 use Okay\Entities\CurrenciesEntity;
 use Okay\Entities\OrdersEntity;
 use Okay\Entities\PaymentsEntity;
+use Okay\Modules\OkayCMS\LiqPay\LiqPayProtocol;
 use Psr\Log\LoggerInterface;
 
 class CallbackController extends AbstractController
@@ -20,7 +21,8 @@ class CallbackController extends AbstractController
         CurrenciesEntity $currenciesEntity,
         Money $money,
         Notify $notify,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        LiqPayProtocol $protocol
     ) {
 
         $this->response->setContentType(RESPONSE_TEXT);
@@ -30,7 +32,7 @@ class CallbackController extends AbstractController
 
         $payment_data = json_decode(base64_decode($data));
 
-        $orderId = intval(substr($payment_data->order_id, 0, strpos($payment_data->order_id, '-')));
+        $orderId = $protocol->extractOrderId((string)$payment_data->order_id);
         $currency = $payment_data->currency;
         $status = $payment_data->status;
         $type = $payment_data->type;
@@ -78,9 +80,10 @@ class CallbackController extends AbstractController
             exit;
         }
 
-        $mySignature = base64_encode(sha1($settings['liq_pay_private_key'] . $data . $settings['liq_pay_private_key'],1));
-
-        if ($mySignature !== $signature) {
+        // hash_equals, а не !==: порівняння підпису за часом виконання не
+        // повинно підказувати, наскільки близький здогад. Той самий зразок уже
+        // застосований у RozetkaPay/Controllers/CallbackController.php.
+        if (!$protocol->matches($settings['liq_pay_private_key'], (string)$data, (string)$signature)) {
             $logger->warning("LiqPay notice: 'bad sign {$signature}'. Order №{$orderId}");
             $this->response->setContent("bad sign {$signature}")->setStatusCode(400);
             $this->response->sendContent();

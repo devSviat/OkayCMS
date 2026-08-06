@@ -18,12 +18,14 @@ class PaymentForm extends AbstractModule implements PaymentFormInterface
 
     private $entityFactory;
     private $money;
+    private $protocol;
 
-    public function __construct(EntityFactory $entityFactory, Money $money)
+    public function __construct(EntityFactory $entityFactory, Money $money, LiqPayProtocol $protocol)
     {
         parent::__construct();
         $this->entityFactory = $entityFactory;
         $this->money = $money;
+        $this->protocol = $protocol;
     }
 
     /**
@@ -59,10 +61,10 @@ class PaymentForm extends AbstractModule implements PaymentFormInterface
         $publicKey = $settings['liq_pay_public_key'];
         $paymentType = $settings['pay_types'];
 
+        // Приватного ключа тут немає навмисно: у протоколі v3 він потрібен лише
+        // для обчислення підпису на сервері. Раніше він лежав у цьому масиві й
+        // доїжджав до браузера покупця у складі поля data.
         $data_array = [
-            'version'      => 3,
-            'public_key'   => $publicKey,
-            'private_key'  => $privateKey,
             'action'       => 'pay',
             'amount'       => $price,
             'currency'     => $paymentCurrency->code,
@@ -76,9 +78,8 @@ class PaymentForm extends AbstractModule implements PaymentFormInterface
             $data_array['paytypes'] = $paymentType;
         }
 
-
-        $data = base64_encode(json_encode($data_array));
-        $sign = base64_encode(sha1($privateKey.$data.$privateKey,1));
+        $data = $this->protocol->payload($publicKey, $data_array);
+        $sign = $this->protocol->sign($privateKey, $data);
 
         $this->design->assign('data', $data);
         $this->design->assign('sign', $sign);

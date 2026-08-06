@@ -61,7 +61,7 @@ class GoogleMerchantAdmin extends IndexAdmin
 
         $allFeeds                = $feedsEntity->find();
         $allCategories           = $categoriesEntity->getCategoriesTree();
-        $allBrands               = $brandsEntity->find(['limit' => $brandsEntity->count()]);
+        $allBrands               = $brandsEntity->noLimit()->find();
         $allFeatures             = $featuresEntity->find();
         $allRelatedCategoriesIds = $backendGoogleMerchantHelper->getAllRelatedCategoriesIds();
         $allRelatedBrandsIds     = $backendGoogleMerchantHelper->getAllRelatedBrandsIds();
