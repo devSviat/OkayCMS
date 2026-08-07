@@ -72,23 +72,57 @@ class AbstractRouteAliasCaseTest extends TestCase
     }
 
     /**
-     * mergeUrlSlugAlias() — це саме той шлях, яким рядки з бази потрапляють у
-     * масив під час прогріву кешу.
+     * mergeUrlSlugAlias() — це шлях, яким рядки з бази потрапляють у масив під
+     * час прогріву кешу. Нормалізовані рядки беремо як є.
      */
-    public function testMergeNormalisesRowsComingFromDatabase(): void
+    public function testMergeLoadsNormalisedRows(): void
     {
         ProductRoute::mergeUrlSlugAlias([
-            $this->cacheRow('delonghi-AS00004434', 'coffee-machines/delonghi-AS00004434'),
-            $this->cacheRow('delonghi-AS00008245', 'coffee-machines/delonghi-AS00008245'),
+            $this->cacheRow('delonghi-as00004434', 'coffee-machines/delonghi-as00004434'),
         ]);
 
         $this->assertSame(
-            'coffee-machines/delonghi-AS00004434',
+            'coffee-machines/delonghi-as00004434',
             ProductRoute::getUrlSlugAlias('delonghi-as00004434')
         );
+    }
+
+    /**
+     * А от рядок, url якого сам не в нижньому регістрі, — застарілий: його
+     * писав ще код без нормалізації. Якби ми його підхопили, пошук почав би в
+     * нього влучати й повертати збережений там slug, тобто сторінки й фіди
+     * назавжди лишились би зі старим урлом, а RouterCacheEntity::add() до
+     * такого рядка вже не дійшов би й не полагодив би його.
+     *
+     * Тому такі рядки пропускаємо: пошук промахується, стратегія генерує slug
+     * заново з джерела, і upsert переписує рядок правильним. Один зайвий
+     * прохід на рядок — і дані вилікувані без ручного DELETE.
+     */
+    public function testMergeSkipsStaleMixedCaseRows(): void
+    {
+        ProductRoute::mergeUrlSlugAlias([
+            $this->cacheRow('delonghi-AS00004434', 'coffee-machines/delonghi-AS00004434'),
+            $this->cacheRow('asus-0B200-03580600', 'laptops/asus-0B200-03580600'),
+        ]);
+
+        $this->assertFalse(ProductRoute::getUrlSlugAlias('delonghi-as00004434'));
+        $this->assertFalse(ProductRoute::getUrlSlugAlias('delonghi-AS00004434'));
+        $this->assertFalse(ProductRoute::getUrlSlugAlias('asus-0b200-03580600'));
+        $this->assertSame([], $this->storedAliases());
+    }
+
+    /**
+     * Пропуск стосується лише рядків із бази. Коли модуль (Feeds, Rozetka,
+     * GoogleMerchant) сам віддає зв'язку через setUrlSlugAlias(), це свіжі
+     * дані з джерела — там великі літери легітимні й ключ просто нормалізується.
+     */
+    public function testDirectSetStillAcceptsMixedCaseUrls(): void
+    {
+        ProductRoute::setUrlSlugAlias('Delonghi-AS00004434', 'coffee-machines/Delonghi-AS00004434');
+
         $this->assertSame(
-            'coffee-machines/delonghi-AS00008245',
-            ProductRoute::getUrlSlugAlias('delonghi-as00008245')
+            'coffee-machines/Delonghi-AS00004434',
+            ProductRoute::getUrlSlugAlias('delonghi-as00004434')
         );
     }
 

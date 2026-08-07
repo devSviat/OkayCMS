@@ -112,6 +112,19 @@ abstract class AbstractRoute
     public static function mergeUrlSlugAlias($mappedCacheUrlSlugByUrl)
     {
         foreach ($mappedCacheUrlSlugByUrl ?? [] as $item) {
+            // Рядок, url якого сам не в нижньому регістрі, писав ще код без
+            // нормалізації — тобто він застарілий. Підхопити його означало б
+            // почати в нього влучати й віддавати збережений там slug: сторінки
+            // й фіди назавжди лишились би зі старим урлом, а
+            // RouterCacheEntity::add() до такого рядка вже не дійшов би.
+            //
+            // Пропускаємо — і рядок лагодиться сам: пошук промахується,
+            // стратегія генерує slug заново з джерела, upsert переписує рядок
+            // правильним. Ціна — один зайвий прохід на такий рядок, одноразово.
+            if ((string) $item->url !== self::normalizeAliasKey($item->url)) {
+                continue;
+            }
+
             self::setUrlSlugAlias($item->url, $item->slug_url);
         }
     }

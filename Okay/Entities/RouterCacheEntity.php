@@ -84,9 +84,12 @@ class RouterCacheEntity extends Entity
                 'slug_url' => $cols['slug_url'],
             ]);
 
-        $this->db->query($insert);
+        // Database::query() ловить виняток і повертає false — віддаємо саме
+        // його, а не беззастережне true, щоб виклик міг відрізнити записаний
+        // рядок від відхиленого.
+        $result = (bool) $this->db->query($insert);
 
-        return ExtenderFacade::execute([static::class, __FUNCTION__], true, func_get_args());
+        return ExtenderFacade::execute([static::class, __FUNCTION__], $result, func_get_args());
     }
 
     public function deleteByUrl($objectType, $url)

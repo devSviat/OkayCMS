@@ -146,6 +146,34 @@ class RouterCacheEntityAddTest extends TestCase
     }
 
     /**
+     * Database::query() ловить виняток і повертає false. Якщо add() віддавав
+     * би беззастережне true, викликач не відрізнив би записаний рядок від
+     * відхиленого — а помилка при цьому лише тихо лягає в лог.
+     */
+    public function testRejectedWriteIsReportedAsFailure(): void
+    {
+        $context = $this->add([
+            'url'      => 'asus-0b200-03580600',
+            'slug_url' => 'laptops/asus-0b200-03580600',
+            'type'     => 'product',
+        ], queryResult: false);
+
+        $this->assertTrue($context->queried, 'Запит мав піти в базу.');
+        $this->assertFalse($context->result);
+    }
+
+    public function testSuccessfulWriteIsReportedAsSuccess(): void
+    {
+        $context = $this->add([
+            'url'      => 'asus-0b200-03580600',
+            'slug_url' => 'laptops/asus-0b200-03580600',
+            'type'     => 'product',
+        ]);
+
+        $this->assertTrue($context->result);
+    }
+
+    /**
      * Метод мусить лишатись розширюваним із модулів — це вимога до всіх
      * публічних методів сутностей і хелперів. Перевіряємо поведінкою, а не
      * текстом джерела: реєструємо справжній ChainExtender і дивимось, чи він
@@ -211,7 +239,7 @@ class RouterCacheEntityAddTest extends TestCase
      * Збирає RouterCacheEntity без DI: конструктор Entity тягне сім сервісів із
      * контейнера, а для add() потрібні лише queryFactory і db.
      */
-    private function add(array $object): object
+    private function add(array $object, bool $queryResult = true): object
     {
         $auraInsert = (new AuraQueryFactory('mysql'))->newInsert();
 
@@ -225,9 +253,11 @@ class RouterCacheEntityAddTest extends TestCase
             public function newInsert(): Insert { return $this->insert; }
         });
 
-        $db = new class {
+        // Database::query() повертає true, а на впійманому винятку — false.
+        $db = new class ($queryResult) {
             public bool $queried = false;
-            public function query($query, $debug = false) { $this->queried = true; return null; }
+            public function __construct(private readonly bool $result) {}
+            public function query($query, $debug = false) { $this->queried = true; return $this->result; }
             public function insertId() { return 0; }
         };
         (new ReflectionProperty($entity, 'db'))->setValue($entity, $db);
