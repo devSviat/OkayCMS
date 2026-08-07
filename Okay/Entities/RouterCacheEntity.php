@@ -50,19 +50,38 @@ class RouterCacheEntity extends Entity
      */
     public function add($object)
     {
+        // Пишемо в окрему змінну, а не в $object: func_get_args() віддає
+        // поточні значення параметрів, і екстендери мають бачити те, що
+        // передав викликач, а не наш відфільтрований масив.
         // Тільки колонки, які є в таблиці: `id` тут не існує, а решту ключів
         // до cols() пускати нема за чим.
-        $object = array_intersect_key((array) $object, array_flip(self::getFields()));
-        $object['url'] = mb_strtolower((string) ($object['url'] ?? ''), 'UTF-8');
+        $cols = array_intersect_key((array) $object, array_flip(self::getFields()));
+
+        // Той самий вираз, що й AbstractRoute::normalizeAliasKey(): обидві
+        // половини правки мусять згортати регістр однаково, інакше запис і
+        // пошук знову розійдуться.
+        $cols['url']      = mb_strtolower((string) ($cols['url'] ?? ''), 'UTF-8');
+        $cols['slug_url'] = (string) ($cols['slug_url'] ?? '');
+        $cols['type']     = (string) ($cols['type'] ?? '');
+
+        // Неповний рядок кешувати нема сенсу: getUrlSlugAlias() перевіряє
+        // через !empty(), тож порожній slug однаково вважається відсутнім
+        // кешем. Порожній slug виникає, коли сутність не знайшлась
+        // ($product->url на false дає null). З ON DUPLICATE KEY UPDATE такий
+        // запис став би ще й руйнівним: там, де INSERT просто падав і лишав
+        // чинний рядок недоторканим, upsert затер би його порожнім значенням.
+        if ($cols['url'] === '' || $cols['slug_url'] === '' || $cols['type'] === '') {
+            return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
+        }
 
         $insert = $this->queryFactory->newInsert();
         $insert->into(self::getTable())
-            ->cols($object)
+            ->cols($cols)
             // Саме пари ключ-значення: onDuplicateKeyUpdateCol() без значення
             // створює плейсхолдер і нічого в нього не біндить.
             ->onDuplicateKeyUpdateCols([
-                'url'      => $object['url'],
-                'slug_url' => $object['slug_url'] ?? '',
+                'url'      => $cols['url'],
+                'slug_url' => $cols['slug_url'],
             ]);
 
         $this->db->query($insert);
