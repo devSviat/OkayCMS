@@ -35,6 +35,14 @@ class BackendAuthorsRequest
         $author->description      = $this->request->post('description');
         $author->visible          = $this->request->post('visible', 'boolean');
         $author->url              = trim($this->request->post('url', 'string'));
+        // Регістр зводимо лише на створенні. У картці наявної сутності поле url
+        // readonly (розблоковується кнопкою .fn_disable_url), тож при звичайному
+        // збереженні воно повертається в POST незміненим — нормалізація там
+        // мовчки перейменувала б сутність зі старим mixed-case урлом, а це 404
+        // без 301 для всіх наявних посилань.
+        if (empty($author->id)) {
+            $author->url = mb_strtolower($author->url, 'UTF-8');
+        }
         $author->meta_title       = $this->request->post('meta_title');
         $author->meta_keywords    = $this->request->post('meta_keywords');
         $author->meta_description = $this->request->post('meta_description');

@@ -69,6 +69,14 @@ class BackendBlogRequest
             $post->updated_date = null;
         }
         $post->url              = trim($this->request->post('url', 'string'));
+        // Регістр зводимо лише на створенні. У картці наявної сутності поле url
+        // readonly (розблоковується кнопкою .fn_disable_url), тож при звичайному
+        // збереженні воно повертається в POST незміненим — нормалізація там
+        // мовчки перейменувала б сутність зі старим mixed-case урлом, а це 404
+        // без 301 для всіх наявних посилань.
+        if (empty($post->id)) {
+            $post->url = mb_strtolower($post->url, 'UTF-8');
+        }
         $post->visible          = $this->request->post('visible', 'integer');
         $post->show_table_content = $this->request->post('show_table_content', 'integer');
         $post->meta_title       = $this->request->post('meta_title');

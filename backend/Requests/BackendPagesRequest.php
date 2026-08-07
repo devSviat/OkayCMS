@@ -25,7 +25,15 @@ class BackendPagesRequest
         $page->id               = $this->request->post('id', 'integer');
         $page->name             = $this->request->post('name');
         $page->name_h1          = $this->request->post('name_h1');
-        $page->url              = trim($this->request->post('url'));
+        $page->url              = trim($this->request->post('url', 'string'));
+        // Регістр зводимо лише на створенні. У картці наявної сутності поле url
+        // readonly (розблоковується кнопкою .fn_disable_url), тож при звичайному
+        // збереженні воно повертається в POST незміненим — нормалізація там
+        // мовчки перейменувала б сутність зі старим mixed-case урлом, а це 404
+        // без 301 для всіх наявних посилань.
+        if (empty($page->id)) {
+            $page->url = mb_strtolower($page->url, 'UTF-8');
+        }
         $page->visible          = $this->request->post('visible', 'boolean');
         $page->meta_title       = $this->request->post('meta_title');
         $page->meta_keywords    = $this->request->post('meta_keywords');
