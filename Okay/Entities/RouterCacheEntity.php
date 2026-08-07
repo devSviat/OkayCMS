@@ -64,13 +64,12 @@ class RouterCacheEntity extends Entity
         $cols['slug_url'] = (string) ($cols['slug_url'] ?? '');
         $cols['type']     = (string) ($cols['type'] ?? '');
 
-        // Неповний рядок кешувати нема сенсу: getUrlSlugAlias() перевіряє
-        // через !empty(), тож порожній slug однаково вважається відсутнім
-        // кешем. Порожній slug виникає, коли сутність не знайшлась
-        // ($product->url на false дає null). З ON DUPLICATE KEY UPDATE такий
-        // запис став би ще й руйнівним: там, де INSERT просто падав і лишав
-        // чинний рядок недоторканим, upsert затер би його порожнім значенням.
-        if ($cols['url'] === '' || $cols['slug_url'] === '' || $cols['type'] === '') {
+        // Зіпсований рядок кешувати не можна. До upsert це було нешкідливо —
+        // INSERT падав і чинний рядок лишався, — а тепер такий запис затер би
+        // робочий slug. Причому назавжди: url у нього вже нижнього регістру,
+        // тож прогрів більше не пропустить цей рядок і самолікування не
+        // спрацює.
+        if ($cols['url'] === '' || $cols['type'] === '' || !self::isSlugConsistent($cols['slug_url'], $cols['url'])) {
             return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
         }
 
@@ -78,11 +77,11 @@ class RouterCacheEntity extends Entity
         $insert->into(self::getTable())
             ->cols($cols)
             // Саме пари ключ-значення: onDuplicateKeyUpdateCol() без значення
-            // створює плейсхолдер і нічого в нього не біндить.
-            ->onDuplicateKeyUpdateCols([
-                'url'      => $cols['url'],
-                'slug_url' => $cols['slug_url'],
-            ]);
+            // створює плейсхолдер і нічого в нього не біндить. Оновлюємо весь
+            // $cols, а не два імені списком: `type` входить в унікальний ключ,
+            // тож там уже те саме значення, зате майбутнє поле, додане через
+            // registerEntityField(), не лишиться назавжди зі старим значенням.
+            ->onDuplicateKeyUpdateCols($cols);
 
         // Database::query() ловить виняток і повертає false — віддаємо саме
         // його, а не беззастережне true, щоб виклик міг відрізнити записаний
@@ -90,6 +89,36 @@ class RouterCacheEntity extends Entity
         $result = (bool) $this->db->query($insert);
 
         return ExtenderFacade::execute([static::class, __FUNCTION__], $result, func_get_args());
+    }
+
+    /**
+     * slug — це шлях із непорожніх сегментів, останній з яких і є url самої
+     * сутності: `gadgets/product-x` для товара, `goods` для категорії
+     * без батька. Перевірено на всіх рядках робочої бази — жодного винятку.
+     *
+     * Ловить обидві форми, які дає невдалий пошук сутності в стратегії, бо
+     * вона збирає slug конкатенацією `$category->url . '/' . $product->url`:
+     * якщо не знайшлась категорія — виходить `/product-x`, якщо товар — `gadgets/`.
+     * Обидва рядки непорожні, тож простої перевірки на порожнечу тут мало.
+     *
+     * Регістр останнього сегмента ігноруємо: `url` ми вже звели в нижній, а
+     * slug зберігає регістр джерела, і для товара з великими літерами в урлі
+     * ці два значення легітимно відрізняються.
+     */
+    private static function isSlugConsistent(string $slugUrl, string $url): bool
+    {
+        if ($slugUrl === '') {
+            return false;
+        }
+
+        $segments = explode('/', $slugUrl);
+        foreach ($segments as $segment) {
+            if ($segment === '') {
+                return false;
+            }
+        }
+
+        return mb_strtolower((string) end($segments), 'UTF-8') === $url;
     }
 
     public function deleteByUrl($objectType, $url)

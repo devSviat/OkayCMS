@@ -146,6 +146,68 @@ class RouterCacheEntityAddTest extends TestCase
     }
 
     /**
+     * Небезпечніший різновид того самого: slug непорожній, але зіпсований.
+     * Стратегія збирає його як `$category->url . '/' . $product->url`, і якщо
+     * одна з двох сутностей не знайшлась (наприклад main_category_id указує на
+     * видалену категорію), виходить "/product-x" або "gadgets/" — рядок, який
+     * проходить перевірку на порожнечу, але веде в нікуди.
+     *
+     * До upsert це було нешкідливо: INSERT падав з 1062 і чинний рядок лишався.
+     * Тепер такий запис затер би робочий slug, і — оскільки url у нього вже
+     * нижнього регістру — прогрів більше не пропустив би цей рядок, тобто
+     * самолікування б не спрацювало й сторінка віддавала б 404 назавжди.
+     *
+     * Інваріант: slug — це шлях із непорожніх сегментів, останній з яких і є
+     * url. Перевірено на всіх рядках робочої бази: жодного винятку.
+     */
+    #[DataProvider('malformedSlugProvider')]
+    public function testMalformedSlugIsNeverWritten(string $url, string $slugUrl): void
+    {
+        $context = $this->add(['url' => $url, 'slug_url' => $slugUrl, 'type' => 'product']);
+
+        $this->assertFalse($context->queried, 'Зіпсований slug не має доходити до бази.');
+        $this->assertFalse($context->result);
+    }
+
+    public static function malformedSlugProvider(): array
+    {
+        return [
+            'категорія не знайшлась'   => ['product-x', '/product-x'],
+            'товар не знайшовся'       => ['product-x', 'gadgets/'],
+            'порожній сегмент усередині' => ['product-x', 'gadgets//product-x'],
+            'останній сегмент чужий'   => ['product-x', 'gadgets/other-product'],
+            'сам лише слеш'            => ['product-x', '/'],
+        ];
+    }
+
+    /**
+     * Валідні форми, які гард ламати не має: шлях із категорією, урл категорії
+     * без шляху, і — окремо важливе — slug, що зберіг регістр джерела, тоді як
+     * url ми звели в нижній. Порівняння останнього сегмента мусить бути
+     * нечутливим до регістру, інакше легітимний товар із великими літерами в
+     * урлі перестав би кешуватись зовсім.
+     */
+    #[DataProvider('validSlugProvider')]
+    public function testValidSlugIsWritten(string $url, string $slugUrl): void
+    {
+        $context = $this->add(['url' => $url, 'slug_url' => $slugUrl, 'type' => 'product']);
+
+        $this->assertTrue($context->queried, 'Валідний рядок мав піти в базу.');
+        $this->assertTrue($context->result);
+    }
+
+    public static function validSlugProvider(): array
+    {
+        return [
+            'шлях із категорією'        => ['product-x', 'gadgets/product-x'],
+            'вкладений шлях'            => ['product-x', 'katalog/gadgets/product-x'],
+            'slug дорівнює url'         => ['goods', 'goods'],
+            'регістр джерела в slug'    => ['product-0b200-03580600', 'gadgets/Product-0B200-03580600'],
+            'кирилиця'                  => ['категорія-тест', 'katalog/Категорія-Тест'],
+        ];
+    }
+
+    /**
      * Database::query() ловить виняток і повертає false. Якщо add() віддавав
      * би беззастережне true, викликач не відрізнив би записаний рядок від
      * відхиленого — а помилка при цьому лише тихо лягає в лог.
