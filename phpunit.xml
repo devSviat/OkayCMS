@@ -1,5 +1,5 @@
 <phpunit bootstrap="tests/bootstrap.php"
-         cacheResult="false"
+         recordTestRunHistory="false"
          failOnDeprecation="true"
          failOnPhpunitDeprecation="true"
          failOnNotice="true"
