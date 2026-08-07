@@ -99,7 +99,7 @@ abstract class AbstractRoute
      */
     public static function setUrlSlugAlias($url, $routeAlias)
     {
-        self::$routeAliases[$url] = $routeAlias;
+        self::$routeAliases[self::normalizeAliasKey($url)] = $routeAlias;
     }
 
     /**
@@ -118,10 +118,26 @@ abstract class AbstractRoute
 
     public static function getUrlSlugAlias($url)
     {
-        if (!empty(self::$routeAliases[$url])) {
-            return self::$routeAliases[$url];
+        $key = self::normalizeAliasKey($url);
+        if (!empty(self::$routeAliases[$key])) {
+            return self::$routeAliases[$key];
         }
         return false;
+    }
+
+    /**
+     * Ключ масиву — єдине чутливе до регістру порівняння в усьому ланцюжку
+     * генерації урла: унікальний індекс url_type у router_cache живе в
+     * utf8mb4_general_ci і регістр ігнорує. Без нормалізації рядок кешу,
+     * записаний у змішаному регістрі, не знаходився, і INSERT падав з 1062.
+     *
+     * mb_strtolower, а не strtolower: урли бувають не-ASCII. Повного збігу зі
+     * згортанням utf8mb4_general_ci по всьому Unicode це не дає, але для слагів
+     * (ASCII + кирилиця) поведінка та сама.
+     */
+    private static function normalizeAliasKey($url): string
+    {
+        return mb_strtolower((string) $url, 'UTF-8');
     }
     
     public function generateRouteParams()
