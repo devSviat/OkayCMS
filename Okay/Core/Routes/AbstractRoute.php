@@ -134,6 +134,11 @@ abstract class AbstractRoute
      * mb_strtolower, а не strtolower: урли бувають не-ASCII. Повного збігу зі
      * згортанням utf8mb4_general_ci по всьому Unicode це не дає, але для слагів
      * (ASCII + кирилиця) поведінка та сама.
+     *
+     * Той самий вираз продубльовано в RouterCacheEntity::add() — половина, що
+     * пише в базу. Міняти згортання можна лише в обох місцях одночасно,
+     * інакше запис і пошук знову розійдуться, і повернеться саме та помилка,
+     * заради якої це писалось.
      */
     private static function normalizeAliasKey($url): string
     {
