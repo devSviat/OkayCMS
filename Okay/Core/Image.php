@@ -239,9 +239,9 @@ class Image
      * @param int $width
      * @param int $height
      * @param bool $setWatermark
-     * @param null $resizedDir
-     * @param null $cropPositionX
-     * @param null $cropPositionY
+     * @param string|null $resizedDir
+     * @param string|null $cropPositionX
+     * @param string|null $cropPositionY
      * @return mixed|void|null
      * @throws \Exception
      */
