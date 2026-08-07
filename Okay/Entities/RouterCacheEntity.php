@@ -5,10 +5,11 @@ namespace Okay\Entities;
 
 
 use Okay\Core\Entity\Entity;
+use Okay\Core\Modules\Extender\ExtenderFacade;
 
 class RouterCacheEntity extends Entity
 {
-    
+
     const TYPE_PRODUCT = 'product';
     const TYPE_CATEGORY = 'category';
     const TYPE_POST = 'post';
@@ -21,7 +22,49 @@ class RouterCacheEntity extends Entity
     ];
 
     protected static $table = 'router_cache';
-    
+
+    /**
+     * Свій add() замість CRUD::add() з двох причин.
+     *
+     * Перша: у таблиці немає колонки `id`, тож базовий метод однаково доходить
+     * до `if (!$id = $this->db->insertId())` і завжди повертає false, не
+     * виконуючи блок мовних полів. Тут його просто нема сенсу проходити.
+     *
+     * Друга, головна: звичайний INSERT давав 1062 Duplicate entry щоразу, коли
+     * урл відрізнявся від закешованого лише регістром — унікальний індекс
+     * url_type живе в utf8mb4_general_ci. Нижній регістр для `url` плюс
+     * ON DUPLICATE KEY UPDATE роблять запис ідемпотентним: застарілий рядок
+     * лагодиться сам на першому ж запиті, а дві одночасні вставки більше не
+     * гоняться між собою.
+     *
+     * `slug_url` навмисно лишається як є: він складається з
+     * `$category->url . '/' . $product->url`, тобто вже несе регістр джерела.
+     *
+     * @param array|object $object
+     * @return bool
+     */
+    public function add($object)
+    {
+        // Тільки колонки, які є в таблиці: `id` тут не існує, а решту ключів
+        // до cols() пускати нема за чим.
+        $object = array_intersect_key((array) $object, array_flip(self::getFields()));
+        $object['url'] = mb_strtolower((string) ($object['url'] ?? ''), 'UTF-8');
+
+        $insert = $this->queryFactory->newInsert();
+        $insert->into(self::getTable())
+            ->cols($object)
+            // Саме пари ключ-значення: onDuplicateKeyUpdateCol() без значення
+            // створює плейсхолдер і нічого в нього не біндить.
+            ->onDuplicateKeyUpdateCols([
+                'url'      => $object['url'],
+                'slug_url' => $object['slug_url'] ?? '',
+            ]);
+
+        $this->db->query($insert);
+
+        return ExtenderFacade::execute([static::class, __FUNCTION__], true, func_get_args());
+    }
+
     public function deleteByUrl($objectType, $url)
     {
         $delete = $this->queryFactory->newDelete();
