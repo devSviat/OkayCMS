@@ -5,10 +5,11 @@ namespace Okay\Entities;
 
 
 use Okay\Core\Entity\Entity;
+use Okay\Core\Modules\Extender\ExtenderFacade;
 
 class RouterCacheEntity extends Entity
 {
-    
+
     const TYPE_PRODUCT = 'product';
     const TYPE_CATEGORY = 'category';
     const TYPE_POST = 'post';
@@ -21,7 +22,76 @@ class RouterCacheEntity extends Entity
     ];
 
     protected static $table = 'router_cache';
-    
+
+    /**
+     * Свій add() замість CRUD::add() з двох причин.
+     *
+     * Перша: у таблиці немає колонки `id`, тож базовий метод однаково доходить
+     * до `if (!$id = $this->db->insertId())` і завжди повертає false, не
+     * виконуючи блок мовних полів. Тут його просто нема сенсу проходити.
+     *
+     * Друга, головна: звичайний INSERT давав 1062 Duplicate entry щоразу, коли
+     * урл відрізнявся від закешованого лише регістром — унікальний індекс
+     * url_type живе в utf8mb4_general_ci. Нижній регістр для `url` плюс
+     * ON DUPLICATE KEY UPDATE роблять запис ідемпотентним і знімають гонку
+     * двох одночасних вставок того самого урла.
+     *
+     * Наявні рядки у змішаному регістрі це саме по собі не лагодить: після
+     * нормалізації ключа в AbstractRoute пошук у кеші починає в них влучати,
+     * тож до цього методу виконання просто не доходить. Такі рядки чистяться
+     * разовим DELETE ... WHERE BINARY url <> BINARY LOWER(url), після чого
+     * перегенеровуються тут уже правильними.
+     *
+     * `slug_url` навмисно лишається як є: він складається з
+     * `$category->url . '/' . $product->url`, тобто вже несе регістр джерела.
+     *
+     * @param array|object $object
+     * @return bool
+     */
+    public function add($object)
+    {
+        // Пишемо в окрему змінну, а не в $object: func_get_args() віддає
+        // поточні значення параметрів, і екстендери мають бачити те, що
+        // передав викликач, а не наш відфільтрований масив.
+        // Тільки колонки, які є в таблиці: `id` тут не існує, а решту ключів
+        // до cols() пускати нема за чим.
+        $cols = array_intersect_key((array) $object, array_flip(self::getFields()));
+
+        // Той самий вираз, що й AbstractRoute::normalizeAliasKey(): обидві
+        // половини правки мусять згортати регістр однаково, інакше запис і
+        // пошук знову розійдуться.
+        $cols['url']      = mb_strtolower((string) ($cols['url'] ?? ''), 'UTF-8');
+        $cols['slug_url'] = (string) ($cols['slug_url'] ?? '');
+        $cols['type']     = (string) ($cols['type'] ?? '');
+
+        // Неповний рядок кешувати нема сенсу: getUrlSlugAlias() перевіряє
+        // через !empty(), тож порожній slug однаково вважається відсутнім
+        // кешем. Порожній slug виникає, коли сутність не знайшлась
+        // ($product->url на false дає null). З ON DUPLICATE KEY UPDATE такий
+        // запис став би ще й руйнівним: там, де INSERT просто падав і лишав
+        // чинний рядок недоторканим, upsert затер би його порожнім значенням.
+        if ($cols['url'] === '' || $cols['slug_url'] === '' || $cols['type'] === '') {
+            return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
+        }
+
+        $insert = $this->queryFactory->newInsert();
+        $insert->into(self::getTable())
+            ->cols($cols)
+            // Саме пари ключ-значення: onDuplicateKeyUpdateCol() без значення
+            // створює плейсхолдер і нічого в нього не біндить.
+            ->onDuplicateKeyUpdateCols([
+                'url'      => $cols['url'],
+                'slug_url' => $cols['slug_url'],
+            ]);
+
+        // Database::query() ловить виняток і повертає false — віддаємо саме
+        // його, а не беззастережне true, щоб виклик міг відрізнити записаний
+        // рядок від відхиленого.
+        $result = (bool) $this->db->query($insert);
+
+        return ExtenderFacade::execute([static::class, __FUNCTION__], $result, func_get_args());
+    }
+
     public function deleteByUrl($objectType, $url)
     {
         $delete = $this->queryFactory->newDelete();
