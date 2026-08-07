@@ -17,9 +17,9 @@ use stdClass;
  * У ланцюжку генерації URL єдине чутливе до регістру порівняння — ключ масиву
  * $routeAliases. Прогрів кешу кладе туди рядки з ok_router_cache як є, а
  * унікальний індекс url_type живе в utf8mb4_general_ci і регістр ігнорує. Через
- * це рядок `asus-0B200-03580600` не влучав у пошук за `asus-0b200-03580600`:
- * код вважав, що кешу нема, робив INSERT і отримував 1062 Duplicate entry —
- * рівно три штуки на кожен запит /sitemap.xml, нескінченно.
+ * це рядок `product-0B200-03580600` не влучав у пошук за `product-0b200-03580600`:
+ * код вважав, що кешу нема, робив INSERT і отримував 1062 Duplicate entry — по
+ * одному на кожен такий рядок, і так на кожному запиті /sitemap.xml, нескінченно.
  *
  * Ключ має нормалізуватись однаково на записі й на читанні.
  */
@@ -53,21 +53,21 @@ class AbstractRouteAliasCaseTest extends TestCase
 
     public function testAliasStoredInUpperCaseIsFoundByLowerCaseLookup(): void
     {
-        ProductRoute::setUrlSlugAlias('asus-0B200-03580600', 'laptops/asus-0B200-03580600');
+        ProductRoute::setUrlSlugAlias('product-0B200-03580600', 'gadgets/product-0B200-03580600');
 
         $this->assertSame(
-            'laptops/asus-0B200-03580600',
-            ProductRoute::getUrlSlugAlias('asus-0b200-03580600')
+            'gadgets/product-0B200-03580600',
+            ProductRoute::getUrlSlugAlias('product-0b200-03580600')
         );
     }
 
     public function testAliasStoredInLowerCaseIsFoundByUpperCaseLookup(): void
     {
-        ProductRoute::setUrlSlugAlias('asus-0b200-03580600', 'laptops/asus-0b200-03580600');
+        ProductRoute::setUrlSlugAlias('product-0b200-03580600', 'gadgets/product-0b200-03580600');
 
         $this->assertSame(
-            'laptops/asus-0b200-03580600',
-            ProductRoute::getUrlSlugAlias('asus-0B200-03580600')
+            'gadgets/product-0b200-03580600',
+            ProductRoute::getUrlSlugAlias('product-0B200-03580600')
         );
     }
 
@@ -78,12 +78,12 @@ class AbstractRouteAliasCaseTest extends TestCase
     public function testMergeLoadsNormalisedRows(): void
     {
         ProductRoute::mergeUrlSlugAlias([
-            $this->cacheRow('delonghi-as00004434', 'coffee-machines/delonghi-as00004434'),
+            $this->cacheRow('item-as00004434', 'goods/item-as00004434'),
         ]);
 
         $this->assertSame(
-            'coffee-machines/delonghi-as00004434',
-            ProductRoute::getUrlSlugAlias('delonghi-as00004434')
+            'goods/item-as00004434',
+            ProductRoute::getUrlSlugAlias('item-as00004434')
         );
     }
 
@@ -101,13 +101,13 @@ class AbstractRouteAliasCaseTest extends TestCase
     public function testMergeSkipsStaleMixedCaseRows(): void
     {
         ProductRoute::mergeUrlSlugAlias([
-            $this->cacheRow('delonghi-AS00004434', 'coffee-machines/delonghi-AS00004434'),
-            $this->cacheRow('asus-0B200-03580600', 'laptops/asus-0B200-03580600'),
+            $this->cacheRow('item-AS00004434', 'goods/item-AS00004434'),
+            $this->cacheRow('product-0B200-03580600', 'gadgets/product-0B200-03580600'),
         ]);
 
-        $this->assertFalse(ProductRoute::getUrlSlugAlias('delonghi-as00004434'));
-        $this->assertFalse(ProductRoute::getUrlSlugAlias('delonghi-AS00004434'));
-        $this->assertFalse(ProductRoute::getUrlSlugAlias('asus-0b200-03580600'));
+        $this->assertFalse(ProductRoute::getUrlSlugAlias('item-as00004434'));
+        $this->assertFalse(ProductRoute::getUrlSlugAlias('item-AS00004434'));
+        $this->assertFalse(ProductRoute::getUrlSlugAlias('product-0b200-03580600'));
         $this->assertSame([], $this->storedAliases());
     }
 
@@ -118,11 +118,11 @@ class AbstractRouteAliasCaseTest extends TestCase
      */
     public function testDirectSetStillAcceptsMixedCaseUrls(): void
     {
-        ProductRoute::setUrlSlugAlias('Delonghi-AS00004434', 'coffee-machines/Delonghi-AS00004434');
+        ProductRoute::setUrlSlugAlias('Item-AS00004434', 'goods/Item-AS00004434');
 
         $this->assertSame(
-            'coffee-machines/Delonghi-AS00004434',
-            ProductRoute::getUrlSlugAlias('delonghi-as00004434')
+            'goods/Item-AS00004434',
+            ProductRoute::getUrlSlugAlias('item-as00004434')
         );
     }
 
@@ -131,42 +131,44 @@ class AbstractRouteAliasCaseTest extends TestCase
      */
     public function testCyrillicUrlIsMatchedRegardlessOfCase(): void
     {
-        CategoryRoute::setUrlSlugAlias('Ноутбуки-Асус', 'katalog/Ноутбуки-Асус');
+        CategoryRoute::setUrlSlugAlias('Категорія-Тест', 'katalog/Категорія-Тест');
 
         $this->assertSame(
-            'katalog/Ноутбуки-Асус',
-            CategoryRoute::getUrlSlugAlias('ноутбуки-асус')
+            'katalog/Категорія-Тест',
+            CategoryRoute::getUrlSlugAlias('категорія-тест')
         );
     }
 
     /**
-     * Регресія на трьох реальних URL, які щодня давали 1062 на проді.
+     * Форми URL, на яких дефект і спрацьовував: великі літери в артикулі —
+     * рівно те, що генератори slug'ів лишають як є, а PHP-масив рахує іншим
+     * ключем.
      */
-    #[DataProvider('productionUrlProvider')]
-    public function testProductionUrlsHitTheCache(string $cachedUrl, string $slug, string $productUrl): void
+    #[DataProvider('mixedCaseUrlProvider')]
+    public function testMixedCaseUrlsHitTheCache(string $cachedUrl, string $slug, string $productUrl): void
     {
         ProductRoute::setUrlSlugAlias($cachedUrl, $slug);
 
         $this->assertSame($slug, ProductRoute::getUrlSlugAlias($productUrl));
     }
 
-    public static function productionUrlProvider(): array
+    public static function mixedCaseUrlProvider(): array
     {
         return [
-            'delonghi-AS00004434' => [
-                'delonghi-AS00004434',
-                'coffee-machines/delonghi-AS00004434',
-                'delonghi-as00004434',
+            'item-AS00004434' => [
+                'item-AS00004434',
+                'goods/item-AS00004434',
+                'item-as00004434',
             ],
-            'delonghi-AS00008245' => [
-                'delonghi-AS00008245',
-                'coffee-machines/delonghi-AS00008245',
-                'delonghi-as00008245',
+            'item-AS00008245' => [
+                'item-AS00008245',
+                'goods/item-AS00008245',
+                'item-as00008245',
             ],
-            'asus-0B200-03580600' => [
-                'asus-0B200-03580600',
-                'laptops/asus-0B200-03580600',
-                'asus-0b200-03580600',
+            'product-0B200-03580600' => [
+                'product-0B200-03580600',
+                'gadgets/product-0B200-03580600',
+                'product-0b200-03580600',
             ],
         ];
     }

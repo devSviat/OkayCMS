@@ -23,19 +23,19 @@ class RouterCacheEntityAddTest extends TestCase
     public function testUrlIsStoredInLowerCase(): void
     {
         $binds = $this->addAndGetBindValues([
-            'url'      => 'asus-0B200-03580600',
-            'slug_url' => 'laptops/asus-0b200-03580600',
+            'url'      => 'product-0B200-03580600',
+            'slug_url' => 'gadgets/product-0b200-03580600',
             'type'     => 'product',
         ]);
 
-        $this->assertSame('asus-0b200-03580600', $binds['url']);
+        $this->assertSame('product-0b200-03580600', $binds['url']);
     }
 
     public function testStatementUsesOnDuplicateKeyUpdate(): void
     {
         $statement = $this->addAndGetStatement([
-            'url'      => 'asus-0B200-03580600',
-            'slug_url' => 'laptops/asus-0b200-03580600',
+            'url'      => 'product-0B200-03580600',
+            'slug_url' => 'gadgets/product-0b200-03580600',
             'type'     => 'product',
         ]);
 
@@ -51,15 +51,15 @@ class RouterCacheEntityAddTest extends TestCase
     public function testOnDuplicateKeyValuesAreActuallyBound(): void
     {
         $binds = $this->addAndGetBindValues([
-            'url'      => 'asus-0B200-03580600',
-            'slug_url' => 'laptops/asus-0b200-03580600',
+            'url'      => 'product-0B200-03580600',
+            'slug_url' => 'gadgets/product-0b200-03580600',
             'type'     => 'product',
         ]);
 
         $this->assertArrayHasKey('url__on_duplicate_key', $binds);
         $this->assertArrayHasKey('slug_url__on_duplicate_key', $binds);
-        $this->assertSame('asus-0b200-03580600', $binds['url__on_duplicate_key']);
-        $this->assertSame('laptops/asus-0b200-03580600', $binds['slug_url__on_duplicate_key']);
+        $this->assertSame('product-0b200-03580600', $binds['url__on_duplicate_key']);
+        $this->assertSame('gadgets/product-0b200-03580600', $binds['slug_url__on_duplicate_key']);
     }
 
     /**
@@ -70,12 +70,12 @@ class RouterCacheEntityAddTest extends TestCase
     public function testSlugUrlKeepsItsOriginalCase(): void
     {
         $binds = $this->addAndGetBindValues([
-            'url'      => 'delonghi-as00004434',
-            'slug_url' => 'coffee-machines/Delonghi-AS00004434',
+            'url'      => 'item-as00004434',
+            'slug_url' => 'goods/Item-AS00004434',
             'type'     => 'product',
         ]);
 
-        $this->assertSame('coffee-machines/Delonghi-AS00004434', $binds['slug_url']);
+        $this->assertSame('goods/Item-AS00004434', $binds['slug_url']);
     }
 
     /**
@@ -86,8 +86,8 @@ class RouterCacheEntityAddTest extends TestCase
     {
         $insert = $this->add([
             'id'       => 5,
-            'url'      => 'asus-0b200-03580600',
-            'slug_url' => 'laptops/asus-0b200-03580600',
+            'url'      => 'product-0b200-03580600',
+            'slug_url' => 'gadgets/product-0b200-03580600',
             'type'     => 'product',
             'evil_col' => 'DROP TABLE',
         ])->insert;
@@ -106,8 +106,8 @@ class RouterCacheEntityAddTest extends TestCase
     public function testTypeIsPassedThroughUntouched(): void
     {
         $binds = $this->addAndGetBindValues([
-            'url'      => 'kavovarky',
-            'slug_url' => 'katalog/kavovarky',
+            'url'      => 'sample-category',
+            'slug_url' => 'katalog/sample-category',
             'type'     => 'category',
         ]);
 
@@ -134,14 +134,14 @@ class RouterCacheEntityAddTest extends TestCase
     public static function incompleteObjectProvider(): array
     {
         return [
-            'порожній slug_url'  => [['url' => 'asus-0b200', 'slug_url' => '',   'type' => 'product']],
-            'slug_url = null'    => [['url' => 'asus-0b200', 'slug_url' => null, 'type' => 'product']],
-            'slug_url відсутній' => [['url' => 'asus-0b200', 'type' => 'product']],
-            'порожній url'       => [['url' => '',   'slug_url' => 'laptops/asus', 'type' => 'product']],
-            'url = null'         => [['url' => null, 'slug_url' => 'laptops/asus', 'type' => 'product']],
-            'url відсутній'      => [['slug_url' => 'laptops/asus', 'type' => 'product']],
-            'порожній type'      => [['url' => 'asus-0b200', 'slug_url' => 'laptops/asus', 'type' => '']],
-            'type відсутній'     => [['url' => 'asus-0b200', 'slug_url' => 'laptops/asus']],
+            'порожній slug_url'  => [['url' => 'product-0b200', 'slug_url' => '',   'type' => 'product']],
+            'slug_url = null'    => [['url' => 'product-0b200', 'slug_url' => null, 'type' => 'product']],
+            'slug_url відсутній' => [['url' => 'product-0b200', 'type' => 'product']],
+            'порожній url'       => [['url' => '',   'slug_url' => 'gadgets/product', 'type' => 'product']],
+            'url = null'         => [['url' => null, 'slug_url' => 'gadgets/product', 'type' => 'product']],
+            'url відсутній'      => [['slug_url' => 'gadgets/product', 'type' => 'product']],
+            'порожній type'      => [['url' => 'product-0b200', 'slug_url' => 'gadgets/product', 'type' => '']],
+            'type відсутній'     => [['url' => 'product-0b200', 'slug_url' => 'gadgets/product']],
         ];
     }
 
@@ -153,8 +153,8 @@ class RouterCacheEntityAddTest extends TestCase
     public function testRejectedWriteIsReportedAsFailure(): void
     {
         $context = $this->add([
-            'url'      => 'asus-0b200-03580600',
-            'slug_url' => 'laptops/asus-0b200-03580600',
+            'url'      => 'product-0b200-03580600',
+            'slug_url' => 'gadgets/product-0b200-03580600',
             'type'     => 'product',
         ], queryResult: false);
 
@@ -165,8 +165,8 @@ class RouterCacheEntityAddTest extends TestCase
     public function testSuccessfulWriteIsReportedAsSuccess(): void
     {
         $context = $this->add([
-            'url'      => 'asus-0b200-03580600',
-            'slug_url' => 'laptops/asus-0b200-03580600',
+            'url'      => 'product-0b200-03580600',
+            'slug_url' => 'gadgets/product-0b200-03580600',
             'type'     => 'product',
         ]);
 
@@ -184,8 +184,8 @@ class RouterCacheEntityAddTest extends TestCase
         $this->registerChainExtension(RouterCacheEntity::class, 'add', AddSpyExtension::class, 'onAdd');
 
         $context = $this->add([
-            'url'      => 'asus-0B200-03580600',
-            'slug_url' => 'laptops/asus-0b200-03580600',
+            'url'      => 'product-0B200-03580600',
+            'slug_url' => 'gadgets/product-0b200-03580600',
             'type'     => 'product',
         ]);
 
@@ -203,8 +203,8 @@ class RouterCacheEntityAddTest extends TestCase
         $this->registerChainExtension(RouterCacheEntity::class, 'add', AddSpyExtension::class, 'onAdd');
 
         $original = [
-            'url'      => 'asus-0B200-03580600',
-            'slug_url' => 'laptops/asus-0b200-03580600',
+            'url'      => 'product-0B200-03580600',
+            'slug_url' => 'gadgets/product-0b200-03580600',
             'type'     => 'product',
             'evil_col' => 'DROP TABLE',
         ];
