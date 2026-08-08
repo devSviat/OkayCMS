@@ -24,15 +24,13 @@ class BackendBlogCategoriesRequest
         $category->name             = $this->request->post('name');
         $category->name_h1          = $this->request->post('name_h1');
         $category->visible          = $this->request->post('visible', 'boolean');
-        $category->url              = trim($this->request->post('url', 'string'));
-        // Регістр зводимо лише на створенні. У картці наявної сутності поле url
-        // readonly (розблоковується кнопкою .fn_disable_url), тож при звичайному
-        // збереженні воно повертається в POST незміненим — нормалізація там
-        // мовчки перейменувала б сутність зі старим mixed-case урлом, а це 404
-        // без 301 для всіх наявних посилань.
-        if (empty($category->id)) {
-            $category->url = mb_strtolower($category->url, 'UTF-8');
-        }
+        // Зводимо на будь-якому збереженні, не лише на створенні. Поле url у
+        // картці наявної сутності readonly, але readonly-поле браузер усе одно
+        // надсилає — тож сутність зі старим mixed-case урлом нормалізується при
+        // першому ж збереженні картки. Це свідомо: інакше такий url лишався б
+        // назавжди й далі розходився б із _ci-порівнянням у базі. Магазинам, де
+        // такі url є, це міняє адреси — див. примітку до релізу.
+        $category->url              = mb_strtolower(trim($this->request->post('url', 'string')), 'UTF-8');
         $category->meta_title       = $this->request->post('meta_title');
         $category->meta_keywords    = $this->request->post('meta_keywords');
         $category->meta_description = $this->request->post('meta_description');

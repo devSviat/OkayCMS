@@ -36,14 +36,19 @@ use ReflectionProperty;
  * Нормалізація на вході знімає це за побудовою — цикл, валідація й гейти
  * порівняння бачать уже кінцеве значення.
  *
- * І чому лише на створенні. Поле url у картці наявної сутності readonly
+ * Зводимо на будь-якому збереженні, а не лише на створенні, і в цього є ціна.
+ * Поле url у картці наявної сутності readonly
  * (`{if $category->id}readonly=""{/if}` у backend/design/html/*.tpl), але
  * readonly-поле браузер усе одно надсилає. Тобто кожне збереження повертає
- * збережений url назад у POST — і безумовна нормалізація перейменовувала б
- * сутності з legacy mixed-case урлом при першому ж дотику до картки, мовчки й
- * без 301. Ручний ввід від цього не страждає: кнопка .fn_disable_url знімає
- * readonly, але керуючий, який справді змінює url, отримує рівно те, що
- * вписав, а не мовчки зведений регістр.
+ * збережений url назад у POST, і сутність зі старим mixed-case урлом переїде
+ * на нижній регістр при першому ж дотику до картки — у магазині, де такі url
+ * є, це зміна адрес без 301.
+ *
+ * Компроміс прийнятий свідомо: протилежний варіант лишає такий url назавжди, а
+ * разом із ним і розходження з _ci-порівнянням у базі — рівно те, заради
+ * усунення чого все це й робиться. Магазинам, які оновлюються, потрібна
+ * примітка до релізу й перевірка `WHERE BINARY url <> BINARY LOWER(url)` перед
+ * оновленням.
  */
 class BackendRequestUrlCaseTest extends TestCase
 {
@@ -56,16 +61,22 @@ class BackendRequestUrlCaseTest extends TestCase
     }
 
     /**
-     * Головний запобіжник: у наявної сутності url не чіпаємо взагалі. Інакше
-     * будь-яке збереження картки перейменувало б її, бо readonly-поле
-     * повертається в POST як є.
+     * Наявна сутність нормалізується так само, як нова. Наслідок, прийнятий
+     * свідомо: поле url у картці readonly, але браузер readonly-поле все одно
+     * надсилає, тож сутність зі старим mixed-case урлом переїде на нижній
+     * регістр при першому ж збереженні картки — і в магазині, де такі url є,
+     * це зміна адрес.
+     *
+     * Альтернатива — не чіпати наявні — лишає такий url назавжди, а разом із
+     * ним і розходження з _ci-порівнянням у базі, заради усунення якого все
+     * це й робиться.
      */
     #[DataProvider('requestProvider')]
-    public function testExistingEntityUrlIsLeftUntouched(string $requestClass, string $method): void
+    public function testExistingEntityUrlIsLowercasedToo(string $requestClass, string $method): void
     {
         $result = $this->post($requestClass, $method, 'Legacy-MixedCase-1', ['id' => 7]);
 
-        $this->assertSame('Legacy-MixedCase-1', $result->url);
+        $this->assertSame('legacy-mixedcase-1', $result->url);
     }
 
     /**
@@ -82,13 +93,13 @@ class BackendRequestUrlCaseTest extends TestCase
 
     /**
      * Пробіли по краях знімались і раніше — нормалізація не має це ламати, і
-     * має знімати їх однаково для нової та наявної сутності.
+     * має поводитись однаково для нової та наявної сутності.
      */
     #[DataProvider('requestProvider')]
     public function testSurroundingSpacesAreStillRemoved(string $requestClass, string $method): void
     {
         $this->assertSame('item-1', $this->post($requestClass, $method, '  Item-1  ')->url);
-        $this->assertSame('Item-1', $this->post($requestClass, $method, '  Item-1  ', ['id' => 7])->url);
+        $this->assertSame('item-1', $this->post($requestClass, $method, '  Item-1  ', ['id' => 7])->url);
     }
 
     #[DataProvider('requestProvider')]

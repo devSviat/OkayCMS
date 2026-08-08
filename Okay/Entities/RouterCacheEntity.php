@@ -5,11 +5,10 @@ namespace Okay\Entities;
 
 
 use Okay\Core\Entity\Entity;
-use Okay\Core\Modules\Extender\ExtenderFacade;
 
 class RouterCacheEntity extends Entity
 {
-
+    
     const TYPE_PRODUCT = 'product';
     const TYPE_CATEGORY = 'category';
     const TYPE_POST = 'post';
@@ -22,105 +21,7 @@ class RouterCacheEntity extends Entity
     ];
 
     protected static $table = 'router_cache';
-
-    /**
-     * Свій add() замість CRUD::add() з двох причин.
-     *
-     * Перша: у таблиці немає колонки `id`, тож базовий метод однаково доходить
-     * до `if (!$id = $this->db->insertId())` і завжди повертає false, не
-     * виконуючи блок мовних полів. Тут його просто нема сенсу проходити.
-     *
-     * Друга, головна: звичайний INSERT давав 1062 Duplicate entry щоразу, коли
-     * урл відрізнявся від закешованого лише регістром — унікальний індекс
-     * url_type живе в utf8mb4_general_ci. Нижній регістр для `url` плюс
-     * ON DUPLICATE KEY UPDATE роблять запис ідемпотентним і знімають гонку
-     * двох одночасних вставок того самого урла.
-     *
-     * Наявні рядки у змішаному регістрі лагодяться самі, у парі з
-     * AbstractRoute::mergeUrlSlugAlias(): той не підхоплює рядок, url якого не
-     * в нижньому регістрі, тож пошук у кеші промахується, стратегія генерує
-     * slug заново з джерела і доходить сюди — а ON DUPLICATE KEY UPDATE
-     * переписує рядок уже правильним. Ручний DELETE для цього не потрібен.
-     *
-     * `slug_url` навмисно лишається як є: він складається з
-     * `$category->url . '/' . $product->url`, тобто вже несе регістр джерела.
-     *
-     * @param array|object $object
-     * @return bool
-     */
-    public function add($object)
-    {
-        // Пишемо в окрему змінну, а не в $object: func_get_args() віддає
-        // поточні значення параметрів, і екстендери мають бачити те, що
-        // передав викликач, а не наш відфільтрований масив.
-        // Тільки колонки, які є в таблиці: `id` тут не існує, а решту ключів
-        // до cols() пускати нема за чим.
-        $cols = array_intersect_key((array) $object, array_flip(self::getFields()));
-
-        // Той самий вираз, що й AbstractRoute::normalizeAliasKey(): обидві
-        // половини правки мусять згортати регістр однаково, інакше запис і
-        // пошук знову розійдуться.
-        $cols['url']      = mb_strtolower((string) ($cols['url'] ?? ''), 'UTF-8');
-        $cols['slug_url'] = (string) ($cols['slug_url'] ?? '');
-        $cols['type']     = (string) ($cols['type'] ?? '');
-
-        // Зіпсований рядок кешувати не можна. До upsert це було нешкідливо —
-        // INSERT падав і чинний рядок лишався, — а тепер такий запис затер би
-        // робочий slug. Причому назавжди: url у нього вже нижнього регістру,
-        // тож прогрів більше не пропустить цей рядок і самолікування не
-        // спрацює.
-        if ($cols['url'] === '' || $cols['type'] === '' || !self::isSlugConsistent($cols['slug_url'], $cols['url'])) {
-            return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
-        }
-
-        $insert = $this->queryFactory->newInsert();
-        $insert->into(self::getTable())
-            ->cols($cols)
-            // Саме пари ключ-значення: onDuplicateKeyUpdateCol() без значення
-            // створює плейсхолдер і нічого в нього не біндить. Оновлюємо весь
-            // $cols, а не два імені списком: `type` входить в унікальний ключ,
-            // тож там уже те саме значення, зате майбутнє поле, додане через
-            // registerEntityField(), не лишиться назавжди зі старим значенням.
-            ->onDuplicateKeyUpdateCols($cols);
-
-        // Database::query() ловить виняток і повертає false — віддаємо саме
-        // його, а не беззастережне true, щоб виклик міг відрізнити записаний
-        // рядок від відхиленого.
-        $result = (bool) $this->db->query($insert);
-
-        return ExtenderFacade::execute([static::class, __FUNCTION__], $result, func_get_args());
-    }
-
-    /**
-     * slug — це шлях із непорожніх сегментів, останній з яких і є url самої
-     * сутності: `gadgets/product-x` для товара, `goods` для категорії
-     * без батька. Перевірено на всіх рядках робочої бази — жодного винятку.
-     *
-     * Ловить обидві форми, які дає невдалий пошук сутності в стратегії, бо
-     * вона збирає slug конкатенацією `$category->url . '/' . $product->url`:
-     * якщо не знайшлась категорія — виходить `/product-x`, якщо товар — `gadgets/`.
-     * Обидва рядки непорожні, тож простої перевірки на порожнечу тут мало.
-     *
-     * Регістр останнього сегмента ігноруємо: `url` ми вже звели в нижній, а
-     * slug зберігає регістр джерела, і для товара з великими літерами в урлі
-     * ці два значення легітимно відрізняються.
-     */
-    private static function isSlugConsistent(string $slugUrl, string $url): bool
-    {
-        if ($slugUrl === '') {
-            return false;
-        }
-
-        $segments = explode('/', $slugUrl);
-        foreach ($segments as $segment) {
-            if ($segment === '') {
-                return false;
-            }
-        }
-
-        return mb_strtolower((string) end($segments), 'UTF-8') === $url;
-    }
-
+    
     public function deleteByUrl($objectType, $url)
     {
         $delete = $this->queryFactory->newDelete();

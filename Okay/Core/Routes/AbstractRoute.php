@@ -99,7 +99,7 @@ abstract class AbstractRoute
      */
     public static function setUrlSlugAlias($url, $routeAlias)
     {
-        self::$routeAliases[self::normalizeAliasKey($url)] = $routeAlias;
+        self::$routeAliases[$url] = $routeAlias;
     }
 
     /**
@@ -112,50 +112,16 @@ abstract class AbstractRoute
     public static function mergeUrlSlugAlias($mappedCacheUrlSlugByUrl)
     {
         foreach ($mappedCacheUrlSlugByUrl ?? [] as $item) {
-            // Рядок, url якого сам не в нижньому регістрі, писав ще код без
-            // нормалізації — тобто він застарілий. Підхопити його означало б
-            // почати в нього влучати й віддавати збережений там slug: сторінки
-            // й фіди назавжди лишились би зі старим урлом, а
-            // RouterCacheEntity::add() до такого рядка вже не дійшов би.
-            //
-            // Пропускаємо — і рядок лагодиться сам: пошук промахується,
-            // стратегія генерує slug заново з джерела, upsert переписує рядок
-            // правильним. Ціна — один зайвий прохід на такий рядок, одноразово.
-            if ((string) $item->url !== self::normalizeAliasKey($item->url)) {
-                continue;
-            }
-
             self::setUrlSlugAlias($item->url, $item->slug_url);
         }
     }
 
     public static function getUrlSlugAlias($url)
     {
-        $key = self::normalizeAliasKey($url);
-        if (!empty(self::$routeAliases[$key])) {
-            return self::$routeAliases[$key];
+        if (!empty(self::$routeAliases[$url])) {
+            return self::$routeAliases[$url];
         }
         return false;
-    }
-
-    /**
-     * Ключ масиву — єдине чутливе до регістру порівняння в усьому ланцюжку
-     * генерації урла: унікальний індекс url_type у router_cache живе в
-     * utf8mb4_general_ci і регістр ігнорує. Без нормалізації рядок кешу,
-     * записаний у змішаному регістрі, не знаходився, і INSERT падав з 1062.
-     *
-     * mb_strtolower, а не strtolower: урли бувають не-ASCII. Повного збігу зі
-     * згортанням utf8mb4_general_ci по всьому Unicode це не дає, але для слагів
-     * (ASCII + кирилиця) поведінка та сама.
-     *
-     * Той самий вираз продубльовано в RouterCacheEntity::add() — половина, що
-     * пише в базу. Міняти згортання можна лише в обох місцях одночасно,
-     * інакше запис і пошук знову розійдуться, і повернеться саме та помилка,
-     * заради якої це писалось.
-     */
-    private static function normalizeAliasKey($url): string
-    {
-        return mb_strtolower((string) $url, 'UTF-8');
     }
     
     public function generateRouteParams()

@@ -24,19 +24,14 @@ class BackendProductsRequest
         $product->visible  = $this->request->post('visible', 'integer');
         $product->featured = $this->request->post('featured', 'integer');
         $product->brand_id = $this->request->post('brand_id', 'integer');
+        // Зводимо на будь-якому збереженні, не лише на створенні. Поле url у
+        // картці наявної сутності readonly, але readonly-поле браузер усе одно
+        // надсилає — тож сутність зі старим mixed-case урлом нормалізується при
+        // першому ж збереженні картки. Це свідомо: інакше такий url лишався б
+        // назавжди й далі розходився б із _ci-порівнянням у базі. Магазинам, де
+        // такі url є, це міняє адреси — див. примітку до релізу.
 
-        $product->url              = trim($this->request->post('url', 'string'));
-        // Регістр зводимо лише на створенні. У картці наявної сутності поле url
-        // readonly (розблоковується кнопкою .fn_disable_url), тож при звичайному
-        // збереженні воно повертається в POST незміненим — нормалізація там
-        // мовчки перейменувала б сутність зі старим mixed-case урлом, а це 404
-        // без 301 для всіх наявних посилань.
-
-        if (empty($product->id)) {
-
-            $product->url = mb_strtolower($product->url, 'UTF-8');
-
-        }
+        $product->url              = mb_strtolower(trim($this->request->post('url', 'string')), 'UTF-8');
         $product->meta_title       = $this->request->post('meta_title');
         $product->meta_keywords    = $this->request->post('meta_keywords');
         $product->meta_description = $this->request->post('meta_description');

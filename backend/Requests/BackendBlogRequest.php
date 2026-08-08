@@ -68,15 +68,13 @@ class BackendBlogRequest
         } else {
             $post->updated_date = null;
         }
-        $post->url              = trim($this->request->post('url', 'string'));
-        // Регістр зводимо лише на створенні. У картці наявної сутності поле url
-        // readonly (розблоковується кнопкою .fn_disable_url), тож при звичайному
-        // збереженні воно повертається в POST незміненим — нормалізація там
-        // мовчки перейменувала б сутність зі старим mixed-case урлом, а це 404
-        // без 301 для всіх наявних посилань.
-        if (empty($post->id)) {
-            $post->url = mb_strtolower($post->url, 'UTF-8');
-        }
+        // Зводимо на будь-якому збереженні, не лише на створенні. Поле url у
+        // картці наявної сутності readonly, але readonly-поле браузер усе одно
+        // надсилає — тож сутність зі старим mixed-case урлом нормалізується при
+        // першому ж збереженні картки. Це свідомо: інакше такий url лишався б
+        // назавжди й далі розходився б із _ci-порівнянням у базі. Магазинам, де
+        // такі url є, це міняє адреси — див. примітку до релізу.
+        $post->url              = mb_strtolower(trim($this->request->post('url', 'string')), 'UTF-8');
         $post->visible          = $this->request->post('visible', 'integer');
         $post->show_table_content = $this->request->post('show_table_content', 'integer');
         $post->meta_title       = $this->request->post('meta_title');

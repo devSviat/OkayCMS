@@ -34,15 +34,13 @@ class BackendAuthorsRequest
         $author->position_name    = $this->request->post('position_name');
         $author->description      = $this->request->post('description');
         $author->visible          = $this->request->post('visible', 'boolean');
-        $author->url              = trim($this->request->post('url', 'string'));
-        // Регістр зводимо лише на створенні. У картці наявної сутності поле url
-        // readonly (розблоковується кнопкою .fn_disable_url), тож при звичайному
-        // збереженні воно повертається в POST незміненим — нормалізація там
-        // мовчки перейменувала б сутність зі старим mixed-case урлом, а це 404
-        // без 301 для всіх наявних посилань.
-        if (empty($author->id)) {
-            $author->url = mb_strtolower($author->url, 'UTF-8');
-        }
+        // Зводимо на будь-якому збереженні, не лише на створенні. Поле url у
+        // картці наявної сутності readonly, але readonly-поле браузер усе одно
+        // надсилає — тож сутність зі старим mixed-case урлом нормалізується при
+        // першому ж збереженні картки. Це свідомо: інакше такий url лишався б
+        // назавжди й далі розходився б із _ci-порівнянням у базі. Магазинам, де
+        // такі url є, це міняє адреси — див. примітку до релізу.
+        $author->url              = mb_strtolower(trim($this->request->post('url', 'string')), 'UTF-8');
         $author->meta_title       = $this->request->post('meta_title');
         $author->meta_keywords    = $this->request->post('meta_keywords');
         $author->meta_description = $this->request->post('meta_description');
