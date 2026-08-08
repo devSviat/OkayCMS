@@ -2,6 +2,7 @@
 
 namespace Core\Entity;
 
+use Okay\Entities\BlogCategoriesEntity;
 use Okay\Entities\CategoriesEntity;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -10,8 +11,8 @@ use ReflectionProperty;
 use stdClass;
 
 /**
- * Категорії — єдина сутність, яку резолвлять обходом дерева в пам'яті, а не
- * SQL-запитом. Решта шукає в базі, де url живе в utf8mb4_general_ci, тож для
+ * Категорії та категорії блога — єдині сутності, які резолвлять обходом дерева
+ * в пам'яті, а не SQL-запитом. Решта шукає в базі, де url живе в utf8mb4_general_ci, тож для
  * них `DELonghi` і `delonghi` — той самий рядок; доки тут стояло `==`,
  * категорії поводились інакше за все інше й за саму базу.
  *
@@ -24,12 +25,12 @@ class CategoriesEntityUrlLookupTest extends TestCase
     #[DataProvider('lookupProvider')]
     public function testUrlLookupIgnoresCase(string $storedUrl, string $lookedUpUrl): void
     {
-        $entity = $this->entityWith([7 => $storedUrl]);
+        foreach ([CategoriesEntity::class, BlogCategoriesEntity::class] as $class) {
+            $found = $this->entityWith([7 => $storedUrl], $class)->get($lookedUpUrl);
 
-        $found = $entity->get($lookedUpUrl);
-
-        $this->assertNotNull($found, "«{$lookedUpUrl}» мав знайти категорію «{$storedUrl}»");
-        $this->assertSame(7, $found->id);
+            $this->assertNotEmpty($found, "{$class}: «{$lookedUpUrl}» мав знайти «{$storedUrl}»");
+            $this->assertSame(7, $found->id);
+        }
     }
 
     public static function lookupProvider(): array
@@ -47,11 +48,11 @@ class CategoriesEntityUrlLookupTest extends TestCase
     /**
      * Нечутливість до регістру не має перетворитись на «знаходить будь-що».
      */
-    public function testUnrelatedUrlStillReturnsNull(): void
+    public function testUnrelatedUrlIsStillNotFound(): void
     {
-        $entity = $this->entityWith([7 => 'katalog']);
-
-        $this->assertNull($entity->get('inshyi-katalog'));
+        foreach ([CategoriesEntity::class, BlogCategoriesEntity::class] as $class) {
+            $this->assertEmpty($this->entityWith([7 => 'katalog'], $class)->get('inshyi-katalog'), $class);
+        }
     }
 
     /**
@@ -59,10 +60,12 @@ class CategoriesEntityUrlLookupTest extends TestCase
      */
     public function testLookupByIdIsUnaffected(): void
     {
-        $entity = $this->entityWith([7 => 'katalog', 9 => 'novyny']);
+        foreach ([CategoriesEntity::class, BlogCategoriesEntity::class] as $class) {
+            $entity = $this->entityWith([7 => 'katalog', 9 => 'novyny'], $class);
 
-        $this->assertSame('novyny', $entity->get(9)->url);
-        $this->assertNull($entity->get(11));
+            $this->assertSame('novyny', $entity->get(9)->url);
+            $this->assertEmpty($entity->get(11));
+        }
     }
 
     /**
@@ -71,7 +74,7 @@ class CategoriesEntityUrlLookupTest extends TestCase
      * заповнює initCategories(). Непорожній categoriesTree не дає йому піти в
      * базу.
      */
-    private function entityWith(array $urlsById): CategoriesEntity
+    private function entityWith(array $urlsById, string $class = CategoriesEntity::class): object
     {
         $categories = [];
         foreach ($urlsById as $id => $url) {
@@ -81,7 +84,7 @@ class CategoriesEntityUrlLookupTest extends TestCase
             $categories[$id] = $category;
         }
 
-        $entity = (new ReflectionClass(CategoriesEntity::class))->newInstanceWithoutConstructor();
+        $entity = (new ReflectionClass($class))->newInstanceWithoutConstructor();
         (new ReflectionProperty($entity, 'allCategories'))->setValue($entity, $categories);
         (new ReflectionProperty($entity, 'categoriesTree'))->setValue($entity, [new stdClass()]);
 
