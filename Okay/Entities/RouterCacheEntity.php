@@ -29,8 +29,10 @@ class RouterCacheEntity extends Entity
      * кешують той самий url. Заміряно: 200 незакешованих рядків, чотири
      * паралельні запити — 600 помилок у лозі, один запит — жодної.
      *
-     * Значення передаються парами ключ-значення: onDuplicateKeyUpdateCol($col)
-     * без значення лишає плейсхолдер незабіндженим.
+     * Оновлюємо лише тоді, коли рядок конфліктує саме тим самим url. Ключ
+     * префіксний — url(100), — тож у нього влучають і два різні урли, що
+     * збігаються на перших 100 символах; для них умова хибна, чужий рядок
+     * лишається недоторканим, і поведінка та сама, що в апстріму.
      */
     public function add($object)
     {
@@ -43,15 +45,15 @@ class RouterCacheEntity extends Entity
             return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
         }
 
-        // url і type самі є унікальним ключем: на справжньому дублікаті вони вже
-        // рівні, а на колізії префіксного індексу url(100) оновлення url затерло
-        // б чужий рядок замість того, щоб відхилити вставку.
-        $update = array_diff_key($cols, array_flip(['url', 'type']));
-
         $insert = $this->queryFactory->newInsert();
-        $insert->into(self::getTable())
-            ->cols($cols)
-            ->onDuplicateKeyUpdateCols($update);
+        $insert->into(self::getTable())->cols($cols);
+
+        // Список колонок звужений до оголошених полів: імена йдуть у вираз
+        // текстом, тож у нього не має потрапити нічого від викликача.
+        $update = array_intersect_key($cols, array_flip(self::getFields()));
+        foreach (array_diff_key($update, array_flip(['url', 'type'])) as $col => $ignored) {
+            $insert->onDuplicateKeyUpdate($col, "IF(url = VALUES(url), VALUES({$col}), {$col})");
+        }
 
         $result = (bool) $this->db->query($insert);
 
