@@ -35,12 +35,9 @@ class BackendBrandsRequest
         $brand->annotation       = $this->request->post('annotation');
         $brand->description      = $this->request->post('description');
         $brand->visible          = $this->request->post('visible', 'boolean');
-        // Зводимо на будь-якому збереженні, не лише на створенні. Поле url у
-        // картці наявної сутності readonly, але readonly-поле браузер усе одно
-        // надсилає — тож сутність зі старим mixed-case урлом нормалізується при
-        // першому ж збереженні картки. Це свідомо: інакше такий url лишався б
-        // назавжди й далі розходився б із _ci-порівнянням у базі. Магазинам, де
-        // такі url є, це міняє адреси — див. примітку до релізу.
+        // Зводимо на будь-якому збереженні: readonly-поле url браузер усе одно
+        // надсилає, тож інакше старий mixed-case url лишався б назавжди.
+        // Наслідки й перевірка перед викаткою — docs/UPGRADE-urls.md.
         $brand->url              = mb_strtolower(trim($this->request->post('url', 'string')), 'UTF-8');
         $brand->meta_title       = $this->request->post('meta_title');
         $brand->meta_keywords    = $this->request->post('meta_keywords');

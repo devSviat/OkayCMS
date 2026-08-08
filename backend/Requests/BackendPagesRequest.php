@@ -25,19 +25,9 @@ class BackendPagesRequest
         $page->id               = $this->request->post('id', 'integer');
         $page->name             = $this->request->post('name');
         $page->name_h1          = $this->request->post('name_h1');
-        // post('url') тут навмисно без типу 'string', на відміну від решти
-        // реквестів: його whitelist вирізає слеш, а url сторінки законно буває
-        // складеним — user/login, user/register, user/password_remind. З типом
-        // сторінка «Вхід» після першого ж збереження картки стала б userlogin.
-        // is_string() закриває рівно два випадки, на яких падав trim(): null із
-        // відсутнього поля й масив із url[]. Символьний whitelist він НЕ
-        // замінює — `?`, `#`, `<`, `>` і ведучий слеш проходять у ok_pages.url
-        // як є. Так само було в апстрімі й у нас до появи типу, тож це не
-        // регресія, але й не гарантія: сторінка з таким url — відповідальність
-        // того, хто його вписав.
-        //
-        // Регістр, як і в решті реквестів, зводимо на будь-якому збереженні —
-        // див. пояснення там.
+        // Без типу 'string': його whitelist вирізає слеш, а url сторінки буває
+        // складеним (user/login). is_string() ловить null і масив, на яких падав
+        // trim(); символьний whitelist він не замінює. Регістр — як у решти.
         $postedUrl              = $this->request->post('url');
         $page->url              = mb_strtolower(is_string($postedUrl) ? trim($postedUrl) : '', 'UTF-8');
         $page->visible          = $this->request->post('visible', 'boolean');
