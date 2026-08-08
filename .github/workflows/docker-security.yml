@@ -37,11 +37,15 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
-      # Обидва образи в одній джобі: nginx-prod — це COPY поверх alpine, майже
-      # безкоштовний після першого білду.
+      # Обидва образи в одній джобі: nginx-prod — це COPY поверх alpine.
       #
-      # no-cache за розкладом: інакше шар apt-get upgrade лишається замороженим
-      # і тижневий скан дивиться на той самий образ, що й минулого тижня.
+      # no-cache завжди, а не лише за розкладом. Перший шар Dockerfile —
+      # apt-get upgrade, і з кешу він приїздить із пакетами того дня, коли його
+      # зібрали вперше. Скан тоді дивиться на заморожений образ і валиться на
+      # CVE, які свіжий білд уже закриває: так сталось із CVE-2026-64561 у
+      # linux-libc-dev, де база несе 6.12.100-1, а apt-get upgrade ставить
+      # 6.12.101-1. Сенс цього воркфлоу — знати стан образу, який зібрався б
+      # зараз, тож кеш тут шкодить. Ціна — кілька хвилин; на PR він не бігає.
       - name: Build the prod image
         uses: docker/build-push-action@v6
         with:
@@ -51,9 +55,7 @@ jobs:
           tags: okaycms:ci
           load: true
           pull: true
-          no-cache: ${{ github.event_name == 'schedule' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
 
       - name: Build the nginx-prod image
         uses: docker/build-push-action@v6
@@ -64,9 +66,7 @@ jobs:
           tags: okaycms-nginx:ci
           load: true
           pull: true
-          no-cache: ${{ github.event_name == 'schedule' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
 
       # ignore-unfixed: CVE без патча в апстрімі полагодити нічим, а постійно
       # червоний CI привчає ігнорувати червоне.
