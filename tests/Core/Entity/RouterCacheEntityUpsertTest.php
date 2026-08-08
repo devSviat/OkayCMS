@@ -40,75 +40,86 @@ class RouterCacheEntityUpsertTest extends TestCase
      * список ['url','slug_url'] дав би невалідний запит. Значення мусять
      * приїхати парами ключ-значення.
      */
-    public function testOnDuplicateKeyValuesAreActuallyBound(): void
-    {
-        $binds = $this->add([
-            'url'      => 'product-0b200-03580600',
-            'slug_url' => 'gadgets/product-0b200-03580600',
-            'type'     => 'product',
-        ])->insert->getBindValues();
-
-        $this->assertArrayHasKey('slug_url__on_duplicate_key', $binds);
-        $this->assertSame('gadgets/product-0b200-03580600', $binds['slug_url__on_duplicate_key']);
-    }
-
     /**
-     * url і type самі є унікальним ключем. На справжньому дублікаті вони вже
-     * рівні, а на колізії префіксного індексу url(100) оновлення url затерло б
-     * чужий рядок замість того, щоб відхилити вставку — і два товари почали б
-     * по черзі витісняти один одного з кешу назавжди.
+     * Оновлення умовне: спрацьовує лише коли рядок конфліктує саме тим самим
+     * url. Ключ префіксний — url(100), — тож у нього влучають і два різні
+     * урли, що збігаються на перших 100 символах. Без цієї умови така вставка
+     * затирала б slug_url чужого рядка, і сторінка, сайтмап та фіди назавжди
+     * вели б одну сутність на чужу адресу. Перевірено на MariaDB 10.11:
+     * рядок-жертва лишається недоторканим.
      */
-    public function testKeyColumnsAreNeverUpdated(): void
+    public function testUpdateFiresOnlyForTheSameUrl(): void
     {
-        $binds = $this->add([
+        $statement = $this->add([
             'url'      => 'product-x',
             'slug_url' => 'gadgets/product-x',
             'type'     => 'product',
-        ])->insert->getBindValues();
+        ])->insert->getStatement();
 
-        $this->assertArrayNotHasKey('url__on_duplicate_key', $binds);
-        $this->assertArrayNotHasKey('type__on_duplicate_key', $binds);
+        $this->assertStringContainsString(
+            'IF(url = VALUES(url), VALUES(slug_url), slug_url)',
+            $statement
+        );
     }
 
     /**
-     * А неключові оновлюються всі: поле, додане модулем через
+     * url і type самі є унікальним ключем: на справжньому дублікаті вони вже
+     * рівні, оновлювати нічого.
+     */
+    public function testKeyColumnsAreNeverUpdated(): void
+    {
+        $statement = $this->add([
+            'url'      => 'product-x',
+            'slug_url' => 'gadgets/product-x',
+            'type'     => 'product',
+        ])->insert->getStatement();
+
+        $odku = substr($statement, strpos($statement, 'ON DUPLICATE KEY UPDATE'));
+
+        $this->assertStringNotContainsString('`url` =', $odku);
+        $this->assertStringNotContainsString('`type` =', $odku);
+    }
+
+    /**
+     * Неключові оновлюються всі: поле, додане модулем через
      * registerEntityField(), інакше лишалось би назавжди зі значенням першої
      * вставки.
      */
     public function testNonKeyColumnsAreUpdated(): void
     {
-        $binds = $this->add([
-            'url'      => 'product-x',
-            'slug_url' => 'gadgets/product-x',
-            'type'     => 'product',
-            'weight'   => 5,
-        ])->insert->getBindValues();
+        RouterCacheEntity::addField('weight');
 
-        $this->assertArrayHasKey('slug_url__on_duplicate_key', $binds);
-        $this->assertArrayHasKey('weight__on_duplicate_key', $binds);
+        try {
+            $odku = $this->add([
+                'url'      => 'product-x',
+                'slug_url' => 'gadgets/product-x',
+                'type'     => 'product',
+                'weight'   => 5,
+            ])->insert->getStatement();
+
+            $this->assertStringContainsString('`weight` = IF(url = VALUES(url), VALUES(weight), weight)', $odku);
+        } finally {
+            $fields = new ReflectionProperty(RouterCacheEntity::class, 'fields');
+            $fields->setValue(null, array_values(array_diff(RouterCacheEntity::getFields(), ['weight'])));
+        }
     }
 
     /**
-     * Порожній slug стратегія віддає, коли не знайшла сутності. До upsert така
-     * вставка просто падала й чинний рядок лишався; тепер вона затерла б його
-     * порожнім значенням, тож до бази не доходить зовсім.
+     * Імена колонок ідуть у вираз текстом, тож усе, чого немає серед
+     * оголошених полів, не має до нього доїжджати.
      */
-    #[DataProvider('emptySlugProvider')]
-    public function testEmptySlugIsNeverWritten(array $object): void
+    public function testUndeclaredColumnsNeverReachTheExpression(): void
     {
-        $context = $this->add($object);
+        $statement = $this->add([
+            'url'      => 'product-x',
+            'slug_url' => 'gadgets/product-x',
+            'type'     => 'product',
+            'evil)--'  => 'x',
+        ])->insert->getStatement();
 
-        $this->assertFalse($context->queried, 'Порожній slug не має доходити до бази.');
-        $this->assertFalse($context->result, 'add() має повідомити, що нічого не записано.');
-    }
+        $odku = substr($statement, strpos($statement, 'ON DUPLICATE KEY UPDATE'));
 
-    public static function emptySlugProvider(): array
-    {
-        return [
-            'порожній рядок' => [['url' => 'product-x', 'slug_url' => '',   'type' => 'product']],
-            'null'           => [['url' => 'product-x', 'slug_url' => null, 'type' => 'product']],
-            'відсутній'      => [['url' => 'product-x', 'type' => 'product']],
-        ];
+        $this->assertStringNotContainsString('evil', $odku);
     }
 
     /**
