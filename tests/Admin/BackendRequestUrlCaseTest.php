@@ -135,8 +135,17 @@ class BackendRequestUrlCaseTest extends TestCase
     {
         $result = $this->post($requestClass, $method, null, ['url' => ['first-1', 'second-2']]);
 
-        $this->assertIsString($result->url);
-        $this->assertNotSame('array', $result->url);
+        // Очікування різні, і це не випадковість. Шість реквестів беруть url
+        // типом 'string', а Request::post() із будь-яким типом згортає масив до
+        // першого елемента ще до реквеста. Сторінки типу не мають — він вирізав
+        // би слеш, — тож масив там відсікає is_string() і url лишається
+        // порожнім, після чого валідатор знайде за ним головну сторінку й
+        // поверне url_exists. Обидві поведінки безпечні, але різні, і
+        // перевіряти їх треба точним значенням: assertNotSame('array') для
+        // шести з семи істинний за побудовою й не стереже нічого.
+        $expected = $requestClass === BackendPagesRequest::class ? '' : 'first-1';
+
+        $this->assertSame($expected, $result->url);
     }
 
     /**
