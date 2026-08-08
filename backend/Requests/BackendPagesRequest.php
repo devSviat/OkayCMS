@@ -25,7 +25,14 @@ class BackendPagesRequest
         $page->id               = $this->request->post('id', 'integer');
         $page->name             = $this->request->post('name');
         $page->name_h1          = $this->request->post('name_h1');
-        $page->url              = trim($this->request->post('url', 'string'));
+        // post('url') тут навмисно без типу 'string', на відміну від решти
+        // реквестів: його whitelist вирізає слеш, а url сторінки законно буває
+        // складеним — user/login, user/register, user/password_remind. З типом
+        // сторінка «Вхід» після першого ж збереження картки стала б userlogin.
+        // is_string() закриває те, заради чого тип був потрібен: null із
+        // відсутнього поля й масив із url[], на яких trim() падав.
+        $postedUrl              = $this->request->post('url');
+        $page->url              = is_string($postedUrl) ? trim($postedUrl) : '';
         // Регістр зводимо лише на створенні. У картці наявної сутності поле url
         // readonly (розблоковується кнопкою .fn_disable_url), тож при звичайному
         // збереженні воно повертається в POST незміненим — нормалізація там

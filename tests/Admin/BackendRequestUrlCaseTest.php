@@ -116,16 +116,46 @@ class BackendRequestUrlCaseTest extends TestCase
     /**
      * url[] замість url приходить із будь-якого нестандартного POST — від
      * дубльованого input із `[]` у name до шаблону, розширеного модулем.
-     * Request::post($name, 'string') зводить такий масив до скаляра; без типу
-     * рядок доїжджав би до trim() масивом. Перевіряємо, що жоден із реквестів
-     * не зберігає сутність під літеральним url `array`.
+     * Хай там що, у сутність не має потрапити ані літерал `array`, ані масив:
+     * url — це alternativeIdField, і сміття в ньому забирає в сутності адресу.
      */
     #[DataProvider('requestProvider')]
-    public function testArrayUrlDoesNotBecomeTheLiteralArray(string $requestClass, string $method): void
+    public function testArrayUrlNeverReachesTheEntity(string $requestClass, string $method): void
     {
         $result = $this->post($requestClass, $method, null, ['url' => ['first-1', 'second-2']]);
 
+        $this->assertIsString($result->url);
         $this->assertNotSame('array', $result->url);
+    }
+
+    /**
+     * У сторінок url законно буває складеним: `user/login`, `user/register`,
+     * `user/password_remind` — усі три лежать у стоковій базі, і жодного з них
+     * немає в PagesEntity::getSystemPages(), тобто від перейменування вони не
+     * захищені нічим.
+     *
+     * Через це postPage() — єдиний із семи, хто не може взяти url через
+     * post('url', 'string'): whitelist того типу
+     * (/[^\p{L}\p{Nd}\d\s_\-.%]/ui) вирізає слеш. Менеджер відкрив би картку
+     * «Вхід», зберіг би її не змінюючи — і сторінка стала б `userlogin`.
+     */
+    public function testPageUrlKeepsItsSlashes(): void
+    {
+        foreach (['user/login', 'user/register', 'user/password_remind'] as $url) {
+            $result = $this->post(BackendPagesRequest::class, 'postPage', $url, ['id' => 7]);
+
+            $this->assertSame($url, $result->url);
+        }
+    }
+
+    /**
+     * Слеш має пережити й створення, де регістр зводиться.
+     */
+    public function testPageUrlKeepsSlashesOnCreateWhileFoldingCase(): void
+    {
+        $result = $this->post(BackendPagesRequest::class, 'postPage', 'User/Login-Test');
+
+        $this->assertSame('user/login-test', $result->url);
     }
 
     public static function requestProvider(): array
