@@ -88,9 +88,12 @@ class CategoriesEntity extends Entity
             return ExtenderFacade::execute([static::class, __FUNCTION__], $category, func_get_args());
         }
 
+        // Нечутливо до регістру — як у решти сутностей, які шукають SQL-ом у
+        // utf8mb4_general_ci. mb_strtolower, а не strcasecmp: url буває кириличним.
         if (is_string($id)) {
+            $needle = mb_strtolower($id, 'UTF-8');
             foreach ($this->allCategories as $category) {
-                if ($category->url == $id) {
+                if (mb_strtolower((string)$category->url, 'UTF-8') === $needle) {
                     return ExtenderFacade::execute([static::class, __FUNCTION__], $this->get((int)$category->id), func_get_args());
                 }
             }
