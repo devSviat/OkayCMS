@@ -24,7 +24,7 @@
 | Перенести свою тему на форк | [theme-porting.md](theme-porting.md) |
 | Перенести тему звідси на стокову OkayCMS | [theme-to-stock.md](theme-to-stock.md) |
 | Зрозуміти, що змінили ітерації безпеки | [UPGRADE-security.md](UPGRADE-security.md) |
-| **Оновити магазин на нову версію форку** | [UPGRADE-security.md](UPGRADE-security.md) — там є дія, обов'язкова для всіх: конфіг nginx |
+| **Оновити магазин на нову версію форку** | [UPGRADE-security.md](UPGRADE-security.md) — там є дія, обов'язкова для всіх: конфіг nginx; і [UPGRADE-urls.md](UPGRADE-urls.md) — перевірка перед викаткою |
 | **Щось зламалось, і воно мовчить** | [troubleshooting.md](troubleshooting.md) |
 
 ## Довідник
@@ -77,6 +77,7 @@
 
 ### Безпека
 
+* [Оновлення: url у нижньому регістрі](UPGRADE-urls.md) — одна перевірка перед викаткою; якщо нулі, робити нічого не треба
 * [Оновлення: посилення безпеки](UPGRADE-security.md) — обидві ітерації: що змінилось, що
   ламається у сторонніх темах і що обов'язково зробити на сервері
 

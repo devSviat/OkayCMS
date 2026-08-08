@@ -35,15 +35,10 @@ class BackendBrandsRequest
         $brand->annotation       = $this->request->post('annotation');
         $brand->description      = $this->request->post('description');
         $brand->visible          = $this->request->post('visible', 'boolean');
-        $brand->url              = trim($this->request->post('url', 'string'));
-        // Регістр зводимо лише на створенні. У картці наявної сутності поле url
-        // readonly (розблоковується кнопкою .fn_disable_url), тож при звичайному
-        // збереженні воно повертається в POST незміненим — нормалізація там
-        // мовчки перейменувала б сутність зі старим mixed-case урлом, а це 404
-        // без 301 для всіх наявних посилань.
-        if (empty($brand->id)) {
-            $brand->url = mb_strtolower($brand->url, 'UTF-8');
-        }
+        // Зводимо на будь-якому збереженні: readonly-поле url браузер усе одно
+        // надсилає, тож інакше старий mixed-case url лишався б назавжди.
+        // Наслідки й перевірка перед викаткою — docs/UPGRADE-urls.md.
+        $brand->url              = mb_strtolower(trim($this->request->post('url', 'string')), 'UTF-8');
         $brand->meta_title       = $this->request->post('meta_title');
         $brand->meta_keywords    = $this->request->post('meta_keywords');
         $brand->meta_description = $this->request->post('meta_description');

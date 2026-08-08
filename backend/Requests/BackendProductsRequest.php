@@ -24,19 +24,11 @@ class BackendProductsRequest
         $product->visible  = $this->request->post('visible', 'integer');
         $product->featured = $this->request->post('featured', 'integer');
         $product->brand_id = $this->request->post('brand_id', 'integer');
+        // Зводимо на будь-якому збереженні: readonly-поле url браузер усе одно
+        // надсилає, тож інакше старий mixed-case url лишався б назавжди.
+        // Наслідки й перевірка перед викаткою — docs/UPGRADE-urls.md.
 
-        $product->url              = trim($this->request->post('url', 'string'));
-        // Регістр зводимо лише на створенні. У картці наявної сутності поле url
-        // readonly (розблоковується кнопкою .fn_disable_url), тож при звичайному
-        // збереженні воно повертається в POST незміненим — нормалізація там
-        // мовчки перейменувала б сутність зі старим mixed-case урлом, а це 404
-        // без 301 для всіх наявних посилань.
-
-        if (empty($product->id)) {
-
-            $product->url = mb_strtolower($product->url, 'UTF-8');
-
-        }
+        $product->url              = mb_strtolower(trim($this->request->post('url', 'string')), 'UTF-8');
         $product->meta_title       = $this->request->post('meta_title');
         $product->meta_keywords    = $this->request->post('meta_keywords');
         $product->meta_description = $this->request->post('meta_description');

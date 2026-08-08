@@ -19,31 +19,17 @@ use ReflectionProperty;
 
 /**
  * MySQL порівнює url у _ci: `Item-1` і `item-1` для бази це один рядок, а для
- * PHP — два. Саме на цьому розходженні ok_router_cache і набирав 1062
- * Duplicate entry.
+ * PHP — два. На цьому розходженні ok_router_cache і набирав 1062 Duplicate
+ * entry.
  *
- * Два з трьох входів url регістр уже зводять: автогенерація з назви (JS в
- * адмінці) і CSV-імпорт — обидва йдуть через Translit::translit(), що
- * закінчується strtolower(). Незакритим лишався рівно один: менеджер вписує
- * url у форму руками.
+ * Два з трьох входів регістр зводили й раніше — автогенерація з назви та
+ * CSV-імпорт, обидва через Translit::translit(). Незакритим лишався ручний
+ * ввід у форму; його й закриваємо, на будь-якому збереженні.
  *
- * Нормалізуємо саме тут, а не глибше в CRUD, і це принципово. Нижче по стеку
- * значення читають ДО запису: CategoriesEntity::add() крутить цикл
- * унікальності через get(), який порівнює url у PHP чутливо до регістру.
- * Зведи регістр після цього циклу — і на введений `Katalog` він не побачить
- * наявного `katalog`, суфікса не додасть, а UNIQUE на таблиці немає: у базі
- * опиняться два однакові (для неї) url, і одна з категорій стане недосяжною.
- * Нормалізація на вході знімає це за побудовою — цикл, валідація й гейти
- * порівняння бачать уже кінцеве значення.
- *
- * І чому лише на створенні. Поле url у картці наявної сутності readonly
- * (`{if $category->id}readonly=""{/if}` у backend/design/html/*.tpl), але
- * readonly-поле браузер усе одно надсилає. Тобто кожне збереження повертає
- * збережений url назад у POST — і безумовна нормалізація перейменовувала б
- * сутності з legacy mixed-case урлом при першому ж дотику до картки, мовчки й
- * без 301. Ручний ввід від цього не страждає: кнопка .fn_disable_url знімає
- * readonly, але керуючий, який справді змінює url, отримує рівно те, що
- * вписав, а не мовчки зведений регістр.
+ * Чому в реквесті, а не глибше: нижче по стеку значення читають ДО запису
+ * (цикл унікальності в CategoriesEntity::add, валідатори), і згортання після
+ * них проґавило б дубль. Ціна рішення й перевірка перед викаткою —
+ * docs/UPGRADE-urls.md.
  */
 class BackendRequestUrlCaseTest extends TestCase
 {
@@ -56,16 +42,22 @@ class BackendRequestUrlCaseTest extends TestCase
     }
 
     /**
-     * Головний запобіжник: у наявної сутності url не чіпаємо взагалі. Інакше
-     * будь-яке збереження картки перейменувало б її, бо readonly-поле
-     * повертається в POST як є.
+     * Наявна сутність нормалізується так само, як нова. Наслідок, прийнятий
+     * свідомо: поле url у картці readonly, але браузер readonly-поле все одно
+     * надсилає, тож сутність зі старим mixed-case урлом переїде на нижній
+     * регістр при першому ж збереженні картки — і в магазині, де такі url є,
+     * це зміна адрес.
+     *
+     * Альтернатива — не чіпати наявні — лишає такий url назавжди, а разом із
+     * ним і розходження з _ci-порівнянням у базі, заради усунення якого все
+     * це й робиться.
      */
     #[DataProvider('requestProvider')]
-    public function testExistingEntityUrlIsLeftUntouched(string $requestClass, string $method): void
+    public function testExistingEntityUrlIsLowercasedToo(string $requestClass, string $method): void
     {
         $result = $this->post($requestClass, $method, 'Legacy-MixedCase-1', ['id' => 7]);
 
-        $this->assertSame('Legacy-MixedCase-1', $result->url);
+        $this->assertSame('legacy-mixedcase-1', $result->url);
     }
 
     /**
@@ -82,13 +74,13 @@ class BackendRequestUrlCaseTest extends TestCase
 
     /**
      * Пробіли по краях знімались і раніше — нормалізація не має це ламати, і
-     * має знімати їх однаково для нової та наявної сутності.
+     * має поводитись однаково для нової та наявної сутності.
      */
     #[DataProvider('requestProvider')]
     public function testSurroundingSpacesAreStillRemoved(string $requestClass, string $method): void
     {
         $this->assertSame('item-1', $this->post($requestClass, $method, '  Item-1  ')->url);
-        $this->assertSame('Item-1', $this->post($requestClass, $method, '  Item-1  ', ['id' => 7])->url);
+        $this->assertSame('item-1', $this->post($requestClass, $method, '  Item-1  ', ['id' => 7])->url);
     }
 
     #[DataProvider('requestProvider')]
@@ -124,8 +116,17 @@ class BackendRequestUrlCaseTest extends TestCase
     {
         $result = $this->post($requestClass, $method, null, ['url' => ['first-1', 'second-2']]);
 
-        $this->assertIsString($result->url);
-        $this->assertNotSame('array', $result->url);
+        // Очікування різні, і це не випадковість. Шість реквестів беруть url
+        // типом 'string', а Request::post() із будь-яким типом згортає масив до
+        // першого елемента ще до реквеста. Сторінки типу не мають — він вирізав
+        // би слеш, — тож масив там відсікає is_string() і url лишається
+        // порожнім, після чого валідатор знайде за ним головну сторінку й
+        // поверне url_exists. Обидві поведінки безпечні, але різні, і
+        // перевіряти їх треба точним значенням: assertNotSame('array') для
+        // шести з семи істинний за побудовою й не стереже нічого.
+        $expected = $requestClass === BackendPagesRequest::class ? '' : 'first-1';
+
+        $this->assertSame($expected, $result->url);
     }
 
     /**

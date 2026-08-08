@@ -26,15 +26,10 @@ class BackendCategoriesRequest
         $category->visible          = $this->request->post('visible', 'boolean');
         $category->on_main          = $this->request->post('on_main', 'boolean');
         $category->show_table_content = $this->request->post('show_table_content', 'integer');
-        $category->url              = trim($this->request->post('url', 'string'));
-        // Регістр зводимо лише на створенні. У картці наявної сутності поле url
-        // readonly (розблоковується кнопкою .fn_disable_url), тож при звичайному
-        // збереженні воно повертається в POST незміненим — нормалізація там
-        // мовчки перейменувала б сутність зі старим mixed-case урлом, а це 404
-        // без 301 для всіх наявних посилань.
-        if (empty($category->id)) {
-            $category->url = mb_strtolower($category->url, 'UTF-8');
-        }
+        // Зводимо на будь-якому збереженні: readonly-поле url браузер усе одно
+        // надсилає, тож інакше старий mixed-case url лишався б назавжди.
+        // Наслідки й перевірка перед викаткою — docs/UPGRADE-urls.md.
+        $category->url              = mb_strtolower(trim($this->request->post('url', 'string')), 'UTF-8');
         $category->meta_title       = $this->request->post('meta_title');
         $category->meta_keywords    = $this->request->post('meta_keywords');
         $category->meta_description = $this->request->post('meta_description');
