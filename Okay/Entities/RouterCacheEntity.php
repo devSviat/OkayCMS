@@ -5,6 +5,7 @@ namespace Okay\Entities;
 
 
 use Okay\Core\Entity\Entity;
+use Okay\Core\Modules\Extender\ExtenderFacade;
 
 class RouterCacheEntity extends Entity
 {
@@ -21,7 +22,42 @@ class RouterCacheEntity extends Entity
     ];
 
     protected static $table = 'router_cache';
-    
+
+    /**
+     * Свій add() рівно заради ON DUPLICATE KEY UPDATE: простий INSERT із
+     * CRUD::add() на конкурентності дає 1062, коли два запити одночасно
+     * кешують той самий url. Заміряно: 200 незакешованих рядків, чотири
+     * паралельні запити — 600 помилок у лозі, один запит — жодної.
+     *
+     * Значення передаються парами ключ-значення: onDuplicateKeyUpdateCol($col)
+     * без значення лишає плейсхолдер незабіндженим.
+     */
+    public function add($object)
+    {
+        $cols = (array) $object;
+
+        // Порожній slug getUrlSlugAlias() однаково вважає відсутнім, а з upsert
+        // він ще й руйнівний: затер би робочий рядок. Порожнім він виходить,
+        // коли стратегія не знайшла сутності.
+        if (empty($cols['slug_url'])) {
+            return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
+        }
+
+        // url і type самі є унікальним ключем: на справжньому дублікаті вони вже
+        // рівні, а на колізії префіксного індексу url(100) оновлення url затерло
+        // б чужий рядок замість того, щоб відхилити вставку.
+        $update = array_diff_key($cols, array_flip(['url', 'type']));
+
+        $insert = $this->queryFactory->newInsert();
+        $insert->into(self::getTable())
+            ->cols($cols)
+            ->onDuplicateKeyUpdateCols($update);
+
+        $result = (bool) $this->db->query($insert);
+
+        return ExtenderFacade::execute([static::class, __FUNCTION__], $result, func_get_args());
+    }
+
     public function deleteByUrl($objectType, $url)
     {
         $delete = $this->queryFactory->newDelete();
