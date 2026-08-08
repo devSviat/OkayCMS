@@ -36,10 +36,22 @@ class RouterCacheEntity extends Entity
     {
         $cols = (array) $object;
 
+        // Порожній slug getUrlSlugAlias() однаково вважає відсутнім, а з upsert
+        // він ще й руйнівний: затер би робочий рядок. Порожнім він виходить,
+        // коли стратегія не знайшла сутності.
+        if (empty($cols['slug_url'])) {
+            return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
+        }
+
+        // url і type самі є унікальним ключем: на справжньому дублікаті вони вже
+        // рівні, а на колізії префіксного індексу url(100) оновлення url затерло
+        // б чужий рядок замість того, щоб відхилити вставку.
+        $update = array_diff_key($cols, array_flip(['url', 'type']));
+
         $insert = $this->queryFactory->newInsert();
         $insert->into(self::getTable())
             ->cols($cols)
-            ->onDuplicateKeyUpdateCols($cols);
+            ->onDuplicateKeyUpdateCols($update);
 
         $result = (bool) $this->db->query($insert);
 

@@ -7,6 +7,7 @@ use Okay\Core\Modules\Extender\ChainExtender;
 use Okay\Core\Modules\Extender\ExtensionInterface;
 use Okay\Core\QueryFactory\Insert;
 use Okay\Entities\RouterCacheEntity;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 
@@ -47,19 +48,17 @@ class RouterCacheEntityUpsertTest extends TestCase
             'type'     => 'product',
         ])->insert->getBindValues();
 
-        $this->assertArrayHasKey('url__on_duplicate_key', $binds);
         $this->assertArrayHasKey('slug_url__on_duplicate_key', $binds);
-        $this->assertSame('product-0b200-03580600', $binds['url__on_duplicate_key']);
         $this->assertSame('gadgets/product-0b200-03580600', $binds['slug_url__on_duplicate_key']);
-        $this->assertSame('product', $binds['type__on_duplicate_key']);
     }
 
     /**
-     * Оновлюємо весь набір колонок, а не два імені списком: поле, додане
-     * модулем через registerEntityField(), інакше лишалось би назавжди зі
-     * значенням першої вставки.
+     * url і type самі є унікальним ключем. На справжньому дублікаті вони вже
+     * рівні, а на колізії префіксного індексу url(100) оновлення url затерло б
+     * чужий рядок замість того, щоб відхилити вставку — і два товари почали б
+     * по черзі витісняти один одного з кешу назавжди.
      */
-    public function testEveryPassedColumnIsAlsoUpdated(): void
+    public function testKeyColumnsAreNeverUpdated(): void
     {
         $binds = $this->add([
             'url'      => 'product-x',
@@ -67,9 +66,49 @@ class RouterCacheEntityUpsertTest extends TestCase
             'type'     => 'product',
         ])->insert->getBindValues();
 
-        foreach (['url', 'slug_url', 'type'] as $col) {
-            $this->assertArrayHasKey($col . '__on_duplicate_key', $binds, $col . ' має оновлюватись');
-        }
+        $this->assertArrayNotHasKey('url__on_duplicate_key', $binds);
+        $this->assertArrayNotHasKey('type__on_duplicate_key', $binds);
+    }
+
+    /**
+     * А неключові оновлюються всі: поле, додане модулем через
+     * registerEntityField(), інакше лишалось би назавжди зі значенням першої
+     * вставки.
+     */
+    public function testNonKeyColumnsAreUpdated(): void
+    {
+        $binds = $this->add([
+            'url'      => 'product-x',
+            'slug_url' => 'gadgets/product-x',
+            'type'     => 'product',
+            'weight'   => 5,
+        ])->insert->getBindValues();
+
+        $this->assertArrayHasKey('slug_url__on_duplicate_key', $binds);
+        $this->assertArrayHasKey('weight__on_duplicate_key', $binds);
+    }
+
+    /**
+     * Порожній slug стратегія віддає, коли не знайшла сутності. До upsert така
+     * вставка просто падала й чинний рядок лишався; тепер вона затерла б його
+     * порожнім значенням, тож до бази не доходить зовсім.
+     */
+    #[DataProvider('emptySlugProvider')]
+    public function testEmptySlugIsNeverWritten(array $object): void
+    {
+        $context = $this->add($object);
+
+        $this->assertFalse($context->queried, 'Порожній slug не має доходити до бази.');
+        $this->assertFalse($context->result, 'add() має повідомити, що нічого не записано.');
+    }
+
+    public static function emptySlugProvider(): array
+    {
+        return [
+            'порожній рядок' => [['url' => 'product-x', 'slug_url' => '',   'type' => 'product']],
+            'null'           => [['url' => 'product-x', 'slug_url' => null, 'type' => 'product']],
+            'відсутній'      => [['url' => 'product-x', 'type' => 'product']],
+        ];
     }
 
     /**
