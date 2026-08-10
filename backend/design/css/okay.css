@@ -8339,11 +8339,22 @@ div.tox-fullscreen {
     margin-left: 15px;
     display: none;
 }
-.jssocials-share {border-bottom: 3px solid #fff;}
-.jssocials-share.active {
-    border-bottom: 3px solid #080688;
+.share_networks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
 }
-.jssocials-share-link {color: var(--ok-accent);}
+.share_networks__item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-weight: 400;
+    cursor: pointer;
+}
+.share_networks__item input {
+    margin: 0;
+}
 
 .theme_color {
     display: block;
