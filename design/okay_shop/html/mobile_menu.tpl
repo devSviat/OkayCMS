@@ -157,9 +157,6 @@
 
 
 <ul class="bottom-nav social">
-    {*Домен некоторых соц. сетей не соответствует стилям font-awesome, для них сделаны эти алиасы*}
-    {$social_aliases.ok = 'odnoklassniki'}
-
     {foreach $settings->site_social_links as $social_link}
     {$social_domain = preg_replace('~(https?://)?(www\.)?([^\.]+)?\..*~', '$3', $social_link)}
     {if isset($social_aliases.$social_domain) || $social_domain}

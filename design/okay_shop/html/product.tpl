@@ -304,12 +304,7 @@
 
                 {* Share buttons *}
                 <div class="details_boxed__item details_boxed__share">
-                    <div class="share">
-                        <div class="share__text">
-                            <span data-language="product_share">{$lang->product_share}:</span>
-                        </div>
-                        <div class="fn_share jssocials share__icons"></div>
-                    </div>
+                    {include file="share.tpl" url=$canonical title=$h1}
                 </div>
             </div>
         </div>

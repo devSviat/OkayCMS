@@ -3353,12 +3353,37 @@ a.filter__catalog_link svg {
   opacity: 0.8;
   margin-right: 10px;
 }
-.share__icons .jssocials-share-logo {
-  font-size: 16px;
+.share__icons {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
 }
-.share__icons .jssocials-share-link {
+.share__item {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   padding: 5px 10px;
   border-radius: 4px;
+  color: var(--okay-body-text);
+}
+.share__item:hover {
+  color: var(--okay-basic-company);
+}
+.share__item .fa {
+  font-size: 16px;
 }
 
 /***** #Features ********************************************************************/
