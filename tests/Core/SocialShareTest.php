@@ -51,13 +51,13 @@ class SocialShareTest extends TestCase
         $labels = (new SocialShare())->getNetworkLabels();
 
         $this->assertSame('X', $labels['twitter']);
-        $this->assertSame('OK', $labels['odnoklassniki']);
+        $this->assertSame('Telegram', $labels['telegram']);
         $this->assertSame((new SocialShare())->getNetworks(), array_keys($labels));
     }
 
-    public function testGetSocialDomainAliasesOkToOdnoklassniki(): void
+    public function testGetSocialDomainStripsSchemeAndWww(): void
     {
-        $this->assertSame('odnoklassniki', SocialShare::getSocialDomain('https://ok.ru/group/123'));
         $this->assertSame('facebook', SocialShare::getSocialDomain('https://www.facebook.com/shop'));
+        $this->assertSame('t', SocialShare::getSocialDomain('https://t.me/shop'));
     }
 }

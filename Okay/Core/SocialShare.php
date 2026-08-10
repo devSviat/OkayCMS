@@ -29,18 +29,7 @@ class SocialShare
         'pinterest'     => ['label' => 'Pinterest', 'url' => 'https://pinterest.com/pin/create/bookmarklet/?url={url}&description={title}'],
         'reddit'        => ['label' => 'Reddit',    'url' => 'https://www.reddit.com/submit?url={url}&title={title}'],
         'line'          => ['label' => 'LINE',      'url' => 'https://social-plugins.line.me/lineit/share?url={url}'],
-        'vkontakte'     => ['label' => 'VK',        'url' => 'https://vk.com/share.php?url={url}&title={title}'],
-        'odnoklassniki' => ['label' => 'OK',        'url' => 'https://connect.ok.ru/dk?st.cmd=WidgetSharePreview&st.shareUrl={url}&title={title}'],
         'email'         => ['label' => 'Email',     'url' => 'mailto:?subject={title}&body={url}'],
-    ];
-
-    /**
-     * Домен деяких соцмереж не збігається з назвою мережі.
-     *
-     * @var string[]
-     */
-    private static $socialAliases = [
-        'ok' => 'odnoklassniki',
     ];
 
     /**
@@ -87,13 +76,11 @@ class SocialShare
         return $links;
     }
 
+    /**
+     * Домен посилання з site_social_links => назва мережі для іконки.
+     */
     public static function getSocialDomain($link)
     {
-        $socialDomain = preg_replace('~^(https?://)?(www\.)?([^.]+)?\..*$~', '$3', $link);
-
-        if (isset(self::$socialAliases[$socialDomain])) {
-            return self::$socialAliases[$socialDomain];
-        }
-        return $socialDomain;
+        return preg_replace('~^(https?://)?(www\.)?([^.]+)?\..*$~', '$3', $link);
     }
 }
