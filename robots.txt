@@ -11,7 +11,6 @@ Disallow: /Smarty/
 Disallow: /api/
 Disallow: /compiled/
 Disallow: /resize/
-Disallow: /js_libraries/
 Disallow: /*?currency_id
 Disallow: /*?keyword
 Disallow: /*?utm
@@ -31,7 +30,6 @@ Disallow: /Smarty/
 Disallow: /api/
 Disallow: /compiled/
 Disallow: /resize/
-Disallow: /js_libraries/
 Disallow: /*?currency_id
 Disallow: /*?keyword
 Disallow: /*?utm

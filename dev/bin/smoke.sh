@@ -330,7 +330,6 @@ fi
 for probe in \
     "$(cd .. && ls design/*/css/*.css 2>/dev/null | head -1)" \
     "$(cd .. && ls design/*/preview.png 2>/dev/null | head -1)" \
-    "$(cd .. && find js_libraries -name '*.js' 2>/dev/null | head -1)" \
     "$(cd .. && find backend/design/css -name '*.css' 2>/dev/null | head -1)" \
     "$(cd .. && find Okay/Modules -path '*design/images/*.png' 2>/dev/null | head -1)" \
     "$(cd .. && ls Okay/Modules/*/*/preview.png 2>/dev/null | head -1)"; do

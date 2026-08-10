@@ -613,7 +613,7 @@ location / { try_files /does_not_exist /index.php?$args; }
 конструкції, а не довжиною переліку.
 
 Віддаються лише: `robots.txt`, `favicon.ico`, `/.well-known/`, статика тем під
-`design/<тема>/{css,js,images,fonts}/`, бандли `cache/{css,js}/`, `js_libraries/`, асети й прев'ю
+`design/<тема>/{css,js,images,fonts}/`, бандли `cache/{css,js}/`, асети й прев'ю
 модулів під `Okay/Modules/`, завантаження `files/` крім `originals/`, і адмінка.
 
 **Що робити:** зі стеком із цього репозиторію конфіг оновиться сам. З власним nginx — візьміть
