@@ -133,10 +133,7 @@
                     </div>
 
                     {* Share buttons *}
-                    <div class="vs-share vs-post__share">
-                        <span class="vs-share__label" data-language="product_share">{$lang->product_share}</span>
-                        <div class="fn_share jssocials vs-share__list"></div>
-                    </div>
+                    {include file="share.tpl" url=$canonical title=$post->name class="vs-post__share"}
                 </div>
 
                 {* Article author *}

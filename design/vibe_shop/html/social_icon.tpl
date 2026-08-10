@@ -5,9 +5,9 @@
 
    The keys are what the callers actually hold. site_social hands a domain pulled
    out of the URL, so "youtu" and "t" are here beside "youtube" and "telegram".
-   jsSocials hands its own network name, which is where "email" and "googleplus"
-   come from. Twitter is X - the network renamed itself, the share endpoint did
-   not, so the key stays twitter and the glyph is the X.
+   SocialShare hands its own network name, which is where "email" comes from.
+   Twitter is X - the network renamed itself, the share endpoint did not, so the
+   key stays twitter and the glyph is the X.
 
    Anything unmatched gets the generic globe rather than nothing: a shop can put
    a network in site_social_links or in the share list that this theme has never
@@ -24,6 +24,10 @@
     'x' => 'social_x',
     'linkedin' => 'social_linkedin',
     'whatsapp' => 'social_whatsapp',
+    'viber' => 'social_viber',
+    'pinterest' => 'social_pinterest',
+    'reddit' => 'social_reddit',
+    'line' => 'social_line',
     'email' => 'mail'
 ]}
 {include file="svg.tpl" svgId=$vsSocialIcons[$domain|default:''|lower]|default:'social_link'}

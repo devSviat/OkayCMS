@@ -323,19 +323,6 @@
         {include file="mobile_menu.tpl"}
     </div>
 
-    {* Glyphs for the share pills. jsSocials builds those buttons in JS and its own
-       logo is a Font Awesome <i>, which this theme has no font for - so scripts.tpl
-       lifts the matching glyph out of here instead. A bank rather than data URIs in
-       the stylesheet: svg.tpl stays the one place the art lives, and the list is
-       built from the same setting the buttons are, so it can never fall behind it. *}
-    {if $settings->sj_shares}
-        <div id="fn_share_icons" class="hidden" aria-hidden="true">
-            {foreach $settings->sj_shares as $vsShare}
-                <span data-vs-share-icon="{$vsShare|escape}">{include file="social_icon.tpl" domain=$vsShare}</span>
-            {/foreach}
-        </div>
-    {/if}
-
     {* Форма зворотного дзвінка *}
     {include file='callback.tpl'}
     
@@ -366,22 +353,12 @@
     
     <script>ut_tracker.start('parsing:body_bottom:scripts');</script>
 
-    {if $controller == 'ProductController' || $controller == "BlogController"}
-        {js file="jssocials.min.js" dir='js_libraries/js_socials/js' defer=true}
-    {/if}
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha512-uURl+ZXMBrF4AwGaWmEetzrd+J5/8NRkWAvJx5sbPSSuOb0bZLqf+tOzniObO00BjHa/dD7gub9oCGMLPQHtQA==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js" integrity="sha512-0QDLUJ0ILnknsQdYYjG7v2j8wERkKufvjBNmng/EdR/s/SE7X8cQ9y0+wMzuQT0lfXQ/NhG+zhmHNOWTUS3kMA==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.devbridge-autocomplete/1.4.11/jquery.autocomplete.min.js" integrity="sha512-uxCwHf1pRwBJvURAMD/Gg0Kz2F2BymQyXDlTqnayuRyBFE7cisFCh2dSb1HIumZCRHuZikgeqXm8ruUoaxk5tA==" crossorigin="anonymous"></script>
 
     {$ok_footer}
 
-    {if $controller == 'ProductController' || $controller == "BlogController"}
-        {css file='jssocials.css' dir='js_libraries/js_socials/css'}
-        {if $settings->social_share_theme}
-            {css file="jssocials-theme-{$settings->social_share_theme|escape}.css" dir='js_libraries/js_socials/css'}
-        {/if}
-    {/if}
     <script>ut_tracker.end('parsing:body_bottom:scripts');</script>
 
     {if !empty($counters['body_bottom'])}

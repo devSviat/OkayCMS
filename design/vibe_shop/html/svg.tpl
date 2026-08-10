@@ -678,6 +678,35 @@
         <path d="M16 16v-3a2 2 0 1 0 -4 0"/>
     </svg>
 {/if}
+{if $svgId == "social_pinterest"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M8 20l4 -9"/>
+        <path d="M10.7 14c.437 1.263 1.43 2 2.55 2c2.071 0 3.75 -1.554 3.75 -4a5 5 0 1 0 -9.7 1.7"/>
+        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
+    </svg>
+{/if}
+{if $svgId == "social_reddit"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M12 8c2.648 0 5.028 .826 6.675 2.14a2.5 2.5 0 0 1 2.326 4.36c0 3.59 -4.03 6.5 -9 6.5c-4.875 0 -8.845 -2.8 -9 -6.294l-1 -.206a2.5 2.5 0 0 1 2.326 -4.36c1.646 -1.313 4.026 -2.14 6.674 -2.14l.999 0"/>
+        <path d="M12 8l1 -5l6 1"/>
+        <path d="M18 4a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
+        <path d="M8.5 13a.5 .5 0 1 0 1 0a.5 .5 0 1 0 -1 0"/>
+        <path d="M14.5 13a.5 .5 0 1 0 1 0a.5 .5 0 1 0 -1 0"/>
+        <path d="M10 17c.667 .333 1.333 .5 2 .5s1.333 -.167 2 -.5"/>
+    </svg>
+{/if}
+{if $svgId == "social_line"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M21 10.663c0 -4.224 -4.041 -7.663 -9 -7.663s-9 3.439 -9 7.663c0 3.783 3.201 6.958 7.527 7.56c1.053 .239 .932 .644 .696 2.133c-.039 .238 -.184 .932 .777 .512c.96 -.42 5.18 -3.201 7.073 -5.48c1.304 -1.504 1.927 -3.029 1.927 -4.715v-.01"/>
+    </svg>
+{/if}
+{* Viber має лише телефонну трубку: у родині Tabler бренд-гліфа для нього
+   немає, а мальований від руки не тримав би ні ту саму сітку, ні товщину. *}
+{if $svgId == "social_viber"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2"/>
+    </svg>
+{/if}
 {if $svgId == "social_link"}
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
         <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/>
