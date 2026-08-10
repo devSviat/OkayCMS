@@ -55,6 +55,44 @@ class SocialShareTest extends TestCase
         $this->assertSame((new SocialShare())->getNetworks(), array_keys($labels));
     }
 
+    /**
+     * mailto: віддається поштовому клієнту, viber:// - застосунку. target="_blank"
+     * на них лишає в браузері порожню вкладку, тож прапорець мають отримати
+     * тільки http(s)-адреси.
+     */
+    public function testOnlyHttpLinksAreMarkedForANewTab(): void
+    {
+        $links = (new SocialShare())->buildLinks(
+            ['facebook', 'viber', 'email'],
+            'https://shop.ua/p/1',
+            'Диван'
+        );
+
+        $this->assertSame(
+            ['facebook' => true, 'viber' => false, 'email' => false],
+            array_column($links, 'blank', 'key')
+        );
+    }
+
+    /**
+     * Модуль реєструє мережу одним викликом, і її мають побачити обидві
+     * сторони: список галочок в адмінці й кнопки на вітрині. Раніше цю роль
+     * грав getCustomSocials(), який годував бібліотеку.
+     */
+    public function testAddNetworkReachesBothTheAdminListAndTheStorefront(): void
+    {
+        $share = new SocialShare();
+        $share->addNetwork('mastodon', 'Mastodon', 'https://example.social/share?text={title}%20{url}');
+
+        $this->assertContains('mastodon', $share->getNetworks());
+        $this->assertSame('Mastodon', $share->getNetworkLabels()['mastodon']);
+
+        $links = $share->buildLinks(['mastodon'], 'https://shop.ua/p/1', 'Диван');
+        $this->assertSame('mastodon', $links[0]['key']);
+        $this->assertStringContainsString('https%3A%2F%2Fshop.ua%2Fp%2F1', $links[0]['url']);
+        $this->assertTrue($links[0]['blank']);
+    }
+
     public function testGetSocialDomainStripsSchemeAndWww(): void
     {
         $this->assertSame('facebook', SocialShare::getSocialDomain('https://www.facebook.com/shop'));

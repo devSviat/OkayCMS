@@ -11,6 +11,11 @@
    просту. *}
 {$okSocialIcons = [
     'facebook' => 'social_facebook',
+    'instagram' => 'social_instagram',
+    'youtube' => 'social_youtube',
+    'youtu' => 'social_youtube',
+    'tiktok' => 'social_tiktok',
+    'github' => 'social_github',
     'twitter' => 'social_x',
     'x' => 'social_x',
     'telegram' => 'social_telegram',

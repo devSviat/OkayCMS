@@ -33,11 +33,36 @@ class SocialShare
     ];
 
     /**
+     * Мережі, додані модулями. Сервіс у контейнері один, тож виклик з
+     * Init::init() бачать і адмінка, і вітрина - інакше галочка зʼявлялась би
+     * в налаштуваннях, а кнопка на сторінці ні.
+     *
+     * @var array<string, array{label: string, url: string}>
+     */
+    private $extraNetworks = [];
+
+    /**
+     * $url - шаблон адреси з {url} і {title}; підставляються закодованими.
+     */
+    public function addNetwork(string $key, string $label, string $url): void
+    {
+        $this->extraNetworks[$key] = ['label' => $label, 'url' => $url];
+    }
+
+    /**
+     * @return array<string, array{label: string, url: string}>
+     */
+    private function networks(): array
+    {
+        return self::NETWORKS + $this->extraNetworks;
+    }
+
+    /**
      * @return string[]
      */
     public function getNetworks(): array
     {
-        return array_keys(self::NETWORKS);
+        return array_keys($this->networks());
     }
 
     /**
@@ -45,20 +70,24 @@ class SocialShare
      */
     public function getNetworkLabels(): array
     {
-        return array_map(static fn (array $network): string => $network['label'], self::NETWORKS);
+        return array_map(static fn (array $network): string => $network['label'], $this->networks());
     }
 
     /**
      * Порядок кнопок береться з NETWORKS, а не з $enabled: інакше він залежав
      * би від того, в якому порядку адмін тикав галочки.
      *
+     * blank каже шаблону, чи вішати target="_blank". Тільки для http(s):
+     * mailto: віддається поштовому клієнту, viber:// - застосунку, і нова
+     * вкладка в обох випадках лишається висіти порожньою.
+     *
      * @param string[] $enabled
-     * @return array<int, array{key: string, label: string, url: string}>
+     * @return array<int, array{key: string, label: string, url: string, blank: bool}>
      */
     public function buildLinks(array $enabled, string $url, string $title): array
     {
         $links = [];
-        foreach (self::NETWORKS as $key => $network) {
+        foreach ($this->networks() as $key => $network) {
             if (!in_array($key, $enabled, true)) {
                 continue;
             }
@@ -70,6 +99,7 @@ class SocialShare
                     '{url}'   => rawurlencode($url),
                     '{title}' => rawurlencode($title),
                 ]),
+                'blank' => str_starts_with($network['url'], 'http'),
             ];
         }
 

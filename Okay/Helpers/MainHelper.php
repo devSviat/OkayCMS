@@ -11,7 +11,7 @@ use Okay\Core\DebugBar\DebugBar;
 use Okay\Core\Design;
 use Okay\Core\EntityFactory;
 use Okay\Core\FrontTranslations;
-use Okay\Core\JsSocial;
+use Okay\Core\SocialShare;
 use Okay\Core\Languages;
 use Okay\Core\Modules\Extender\ExtenderFacade;
 use Okay\Core\Modules\Module;
@@ -262,7 +262,7 @@ class MainHelper
                 if (empty($socialUrl)) {
                     continue;
                 }
-                $social['domain'] = JsSocial::getSocialDomain($socialUrl);
+                $social['domain'] = SocialShare::getSocialDomain($socialUrl);
                 $social['url'] = $socialUrl;
                 $socials[] = $social;
             }
@@ -279,8 +279,6 @@ class MainHelper
         $allBlogCategories = $blogCategoriesEntity->find();
         $this->countVisible($blogCategoriesEntity->getCategoriesTree(), $allBlogCategories);
         $design->assign('blog_categories', $blogCategoriesEntity->getCategoriesTree());
-
-        $design->assign('js_custom_socials', $this->SL->getService(JsSocial::class)->getCustomSocials());
 
         // Передаем счетчики
         $counters = [];
