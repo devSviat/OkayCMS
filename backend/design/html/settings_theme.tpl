@@ -323,10 +323,12 @@
                             <div class="mb-1">
                                 <div class="share_networks">
                                     {foreach $share_networks as $network => $label}
-                                        <label class="share_networks__item">
-                                            <input type="checkbox" name="sj_shares[]" value="{$network|escape}"{if is_array($settings->sj_shares) && in_array($network, $settings->sj_shares)} checked{/if} />
-                                            <span>{$label|escape}</span>
-                                        </label>
+                                        <div class="okay_type_checkbox_wrap">
+                                            <input id="fn_share_{$network|escape}" class="hidden_check" type="checkbox" name="sj_shares[]" value="{$network|escape}"{if is_array($settings->sj_shares) && in_array($network, $settings->sj_shares)} checked{/if} />
+                                            <label for="fn_share_{$network|escape}" class="okay_type_checkbox">
+                                                <span>{$label|escape}</span>
+                                            </label>
+                                        </div>
                                     {/foreach}
                                 </div>
                             </div>

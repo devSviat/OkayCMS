@@ -8339,21 +8339,21 @@ div.tox-fullscreen {
     margin-left: 15px;
     display: none;
 }
+/* Компонент розрахований на вертикальний список у всю ширину рядка, а тут   */
+/* потрібен ряд із переносом, тож обидві коробки звужуються до вмісту.       */
 .share_networks {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 16px;
+    gap: 4px 20px;
 }
-.share_networks__item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin: 0;
-    font-weight: 400;
-    cursor: pointer;
+.share_networks .okay_type_checkbox_wrap {
+    min-height: 0;
+    width: auto;
 }
-.share_networks__item input {
-    margin: 0;
+/* padding: 10px 0 у компонента дає рядок 40px - це для вертикального списку. */
+.share_networks .okay_type_checkbox {
+    width: auto;
+    padding: 2px 0;
 }
 
 .theme_color {
