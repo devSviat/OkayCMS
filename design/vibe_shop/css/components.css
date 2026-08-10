@@ -4816,9 +4816,6 @@ body.hc-nav-open {
 }
 
 /* ------------------------------------------------------------------- share */
-/* Тема jsSocials реєструється після цього файлу й фарбує кожну мережу у власний */
-/* колір. Її селектори — два класи завглибшки, тож тут потрібні три, щоб виграти */
-/* без !important і без зміни порядку завантаження.                              */
 
 .vs-share {
 	display: flex;
@@ -4839,24 +4836,12 @@ body.hc-nav-open {
 	gap: var(--vs-space-2);
 }
 
-.vs-share .jssocials-shares {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--vs-space-2);
-	margin: 0;
-}
-
-.vs-share .jssocials-share {
-	margin: 0;
-}
-
-.vs-share .jssocials-share .jssocials-share-link {
+.vs-share__item {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-width: 44px;
-	min-height: 44px;
-	padding: 0 var(--vs-space-4);
+	width: 44px;
+	height: 44px;
 	border: 1px solid var(--vs-border);
 	border-radius: var(--vs-radius-full);
 	background: var(--vs-surface);
@@ -4865,57 +4850,32 @@ body.hc-nav-open {
 	transition: border-color var(--vs-dur-1) var(--vs-ease), background-color var(--vs-dur-1) var(--vs-ease);
 }
 
-.vs-share .jssocials-share .jssocials-share-link:hover {
+.vs-share__item:hover {
 	border-color: var(--vs-border-strong);
 	background: var(--vs-surface-subtle);
 	color: var(--vs-text);
 }
 
-/* Логотип jsSocials — це <i> іконкового шрифту, якого тема не має, тож          */
-/* scripts.tpl гасить той клас і кладе всередину власний SVG. :empty — запасний  */
-/* варіант: мережа, для якої гліфа тут немає, лишається з текстовим підписом.    */
+/* Явна коробка: гліф заповнює її, а не несе власний розмір.                     */
 
-/* Явна коробка, бо бібліотека розмірює цей елемент в em і завантажується після  */
-/* нас: будь-який font-size: 0 тут перетворив би ту ширину на нуль і кнопки       */
-/* вийшли б порожніми колами. Гліф заповнює коробку, а не несе власний розмір.    */
-
-.vs-share .jssocials-share .jssocials-share-logo {
+.vs-share__glyph {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	flex: none;
 	width: 20px;
 	height: 20px;
-	color: var(--vs-text);
 }
 
-.vs-share .jssocials-share .jssocials-share-logo:empty {
-	display: none;
-}
-
-.vs-share .jssocials-share .jssocials-share-logo svg {
+.vs-share__glyph svg {
 	width: 100%;
 	height: 100%;
 }
 
-.vs-share .jssocials-share .jssocials-share-label {
-	margin: 0;
-	font-size: var(--vs-text-sm);
-	line-height: 1;
-	text-transform: capitalize;
-	white-space: nowrap;
-}
+/* Обрізаний, а не прибраний: це доступна назва кнопки, а посилання з одного     */
+/* гліфа не має жодної.                                                          */
 
-/* Clipped, not removed: it is the button's accessible name, and a link whose only */
-/* content is a glyph has none. Same technique as .vs-sr-only, restated here       */
-/* because the element is jsSocials' and cannot be given that class.               */
-
-.vs-share .jssocials-share.vs-share--glyph .jssocials-share-link {
-	width: 44px;
-	padding: 0;
-}
-
-.vs-share .jssocials-share.vs-share--glyph .jssocials-share-label {
+.vs-share__name {
 	position: absolute;
 	width: 1px;
 	height: 1px;

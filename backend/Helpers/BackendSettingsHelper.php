@@ -9,6 +9,7 @@ use Okay\Core\DataCleaner;
 use Okay\Core\EntityFactory;
 use Okay\Core\Image;
 use Okay\Core\JsSocial;
+use Okay\Core\SocialShare;
 use Okay\Core\Languages;
 use Okay\Core\Managers;
 use Okay\Core\Modules\LicenseModulesTemplates;
@@ -79,6 +80,11 @@ class BackendSettingsHelper
     private $jsSocial;
 
     /**
+     * @var SocialShare
+     */
+    private $socialShare;
+
+    /**
      * @var Image
      */
     private $imageCore;
@@ -101,6 +107,7 @@ class BackendSettingsHelper
         QueryFactory $queryFactory,
         Languages $languages,
         JsSocial $jsSocial,
+        SocialShare $socialShare,
         Image $imageCore,
         LicenseModulesTemplates $licenseModulesTemplates
     )
@@ -115,6 +122,7 @@ class BackendSettingsHelper
         $this->queryFactory = $queryFactory;
         $this->languages = $languages;
         $this->jsSocial = $jsSocial;
+        $this->socialShare = $socialShare;
         $this->dataCleaner = $dataCleaner;
         $this->imageCore = $imageCore;
         $this->licenseModulesTemplates = $licenseModulesTemplates;
@@ -365,11 +373,6 @@ class BackendSettingsHelper
             $cssSaved = $this->frontTemplateConfig->updateCssVariables($cssColors);
         }
 
-        if ($this->settings->get('social_share_theme') != $this->request->post('social_share_theme')) {
-            $this->frontTemplateConfig->clearCompiled();
-        }
-
-        $this->settings->set('social_share_theme', $this->request->post('social_share_theme'));
         // Знята остання галочка не постить нічого, і без приведення до масиву
         // в налаштуванні опинявся false, на якому падав in_array() у шаблоні.
         $this->settings->set('sj_shares', (array)$this->request->post('sj_shares'));
@@ -492,11 +495,26 @@ class BackendSettingsHelper
         return ExtenderFacade::execute(__METHOD__, $this->allowedImageExtensions, func_get_args());
     }
 
+    /**
+     * Мережа => підпис, для списку галочок у налаштуваннях теми.
+     */
+    public function getSocialShareNetworks()
+    {
+        return ExtenderFacade::execute(__METHOD__, $this->socialShare->getNetworkLabels(), func_get_args());
+    }
+
+    /**
+     * @deprecated Лишився для модулів, які його розширювали. Список галочок
+     *             будується з getSocialShareNetworks().
+     */
     public function getJsSocials()
     {
         return ExtenderFacade::execute(__METHOD__, $this->jsSocial->getSocials(), func_get_args());
     }
 
+    /**
+     * @deprecated Лишився для модулів, які його розширювали.
+     */
     public function getJsCustomSocials()
     {
         return ExtenderFacade::execute(__METHOD__, $this->jsSocial->getCustomSocials(), func_get_args());

@@ -321,21 +321,15 @@
                         <div class="col-xs-12">
                             <div class="heading_label">{$btr->settings_theme_social_share|escape}</div>
                             <div class="mb-1">
-                                <div class="">
-                                    <select name="social_share_theme" class="fn_social_share_theme selectpicker form-control">
-                                        <option value=""{if !$settings->social_share_theme} selected{/if}>default</option>
-                                        <option value="flat"{if $settings->social_share_theme == 'flat'} selected{/if}>flat</option>
-                                        <option value="classic"{if $settings->social_share_theme == 'classic'} selected{/if}>classic</option>
-                                        <option value="minima"{if $settings->social_share_theme == 'minima'} selected{/if}>minima</option>
-                                        <option value="plain"{if $settings->social_share_theme == 'plain'} selected{/if}>plain</option>
-                                    </select>
-                                    <div class="fn_share"></div>
-
-                                    <div style="display: none;">
-                                    {foreach $js_socials as $soc}
-                                        <input type="checkbox" class="fn_{$soc}" name="sj_shares[]"{if is_array($settings->sj_shares) && in_array($soc, $settings->sj_shares)} checked{/if} value="{$soc}" />
+                                <div class="share_networks">
+                                    {foreach $share_networks as $network => $label}
+                                        <div class="okay_type_checkbox_wrap">
+                                            <input id="fn_share_{$network|escape}" class="hidden_check" type="checkbox" name="sj_shares[]" value="{$network|escape}"{if is_array($settings->sj_shares) && in_array($network, $settings->sj_shares)} checked{/if} />
+                                            <label for="fn_share_{$network|escape}" class="okay_type_checkbox">
+                                                <span>{$label|escape}</span>
+                                            </label>
+                                        </div>
                                     {/foreach}
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -407,11 +401,6 @@
 <link rel="stylesheet" media="screen" type="text/css" href="design/js/colorpicker/css/colorpicker.css" />
 <script type="text/javascript" src="design/js/colorpicker/js/colorpicker.js"></script>
 
-<script type="text/javascript" src="{$rootUrl}/js_libraries/js_socials/js/jssocials.min.js"></script>
-<link type="text/css" rel="stylesheet" href="{$rootUrl}/js_libraries/js_socials/css/jssocials.css" />
-{if $settings->social_share_theme}
-    <link type="text/css" class="fn_social_share_style" rel="stylesheet" href="{$rootUrl}/js_libraries/js_socials/css/jssocials-theme-{$settings->social_share_theme|escape}.css" />
-{/if}
 <script type="text/javascript" src="design/js/tinymce_jq/tinymce.min.js"></script>
 {literal}
     <script>
@@ -436,53 +425,6 @@
 
         });
         
-        {/literal}
-        {if $js_custom_socials}
-            {foreach $js_custom_socials as $social=>$params}
-                jsSocials.shares.{$social|escape} = {$params|json_encode};
-            {/foreach}
-        {/if}
-        {literal}
-        
-        $(".fn_share").jsSocials({
-            showLabel: false,
-            showCount: false,
-            shares: {/literal}{$js_socials|json_encode}{literal},
-            on: {
-                click: function(e) {
-                    var $share_checkbox = $('.fn_'+this.share);
-                    if ($share_checkbox.is(':checked')) {
-                        $('.jssocials-share-'+this.share).removeClass('active');
-                        $share_checkbox.prop('checked', false);
-                    } else {
-                        $('.jssocials-share-'+this.share).addClass('active');
-                        $share_checkbox.prop('checked', true);
-                    }
-                    return false;
-                }
-            }
-        });
-        {/literal}
-        
-        {*Отметим выбранные соц. сети как выбранные*}
-        {if $settings->sj_shares}
-            {foreach $settings->sj_shares as $soc}
-                $('.jssocials-share-{$soc}').addClass('active');
-            {/foreach}
-        {/if}
-        {literal}
-        
-        $(document).on('change', 'select.fn_social_share_theme', function() {
-            if ($(this).val() != '') {
-                if ($('.fn_social_share_style').length > 0) {
-                    $('.fn_social_share_style').prop('href', '{/literal}{$rootUrl}{literal}/js_libraries/js_socials/css/jssocials-theme-' + $(this).val() + '.css')
-                } else {
-                    $('body').append('<link type="text/css" class="fn_social_share_style" rel="stylesheet" href="{/literal}{$rootUrl}{literal}/js_libraries/js_socials/css/jssocials-theme-' + $(this).val() + '.css" />');
-                }
-            } else {
-                $('.fn_social_share_style').remove();
-            }
-        });
         
         $(function(){
             tinyMCE.init({

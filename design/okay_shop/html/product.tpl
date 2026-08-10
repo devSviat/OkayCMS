@@ -302,15 +302,13 @@
                     </div>
                 </div>
 
-                {* Share buttons *}
-                <div class="details_boxed__item details_boxed__share">
-                    <div class="share">
-                        <div class="share__text">
-                            <span data-language="product_share">{$lang->product_share}:</span>
-                        </div>
-                        <div class="fn_share jssocials share__icons"></div>
+                {* Share buttons. Обгортка всередині умови: .details_boxed__item несе
+                   власні відступи, і порожньою вона лишала б смугу без причини. *}
+                {if $settings->sj_shares}
+                    <div class="details_boxed__item details_boxed__share">
+                        {include file="share.tpl" url=$canonical title=$h1}
                     </div>
-                </div>
+                {/if}
             </div>
         </div>
     </div>

@@ -678,6 +678,39 @@
         <path d="M16 16v-3a2 2 0 1 0 -4 0"/>
     </svg>
 {/if}
+{if $svgId == "social_pinterest"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M8 20l4 -9"/>
+        <path d="M10.7 14c.437 1.263 1.43 2 2.55 2c2.071 0 3.75 -1.554 3.75 -4a5 5 0 1 0 -9.7 1.7"/>
+        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
+    </svg>
+{/if}
+{if $svgId == "social_reddit"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M12 8c2.648 0 5.028 .826 6.675 2.14a2.5 2.5 0 0 1 2.326 4.36c0 3.59 -4.03 6.5 -9 6.5c-4.875 0 -8.845 -2.8 -9 -6.294l-1 -.206a2.5 2.5 0 0 1 2.326 -4.36c1.646 -1.313 4.026 -2.14 6.674 -2.14l.999 0"/>
+        <path d="M12 8l1 -5l6 1"/>
+        <path d="M18 4a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
+        <path d="M8.5 13a.5 .5 0 1 0 1 0a.5 .5 0 1 0 -1 0"/>
+        <path d="M14.5 13a.5 .5 0 1 0 1 0a.5 .5 0 1 0 -1 0"/>
+        <path d="M10 17c.667 .333 1.333 .5 2 .5s1.333 -.167 2 -.5"/>
+    </svg>
+{/if}
+{* LINE: контур із набору Huge Icons (MIT), звідти ж і Viber. Tabler малює
+   лише порожню бульбашку без напису, а саме напис робить знак упізнаваним. *}
+{if $svgId == "social_line"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M2 10.5C2 15.194 6.477 19 12 19q1.03-.001 2-.17V22c1.67-1.635 4.5-4.5 6.256-6.703C21.356 13.932 22 12.28 22 10.5C22 5.806 17.523 2 12 2S2 5.806 2 10.5Z"/>
+        <path d="M6 8.5v4h1m2-4v4m2.1 0v-4l2.4 4v-4m4 0h-1.9v2m1.9 2h-1.9v-2m0 0h1.44"/>
+    </svg>
+{/if}
+{* Viber: контур із набору Huge Icons (MIT, як і Tabler) - у самому Tabler
+   бренд-гліфа для нього немає. Товщина приведена до родини. *}
+{if $svgId == "social_viber"}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M21 10.5c0 6.5-3 8-9 8q-.515 0-1-.015l-2.896 2.91a.353.353 0 0 1-.604-.248v-3.121c-3-.834-4.5-2.93-4.5-7.526c0-6.5 3-8 9-8s9 1.5 9 8"/>
+        <path d="M12.729 13.664c.725.396 1.379.65 1.802.793a.84.84 0 0 0 .863-.215l.606-.606l-1.633-1.089a.46.46 0 0 0-.58.058zm0 0a9.8 9.8 0 0 1-2.243-1.65a9.8 9.8 0 0 1-1.65-2.242m0 0a12 12 0 0 1-.793-1.803a.84.84 0 0 1 .215-.863l.606-.606l1.089 1.633a.46.46 0 0 1-.058.58zm-.297-2.299l.65 1.298m5.838 5.19l-1.298-.65M17 10a4 4 0 0 0-4-4m1 4a1 1 0 0 0-1-1"/>
+    </svg>
+{/if}
 {if $svgId == "social_link"}
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
         <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/>

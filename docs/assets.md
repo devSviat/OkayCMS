@@ -60,8 +60,17 @@ public function setDefer($defer)                    // лише Js
 Для разового підключення просто в шаблоні:
 
 ```smarty
-{js file="jssocials.min.js" dir='js_libraries/js_socials/js' defer=true}
-{css file='jssocials.css' dir='js_libraries/js_socials/css'}
+{js file="lazyload.min.js" dir='design/vibe_shop/js' defer=true}
+{css file='select2.min.css' dir='design/vibe_shop/css'}
+```
+
+`dir` — шлях від кореня сайту, який заміняє типовий `design/<тема>/{js,css}/`. Крім дерев
+теми віддається ще й `js_libraries/` — місце для сторонніх бібліотек, спільних для тем.
+У репозиторії його немає (єдиний мешканець, jssocials, прибраний), але маршрут лишається
+в `.htaccess` і в конфігу nginx, тож покладена туди бібліотека віддаватиметься:
+
+```smarty
+{js file="lib.min.js" dir='js_libraries/lib/js'}
 ```
 
 Параметри: `file` (або `filename`), `dir`, `defer` (лише `{js}`), `backend`/`admin` —

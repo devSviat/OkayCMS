@@ -353,10 +353,7 @@
                     </div>
                 </div>
 
-                <div class="vs-share">
-                    <span class="vs-share__label" data-language="product_share">{$lang->product_share}</span>
-                    <div class="fn_share jssocials vs-share__list"></div>
-                </div>
+                {include file="share.tpl" url=$canonical title=$h1}
             </div>
         </div>
 

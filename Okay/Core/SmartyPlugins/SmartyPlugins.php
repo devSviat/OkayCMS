@@ -16,6 +16,7 @@ use Okay\Core\Router;
 use Okay\Core\EntityFactory;
 use Okay\Core\Image;
 use Okay\Core\Settings;
+use Okay\Core\SocialShare;
 use Okay\Core\DesignBlocks;
 use Okay\Core\TemplateConfig\BackendTemplateConfig;
 use Okay\Core\TemplateConfig\FrontTemplateConfig;
@@ -199,6 +200,13 @@ $plugins = [
             new SR(DesignBlocks::class),
             new SR(Design::class),
             new SR(Config::class),
+        ],
+    ],
+    Plugins\ShareLinks::class => [
+        'class' => Plugins\ShareLinks::class,
+        'arguments' => [
+            new SR(SocialShare::class),
+            new SR(Settings::class),
         ],
     ],
     Plugins\ReadSvg::class => [

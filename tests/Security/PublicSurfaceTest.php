@@ -27,19 +27,24 @@ class PublicSurfaceTest extends TestCase
     /** Решта кореня. Перелік потрібен тесту, не конфігу. */
     private const PRIVATE_ROOT_ENTRIES = [
         '1DB_changes', 'backend', 'CLAUDE.md', 'compiled', 'composer.json',
-        'composer.lock', 'config', 'design', 'dev', 'docs', 'files', 'js_libraries',
+        'composer.lock', 'config', 'design', 'dev', 'docs', 'files',
         'LICENSE.md', 'ok', 'Okay', 'phpcs.xml.dist', 'phpstan-baseline.neon',
         'phpstan.neon', 'phpunit.xml', 'PRODUCT.md', 'README.md', 'tests', 'vendor',
     ];
 
     /**
-     * Створюються під час роботи, а не лежать у репозиторії, тож у свіжому
-     * клоні їх може не бути — у CI саме так і сталось із cache/. Класифіковані
-     * вони так само, як приватні; відрізняються лише тим, що перевірка
-     * застарілих записів їх не вимагає.
+     * Можуть бути відсутні у свіжому клоні — у CI саме так і сталось із cache/.
+     * Класифіковані вони так само, як приватні; відрізняються лише тим, що
+     * перевірка застарілих записів їх не вимагає.
+     *
+     * cache/ створюється під час роботи. js_libraries/ у репозиторії немає
+     * взагалі: його маршрут лишається в .htaccess і в конфігах nginx як місце
+     * для сторонніх бібліотек магазину (docs/assets.md), тож каталог може
+     * зʼявитись і мусить лишатись класифікованим.
      */
     private const RUNTIME_ROOT_ENTRIES = [
         'cache',
+        'js_libraries',
     ];
 
     private function repoRoot(): string

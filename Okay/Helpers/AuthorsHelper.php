@@ -6,7 +6,7 @@ namespace Okay\Helpers;
 
 use Okay\Core\Design;
 use Okay\Core\EntityFactory;
-use Okay\Core\JsSocial;
+use Okay\Core\SocialShare;
 use Okay\Core\Modules\Extender\ExtenderFacade;
 use Okay\Entities\AuthorsEntity;
 
@@ -56,7 +56,7 @@ class AuthorsHelper implements GetListInterface
             return ExtenderFacade::execute(__METHOD__, $author->socials, func_get_args());
         } elseif ($socials = json_decode($author->socials, true)) {
             foreach ($socials as $k=>$social) {
-                $socials[$k]['domain'] = JsSocial::getSocialDomain($social['url']);
+                $socials[$k]['domain'] = SocialShare::getSocialDomain($social['url']);
             }
             return ExtenderFacade::execute(__METHOD__, $socials, func_get_args());
         }

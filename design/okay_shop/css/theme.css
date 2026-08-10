@@ -3353,12 +3353,58 @@ a.filter__catalog_link svg {
   opacity: 0.8;
   margin-right: 10px;
 }
-.share__icons .jssocials-share-logo {
-  font-size: 16px;
+.share__icons {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
 }
-.share__icons .jssocials-share-link {
+.share__item {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   padding: 5px 10px;
   border-radius: 4px;
+  color: var(--okay-body-text);
+}
+.share__item:hover {
+  color: var(--okay-basic-company);
+}
+.share__glyph {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 18px;
+  height: 18px;
+}
+.share__glyph svg {
+  width: 100%;
+  height: 100%;
+}
+/* Власне визначення, бо єдине інше приходило зі стилю FontAwesome на cdnjs:  */
+/* при недоступному CDN назва мережі виводилась видимим текстом біля гліфа.   */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
 }
 
 /***** #Features ********************************************************************/
@@ -3794,6 +3840,28 @@ footer {
   float: left;
   text-decoration: none;
   transition: all 400ms;
+}
+.social__link {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+.social__link svg {
+  width: 16px;
+  height: 16px;
+}
+.post_author__social .social__link svg {
+  width: 13px;
+  height: 13px;
 }
 .footer__payments {
   text-align: right;

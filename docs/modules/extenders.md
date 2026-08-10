@@ -163,3 +163,16 @@ FrontExtender::class => [
   ([backend.md](backend.md#блоки-дизайну), [frontend.md](frontend.md#блоки-дизайну)).
 - Треба додати умову у вибірку чужої сутності → фільтр сутності
   ([init-reference.md](init-reference.md#registerentityfilter)).
+- Треба додати свою мережу в кнопки «поділитися» → `Okay\Core\SocialShare::addNetwork()`
+  з `Init::init()`. Сервіс у контейнері один, тож мережу побачать і список галочок у
+  налаштуваннях теми, і кнопки на вітрині:
+
+  ```php
+  ServiceLocator::getInstance()
+      ->getService(SocialShare::class)
+      ->addNetwork('mastodon', 'Mastodon', 'https://example.social/share?text={title}%20{url}');
+  ```
+
+  `{url}` і `{title}` підставляються вже закодованими. Розширювати
+  `BackendSettingsHelper::getJsSocials()` чи `getJsCustomSocials()` для цього не треба —
+  обидва лишились тільки заради сумісності й на вітрину більше не впливають.

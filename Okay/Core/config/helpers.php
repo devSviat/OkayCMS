@@ -276,6 +276,7 @@ return [
             new SR(QueryFactory::class),
             new SR(Languages::class),
             new SR(JsSocial::class),
+            new SR(SocialShare::class),
             new SR(Image::class),
             new SR(LicenseModulesTemplates::class),
         ]

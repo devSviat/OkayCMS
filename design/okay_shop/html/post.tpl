@@ -133,12 +133,7 @@
 
                         {* Share buttons *}
                         <div class="post_share_boxed">
-                            <div class="share">
-                                {*<div class="share__text post_share__text">
-                                <span data-language="product_share">{$lang->product_share}:</span>
-                            </div>*}
-                                <div class="fn_share jssocials share__icons"></div>
-                            </div>
+                            {include file="share.tpl" url=$canonical title=$post->name label=false}
                         </div>
                     </div>
 
@@ -172,7 +167,7 @@
                             <div class="post_author__social">
                                 {foreach $post->author->socials as $social}
                                 <a class="fn_social_image social__link {$social.domain|escape}" rel="noreferrer" aria-label="{$social_domain}" href="{if !preg_match('~^https?://.*$~', $social.url)}https://{/if}{$social.url|escape}" target="_blank" title="{$social.domain|escape}">
-                                    <i class="fa fa-{$social.domain|escape}"></i>
+                                    {include file="social_icon.tpl" domain=$social.domain}
                                 </a>
                                 {/foreach}
                             </div>

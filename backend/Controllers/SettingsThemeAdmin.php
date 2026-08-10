@@ -52,15 +52,13 @@ class SettingsThemeAdmin extends IndexAdmin
 
         $cssVariables    = $backendSettingsHelper->getCssVariables();
         $allowExt        = $backendSettingsHelper->getAllowImageExtensions();
-        $jsSocials       = $backendSettingsHelper->getJsSocials();
-        $jsCustomSocials = $backendSettingsHelper->getJsCustomSocials();
+        $shareNetworks   = $backendSettingsHelper->getSocialShareNetworks();
         $sitePhones      = $backendSettingsHelper->getSitePhones();
         $siteSocialLinks = $backendSettingsHelper->getSiteSocialLinks();
 
         $this->design->assign('css_variables',     $cssVariables);
         $this->design->assign('allow_ext',         $allowExt);
-        $this->design->assign('js_socials',        $jsSocials);
-        $this->design->assign('js_custom_socials', $jsCustomSocials);
+        $this->design->assign('share_networks',    $shareNetworks);
         $this->design->assign('site_phones',       $sitePhones);
         $this->design->assign('site_social_links', $siteSocialLinks);
 

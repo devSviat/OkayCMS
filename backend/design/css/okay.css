@@ -8339,11 +8339,22 @@ div.tox-fullscreen {
     margin-left: 15px;
     display: none;
 }
-.jssocials-share {border-bottom: 3px solid #fff;}
-.jssocials-share.active {
-    border-bottom: 3px solid #080688;
+/* Компонент розрахований на вертикальний список у всю ширину рядка, а тут   */
+/* потрібен ряд із переносом, тож обидві коробки звужуються до вмісту.       */
+.share_networks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 20px;
 }
-.jssocials-share-link {color: var(--ok-accent);}
+.share_networks .okay_type_checkbox_wrap {
+    min-height: 0;
+    width: auto;
+}
+/* padding: 10px 0 у компонента дає рядок 40px - це для вертикального списку. */
+.share_networks .okay_type_checkbox {
+    width: auto;
+    padding: 2px 0;
+}
 
 .theme_color {
     display: block;
@@ -9343,10 +9354,8 @@ margin-right: 3px;
 .fn_social_image .fa-google:before{content: "\f1a0";}
 .fn_social_image .fa-twitter:before{content: "\f099";}
 .fn_social_image .fa-pinterest-p:before{content: "\f231";}
-.fn_social_image .fa-odnoklassniki:before{content: "\f263";}
 .fn_social_image .fa-facebook:before{content: "\f09a";}
 .fn_social_image .fa-skype:before{content: "\f17e";}
-.fn_social_image .fa-vk:before{content: "\f189";}
 .fn_social_image .fa-whatsapp:before{content: "\f232";}
 .fn_social_image .fa-youtube:before{content: "\f167";}
 .fn_social_image .fa-instagram:before{content: "\f16d";}
