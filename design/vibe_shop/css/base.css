@@ -60,7 +60,6 @@ h6 { font-size: var(--vs-text-base); }
 p {
 	margin: 0 0 var(--vs-space-4);
 	text-wrap: pretty;
-	max-width: 70ch;
 }
 
 a {

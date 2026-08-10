@@ -8,8 +8,8 @@
 */
 
 /* Рампа рівно така, як тема використовує. Темні відтінки приходять через
-* theme-settings.css (--okay-second-company, --okay-button-color) — саме там їх
-* може змінити власник магазину. */
+* theme-settings.css (--okay-button-color) — саме там їх може змінити власник
+* магазину. */
 
 :root {
 	--vs-n-0: #ffffff;
@@ -33,17 +33,36 @@
 * theme-settings.css оголошує сімнадцять — решта вісім (зокрема
 * --okay-border-color, --okay-body-text, --okay-body-heading, тобто колір
 * кожного слова на сторінці) з адмінки недосяжні й правляться лише руками.
-* Збереження форми їх не зачіпає — саме це й тримає --vs-border на 3:1. */
+* Збереження форми їх не зачіпає — саме це й тримає --vs-border на 3:1.
+*
+* Дев'ять ключів — стеля, і рушій ми не чіпаємо, тож слоти розподілені за
+* видимістю на сторінці, а не за назвою змінної:
+*
+* --okay-second-company — шапка й футер. Так само було в стоковій темі, тож
+* перенесені звідти налаштування лягають на своє місце.
+*
+* --okay-basic-company — смуга акційних товарів на головній. Єдиний блок, що
+* має власне тло, і єдиний, заради якого власник магазину сюди й заходить.
+*
+* --okay-button-color — не лише кнопки, а весь темний інтерактив: --vs-ink
+* (активна пагінація, чип категорії, вкладки, sticky-buy) і --vs-accent
+* (підкреслення посилань, крапка радіо) вказують сюди. Обидва мали власні
+* слоти й обидва їх віддали; дефолт у трьох однаковий, тож вигляд не змінився,
+* але тепер темний інтерактив рухається однією ручкою. */
 
 	--vs-canvas: var(--okay-bg);
 	--vs-surface: var(--okay-boxed-color);
 	--vs-border: var(--okay-border-color);
 	--vs-text: var(--okay-body-text);
 	--vs-heading: var(--okay-body-heading);
-	--vs-ink: var(--okay-second-company);
-	--vs-ink-text: var(--okay-second-company-text);
-	--vs-accent: var(--okay-basic-company);
-	--vs-accent-text: var(--okay-basic-company-text);
+	--vs-chrome: var(--okay-second-company);
+	--vs-chrome-text: var(--okay-second-company-text);
+	--vs-band: var(--okay-basic-company);
+	--vs-band-text: var(--okay-basic-company-text);
+	--vs-ink: var(--okay-button-color);
+	--vs-ink-text: var(--okay-button-text);
+	--vs-accent: var(--okay-button-color);
+	--vs-accent-text: var(--okay-button-text);
 	--vs-cta: var(--okay-button-color);
 	--vs-cta-hover: var(--okay-button-color-hover);
 	--vs-cta-text: var(--okay-button-text);
