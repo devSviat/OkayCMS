@@ -352,10 +352,59 @@ body.other_page .main {
 
 /* ------------------------------------------------------------ header shell */
 
+/* Хром (шапка + футер) — єдина область теми з власною парою кольорів в         */
+/* адмінці. Тло береться прямо, решта виводиться з кольору тексту: приглушений  */
+/* відтінок, ховер-заливка й роздільник — це той самий колір, зміщений до тла,  */
+/* тож темний хром лишається зв'язним без жодного другого налаштування.         */
+/*                                                                             */
+/* Мішається саме з --vs-chrome, а не з transparent: напівпрозорий колір        */
+/* подвоюється там, де штрих SVG перетинає сам себе, і іконки інформерів        */
+/* виходили помітно темнішими за решту приглушеного тексту.                     */
+/*                                                                             */
+/* Відсотки підібрані так, щоб на дефолтному білому хромі дати рівно рампу      */
+/* (--vs-n-500, --vs-n-200, --vs-n-100) — інакше оновлення теми зсунуло б колір */
+/* кожної другої лінії в шапці.                                                 */
+
+.vs-header,
+.vs-footer {
+	--vs-text: var(--vs-chrome-text);
+	--vs-heading: var(--vs-chrome-text);
+	--vs-text-muted: color-mix(in srgb, var(--vs-chrome-text) 65%, var(--vs-chrome));
+	--vs-surface-subtle: color-mix(in srgb, var(--vs-chrome-text) 8%, var(--vs-chrome));
+	--vs-hairline: color-mix(in srgb, var(--vs-chrome-text) 13%, var(--vs-chrome));
+}
+
+/* Поверхні, які лежать у хромі, але фарбуються не ним: випадайка каталогу,     */
+/* підменю, панель перемикача, поле пошуку з підказками, поле підписки. Кожна   */
+/* світла за будь-якого хрому, тож токени повертаються до значень тіла — і межа */
+/* теж, інакше на темній шапці біла панель отримала б світлий контур на собі.   */
+
+.vs-header .vs-catalog,
+.vs-header .vs-nav ul ul,
+.vs-header .vs-disclosure__panel,
+.vs-header .vs-search,
+.vs-footer .vs-field {
+	--vs-text: var(--okay-body-text);
+	--vs-heading: var(--okay-body-heading);
+	--vs-text-muted: var(--vs-n-500);
+	--vs-surface-subtle: var(--vs-n-100);
+	--vs-hairline: var(--vs-n-200);
+}
+
+/* Колір кнопки й колір хрому — два незалежні налаштування, і ніщо не заважає   */
+/* їм збігтися: тоді «Каталог товарів» і «Підписатися» лишаються читабельними,  */
+/* але втрачають форму. Волосяний контур із кольору тексту хрому повертає межу  */
+/* й на світлому хромі невидимий, бо там кнопка й так контрастна.               */
+
+.vs-header .vs-btn--primary,
+.vs-footer .vs-btn--primary {
+	border-color: color-mix(in srgb, var(--vs-chrome-text) 22%, transparent);
+}
+
 .vs-header {
 	position: relative;
 	z-index: var(--vs-z-sticky);
-	background-color: var(--vs-surface);
+	background-color: var(--vs-chrome);
 }
 
 .vs-header__utility {
@@ -367,7 +416,7 @@ body.other_page .main {
 /* та липне; після початку прокрутки смугу відділяє тінь нижче.                 */
 
 .vs-header__main {
-	background-color: var(--vs-surface);
+	background-color: var(--vs-chrome);
 	border-bottom: 1px solid var(--vs-hairline);
 	transition: box-shadow var(--vs-dur-2) var(--vs-ease);
 }
@@ -1921,7 +1970,7 @@ body.hc-nav-open {
 .vs-footer {
 	margin-top: var(--vs-space-9);
 	padding-top: var(--vs-space-7);
-	background-color: var(--vs-surface);
+	background-color: var(--vs-chrome);
 	border-top: 1px solid var(--vs-hairline);
 }
 
@@ -2977,7 +3026,6 @@ body.hc-nav-open {
 
 .vs-catalogue__intro {
 	margin-top: var(--vs-space-4);
-	max-width: 70ch;
 	color: var(--vs-text-muted);
 	font-size: var(--vs-text-sm);
 }
@@ -2990,10 +3038,6 @@ body.hc-nav-open {
 	margin-top: var(--vs-space-9);
 	padding-top: var(--vs-space-6);
 	border-top: 1px solid var(--vs-hairline);
-}
-
-.vs-catalogue__outro .block__description {
-	max-width: 80ch;
 }
 
 .vs-toc {
@@ -4472,7 +4516,6 @@ body.hc-nav-open {
 	align-items: center;
 	justify-content: center;
 	flex: 1 1 160px;
-	max-width: none;
 	min-height: 52px;
 	margin: 0;
 	padding: 0 var(--vs-space-4);
@@ -6259,7 +6302,6 @@ body.hc-nav-open {
 }
 
 .vs-checkout__intro {
-	max-width: 70ch;
 	margin-bottom: var(--vs-space-5);
 	color: var(--vs-text-muted);
 	font-size: var(--vs-text-sm);
@@ -7428,7 +7470,6 @@ body.hc-nav-open {
 /* defensive - it constrains what arrives rather than assuming a shape.         */
 
 .vs-prose {
-	max-width: 74ch;
 	color: var(--vs-text);
 	line-height: var(--vs-leading-body);
 	overflow-wrap: break-word;
@@ -7444,7 +7485,6 @@ body.hc-nav-open {
 
 .vs-prose p {
 	margin: 0 0 var(--vs-space-4);
-	max-width: none;
 }
 
 .vs-prose p:last-child {
@@ -7906,7 +7946,6 @@ body.hc-nav-open {
 
 .vs-modal-note__text {
 	margin: 0;
-	max-width: none;
 	color: var(--vs-text-muted);
 }
 
@@ -7980,13 +8019,25 @@ body.hc-nav-open {
 	transform: translateX(2px);
 }
 
-/* A value step, not a fourth hue: the band separates the discounted rail from   */
-/* the two rails above it without colouring anything.                            */
+/* Смуга акційних товарів — єдиний блок вітрини з власним тлом і єдине місце,   */
+/* де воно виноситься в адмінку. За замовчуванням це той самий крок світлоти,   */
+/* що й був, а не четвертий відтінок; але власник може зробити смугу фірмовою,  */
+/* тож заголовок і «переглянути всі» ведуться за кольором тексту. Картки        */
+/* всередині мають власне тло, тож повертають токени до значень тіла.           */
 
 .vs-home__band {
 	margin-top: var(--vs-space-9);
 	padding-bottom: var(--vs-space-8);
-	background-color: var(--vs-surface-subtle);
+	background-color: var(--vs-band);
+	--vs-text: var(--vs-band-text);
+	--vs-heading: var(--vs-band-text);
+	--vs-text-muted: color-mix(in srgb, var(--vs-band-text) 65%, var(--vs-band));
+}
+
+.vs-home__band .product_item {
+	--vs-text: var(--okay-body-text);
+	--vs-heading: var(--okay-body-heading);
+	--vs-text-muted: var(--vs-n-500);
 }
 
 .vs-home__band .vs-home__section {
@@ -8367,7 +8418,6 @@ body.hc-nav-open {
 	-webkit-box-orient: vertical;
 	overflow: hidden;
 	margin: 0;
-	max-width: none;
 	color: var(--vs-text-muted);
 	font-size: var(--vs-text-sm);
 }
@@ -8434,7 +8484,6 @@ body.hc-nav-open {
 
 .vs-blog__intro {
 	margin-top: var(--vs-space-4);
-	max-width: 70ch;
 	color: var(--vs-text-muted);
 	font-size: var(--vs-text-sm);
 }
@@ -8460,7 +8509,6 @@ body.hc-nav-open {
 
 .vs-aside__promo {
 	margin: 0 0 var(--vs-space-3);
-	max-width: none;
 	color: var(--vs-text-muted);
 	font-size: var(--vs-text-sm);
 }
@@ -9518,7 +9566,6 @@ body.hc-nav-open {
 
 .vs-404__note p {
 	margin: 0;
-	max-width: none;
 }
 
 .vs-404__actions {
@@ -10998,10 +11045,19 @@ img.lazy:not(.loaded) {
 		}
 
 		.vs-header__utility {
-			background-color: var(--vs-surface);
+			background-color: var(--vs-chrome);
 		}
 
-		.vs-header__main,
+		/* Смуга покупки не хром, а картка товару, що переїхала вниз екрана, тож */
+		/* лишається на --vs-surface. Правило поруч, бо саме звідси воно виграє  */
+		/* каскад, і розділення селектора цього не змінює.                       */
+
+		.vs-header__main {
+			background-color: color-mix(in srgb, var(--vs-chrome) 82%, transparent);
+			-webkit-backdrop-filter: blur(12px);
+			backdrop-filter: blur(12px);
+		}
+
 		.vs-sticky-buy {
 			background-color: color-mix(in srgb, var(--vs-surface) 82%, transparent);
 			-webkit-backdrop-filter: blur(12px);
