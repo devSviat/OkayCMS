@@ -3190,17 +3190,11 @@ button.swiper-pagination-bullet {
 .fn_social_image .fa-pinterest-p:before {
   content: "\f231";
 }
-.fn_social_image .fa-odnoklassniki:before {
-  content: "\f263";
-}
 .fn_social_image .fa-facebook:before {
   content: "\f09a";
 }
 .fn_social_image .fa-skype:before {
   content: "\f17e";
-}
-.fn_social_image .fa-vk:before {
-  content: "\f189";
 }
 .fn_social_image .fa-whatsapp:before {
   content: "\f232";

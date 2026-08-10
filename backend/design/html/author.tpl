@@ -384,10 +384,6 @@
     $(document).on("change keyup", ".fn_social_input", function () {
         let domain = $(this).val().replace(/^(https?:\/\/)?(www\.)?([^.]+)?\..*$/, '$3'),
             social_image_wrap = $(this).closest('.fn_row').find('.fn_social_image');
-        
-        if (domain === 'ok') {
-            domain = 'odnoklassniki';
-        }
 
         var source = $(".fn_social_icon_source [data-domain='" + domain + "']");
         if (!source.length) {
