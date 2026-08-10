@@ -4,62 +4,37 @@
 namespace Okay\Core;
 
 
+/**
+ * @deprecated Лишився заради зворотної сумісності з модулями. Нове йде через
+ *             Okay\Core\SocialShare — назва JsSocial указувала на бібліотеку
+ *             jssocials, якої у форку більше немає.
+ */
 class JsSocial
 {
+    private $socialShare;
 
-    /**
-     * Домен некоторых соц. сетей не соответствует стилям font-awesome, для них сделаны эти алиасы
-     * 
-     * @var string[] 
-     */
-    private static $socialAliases = [
-        "ok" => 'odnoklassniki',
-    ];
+    public function __construct(SocialShare $socialShare)
+    {
+        $this->socialShare = $socialShare;
+    }
 
-    private $jsSocials = [
-        "email",
-        "twitter",
-        "facebook",
-        "googleplus",
-        "linkedin",
-        "pinterest",
-        "stumbleupon",
-        "pocket",
-        "whatsapp",
-        "viber",
-        "messenger",
-        "telegram",
-        "line",
-        "odnoklassniki",
-        "vkontakte",
-    ];
-    
-    private $customJsSocials = [
-        "odnoklassniki" => [
-            "label" => "ok",
-            "logo" => "fa fa-odnoklassniki",
-            "shareUrl" => "https://connect.ok.ru/dk?st.cmd=WidgetSharePreview&st.shareUrl={url}&title={title}",
-        ],
-    ];
-    
     public function getSocials()
     {
-        return $this->jsSocials;
+        return $this->socialShare->getNetworks();
     }
-    
+
+    /**
+     * Раніше доліплювало odnoklassniki, якого не було у вбудованому списку
+     * jssocials. Тепер ОК є у SocialShare нарівні з рештою, тож доліплювати
+     * нічого. Метод лишається, щоб foreach у чужому шаблоні не впав.
+     */
     public function getCustomSocials()
     {
-        return $this->customJsSocials;
+        return [];
     }
-    
+
     public static function getSocialDomain($link)
     {
-        $socialDomain = preg_replace('~^(https?://)?(www\.)?([^.]+)?\..*$~', '$3', $link);
-        
-        if (isset(self::$socialAliases[$socialDomain])) {
-            return self::$socialAliases[$socialDomain];
-        }
-        return $socialDomain;
+        return SocialShare::getSocialDomain($link);
     }
-    
 }

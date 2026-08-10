@@ -357,8 +357,14 @@ $services = [
             new PR('design.debug_translation'),
         ],
     ],
+    SocialShare::class => [
+        'class' => SocialShare::class,
+    ],
     JsSocial::class => [
         'class' => JsSocial::class,
+        'arguments' => [
+            new SR(SocialShare::class),
+        ],
     ],
     DataCleaner::class => [
         'class' => DataCleaner::class,
