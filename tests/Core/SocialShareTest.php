@@ -93,6 +93,38 @@ class SocialShareTest extends TestCase
         $this->assertTrue($links[0]['blank']);
     }
 
+    /**
+     * Правити ядро модулю не можна, тож addNetwork() - єдиний спосіб замінити
+     * адресу вбудованої мережі. На операторі + злиття лишало стару адресу, і
+     * реєстрація мовчки не діяла.
+     */
+    public function testAddNetworkOverridesABuiltInNetwork(): void
+    {
+        $share = new SocialShare();
+        $share->addNetwork('pinterest', 'Pinterest', 'https://pinterest.com/pin/create/button/?url={url}');
+
+        $links = $share->buildLinks(['pinterest'], 'https://shop.ua/p/1', 'Диван');
+
+        $this->assertCount(1, $links, 'мережа не має здвоюватись');
+        $this->assertSame(
+            'https://pinterest.com/pin/create/button/?url=https%3A%2F%2Fshop.ua%2Fp%2F1',
+            $links[0]['url']
+        );
+    }
+
+    /**
+     * Перевизначення не має пересувати кнопку: порядок береться з NETWORKS.
+     */
+    public function testOverridingANetworkKeepsItsPosition(): void
+    {
+        $share = new SocialShare();
+        $before = $share->getNetworks();
+
+        $share->addNetwork('telegram', 'Telegram', 'https://t.me/share/url?url={url}');
+
+        $this->assertSame($before, $share->getNetworks());
+    }
+
     public function testGetSocialDomainStripsSchemeAndWww(): void
     {
         $this->assertSame('facebook', SocialShare::getSocialDomain('https://www.facebook.com/shop'));

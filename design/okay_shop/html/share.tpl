@@ -13,7 +13,7 @@
         {/if}
         <div class="share__icons">
             {foreach $okShareLinks as $okLink}
-                <a class="share__item" href="{$okLink.url|escape}"{if $okLink.blank} target="_blank" rel="noopener nofollow"{/if}>
+                <a class="share__item" href="{$okLink.url|escape}" title="{$okLink.label|escape}"{if $okLink.blank} target="_blank" rel="noopener nofollow"{/if}>
                     <span class="share__glyph">{include file="social_icon.tpl" domain=$okLink.key}</span>
                     <span class="sr-only">{$okLink.label|escape}</span>
                 </a>

@@ -14,7 +14,7 @@
         <span class="vs-share__label" data-language="product_share">{$lang->product_share}</span>
         <div class="vs-share__list">
             {foreach $vsShareLinks as $vsLink}
-                <a class="vs-share__item" href="{$vsLink.url|escape}"{if $vsLink.blank} target="_blank" rel="noopener nofollow"{/if}>
+                <a class="vs-share__item" href="{$vsLink.url|escape}" title="{$vsLink.label|escape}"{if $vsLink.blank} target="_blank" rel="noopener nofollow"{/if}>
                     <span class="vs-share__glyph">{include file="social_icon.tpl" domain=$vsLink.key}</span>
                     <span class="vs-share__name">{$vsLink.label|escape}</span>
                 </a>

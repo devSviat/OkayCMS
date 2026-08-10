@@ -50,11 +50,15 @@ class SocialShare
     }
 
     /**
+     * array_replace, а не оператор +: той при збігу ключів лишає значення
+     * лівого масиву, тобто addNetwork() для вбудованої мережі мовчки нічого
+     * не робив би. Порядок NETWORKS зберігається, нові ключі йдуть у кінець.
+     *
      * @return array<string, array{label: string, url: string}>
      */
     private function networks(): array
     {
-        return self::NETWORKS + $this->extraNetworks;
+        return array_replace(self::NETWORKS, $this->extraNetworks);
     }
 
     /**

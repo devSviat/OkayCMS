@@ -540,5 +540,8 @@ body.hc-nav-open {
     display: inline-block;
     vertical-align: middle;
     width: 21px;
-    height: 21px
+    height: 21px;
+    /* Скидається, бо .hc-offcanvas-nav a svg дає 10px, і в комірці,     */
+    /* центрованій через justify-content, іконка зʼїжджала на 5px ліворуч. */
+    margin-right: 0;
 }
