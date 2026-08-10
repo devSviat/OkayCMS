@@ -163,7 +163,7 @@ git diff upstream/master main -- design/okay_shop
 `css.php` та `js.php`, перекладений коментар у `theme-settings.css`, вставка
 `{$debug_bar_inline_assets}` в `index.tpl`.
 
-**5. Іконки соцмереж — власні SVG, а не іконковий шрифт (10 файлів).** Бібліотеки
+**5. Іконки соцмереж — власні SVG, а не іконковий шрифт (11 файлів).** Бібліотеки
 `js_libraries/` у форку немає: розмітку кнопок «поділитися» віддає сервер, а гліфи для них і
 для посилань магазину у футері бере `html/social_icon.tpl`. Вашої теми це стосується
 напряму — див. [крок 7](#7-кнопки-поділитися-віддає-сервер).
@@ -322,7 +322,7 @@ $(".fn_share").jsSocials({ shares: {$settings->sj_shares|json_encode} });
 {if $shareLinks}
     <div class="share__list">
         {foreach $shareLinks as $link}
-            <a href="{$link.url|escape}" target="_blank" rel="noopener nofollow">
+            <a href="{$link.url|escape}"{if $link.blank} target="_blank" rel="noopener nofollow"{/if}>
                 {* ваш гліф за $link.key *}
                 <span class="sr-only">{$link.label|escape}</span>
             </a>
@@ -330,6 +330,11 @@ $(".fn_share").jsSocials({ shares: {$settings->sj_shares|json_encode} });
     </div>
 {/if}
 ```
+
+`$link.blank` вішайте саме так, а не безумовно: `email` віддається поштовому клієнту
+(`mailto:`), `viber` — застосунку (`viber://`), і нова вкладка в обох випадках лишається
+висіти порожньою. Прапорець рахує `SocialShare` зі схеми адреси, тож у шаблоні його
+перевіряти не треба.
 
 Викликайте його там, де стояв контейнер: `{include file="share.tpl" url=$canonical title=$h1}`
 на товарі й `url=$canonical title=$post->name` у пості.
