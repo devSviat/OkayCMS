@@ -1,20 +1,8 @@
-{* Кнопки шарингу. Мережі — з налаштувань теми, адреси будує Okay\Core\SocialShare.
-   Гліфи — FontAwesome, як і решта іконок цієї теми; бренд-класи для X, Viber і LINE
-   у 4.7 відсутні, тож там загальні. Раніше ці кнопки малював у браузері jssocials.
+{* Кнопки шарингу. Мережі — з налаштувань теми, адреси будує Okay\Core\SocialShare,
+   гліфи — з social_icon.tpl. Раніше це малював у браузері jssocials, а іконки брав
+   із FontAwesome, де немає ні X, ні Viber, ні LINE.
 
    label=false у пості: там підпис прибраний ще стоковою темою. *}
-{$okShareIcons = [
-    'facebook' => 'fa-facebook',
-    'twitter' => 'fa-twitter',
-    'telegram' => 'fa-telegram',
-    'whatsapp' => 'fa-whatsapp',
-    'viber' => 'fa-phone',
-    'linkedin' => 'fa-linkedin',
-    'pinterest' => 'fa-pinterest',
-    'reddit' => 'fa-reddit',
-    'line' => 'fa-comment',
-    'email' => 'fa-envelope-o'
-]}
 {share_links var=okShareLinks url=$url title=$title}
 {if $okShareLinks}
     <div class="share">
@@ -26,7 +14,7 @@
         <div class="share__icons">
             {foreach $okShareLinks as $okLink}
                 <a class="share__item" href="{$okLink.url|escape}" target="_blank" rel="noopener nofollow">
-                    <i class="fa {$okShareIcons[$okLink.key]|default:'fa-share-alt'}" aria-hidden="true"></i>
+                    <span class="share__glyph">{include file="social_icon.tpl" domain=$okLink.key}</span>
                     <span class="sr-only">{$okLink.label|escape}</span>
                 </a>
             {/foreach}

@@ -159,10 +159,10 @@
 <ul class="bottom-nav social">
     {foreach $settings->site_social_links as $social_link}
     {$social_domain = preg_replace('~(https?://)?(www\.)?([^\.]+)?\..*~', '$3', $social_link)}
-    {if isset($social_aliases.$social_domain) || $social_domain}
+    {if $social_domain}
     <li class="">
-        <a class="{if isset($social_aliases.$social_domain)}{$social_aliases.$social_domain}{else}{$social_domain}{/if}" href="{if !preg_match('~^https?://.*$~', $social_link)}https://{/if}{$social_link|escape}" target="_blank" title="{$social_domain}">
-            <i class="fa fa-{if isset($social_aliases.$social_domain)}{$social_aliases.$social_domain}{else}{$social_domain}{/if}"></i>
+        <a class="{$social_domain|escape}" href="{if !preg_match('~^https?://.*$~', $social_link)}https://{/if}{$social_link|escape}" target="_blank" title="{$social_domain|escape}">
+            {include file="social_icon.tpl" domain=$social_domain}
         </a>
     </li>
     {/if}

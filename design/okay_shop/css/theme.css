@@ -3382,8 +3382,17 @@ a.filter__catalog_link svg {
 .share__item:hover {
   color: var(--okay-basic-company);
 }
-.share__item .fa {
-  font-size: 16px;
+.share__glyph {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 18px;
+  height: 18px;
+}
+.share__glyph svg {
+  width: 100%;
+  height: 100%;
 }
 
 /***** #Features ********************************************************************/
@@ -3819,6 +3828,28 @@ footer {
   float: left;
   text-decoration: none;
   transition: all 400ms;
+}
+.social__link {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+.social__link svg {
+  width: 16px;
+  height: 16px;
+}
+.post_author__social .social__link svg {
+  width: 13px;
+  height: 13px;
 }
 .footer__payments {
   text-align: right;

@@ -301,7 +301,7 @@
                         <div class="footer__content footer__social social footer__hidden">
                             {foreach $site_social as $social}
                                 <a class="social__link {$social.domain|escape}" rel="noreferrer" aria-label="{$social_domain}" href="{if !preg_match('~^https?://.*$~', $social.url)}https://{/if}{$social.url|escape}" target="_blank" title="{$social.domain|escape}">
-                                    <i class="fa fa-{$social.domain|escape}"></i>
+                                    {include file="social_icon.tpl" domain=$social.domain}
                                 </a>
                             {/foreach}
                         </div>
