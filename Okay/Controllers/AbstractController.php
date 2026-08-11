@@ -15,6 +15,7 @@ use Okay\Core\EntityFactory;
 use Okay\Core\Request;
 use Okay\Core\Response;
 use Okay\Core\Security\CustomerCsrfToken;
+use Okay\Core\Security\StorefrontGuard;
 use Okay\Core\Settings;
 use Okay\Helpers\MainHelper;
 use Okay\Helpers\MetadataHelpers\MetadataInterface;
@@ -162,19 +163,7 @@ class AbstractController
      */
     protected function requireCustomerCsrf()
     {
-        if (!$this->request->method('post')) {
-            $this->response->setStatusCode(405);
-            $this->response->setContent('Method Not Allowed', RESPONSE_TEXT);
-            $this->response->sendContent();
-            exit;
-        }
-
-        if (!CustomerCsrfToken::check($this->request->post('customer_csrf_token'))) {
-            $this->response->setStatusCode(403);
-            $this->response->setContent('Forbidden', RESPONSE_TEXT);
-            $this->response->sendContent();
-            exit;
-        }
+        $this->serviceLocator->getService(StorefrontGuard::class)->requireCustomerCsrf();
     }
     
     /*

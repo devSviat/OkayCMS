@@ -73,6 +73,78 @@ public function ajaxUpdate()
 [../UPGRADE-security.md](../UPGRADE-security.md), приклади розмітки —
 [../theme-porting.md](../theme-porting.md).
 
+`requireCustomerCsrf()` живе в `AbstractController`, тож із хелпера чи будь-якого іншого класу
+недоступний. Там візьміть той самий сервіс через DI:
+
+```php
+use Okay\Core\Security\StorefrontGuard;
+
+public function __construct(StorefrontGuard $storefrontGuard)
+{
+    $this->storefrontGuard = $storefrontGuard;
+}
+
+public function handlePost()
+{
+    $this->storefrontGuard->requireCustomerCsrf();
+    // …
+}
+```
+
+## Форма в модулі
+
+Якщо модуль додає на вітрину власну форму, у неї закладаються два різні поля. Вони вирішують
+різні задачі, і плутати їх не варто.
+
+| Поле | Від чого | Обовʼязкове? |
+| ---- | -------- | ------------ |
+| `customer_csrf_token` | підробка запиту з чужого сайту | **так**, якщо форма щось змінює |
+| `form_token` | повтор тієї самої відправки | ні, але без нього захист слабший |
+
+```smarty
+<form method="post" action="{url_generator route="Vendor.Module.Action"}">
+    <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
+    {form_token name="vendor_module_action"}
+    …
+</form>
+```
+
+**`customer_csrf_token` обовʼязковий.** Без нього серверна перевірка віддасть 403 і запис не
+створиться. Значення кладе `AbstractController` у кожен шаблон вітрини — включно з шаблонами
+модулів, — тож нічого готувати не треба.
+
+**`form_token` не обовʼязковий**, але потрібен усюди, де повторна відправка створює зайвий
+рядок або зайвий лист: заявка, відгук, коментар, замовлення. Імʼя форми вибирайте своє й
+унікальне — під ним токен лежить у сесії, тож дві форми з одним іменем гаситимуть одна одну.
+
+На сервері рішення «нова відправка чи повтор» приймає один виклик:
+
+```php
+use Okay\Core\Security\FormToken;
+
+const ORDER_FORM = 'vendor_module_action';
+
+if (!FormToken::accept(self::ORDER_FORM, $this->request->post('form_token'), $payload)) {
+    // Повтор. Це не помилка користувача: показуйте той самий успіх,
+    // що й перша відправка, або ведіть на вже створений обʼєкт.
+    return;
+}
+```
+
+`$payload` — дані форми (обʼєкт або масив). Вони йдуть у запасний відбиток: якщо поле
+`form_token` у запиті відсутнє, повтором вважається та сама відправка протягом 10 хвилин.
+Відбиток менш точний, тому це саме запасний шлях.
+
+Дві речі, на яких легко спіткнутись:
+
+- **Виклик має бути до запису**, інакше рядок уже створено, і гасити нема чого.
+- **Не кладіть у `$payload` те, що змінює сама дія.** Оформлення замовлення очищає кошик, тож
+  відбиток, порахований зі складу кошика, у повторного запиту вийде інший — і повтор
+  проскочить. Беріть дані форми, а не стан, який дія руйнує.
+
+Зразки в дереві: `Okay/Helpers/CommonHelper.php` (зворотний дзвінок),
+`Okay/Modules/OkayCMS/FastOrder/Controllers/FastOrderController.php` (замовлення через AJAX).
+
 ## Блоки дизайну
 
 Вітрина теж розмічена іменованими блоками — їх менше, ніж в адмінці.

@@ -104,8 +104,20 @@ class StorefrontCsrfGuardTest extends TestCase
         $this->assertStringContainsString('function requireCustomerCsrf', $source);
         $this->assertStringContainsString('function customerCsrfToken', $source);
         $this->assertStringContainsString("assign('customer_csrf_token'", $source);
-        $this->assertStringContainsString('setStatusCode(405)', $source);
-        $this->assertStringContainsString('setStatusCode(403)', $source);
+    }
+
+    /**
+     * Тіло охорони живе в сервісі, бо POST обробляють і хелпери, де контролера
+     * немає. Коди відповіді перевіряються там, де вони тепер стоять.
+     */
+    public function testGuardServiceRefusesWrongMethodAndWrongToken()
+    {
+        $source = $this->read('Okay/Core/Security/StorefrontGuard.php');
+
+        $this->assertStringContainsString("method('post')", $source);
+        $this->assertStringContainsString('CustomerCsrfToken::check', $source);
+        $this->assertStringContainsString('reject(405', $source);
+        $this->assertStringContainsString('reject(403', $source);
     }
 
     #[DataProvider('mutationParamReaderProvider')]

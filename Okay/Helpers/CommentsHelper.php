@@ -11,7 +11,9 @@ use Okay\Core\Modules\Extender\ExtenderFacade;
 use Okay\Core\Notify;
 use Okay\Core\Request;
 use Okay\Core\Response;
+use Okay\Core\Security\FormToken;
 use Okay\Core\Security\SafeRedirect;
+use Okay\Core\Security\StorefrontGuard;
 use Okay\Entities\BlogEntity;
 use Okay\Entities\CommentsEntity;
 use Okay\Entities\ProductsEntity;
@@ -19,6 +21,8 @@ use Okay\Requests\CommonRequest;
 
 class CommentsHelper implements GetListInterface
 {
+    /** Форма коментаря для FormToken. */
+    const COMMENT_FORM = 'comment';
 
     private $entityFactory;
     private $commentsRequest;
@@ -28,15 +32,19 @@ class CommentsHelper implements GetListInterface
     private $languages;
     private $user;
     private $mainHelper;
+    private $storefrontGuard;
+    private $request;
 
     public function __construct(
-        EntityFactory  $entityFactory,
-        CommonRequest  $commentsRequest,
-        ValidateHelper $validateHelper,
-        Design         $design,
-        Notify         $notify,
-        MainHelper     $mainHelper,
-        Languages      $languages
+        EntityFactory   $entityFactory,
+        CommonRequest   $commentsRequest,
+        ValidateHelper  $validateHelper,
+        Design          $design,
+        Notify          $notify,
+        MainHelper      $mainHelper,
+        Languages       $languages,
+        StorefrontGuard $storefrontGuard,
+        Request         $request
     ) {
         $this->entityFactory = $entityFactory;
         $this->commentsRequest = $commentsRequest;
@@ -45,6 +53,8 @@ class CommentsHelper implements GetListInterface
         $this->notify = $notify;
         $this->languages = $languages;
         $this->mainHelper = $mainHelper;
+        $this->storefrontGuard = $storefrontGuard;
+        $this->request = $request;
         $this->user = $mainHelper->getCurrentUser();
     }
 
@@ -179,13 +189,22 @@ class CommentsHelper implements GetListInterface
     public function addCommentProcedure($objectType, $objectId)
     {
         if (($comment = $this->commentsRequest->postComment()) !== null) {
+            $this->storefrontGuard->requireCustomerCsrf();
+
             if ($error = $this->validateHelper->getCommentValidateError($comment)) {
                 $this->design->assign('error', $error);
             } else {
 
+                // Редирект нижче рятує лише браузерний F5. Від подвійного кліку
+                // й повтору запиту рятує токен: без нього два майже одночасні
+                // POST давали два коментарі й два листи.
+                if (!$this->acceptComment($comment)) {
+                    Response::redirectTo($this->backUrl(''));
+                }
+
                 /** @var CommentsEntity $commentsEntity */
                 $commentsEntity = $this->entityFactory->get(CommentsEntity::class);
-                
+
                 // Создаем комментарий
                 $comment->object_id = $objectId;
                 $comment->type      = $objectType;
@@ -197,23 +216,37 @@ class CommentsHelper implements GetListInterface
                 } elseif (!empty($user = $this->mainHelper->getCurrentUser()) && !empty($user->id)) {
                     $comment->user_id = $user->id;
                 }
-                
+
                 // Добавляем комментарий в базу
                 $commentId = $commentsEntity->add($comment);
                 // Отправляем email
                 $this->notify->emailCommentAdmin($commentId);
-                
+
                 ExtenderFacade::execute(__METHOD__, $commentId, func_get_args());
-                
-                // REQUEST_URI приходить із рядка запиту: "GET //evil.com"
-                // дає protocol-relative редирект на чужий хост.
-                $backUrl = $_SERVER['REQUEST_URI'] . '#comment_' . $commentId;
-                if (!SafeRedirect::isSameOrigin($backUrl, Request::getDomainWithProtocol())) {
-                    $backUrl = Request::getRootUrl();
-                }
-                Response::redirectTo($backUrl);
+
+                Response::redirectTo($this->backUrl('#comment_' . $commentId));
             }
         }
+    }
+
+    private function acceptComment($comment)
+    {
+        return FormToken::accept(self::COMMENT_FORM, $this->request->post('form_token'), $comment);
+    }
+
+    /**
+     * REQUEST_URI приходить із рядка запиту: "GET //evil.com" дає
+     * protocol-relative редирект на чужий хост.
+     */
+    private function backUrl($anchor)
+    {
+        $backUrl = $_SERVER['REQUEST_URI'] . $anchor;
+
+        if (!SafeRedirect::isSameOrigin($backUrl, Request::getDomainWithProtocol())) {
+            return Request::getRootUrl();
+        }
+
+        return $backUrl;
     }
 
     public function attachTargetEntitiesToComments($comments)

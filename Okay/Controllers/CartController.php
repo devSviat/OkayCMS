@@ -17,7 +17,7 @@ use Okay\Entities\OrdersEntity;
 use Okay\Core\Request;
 use Okay\Core\Cart;
 use Okay\Core\Languages;
-use Okay\Core\Security\CheckoutToken;
+use Okay\Core\Security\FormToken;
 use Okay\Helpers\DeliveriesHelper;
 use Okay\Helpers\PaymentsHelper;
 use Okay\Helpers\ValidateHelper;
@@ -25,31 +25,29 @@ use Okay\Helpers\OrdersHelper;
 
 class CartController extends AbstractController
 {
-    /** Куди вести повторний сабміт: замовлення вже створене цим сеансом. */
-    const LAST_ORDER_URL = 'last_order_url';
+    /** Форма оформлення для FormToken. */
+    const CHECKOUT_FORM = 'checkout';
 
     /**
-     * Токен - основний шлях, відбиток - запасний для тем, які токен ще не
-     * передають. Відбиток менш точний, тому лише за відсутності токена.
+     * Відбиток тут враховує ще й склад кошика: те саме ім'я з тим самим
+     * телефоном, але з іншим набором товарів - це нове замовлення.
      */
     private function acceptCheckout($order)
     {
-        $token = $this->request->post('checkout_token');
-
-        if (CheckoutToken::isWellFormed($token)) {
-            return CheckoutToken::consume($token);
-        }
-
         $cartItems = isset($_SESSION['shopping_cart']) && is_array($_SESSION['shopping_cart'])
             ? $_SESSION['shopping_cart']
             : [];
 
-        return CheckoutToken::consumeFingerprint(CheckoutToken::fingerprintOf($order, $cartItems));
+        return FormToken::accept(
+            self::CHECKOUT_FORM,
+            $this->request->post('form_token'),
+            [$order, $cartItems]
+        );
     }
 
     private function lastOrderUrl()
     {
-        $url = $_SESSION[self::LAST_ORDER_URL] ?? null;
+        $url = $_SESSION[OrdersHelper::LAST_ORDER_URL] ?? null;
 
         if (is_string($url) && $url !== '') {
             return Router::generateUrl('order', ['url' => $url], true);
@@ -156,8 +154,6 @@ class CartController extends AbstractController
 
                 $cart->clear();
 
-                $_SESSION[self::LAST_ORDER_URL] = $order->url;
-
                 // Перенаправляем на страницу заказа или отправляем форму для автосабмита или урл заказа
                 if ($this->request->post('ajax')) {
                     $content = $cartHelper->getAjaxOrderContent($order);
@@ -200,9 +196,6 @@ class CartController extends AbstractController
         $this->design->assign('payment_methods', $paymentMethods);
         $this->design->assign('active_delivery', $activeDelivery);
         $this->design->assign('active_payment', $activePayment);
-
-        // Форма оформлення: <input type="hidden" name="checkout_token" value="{$checkout_token|escape}">
-        $this->design->assign('checkout_token', CheckoutToken::get());
 
         if ($couponsEntity->count(['valid'=>1])>0) {
             $this->design->assign('coupon_request', true);

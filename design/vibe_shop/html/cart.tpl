@@ -60,7 +60,7 @@
                     <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                     {* Одноразовий: повторний сабміт тієї самої форми (подвійний клік,
                        F5, повтор після таймауту) не створює друге замовлення. *}
-                    <input type="hidden" name="checkout_token" value="{$checkout_token|escape}">
+                    {form_token name="checkout"}
 
                     {* Implicit submission (Enter in any text field, the phone
                        keyboard's Go key) activates the form's DEFAULT button -

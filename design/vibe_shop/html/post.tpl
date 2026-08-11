@@ -258,6 +258,9 @@
 
                 {* Comment form *}
                 <form id="fn_blog_comment" class="fn_validate_post vs-form vs-reviews__form" method="post" action="">
+                    <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
+                    {form_token name="comment"}
+
                     {if $settings->captcha_type == "v3"}
                         <input type="hidden" class="fn_recaptcha_token fn_recaptchav3" name="recaptcha_token" />
                     {/if}

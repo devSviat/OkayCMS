@@ -22,6 +22,30 @@ function okayAjax(options) {
   return $.ajax(options);
 }
 
+/* Друга відправка тієї самої форми, поки перша ще в дорозі. Сервер її й так
+   відсіє одноразовим токеном, але тоді дубль уже витратив запит.
+
+   Лише форми, які просто йдуть POST-ом і перезавантажують сторінку. Кошик
+   сюди не входить: автоперехід на оплату пересилає його програмно, і прапорець
+   заблокував би другий, законний сабміт. Кнопку не вимикаємо - її name
+   є частиною payload. */
+$(document).on(
+  "submit",
+  ".fn_validate_callback, .fn_validate_feedback, .fn_validate_product, .fn_validate_post",
+  function (e) {
+    var form = $(this);
+    if (form.data("okay_submitting")) {
+      return false;
+    }
+    // jquery.validate вішається на саму форму, тож відпрацьовує раніше: якщо
+    // вона відхилила ввід, форма нікуди не пішла й блокувати її не можна.
+    if (e.isDefaultPrevented()) {
+      return;
+    }
+    form.data("okay_submitting", true);
+  }
+);
+
 /* Начальное кол-во для смены в карточке и корзине */
 okay.amount = 1;
 
