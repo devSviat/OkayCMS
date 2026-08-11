@@ -25,9 +25,9 @@ class CommonRequest
         $comment = null;
         if ($this->request->post('comment')) {
             $comment = new \stdClass;
-            $comment->name = $this->request->post('name');
-            $comment->email = $this->request->post('email');
-            $comment->text = $this->request->post('text');
+            $comment->name = $this->text('name');
+            $comment->email = $this->text('email');
+            $comment->text = $this->text('text');
         }
 
         return ExtenderFacade::execute(__METHOD__, $comment, func_get_args());
@@ -38,9 +38,9 @@ class CommonRequest
         $feedback = null;
         if ($this->request->post('feedback')) {
             $feedback = new \stdClass;
-            $feedback->email    = $this->request->post('email');
-            $feedback->name     = $this->request->post('name');
-            $feedback->message  = $this->request->post('message');
+            $feedback->email    = $this->text('email');
+            $feedback->name     = $this->text('name');
+            $feedback->message  = $this->text('message');
         }
 
         return ExtenderFacade::execute(__METHOD__, $feedback, func_get_args());
@@ -65,9 +65,24 @@ class CommonRequest
         $subscribe = null;
         if ($this->request->post('subscribe')) {
             $subscribe = new \stdClass;
-            $subscribe->email = $this->request->post('subscribe_email');
+            $subscribe->email = $this->text('subscribe_email');
         }
 
         return ExtenderFacade::execute(__METHOD__, $subscribe, func_get_args());
+    }
+
+    /**
+     * Поля, що лягають у NOT NULL-колонки, беруться тільки через це.
+     * Request::post() на відсутнє поле дає null, а явний null перебиває
+     * значення за замовчуванням: вставка падає, і форма мовчки нічого не
+     * зберігає. Так само зроблено в CartRequest для замовлення.
+     *
+     * callback->message сюди не входить навмисно - його колонка nullable.
+     */
+    private function text($name)
+    {
+        $value = $this->request->post($name);
+
+        return is_scalar($value) ? (string)$value : '';
     }
 }
