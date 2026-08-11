@@ -11,6 +11,7 @@ use Okay\Core\Security\FormToken;
 use Okay\Entities\FeedbacksEntity;
 use Okay\Helpers\ValidateHelper;
 use Okay\Requests\CommonRequest;
+use Psr\Log\LoggerInterface;
 
 class FeedbackController extends AbstractController {
 
@@ -22,7 +23,8 @@ class FeedbackController extends AbstractController {
         Notify $notify,
         CommonRequest $commonRequest,
         ValidateHelper $validateHelper,
-        FrontPostRedirectGet $frontPostRedirectGet
+        FrontPostRedirectGet $frontPostRedirectGet,
+        LoggerInterface $logger
     ) {
 
         // Повідомлення з попереднього POST уже роздав CommonHelper::applyFlash()
@@ -35,22 +37,34 @@ class FeedbackController extends AbstractController {
                 $this->design->assign('error', $error);
             } else {
 
+                $saved = true;
+
                 if ($this->acceptFeedback($feedback)) {
                     $feedback->ip = $_SERVER['REMOTE_ADDR'];
                     $feedback->lang_id = $_SESSION['lang_id'];
                     $feedbackId = $feedbacksEntity->add($feedback);
 
-                    // Отправляем email
-                    $notify->emailFeedbackAdmin($feedbackId);
+                    // Порожній id - запис не пройшов, а нижче показалось би
+                    // «повідомлення надіслано».
+                    if (empty($feedbackId)) {
+                        $logger->error('Звернення зі сторінки зворотного зв\'язку не збережено');
+                        $this->design->assign('error', 'not_saved');
+                        $saved = false;
+                    } else {
+                        // Отправляем email
+                        $notify->emailFeedbackAdmin($feedbackId);
+                    }
                 }
 
                 // Відсіяний повтор бачить те саме, що й перша відправка: для
                 // відвідувача лист пішов, і другого підтвердження він не просив.
-                $frontPostRedirectGet->flash([
-                    'message_sent' => true,
-                    'request_data' => $this->design->getVar('request_data'),
-                ]);
-                $frontPostRedirectGet->redirectToCurrent();
+                if ($saved) {
+                    $frontPostRedirectGet->flash([
+                        'message_sent' => true,
+                        'request_data' => $this->design->getVar('request_data'),
+                    ]);
+                    $frontPostRedirectGet->redirectToCurrent();
+                }
             }
         }
 

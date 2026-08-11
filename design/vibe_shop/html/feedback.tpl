@@ -37,6 +37,8 @@
                             <span data-language="form_enter_email">{$lang->form_enter_email}</span>
                         {elseif $error=='empty_text'}
                             <span data-language="form_enter_message">{$lang->form_enter_message}</span>
+                        {elseif $error=='not_saved'}
+                            <span data-language="form_error_not_saved">{$lang->form_error_not_saved}</span>
                         {else}
                             {$error|escape}
                         {/if}

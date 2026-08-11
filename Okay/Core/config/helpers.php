@@ -540,6 +540,7 @@ return [
             new SR(Languages::class),
             new SR(StorefrontGuard::class),
             new SR(Request::class),
+            new SR(LoggerInterface::class),
         ]
     ],
     RelatedProductsHelper::class => [
