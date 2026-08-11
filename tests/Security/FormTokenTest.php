@@ -19,12 +19,42 @@ class FormTokenTest extends TestCase
         $_SESSION = [];
     }
 
-    public function testTokenIsIssuedAndStable()
+    /**
+     * Кожен рендер форми отримує власний токен. Один спільний був би пасткою:
+     * форма зворотного дзвінка стоїть на кожній сторінці, тож після першої
+     * заявки кожна раніше відкрита вкладка тримала б мертвий токен.
+     */
+    public function testEachRenderGetsItsOwnToken()
     {
-        $token = FormToken::get('callback');
+        $first  = FormToken::get('callback');
+        $second = FormToken::get('callback');
 
-        $this->assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $token);
-        $this->assertSame($token, FormToken::get('callback'));
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $first);
+        $this->assertNotSame($first, $second);
+    }
+
+    public function testTwoTabsBothGoThrough()
+    {
+        $tabOne = FormToken::get('callback');
+        $tabTwo = FormToken::get('callback');
+
+        $this->assertTrue(FormToken::consume('callback', $tabOne));
+        $this->assertTrue(FormToken::consume('callback', $tabTwo));
+    }
+
+    /**
+     * Сторінка, відкрита давно, теж має спрацювати: її токен ніхто не
+     * використав, тож це не повтор, хай і виданий він був годину тому.
+     */
+    public function testAnOldUnusedTokenStillWorks()
+    {
+        $old = FormToken::get('callback');
+
+        for ($i = 0; $i < 5; $i++) {
+            FormToken::consume('callback', FormToken::get('callback'));
+        }
+
+        $this->assertTrue(FormToken::consume('callback', $old));
     }
 
     public function testTokenWorksExactlyOnce()
@@ -35,45 +65,42 @@ class FormTokenTest extends TestCase
         $this->assertFalse(FormToken::consume('callback', $token));
     }
 
-    public function testNextSubmissionGetsAFreshToken()
+    /**
+     * Перелік використаних - свій у кожної форми: заявка на дзвінок не має
+     * гасити коментар, відправлений із тієї ж картки товару.
+     */
+    public function testFormsDoNotShareTheUsedList()
+    {
+        $token = FormToken::get('callback');
+
+        $this->assertTrue(FormToken::consume('callback', $token));
+        $this->assertFalse(FormToken::consume('callback', $token));
+        $this->assertTrue(FormToken::consume('comment', $token));
+    }
+
+    public function testMalformedTokensAreRefused()
+    {
+        $this->assertFalse(FormToken::consume('callback', null));
+        $this->assertFalse(FormToken::consume('callback', ''));
+        $this->assertFalse(FormToken::consume('callback', 'коротко'));
+        $this->assertFalse(FormToken::consume('callback', str_repeat('ы', 64)));
+    }
+
+    /**
+     * Перелік обмежений, інакше сесія росла б без краю. Переповнення означає,
+     * що дуже давній повтор проскочить - це дешевше за втрату даних.
+     */
+    public function testTheUsedListIsBounded()
     {
         $first = FormToken::get('callback');
         FormToken::consume('callback', $first);
 
-        $second = FormToken::get('callback');
+        for ($i = 0; $i < FormToken::MAX_USED; $i++) {
+            FormToken::consume('callback', FormToken::get('callback'));
+        }
 
-        $this->assertNotSame($first, $second);
-        $this->assertTrue(FormToken::consume('callback', $second));
-    }
-
-    /**
-     * Форми на одній сторінці незалежні: заявка на дзвінок не має гасити
-     * коментар, відправлений із тієї ж картки товару.
-     */
-    public function testFormsDoNotShareTokens()
-    {
-        $callback = FormToken::get('callback');
-        $comment  = FormToken::get('comment');
-
-        $this->assertNotSame($callback, $comment);
-        $this->assertFalse(FormToken::consume('comment', $callback));
-        $this->assertTrue(FormToken::consume('callback', $callback));
-        $this->assertTrue(FormToken::consume('comment', $comment));
-    }
-
-    public function testMalformedAndForeignTokensAreRefused()
-    {
-        FormToken::get('callback');
-
-        $this->assertFalse(FormToken::consume('callback', null));
-        $this->assertFalse(FormToken::consume('callback', ''));
-        $this->assertFalse(FormToken::consume('callback', 'коротко'));
-        $this->assertFalse(FormToken::consume('callback', str_repeat('a', 64)));
-    }
-
-    public function testConsumeWithoutAnIssuedTokenIsRefused()
-    {
-        $this->assertFalse(FormToken::consume('callback', str_repeat('a', 64)));
+        $this->assertCount(FormToken::MAX_USED, $_SESSION[FormToken::SESSION_KEY]['callback']);
+        $this->assertTrue(FormToken::consume('callback', $first));
     }
 
     public function testSameSubmissionTwiceIsRefusedByFingerprint()

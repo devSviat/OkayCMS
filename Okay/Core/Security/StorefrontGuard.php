@@ -27,22 +27,31 @@ class StorefrontGuard
 
     /**
      * Пропускає лише POST із коректним токеном вітрини, інакше завершує запит.
+     *
+     * @param bool $asJson для ajax-ендпоінтів: відмова має приїхати в тому ж
+     *                     форматі, що й успіх, інакше виклик її не розбере
      */
-    public function requireCustomerCsrf()
+    public function requireCustomerCsrf($asJson = false)
     {
         if (!$this->request->method('post')) {
-            $this->reject(405, 'Method Not Allowed');
+            $this->reject(405, 'Method Not Allowed', $asJson);
         }
 
         if (!CustomerCsrfToken::check($this->request->post('customer_csrf_token'))) {
-            $this->reject(403, 'Forbidden');
+            $this->reject(403, 'Forbidden', $asJson);
         }
     }
 
-    private function reject($statusCode, $message)
+    private function reject($statusCode, $message, $asJson)
     {
         $this->response->setStatusCode($statusCode);
-        $this->response->setContent($message, RESPONSE_TEXT);
+
+        if ($asJson) {
+            $this->response->setContent(json_encode(['errors' => [$message]]), RESPONSE_JSON);
+        } else {
+            $this->response->setContent($message, RESPONSE_TEXT);
+        }
+
         $this->response->sendContent();
         exit;
     }

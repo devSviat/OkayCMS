@@ -75,6 +75,22 @@ class FormResubmitGuardTest extends TestCase
     }
 
     /**
+     * Розширення мають викликатись до редиректу: Response::redirectTo()
+     * завершується exit, тож усе після нього не виконується взагалі.
+     */
+    public function testExtendersRunBeforeTheRedirect()
+    {
+        $source = $this->read('Okay/Helpers/CommonHelper.php');
+
+        $extenderAt = strpos($source, 'ExtenderFacade::execute(');
+        $redirectAt = strpos($source, '$this->frontPostRedirectGet->redirectToCurrent()');
+
+        $this->assertNotFalse($extenderAt);
+        $this->assertNotFalse($redirectAt);
+        $this->assertLessThan($redirectAt, $extenderAt, 'редирект з exit проковтне розширення');
+    }
+
+    /**
      * Підписка токена не має свідомо: повторний POST тим самим email рядка не
      * створює - його відсіює перевірка унікальності. Якщо колись відсіювання
      * приберуть, цей тест впаде і нагадає про токен.
@@ -107,6 +123,45 @@ class FormResubmitGuardTest extends TestCase
             'blog comment'    => ['post.tpl', 'comment'],
             'checkout'        => ['cart.tpl', 'checkout'],
         ];
+    }
+
+    /**
+     * Форму підписки легко проґавити: токен їй доклеює JS. Але вона не має
+     * action, тож без JS сабмітиться нативно - і без поля відпадає з 403.
+     */
+    #[DataProvider('subscribeTemplateProvider')]
+    public function testSubscribeFormsCarryTheCsrfField($template)
+    {
+        foreach (['okay_shop', 'vibe_shop'] as $theme) {
+            $this->assertStringContainsString(
+                'name="customer_csrf_token"',
+                $this->read("design/{$theme}/html/{$template}"),
+                "$theme/$template"
+            );
+        }
+    }
+
+    public static function subscribeTemplateProvider()
+    {
+        return [
+            'index'        => ['index.tpl'],
+            'blog sidebar' => ['blog_sidebar.tpl'],
+        ];
+    }
+
+    /**
+     * Ajax-ендпоінт має відмовляти в тому ж форматі, що й відповідає: його
+     * виклик читає відповідь як json і text/plain просто не розбере.
+     */
+    public function testFastOrderRefusesInJson()
+    {
+        $source = $this->read('Okay/Modules/OkayCMS/FastOrder/Controllers/FastOrderController.php');
+
+        $this->assertStringContainsString('requireCustomerCsrf(true)', $source);
+        $this->assertStringContainsString(
+            'RESPONSE_JSON',
+            $this->read('Okay/Core/Security/StorefrontGuard.php')
+        );
     }
 
     public function testFastOrderFormSubmitsBothTokens()

@@ -7,3 +7,4 @@ $lang['okay_cms__fast_order__form_phone_error'] = 'Incorrect phone number';
 $lang['okay_cms__fast_order__order_submit'] = 'Order';
 $lang['okay_cms__fast_order__form_captcha_error'] = 'Captcha entered incorrectly';
 $lang['okay_cms__fast_order__wrong_variant'] = 'Selected product not found';
+$lang['okay_cms__fast_order__resend_error'] = 'The order could not be placed, please try again';

@@ -25,9 +25,8 @@ class FeedbackController extends AbstractController {
         FrontPostRedirectGet $frontPostRedirectGet
     ) {
 
-        foreach ($frontPostRedirectGet->match() as $var => $value) {
-            $this->design->assign($var, $value);
-        }
+        // Повідомлення з попереднього POST уже роздав CommonHelper::applyFlash()
+        // із onInit(), тому тут його не забирають удруге - у сесії вже порожньо.
 
         if (($feedback = $commonRequest->postFeedback()) !== null) {
             $this->requireCustomerCsrf();

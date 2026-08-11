@@ -82,12 +82,15 @@ class CommonHelper
             $redirect = true;
         }
 
+        // Розширення - до редиректу: Response::redirectTo() завершується exit,
+        // тож усе, що стоїть після нього, не виконується взагалі. Модуль, який
+        // шле заявку в CRM, інакше мовчки не спрацьовував би саме на успіху.
+        ExtenderFacade::execute(__METHOD__, null, func_get_args());
+
         if ($redirect === true) {
             $this->frontPostRedirectGet->flash($this->flashPayload());
             $this->frontPostRedirectGet->redirectToCurrent();
         }
-
-        ExtenderFacade::execute(__METHOD__, null, func_get_args());
     }
 
     /**
@@ -148,6 +151,9 @@ class CommonHelper
         return FormToken::accept(self::CALLBACK_FORM, $this->request->post('form_token'), $callback);
     }
 
+    /** Прапорці результату, які шаблони показують після редиректу. */
+    const FLASH_FLAGS = ['call_sent', 'call_error', 'subscribe_success', 'subscribe_error'];
+
     /**
      * Що має пережити редирект: прапорці результату й дані форми - шаблони
      * друкують із них ім'я відправника у повідомленні про успіх.
@@ -156,7 +162,7 @@ class CommonHelper
     {
         $vars = ['request_data' => $this->design->getVar('request_data')];
 
-        foreach (['call_sent', 'call_error', 'subscribe_success', 'subscribe_error'] as $var) {
+        foreach (self::FLASH_FLAGS as $var) {
             if (($value = $this->design->getVar($var)) !== null) {
                 $vars[$var] = $value;
             }
@@ -165,10 +171,15 @@ class CommonHelper
         return $vars;
     }
 
+    /**
+     * Третій аргумент assign() - це $dynamicJs, а не «глобально». Прапорці
+     * результату його мали й до PRG, тож вони його зберігають; решта, зокрема
+     * дані форми, у dynamic_js не їде.
+     */
     private function applyFlash()
     {
         foreach ($this->frontPostRedirectGet->match() as $var => $value) {
-            $this->design->assign($var, $value, true);
+            $this->design->assign($var, $value, in_array($var, self::FLASH_FLAGS, true));
         }
     }
 }

@@ -161,9 +161,9 @@ class AbstractController
      *
      * @return void
      */
-    protected function requireCustomerCsrf()
+    protected function requireCustomerCsrf($asJson = false)
     {
-        $this->serviceLocator->getService(StorefrontGuard::class)->requireCustomerCsrf();
+        $this->serviceLocator->getService(StorefrontGuard::class)->requireCustomerCsrf($asJson);
     }
     
     /*

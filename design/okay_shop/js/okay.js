@@ -46,6 +46,14 @@ $(document).on(
   }
 );
 
+/* Повернення кнопкою "Назад" віддає документ із bfcache разом із купою JS, тож
+   прапорець лишається зведеним і форма більше нікуди не надсилається. */
+window.addEventListener("pageshow", function (e) {
+  if (e.persisted) {
+    $("form").removeData("okay_submitting");
+  }
+});
+
 /* Начальное кол-во для смены в карточке и корзине */
 okay.amount = 1;
 

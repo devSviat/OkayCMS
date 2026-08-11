@@ -8,36 +8,41 @@ namespace Okay\Core\Security;
  * Захищає не від підробки запиту - це робить CustomerCsrfToken - а від
  * повтору того самого: подвійний клік, F5, повтор після таймауту.
  *
- * Токени різних форм незалежні: заявка на дзвінок не гасить коментар,
- * відправлений із тієї ж сторінки.
+ * Кожен рендер форми отримує власний токен, а сесія тримає перелік уже
+ * використаних. Зворотний порядок - видати один токен і чекати саме на нього -
+ * не працює: форма зворотного дзвінка стоїть на кожній сторінці, тож після
+ * першої заявки кожна раніше відкрита вкладка тримала б мертвий токен, і її
+ * заявка зникла б, хоч дані інші.
+ *
+ * Токен не підтверджує походження запиту, тому вигаданий зловмисником
+ * пройде - і це нормально: справжність перевіряє CustomerCsrfToken.
  */
 class FormToken
 {
-    const SESSION_KEY = 'form_tokens';
+    /** Уже використані токени кожної форми. */
+    const SESSION_KEY = 'form_tokens_used';
 
     /** Останній прийнятий відбиток кожної форми - для тем без токена. */
     const FINGERPRINT_KEY = 'form_fingerprints';
 
     const FINGERPRINT_TTL = 600;
 
+    /**
+     * Скільки використаних токенів пам'ятати на форму. Переповнення означає,
+     * що дуже давній повтор проскочить - помилка куди дешевша за втрату
+     * даних, яку дав би обмежений перелік виданих токенів.
+     */
+    const MAX_USED = 20;
+
     const TOKEN_PATTERN = '/^[0-9a-f]{64}$/';
 
+    /**
+     * Ім'я форми тут не потрібне - токен просто випадковий. Розділення за
+     * формами живе в consume(): перелік використаних свій у кожної.
+     */
     public static function get($form)
     {
-        $stored = $_SESSION[self::SESSION_KEY][$form] ?? null;
-
-        if (is_string($stored) && self::isWellFormed($stored)) {
-            return $stored;
-        }
-
-        return self::rotate($form);
-    }
-
-    public static function rotate($form)
-    {
-        $_SESSION[self::SESSION_KEY][$form] = bin2hex(random_bytes(32));
-
-        return $_SESSION[self::SESSION_KEY][$form];
+        return bin2hex(random_bytes(32));
     }
 
     public static function consume($form, $token)
@@ -46,13 +51,16 @@ class FormToken
             return false;
         }
 
-        $stored = $_SESSION[self::SESSION_KEY][$form] ?? null;
+        $used = self::used($form);
 
-        if (!is_string($stored) || !hash_equals($stored, (string)$token)) {
-            return false;
+        foreach ($used as $spent) {
+            if (hash_equals($spent, (string)$token)) {
+                return false;
+            }
         }
 
-        unset($_SESSION[self::SESSION_KEY][$form]);
+        $used[] = (string)$token;
+        $_SESSION[self::SESSION_KEY][$form] = array_slice($used, -self::MAX_USED);
 
         return true;
     }
@@ -118,10 +126,23 @@ class FormToken
      */
     public static function fingerprintOf($payload)
     {
-        $normalized = self::normalize($payload);
-        $encoded = json_encode($normalized);
+        $encoded = json_encode(self::normalize($payload));
 
         return is_string($encoded) ? hash('sha256', $encoded) : '';
+    }
+
+    /**
+     * @return string[]
+     */
+    private static function used($form)
+    {
+        $used = $_SESSION[self::SESSION_KEY][$form] ?? [];
+
+        if (!is_array($used)) {
+            return [];
+        }
+
+        return array_values(array_filter($used, 'is_string'));
     }
 
     /**

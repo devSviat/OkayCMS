@@ -255,6 +255,9 @@
                             <span data-language="subscribe_promotext">{$lang->subscribe_promotext}</span>
                         </p>
                         <form class="fn_subscribe_form fn_validate_subscribe vs-subscribe" method="post">
+                            {* Токен доклеює JS, але форма не має action: без JS вона сабмітиться
+                               нативно на поточну сторінку, і там охорона його вимагає. *}
+                            <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                             <div class="vs-subscribe__row">
                                 <input type="hidden" name="subscribe" value="1"/>
                                 <input class="vs-field vs-subscribe__input" aria-label="subscribe" type="email" name="subscribe_email" value="" data-format="email" placeholder="{$lang->form_email}"/>

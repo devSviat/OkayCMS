@@ -7,3 +7,4 @@ $lang['okay_cms__fast_order__form_phone_error'] = 'Введіть номер т�
 $lang['okay_cms__fast_order__order_submit'] = 'Замовити';
 $lang['okay_cms__fast_order__form_captcha_error'] = 'Невірно введена капча';
 $lang['okay_cms__fast_order__wrong_variant'] = 'Обраний товар не знайдено';
+$lang['okay_cms__fast_order__resend_error'] = 'Не вдалося оформити замовлення, спробуйте ще раз';
