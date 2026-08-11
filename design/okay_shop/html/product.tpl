@@ -486,7 +486,7 @@
                                     
                                     {* User's comment *}
                                     <div class="form__group">
-                                        <textarea class="form__textarea form__placeholder--focus" rows="3" name="text" >{$request_data.text}</textarea>
+                                        <textarea class="form__textarea form__placeholder--focus" rows="3" name="text" >{$request_data.text|escape}</textarea>
                                         <span class="form__placeholder">{$lang->form_enter_comment}*</span>
                                     </div>
                                 </div>
