@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 class FormTokenFollowupsTest extends TestCase
 {
     private const FAST_ORDER = 'Okay/Modules/OkayCMS/FastOrder/Controllers/FastOrderController.php';
+    private const CART       = 'Okay/Controllers/CartController.php';
 
     /**
      * Кількість приходить прихованим полем форми. Cart::addItem() її затискав
@@ -51,6 +52,22 @@ class FormTokenFollowupsTest extends TestCase
     }
 
     /**
+     * ...але вже ПІСЛЯ гілки повтору. Залишок міг впасти до нуля саме цим
+     * замовленням, і тоді законний F5 отримував «невірний варіант» замість
+     * власного замовлення, яке спокійно лежить в адмінці.
+     */
+    public function testFastOrderAnswersARepeatBeforeItChecksAvailability()
+    {
+        $source = $this->read(self::FAST_ORDER);
+
+        $repeatAt = strpos($source, '$this->acceptFastOrder(');
+        $checkAt  = strpos($source, '$stock <= 0');
+
+        $this->assertNotFalse($repeatAt, 'гілку повтору прибрано');
+        $this->assertLessThan($checkAt, $repeatAt, 'наявність перевіряється до гілки повтору');
+    }
+
+    /**
      * Request::post() без типу віддає масив як є, а значення йде ключем
      * масиву — variant_id[]=17 давав фатал уже після запису замовлення.
      */
@@ -63,17 +80,82 @@ class FormTokenFollowupsTest extends TestCase
     }
 
     /**
-     * Форма швидкого замовлення стоїть на сторінці списку й повертається з
-     * bfcache разом із витраченим токеном. Без звірки відбитка наступне
-     * замовлення іншого товару мовчки зникало, віддавши сторінку попереднього.
+     * Форма швидкого замовлення на сторінці ОДНА: fast_order_form.tpl рендерить
+     * її прихованою, а кнопка біля кожного товару лише вписує туди variant_id.
+     * Тобто з одним токеном приходять різні замовлення, і пам'ять має бути на
+     * кожну відправку окремо.
      */
-    public function testFastOrderTellsARepeatFromANewSubmissionWithAStaleToken()
+    public function testFastOrderRemembersEverySubmissionSeparately()
     {
         $source = $this->read(self::FAST_ORDER);
 
-        $this->assertStringContainsString("'fingerprint' =>", $source);
-        $this->assertStringContainsString('hash_equals(', $source);
-        $this->assertStringContainsString('FormToken::consumeFingerprint(', $source);
+        $this->assertStringContainsString('$created[$submission]', $source);
+        $this->assertStringContainsString('array_slice($created', $source);
+        $this->assertStringContainsString('MAX_REMEMBERED', $source);
+    }
+
+    /**
+     * consumeFingerprint() тримає ОДНУ комірку на форму й перезаписує її, тож
+     * у контролері їй робити нічого: другий товар затирав відбиток першого, і
+     * справжній повтор після цього проходив як нова відправка. Запасний шлях
+     * для тем без токена лишається там, де йому місце - усередині accept().
+     */
+    public function testFastOrderDoesNotHandRollTheFingerprintPath()
+    {
+        $source = $this->read(self::FAST_ORDER);
+
+        $this->assertStringNotContainsString('FormToken::consumeFingerprint(', $source);
+        $this->assertStringContainsString('FormToken::accept(', $source);
+    }
+
+    /**
+     * Без кількості у відбитку друге замовлення того самого товару в іншій
+     * кількості читалось як повтор першого: рядка не створювалось, листа не
+     * було, а покупцеві показували підтвердження кількості, від якої він
+     * щойно відмовився.
+     */
+    public function testFastOrderFingerprintCoversTheAmount()
+    {
+        $source = $this->read(self::FAST_ORDER);
+
+        $this->assertMatchesRegularExpression(
+            '/fingerprintOf\(\[\$order, \$variantId, \$amount\]\)/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/accept\(\s*self::FAST_ORDER_FORM,\s*.+,\s*\[\$order, \$variantId, \$amount\]/s',
+            $source
+        );
+    }
+
+    /**
+     * fingerprintOf() віддає '' коли json_encode() падає — на такому відбитку
+     * порівняння дало б хибний збіг, тож він не має ні шукатись, ні писатись.
+     */
+    public function testFastOrderIgnoresAnEmptyFingerprint()
+    {
+        $source = $this->read(self::FAST_ORDER);
+
+        $this->assertSame(
+            2,
+            substr_count($source, "\$submission !== ''"),
+            'порожній відбиток має відсіюватись і на пошуку, і на записі'
+        );
+    }
+
+    /**
+     * release() знімає рішення accept(). Знімати можна лише те, що зайняв цей
+     * запит: інакше відмова за наявністю стирала б пам'ять про вже створені
+     * цим токеном замовлення, і їхній повтор пішов би гілкою нової відправки.
+     */
+    public function testFastOrderReleasesOnlyWhatItTook()
+    {
+        $source = $this->read(self::FAST_ORDER);
+
+        $this->assertMatchesRegularExpression(
+            '/if \(\$accepted\) \{\s*FormToken::release\(self::FAST_ORDER_FORM/s',
+            $source
+        );
     }
 
     /**
@@ -83,15 +165,71 @@ class FormTokenFollowupsTest extends TestCase
      */
     public function testEmptyCartIsNotTreatedAsADuplicateByItself()
     {
-        $source = $this->read('Okay/Controllers/CartController.php');
-
-        $emptyAt = strpos($source, '$cart->isEmpty');
-        $this->assertNotFalse($emptyAt, 'гілку порожнього кошика прибрано');
-
-        $branch = substr($source, $emptyAt, 1200);
+        $branch = $this->emptyCartBranch();
 
         $this->assertStringContainsString('FormToken::recall(', $branch);
-        $this->assertStringContainsString("'cart_empty'", $branch);
+        $this->assertStringContainsString('$this->answerEmptyCart()', $branch);
+    }
+
+    /**
+     * ...але тему без поля form_token FormToken підтримує свідомо, і доказу
+     * «саме цей токен створив замовлення» вона дати не може. Для неї має
+     * лишитись колишня поведінка, інакше кнопка «назад» після успішного
+     * оформлення показує помилку замість замовлення.
+     */
+    public function testTokenlessThemesKeepTheOldEmptyCartBehaviour()
+    {
+        $branch = $this->emptyCartBranch();
+
+        $this->assertStringContainsString('!FormToken::isWellFormed($token)', $branch);
+        $this->assertStringContainsString('$this->answerDuplicateCheckout()', $branch);
+    }
+
+    /**
+     * Форма кошика вміє слати ajax=1 і чекає JSON. HTML у відповідь обробник
+     * auto_submit не розбирає й пересилає всю форму оформлення ще раз.
+     */
+    public function testEmptyCartAnswersAjaxWithJson()
+    {
+        $source = $this->read(self::CART);
+
+        $at = strpos($source, 'private function answerEmptyCart()');
+        $this->assertNotFalse($at, 'відповідь на порожній кошик прибрано');
+
+        $method = substr($source, $at, 700);
+
+        $this->assertStringContainsString("post('ajax')", $method);
+        $this->assertStringContainsString('RESPONSE_JSON', $method);
+    }
+
+    /**
+     * Повідомлення про відмову має жити ПОЗА формою оформлення: контролер
+     * ставить цю помилку лише коли кошик уже порожній, а блок форми в такому
+     * разі не рендериться взагалі.
+     */
+    #[DataProvider('themeProvider')]
+    public function testCartEmptyMessageLivesOutsideTheCheckoutForm($theme)
+    {
+        $source = $this->read("design/{$theme}/html/cart.tpl");
+
+        $messageAt = strpos($source, 'cart_empty_error');
+        $buttonAt  = strpos($source, 'name="checkout"');
+
+        $this->assertNotFalse($messageAt, "{$theme}: повідомлення cart_empty_error відсутнє");
+        $this->assertNotFalse($buttonAt, "{$theme}: не знайдено кнопки оформлення - тест застарів");
+        $this->assertGreaterThan(
+            $buttonAt,
+            $messageAt,
+            "{$theme}: повідомлення стоїть усередині форми оформлення, тобто не рендериться ніколи"
+        );
+    }
+
+    public static function themeProvider()
+    {
+        return [
+            'okay_shop' => ['okay_shop'],
+            'vibe_shop' => ['vibe_shop'],
+        ];
     }
 
     /**
@@ -114,6 +252,16 @@ class FormTokenFollowupsTest extends TestCase
             'feedback' => ['Okay/Controllers/FeedbackController.php', 'self::FEEDBACK_FORM'],
             'comment'  => ['Okay/Helpers/CommentsHelper.php', 'self::COMMENT_FORM'],
         ];
+    }
+
+    private function emptyCartBranch()
+    {
+        $source = $this->read(self::CART);
+
+        $at = strpos($source, '$cart->isEmpty');
+        $this->assertNotFalse($at, 'гілку порожнього кошика прибрано');
+
+        return substr($source, $at, 2400);
     }
 
     private function read($file)

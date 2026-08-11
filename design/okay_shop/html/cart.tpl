@@ -140,8 +140,6 @@
                                                                 <span data-language="form_enter_email">{$lang->form_enter_email}</span>
                                                             {elseif $error == 'captcha'}
                                                                 <span data-language="form_error_captcha">{$lang->form_error_captcha}</span>
-                                                            {elseif $error == 'cart_empty'}
-                                                                <span data-language="cart_empty_error">{$lang->cart_empty_error}</span>
                                                             {elseif $error == 'empty_phone'}
                                                                 <span data-language="form_error_phone">{$lang->form_error_phone} {$lang->form_error_phone_example} {$phone_example}</span>
                                                             {else}
@@ -236,6 +234,15 @@
                 <div class="block">
                     {* The page heading *}
                     <h1 class="h1"><span data-language="cart_header">{$lang->cart_header}</span></h1>
+
+                    {* Спроба оформити порожній кошик. Повідомлення живе саме
+                       тут: контролер ставить цю помилку лише коли кошик уже
+                       порожній, тож блок форми вище не рендериться взагалі. *}
+                    {if $error == 'cart_empty'}
+                        <div class="message_error">
+                            <span data-language="cart_empty_error">{$lang->cart_empty_error}</span>
+                        </div>
+                    {/if}
 
                     <p class="block padding" data-language="cart_empty">{$lang->cart_empty}</p>
                 </div>

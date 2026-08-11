@@ -27,6 +27,17 @@ class FastOrderController extends AbstractController
     /** Форма швидкого замовлення для FormToken. */
     const FAST_ORDER_FORM = 'fast_order';
 
+    /**
+     * Скільки відправок пам'ятати на один токен.
+     *
+     * Форма швидкого замовлення на сторінці одна: fast_order_form.tpl рендерить
+     * її прихованою, а кнопка біля кожного товару лише вписує туди variant_id.
+     * Тобто токен теж один на весь рендер, а відправок із нього буває кілька, і
+     * кожна - своє замовлення. Одна комірка пам'яті на форму їх плутає, тому
+     * пам'ятаємо кожну відправку окремо.
+     */
+    const MAX_REMEMBERED = 10;
+
     public function createOrder(
         EntityFactory     $entityFactory,
         OrdersHelper      $ordersHelper,
@@ -64,76 +75,71 @@ class FastOrderController extends AbstractController
             return $this->response->setContent(json_encode(['errors' => $errors]), RESPONSE_JSON);
         }
 
-        $variant = $variantsEntity->findOne(['id' => $variantId]);
-
         // Кількість приходить прихованим полем форми, тобто повністю з клієнта.
-        // Cart::addItem() її затискав залишком; getPurchases() не затискає
-        // нічого, тож затиск потрібен тут - і до створення замовлення.
+        // Затискаємо її нижче, залишком; тут потрібна лише нижня межа, щоб
+        // від'ємне значення не поїхало у відбиток відправки.
         $amount = max(1, (int) $this->request->post('amount', 'integer'));
-        $stock  = is_object($variant) ? (int) $variant->stock : 0;
-
-        if (!is_object($variant) || ($stock <= 0 && !$this->settings->get('is_preorder'))) {
-            return $this->response->setContent(json_encode([
-                'errors' => [$frontTranslations->getTranslation('okay_cms__fast_order__wrong_variant')],
-            ]), RESPONSE_JSON);
-        }
-
-        $amount = $stock > 0
-            ? min($amount, $stock)
-            : min($amount, (int) $this->settings->get('max_order_amount'));
-
-        $token = $this->request->post('form_token');
+        $token  = $this->request->post('form_token');
 
         // Рахуємо до створення замовлення: нижче $order підміняється рядком з
         // бази, і склад відправки з нього вже не відновити.
-        $submission = self::submissionFingerprint($order, $variantId);
+        $submission = self::submissionFingerprint($order, $variantId, $amount);
 
-        if (!$this->acceptFastOrder($order, $variantId)) {
-            $created = FormToken::recall(self::FAST_ORDER_FORM, $token);
+        $created = FormToken::recall(self::FAST_ORDER_FORM, $token);
+        // Попередній реліз клав сюди голу адресу замовлення. Такий запис нічого
+        // не каже про склад тієї відправки, тож покластись на нього не можна:
+        // ігноруємо його і пропускаємо відправку далі. Зайве замовлення видно
+        // й виправно, втрачене - ні.
+        $created = is_array($created) ? $created : [];
 
-            // Замовлення вже створене цим токеном - але тільки якщо це та сама
-            // відправка. Форма стоїть на сторінці списку й повертається з
-            // bfcache разом із уже витраченим токеном, тож наступне замовлення
-            // ІНШОГО товару приходило з тим самим токеном і мовчки зникало,
-            // віддавши покупцеві сторінку попереднього замовлення.
-            if (is_array($created) && isset($created['url'], $created['fingerprint'])) {
-                if (hash_equals($created['fingerprint'], $submission)) {
-                    return $this->response->setContent(json_encode([
-                        'success'           => 1,
-                        'redirect_location' => Router::generateUrl('order', ['url' => $created['url']], true),
-                    ], JSON_UNESCAPED_SLASHES), RESPONSE_JSON);
-                }
+        $accepted = $this->acceptFastOrder($order, $variantId, $amount);
 
-                // Той самий токен, але інша відправка: це не повтор. Рішення
-                // віддаємо відбитку - він відсіє справжній дубль і пропустить
-                // нове замовлення.
-                if (FormToken::consumeFingerprint(self::FAST_ORDER_FORM, $submission)) {
-                    $created = null;
-                }
+        if (!$accepted) {
+            // Це замовлення вже створене цим токеном - веземо покупця саме на
+            // нього. Пошук іде по ЦІЙ відправці, а не по останній: форма одна
+            // на сторінку, тож із тим самим токеном приходять і зовсім інші
+            // замовлення, і сплутати їх означало б показати чуже.
+            if ($submission !== '' && isset($created[$submission])) {
+                return $this->answerCreated($created[$submission]);
             }
 
-            if ($created !== null) {
-                return $this->response->setContent(json_encode([
-                    'success'           => 1,
-                    'redirect_location' => Router::generateUrl(
-                        'order',
-                        ['url' => is_array($created) ? $created['url'] : $created],
-                        true
-                    ),
-                ], JSON_UNESCAPED_SLASHES), RESPONSE_JSON);
-            }
-
-            // Токен витрачений, але замовлення за ним немає: попередню спробу
-            // обірвало вже після зняття токена. Це не повтор, і глухий кут із
-            // порадою «спробуйте ще раз» тут нічим би не скінчився - тож
-            // пропускаємо. Коли токена немає зовсім, рішення лишається за
-            // відбитком, і тоді це справді повтор.
+            // Токен витрачений, але саме цієї відправки за ним немає. Отже це
+            // не повтор, а нова відправка зі сторінки, яка повернулась разом
+            // зі старим токеном, - або попередню спробу обірвало вже після
+            // зняття токена. Глухий кут із порадою «спробуйте ще раз» тут
+            // нічим би не скінчився, тож пропускаємо.
+            //
+            // Коли токена немає зовсім, рішення вже ухвалив відбиток усередині
+            // accept() - і тоді це справді повтор.
             if (!FormToken::isWellFormed($token)) {
-                return $this->response->setContent(json_encode([
-                    'errors' => [$frontTranslations->getTranslation('okay_cms__fast_order__resend_error')],
-                ]), RESPONSE_JSON);
+                return $this->answerError($frontTranslations, 'okay_cms__fast_order__resend_error');
             }
         }
+
+        // Наявність перевіряємо ПІСЛЯ гілки повтору: замовлення вже створене, а
+        // залишок міг впасти до нуля саме ним. Інакше законний F5 отримав би
+        // «невірний варіант» замість власного замовлення.
+        $variant = $variantsEntity->findOne(['id' => $variantId]);
+        $stock   = is_object($variant) ? (int) $variant->stock : 0;
+
+        if (!is_object($variant) || ($stock <= 0 && !$this->settings->get('is_preorder'))) {
+            // Відправку не прийнято, тож і повтором вона не є. Без release()
+            // токен лишався б витраченим, і друга спроба пішла б гілкою «нова
+            // відправка зі старим токеном». Знімаємо лише те, що зайняв цей
+            // запит: чужої пам'яті тут не буває - токен із записаними
+            // відправками повторно accept() не проходить.
+            if ($accepted) {
+                FormToken::release(self::FAST_ORDER_FORM, $token);
+            }
+
+            return $this->answerError($frontTranslations, 'okay_cms__fast_order__wrong_variant');
+        }
+
+        // Cart::addItem() затискав кількість залишком; getPurchases() не
+        // затискає нічого, тож затиск потрібен тут - і до створення замовлення.
+        $amount = $stock > 0
+            ? min($amount, $stock)
+            : min($amount, (int) $this->settings->get('max_order_amount'));
 
         /** @var OrdersEntity $ordersEntity */
         $ordersEntity = $entityFactory->get(OrdersEntity::class);
@@ -160,35 +166,53 @@ class FastOrderController extends AbstractController
 
         $orderUrl = $order->url;
 
-        // Разом з адресою памʼятаємо відбиток самої відправки: повтор із тим
-        // самим токеном має привести на СВОЄ замовлення, а не на будь-яке,
-        // створене цим токеном раніше.
-        FormToken::remember(self::FAST_ORDER_FORM, $token, [
-            'url'         => $orderUrl,
-            'fingerprint' => $submission,
-        ]);
+        // Адресу пам'ятаємо під відбитком самої відправки, а не під токеном:
+        // повтор має привести на СВОЄ замовлення, а не на будь-яке, створене
+        // цим токеном раніше.
+        if ($submission !== '') {
+            $created[$submission] = $orderUrl;
 
-        return $this->response->setContent(json_encode([
-            'success'           => 1,
-            'redirect_location' => Router::generateUrl('order', ['url' => $orderUrl], true)
-        ]), RESPONSE_JSON);
+            FormToken::remember(
+                self::FAST_ORDER_FORM,
+                $token,
+                array_slice($created, -self::MAX_REMEMBERED, null, true)
+            );
+        }
+
+        return $this->answerCreated($orderUrl);
     }
 
     /**
-     * Відбиток відправки: те саме замовлення того самого варіанта. Служить
-     * розрізненню "це повтор" і "це нова відправка зі старим токеном".
+     * Відбиток відправки: те саме замовлення того самого варіанта в тій самій
+     * кількості. Кількість тут обов'язкова - без неї друге замовлення того
+     * самого товару в іншій кількості читалось би як повтор першого.
      */
-    private static function submissionFingerprint($order, $variantId)
+    private static function submissionFingerprint($order, $variantId, $amount)
     {
-        return FormToken::fingerprintOf([$order, $variantId]);
+        return FormToken::fingerprintOf([$order, $variantId, $amount]);
     }
 
-    private function acceptFastOrder($order, $variantId)
+    private function acceptFastOrder($order, $variantId, $amount)
     {
         return FormToken::accept(
             self::FAST_ORDER_FORM,
             $this->request->post('form_token'),
-            [$order, $variantId]
+            [$order, $variantId, $amount]
         );
+    }
+
+    private function answerCreated($orderUrl)
+    {
+        return $this->response->setContent(json_encode([
+            'success'           => 1,
+            'redirect_location' => Router::generateUrl('order', ['url' => $orderUrl], true),
+        ], JSON_UNESCAPED_SLASHES), RESPONSE_JSON);
+    }
+
+    private function answerError(FrontTranslations $frontTranslations, $key)
+    {
+        return $this->response->setContent(json_encode([
+            'errors' => [$frontTranslations->getTranslation($key)],
+        ]), RESPONSE_JSON);
     }
 }

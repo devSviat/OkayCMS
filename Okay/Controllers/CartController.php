@@ -84,6 +84,29 @@ class CartController extends AbstractController
         $this->response->redirectTo($url, 303);
     }
 
+    /**
+     * Кошик порожній, і це не повтор: покупець прибрав останню позицію в
+     * сусідній вкладці. Відповідь тут теж має бути того самого формату, що й
+     * успіх, - інакше обробник auto_submit не розбере HTML і пересилає всю
+     * форму оформлення ще раз.
+     */
+    private function answerEmptyCart()
+    {
+        if ($this->request->post('ajax')) {
+            $this->response->setContent(
+                json_encode(
+                    ['auto_submit' => false, 'url' => Router::generateUrl('cart', [], true)],
+                    JSON_UNESCAPED_SLASHES
+                ),
+                RESPONSE_JSON
+            );
+            $this->response->sendContent();
+            exit;
+        }
+
+        $this->design->assign('error', 'cart_empty');
+    }
+
     /*Отображение заказа*/
     public function render(
         DeliveriesEntity   $deliveriesEntity,
@@ -155,11 +178,20 @@ class CartController extends AbstractController
                 //
                 // Повтор це лише тоді, коли саме ЦЕЙ токен уже створив
                 // замовлення. Інакше кошик просто порожній.
-                if (FormToken::recall(self::CHECKOUT_FORM, $this->request->post('form_token')) !== null) {
+                //
+                // Тема, яка токена не шле, такого доказу дати не може, а
+                // FormToken підтримує такі теми свідомо. Для них лишається
+                // колишня поведінка: інакше кнопка «назад» після успішного
+                // оформлення привела б їх на помилку замість замовлення.
+                $token = $this->request->post('form_token');
+
+                if (!FormToken::isWellFormed($token)
+                    || FormToken::recall(self::CHECKOUT_FORM, $token) !== null
+                ) {
                     $this->answerDuplicateCheckout();
                 }
 
-                $this->design->assign('error', 'cart_empty');
+                $this->answerEmptyCart();
             } elseif (!$this->acceptCheckout($order)) {
                 // Не помилка покупця: замовлення вже створене, тож друга
                 // вкладка має показати те саме, що й перша.
