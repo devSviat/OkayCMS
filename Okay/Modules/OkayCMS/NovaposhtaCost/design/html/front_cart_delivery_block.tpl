@@ -30,10 +30,10 @@
             </div>
             <input name="novaposhta_door_delivery" type="hidden" value="1"/>
 
-            <input name="novaposhta_city_name" class="fn_np_clear" type="hidden" value="{$request_data.novaposhta_city_name}"/>
-            <input name="novaposhta_area_name" class="fn_np_clear" type="hidden" value="{$request_data.novaposhta_area_name}"/>
-            <input name="novaposhta_region_name" class="fn_np_clear" type="hidden" value="{$request_data.novaposhta_region_name}"/>
-            <input name="novaposhta_street_name" class="fn_np_clear" type="hidden" value="{$request_data.novaposhta_street_name}"/>
+            <input name="novaposhta_city_name" class="fn_np_clear" type="hidden" value="{$request_data.novaposhta_city_name|escape}"/>
+            <input name="novaposhta_area_name" class="fn_np_clear" type="hidden" value="{$request_data.novaposhta_area_name|escape}"/>
+            <input name="novaposhta_region_name" class="fn_np_clear" type="hidden" value="{$request_data.novaposhta_region_name|escape}"/>
+            <input name="novaposhta_street_name" class="fn_np_clear" type="hidden" value="{$request_data.novaposhta_street_name|escape}"/>
             
         {else}
             <div class="form__group">
@@ -46,7 +46,7 @@
                 <div class="np_delivery_types_content"></div>
             </div>
 
-            <input name="novaposhta_delivery_warehouse_id" type="hidden" value="{$request_data.novaposhta_delivery_warehouse_id}"/>
+            <input name="novaposhta_delivery_warehouse_id" type="hidden" value="{$request_data.novaposhta_delivery_warehouse_id|escape}"/>
         {/if}
 
         {if $np_redelivery_payments_ids && $cart->total_price > 0}
@@ -61,9 +61,9 @@
         <div class="term_novaposhta">{$lang->np_cart_term} <span></span></div>
     
         <input name="is_novaposhta_delivery" type="hidden" value="1"/>
-        <input name="novaposhta_delivery_price" type="hidden" value="{$request_data.novaposhta_delivery_price}"/>
-        <input name="novaposhta_delivery_term" type="hidden" value="{$request_data.novaposhta_delivery_term}"/>
-        <input name="novaposhta_delivery_city_id" type="hidden" value="{$request_data.novaposhta_delivery_city_id}"/>
+        <input name="novaposhta_delivery_price" type="hidden" value="{$request_data.novaposhta_delivery_price|escape}"/>
+        <input name="novaposhta_delivery_term" type="hidden" value="{$request_data.novaposhta_delivery_term|escape}"/>
+        <input name="novaposhta_delivery_city_id" type="hidden" value="{$request_data.novaposhta_delivery_city_id|escape}"/>
         
     </div>
 

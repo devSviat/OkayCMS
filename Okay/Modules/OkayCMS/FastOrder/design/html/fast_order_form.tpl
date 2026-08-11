@@ -13,6 +13,11 @@
             </div>
         </div>
 
+        {* Форма створює повноцінне замовлення, тож несе обидва поля: токен
+           вітрини проти підробки запиту й одноразовий проти дубля. *}
+        <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
+        {form_token name="fast_order"}
+
         {if $settings->captcha_type == "v3"}
             <input id="fn_fast_order_recaptcha_token" class="fn_recaptchav3" type="hidden" name="recaptcha_token" />
         {/if}

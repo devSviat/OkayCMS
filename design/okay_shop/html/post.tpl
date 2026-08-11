@@ -289,6 +289,9 @@
                     <div class="form_wrap ">
                         {* Comment form *}
                         <form id="fn_blog_comment" class="fn_validate_post form form--boxed"  method="post" action="">
+                            <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
+                            {form_token name="comment"}
+
                             {if $settings->captcha_type == "v3"}
                             <input type="hidden" class="fn_recaptcha_token fn_recaptchav3" name="recaptcha_token" />
                             {/if}
@@ -329,7 +332,7 @@
 
                                 {* User's comment *}
                                 <div class="form__group">
-                                    <textarea class="form__textarea form__placeholder--focus" rows="3" name="text" >{$request_data.text}</textarea>
+                                    <textarea class="form__textarea form__placeholder--focus" rows="3" name="text" >{$request_data.text|escape}</textarea>
                                     <span class="form__placeholder">{$lang->form_enter_comment}*</span>
                                 </div>
                             </div>

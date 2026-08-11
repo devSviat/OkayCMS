@@ -77,6 +77,9 @@
             <span data-language="subscribe_promotext">{$lang->subscribe_promotext}</span>
         </div>
         <form class="sidebar_subscribe__form fn_subscribe_form_blog fn_validate_subscribe_blog" method="post">
+            {* Токен доклеює JS, але форма не має action: без JS вона сабмітиться
+               нативно на поточну сторінку, і там охорона його вимагає. *}
+            <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
             <div class="sidebar_subscribe__group">
                 <input type="hidden" name="subscribe" value="1"/>
                 <input class="form__input form__input--aside_subscribe" aria-label="subscribe" type="email" name="subscribe_email" value="" data-format="email" placeholder="{$lang->form_email}"/>

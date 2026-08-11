@@ -19,6 +19,9 @@ use Okay\Core\Modules\Extender\ExtenderFacade;
 
 class OrdersHelper
 {
+    /** Куди вести повторний сабміт: замовлення вже створене цим сеансом. */
+    const LAST_ORDER_URL = 'last_order_url';
+
     /** @var EntityFactory */
     private $entityFactory;
 
@@ -56,6 +59,12 @@ class OrdersHelper
      */
     public function finalCreateOrderProcedure($order)
     {
+        // Спільна точка обох шляхів оформлення - кошика і швидкого замовлення.
+        // Звідси відсіяний повтор дізнається, куди вести покупця.
+        if (!empty($order->url)) {
+            $_SESSION[self::LAST_ORDER_URL] = $order->url;
+        }
+
         ExtenderFacade::execute(__METHOD__, null, func_get_args());
     }
 

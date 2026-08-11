@@ -274,6 +274,9 @@
                             <span data-language="subscribe_promotext">{$lang->subscribe_promotext}</span>
                         </div>
                         <form class="fn_subscribe_form fn_validate_subscribe" method="post">
+                            {* Токен доклеює JS, але форма не має action: без JS вона сабмітиться
+                               нативно на поточну сторінку, і там охорона його вимагає. *}
+                            <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                             <div class="subscribe_form__group">
                                  <div class="d-flex align-items-center ">
                                     <div class="form__group form__group--subscribe">

@@ -45,10 +45,28 @@ function sendAjaxFastOrderForm() {
                 errorString += '<div>' + response.errors[error] + '</div>';
             }
             $errorBlock.html(errorString).show();
-            
+
         }
+    }).fail(function(xhr) {
+        // Без цієї гілки будь-яка відповідь, яку не вдалось розібрати як json
+        // (403 охорони, 500, обрив мережі), лишала модалку мовчазною.
+        if (typeof resetFastOrderCaptcha === "function") {
+            resetFastOrderCaptcha();
+        }
+
+        let message = '';
+        try {
+            let response = JSON.parse(xhr.responseText);
+            if (response && response.errors) {
+                message = response.errors.join(' ');
+            }
+        } catch (e) {
+            message = '';
+        }
+
+        $errorBlock.text(message || ('HTTP ' + xhr.status)).show();
     });
-    
+
 }
 
 

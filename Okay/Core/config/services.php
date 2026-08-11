@@ -52,6 +52,7 @@ use Okay\Core\TplMod\Parser as TplParser;
 use Okay\Core\Security\AdminRecoveryToken;
 use Okay\Core\Security\AttemptLimiter;
 use Okay\Core\Security\RecoveryToken;
+use Okay\Core\Security\StorefrontGuard;
 
 $services = [
     BRouter::class => [
@@ -526,6 +527,17 @@ $services = [
     ],
     BackendPostRedirectGet::class => [
         'class' => BackendPostRedirectGet::class,
+        'arguments' => [
+            new SR(Request::class),
+            new SR(Response::class),
+        ],
+    ],
+    FrontPostRedirectGet::class => [
+        'class' => FrontPostRedirectGet::class,
+        'arguments' => [],
+    ],
+    StorefrontGuard::class => [
+        'class' => StorefrontGuard::class,
         'arguments' => [
             new SR(Request::class),
             new SR(Response::class),

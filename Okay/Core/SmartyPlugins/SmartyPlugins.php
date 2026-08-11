@@ -34,6 +34,9 @@ $plugins = [
     Plugins\GetCaptcha::class => [
         'class' => Plugins\GetCaptcha::class,
     ],
+    Plugins\FormTokenField::class => [
+        'class' => Plugins\FormTokenField::class,
+    ],
     Plugins\GetBrands::class => [
         'class' => Plugins\GetBrands::class,
         'arguments' => [

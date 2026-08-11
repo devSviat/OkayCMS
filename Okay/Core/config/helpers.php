@@ -89,6 +89,7 @@ use Okay\Helpers\OrdersHelper;
 use Okay\Helpers\FilterHelper;
 use Okay\Helpers\MoneyHelper;
 use Okay\Core\Entity\UrlUniqueValidator;
+use Okay\Core\Security\StorefrontGuard;
 use Okay\Admin\Helpers\BackendExportHelper;
 use Symfony\Component\Console\Helper\QuestionHelper as ConsoleQuestionHelper;
 
@@ -522,6 +523,9 @@ return [
             new SR(CommonRequest::class),
             new SR(EntityFactory::class),
             new SR(UserHelper::class),
+            new SR(StorefrontGuard::class),
+            new SR(FrontPostRedirectGet::class),
+            new SR(Request::class),
         ]
     ],
     CommentsHelper::class => [
@@ -534,6 +538,8 @@ return [
             new SR(Notify::class),
             new SR(MainHelper::class),
             new SR(Languages::class),
+            new SR(StorefrontGuard::class),
+            new SR(Request::class),
         ]
     ],
     RelatedProductsHelper::class => [

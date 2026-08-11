@@ -53,7 +53,7 @@
                             <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                             {* Одноразовий: повторний сабміт тієї самої форми (подвійний клік,
                                F5, повтор після таймауту) не створює друге замовлення. *}
-                            <input type="hidden" name="checkout_token" value="{$checkout_token|escape}">
+                            {form_token name="checkout"}
                             <div class="f_row flex-column align-items-start flex-lg-row">
                                 <div class="position_sticky f_col f_col-lg-6 f_col-xl-5">
                                     {* The list of products in the cart *}

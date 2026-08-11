@@ -10,6 +10,7 @@ use Okay\Core\Notify;
 use Okay\Core\Phone;
 use Okay\Core\Router;
 use Okay\Core\Languages;
+use Okay\Core\Security\FormToken;
 use Okay\Core\EntityFactory;
 use Okay\Core\Validator;
 use Okay\Entities\VariantsEntity;
@@ -23,6 +24,9 @@ use Okay\Modules\OkayCMS\FastOrder\Helpers\ValidateHelper;
 
 class FastOrderController extends AbstractController
 {
+    /** Форма швидкого замовлення для FormToken. */
+    const FAST_ORDER_FORM = 'fast_order';
+
     public function createOrder(
         EntityFactory     $entityFactory,
         OrdersHelper      $ordersHelper,
@@ -35,9 +39,9 @@ class FastOrderController extends AbstractController
         Cart              $cart,
         BackendExtender   $validateExtend
     ) {
-        if (!$this->request->method('post')) {
-            return $this->response->setContent(json_encode(['errors' => ['Request must be post']]), RESPONSE_JSON);
-        }
+        // Форму шле ajax, тож і відмова має бути JSON: fast_order.js читає
+        // відповідь як json і без цього просто нічого не показав би.
+        $this->requireCustomerCsrf(true);
 
         $order = new \stdClass();
         $order->name    = $this->request->post('name');
@@ -56,7 +60,26 @@ class FastOrderController extends AbstractController
         if (!empty($errors)) {
             return $this->response->setContent(json_encode(['errors' => $errors]), RESPONSE_JSON);
         }
-        
+
+        if (!$this->acceptFastOrder($order, $variantId)) {
+            // Замовлення вже створене цим сеансом: другий клік має привести
+            // туди ж, куди привів перший, а не створити дубль.
+            //
+            // Успіх заявляємо лише разом із адресою замовлення. Порожня адреса
+            // означає, що першу спробу обірвало після зняття токена, і вести
+            // покупця на головну зі словом «success» - гірше за помилку.
+            if (($lastOrder = $this->lastOrderUrl()) === null) {
+                return $this->response->setContent(json_encode([
+                    'errors' => [$frontTranslations->getTranslation('okay_cms__fast_order__resend_error')],
+                ]), RESPONSE_JSON);
+            }
+
+            return $this->response->setContent(json_encode([
+                'success'           => 1,
+                'redirect_location' => $lastOrder,
+            ], JSON_UNESCAPED_SLASHES), RESPONSE_JSON);
+        }
+
         /** @var OrdersEntity $ordersEntity */
         $ordersEntity = $entityFactory->get(OrdersEntity::class);
         $preparedOrder = $ordersHelper->prepareAdd($order);
@@ -89,5 +112,25 @@ class FastOrderController extends AbstractController
             'success'           => 1,
             'redirect_location' => Router::generateUrl('order', ['url' => $order->url], true)
         ]), RESPONSE_JSON);
+    }
+
+    private function acceptFastOrder($order, $variantId)
+    {
+        return FormToken::accept(
+            self::FAST_ORDER_FORM,
+            $this->request->post('form_token'),
+            [$order, $variantId]
+        );
+    }
+
+    private function lastOrderUrl()
+    {
+        $url = $_SESSION[OrdersHelper::LAST_ORDER_URL] ?? null;
+
+        if (is_string($url) && $url !== '') {
+            return Router::generateUrl('order', ['url' => $url], true);
+        }
+
+        return null;
     }
 }

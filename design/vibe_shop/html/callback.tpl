@@ -8,6 +8,9 @@
            it after CommonHelper had already saved the row. *}
         <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
 
+        {* Одноразовий: гасить другу заявку від подвійного кліку чи F5. *}
+        {form_token name="callback"}
+
         {if $settings->captcha_type == "v3"}
             <input type="hidden" class="fn_recaptcha_token fn_recaptchav3" name="recaptcha_token" />
         {/if}
