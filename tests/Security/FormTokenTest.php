@@ -90,6 +90,49 @@ class FormTokenTest extends TestCase
      * Перелік обмежений, інакше сесія росла б без краю. Переповнення означає,
      * що дуже давній повтор проскочить - це дешевше за втрату даних.
      */
+    /**
+     * Повтор має привести на те замовлення, яке створив саме цей токен, а не
+     * на «останнє замовлення сесії» - воно могло бути й від іншої вкладки.
+     */
+    public function testResultIsRecalledByTheTokenThatCreatedIt()
+    {
+        $first  = FormToken::get('fast_order');
+        $second = FormToken::get('fast_order');
+
+        FormToken::consume('fast_order', $first);
+        FormToken::remember('fast_order', $first, 'order-a');
+        FormToken::consume('fast_order', $second);
+        FormToken::remember('fast_order', $second, 'order-b');
+
+        $this->assertSame('order-a', FormToken::recall('fast_order', $first));
+        $this->assertSame('order-b', FormToken::recall('fast_order', $second));
+    }
+
+    /**
+     * Токен витрачено, але результату немає - попередню спробу обірвало вже
+     * після зняття токена. Викликач має вміти відрізнити це від повтору.
+     */
+    public function testAbortedAttemptLeavesNoResult()
+    {
+        $token = FormToken::get('fast_order');
+        FormToken::consume('fast_order', $token);
+
+        $this->assertFalse(FormToken::consume('fast_order', $token));
+        $this->assertNull(FormToken::recall('fast_order', $token));
+    }
+
+    public function testShortWindowLetsADeliberateRepeatThrough()
+    {
+        $payload = (object)['name' => 'Іван', 'phone' => '380670000000'];
+
+        $this->assertTrue(FormToken::accept('callback', null, $payload, FormToken::ACCIDENT_TTL));
+        $this->assertFalse(FormToken::accept('callback', null, $payload, FormToken::ACCIDENT_TTL));
+
+        $_SESSION[FormToken::FINGERPRINT_KEY]['callback']['expires_at'] = time() - 1;
+
+        $this->assertTrue(FormToken::accept('callback', null, $payload, FormToken::ACCIDENT_TTL));
+    }
+
     public function testTheUsedListIsBounded()
     {
         $first = FormToken::get('callback');

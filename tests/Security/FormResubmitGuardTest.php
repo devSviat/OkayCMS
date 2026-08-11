@@ -75,6 +75,26 @@ class FormResubmitGuardTest extends TestCase
     }
 
     /**
+     * Токен видається на кожен рендер, тож дві вкладки кошика несуть різні
+     * токени й за токеном обидві виглядають новими. Друга з них приходить уже
+     * після того, як перша очистила кошик, - і саме порожній кошик її ловить.
+     * На стенді без цієї перевірки друга вкладка створювала замовлення на 0.00
+     * без жодної позиції.
+     */
+    public function testCheckoutRefusesAnEmptyCartBeforeCreatingAnOrder()
+    {
+        $source = $this->read('Okay/Controllers/CartController.php');
+
+        $emptyAt  = strpos($source, '$cart->isEmpty');
+        $acceptAt = strpos($source, '$this->acceptCheckout(');
+        $writeAt  = strpos($source, '$ordersHelper->add(');
+
+        $this->assertNotFalse($emptyAt, 'checkout не перевіряє, чи кошик порожній');
+        $this->assertLessThan($acceptAt, $emptyAt, 'перевірка кошика має бути до зняття токена');
+        $this->assertLessThan($writeAt, $emptyAt, 'checkout пише замовлення до перевірки кошика');
+    }
+
+    /**
      * Розширення мають викликатись до редиректу: Response::redirectTo()
      * завершується exit, тож усе після нього не виконується взагалі.
      */

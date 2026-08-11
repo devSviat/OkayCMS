@@ -61,6 +61,11 @@ class FeedbackController extends AbstractController {
 
     private function acceptFeedback($feedback)
     {
-        return FormToken::accept(self::FEEDBACK_FORM, $this->request->post('form_token'), $feedback);
+        return FormToken::accept(
+            self::FEEDBACK_FORM,
+            $this->request->post('form_token'),
+            $feedback,
+            FormToken::ACCIDENT_TTL
+        );
     }
 }

@@ -61,23 +61,28 @@ class FastOrderController extends AbstractController
             return $this->response->setContent(json_encode(['errors' => $errors]), RESPONSE_JSON);
         }
 
+        $token = $this->request->post('form_token');
+
         if (!$this->acceptFastOrder($order, $variantId)) {
-            // Замовлення вже створене цим сеансом: другий клік має привести
-            // туди ж, куди привів перший, а не створити дубль.
-            //
-            // Успіх заявляємо лише разом із адресою замовлення. Порожня адреса
-            // означає, що першу спробу обірвало після зняття токена, і вести
-            // покупця на головну зі словом «success» - гірше за помилку.
-            if (($lastOrder = $this->lastOrderUrl()) === null) {
+            // Замовлення вже створене цим токеном: другий клік має привести
+            // туди ж, куди привів перший.
+            if (($created = FormToken::recall(self::FAST_ORDER_FORM, $token)) !== null) {
+                return $this->response->setContent(json_encode([
+                    'success'           => 1,
+                    'redirect_location' => Router::generateUrl('order', ['url' => $created], true),
+                ], JSON_UNESCAPED_SLASHES), RESPONSE_JSON);
+            }
+
+            // Токен витрачений, але замовлення за ним немає: попередню спробу
+            // обірвало вже після зняття токена. Це не повтор, і глухий кут із
+            // порадою «спробуйте ще раз» тут нічим би не скінчився - тож
+            // пропускаємо. Коли токена немає зовсім, рішення лишається за
+            // відбитком, і тоді це справді повтор.
+            if (!FormToken::isWellFormed($token)) {
                 return $this->response->setContent(json_encode([
                     'errors' => [$frontTranslations->getTranslation('okay_cms__fast_order__resend_error')],
                 ]), RESPONSE_JSON);
             }
-
-            return $this->response->setContent(json_encode([
-                'success'           => 1,
-                'redirect_location' => $lastOrder,
-            ], JSON_UNESCAPED_SLASHES), RESPONSE_JSON);
         }
 
         /** @var OrdersEntity $ordersEntity */
@@ -90,11 +95,13 @@ class FastOrderController extends AbstractController
             $amount = 1;
         }
 
-        if ($variantId && $amount) {
-            $cart->addItem($variantId, $amount);
-        }
+        // Покупка в один клік - це один товар, а не весь кошик. Раніше варіант
+        // дописувався в живий кошик, звідти потрапляв у замовлення разом з
+        // усім, що покупець ще обирав, і кошик по тому очищався. getPurchases()
+        // рахує склад замовлення з переданого списку й $_SESSION не торкається.
+        $cart->getPurchases([$variantId => $amount]);
 
-        $preparedCart = $cartHelper->prepareCart($cart, $orderId);
+        $preparedCart = $cartHelper->prepareCart($cart->get(), $orderId);
         $preparedCart = $cartHelper->cartToOrder($preparedCart, $orderId);
         $preparedCart = $cartHelper->prepareDiscounts($preparedCart, $orderId);
         $cartHelper->discountsToDB($preparedCart);
@@ -106,11 +113,12 @@ class FastOrderController extends AbstractController
         $notify->emailOrderUser($order->id);
         $notify->emailOrderAdmin($order->id);
 
-        $cart->clear();
+        $orderUrl = $order->url;
+        FormToken::remember(self::FAST_ORDER_FORM, $token, $orderUrl);
 
         return $this->response->setContent(json_encode([
             'success'           => 1,
-            'redirect_location' => Router::generateUrl('order', ['url' => $order->url], true)
+            'redirect_location' => Router::generateUrl('order', ['url' => $orderUrl], true)
         ]), RESPONSE_JSON);
     }
 
@@ -121,16 +129,5 @@ class FastOrderController extends AbstractController
             $this->request->post('form_token'),
             [$order, $variantId]
         );
-    }
-
-    private function lastOrderUrl()
-    {
-        $url = $_SESSION[OrdersHelper::LAST_ORDER_URL] ?? null;
-
-        if (is_string($url) && $url !== '') {
-            return Router::generateUrl('order', ['url' => $url], true);
-        }
-
-        return null;
     }
 }
