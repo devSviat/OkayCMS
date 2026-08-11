@@ -198,7 +198,7 @@ class CommentsHelper implements GetListInterface
                 // Редирект нижче рятує лише браузерний F5. Від подвійного кліку
                 // й повтору запиту рятує токен: без нього два майже одночасні
                 // POST давали два коментарі й два листи.
-                if (!$this->acceptComment($comment)) {
+                if (!$this->acceptComment($comment, $objectType, $objectId)) {
                     Response::redirectTo($this->backUrl(''));
                 }
 
@@ -229,9 +229,19 @@ class CommentsHelper implements GetListInterface
         }
     }
 
-    private function acceptComment($comment)
+    /**
+     * Ціль обов'язково входить у відбиток: без неї однаковий короткий відгук
+     * («Дуже задоволений») на двох різних товарах дає той самий хеш, і другий
+     * зникає як уявний повтор.
+     */
+    private function acceptComment($comment, $objectType, $objectId)
     {
-        return FormToken::accept(self::COMMENT_FORM, $this->request->post('form_token'), $comment);
+        return FormToken::accept(
+            self::COMMENT_FORM,
+            $this->request->post('form_token'),
+            [$comment, $objectType, $objectId],
+            FormToken::ACCIDENT_TTL
+        );
     }
 
     /**

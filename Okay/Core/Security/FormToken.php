@@ -19,13 +19,24 @@ namespace Okay\Core\Security;
  */
 class FormToken
 {
-    /** Уже використані токени кожної форми. */
+    /** Використані токени кожної форми: токен => результат тієї відправки. */
     const SESSION_KEY = 'form_tokens_used';
 
     /** Останній прийнятий відбиток кожної форми - для тем без токена. */
     const FINGERPRINT_KEY = 'form_fingerprints';
 
+    /**
+     * Скільки живе відбиток там, де ціна дубля висока (замовлення).
+     * Довге вікно тут виправдане: друге замовлення коштує грошей.
+     */
     const FINGERPRINT_TTL = 600;
+
+    /**
+     * Скільки живе відбиток там, де ціна дубля низька (заявка, відгук).
+     * Випадковий повтор стається за секунди, а не за десять хвилин, тож
+     * довге вікно тут лише ковтало б навмисні повторні звернення.
+     */
+    const ACCIDENT_TTL = 60;
 
     /**
      * Скільки використаних токенів пам'ятати на форму. Переповнення означає,
@@ -53,14 +64,12 @@ class FormToken
 
         $used = self::used($form);
 
-        foreach ($used as $spent) {
-            if (hash_equals($spent, (string)$token)) {
-                return false;
-            }
+        if (array_key_exists((string)$token, $used)) {
+            return false;
         }
 
-        $used[] = (string)$token;
-        $_SESSION[self::SESSION_KEY][$form] = array_slice($used, -self::MAX_USED);
+        $used[(string)$token] = null;
+        $_SESSION[self::SESSION_KEY][$form] = array_slice($used, -self::MAX_USED, null, true);
 
         return true;
     }
@@ -68,6 +77,36 @@ class FormToken
     public static function isWellFormed($token)
     {
         return is_string($token) && (bool)preg_match(self::TOKEN_PATTERN, $token);
+    }
+
+    /**
+     * Записує, чим завершилась відправка з цим токеном - наприклад, адресу
+     * створеного замовлення. Повтор із тим самим токеном отримає рівно її, а
+     * не «останнє замовлення сесії», яким могло бути й чуже.
+     */
+    public static function remember($form, $token, $result)
+    {
+        if (!self::isWellFormed($token)) {
+            return;
+        }
+
+        $used = self::used($form);
+        $used[(string)$token] = $result;
+
+        $_SESSION[self::SESSION_KEY][$form] = array_slice($used, -self::MAX_USED, null, true);
+    }
+
+    /**
+     * @return mixed null, якщо токен невідомий або та відправка нічим не
+     *               завершилась - тобто попередня спроба обірвалась
+     */
+    public static function recall($form, $token)
+    {
+        if (!self::isWellFormed($token)) {
+            return null;
+        }
+
+        return self::used($form)[(string)$token] ?? null;
     }
 
     /**
@@ -81,21 +120,22 @@ class FormToken
      * @param string $form    ім'я форми
      * @param mixed  $token   значення поля form_token, якщо тема його шле
      * @param mixed  $payload дані форми для запасного відбитка
+     * @param int    $ttl     скільки секунд відбиток вважається повтором
      */
-    public static function accept($form, $token, $payload)
+    public static function accept($form, $token, $payload, $ttl = self::FINGERPRINT_TTL)
     {
         if (self::isWellFormed($token)) {
             return self::consume($form, $token);
         }
 
-        return self::consumeFingerprint($form, self::fingerprintOf($payload));
+        return self::consumeFingerprint($form, self::fingerprintOf($payload), $ttl);
     }
 
     /**
      * Запасний шлях для тем без поля form_token: те саме тіло протягом TTL
      * вважається повтором. Точність нижча за токен.
      */
-    public static function consumeFingerprint($form, $fingerprint)
+    public static function consumeFingerprint($form, $fingerprint, $ttl = self::FINGERPRINT_TTL)
     {
         if (!is_string($fingerprint) || $fingerprint === '') {
             return true;
@@ -115,7 +155,7 @@ class FormToken
 
         $_SESSION[self::FINGERPRINT_KEY][$form] = [
             'value' => $fingerprint,
-            'expires_at' => $now + self::FINGERPRINT_TTL,
+            'expires_at' => $now + (int)$ttl,
         ];
 
         return true;
@@ -132,17 +172,13 @@ class FormToken
     }
 
     /**
-     * @return string[]
+     * @return array<string, mixed>
      */
     private static function used($form)
     {
         $used = $_SESSION[self::SESSION_KEY][$form] ?? [];
 
-        if (!is_array($used)) {
-            return [];
-        }
-
-        return array_values(array_filter($used, 'is_string'));
+        return is_array($used) ? $used : [];
     }
 
     /**

@@ -19,7 +19,11 @@ class FormTokenField extends Func
     public function run($params, $smarty)
     {
         if (empty($params['name'])) {
-            return '';
+            // Мовчазний порожній вивід лишав би форму зовсім без захисту від
+            // повтору, і побачити це можна було б хіба по дублях у базі.
+            trigger_error('{form_token} викликано без обов\'язкового name', E_USER_WARNING);
+
+            return '<!-- form_token: не вказано name -->';
         }
 
         $token = FormToken::get((string)$params['name']);

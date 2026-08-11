@@ -146,9 +146,19 @@ class CommonHelper
         return false;
     }
 
+    /**
+     * Вікно відбитка тут коротке. Заявка коштує дешево, а втрачена - дорого:
+     * покупець, якому не додзвонились, за десять хвилин цілком може лишити ту
+     * саму заявку ще раз, і вона має дійти.
+     */
     private function acceptCallback($callback)
     {
-        return FormToken::accept(self::CALLBACK_FORM, $this->request->post('form_token'), $callback);
+        return FormToken::accept(
+            self::CALLBACK_FORM,
+            $this->request->post('form_token'),
+            $callback,
+            FormToken::ACCIDENT_TTL
+        );
     }
 
     /** Прапорці результату, які шаблони показують після редиректу. */

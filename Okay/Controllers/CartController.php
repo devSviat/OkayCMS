@@ -45,15 +45,43 @@ class CartController extends AbstractController
         );
     }
 
+    /**
+     * Куди вести відсіяний повтор. Спершу - замовлення, створене саме цим
+     * токеном; воно точне. Якщо тема токена не шле, лишається останнє
+     * замовлення сесії, а якщо немає й того - сторінка кошика.
+     */
     private function lastOrderUrl()
     {
-        $url = $_SESSION[OrdersHelper::LAST_ORDER_URL] ?? null;
+        $url = FormToken::recall(self::CHECKOUT_FORM, $this->request->post('form_token'))
+            ?? $_SESSION[OrdersHelper::LAST_ORDER_URL]
+            ?? null;
 
         if (is_string($url) && $url !== '') {
             return Router::generateUrl('order', ['url' => $url], true);
         }
 
         return Router::generateUrl('cart', [], true);
+    }
+
+    /**
+     * Форма кошика вміє слати ajax=1 і чекає JSON; гілка успіху це враховує,
+     * тож і відмова має відповідати тим самим форматом - інакше обробник
+     * отримує HTML і пересилає всю форму ще раз.
+     */
+    private function answerDuplicateCheckout()
+    {
+        $url = $this->lastOrderUrl();
+
+        if ($this->request->post('ajax')) {
+            $this->response->setContent(
+                json_encode(['auto_submit' => false, 'url' => $url], JSON_UNESCAPED_SLASHES),
+                RESPONSE_JSON
+            );
+            $this->response->sendContent();
+            exit;
+        }
+
+        $this->response->redirectTo($url, 303);
     }
 
     /*Отображение заказа*/
@@ -117,10 +145,17 @@ class CartController extends AbstractController
 
             if ($error = $validateHelper->getCartValidateError($order)) {
                 $this->design->assign('error', $error);
+            } elseif ($cart->isEmpty) {
+                // Замовлення з порожнього кошика не буває. Сюди приходить друга
+                // вкладка кошика: перша вже оформила замовлення й очистила
+                // кошик, а її токен друга не бачила, тож за токеном це нова
+                // відправка. Перевірка складу кошика - те, чого токен знати не
+                // може, і саме вона тримає цей випадок.
+                $this->answerDuplicateCheckout();
             } elseif (!$this->acceptCheckout($order)) {
                 // Не помилка покупця: замовлення вже створене, тож друга
                 // вкладка має показати те саме, що й перша.
-                $this->response->redirectTo($this->lastOrderUrl(), 303);
+                $this->answerDuplicateCheckout();
             } else {
                 // Добавляем заказ в базу
                 $order->lang_id = $languages->getLangId();
@@ -145,7 +180,17 @@ class CartController extends AbstractController
 
                 $ordersEntity->updateTotalPrice($order->id);
                 $ordersHelper->finalCreateOrderProcedure($order);
-                
+
+                // Прив'язуємо замовлення до витраченого токена: повтор саме з
+                // цієї сторінки має привести на нього, а не на те, що сесія
+                // оформила останнім.
+                FormToken::remember(
+                    self::CHECKOUT_FORM,
+                    $this->request->post('form_token'),
+                    $order->url
+                );
+
+
                 // Отправляем письмо пользователю
                 $notify->emailOrderUser($order->id);
 

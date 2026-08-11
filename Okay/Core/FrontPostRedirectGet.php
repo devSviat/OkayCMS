@@ -19,13 +19,22 @@ class FrontPostRedirectGet
     const SESSION_KEY = 'front_prg';
 
     /**
+     * Повідомлення живе рівно стільки, скільки триває перехід за редиректом.
+     * Без строку воно чекало б у сесії скільки завгодно: покупець міг не
+     * дійти до тієї сторінки взагалі, а через годину повернутись на неї й
+     * побачити «заявку прийнято» з давно набраними даними у формі.
+     */
+    const TTL = 60;
+
+    /**
      * @param array<string, mixed> $designVars змінні, які має отримати наступний GET
      */
     public function flash(array $designVars)
     {
         $_SESSION[self::SESSION_KEY] = [
-            'url'  => Request::getCurrentUrl(),
-            'vars' => self::withoutTokens($designVars),
+            'url'        => Request::getCurrentUrl(),
+            'expires_at' => time() + self::TTL,
+            'vars'       => self::withoutTokens($designVars),
         ];
     }
 
@@ -62,7 +71,15 @@ class FrontPostRedirectGet
     {
         $flashed = $_SESSION[self::SESSION_KEY] ?? null;
 
-        if (!is_array($flashed) || !isset($flashed['url'], $flashed['vars'])) {
+        if (!is_array($flashed) || !isset($flashed['url'], $flashed['vars'], $flashed['expires_at'])) {
+            unset($_SESSION[self::SESSION_KEY]);
+
+            return [];
+        }
+
+        if ((int)$flashed['expires_at'] < time()) {
+            unset($_SESSION[self::SESSION_KEY]);
+
             return [];
         }
 
