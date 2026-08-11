@@ -228,6 +228,7 @@ class CommentsHelper implements GetListInterface
                 // #comment_ без id, тобто показував успіх.
                 if (empty($commentId)) {
                     $this->logger->error("Коментар до {$objectType} #{$objectId} не збережено");
+                    FormToken::release(self::COMMENT_FORM, $this->request->post('form_token'));
                     $this->design->assign('error', 'not_saved');
                     return;
                 }

@@ -48,6 +48,7 @@ class FeedbackController extends AbstractController {
                     // «повідомлення надіслано».
                     if (empty($feedbackId)) {
                         $logger->error('Звернення зі сторінки зворотного зв\'язку не збережено');
+                        FormToken::release(self::FEEDBACK_FORM, $this->request->post('form_token'));
                         $this->design->assign('error', 'not_saved');
                         $saved = false;
                     } else {
