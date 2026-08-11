@@ -73,6 +73,7 @@ $lang['callback_sent_header'] = 'Your application is accepted';
 $lang['callback_sent_text'] = 'We will connect with you as soon as possible';
 $lang['cart_purchase_title'] = 'Your products:';
 $lang['cart_header'] = 'Cart';
+$lang['cart_empty_error'] = 'Your cart is empty — add a product before checking out.';
 $lang['cart_form_header'] = 'Contact Information';
 $lang['form_enter_email'] = 'Enter email';
 $lang['form_error_captcha'] = 'CAPTCHA is wrong';

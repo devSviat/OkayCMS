@@ -73,6 +73,7 @@ $lang['callback_sent_header'] = 'Ваша заявка принята';
 $lang['callback_sent_text'] = 'Мы свяжемся с вами в ближайшее время';
 $lang['cart_purchase_title'] = 'Ваши товары:';
 $lang['cart_header'] = 'Корзина';
+$lang['cart_empty_error'] = 'Корзина пуста — добавьте товар перед оформлением.';
 $lang['cart_form_header'] = 'Контактные данные';
 $lang['form_enter_email'] = 'Введите email';
 $lang['form_error_captcha'] = 'Неверно введена капча';

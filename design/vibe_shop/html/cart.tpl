@@ -104,6 +104,8 @@
                                         <span data-language="form_enter_email">{$lang->form_enter_email}</span>
                                     {elseif $error == 'captcha'}
                                         <span data-language="form_error_captcha">{$lang->form_error_captcha}</span>
+                                    {elseif $error == 'cart_empty'}
+                                        <span data-language="cart_empty_error">{$lang->cart_empty_error}</span>
                                     {elseif $error == 'empty_phone'}
                                         <span data-language="form_error_phone">{$lang->form_error_phone} {$lang->form_error_phone_example} {$phone_example}</span>
                                     {else}
