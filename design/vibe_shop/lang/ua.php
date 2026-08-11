@@ -76,6 +76,7 @@ $lang['cart_header'] = 'Кошик';
 $lang['cart_form_header'] = 'Контактні дані';
 $lang['form_enter_email'] = 'Введіть email';
 $lang['form_error_captcha'] = 'Невірно введена капча';
+$lang['form_error_not_saved'] = 'Не вдалося зберегти. Спробуйте ще раз або звʼяжіться з нами.';
 $lang['form_error_phone'] = 'Поле телефон порожнє або має невірний формат.';
 $lang['form_error_phone_example'] = 'Приклад правильного телефону:';
 $lang['form_email'] = 'Email';

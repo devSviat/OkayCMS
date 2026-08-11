@@ -132,6 +132,24 @@ class FormToken
     }
 
     /**
+     * Скасовує рішення accept(): відправка нічого не створила, тож і повтором
+     * вона не є. Без цього спроба після невдалого запису лишалась би
+     * заблокованою до кінця вікна відбитка.
+     */
+    public static function release($form, $token)
+    {
+        if (self::isWellFormed($token)) {
+            $used = self::used($form);
+            unset($used[(string)$token]);
+            $_SESSION[self::SESSION_KEY][$form] = $used;
+
+            return;
+        }
+
+        unset($_SESSION[self::FINGERPRINT_KEY][$form]);
+    }
+
+    /**
      * Запасний шлях для тем без поля form_token: те саме тіло протягом TTL
      * вважається повтором. Точність нижча за токен.
      */

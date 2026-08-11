@@ -480,6 +480,8 @@
                                             <span data-language="form_enter_comment">{$lang->form_enter_comment}</span>
                                         {elseif $error=='empty_email'}
                                             <span data-language="form_enter_email">{$lang->form_enter_email}</span>
+                                        {elseif $error=='not_saved'}
+                                            <span data-language="form_error_not_saved">{$lang->form_error_not_saved}</span>
                                         {/if}
                                     </p>
                                 {/if}

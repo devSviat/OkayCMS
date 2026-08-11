@@ -18,6 +18,7 @@ use Okay\Entities\BlogEntity;
 use Okay\Entities\CommentsEntity;
 use Okay\Entities\ProductsEntity;
 use Okay\Requests\CommonRequest;
+use Psr\Log\LoggerInterface;
 
 class CommentsHelper implements GetListInterface
 {
@@ -34,6 +35,7 @@ class CommentsHelper implements GetListInterface
     private $mainHelper;
     private $storefrontGuard;
     private $request;
+    private $logger;
 
     public function __construct(
         EntityFactory   $entityFactory,
@@ -44,8 +46,10 @@ class CommentsHelper implements GetListInterface
         MainHelper      $mainHelper,
         Languages       $languages,
         StorefrontGuard $storefrontGuard,
-        Request         $request
+        Request         $request,
+        LoggerInterface $logger
     ) {
+        $this->logger = $logger;
         $this->entityFactory = $entityFactory;
         $this->commentsRequest = $commentsRequest;
         $this->validateHelper = $validateHelper;
@@ -219,6 +223,16 @@ class CommentsHelper implements GetListInterface
 
                 // Добавляем комментарий в базу
                 $commentId = $commentsEntity->add($comment);
+
+                // Порожній id - запис не пройшов, а редирект нижче вів би на
+                // #comment_ без id, тобто показував успіх.
+                if (empty($commentId)) {
+                    $this->logger->error("Коментар до {$objectType} #{$objectId} не збережено");
+                    FormToken::release(self::COMMENT_FORM, $this->request->post('form_token'));
+                    $this->design->assign('error', 'not_saved');
+                    return;
+                }
+
                 // Отправляем email
                 $this->notify->emailCommentAdmin($commentId);
 

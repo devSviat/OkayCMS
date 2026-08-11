@@ -232,6 +232,42 @@ class FormTokenTest extends TestCase
         $this->assertFalse(FormToken::accept('checkout', $token, [$order, []]));
     }
 
+    /**
+     * Запис не пройшов - відправка нічого не створила, тож спроба з тими
+     * самими даними має дійти, а не зникнути як уявний повтор.
+     */
+    public function testReleaseLetsTheSameSubmissionThrough()
+    {
+        $token = FormToken::get('comment');
+        $comment = (object)['text' => 'дуже задоволений'];
+
+        $this->assertTrue(FormToken::accept('comment', $token, $comment));
+        FormToken::release('comment', $token);
+        $this->assertTrue(FormToken::accept('comment', $token, $comment));
+    }
+
+    public function testReleaseWithoutTokenClearsTheFingerprint()
+    {
+        $comment = (object)['text' => 'дуже задоволений'];
+
+        $this->assertTrue(FormToken::accept('comment', null, $comment, FormToken::ACCIDENT_TTL));
+        $this->assertFalse(FormToken::accept('comment', null, $comment, FormToken::ACCIDENT_TTL));
+
+        FormToken::release('comment', null);
+
+        $this->assertTrue(FormToken::accept('comment', null, $comment, FormToken::ACCIDENT_TTL));
+    }
+
+    public function testReleaseTouchesOnlyItsOwnForm()
+    {
+        $order = (object)['name' => 'Іван'];
+
+        FormToken::accept('checkout', null, $order);
+        FormToken::release('comment', null);
+
+        $this->assertFalse(FormToken::accept('checkout', null, $order));
+    }
+
     public function testExpiredFingerprintNoLongerBlocks()
     {
         $fingerprint = FormToken::fingerprintOf((object)['name' => 'Іван']);
