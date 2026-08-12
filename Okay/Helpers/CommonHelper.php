@@ -120,6 +120,11 @@ class CommonHelper
             return true;
         }
 
+        // Запис не пройшов, тож повтором ця відправка не є: без release()
+        // друга спроба пішла б гілкою дубля й показала б «прийнято», не
+        // створивши рядка. Так само роблять FeedbackController і CommentsHelper.
+        FormToken::release(self::CALLBACK_FORM, $this->request->post('form_token'));
+
         $this->design->assign('call_error', 'unknown error', true);
         return false;
     }

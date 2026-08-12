@@ -235,6 +235,14 @@
                     {* The page heading *}
                     <h1 class="h1"><span data-language="cart_header">{$lang->cart_header}</span></h1>
 
+                    {* Помилка ставиться лише при порожньому кошику, тож у блоці
+                       форми вище це повідомлення не рендерилось би ніколи. *}
+                    {if $error == 'cart_empty'}
+                        <div class="message_error">
+                            <span data-language="cart_empty_error">{$lang->cart_empty_error}</span>
+                        </div>
+                    {/if}
+
                     <p class="block padding" data-language="cart_empty">{$lang->cart_empty}</p>
                 </div>
             {/if}

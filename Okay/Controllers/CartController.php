@@ -84,6 +84,27 @@ class CartController extends AbstractController
         $this->response->redirectTo($url, 303);
     }
 
+    /**
+     * Кошик порожній, і це не повтор. Формат відповіді той самий, що й в
+     * успіху: обробник auto_submit HTML не розбирає й пересилає форму ще раз.
+     */
+    private function answerEmptyCart()
+    {
+        if ($this->request->post('ajax')) {
+            $this->response->setContent(
+                json_encode(
+                    ['auto_submit' => false, 'url' => Router::generateUrl('cart', [], true)],
+                    JSON_UNESCAPED_SLASHES
+                ),
+                RESPONSE_JSON
+            );
+            $this->response->sendContent();
+            exit;
+        }
+
+        $this->design->assign('error', 'cart_empty');
+    }
+
     /*Отображение заказа*/
     public function render(
         DeliveriesEntity   $deliveriesEntity,
@@ -146,12 +167,23 @@ class CartController extends AbstractController
             if ($error = $validateHelper->getCartValidateError($order)) {
                 $this->design->assign('error', $error);
             } elseif ($cart->isEmpty) {
-                // Замовлення з порожнього кошика не буває. Сюди приходить друга
-                // вкладка кошика: перша вже оформила замовлення й очистила
-                // кошик, а її токен друга не бачила, тож за токеном це нова
-                // відправка. Перевірка складу кошика - те, чого токен знати не
-                // може, і саме вона тримає цей випадок.
-                $this->answerDuplicateCheckout();
+                // Порожній кошик сам по собі не означає повтору: покупець міг
+                // прибрати останню позицію в сусідній вкладці, і редирект на
+                // останнє замовлення сесії показав би йому чуже підтвердження.
+                // Повтор це лише тоді, коли саме ЦЕЙ токен створив замовлення.
+                //
+                // Тема без токена такого доказу дати не може - для неї
+                // лишається колишня поведінка, інакше кнопка «назад» після
+                // оформлення вела б на помилку замість замовлення.
+                $token = $this->request->post('form_token');
+
+                if (!FormToken::isWellFormed($token)
+                    || FormToken::recall(self::CHECKOUT_FORM, $token) !== null
+                ) {
+                    $this->answerDuplicateCheckout();
+                }
+
+                $this->answerEmptyCart();
             } elseif (!$this->acceptCheckout($order)) {
                 // Не помилка покупця: замовлення вже створене, тож друга
                 // вкладка має показати те саме, що й перша.

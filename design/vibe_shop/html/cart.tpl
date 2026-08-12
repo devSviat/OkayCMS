@@ -216,6 +216,14 @@
                     <h1 class="vs-empty__title">
                         <span data-language="cart_empty">{$lang->cart_empty}</span>
                     </h1>
+                    {* Помилка ставиться лише при порожньому кошику, тож у блоці
+                       форми вище це повідомлення не рендерилось би ніколи. *}
+                    {if $error == 'cart_empty'}
+                        <p class="vs-note vs-note--error">
+                            <span data-language="cart_empty_error">{$lang->cart_empty_error}</span>
+                        </p>
+                    {/if}
+
                     <p class="vs-empty__note" data-language="cart_empty_note">{$lang->cart_empty_note}</p>
                     <a class="vs-btn vs-btn--primary" href="{url_generator route='products'}">
                         <span data-language="cart_continue_shopping">{$lang->cart_continue_shopping}</span>

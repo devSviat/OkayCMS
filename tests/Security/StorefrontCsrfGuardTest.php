@@ -8,13 +8,13 @@ use PHPUnit\Framework\Attributes\DataProvider;
 class StorefrontCsrfGuardTest extends TestCase
 {
     #[DataProvider('guardedControllerProvider')]
-    public function testMutationControllersInvokeTheGuard($file, $expectedCalls)
+    public function testMutationControllersInvokeTheGuard($file, $expectedCalls, $call = '$this->requireCustomerCsrf(')
     {
         $source = $this->read($file);
 
         $this->assertSame(
             $expectedCalls,
-            substr_count($source, '$this->requireCustomerCsrf('),
+            substr_count($source, $call),
             $file
         );
     }
@@ -25,9 +25,29 @@ class StorefrontCsrfGuardTest extends TestCase
             'cart'       => ['Okay/Controllers/CartController.php', 4],
             'wishlist'   => ['Okay/Controllers/WishListController.php', 1],
             'comparison' => ['Okay/Controllers/ComparisonController.php', 1],
-            'subscribe'  => ['Okay/Controllers/SubscribeController.php', 1],
             'feedback'   => ['Okay/Controllers/FeedbackController.php', 1],
+            // SubscribeController не успадковує AbstractController, тож бере
+            // ту саму охорону сервісом.
+            'subscribe'  => [
+                'Okay/Controllers/SubscribeController.php',
+                1,
+                '$storefrontGuard->requireCustomerCsrf(',
+            ],
         ];
+    }
+
+    /**
+     * Охорона живе в одному місці: копія її тіла в контролері означає, що
+     * наступна зміна політики цей ендпоінт мовчки омине.
+     */
+    public function testNobodyHandRollsTheGuard()
+    {
+        foreach (['Okay/Controllers/SubscribeController.php'] as $file) {
+            $source = $this->read($file);
+
+            $this->assertStringNotContainsString('CustomerCsrfToken::check', $source, $file);
+            $this->assertStringNotContainsString("setStatusCode(403)", $source, $file);
+        }
     }
 
     /**
