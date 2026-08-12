@@ -235,9 +235,8 @@
                     {* The page heading *}
                     <h1 class="h1"><span data-language="cart_header">{$lang->cart_header}</span></h1>
 
-                    {* Спроба оформити порожній кошик. Повідомлення живе саме
-                       тут: контролер ставить цю помилку лише коли кошик уже
-                       порожній, тож блок форми вище не рендериться взагалі. *}
+                    {* Помилка ставиться лише при порожньому кошику, тож у блоці
+                       форми вище це повідомлення не рендерилось би ніколи. *}
                     {if $error == 'cart_empty'}
                         <div class="message_error">
                             <span data-language="cart_empty_error">{$lang->cart_empty_error}</span>

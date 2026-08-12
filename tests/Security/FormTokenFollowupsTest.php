@@ -15,10 +15,7 @@ class FormTokenFollowupsTest extends TestCase
     private const FAST_ORDER = 'Okay/Modules/OkayCMS/FastOrder/Controllers/FastOrderController.php';
     private const CART       = 'Okay/Controllers/CartController.php';
 
-    /**
-     * Кількість приходить прихованим полем форми. Cart::addItem() її затискав
-     * залишком; getPurchases(), яким його замінили, не затискає нічого.
-     */
+    /** addItem() затискав кількість залишком, getPurchases() не затискає нічого. */
     public function testFastOrderClampsTheAmountByStock()
     {
         $source = $this->read(self::FAST_ORDER);
@@ -35,10 +32,7 @@ class FormTokenFollowupsTest extends TestCase
         $this->assertStringContainsString("\$stock <= 0 && !\$this->settings->get('is_preorder')", $source);
     }
 
-    /**
-     * Відмова має статись до запису: інакше в базі лишається замовлення без
-     * позицій і без суми.
-     */
+    /** Інакше в базі лишається замовлення без позицій і без суми. */
     public function testFastOrderChecksAvailabilityBeforeCreatingTheOrder()
     {
         $source = $this->read(self::FAST_ORDER);
@@ -52,9 +46,8 @@ class FormTokenFollowupsTest extends TestCase
     }
 
     /**
-     * ...але вже ПІСЛЯ гілки повтору. Залишок міг впасти до нуля саме цим
-     * замовленням, і тоді законний F5 отримував «невірний варіант» замість
-     * власного замовлення, яке спокійно лежить в адмінці.
+     * ...але після гілки повтору: залишок міг впасти до нуля саме цим
+     * замовленням, і тоді F5 давав «невірний варіант» замість свого замовлення.
      */
     public function testFastOrderAnswersARepeatBeforeItChecksAvailability()
     {
@@ -67,10 +60,7 @@ class FormTokenFollowupsTest extends TestCase
         $this->assertLessThan($checkAt, $repeatAt, 'наявність перевіряється до гілки повтору');
     }
 
-    /**
-     * Request::post() без типу віддає масив як є, а значення йде ключем
-     * масиву — variant_id[]=17 давав фатал уже після запису замовлення.
-     */
+    /** Без типу значення йде ключем масиву: variant_id[]=17 давав фатал. */
     public function testFastOrderReadsVariantIdAsInteger()
     {
         $source = $this->read(self::FAST_ORDER);
@@ -80,10 +70,8 @@ class FormTokenFollowupsTest extends TestCase
     }
 
     /**
-     * Форма швидкого замовлення на сторінці ОДНА: fast_order_form.tpl рендерить
-     * її прихованою, а кнопка біля кожного товару лише вписує туди variant_id.
-     * Тобто з одним токеном приходять різні замовлення, і пам'ять має бути на
-     * кожну відправку окремо.
+     * Форма на сторінці одна, кнопка біля товару лише вписує в неї variant_id -
+     * тож із одним токеном приходять різні замовлення.
      */
     public function testFastOrderRemembersEverySubmissionSeparately()
     {
@@ -95,10 +83,8 @@ class FormTokenFollowupsTest extends TestCase
     }
 
     /**
-     * consumeFingerprint() тримає ОДНУ комірку на форму й перезаписує її, тож
-     * у контролері їй робити нічого: другий товар затирав відбиток першого, і
-     * справжній повтор після цього проходив як нова відправка. Запасний шлях
-     * для тем без токена лишається там, де йому місце - усередині accept().
+     * consumeFingerprint() тримає одну комірку на форму й перезаписує її: другий
+     * товар затирав відбиток першого. Запасний шлях лишається всередині accept().
      */
     public function testFastOrderDoesNotHandRollTheFingerprintPath()
     {
@@ -108,12 +94,7 @@ class FormTokenFollowupsTest extends TestCase
         $this->assertStringContainsString('FormToken::accept(', $source);
     }
 
-    /**
-     * Без кількості у відбитку друге замовлення того самого товару в іншій
-     * кількості читалось як повтор першого: рядка не створювалось, листа не
-     * було, а покупцеві показували підтвердження кількості, від якої він
-     * щойно відмовився.
-     */
+    /** Без кількості те саме в іншій кількості читалось як повтор першого. */
     public function testFastOrderFingerprintCoversTheAmount()
     {
         $source = $this->read(self::FAST_ORDER);
@@ -128,10 +109,7 @@ class FormTokenFollowupsTest extends TestCase
         );
     }
 
-    /**
-     * fingerprintOf() віддає '' коли json_encode() падає — на такому відбитку
-     * порівняння дало б хибний збіг, тож він не має ні шукатись, ні писатись.
-     */
+    /** fingerprintOf() віддає '' коли json_encode() падає - це не збіг. */
     public function testFastOrderIgnoresAnEmptyFingerprint()
     {
         $source = $this->read(self::FAST_ORDER);
@@ -144,9 +122,8 @@ class FormTokenFollowupsTest extends TestCase
     }
 
     /**
-     * release() знімає рішення accept(). Знімати можна лише те, що зайняв цей
-     * запит: інакше відмова за наявністю стирала б пам'ять про вже створені
-     * цим токеном замовлення, і їхній повтор пішов би гілкою нової відправки.
+     * Знімати можна лише те, що зайняв цей запит: інакше відмова за наявністю
+     * стирала б пам'ять про вже створені цим токеном замовлення.
      */
     public function testFastOrderReleasesOnlyWhatItTook()
     {
@@ -158,11 +135,7 @@ class FormTokenFollowupsTest extends TestCase
         );
     }
 
-    /**
-     * Порожній кошик сам по собі не означає повтору: покупець міг прибрати
-     * останню позицію в сусідній вкладці. Редирект на останнє замовлення сесії
-     * показував би підтвердження замовлення, якого він не робив.
-     */
+    /** Покупець міг прибрати останню позицію в сусідній вкладці. */
     public function testEmptyCartIsNotTreatedAsADuplicateByItself()
     {
         $branch = $this->emptyCartBranch();
@@ -172,10 +145,8 @@ class FormTokenFollowupsTest extends TestCase
     }
 
     /**
-     * ...але тему без поля form_token FormToken підтримує свідомо, і доказу
-     * «саме цей токен створив замовлення» вона дати не може. Для неї має
-     * лишитись колишня поведінка, інакше кнопка «назад» після успішного
-     * оформлення показує помилку замість замовлення.
+     * ...а тема без form_token такого доказу дати не може: для неї лишається
+     * колишня поведінка, інакше «назад» показує помилку замість замовлення.
      */
     public function testTokenlessThemesKeepTheOldEmptyCartBehaviour()
     {
@@ -185,10 +156,7 @@ class FormTokenFollowupsTest extends TestCase
         $this->assertStringContainsString('$this->answerDuplicateCheckout()', $branch);
     }
 
-    /**
-     * Форма кошика вміє слати ajax=1 і чекає JSON. HTML у відповідь обробник
-     * auto_submit не розбирає й пересилає всю форму оформлення ще раз.
-     */
+    /** HTML у відповідь обробник auto_submit не розбирає й шле форму ще раз. */
     public function testEmptyCartAnswersAjaxWithJson()
     {
         $source = $this->read(self::CART);
@@ -203,9 +171,8 @@ class FormTokenFollowupsTest extends TestCase
     }
 
     /**
-     * Повідомлення про відмову має жити ПОЗА формою оформлення: контролер
-     * ставить цю помилку лише коли кошик уже порожній, а блок форми в такому
-     * разі не рендериться взагалі.
+     * Помилка ставиться лише при порожньому кошику, тож усередині форми
+     * оформлення повідомлення не рендерилось би ніколи.
      */
     #[DataProvider('themeProvider')]
     public function testCartEmptyMessageLivesOutsideTheCheckoutForm($theme)
@@ -232,11 +199,7 @@ class FormTokenFollowupsTest extends TestCase
         ];
     }
 
-    /**
-     * Відбиток знімається до запису. Якщо запис не пройшов, повтором відправка
-     * не є — інакше друга спроба піде гілкою дубля й покаже «прийнято», не
-     * створивши рядка.
-     */
+    /** Якщо запис не пройшов, повтором відправка не є. */
     #[DataProvider('releaseSiteProvider')]
     public function testFailedWriteReleasesTheToken($file, $form)
     {
