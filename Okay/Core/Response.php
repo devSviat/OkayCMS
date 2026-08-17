@@ -17,6 +17,8 @@ class Response
     private $type;
     private $isStream = false;
     private $statusCode = 200;
+    /** Ключі заголовків, доданих драйвером на попередньому sendHeaders(). */
+    private $adapterHeaderKeys = [];
 
     private const STATUS_CODES_MESSAGES = [
         100 => 'Continue',
@@ -210,9 +212,27 @@ class Response
         /** @var Adapters\Response\AbstractResponse $adapter */
         $adapter = $this->adapterManager->getAdapter($this->type);
         
-        // Добавляем специальные заголовки, от драйвера
+        // Заголовки попереднього драйвера прибираються: інакше на другому
+        // виклику з іншим типом вони читались би як задані викликачем, і
+        // відповідь пішла б зі старим Content-Type.
+        foreach ($this->adapterHeaderKeys as $key) {
+            unset($this->headers[$key]);
+        }
+        $this->adapterHeaderKeys = [];
+
+        // Content-Type драйвера — типове значення, а не остаточне: заголовки
+        // драйвера йдуть після заголовків викликача і з $replace, тож мовчки
+        // перезаписували явно заданий. Решту драйвер лишає за собою — для SSE
+        // Cache-Control це вимога транспорту, а не типове значення.
+        $callerSetContentType = $this->hasHeaderNamed('content-type');
+
         foreach ($adapter->getSpecialHeaders() as $header) {
+            if ($callerSetContentType && $this->headerName($header) === 'content-type') {
+                continue;
+            }
+
             $this->addHeader($header);
+            $this->adapterHeaderKeys[] = array_key_last($this->headers);
         }
         
         if (!empty($this->headers)) {
@@ -231,6 +251,25 @@ class Response
         return $this;
     }
     
+    /** Порівнюються імена, а не рядки: драйвери пишуть `Content-type`, викликачі — `Content-Type`. */
+    private function headerName(string $header): string
+    {
+        $name = strstr($header, ':', true);
+
+        return strtolower(trim($name === false ? $header : $name));
+    }
+
+    private function hasHeaderNamed(string $name): bool
+    {
+        foreach ($this->headers as $header) {
+            if ($this->headerName($header[0]) === $name) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function setHeaderLastModify(string $lastModify): self
     {
         $lastModifiedUnix = $lastModify ? strtotime($lastModify) : time();

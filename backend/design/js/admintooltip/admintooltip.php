@@ -75,6 +75,5 @@ foreach ($fastMenu as $dataProperty => $menuItem) {
 $design->assign('menu_selector', '"' . implode(', ', $menuSelector) . '"');
 $design->assign('fast_menu', $fastMenu);
 
-$response->addHeader('Content-Type: application/javascript');
 $response->setContent($design->fetch('tooltip.tpl'), RESPONSE_JAVASCRIPT);
 $response->sendContent();
