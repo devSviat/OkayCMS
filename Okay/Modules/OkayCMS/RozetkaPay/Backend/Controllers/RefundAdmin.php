@@ -22,14 +22,17 @@ class RefundAdmin extends IndexAdmin
 
     public function execute(Refund $refund)
     {
-        if(isset($_GET['order'])) {
-            $order = $this->getOrder($_GET['order']);
+        // Повернення грошей — мутація, тож лише POST: CSRF-гард у backend/index.php
+        // перевіряє токен за методом, тож на GET він не вимагався ніколи.
+        $orderId = $this->request->post('order', 'integer');
+        if ($orderId) {
+            $order = $this->getOrder($orderId);
             $refundResult = $refund->refund($order);
             $ordersEntity = $this->entityFactory->get(OrdersEntity::class);
             if(isset($refundResult->is_success) && $refundResult->is_success){
-                $ordersEntity->update((int) $_GET['order'], ['payment_details' => $refundResult]);
+                $ordersEntity->update($orderId, ['payment_details' => $refundResult]);
                 if ($order->paid === 1) {
-                    $ordersEntity->update((int) $_GET['order'], ['paid' => 0]);
+                    $ordersEntity->update($orderId, ['paid' => 0]);
                 }
             }
         }
