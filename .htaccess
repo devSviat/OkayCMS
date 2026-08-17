@@ -53,7 +53,7 @@ RewriteCond $1 !^design/[^/]+/preview\.(png|jpe?g)$ [NC]
 RewriteCond $1 !^cache/(css|js)/[^/]+\.(css|js)$ [NC]
 RewriteCond $1 !^js_libraries/.+\.(css|js|map|png|jpe?g|gif|svg|webp|woff2?|ttf|eot)$ [NC]
 RewriteCond $1 !^Okay/Modules/[^/]+/[^/]+/(Backend/)?design/.+\.(css|js|png|jpe?g|gif|svg|webp|woff2?|ttf)$ [NC]
-RewriteCond $1 !^Okay/Modules/[^/]+/[^/]+/preview\.(png|jpe?g)$ [NC]
+RewriteCond $1 !^Okay/Modules/[^/]+/[^/]+/preview\.(png|jpe?g|gif|svg)$ [NC]
 RewriteCond $1 !^files/.+\.(png|jpe?g|gif|svg|webp|ico|pdf|zip|xlsx?|docx?|csv|mp3|mp4|ogg|webm)$ [NC]
 RewriteRule ^(.*)$ index.php [L,QSA]
 
