@@ -101,23 +101,15 @@
             overflow-y: hidden;
             overflow-x: auto;
         }
-        .cm-s-monokai .cm-smarty.cm-tag{color: #ff008a;}
-        .cm-s-monokai .cm-smarty.cm-string {color: #007000;}
-        .cm-s-monokai .cm-smarty.cm-variable {color: #ff008a;}
-        .cm-s-monokai .cm-smarty.cm-variable-2 {color: #ff008a;}
-        .cm-s-monokai .cm-smarty.cm-variable-3 {color: #ff008a;}
-        .cm-s-monokai .cm-smarty.cm-property {color: #ff008a;}
-        .cm-s-monokai .cm-comment {color: #505050;}
-        .cm-s-monokai .cm-smarty.cm-attribute {color: #ff20Fa;}
     </style>
 {/literal}
 
 {literal}
     <script>
         var editor = CodeMirror.fromTextArea(document.getElementById("robots"), {
-            mode: "mixed",
+            // robots.txt - плоский текст, підсвічувати нема чого
+            mode: null,
             lineNumbers: true,
-            styleActiveLine: true,
             matchBrackets: false,
             enterMode: 'keep',
             indentWithTabs: false,
