@@ -50,14 +50,14 @@ COPY dev/config/php/custom.d/okay.ini /usr/local/etc/php/custom.d/okay.ini
 
 # Обслуговують сервіс `scheduler`. У base, а не в prod, щоб dev і prod мали ті
 # самі бінарники.
-ARG SUPERCRONIC_VERSION=v0.2.48
+ARG SUPERCRONIC_VERSION=v0.2.49
 ARG TARGETARCH
 RUN apt-get update \
  && apt-get install -y --no-install-recommends tini \
  && rm -rf /var/lib/apt/lists/* \
  && case "${TARGETARCH}" in \
-        amd64) SUPERCRONIC_SHA256=88c1b66b94c486f972fdd1a4d1f901e3e75ff04f749cddd60c5db573e3a33c6c ;; \
-        arm64) SUPERCRONIC_SHA256=50ae8755e04fa72812d0a1bc47a112a856811cc91cce7b6c875c378a850788bc ;; \
+        amd64) SUPERCRONIC_SHA256=a53ae236602c7338aba3fbaff40bda6300eae3b9fedb8261eb06cfe3724430c1 ;; \
+        arm64) SUPERCRONIC_SHA256=02aa0cb229ba09050cba6638059dadb9eedc2276632ea43d6a57a2f8c1629dd5 ;; \
         *) echo "unsupported architecture for supercronic: ${TARGETARCH}" >&2; exit 1 ;; \
     esac \
  && curl -fsSL -o /usr/local/bin/supercronic \
