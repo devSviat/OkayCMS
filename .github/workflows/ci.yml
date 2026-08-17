@@ -5,6 +5,11 @@ on:
     branches: [ main ]
   pull_request:
 
+# Жодна джоба нічого не пише: тести, аналізатори й скан секретів лише читають
+# дерево. Без цього блоку токен отримує типові права репозиторію.
+permissions:
+  contents: read
+
 jobs:
   tests:
     runs-on: ubuntu-latest
