@@ -2,8 +2,11 @@
 
 namespace Security;
 
+use Okay\Core\Modules\Module;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionMethod;
 
 /**
  * Корінь сайту — весь репозиторій, тож новий файл там за замовчуванням
@@ -225,6 +228,90 @@ class PublicSurfaceTest extends TestCase
         }
 
         $this->assertGreaterThan(5, $conditions, 'білий список мусить перелічувати дозволені дерева');
+    }
+
+    /**
+     * Який файл є прев'ю модуля, вирішує ядро, а конфігів із цим переліком
+     * три. Розширення, додане в один із них, решту лишає з битою картинкою в
+     * списку модулів — і мовчки, бо кожен конфіг сам по собі валідний.
+     */
+    #[DataProvider('previewWhitelistProvider')]
+    public function testModulePreviewWhitelistMatchesTheCore(string $path): void
+    {
+        $this->assertSame(
+            $this->coreModulePreviewExtensions(),
+            $this->configModulePreviewExtensions($path),
+            "перелік розширень прев'ю модуля в {$path} розійшовся з "
+            . 'Module::fileHasAllowImageExtension()'
+        );
+    }
+
+    public static function previewWhitelistProvider(): array
+    {
+        return [
+            'dev template' => ['dev/config/nginx/templates/default.conf.template'],
+            'docs example' => ['docs/nginx/nginx.conf'],
+            'htaccess'     => ['.htaccess'],
+        ];
+    }
+
+    /**
+     * Ядро питається поведінкою, а не читанням його регулярки. Перелік
+     * кандидатів навмисно ширший за дозволене.
+     */
+    private function coreModulePreviewExtensions(): array
+    {
+        $candidates = ['avif', 'bmp', 'gif', 'ico', 'jpeg', 'jpg', 'png', 'svg', 'tiff', 'webp'];
+
+        $module = (new ReflectionClass(Module::class))->newInstanceWithoutConstructor();
+        $method = new ReflectionMethod(Module::class, 'fileHasAllowImageExtension');
+
+        return array_values(array_filter(
+            $candidates,
+            static fn(string $ext) => (bool) $method->invoke($module, "preview.{$ext}")
+        ));
+    }
+
+    /** `jpe?g` розгортається у два розширення — інакше переліки не порівняти. */
+    private function configModulePreviewExtensions(string $path): array
+    {
+        $found = preg_match(
+            '#Okay/Modules/\[\^/\]\+/\[\^/\]\+/preview\\\\\.\((?:\?i:)?([^)]+)\)\$#',
+            $this->config($path),
+            $matches
+        );
+        $this->assertSame(1, $found, "у {$path} не знайдено дозволу на прев'ю модуля");
+
+        $extensions = [];
+        foreach (explode('|', $matches[1]) as $alternative) {
+            $extensions[] = str_replace('?', '', $alternative);
+            if (str_contains($alternative, '?')) {
+                $extensions[] = preg_replace('/.\?/', '', $alternative);
+            }
+        }
+
+        $extensions = array_unique($extensions);
+        sort($extensions);
+
+        return $extensions;
+    }
+
+    /**
+     * Прев'ю кладе в репозиторій автор модуля, а svg прямою навігацією
+     * рендериться як документ і виконує <script>.
+     */
+    #[DataProvider('configProvider')]
+    public function testModulePreviewSendsCspForSvg(string $path): void
+    {
+        $found = preg_match(
+            '#location\s+~\s+\^/Okay/Modules/\[\^/\]\+/\[\^/\]\+/preview\\\\\.[^{]*\{([^}]*)\}#',
+            $this->config($path),
+            $matches
+        );
+        $this->assertSame(1, $found, "у {$path} не знайдено локейшена прев'ю модуля");
+
+        $this->assertStringContainsString("default-src 'none'; sandbox", $matches[1], $path);
+        $this->assertStringContainsString('X-Content-Type-Options nosniff', $matches[1], $path);
     }
 
     /** З /application/public конфіг не працює взагалі, і це помічають не одразу. */
