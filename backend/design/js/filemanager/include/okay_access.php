@@ -10,11 +10,18 @@
 use Okay\Core\EntityFactory;
 use Okay\Core\Security\Filemanager\AccessGuard;
 use Okay\Core\Security\Filemanager\PathResolver;
+use Okay\Core\Security\SecurityHeaders;
 use Okay\Core\Security\SessionNames;
 
 $okayFilemanagerRoot = realpath(__DIR__ . '/../../../../..');
 
 require_once $okayFilemanagerRoot . '/vendor/autoload.php';
+
+// Ці входи не проходять через Okay\Core\Response, а dialog.php віддає
+// HTML-документ.
+foreach (SecurityHeaders::defaults() as $okayHeader) {
+    header($okayHeader);
+}
 
 SessionNames::startBackend();
 
