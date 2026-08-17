@@ -104,6 +104,41 @@ class RefundCsrfTest extends TestCase
     }
 
     /**
+     * `Refund::refund()` читає ключі з методу оплати самого замовлення, тож без
+     * цього гарда чужий id ішов у розетку з чужими реквізитами. Перевіряємо
+     * саме порядок: наявність умови нижче за виклик шлюзу нічого не дала б.
+     */
+    public function testPaymentMethodIsCheckedBeforeTheGatewayIsCalled()
+    {
+        $source = $this->controller();
+
+        $guard = strpos($source, "\$paymentMethod->module !== 'OkayCMS/RozetkaPay'");
+        $call = strpos($source, '$refund->refund(');
+
+        $this->assertNotFalse($guard, 'немає звірки модуля платіжного методу');
+        $this->assertNotFalse($call);
+        $this->assertLessThan($call, $guard, 'звірка модуля стоїть після виклику шлюзу');
+    }
+
+    /**
+     * Гард мусить обривати виконання, а не просто щось залогувати.
+     */
+    public function testWrongPaymentMethodStopsExecution()
+    {
+        $source = $this->controller();
+
+        $guard = strpos($source, "\$paymentMethod->module !== 'OkayCMS/RozetkaPay'");
+        $call = strpos($source, '$refund->refund(');
+
+        // Без цього за відсутнього гарда strpos дає false, substr бере його за
+        // нуль, і перевірка проходить на return; із зовсім іншого місця.
+        $this->assertNotFalse($guard, 'немає звірки модуля платіжного методу');
+        $this->assertNotFalse($call);
+
+        $this->assertStringContainsString('return;', substr($source, $guard, $call - $guard));
+    }
+
+    /**
      * Точка вставки справді лежить усередині форми замовлення — саме цим
      * продиктовані два тести вище. Якщо ядро її перенесе, це має впасти й
      * змусити перечитати міркування, а не тихо лишити мертві обмеження.
