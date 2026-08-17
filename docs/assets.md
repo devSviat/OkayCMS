@@ -163,6 +163,20 @@ box-shadow: 0 0 2px var(--a), 0 0 4px var(--b);       /* ✗ підставит�
 Тести на цю поведінку: `tests/Core/TemplateConfig/CssConfigBlockCommentTest.php`,
 `tests/Core/TemplateConfig/CssConfigSettingsFileTest.php`.
 
+## Вендорний CodeMirror в адмінці
+
+`backend/design/js/codemirror/` — не повний реліз, а обрізаний дроп CodeMirror 5.65.18 із
+дванадцяти файлів: дев'ять апстрімних, які підключають редактори шаблонів, стилів і
+скриптів, сторонній `mode/smartymixed/`, а також `LICENSE` і `AUTHORS`. Решту дерева
+(`demo/`, `doc/`, `test/`, `src/`, невживані режими, теми й аддони, `package.json`)
+прибрано: під `backend/design/` усе віддається публічно за розширенням, тож кожен зайвий
+файл був відкритим зразком версії бібліотеки.
+
+`mode/smartymixed/` в апстрімі не існує — це сторонній режим, який тут і тримає підсвітку
+Smarty поверх HTML. Оновлення CodeMirror має його пережити: він спирається на
+`htmlmixed`-стан (`state.htmlState`) і на `tagName` зі стану `xml`, тому після кожного
+апгрейду підсвітку `.tpl` треба відкрити очима, а не лише порахувати тести.
+
 ## Змінні з PHP у JS
 
 ```php
