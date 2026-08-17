@@ -33,9 +33,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Trivy (prod images)
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       # Обидва образи в одній джобі: nginx-prod — це COPY поверх alpine.
       #
@@ -47,7 +47,7 @@ jobs:
       # 6.12.101-1. Сенс цього воркфлоу — знати стан образу, який зібрався б
       # зараз, тож кеш тут шкодить. Ціна — кілька хвилин; на PR він не бігає.
       - name: Build the prod image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: dev/docker/Dockerfile
@@ -58,7 +58,7 @@ jobs:
           no-cache: true
 
       - name: Build the nginx-prod image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: dev/docker/Dockerfile
