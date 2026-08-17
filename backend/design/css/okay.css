@@ -990,17 +990,19 @@ a.link_white:hover{
 
 /* Button info and download */
 /* Вторинна дія. Була байт у байт як .btn_blue - дві назви, один вигляд.
-   Тепер тримає ту саму родину кольору, але не змагається з первинною. */
+   Тепер тримає ту саму родину кольору, але не змагається з первинною.
+   Заливка від полотна майже не відрізняється, тож форму дає межа проти полотна -
+   звідси --ok-control-line, спільна межа контролів (WCAG 1.4.11). Наведення й
+   натискання її не чіпають, інакше кнопка втрачала б форму; :focus - свідомо. */
 .btn-info{
     color: var(--ok-accent);
     background-color: var(--ok-accent-soft);
-    border-color: var(--ok-accent-soft);
+    border-color: var(--ok-control-line);
 }
 
 .btn-info:hover{
     color: var(--ok-accent-hover);
     background-color: #d6e6f2;
-    border-color: #d6e6f2;
 }
 
 .btn-info:focus{
@@ -1012,7 +1014,6 @@ a.link_white:hover{
 .btn-info:active{
     color: var(--ok-accent-active);
     background-color: #c7dcec;
-    border-color: #c7dcec;
     background-image: none;
 }
 
@@ -1020,13 +1021,11 @@ a.link_white:hover{
 .btn-info:active:focus{
     color: var(--ok-accent-active);
     background-color: #b9d3e6;
-    border-color: #b9d3e6;
 }
 .btn-info:disabled:focus,
 .btn-info:disabled:hover {
     color: var(--ok-ink-muted);
     background-color: var(--ok-accent-soft);
-    border-color: var(--ok-accent-soft);
 }
 
 /* Обидві кнопки були бурштиновими, але різними відтінками. Розведено за
@@ -1219,14 +1218,14 @@ a.link_white:hover{
     background-image: none;
     background-color: transparent;
     /* Була точною копією .btn_border_blue - у гайді дві кнопки виглядали
-       однаково. Пара повторює заливну: blue - акцентна, info - тиха. */
-    border-color: var(--ok-line-strong);
+       однаково. Пара повторює заливну: blue - акцентна, info - тиха. Тиха, але
+       видима: --ok-line-strong це роздільник, для межі контрола він замалий. */
+    border-color: var(--ok-control-line);
 }
 
 .btn_border-info:hover{
     color: var(--ok-accent);
     background-color: var(--ok-accent-soft);
-    border-color: var(--ok-accent-soft);
 }
 
 .btn_border-info:focus{
@@ -1249,11 +1248,9 @@ a.link_white:hover{
 }
 .btn_border-info:disabled:focus{
     background-color: var(--ok-accent-soft);
-    border-color: var(--ok-accent-soft);
 }
 .btn_border-info:disabled:hover {
     background-color: var(--ok-accent-soft);
-    border-color: var(--ok-accent-soft);
 }
 .btn_border_dark{
     color: var(--ok-chrome);

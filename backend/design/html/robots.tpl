@@ -65,7 +65,8 @@
             <div class="heading_box">robots.txt</div>
             <form method="post">
                 <input type=hidden name="session_id" value="{$smarty.session.id}">
-                <textarea id="robots" class="settings_robots_area" name="robots">{$robots_txt|escape}</textarea>
+                <textarea id="robots" class="settings_robots_area" name="robots">
+{$robots_txt|escape}</textarea>
                 <div class="row">
                     <div class="col-lg-12 col-md-12">
                         <button type="submit" name="save" class="fn_save btn btn_small btn_blue float-md-right">
