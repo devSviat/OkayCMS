@@ -71,9 +71,18 @@ class RefundCsrfTest extends TestCase
         $this->assertStringNotContainsString('href', $markup);
     }
 
+    /**
+     * Саме значення, а не саму лише назву поля: із порожнім чи вигаданим
+     * токеном гард віддає 403 на кожне повернення, а перевірка на підрядок
+     * `session_id` цього не бачить.
+     */
     public function testRequestCarriesTheCsrfToken()
     {
-        $this->assertStringContainsString('session_id', $this->script());
+        $this->assertStringContainsString(
+            'data-session="{$smarty.session.id|escape}"',
+            $this->markup()
+        );
+        $this->assertStringContainsString("addField('session_id', button.getAttribute('data-session'))", $this->script());
     }
 
     public function testRequestIsSentByPost()
@@ -136,6 +145,19 @@ class RefundCsrfTest extends TestCase
         $this->assertNotFalse($call);
 
         $this->assertStringContainsString('return;', substr($source, $guard, $call - $guard));
+    }
+
+    /**
+     * Шаблон і контролер мусять звірятися за одним полем. Поки шаблон дивився
+     * на `name`, кнопка зникала на будь-якій назві методу, крім дослівної.
+     */
+    public function testButtonIsGatedOnTheSameFieldAsTheController()
+    {
+        $this->assertStringContainsString(
+            "\$payment_method->module === 'OkayCMS/RozetkaPay'",
+            $this->markup()
+        );
+        $this->assertStringNotContainsString('$payment_method->name', $this->markup());
     }
 
     /**

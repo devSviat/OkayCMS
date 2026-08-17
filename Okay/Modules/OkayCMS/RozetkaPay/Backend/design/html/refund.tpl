@@ -1,4 +1,6 @@
-{if $payment_method->name === 'RozetkaPay' && $order->paid}
+{* Звіряємо module, а не name: name — це редагована назва методу, і кнопка
+   зникала на будь-якій, крім дослівної. Контролер звіряє те саме поле. *}
+{if $payment_method->module === 'OkayCMS/RozetkaPay' && $order->paid}
     <div class="box_btn_heading" style="margin-left: 10px !important;">
         <button type="button" class="btn btn_small btn-info fn_rozetkapay_refund"
                 data-order="{$order->id|escape}"
