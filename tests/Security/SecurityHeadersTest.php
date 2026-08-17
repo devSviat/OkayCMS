@@ -39,4 +39,15 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringContainsString("'X-Powered-CMS: OkayCMS'", $source);
         $this->assertStringContainsString('SecurityHeaders::defaults()', $source);
     }
+
+    /** Точки входу файлового менеджера обходять Okay\Core\Response. */
+    public function testFilemanagerEntryPointsSendTheSameDefaults()
+    {
+        $source = file_get_contents(
+            dirname(__DIR__, 2) . '/backend/design/js/filemanager/include/okay_access.php'
+        );
+        $this->assertIsString($source);
+
+        $this->assertStringContainsString('SecurityHeaders::defaults()', $source);
+    }
 }

@@ -72,20 +72,34 @@ server {
 
     # ─────────────────────── Статика кореня ───────────────────────
     # Єдині файли, які віддаються з кореня репозиторію.
+    #
+    # Захисні заголовки — у кожному локейшені, що віддає файл із диска: серед
+    # дозволених розширень є html і svg, тож документи сюди теж потрапляють, а
+    # SecurityHeaders до них не доходить. На рівні server не спрацює —
+    # add_header у локейшені замінює успадковані, а не додається до них.
 
     location = /robots.txt {
         access_log off;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
     }
 
     # Стандартний шлях ACME-валідації (Let's Encrypt).
     location ^~ /.well-known/ {
         access_log off;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
     }
 
     # Не лише .ico: сучасні теми кладуть у корінь favicon.svg або .png.
     location ~ ^/favicon\.(?i:ico|png|svg|gif|jpe?g|webp)$ {
         access_log off;
         log_not_found off;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
     }
 
     # Після інверсії воно й так недосяжне, але правило лишається явним:
@@ -103,12 +117,18 @@ server {
         expires max;
         add_header Cache-Control public;
         add_header Access-Control-Allow-Origin *;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
     }
 
     # Прев'ю теми — перемикач тем в адмінці бере його прямо звідси.
     location ~ ^/design/[^/]+/preview\.(?i:png|jpe?g)$ {
         access_log off;
         expires max;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
     }
 
     # Саме (css|js)/, а не весь cache/: поруч лежить cache/codes/ і .map.
@@ -117,6 +137,9 @@ server {
         expires max;
         add_header Cache-Control public;
         add_header Access-Control-Allow-Origin *;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
     }
 
     location ~ ^/js_libraries/.+\.(?i:css|js|map|png|jpe?g|gif|svg|webp|woff2?|ttf|eot)$ {
@@ -124,6 +147,9 @@ server {
         expires max;
         add_header Cache-Control public;
         add_header Access-Control-Allow-Origin *;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
     }
 
     # Шаблони адмінки беруть картинки й css прямо з Okay/Modules/.
@@ -131,6 +157,9 @@ server {
     location ~ ^/Okay/Modules/[^/]+/[^/]+/(Backend/)?design/.+\.(?i:css|js|png|jpe?g|gif|svg|webp|woff2?|ttf)$ {
         access_log off;
         expires max;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
     }
 
     # Прев'ю модуля лежить у його корені, а не під design/. Перелік розширень
@@ -146,6 +175,8 @@ server {
         expires max;
         add_header Content-Security-Policy "default-src 'none'; sandbox" always;
         add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
     }
 
     # Завантаження файлового менеджера; originals/ не публічні. Перелік
@@ -165,6 +196,8 @@ server {
         add_header Cache-Control public;
         add_header Content-Security-Policy "default-src 'none'; sandbox" always;
         add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
     }
 
     # ───────────────────────── Адмінка ─────────────────────────
@@ -224,6 +257,9 @@ server {
         # JS-бібліотек (README, .sh, .yml, Thumbs.db).
         location ~ ^/backend/design/.+\.(?i:css|js|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|html?|json)$ {
             try_files $uri =404;
+            add_header X-Content-Type-Options nosniff always;
+            add_header X-Frame-Options SAMEORIGIN always;
+            add_header Referrer-Policy strict-origin-when-cross-origin always;
         }
 
         # Усе інше — фронт-контролер, без віддачі файлу з диска.

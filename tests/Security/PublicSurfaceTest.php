@@ -231,9 +231,8 @@ class PublicSurfaceTest extends TestCase
     }
 
     /**
-     * Який файл є прев'ю модуля, вирішує ядро, а конфігів із цим переліком
-     * три. Розширення, додане в один із них, решту лишає з битою картинкою в
-     * списку модулів — і мовчки, бо кожен конфіг сам по собі валідний.
+     * Перелік тримають три конфіги. Розширення, додане в один, решту лишає з
+     * битою картинкою в списку модулів.
      */
     #[DataProvider('previewWhitelistProvider')]
     public function testModulePreviewWhitelistMatchesTheCore(string $path): void
@@ -312,6 +311,98 @@ class PublicSurfaceTest extends TestCase
 
         $this->assertStringContainsString("default-src 'none'; sandbox", $matches[1], $path);
         $this->assertStringContainsString('X-Content-Type-Options nosniff', $matches[1], $path);
+    }
+
+    /**
+     * Файл, який сервер віддає з диска, до PHP не доходить, а серед дозволених
+     * розширень є html і svg — тобто документи теж.
+     */
+    private const BASELINE_HEADERS = [
+        'add_header X-Content-Type-Options nosniff always;',
+        'add_header X-Frame-Options SAMEORIGIN always;',
+        'add_header Referrer-Policy strict-origin-when-cross-origin always;',
+    ];
+
+    #[DataProvider('configProvider')]
+    public function testEveryLocationServingFilesSendsBaselineHeaders(string $path): void
+    {
+        $serving = array_filter(
+            $this->locationBlocks($this->config($path)),
+            static fn(array $block) => $block['servesFiles']
+        );
+
+        $this->assertNotEmpty($serving, "{$path}: локейшенів, що віддають файли, не знайдено");
+
+        foreach ($serving as $block) {
+            foreach (self::BASELINE_HEADERS as $header) {
+                // Саме рівно один: другий такий рядок nginx віддає окремим
+                // заголовком, а не перезаписом.
+                $this->assertSame(
+                    1,
+                    substr_count($block['body'], $header),
+                    "{$path}: {$block['head']} мусить надсилати «{$header}» рівно один раз"
+                );
+            }
+        }
+    }
+
+    /** Серверний add_header лишив би без заголовків саме ті локейшени, що мають власні. */
+    #[DataProvider('configProvider')]
+    public function testBaselineHeadersAreNotSetServerWide(string $path): void
+    {
+        foreach (self::BASELINE_HEADERS as $header) {
+            $this->assertDoesNotMatchRegularExpression(
+                '#^    ' . preg_quote($header, '#') . '$#m',
+                $this->config($path),
+                "{$path}: «{$header}» на рівні server дублює заголовок застосунку"
+            );
+        }
+    }
+
+    /**
+     * Розбирає конфіг по глибині дужок. Беруться лише листкові блоки: у
+     * контейнера на кшталт `^~ /backend/` власного тіла немає.
+     *
+     * @return list<array{head: string, body: string, servesFiles: bool}>
+     */
+    private function locationBlocks(string $source): array
+    {
+        $blocks = [];
+        $lines = explode("\n", $source);
+        $total = count($lines);
+
+        foreach ($lines as $index => $line) {
+            if (!preg_match('#^\s*location\s+(\S.*?)\s*\{\s*$#', $line, $head)) {
+                continue;
+            }
+
+            $depth = 1;
+            $end = null;
+            for ($i = $index + 1; $i < $total; $i++) {
+                $depth += substr_count($lines[$i], '{') - substr_count($lines[$i], '}');
+                if ($depth === 0) {
+                    $end = $i;
+                    break;
+                }
+            }
+            $this->assertNotNull($end, "незакритий location: {$head[1]}");
+
+            $body = implode("\n", array_slice($lines, $index + 1, $end - $index - 1));
+            if (str_contains($body, 'location')) {
+                continue;
+            }
+
+            // Віддає з диска все, що не завершується поверненням коду,
+            // переписуванням або переходом у фронт-контролер.
+            $servesFiles = !preg_match(
+                '#\breturn\s|fastcgi_pass|\brewrite\s|try_files\s+/does_not_exist#',
+                $body
+            );
+
+            $blocks[] = ['head' => $head[1], 'body' => $body, 'servesFiles' => $servesFiles];
+        }
+
+        return $blocks;
     }
 
     /** З /application/public конфіг не працює взагалі, і це помічають не одразу. */
