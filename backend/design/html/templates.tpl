@@ -70,7 +70,8 @@
                 <div class="heading_box">{$btr->general_template|escape} {$template_file}</div>
 
                 <form class="fn_fast_button">
-                    <textarea id="template_content" name="template_content" style="width:700px;height:500px;">{$template_content|escape}</textarea>
+                    <textarea id="template_content" name="template_content" style="width:700px;height:500px;">
+{$template_content|escape}</textarea>
                 </form>
                 <div class="row">
                     <div class="col-lg-12 col-md-12">
