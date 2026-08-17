@@ -19,12 +19,9 @@
         // парсер викидає; кнопка-сабміт тут теж не годиться — вона стала б
         // першою в тій формі, тобто кнопкою за замовчуванням, і Enter у
         // будь-якому полі замовлення робив би повернення.
-        document.addEventListener('click', function (event) {
-            var button = event.target.closest ? event.target.closest('.fn_rozetkapay_refund') : null;
-            if (!button) {
-                return;
-            }
+        var button = document.querySelector('.fn_rozetkapay_refund');
 
+        button.addEventListener('click', function () {
             var form = document.createElement('form');
             form.method = 'post';
             form.action = 'index.php?controller=OkayCMS.RozetkaPay.RefundAdmin@execute';
