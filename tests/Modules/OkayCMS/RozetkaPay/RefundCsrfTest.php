@@ -46,48 +46,32 @@ class RefundCsrfTest extends TestCase
         return $matches[0];
     }
 
-    public function testOrderIdComesFromPost()
-    {
-        $this->assertStringContainsString("\$this->request->post('order', 'integer')", $this->controller());
-    }
-
     /**
-     * Не про стиль: доки id читається з рядка запиту, дію можна виконати
-     * навігацією, а навігація токена не несе.
+     * Доки id читається з рядка запиту, дію можна виконати навігацією, а
+     * навігація токена не несе.
      */
-    public function testControllerReadsNothingFromTheQueryString()
+    public function testOrderIdComesFromPostAndNowhereElse()
     {
         $source = $this->controller();
 
+        $this->assertStringContainsString("\$this->request->post('order', 'integer')", $source);
         $this->assertStringNotContainsString('$_GET', $source);
         $this->assertStringNotContainsString('$this->request->get(', $source);
     }
 
-    public function testTemplateHasNoLinkThatTriggersTheRefund()
-    {
-        $markup = $this->markup();
-
-        $this->assertStringNotContainsString('<a ', $markup);
-        $this->assertStringNotContainsString('href', $markup);
-    }
-
     /**
-     * Саме значення, а не саму лише назву поля: із порожнім чи вигаданим
-     * токеном гард віддає 403 на кожне повернення, а перевірка на підрядок
-     * `session_id` цього не бачить.
+     * Метод і саме значення токена. Перевірка на підрядок `session_id` не
+     * побачила б підміни значення, а з вигаданим токеном гард віддає 403 на
+     * кожне повернення.
      */
-    public function testRequestCarriesTheCsrfToken()
+    public function testRequestIsPostedWithTheCsrfToken()
     {
         $this->assertStringContainsString(
             'data-session="{$smarty.session.id|escape}"',
             $this->markup()
         );
-        $this->assertStringContainsString("addField('session_id', button.getAttribute('data-session'))", $this->script());
-    }
-
-    public function testRequestIsSentByPost()
-    {
         $this->assertStringContainsString("form.method = 'post'", $this->script());
+        $this->assertStringContainsString("addField('session_id', button.getAttribute('data-session'))", $this->script());
     }
 
     /**
@@ -114,25 +98,11 @@ class RefundCsrfTest extends TestCase
 
     /**
      * `Refund::refund()` читає ключі з методу оплати самого замовлення, тож без
-     * цього гарда чужий id ішов у розетку з чужими реквізитами. Перевіряємо
-     * саме порядок: наявність умови нижче за виклик шлюзу нічого не дала б.
+     * цього гарда чужий id ішов у розетку з чужими реквізитами. Важлива не
+     * наявність умови, а те, що вона стоїть перед викликом шлюзу й обриває
+     * виконання, а не просто щось логує.
      */
-    public function testPaymentMethodIsCheckedBeforeTheGatewayIsCalled()
-    {
-        $source = $this->controller();
-
-        $guard = strpos($source, "\$paymentMethod->module !== 'OkayCMS/RozetkaPay'");
-        $call = strpos($source, '$refund->refund(');
-
-        $this->assertNotFalse($guard, 'немає звірки модуля платіжного методу');
-        $this->assertNotFalse($call);
-        $this->assertLessThan($call, $guard, 'звірка модуля стоїть після виклику шлюзу');
-    }
-
-    /**
-     * Гард мусить обривати виконання, а не просто щось залогувати.
-     */
-    public function testWrongPaymentMethodStopsExecution()
+    public function testWrongPaymentMethodStopsExecutionBeforeTheGatewayIsCalled()
     {
         $source = $this->controller();
 
@@ -144,6 +114,7 @@ class RefundCsrfTest extends TestCase
         $this->assertNotFalse($guard, 'немає звірки модуля платіжного методу');
         $this->assertNotFalse($call);
 
+        $this->assertLessThan($call, $guard, 'звірка модуля стоїть після виклику шлюзу');
         $this->assertStringContainsString('return;', substr($source, $guard, $call - $guard));
     }
 

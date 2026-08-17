@@ -26,8 +26,8 @@ class RefundAdmin extends IndexAdmin
     {
         // Лише POST: CSRF-гард у backend/index.php перевіряє токен за методом,
         // тож на GET повернення грошей виконував будь-який сторонній запит.
-        $orderId = (int) $this->request->post('order', 'integer');
-        $order = $orderId > 0 ? $this->getOrder($orderId) : null;
+        $orderId = $this->request->post('order', 'integer');
+        $order = $this->getOrder($orderId);
 
         if (empty($order)) {
             $this->fetch();
