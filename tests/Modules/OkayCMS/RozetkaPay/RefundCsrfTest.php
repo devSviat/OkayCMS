@@ -1,0 +1,125 @@
+<?php
+
+namespace Modules\OkayCMS\RozetkaPay;
+
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Повернення грошей виконувалось за GET зі звичайного посилання, а
+ * checkSession() гардить лише небезпечні методи — тобто токен для GET не
+ * вимагався ніколи і повернення робив будь-який сторонній запит у браузері
+ * менеджера.
+ */
+class RefundCsrfTest extends TestCase
+{
+    private function source($relativePath)
+    {
+        $path = dirname(__DIR__, 4) . '/' . $relativePath;
+        $this->assertFileExists($path);
+
+        return file_get_contents($path);
+    }
+
+    private function controller()
+    {
+        return $this->source('Okay/Modules/OkayCMS/RozetkaPay/Backend/Controllers/RefundAdmin.php');
+    }
+
+    private function template()
+    {
+        return $this->source('Okay/Modules/OkayCMS/RozetkaPay/Backend/design/html/refund.tpl');
+    }
+
+    /**
+     * Розмітка без блоку <script>. Інакше перевірки ловлять власні коментарі
+     * шаблона — той, що пояснює, чому кнопка не сабміт, називає сабміт.
+     */
+    private function markup()
+    {
+        return preg_replace('#<script\b.*?</script>#s', '', $this->template());
+    }
+
+    private function script()
+    {
+        $this->assertSame(1, preg_match('#<script\b.*?</script>#s', $this->template(), $matches));
+
+        return $matches[0];
+    }
+
+    public function testOrderIdComesFromPost()
+    {
+        $this->assertStringContainsString("\$this->request->post('order', 'integer')", $this->controller());
+    }
+
+    /**
+     * Не про стиль: доки id читається з рядка запиту, дію можна виконати
+     * навігацією, а навігація токена не несе.
+     */
+    public function testControllerReadsNothingFromTheQueryString()
+    {
+        $source = $this->controller();
+
+        $this->assertStringNotContainsString('$_GET', $source);
+        $this->assertStringNotContainsString('$this->request->get(', $source);
+    }
+
+    public function testTemplateHasNoLinkThatTriggersTheRefund()
+    {
+        $markup = $this->markup();
+
+        $this->assertStringNotContainsString('<a ', $markup);
+        $this->assertStringNotContainsString('href', $markup);
+    }
+
+    public function testRequestCarriesTheCsrfToken()
+    {
+        $this->assertStringContainsString('session_id', $this->script());
+    }
+
+    public function testRequestIsSentByPost()
+    {
+        $this->assertStringContainsString("form.method = 'post'", $this->script());
+    }
+
+    /**
+     * Блок вставляється всередину форми замовлення (`order.tpl`), а вкладену
+     * форму HTML-парсер викидає — на цьому вже горів безджаваскриптовий кошик
+     * okay_shop. Тому форма будується в JS і кладеться поза нею.
+     */
+    public function testTemplateDeclaresNoFormOfItsOwn()
+    {
+        $this->assertStringNotContainsString('<form', $this->markup());
+    }
+
+    /**
+     * Кнопка-сабміт стала б першою в формі замовлення, тобто кнопкою за
+     * замовчуванням: Enter у будь-якому полі замовлення повертав би гроші.
+     */
+    public function testRefundButtonIsNotASubmit()
+    {
+        $this->assertSame(1, preg_match('#<button\b[^>]*>#', $this->markup(), $matches));
+
+        $this->assertStringContainsString('type="button"', $matches[0]);
+        $this->assertStringNotContainsString('type="submit"', $matches[0]);
+    }
+
+    /**
+     * Точка вставки справді лежить усередині форми замовлення — саме цим
+     * продиктовані два тести вище. Якщо ядро її перенесе, це має впасти й
+     * змусити перечитати міркування, а не тихо лишити мертві обмеження.
+     */
+    public function testInsertionPointIsStillInsideTheOrderForm()
+    {
+        $orderTemplate = $this->source('backend/design/html/order.tpl');
+
+        $anchor = strpos($orderTemplate, '{*Метки заказа*}');
+        $formOpen = strpos($orderTemplate, '<form ');
+        $formClose = strpos($orderTemplate, '</form>');
+
+        $this->assertNotFalse($anchor, 'у order.tpl немає якоря, за яким вставляється refund.tpl');
+        $this->assertNotFalse($formOpen);
+        $this->assertNotFalse($formClose);
+        $this->assertGreaterThan($formOpen, $anchor);
+        $this->assertLessThan($formClose, $anchor);
+    }
+}
