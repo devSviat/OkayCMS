@@ -8129,7 +8129,6 @@ div.tox-fullscreen {
     background: var(--ok-surface)!important;
 }
 .colorpicker {z-index: var(--ok-z-dropdown)!important;}
-#ui-datepicker-div{z-index: var(--ok-z-dropdown)!important;}
 /* Заголовки таблиць уже світлі, а ці панелі лишались чорними плашками хрому
    посеред контенту - одна роль, дві трактовки. Тепер як у заголовка списку. */
 .system_header{

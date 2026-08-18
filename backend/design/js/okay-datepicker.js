@@ -56,23 +56,37 @@
      * лежить ще й час, і втрачати його від самого лише відкриття сторінки не можна.
      */
     function viewDate(value, format) {
-        var parts = String(value).trim().match(/(\d{1,4})[.\/-](\d{1,2})[.\/-](\d{2,4})/);
-        if (!parts) {
+        var parts = String(value).trim().match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);
+        var day = format.indexOf('dd');
+        var month = format.indexOf('MM');
+        var year = format.indexOf('yyyy');
+
+        // Розбираємо лише формати з роком у кінці — інших в адмінці немає. На
+        // чужому форматі краще не відкрити потрібний місяць, ніж відкрити чужий.
+        if (!parts || day < 0 || month < 0 || year < Math.max(day, month)) {
             return null;
         }
-        var dayFirst = format.indexOf('dd') < format.indexOf('MM');
-        var date = new Date(+parts[3], (dayFirst ? +parts[2] : +parts[1]) - 1, dayFirst ? +parts[1] : +parts[2]);
+
+        var date = new Date(+parts[3], (day < month ? +parts[2] : +parts[1]) - 1, day < month ? +parts[1] : +parts[2]);
         return isNaN(date.getTime()) ? null : date;
     }
 
+    function resolve(target) {
+        if (typeof target === 'string') {
+            return document.querySelectorAll(target);
+        }
+        // Навколо самий jQuery, тож об'єкт jQuery сюди приїде рано чи пізно.
+        return target && target.jquery ? target.get() : [target];
+    }
+
     /**
-     * @param {string|Element} target Селектор або сам елемент.
+     * @param {string|Element|jQuery} target Селектор, елемент або набір jQuery.
      * @param {Object} [options] Опції Air Datepicker поверх наших типових.
      * @returns {Array} Створені екземпляри.
      */
     function okayDatepicker(target, options) {
         var locale = locales[okayDatepicker.lang] || locales.en;
-        var nodes = typeof target === 'string' ? document.querySelectorAll(target) : [target];
+        var nodes = resolve(target);
 
         return Array.prototype.map.call(nodes, function (node) {
             var settings = Object.assign({locale: locale, autoClose: true}, options || {});
