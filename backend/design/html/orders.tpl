@@ -546,13 +546,16 @@ $(function() {
         $(".fn_calendar_pixel").trigger('focus');
     });
 
-    $(".fn_calendar_pixel").datepicker({
-        dateFormat: 'dd-mm-yy',
-        range_multiple_max: 2,
-        range: 'period',
-        onSelect: function(_, __, range){
-            $('.fn_from_date').val(range.startDateText);
-            $('.fn_to_date').val(range.endDateText);
+    okayDatepicker(".fn_calendar_pixel", {
+        dateFormat: 'dd-MM-yyyy',
+        /* Поле-пікселя стоїть у самого правого краю: лівим боком календар туди не влазить. */
+        position: 'bottom right',
+        range: true,
+        autoClose: false,
+        onSelect: function (data) {
+            var dates = data.formattedDate;
+            $('.fn_from_date').val(dates[0] || '');
+            $('.fn_to_date').val(dates[1] || dates[0] || '');
         }
     });
 

@@ -421,8 +421,8 @@
         });
         
         $(window).on("load", function() {
-            $('input[name="date"]').datepicker();
-            $('input[name="updated_date"]').datepicker();
+            okayDatepicker('input[name="date"]');
+            okayDatepicker('input[name="updated_date"]');
 
             var clone_cat = $(".fn_new_category_item").clone();
             $(".fn_new_category_item").remove();

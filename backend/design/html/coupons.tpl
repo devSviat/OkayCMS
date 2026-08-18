@@ -327,7 +327,7 @@
             </div>
         </form>
        <script>
-           $('input[name="new_expire"]').datepicker();
+           okayDatepicker('input[name="new_expire"]');
        </script>
     </div>
 {/if}
@@ -342,8 +342,8 @@
             $(document).on("click", ".fn_add_coupon", function () {
                 $(this).remove();
                 new_coupon.find("select").selectpicker();
-                new_coupon.find('input[name="new_expire"]').datepicker();
                 $(".fn_coupon_wrap").prepend(new_coupon);
+                okayDatepicker(new_coupon.find('input[name="new_expire"]')[0]);
             })
         });
     </script>

@@ -68,8 +68,11 @@
     <link rel="icon" href="design/images/favicon.png" type="image/x-icon" />
 
     {if in_array($smarty.get.controller, array("OrdersAdmin", "PostAdmin", "ReportStatsAdmin", "CouponsAdmin", "CategoryStatsAdmin"))}
-        {js file="jquery/datepicker/jquery.ui.datepicker-{$manager->lang|escape}.js" admin=true}
-        {js file="jquery/datepicker/jquery.datepicker.extension.range.min.js" admin=true}
+        {css file="air-datepicker.css" dir="backend/design/js/air-datepicker" admin=true}
+        {css file="okay-datepicker.css" admin=true}
+        {js file="air-datepicker/air-datepicker.js" admin=true}
+        {js file="okay-datepicker.js" admin=true}
+        <script>okayDatepicker.lang = '{$manager->lang|escape:'javascript'}';</script>
     {/if}
 
     {if $settings->gather_enabled}

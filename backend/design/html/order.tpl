@@ -681,10 +681,6 @@ $(function() {
         $(this).closest('.box_labels_hide').removeClass("active_labels");
     });
 
-    $(".fn_from_date, .fn_to_date ").datepicker({
-        dateFormat: 'dd-mm-yy'
-    });
-
     $(document).on("change", ".fn_ajax_labels input", function () {
         elem = $(this);
        var order_id = parseInt($(this).closest(".fn_ajax_labels").data("order_id"));
