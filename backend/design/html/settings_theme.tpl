@@ -66,7 +66,7 @@
                             <div class="main_header__item">
                                 <div class="heading_box mb-1">
                                 {$btr->settings_theme_site_logo|escape}
-                                <i class="fn_tooltips" title="{$btr->tooltip_settings_theme_site_logo|escape}">
+                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_theme_site_logo|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                                 </div>
@@ -76,7 +76,7 @@
                                     <div class="activity_of_switch_item"> {* row block *}
                                         <div class="okay_switch clearfix">
                                             <label class="switch_label">{$btr->settings_theme_multilang_logo|escape}
-                                                <i class="fn_tooltips" title="{$btr->tooltip_settings_theme_multilang_logo|escape}">
+                                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_theme_multilang_logo|escape}">
                                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                                 </i>
                                             </label>
@@ -143,7 +143,7 @@
                         <div class="heading_box row mb-0">
                             <div class="col-lg-12 col-md-12 mb-1">
                                 {$btr->settings_theme_site_favicon|escape}
-                                <i class="fn_tooltips" title="{$btr->tooltip_settings_theme_site_favicon|escape}">
+                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_theme_site_favicon|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -207,7 +207,7 @@
             <div class="boxed fn_toggle_wrap">
                 <div class="heading_box">
                     {$btr->settings_theme_deliveries|escape}
-                    <i class="fn_tooltips" title="{$btr->tooltip_settings_theme_deliveries|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_theme_deliveries|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -231,7 +231,7 @@
             <div class="boxed fn_toggle_wrap">
                 <div class="heading_box">
                     {$btr->settings_theme_payments|escape}
-                    <i class="fn_tooltips" title="{$btr->tooltip_settings_theme_payments|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_theme_payments|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -258,7 +258,7 @@
             <div class="boxed fn_toggle_wrap">
                 <div class="heading_box">
                     {$btr->settings_theme_contact|escape}
-                    <i class="fn_tooltips" title="{$btr->tooltip_settings_theme_contact|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_theme_contact|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -310,7 +310,7 @@
                     <div class="row">
                         <div class="col-xs-12">
                             <div class="heading_label">{$btr->settings_theme_iframe_map|escape}
-                                <i class="fn_tooltips" title="{$btr->tooltip_settings_theme_iframe_map|escape}">
+                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_theme_iframe_map|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -352,7 +352,7 @@
             <div class="boxed fn_toggle_wrap">
                 <div class="heading_box">
                     {$btr->settings_theme_color|escape}{if $settings->admin_theme} {$settings->admin_theme|escape}{/if}
-                    <i class="fn_tooltips" title="{$btr->tooltip_settings_theme_color|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_theme_color|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">

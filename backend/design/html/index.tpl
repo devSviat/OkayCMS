@@ -664,10 +664,6 @@
             });
         }
 
-        $( function(){
-            $( ".fn_tooltips" ).tooltip();
-        });
-
         /* Catalog items toggle */
         if($('.fn_item_switch').length>0){
             $('.fn_item_switch').on('click',function(e){

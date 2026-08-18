@@ -6,7 +6,7 @@
         <div class="wrap_heading">
             <div class="box_heading heading_page">
             {$btr->left_setting_router_title|escape}
-            <i class="fn_tooltips" title="{$btr->tooltip_title_chpu|escape}">
+            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_title_chpu|escape}">
                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
             </i>
             </div>
@@ -54,7 +54,7 @@
                                 <div class="okay_switch clearfix">
                                     <label class="switch_label">
                                         {$btr->global_url_label|escape}
-                                        <i class="fn_tooltips" title="{$btr->tooltip_settings_router_statuses|escape}">
+                                        <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_router_statuses|escape}">
                                             {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                         </i>
                                     </label>
@@ -69,7 +69,7 @@
                                 <div class="okay_switch clearfix">
                                     <label class="switch_label">
                                         {$btr->page_routes_template_slash_end|escape}
-                                        <i class="fn_tooltips" title="{$btr->page_routes_template_slash_end_notice|escape}">
+                                        <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->page_routes_template_slash_end_notice|escape}">
                                             {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                         </i>
                                     </label>
@@ -101,7 +101,7 @@
                     <div class="okay_switch clearfix">
                         <label class="switch_label">
                             {$btr->settings_router_url_slash_end|escape}
-                            <i class="fn_tooltips" title="{$btr->settings_router_url_slash_end_notice|escape}">
+                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_router_url_slash_end_notice|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </label>
@@ -159,7 +159,7 @@
                     <div class="okay_switch clearfix">
                         <label class="switch_label">
                             {$btr->settings_router_url_slash_end|escape}
-                            <i class="fn_tooltips" title="{$btr->settings_router_url_slash_end_notice|escape}">
+                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_router_url_slash_end_notice|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </label>
@@ -219,7 +219,7 @@
                     <div class="okay_switch clearfix">
                         <label class="switch_label">
                             {$btr->settings_router_url_slash_end|escape}
-                            <i class="fn_tooltips" title="{$btr->settings_router_url_slash_end_notice}">
+                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_router_url_slash_end_notice}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </label>
@@ -266,7 +266,7 @@
                         <div class="okay_switch clearfix">
                             <label class="switch_label">
                                 {$btr->settings_router_url_slash_end|escape}
-                                <i class="fn_tooltips" title="{$btr->settings_router_url_slash_end_notice|escape}">
+                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_router_url_slash_end_notice|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </label>
@@ -286,7 +286,7 @@
                         <div class="okay_switch clearfix">
                             <label class="switch_label">
                                 {$btr->settings_router_url_slash_end}
-                                <i class="fn_tooltips" title="{$btr->settings_router_url_slash_end_notice}">
+                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_router_url_slash_end_notice}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </label>
@@ -306,7 +306,7 @@
                         <div class="okay_switch clearfix">
                             <label class="switch_label">
                                 {$btr->settings_router_url_slash_end}
-                                <i class="fn_tooltips" title="{$btr->settings_router_url_slash_end_notice}">
+                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_router_url_slash_end_notice}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </label>
@@ -333,7 +333,7 @@
                     <div class="okay_switch clearfix">
                         <label class="switch_label">
                             {$btr->settings_router_url_slash_end|escape}
-                            <i class="fn_tooltips" title="{$btr->settings_router_url_slash_end_notice|escape}">
+                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_router_url_slash_end_notice|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </label>
@@ -391,7 +391,7 @@
                     <div class="okay_switch clearfix">
                         <label class="switch_label">
                             {$btr->settings_router_url_slash_end|escape}
-                            <i class="fn_tooltips" title="{$btr->settings_router_url_slash_end_notice|escape}">
+                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_router_url_slash_end_notice|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </label>

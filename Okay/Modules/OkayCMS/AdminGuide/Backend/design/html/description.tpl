@@ -477,7 +477,7 @@
                     <div class="mt-2">
                         <div class="heading_label heading_label--required">
                             <span>Meta-description</span>
-                            <i class="fn_tooltips" title="Правильный description должен содержать ключевые слова, под которые вы намерены продвигать страницу. Самые частотные запросы должны быть расположены в начале описания. Не используйте в мета-теге более 3-4 ключевых фраз. Одно и то же слово не следует повторять более 5-7 раз">
+                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="Правильный description должен содержать ключевые слова, под которые вы намерены продвигать страницу. Самые частотные запросы должны быть расположены в начале описания. Не используйте в мета-теге более 3-4 ключевых фраз. Одно и то же слово не следует повторять более 5-7 раз">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </div>
@@ -486,7 +486,7 @@
                         <textarea class="fn_code_mirror7">
 <div class="heading_label">
     <span>Заголовок</span>
-    <i class="fn_tooltips" title="Текст подсказки">
+    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="Текст подсказки">
     {include file='svg_icon.tpl' svgId='icon_tooltips'}
     </i>
 </div>

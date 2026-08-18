@@ -13,7 +13,7 @@
                         <div class="okay_list_boding okay_list_order_discounted_name">
                             <div class="input-group">
                                 <input name="discounts[{$discount->id}][name]" class="form-control" type="text" value="{$discount->name|escape}">
-                                <a class="fn_tooltips input-group-addon p-0" title="{$discount->description|escape}" href="javascript:;" data-src="#popup_order_discount_text_{$purchase->product->id}" data-fancybox="hello_{$purchase->product->id}">
+                                <a class="fn_tooltips input-group-addon p-0 hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$discount->description|escape}" href="javascript:;" data-src="#popup_order_discount_text_{$purchase->product->id}" data-fancybox="hello_{$purchase->product->id}">
                                     {include file='svg_icon.tpl' svgId='order_list'}
                                 </a>
                             </div>
@@ -41,7 +41,7 @@
                                         </label>
                                         <label class="switch_label m-0" >
                                             {*$btr->order_discount_from_last_discount*}
-                                            <i class="fn_tooltips" title="{$btr->order_discount_from_last_discount_tooltip|escape}">
+                                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->order_discount_from_last_discount_tooltip|escape}">
                                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                             </i>
                                         </label>

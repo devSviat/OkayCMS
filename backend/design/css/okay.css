@@ -338,6 +338,9 @@ body:not(.top-nav) header.navbar {
 .fn_tooltips{
     display: none;
 }
+/* Носій підказки - <i>, тож курсив доводиться знімати: раніше плашку малював
+   окремий вузол у body, і вона курсиву не успадковувала. */
+.fn_tooltips[data-hint]:after{font-style: normal;}
 /********************************************************* Text  */
 .text-success,
 .text_success{color: var(--ok-success)}

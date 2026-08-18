@@ -26,7 +26,7 @@
             <div class="boxed fn_toggle_wrap">
                 <div class="heading_box">
                     {$btr->discounts_settings_purchase_sets|escape}
-                    <i class="fn_tooltips" title="{$btr->discounts_settings_purchase_sets_tooltip|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->discounts_settings_purchase_sets_tooltip|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="box_btn_heading ml-1">
@@ -120,7 +120,7 @@
             <div class="boxed fn_toggle_wrap">
                 <div class="heading_box">
                     {$btr->discounts_settings_cart_sets|escape}
-                    <i class="fn_tooltips" title="{$btr->discounts_settings_cart_sets_tooltip|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->discounts_settings_cart_sets_tooltip|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="box_btn_heading ml-1">

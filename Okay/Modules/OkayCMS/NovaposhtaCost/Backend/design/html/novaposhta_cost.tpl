@@ -95,7 +95,7 @@
                         <div class="col-xxl-6 col-lg-6 col-md-12">
                             <div class="heading_label">
                                 <a href="https://my.novaposhta.ua/settings/index#apikeys" target="_blank">{$btr->settings_np_key}</a>
-                                <i class="fn_tooltips" title='{$btr->tooltip_settings_np_api}'>
+                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint='{$btr->tooltip_settings_np_api}'>
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -106,7 +106,7 @@
                         <div class="col-xxl-6 col-lg-6 col-md-12">
                             <div class="heading_label heading_label--required">
                                 <span>{$btr->settings_np_city}</span>
-                                <i class="fn_tooltips" title='{$btr->tooltip_settings_np_city}'>
+                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint='{$btr->tooltip_settings_np_city}'>
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -118,7 +118,7 @@
                         <div class="col-lg-6 col-md-12">
                             <div class="heading_label heading_label--required">
                                 <span>{$btr->settings_np_weight}</span>
-                                <i class="fn_tooltips" title='{$btr->tooltip_settings_np_weight}'>
+                                <i class="fn_tooltips hint-bottom-left-t-info-s-small-mobile hint-anim" data-hint='{$btr->tooltip_settings_np_weight}'>
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -128,7 +128,7 @@
                         </div>
                         <div class="col-lg-6 col-md-12">
                             <div class="heading_label">{$btr->settings_np_volume}
-                                <i class="fn_tooltips" title='{$btr->tooltip_settings_np_volume}'>
+                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint='{$btr->tooltip_settings_np_volume}'>
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
