@@ -89,7 +89,7 @@
 
     <div class="row">
         <div class="col-lg-12 ">
-            <div class="boxed match_matchHeight_true">
+            <div class="boxed">
                 <div class="row">
                     {*Название элемента сайта*}
                     <div class="col-lg-12 col-md-12">

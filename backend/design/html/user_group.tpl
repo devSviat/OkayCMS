@@ -71,7 +71,7 @@
 
     <div class="row">
         <div class="col-lg-12">
-            <div class="boxed match_matchHeight_true">
+            <div class="boxed">
                 <div class="row">
                     <div class="col-lg-6 col-md-12">
                         <div class="heading_label">

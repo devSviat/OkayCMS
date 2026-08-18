@@ -296,7 +296,7 @@
     {*Варианты товара*}
     <div class="row">
         <div class="col-lg-12 col-md-12 ">
-            <div class="fn_step-8 boxed fn_toggle_wrap match_matchHeight_true">
+            <div class="fn_step-8 boxed fn_toggle_wrap">
                 <div class="heading_box">
                     {$btr->general_options|escape}
                     <i class="fn_tooltips" title="{$btr->tooltip_general_options|escape}">
@@ -810,9 +810,7 @@
 {* On document load *}
 {literal}
     <script src="design/js/autocomplete/jquery.autocomplete-min.js"></script>
-    <script src="design/js/chosen/chosen.jquery.js"></script>
     <script src="design/js/open_ai.js"></script>
-    <link rel="stylesheet" type="text/css" href="design/js/chosen/chosen.min.css" media="screen" />
 <script>
     $(window).on("load", function() {
 
@@ -824,8 +822,6 @@
             $(this).closest(".fn_row").fadeOut(200, function() { $(this).remove(); });
             return false;
         });
-        $(".chosen").chosen('chosen-select');
-
         $(document).on("input", ".fn_rating", function () {
             $(".fn_show_rating").html($(this).val());
             $(".fn_rating_value").val($(this).val());

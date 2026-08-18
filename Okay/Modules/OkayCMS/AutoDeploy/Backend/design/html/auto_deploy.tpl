@@ -23,7 +23,7 @@
 {*Главная форма страницы*}
 <div class="row">
     <div class="col-xs-12 ">
-        <div class="match_matchHeight_true">
+        <div class="">
             {*Название элемента сайта*}
             <div class="row d_flex">
                 <div class="col-lg-12 col-md-12 col-sm-12">
