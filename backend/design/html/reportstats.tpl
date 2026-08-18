@@ -179,7 +179,7 @@
         $('input[name="date_from"]').datepicker();
         $('input[name="date_to"]').datepicker();
 
-        $('button#fn_start').click(function() {
+        $('button#fn_start').on('click', function() {
             $.ajax({
                 url: "{/literal}{url controller='ReportStatsAdmin@export'}{literal}",
                 dataType: 'json',

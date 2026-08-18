@@ -117,7 +117,7 @@
                 {/if}
 
                 let textarea = $('#' + editor.id);
-                if (!textarea.size()) {
+                if (!textarea.length) {
                     textarea = $('[name="' + editor.id + '"]');
                 }
 

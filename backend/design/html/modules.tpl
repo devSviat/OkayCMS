@@ -155,8 +155,8 @@
         $('.fn_form_list input[type="checkbox"][name*="check"]').attr('checked', false);
         $(this).closest(".fn_form_list").find('select[name="action"] option[value=update]').attr('selected', true);
         $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').attr('checked', true);
-        $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').click();
-        $(this).closest(".fn_form_list").submit();
+        $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').trigger('click');
+        $(this).closest(".fn_form_list").trigger('submit');
     });
     
     $(document).on("submit", "#fn_download_module", function (e) {

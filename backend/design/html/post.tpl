@@ -436,7 +436,7 @@
                 clone.find("input").attr("checked",true);
                 clone.find("input").attr("data-cat_name",$(this).find("option:selected").data("category_name"));
                 $(".fn_post_categories_list").append(clone);
-                if ($(".fn_category_item").size() == 1) {
+                if ($(".fn_category_item").length == 1) {
                     change_post_category();
                 }
             });
@@ -444,7 +444,7 @@
                 var item = $(this).closest(".fn_category_item"),
                     is_first = item.hasClass("first_category");
                 item.remove();
-                if (is_first && $(".fn_category_item").size() > 0) {
+                if (is_first && $(".fn_category_item").length > 0) {
                     change_post_category();
                 }
             });

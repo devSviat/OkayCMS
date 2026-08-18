@@ -395,7 +395,7 @@
                 noCache: false,
                 onSelect:
                     function(suggestion){
-                        compact_product_list_input.val('').focus().blur();
+                        compact_product_list_input.val('').trigger('focus').trigger('blur');
                         new_item = compact_product_list_item_add.clone().appendTo(compact_product_list);
                         new_item.find('a.compact_list_product_name').html(suggestion.data.name);
                         new_item.find('a.compact_list_product_name').attr('href', 'index.php?controller=ProductAdmin&id='+suggestion.data.id);

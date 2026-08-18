@@ -320,8 +320,8 @@
         // Добавление валюты
         var curr = $('.fn_new_currency').clone(true);
         $('.fn_new_currency').remove().removeAttr('id');
-        $('a#add_currency').click(function() {
-            $(curr).clone(true).appendTo('#currencies_block').fadeIn('slow').find("input[name*=currency][name*=name]").focus();
+        $('a#add_currency').on('click', function() {
+            $(curr).clone(true).appendTo('#currencies_block').fadeIn('slow').find("input[name*=currency][name*=name]").trigger('focus');
             return false;
         });
 
@@ -333,27 +333,27 @@
         $(document).on("click", ".fn_delete_currency_confirm", function () {
             $('input[type="hidden"][name="action"]').val('delete');
             $('input[type="hidden"][name="action_id"]').val(currency_to_delete);
-            $(".fn_form_list").submit();
+            $(".fn_form_list").trigger('submit');
         });
         
         // Подтвердили пересчет валюты
         $(document).on("click", ".fn_recalculate_currency_confirm", function () {
             $('input[name="recalculate"]').val(1);
             confirm = false;
-            $(".fn_form_list").submit();
+            $(".fn_form_list").trigger('submit');
         });
         
         // Отменили пересчет валют
         $(document).on("click", ".fn_recalculate_currency_dismiss", function () {
             $('input[name="recalculate"]').val(0);
             confirm = false;
-            $(".fn_form_list").submit();
+            $(".fn_form_list").trigger('submit');
         });
 
         // Запоминаем id первой валюты, чтобы определить изменение базовой валюты
         var base_currency_id = $('input[name*="currency[id]"]').val();
 
-        $(".fn_form_list").submit(function() {
+        $(".fn_form_list").on('submit', function() {
             if(base_currency_id != $('input[name*="currency[id]"]:first').val() && confirm) {
                 $('#fn_currency_recalculate .heading_modal').text(сurrency_recalculate + ' ' + $('input[name*="name"]:first').val() + ' ' + сurrency_recalculate_rate);
                 $('[data-target="#fn_currency_recalculate"]').trigger('click');

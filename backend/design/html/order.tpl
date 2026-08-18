@@ -674,10 +674,10 @@ $(function() {
         $(this).parents('.fn_row').find('.order_discounted_block').slideToggle(300);
     });
 
-    $(".fn_labels_show").click(function(){
+    $(".fn_labels_show").on('click', function(){
         $(this).next('.fn_labels_hide').toggleClass("active_labels");
     });
-    $(".fn_delete_labels_hide").click(function(){
+    $(".fn_delete_labels_hide").on('click', function(){
         $(this).closest('.box_labels_hide').removeClass("active_labels");
     });
 
@@ -760,7 +760,7 @@ $(function() {
             }
             variants_select.find('option:first').attr('selected',true);
 
-            variants_select.bind('change', function(){
+            variants_select.on('change', function(){
                 change_variant(variants_select);
             });
             change_variant(variants_select);
@@ -774,7 +774,7 @@ $(function() {
 
             {/literal}{get_design_block block="order_new_purchase_js_block"}{literal}
 
-            $("input#fn_add_purchase").val('').focus().blur();
+            $("input#fn_add_purchase").val('').trigger('focus').trigger('blur');
             new_item.show();
         },
         formatResult:
@@ -830,7 +830,7 @@ $(function() {
     });
 
 
-    $("select.fn_purchase_variant").bind("change", function(){
+    $("select.fn_purchase_variant").on("change", function(){
         change_variant($(this));
     });
 

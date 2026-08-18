@@ -195,8 +195,8 @@
     $(document).on("click", ".fn_copy", function () {
         $('.fn_form_list input[type="checkbox"][name*="check"]').attr('checked', false);
         $(this).closest(".fn_form_list").find('select[name="action"] option[value=duplicate]').attr('selected', true);
-        $(this).closest(".okay_list_row").find('input[type="checkbox"][name*="check"]').attr('checked', true).click();
-        $(this).closest(".fn_form_list").submit();
+        $(this).closest(".okay_list_row").find('input[type="checkbox"][name*="check"]').attr('checked', true).trigger('click');
+        $(this).closest(".fn_form_list").trigger('submit');
     });
 
 </script>
