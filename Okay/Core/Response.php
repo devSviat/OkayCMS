@@ -112,6 +112,13 @@ class Response
             throw new \Exception("$responseCode is not a valid redirect response code.");
         }
         
+        // Метод завершується exit'ом повз sendHeaders(), тож заголовки треба
+        // віддати тут. Ключовий на редіректі - Referrer-Policy: саме він
+        // вирішує, який Referer побачить ціль переходу.
+        foreach (SecurityHeaders::defaults() as $securityHeader) {
+            header($securityHeader);
+        }
+
         $headerContent = 'Location: ' . $resource;
         header($headerContent, false, $responseCode);
         exit;
