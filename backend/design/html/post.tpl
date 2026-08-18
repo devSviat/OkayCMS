@@ -421,7 +421,9 @@
         });
         
         $(window).on("load", function() {
-            okayDatepicker('input[name="date"]');
+            /* Єдине поле з часом: PHP малює його як d.m.Y H:i, а без таймпікера
+               вибір дня зводив час до нуля. */
+            okayDatepicker('input[name="date"]', {timepicker: true, autoClose: false});
             okayDatepicker('input[name="updated_date"]');
 
             var clone_cat = $(".fn_new_category_item").clone();

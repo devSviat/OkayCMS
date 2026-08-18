@@ -63,13 +63,19 @@
      * PHP форматом d.m.Y незалежно від мови адмінки.
      */
     function viewDate(value) {
-        var parts = String(value).trim().match(/(\d{1,2})([.\/-])(\d{1,2})\2(\d{4})/);
+        var parts = String(value).trim().match(/(\d{1,2})([.\/-])(\d{1,2})\2(\d{4})(?:[ T](\d{1,2}):(\d{2}))?/);
         if (!parts) {
             return null;
         }
 
         var dayFirst = parts[2] !== '/';
-        var date = new Date(+parts[4], (dayFirst ? +parts[3] : +parts[1]) - 1, dayFirst ? +parts[1] : +parts[3]);
+        var date = new Date(
+            +parts[4],
+            (dayFirst ? +parts[3] : +parts[1]) - 1,
+            dayFirst ? +parts[1] : +parts[3],
+            +(parts[5] || 0),
+            +(parts[6] || 0)
+        );
         return isNaN(date.getTime()) ? null : date;
     }
 
