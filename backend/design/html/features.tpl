@@ -256,7 +256,7 @@
             $(document).on('change', '.fn_action_block select.features_action', function () {
                 var elem = $(this).find('option:selected').val();
                 $('.fn_hide_block').addClass('hidden');
-                if ($('.fn_' + elem).size() > 0) {
+                if ($('.fn_' + elem).length > 0) {
                     $('.fn_' + elem).removeClass('hidden');
                 }
             });

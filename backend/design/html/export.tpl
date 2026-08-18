@@ -120,7 +120,7 @@
 
         });
 
-        $('button#fn_start').click(function() {
+        $('button#fn_start').on('click', function() {
             if($(".export_options:visible")){
                 field = $(".export_options:visible").find('select').attr('name');
                 value = $(".export_options:visible").find('select').val();

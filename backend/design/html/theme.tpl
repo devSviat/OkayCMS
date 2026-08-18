@@ -214,7 +214,7 @@
         $('.fn_set_admin').on('click', function (e) {
             e.preventDefault();
             $("input[name=admin_theme]").val($(this).val()).attr('disabled', false);
-            $("input[name=theme]").closest('form').submit();
+            $("input[name=theme]").closest('form').trigger('submit');
         });
 
         $('.fn_rename_theme').on('click',function(){
@@ -226,7 +226,7 @@
         $('.fn_set_theme').on('click',function(){
             $("input[name=action]").val('set_main_theme');
             $("input[name=theme]").val($(this).data('set_name'));
-            $("input[name=theme]").closest('form').submit();
+            $("input[name=theme]").closest('form').trigger('submit');
         });
         // Клонировать текущую тему
         $('.fn_clone_theme').on('click',function(e){
@@ -234,7 +234,7 @@
             $("input[name=action]").val('clone_theme');
             // Порожнє theme контролер відсіває разом з action - клон мовчки не відбувався.
             $("input[name=theme]").val($(this).data('theme_name'));
-            $("input[name=theme]").closest('form').submit();
+            $("input[name=theme]").closest('form').trigger('submit');
         });
 
         $(".fn_remove_theme").on("click", function () {
@@ -244,7 +244,7 @@
         $(".fn_submit_delete").on("click",function () {
             $("input[name=action]").val(action);
             $("input[name=theme]").val(theme_name);
-            $("input[name=theme]").closest('form').submit();
+            $("input[name=theme]").closest('form').trigger('submit');
         });
         $(".fn_dismiss_delete").on("click",function () {
             $("form input[name=action]").val("");

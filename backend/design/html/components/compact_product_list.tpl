@@ -87,7 +87,7 @@
         },
         onSelect:
             function(suggestion){
-                $("input#{$name}_compact_product_list").val('').focus().blur();
+                $("input#{$name}_compact_product_list").val('').trigger('focus').trigger('blur');
                 new_item = {$name}_compact_product_list_item_add.clone().appendTo('.{$name}_compact_product_list');
                 new_item.find('a.compact_list_product_name').html(suggestion.data.name);
                 new_item.find('a.compact_list_product_name').attr('href', 'index.php?controller=ProductAdmin&id='+suggestion.data.id);

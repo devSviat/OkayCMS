@@ -172,7 +172,7 @@
         $(function() {
             $('input[name="date_from"]').datepicker();
             $('input[name="date_to"]').datepicker();
-            $('button#fn_start').click(function() {
+            $('button#fn_start').on('click', function() {
                 do_export();
             });
             function do_export(page) {

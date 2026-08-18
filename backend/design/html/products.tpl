@@ -458,7 +458,7 @@ $(function() {
     $(document).on('change','.fn_action_block select.products_action',function(){
         var elem = $(this).find('option:selected').val();
         $('.fn_hide_block').addClass('hidden');
-        if($('.fn_'+elem).size()>0){
+        if($('.fn_'+elem).length>0){
             $('.fn_'+elem).removeClass('hidden');
         }
     });
@@ -472,16 +472,16 @@ $(function() {
         $('.fn_form_list input[type="checkbox"][name*="check"]').attr('checked', false);
         $(this).closest(".fn_form_list").find('select[name="action"] option[value=duplicate]').attr('selected', true);
         $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').attr('checked', true);
-        $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').click();
-        $(this).closest(".fn_form_list").submit();
+        $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').trigger('click');
+        $(this).closest(".fn_form_list").trigger('submit');
     });
     // Бесконечность на складе
-    $("input[name*=stock]").focus(function() {
+    $("input[name*=stock]").on('focus', function() {
         if($(this).val() == '∞')
             $(this).val('');
         return false;
     });
-    $("input[name*=stock]").blur(function() {
+    $("input[name*=stock]").on('blur', function() {
         if($(this).val() == '')
             $(this).val('∞');
     });

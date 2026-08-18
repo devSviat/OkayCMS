@@ -256,7 +256,7 @@
 
                 if (second_feature_id && feature_id) {
                     pattern_type_another_check += '_'+second_feature_id+'_'+feature_id;
-                    if ($('.fn_'+pattern_type_another_check).size() > 0) {
+                    if ($('.fn_'+pattern_type_another_check).length > 0) {
                         toastr.error(msg, "Template already exists");
                         return false;
                     }
@@ -264,7 +264,7 @@
             }
 
 
-            if ($('.fn_'+pattern_type_class).size() > 0) {
+            if ($('.fn_'+pattern_type_class).length > 0) {
                 toastr.error(msg, "Template already exists");
             } else {
                 template.addClass('fn_'+pattern_type_class);

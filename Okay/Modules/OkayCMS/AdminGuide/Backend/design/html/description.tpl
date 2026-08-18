@@ -1655,7 +1655,7 @@ $(window).on("load", function() {
     sclipboard();
 
     $(document).ready(function(){
-        $(".fn_ancor[href*=#]").on("click", function(e){
+        $(".fn_ancor[href*='#']").on("click", function(e){
             var anchor = $(this);
             $('html, body').stop().animate({
                 scrollTop: $(anchor.attr('href')).offset().top - 90

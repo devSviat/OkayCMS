@@ -637,7 +637,7 @@
         });
 
         $(function() {
-            $('input[name="name"]').keyup(function() {
+            $('input[name="name"]').on('keyup', function() {
                 if(!$('#block_translit').is(':checked')) {
                     $('input[name="url"]').val(generate_url());
                 }

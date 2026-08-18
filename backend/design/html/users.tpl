@@ -205,7 +205,7 @@ $(function() {
     $(document).on('change','select.fn_user_select',function(){
         var elem = $(this).find('option:selected').val();
         $('.fn_hide_block').addClass('hidden');
-        if($('#'+elem).size()>0){
+        if($('#'+elem).length>0){
             $('#'+elem).removeClass('hidden');
         }
     });

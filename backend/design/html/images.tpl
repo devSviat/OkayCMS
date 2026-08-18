@@ -129,7 +129,7 @@ $(function() {
     // Удалить
     $('.fn_delete_image').on('click',function(){
         $('input[name=delete_image]').val($(this).data('name'));
-        $('form').submit();
+        $('form').trigger('submit');
     });
     
     // Загрузить
@@ -137,7 +137,7 @@ $(function() {
         $(this).closest('div').append($('<input class="import_file" type="file" name="upload_images[]">'));
     });
     
-    $("form").submit(function() {
+    $("form").on('submit', function() {
         if($('input[name="delete_image"]').val()!='' && !confirm(general_confirm_delete))
             return false;    
     });
