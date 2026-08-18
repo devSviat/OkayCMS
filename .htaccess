@@ -62,10 +62,29 @@ RewriteRule ^(.*)$ index.php [L,QSA]
 <IfModule mod_headers.c>
     # Статику Apache віддає повз PHP, а серед дозволених розширень є html і svg.
     # setifempty, а не set: якщо застосунок уже виставив своє значення, воно
-    # лишається, і дубля не буде. Потребує Apache 2.4.7+.
-    Header setifempty X-Content-Type-Options "nosniff"
-    Header setifempty X-Frame-Options "SAMEORIGIN"
-    Header setifempty Referrer-Policy "strict-origin-when-cross-origin"
+    # лишається.
+    #
+    # Версія перевіряється явно, бо setifempty зʼявився в Apache 2.4.7, а
+    # невідомий аргумент директиви в .htaccess - це не попередження, а 500 на
+    # кожен запит під цим каталогом. На старіших складаннях лишається set: він
+    # теж не дає дубля (замінює наявне значення), лише перебиває застосунок.
+    <IfModule mod_version.c>
+        <IfVersion >= 2.4.7>
+            Header setifempty X-Content-Type-Options "nosniff"
+            Header setifempty X-Frame-Options "SAMEORIGIN"
+            Header setifempty Referrer-Policy "strict-origin-when-cross-origin"
+        </IfVersion>
+        <IfVersion < 2.4.7>
+            Header set X-Content-Type-Options "nosniff"
+            Header set X-Frame-Options "SAMEORIGIN"
+            Header set Referrer-Policy "strict-origin-when-cross-origin"
+        </IfVersion>
+    </IfModule>
+    <IfModule !mod_version.c>
+        Header set X-Content-Type-Options "nosniff"
+        Header set X-Frame-Options "SAMEORIGIN"
+        Header set Referrer-Policy "strict-origin-when-cross-origin"
+    </IfModule>
 
     # SVG прямою навігацією рендериться як документ і виконує <script>.
     # Санітайзер є лише у файловому менеджері, тож глушимо заголовком.
