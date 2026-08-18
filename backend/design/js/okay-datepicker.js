@@ -22,7 +22,9 @@
             clear: 'Clear',
             dateFormat: 'MM/dd/yyyy',
             timeFormat: 'hh:mm aa',
-            firstDay: 0
+            // Апстрім дає тут неділю, але адмінка завжди починала тиждень
+            // з понеділка — в усіх трьох мовах.
+            firstDay: 1
         },
         ru: {
             days: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
@@ -54,20 +56,20 @@
      * Дата з поля — щоб календар відкривався на тому місяці, який у полі, як це
      * робив jQuery UI. Саме поле при цьому не переписується: у полі дати статті
      * лежить ще й час, і втрачати його від самого лише відкриття сторінки не можна.
+     *
+     * Порядок частин визначає роздільник, а не локаль — те саме правило, за яким
+     * читає strtotime(): слеш означає американський m/d/Y, крапка й дефіс —
+     * європейський d.m.Y. Локалі тут довіряти не можна: поле дати статті малює
+     * PHP форматом d.m.Y незалежно від мови адмінки.
      */
-    function viewDate(value, format) {
-        var parts = String(value).trim().match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);
-        var day = format.indexOf('dd');
-        var month = format.indexOf('MM');
-        var year = format.indexOf('yyyy');
-
-        // Розбираємо лише формати з роком у кінці — інших в адмінці немає. На
-        // чужому форматі краще не відкрити потрібний місяць, ніж відкрити чужий.
-        if (!parts || day < 0 || month < 0 || year < Math.max(day, month)) {
+    function viewDate(value) {
+        var parts = String(value).trim().match(/(\d{1,2})([.\/-])(\d{1,2})\2(\d{4})/);
+        if (!parts) {
             return null;
         }
 
-        var date = new Date(+parts[3], (day < month ? +parts[2] : +parts[1]) - 1, day < month ? +parts[1] : +parts[2]);
+        var dayFirst = parts[2] !== '/';
+        var date = new Date(+parts[4], (dayFirst ? +parts[3] : +parts[1]) - 1, dayFirst ? +parts[1] : +parts[3]);
         return isNaN(date.getTime()) ? null : date;
     }
 
@@ -94,8 +96,17 @@
         return Array.prototype.map.call(nodes, function (node) {
             // showOtherMonths: дні сусідніх місяців малюються приглушено (1.6:1 на
             // білому) і при цьому клікабельні. jQuery UI їх не показував узагалі.
-            var settings = Object.assign({locale: locale, autoClose: true, showOtherMonths: false}, options || {});
-            var start = viewDate(node.value, settings.dateFormat || locale.dateFormat);
+            // toggleSelected: повторний клік по вибраній даті чистив поле, а
+            // jQuery UI так не робив; на даті оновлення статті це тихо стирало
+            // значення. showOtherMonths: дні сусідніх місяців малюються приглушено
+            // (1.6:1 на білому) і при цьому клікабельні — jQuery UI їх не показував.
+            var settings = Object.assign({
+                locale: locale,
+                autoClose: true,
+                showOtherMonths: false,
+                toggleSelected: false
+            }, options || {});
+            var start = viewDate(node.value);
             if (start && !settings.startDate) {
                 settings.startDate = start;
             }
