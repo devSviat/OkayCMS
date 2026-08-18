@@ -67,12 +67,15 @@
 
     <link rel="icon" href="design/images/favicon.png" type="image/x-icon" />
 
-    {if in_array($smarty.get.controller, array("OrdersAdmin", "PostAdmin", "ReportStatsAdmin", "CouponsAdmin", "CategoryStatsAdmin"))}
+    <script>okayDatepicker.lang = '{$manager->lang|escape:'javascript'}';</script>
+
+    {*Маршрут Controller@method рендерить той самий шаблон, тож суфікс методу
+      треба зняти - інакше сторінка лишиться без календаря.*}
+    {assign var="dpController" value=$smarty.get.controller|default:''|regex_replace:'/@.*$/':''}
+    {if in_array($dpController, array("OrdersAdmin", "PostAdmin", "ReportStatsAdmin", "CouponsAdmin", "CategoryStatsAdmin"))}
         {css file="air-datepicker.css" dir="backend/design/js/air-datepicker" admin=true}
         {css file="okay-datepicker.css" admin=true}
         {js file="air-datepicker/air-datepicker.js" admin=true}
-        {js file="okay-datepicker.js" admin=true}
-        <script>okayDatepicker.lang = '{$manager->lang|escape:'javascript'}';</script>
     {/if}
 
     {if $settings->gather_enabled}

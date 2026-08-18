@@ -90,6 +90,12 @@
      * @returns {Array} Створені екземпляри.
      */
     function okayDatepicker(target, options) {
+        // Бібліотеку підключають лише на сторінках із полями дат. Тиха відмова
+        // краща за виняток, який забирає з собою решту скрипта сторінки.
+        if (typeof AirDatepicker === 'undefined') {
+            return [];
+        }
+
         var locale = locales[okayDatepicker.lang] || locales.en;
         var nodes = resolve(target);
 
