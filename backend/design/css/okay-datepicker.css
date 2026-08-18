@@ -11,8 +11,6 @@
     --adp-background-color-active: var(--ok-accent-soft);
     --adp-background-color-in-range: var(--ok-accent-soft);
     --adp-background-color-in-range-focused: var(--ok-accent-soft);
-    --adp-background-color-selected-other-month: var(--ok-accent-hover);
-    --adp-background-color-selected-other-month-focused: var(--ok-accent-hover);
     --adp-cell-background-color-selected: var(--ok-accent);
     --adp-cell-background-color-selected-hover: var(--ok-accent-hover);
     --adp-cell-background-color-in-range: var(--ok-accent-soft);
@@ -26,8 +24,6 @@
     --adp-btn-border-radius: var(--ok-radius-control);
     --adp-day-name-color: var(--ok-ink-muted);
     --adp-day-name-color-hover: var(--ok-accent);
-    --adp-color-other-month: var(--ok-line-strong);
-    --adp-color-other-month-hover: var(--ok-ink-muted);
     --adp-btn-color: var(--ok-accent);
     --adp-btn-color-hover: var(--ok-accent-hover);
     --adp-btn-background-color-hover: var(--ok-accent-soft);

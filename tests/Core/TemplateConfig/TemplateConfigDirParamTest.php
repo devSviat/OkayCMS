@@ -71,8 +71,8 @@ class TemplateConfigDirParamTest extends TestCase
             $this->root,
             false,
             'theme-settings.css',
-            'cache/css/',
-            'cache/css/'
+            $this->root . 'cache/css/',
+            $this->root . 'cache/css/'
         );
     }
 

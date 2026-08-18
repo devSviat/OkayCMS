@@ -75,8 +75,11 @@
         if (typeof target === 'string') {
             return document.querySelectorAll(target);
         }
+        if (!target) {
+            return [];
+        }
         // Навколо самий jQuery, тож об'єкт jQuery сюди приїде рано чи пізно.
-        return target && target.jquery ? target.get() : [target];
+        return target.jquery ? target.get() : [target];
     }
 
     /**
@@ -89,7 +92,9 @@
         var nodes = resolve(target);
 
         return Array.prototype.map.call(nodes, function (node) {
-            var settings = Object.assign({locale: locale, autoClose: true}, options || {});
+            // showOtherMonths: дні сусідніх місяців малюються приглушено (1.6:1 на
+            // білому) і при цьому клікабельні. jQuery UI їх не показував узагалі.
+            var settings = Object.assign({locale: locale, autoClose: true, showOtherMonths: false}, options || {});
             var start = viewDate(node.value, settings.dateFormat || locale.dateFormat);
             if (start && !settings.startDate) {
                 settings.startDate = start;
