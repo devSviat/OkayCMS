@@ -101,6 +101,15 @@
                                     </select>
                                 </div>
                             </div>
+
+                            {js file="jquery.dd.min.js" admin=true}
+                            {literal}
+                                <script>
+                                    $(window).on('load', function () {
+                                        $("#countries_select").msDropdown({roundedBorder: false});
+                                    });
+                                </script>
+                            {/literal}
                         {else}
                             <div class="col-md-12">
                                 <div class="row">

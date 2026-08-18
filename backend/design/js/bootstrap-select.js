@@ -1168,7 +1168,10 @@
 
     togglePlaceholder: function () {
       var value = this.$element.val();
-      this.$button.toggleClass('bs-placeholder', value === null || value === '');
+      // jQuery 3 віддає [] замість null для порожнього multiple-селекта.
+      // Апстрім полагодив це в 1.13; тут та сама перевірка, поки файл не оновлено.
+      var empty = value === null || value === '' || (Array.isArray(value) && !value.length);
+      this.$button.toggleClass('bs-placeholder', empty);
     },
 
     tabIndex: function () {

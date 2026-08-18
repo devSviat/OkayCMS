@@ -12,11 +12,11 @@ use Okay\Core\TemplateConfig\Js;
 
 return [
     (new Js('jquery/jquery.js')),
+    (new Js('jquery/jquery-migrate.js')),
     (new Js('jquery.scrollbar.min.js')),
     (new Js('bootstrap.min.js')),
     (new Js('bootstrap-select.js')),
     (new Js('jquery/jquery-ui.min.js')),
-    (new Js('jquery.dd.min.js')),
     (new Js('fancybox/jquery.fancybox.min.js')),
     (new Js('intro_js/intro.js')),
     (new Js('toastr.min.js')),
