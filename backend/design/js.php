@@ -21,4 +21,5 @@ return [
     (new Js('intro_js/intro.js')),
     (new Js('toastr.min.js')),
     (new Js('Sortable.js')),
+    (new Js('okay-datepicker.js')),
 ];

@@ -1,0 +1,32 @@
+/* Air Datepicker на токенах адмінки. Підключається одразу за вендорним файлом,
+   інакше значення за замовчуванням переб'ють ці. */
+.air-datepicker {
+    --adp-font-family: inherit;
+    --adp-font-size: 14px;
+    --adp-color: var(--ok-ink);
+    --adp-color-secondary: var(--ok-ink-muted);
+    --adp-accent-color: var(--ok-accent);
+    --adp-background-color: var(--ok-surface);
+    --adp-background-color-hover: var(--ok-accent-soft);
+    --adp-background-color-active: var(--ok-accent-soft);
+    --adp-background-color-in-range: var(--ok-accent-soft);
+    --adp-background-color-in-range-focused: var(--ok-accent-soft);
+    --adp-cell-background-color-selected: var(--ok-accent);
+    --adp-cell-background-color-selected-hover: var(--ok-accent-hover);
+    --adp-cell-background-color-in-range: var(--ok-accent-soft);
+    --adp-cell-background-color-in-range-hover: var(--ok-accent-soft);
+    --adp-cell-border-color-in-range: var(--ok-accent-soft);
+    --adp-border-color: var(--ok-line-strong);
+    --adp-border-color-inner: var(--ok-line);
+    --adp-border-color-inline: var(--ok-line-strong);
+    --adp-border-radius: var(--ok-radius-panel);
+    --adp-cell-border-radius: var(--ok-radius-control);
+    --adp-btn-border-radius: var(--ok-radius-control);
+    --adp-day-name-color: var(--ok-ink-muted);
+    --adp-day-name-color-hover: var(--ok-accent);
+    --adp-btn-color: var(--ok-accent);
+    --adp-btn-color-hover: var(--ok-accent-hover);
+    --adp-btn-background-color-hover: var(--ok-accent-soft);
+    --adp-btn-background-color-active: var(--ok-accent-soft);
+    --adp-z-index: var(--ok-z-dropdown);
+}

@@ -191,7 +191,9 @@ class BackendTemplateConfig
     {
         $directory =  $this->rootDir;
         if ($dir !== null) {
-            $directory .= trim($dir, ' \t\n\r\0\x0B/') . '/';
+            // Список у подвійних лапках: в одинарних \t\n\r\0\x0B - це не пробільні
+            // символи, а літери, і trim зрізав би їх із кінця самого шляху.
+            $directory .= trim($dir, " \t\n\r\0\x0B/") . '/';
         } else {
             $directory .= 'backend/design/' . $type . '/';
         }

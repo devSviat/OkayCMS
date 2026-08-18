@@ -176,8 +176,8 @@
 {literal}
 <script>
     $(function() {
-        $('input[name="date_from"]').datepicker();
-        $('input[name="date_to"]').datepicker();
+        okayDatepicker('input[name="date_from"]');
+        okayDatepicker('input[name="date_to"]');
 
         $('button#fn_start').on('click', function() {
             $.ajax({
