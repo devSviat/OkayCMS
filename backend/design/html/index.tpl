@@ -1106,12 +1106,15 @@
         }
 
         function generate_meta_description() {
-            if(typeof(tinyMCE.get("fn_editor")) =='object') {
+            if (tinyMCE.get("fn_editor")) {
                 description = tinyMCE.get("fn_editor").getContent().replace(/(<([^>]+)>)/ig," ").replace(/\n/g, "\r\n").replace(/(\&nbsp;)/ig," ").replace(/^\s+|\s+$/g, '').substr(0, 512);
                 $('#fn_meta_description_counter').text( '('+description.length+')');
                 return description;
             } else {
-                return $('.fn_editor_class').val().replace(/(<([^>]+)>)/ig," ").replace(/\n/g, "\r\n").replace(/(\&nbsp;)/ig," ").replace(/^\s+|\s+$/g, '').substr(0, 512);
+                /* Опис лежить під #fn_editor або під .fn_editor_class - залежно від
+                   шаблону, і не всюди під обома. */
+                var raw = $('#fn_editor, .fn_editor_class').first().val() || '';
+                return raw.replace(/(<([^>]+)>)/ig," ").replace(/\n/g, "\r\n").replace(/(\&nbsp;)/ig," ").replace(/^\s+|\s+$/g, '').substr(0, 512);
             }
         }
     }
@@ -1146,10 +1149,6 @@
     /*функции генерации мета данных end*/
 
     $(window).on('load',function () {
-
-        $("#countries_select").msDropdown({
-            roundedBorder:false
-        });
 
         /*
         * Скрипт табов

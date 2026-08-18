@@ -10,7 +10,7 @@
     <link href="design/css/okay.css" rel="stylesheet" type="text/css" />
     <link href="design/css/grid.css" rel="stylesheet" type="text/css" />
     <link rel="icon" href="design/images/favicon.png" type="image/x-icon">
-    <script src="design/js/jquery/jquery.js?v=2.1.4-1"></script>
+    <script src="design/js/jquery/jquery.js?v=3.7.1"></script>
 </head>
 <body>
 <div class="container d-table">
