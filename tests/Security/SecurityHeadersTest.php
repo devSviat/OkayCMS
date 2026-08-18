@@ -2,8 +2,10 @@
 
 namespace Security;
 
+use Okay\Core\Response;
 use Okay\Core\Security\SecurityHeaders;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 
 class SecurityHeadersTest extends TestCase
 {
@@ -38,6 +40,24 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringNotContainsString("'X-Powered-CMS: OkayCMS ' . \$version", $source);
         $this->assertStringContainsString("'X-Powered-CMS: OkayCMS'", $source);
         $this->assertStringContainsString('SecurityHeaders::defaults()', $source);
+    }
+
+    /**
+     * redirectTo() завершується exit'ом повз sendHeaders(). Найважливіший тут
+     * Referrer-Policy: він вирішує, який Referer побачить ціль переходу.
+     */
+    public function testRedirectsCarryTheSameDefaults()
+    {
+        $method = new ReflectionMethod(Response::class, 'redirectTo');
+        $source = file(dirname(__DIR__, 2) . '/Okay/Core/Response.php');
+        $body = implode('', array_slice(
+            $source,
+            $method->getStartLine() - 1,
+            $method->getEndLine() - $method->getStartLine() + 1
+        ));
+
+        $this->assertStringContainsString('SecurityHeaders::defaults()', $body);
+        $this->assertStringContainsString('Location: ', $body);
     }
 
     /** Точки входу файлового менеджера обходять Okay\Core\Response. */
