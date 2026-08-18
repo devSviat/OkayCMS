@@ -206,10 +206,10 @@
     $(function() {
 
         $('.fn_all_managers').on('change', function(){
-            $('.fn_manager').attr('checked', false);
+            $('.fn_manager').prop('checked', false);
         });
         $('.fn_manager').on('change', function(){
-            $('.fn_all_managers').attr('checked', false);
+            $('.fn_all_managers').prop('checked', false);
         });
         $('.fn_set_admin').on('click', function (e) {
             e.preventDefault();

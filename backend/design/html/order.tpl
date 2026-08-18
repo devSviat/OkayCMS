@@ -758,7 +758,7 @@ $(function() {
             } else {
                 variants_select.hide();
             }
-            variants_select.find('option:first').attr('selected',true);
+            variants_select.find('option:first').prop('selected', true);
 
             variants_select.on('change', function(){
                 change_variant(variants_select);

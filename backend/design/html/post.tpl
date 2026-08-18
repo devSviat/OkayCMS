@@ -433,7 +433,7 @@
                 clone.find("span").html($(this).find("option:selected").data("category_name"));
                 clone.find("input").attr("id","id_"+$(this).find("option:selected").val());
                 clone.find("input").val($(this).find("option:selected").val());
-                clone.find("input").attr("checked",true);
+                clone.find("input").prop("checked", true);
                 clone.find("input").attr("data-cat_name",$(this).find("option:selected").data("category_name"));
                 $(".fn_post_categories_list").append(clone);
                 if ($(".fn_category_item").length == 1) {

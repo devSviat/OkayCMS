@@ -152,10 +152,9 @@
 
 <script>
     $(document).on("click", ".fn_update_module", function () {
-        $('.fn_form_list input[type="checkbox"][name*="check"]').attr('checked', false);
-        $(this).closest(".fn_form_list").find('select[name="action"] option[value=update]').attr('selected', true);
-        $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').attr('checked', true);
-        $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').trigger('click');
+        $('.fn_form_list input[type="checkbox"][name*="check"]').prop('checked', false);
+        $(this).closest(".fn_form_list").find('select[name="action"] option[value=update]').prop('selected', true);
+        $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').prop('checked', true);
         $(this).closest(".fn_form_list").trigger('submit');
     });
     

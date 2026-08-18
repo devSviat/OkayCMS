@@ -611,7 +611,7 @@
                 index_new_value = ($('input[name="to_index_new_value"]').is(':checked') ? 1 : 0);
             value.find('input[name="feature_values[to_index][]"]').val(index_new_value);
             if (index_new_value == 1) {
-                value.find(".fn_index").attr("checked", true);
+                value.find(".fn_index").prop("checked", true);
             }
             value.show();
             $(".fn_values_list").prepend(value);

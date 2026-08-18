@@ -820,6 +820,8 @@
                             $(this).closest('.fn_row').remove();
                         } else {
                             helper.append(ui.clone());
+                            /* Саме attr, а не prop: prop справді зняв би галку, і рядок,
+                               який тягнуть, випав би з масового переміщення на сторінку. */
                             item.find('input[type="checkbox"][name*="check"]').attr('checked', false);
                         }
                     });
@@ -850,8 +852,8 @@
             tolerance: "pointer",
             drop: function(event, ui){
                 $(ui.helper).find('input[type="checkbox"][name*="check"]').attr('checked', true);
-                $(ui.draggable).closest("form").find('select[name="action"] option[value=move_to_page]').attr("selected", "selected");
-                $(ui.draggable).closest("form").find('select[name=target_page] option[value='+$(this).html()+']').attr("selected", "selected");
+                $(ui.draggable).closest("form").find('select[name="action"] option[value=move_to_page]').prop('selected', true);
+                $(ui.draggable).closest("form").find('select[name=target_page] option[value='+$(this).html()+']').prop('selected', true);
                 $(ui.draggable).closest("form").trigger('submit');
                 return false;
             }
@@ -922,7 +924,7 @@
         * */
         function success_action ($this){
             $(document).on('click','.fn_submit_delete',function(){
-                $('.fn_form_list input[type="checkbox"][name*="check"]').attr('checked', false);
+                $('.fn_form_list input[type="checkbox"][name*="check"]').prop('checked', false);
                 $this.closest(".fn_row").find('input[type="checkbox"][name*="check"]').prop('checked', true);
                 $this.closest(".fn_form_list").find('select[name="action"] option[value=delete]').prop('selected', true);
                 $this.closest(".fn_form_list").trigger('submit');
