@@ -99,8 +99,6 @@
     {/foreach}
 </div>
 
-<link href="design/js//loading_bar/loading-bar.css" rel="stylesheet" type="text/css" />
-<script src="design/js/loading_bar/loading-bar.js"></script>
 
 {literal}
 <script>

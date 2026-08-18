@@ -86,7 +86,7 @@
 
     <div class="row">
         <div class="col-xs-12">
-            <div class="boxed match_matchHeight_true">
+            <div class="boxed">
                 {*Название элемента сайта*}
                 <div class="row d_flex">
                     <div class="col-lg-9 col-md-9 col-sm-12">

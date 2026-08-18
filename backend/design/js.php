@@ -19,7 +19,6 @@ return [
     (new Js('jquery.dd.min.js')),
     (new Js('fancybox/jquery.fancybox.min.js')),
     (new Js('intro_js/intro.js')),
-    (new Js('intro_js/intro_okay.js')),
     (new Js('toastr.min.js')),
     (new Js('Sortable.js')),
 ];
