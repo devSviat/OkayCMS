@@ -196,10 +196,9 @@
 
             // Дублировать бренд
             $(document).on("click", ".fn_copy", function () {
-                $('.fn_form_list input[type="checkbox"][name*="check"]').attr('checked', false);
-                $(this).closest(".fn_form_list").find('select[name="action"] option[value=duplicate]').attr('selected', true);
-                $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').attr('checked', true);
-                $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').trigger('click');
+                $('.fn_form_list input[type="checkbox"][name*="check"]').prop('checked', false);
+                $(this).closest(".fn_form_list").find('select[name="action"] option[value=duplicate]').prop('selected', true);
+                $(this).closest(".fn_row").find('input[type="checkbox"][name*="check"]').prop('checked', true);
                 $(this).closest(".fn_form_list").trigger('submit');
             });
         });

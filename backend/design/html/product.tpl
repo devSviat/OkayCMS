@@ -895,13 +895,13 @@
         });
         $(document).on("click", ".fn_change_special", function () {
             if($(this).closest('li').hasClass("product_special")) {
-                $(this).closest("ul").find("input[type=radio]").attr("checked", false);
+                $(this).closest("ul").find("input[type=radio]").prop("checked", false);
                 $(this).closest("li").removeClass("product_special");
                 $(this).text($(this).data("origin"));
             } else {
-                $(this).closest("ul").find("input[type=radio]").attr("checked", false);
+                $(this).closest("ul").find("input[type=radio]").prop("checked", false);
                 $(this).closest("li").removeClass("product_special");
-                $(this).closest("li").find("input[type=radio]").attr("checked", true).trigger('click');
+                $(this).closest("li").find("input[type=radio]").prop("checked", true);
                 $(this).closest("ul").find("li").removeClass("product_special");
                 $(this).closest("li").addClass("product_special");
                 $(this).text($(this).data("result"));
@@ -934,7 +934,7 @@
             clone.find("span").html($(this).find("option:selected").data("category_name"));
             clone.find("input").attr("id","id_"+$(this).find("option:selected").val());
             clone.find("input").val($(this).find("option:selected").val());
-            clone.find("input").attr("checked",true);
+            clone.find("input").prop("checked", true);
             clone.find("input").attr("data-cat_name",$(this).find("option:selected").data("category_name"));
             $(".fn_product_categories_list").append(clone);
             if ($(".fn_category_item").length == 1) {
