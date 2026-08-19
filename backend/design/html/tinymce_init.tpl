@@ -97,6 +97,12 @@
                 {/foreach}
             ],
             body_class: "block__description block__description--style",
+            /* Вміст редактора стилізує CSS вітрини, і з ним прилітають дві речі,
+               доречні на сайті й зайві тут: нульові поля сторінки, через які текст
+               лип до країв, і глобальне кільце :focus-visible - на порожньому тілі
+               воно сходиться в темну смугу через усю ширину. */
+            {literal}content_style: "body.mce-content-body{padding:12px 16px;}"
+                + "body.mce-content-body:focus,body.mce-content-body:focus-visible{outline:none;}",{/literal}
             theme_advanced_buttons3_add : "save",
             save_onsavecallback: function() {literal}{{/literal}
                 $("[type='submit']").trigger("click");
