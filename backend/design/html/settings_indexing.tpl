@@ -282,8 +282,6 @@
 
 {* On document load *}
 {literal}
-<link rel="stylesheet" media="screen" type="text/css" href="design/js/colorpicker/css/colorpicker.css" />
-<script type="text/javascript" src="design/js/colorpicker/js/colorpicker.js"></script>
 <script>
     $(function() {
         var new_label = $(".fn_new_label").clone(true);
@@ -327,16 +325,6 @@
                     }, 2000);
                 });
             }
-        });
-
-        $(document).on("mouseenter click", ".fn_color", function () {
-            var elem = $(this);
-            elem.ColorPicker({
-                onChange: function (hsb, hex, rgb) {
-                    elem.css('backgroundColor', '#' + hex);
-                    elem.prev().val(hex);
-                }
-            });
         });
 
     });

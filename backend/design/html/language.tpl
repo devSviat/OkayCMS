@@ -94,22 +94,20 @@
                                 <div class="heading_label">{$btr->language_select|escape} </div>
                                 <div class="">
 
-                                   <select id="countries_select"  name="lang" size="1">
+                                   <select id="countries_select" class="selectpicker" name="lang" size="1" data-live-search="true" data-size="10">
                                         {foreach $lang_list as $lang}
-                                            <option value='{$lang->label|escape}' data-image="{if is_file("{$config->lang_images_dir|escape}{$lang->label|escape}.png")}{("{$lang->label|escape}.png")|resize:23:23:false:$config->lang_resized_dir}"{/if}" data-imagecss="flag ad" data-title="{$lang->name|escape}">{$lang->name|escape} [{$lang->label|escape}]</option>
+                                            {$flag = ''}
+                                            {if is_file("{$config->lang_images_dir}{$lang->label}.png")}
+                                                {$flag = ("{$lang->label|escape}.png")|resize:23:23:false:$config->lang_resized_dir}
+                                            {/if}
+                                            {* Тег прапорця саме сутностями: літерний "<" усередині атрибута ламає TplMod,
+                                               який переписує шаблон при модифікаціях модулів. *}
+                                            <option value="{$lang->label|escape}" data-content="{if $flag}&lt;img src='{$flag|escape}' width='23' height='23' alt=''&gt; {/if}{$lang->name|escape} [{$lang->label|escape}]">{$lang->name|escape} [{$lang->label|escape}]</option>
                                         {/foreach}
                                     </select>
                                 </div>
                             </div>
 
-                            {js file="jquery.dd.min.js" admin=true}
-                            {literal}
-                                <script>
-                                    $(window).on('load', function () {
-                                        $("#countries_select").msDropdown({roundedBorder: false});
-                                    });
-                                </script>
-                            {/literal}
                         {else}
                             <div class="col-md-12">
                                 <div class="row">

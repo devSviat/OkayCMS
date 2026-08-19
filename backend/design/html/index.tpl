@@ -559,18 +559,6 @@
 
         {/if}
 
-        /* Initializing the scrollbar */
-        if($('.scrollbar-inner').length>0){
-            $('.scrollbar-inner').scrollbar({
-                "disableBodyScroll":true
-            });
-        }
-
-        if($(window).width() < 1199 ){
-            if($('.scrollbar-variant').length>0){
-                $('.scrollbar-variant').scrollbar();
-            }
-        }
         if($('.input_file').length>0){
             document.querySelector("html").classList.add('fn_input_file');
 
