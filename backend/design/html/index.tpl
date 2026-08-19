@@ -798,68 +798,112 @@
         }
 
         if($(".sort_extended").length>0) {
+            {literal}
+            /* Порядок рядків і є порядком даних: positions[id] їдуть на сервер у тому
+               порядку, в якому рядки лежать у DOM. */
+            var sortedList = null;
+            var draggedRows = [];
 
-            /*Явно указываем высоту списка, иначе когда скрипт удаляет элемент и ставит на его место заглушку, страница подпрыгивает*/
-            $(".fn_sort_list").css('min-height', $(".fn_sort_list").outerHeight());
+            var rowCheckbox = function (row) {
+                return $(row).find('input[type="checkbox"][name*="check"]');
+            };
 
-            $(".sort_extended").sortable({
-                items: ".fn_sort_item",
-                tolerance: "pointer",
-                handle: ".move_zone",
-                scrollSensitivity: 50,
-                scrollSpeed: 100,
-                scroll: true,
-                opacity: 0.5,
-                containment: "document",
-                helper: function(event, ui){
-                    if ($('input[type="checkbox"][name*="check"]:checked').length<1) return ui;
-                    var helper = $('<div/>');
-                    $('input[type="checkbox"][name*="check"]:checked').each(function() {
-                        var item = $(this).closest('.fn_row');
-                        helper.height(helper.height()+item.innerHeight());
-                        if (item[0]!=ui[0]) {
-                            helper.append(item.clone());
-                            $(this).closest('.fn_row').remove();
-                        } else {
-                            helper.append(ui.clone());
-                            /* Саме attr, а не prop: prop справді зняв би галку, і рядок,
-                               який тягнуть, випав би з масового переміщення на сторінку. */
-                            item.find('input[type="checkbox"][name*="check"]').attr('checked', false);
-                        }
-                    });
-                    return helper;
-                },
-                start: function(event, ui) {
-                    if(ui.helper.children('.fn_row').length>0)
-                        $('.ui-sortable-placeholder').height(ui.helper.height());
-                },
-                beforeStop:function(event, ui){
-                    if(ui.helper.children('.fn_row').length>0){
-                        ui.helper.children('.fn_row').each(function(){
-                            $(this).insertBefore(ui.item);
-                        });
-                        ui.item.remove();
-                    }
-                },
-                update: function (event, ui) {
-                    $("#list_form input[name*='check']").attr('checked', false);
+            $(".sort_extended").each(function () {
+                Sortable.create(this, {
+                    draggable: ".fn_sort_item",
+                    handle: ".move_zone",
+                    multiDrag: true,
+                    multiDragKey: "CTRL",
+                    selectedClass: "sortable-selected",
+                    animation: 150,
+                    scroll: true,
+                    scrollSensitivity: 50,
+                    scrollSpeed: 100,
+                    onStart: function (evt) {
+                        sortedList = evt.from;
+                        /* evt.items заповнений лише при множинному перетягуванні. */
+                        draggedRows = evt.items && evt.items.length ? evt.items : [evt.item];
+                        $(".fn_pagination a.droppable").addClass("drop_active");
+                    },
+                    onEnd: function () {
+                        $(".fn_pagination a.droppable").removeClass("drop_active drop_hover");
+                    },
+                    /* Галка й вибір мусять означати те саме: перетягуємо рівно те,
+                       що відмічено для масових дій. */
+                    onSelect: function (evt) { rowCheckbox(evt.item).prop("checked", true); },
+                    onDeselect: function (evt) { rowCheckbox(evt.item).prop("checked", false); }
+                });
+            });
 
+            $(document).on("change", '.sort_extended input[type="checkbox"][name*="check"]', function () {
+                var row = $(this).closest(".fn_sort_item")[0];
+                if (!row) {
+                    return;
+                }
+                if (this.checked) {
+                    Sortable.utils.select(row);
+                } else {
+                    Sortable.utils.deselect(row);
                 }
             });
-        }
 
-        $(".fn_pagination a.droppable").droppable({
-            activeClass: "drop_active",
-            hoverClass: "drop_hover",
-            tolerance: "pointer",
-            drop: function(event, ui){
-                $(ui.helper).find('input[type="checkbox"][name*="check"]').attr('checked', true);
-                $(ui.draggable).closest("form").find('select[name="action"] option[value=move_to_page]').prop('selected', true);
-                $(ui.draggable).closest("form").find('select[name=target_page] option[value='+$(this).html()+']').prop('selected', true);
-                $(ui.draggable).closest("form").trigger('submit');
-                return false;
-            }
-        });
+            /* Кинути відмічені рядки на номер сторінки - те саме масове переміщення,
+               що й дією зі списку. Ціль шукаємо за координатами, а не за верхнім
+               елементом: пагінацію накривають футер і панель швидкого збереження, і
+               нативний drag-and-drop віддав би подію їм. jQuery UI шукав так само. */
+            var pageLinkAt = function (x, y) {
+                var found = null;
+                $(".fn_pagination a.droppable").each(function () {
+                    var r = this.getBoundingClientRect();
+                    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+                        found = this;
+                        return false;
+                    }
+                });
+                return found;
+            };
+
+            $(document).on("dragover", function (e) {
+                if (!sortedList) {
+                    return;
+                }
+                var link = pageLinkAt(e.originalEvent.clientX, e.originalEvent.clientY);
+                $(".fn_pagination a.droppable").removeClass("drop_hover");
+                if (link) {
+                    e.preventDefault();
+                    $(link).addClass("drop_hover");
+                }
+            });
+
+            $(document).on("drop", function (e) {
+                if (!sortedList) {
+                    return;
+                }
+                var link = pageLinkAt(e.originalEvent.clientX, e.originalEvent.clientY);
+                if (!link) {
+                    return;
+                }
+                e.preventDefault();
+                var form = $(sortedList).closest("form");
+                if (!form.length) {
+                    return;
+                }
+                /* Поки триває перетягування, решта вибраних рядків вийнята з DOM, і
+                   форма їх не побачить. Повертаємо їх перед відправкою - інакше на
+                   сторінку переїде лише той рядок, за який тягнули. */
+                $(draggedRows).each(function () {
+                    if (!$.contains(form[0], this)) {
+                        form.append(this);
+                    }
+                });
+                rowCheckbox($(draggedRows)).prop("checked", true);
+                form.find('select[name="action"] option[value=move_to_page]').prop("selected", true);
+                form.find('select[name=target_page] option[value=' + $(link).html() + ']').prop("selected", true);
+                form.trigger("submit");
+            });
+
+            {/literal}
+        }
 
         /* Call an ajax entity update */
         if($(".fn_ajax_action").length>0){

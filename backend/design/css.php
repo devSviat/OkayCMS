@@ -11,7 +11,6 @@
 use Okay\Core\TemplateConfig\Css;
 
 return [
-    (new Css('jquery-ui.min.css'))->setDir('backend/design/js/jquery'),
     (new Css('jquery.fancybox.min.css')), 
     (new Css('grid.css')),
     (new Css('reboot.css')),
