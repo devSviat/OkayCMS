@@ -90,9 +90,11 @@ RewriteRule ^(.*)$ index.php [L,QSA]
     </IfModule>
 
     # SVG прямою навігацією рендериться як документ і виконує <script>.
-    # Санітайзер є лише у файловому менеджері, тож глушимо заголовком.
-    # На <img src="...svg"> це не впливає.
-    <FilesMatch "\.svg$">
+    # Вибирач файлів переписує svg на завантаженні, але в files/ лежать і старі
+    # файли, тож глушимо заголовком. На <img src="...svg"> це не впливає.
+    # (?i) обов'язкове: для файлової системи .SVG це той самий файл, а
+    # FilesMatch без нього регістрозалежний, на відміну від RewriteCond [NC] поруч.
+    <FilesMatch "(?i)\.svg$">
         Header set Content-Security-Policy "default-src 'none'; sandbox"
     </FilesMatch>
 </IfModule>
