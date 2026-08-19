@@ -334,6 +334,15 @@ expect_status 302 /backend/
 # менеджера.
 expect_status 301 "/backend/index.php"
 expect_status 200 "/backend/index.php?controller=AuthAdmin"
+# У nginx умова стоїть під `~*`, тож канонізація не зважає на регістр.
+expect_status 301 "/INDEX.PHP"
+# Оригінали завантажень назовні не віддаються, але це не серверна 404: і nginx,
+# і .htaccess шлють їх у фронт-контролер, щоб магазин намалював свою сторінку.
+# Перевіряється саме тіло — статус 404 однаковий і в порожньої відповіді.
+expect_status 404 "/files/originals/logo.png"
+expect_contains "files/originals/ is answered by the storefront, not by a bare server 404" \
+    "OkayCMS" \
+    curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/files/originals/logo.png"
 # Шлях бандла береться з реальної сторінки, а не зашивається — в імені хеш вмісту.
 asset_path=$(curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/" 2>/dev/null \
     | grep -oE 'cache/(css|js)/[^"]+\.(css|js)' | head -1)

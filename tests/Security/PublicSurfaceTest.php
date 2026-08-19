@@ -283,6 +283,44 @@ class PublicSurfaceTest extends TestCase
         );
     }
 
+    /**
+     * Оригінали не віддаються, але це не серверна 404: і nginx (шлях просто не
+     * підпадає під білий список files/), і .htaccess (`RewriteRule
+     * ^files/originals/ index.php`) шлють їх у фронт-контролер, щоб магазин
+     * намалював власну сторінку 404. `respond 404` тут дав би порожню.
+     */
+    public function testCaddyfileSendsOriginalsToTheFrontController(): void
+    {
+        $source = $this->config(self::CADDYFILE);
+
+        $start = strpos($source, 'route /files/originals/*');
+        $this->assertIsInt($start, 'у Caddyfile немає правила для files/originals/');
+        $this->assertStringContainsString(
+            'rewrite * /index.php',
+            substr($source, $start, 200),
+            'files/originals/ мусить іти у фронт-контролер, а не віддавати серверну 404'
+        );
+
+        $this->assertStringNotContainsString(
+            '/files/originals/* ',
+            substr($source, (int) strpos($source, '@denied path'), 120),
+            'files/originals/ не має стояти серед шляхів, на які відповідають 404'
+        );
+    }
+
+    /**
+     * У nginx умова канонізації стоїть під `~*`, тобто без урахування
+     * регістру: /INDEX.PHP теж мусить згортатись, інакше це другий URL на ту
+     * саму сторінку. path_regexp у Caddy регістр враховує, тож потрібен (?i).
+     */
+    public function testCaddyfileIndexCanonicalisationIgnoresCase(): void
+    {
+        $source = $this->config(self::CADDYFILE);
+
+        $this->assertStringContainsString('(?i)^(.*/)index\.php$', $source);
+        $this->assertStringContainsString('(?i)^(.*/)index\.html', $source);
+    }
+
     public function testCaddyfileClosesTheVendorTree(): void
     {
         $this->assertMatchesRegularExpression(

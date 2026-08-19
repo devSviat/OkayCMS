@@ -97,13 +97,16 @@
 		# шлях, тож без перевірки на порожній query цей редірект з'їдав би
 		# параметри — і вхід в адмінку ламався б: саме туди ядро редіректить
 		# неавторизованого менеджера.
+		# (?i) — бо в nginx умова стоїть під `~*`, тобто без урахування
+		# регістру: /INDEX.PHP теж канонізується, інакше це другий URL на ту
+		# саму сторінку.
 		@index_php {
-			path_regexp idxphp ^(.*/)index\.php$
+			path_regexp idxphp (?i)^(.*/)index\.php$
 			expression {http.request.uri.query} == ""
 		}
 		redir @index_php {re.idxphp.1} 301
 
-		@index_html path_regexp idxhtml ^(.*/)index\.html
+		@index_html path_regexp idxhtml (?i)^(.*/)index\.html
 		redir @index_html {re.idxhtml.1} 301
 
 		# Сумісність зі старим URL адмінки; 302, як і в nginx.
@@ -111,10 +114,21 @@
 
 		# ───────────────────────── Заборони ─────────────────────────
 		#
-		# Йдуть перед будь-яким дозволом. files/originals/ — тут, бо далі
-		# правило для files/ не може виразити (?!originals/) регуляркою.
-		@denied path /vendor/* /files/originals/* /backend/lang/* /backend/design/compiled/*
+		# Йдуть перед будь-яким дозволом.
+		@denied path /vendor/* /backend/lang/* /backend/design/compiled/*
 		respond @denied 404
+
+		# Оригінали завантажень назовні не віддаються, але це не серверна 404:
+		# і nginx (шлях просто не підпадає під білий список files/), і .htaccess
+		# (`RewriteRule ^files/originals/ index.php`) відправляють його у
+		# фронт-контролер, і магазин малює власну сторінку 404.
+		#
+		# Стоїть перед правилом для files/ навмисно: Go RE2 не має негативного
+		# lookahead, тож `(?!originals/)` виражається лише порядком.
+		route /files/originals/* {
+			rewrite * /index.php
+			php
+		}
 
 		# Класові дерева (PSR-4 Okay\Admin\ -> backend/) — не точки входу.
 		@denied_psr4 path_regexp ^/backend/(Controllers|Helpers|Requests|Entities)/
