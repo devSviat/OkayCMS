@@ -4,7 +4,7 @@
 [assets.md](assets.md); тут про те, **чим** малювати, коли файл уже підключено.
 
 Стилі адмінки живуть у `backend/design/css/`. Головний файл — `okay.css` (244 КБ), решта
-або вендорна (`bootstrap-select`, `toastr`, `fancybox`, `simple-hint`,
+або вендорна (`bootstrap-select`, `toastr`, `simple-hint`,
 `air-datepicker`), або допоміжна (`grid.css`, `reboot.css`, `bootstrap_theme.css`,
 `media.css`). Порядок підключення — `backend/design/css.php`, і він важить: `media.css`
 і вендорні файли йдуть **після** `okay.css` і перебивають його за рівної специфічності.
