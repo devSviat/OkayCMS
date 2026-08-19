@@ -28,22 +28,57 @@ class AuthPageTranslationTest extends TestCase
         );
     }
 
-    public function testTranslationsAreAssignedForEveryRequest(): void
+    /**
+     * Присвоєння мусить стояти на верхньому рівні файлу, а не всередині гілки:
+     * саме через те, що воно лежало в if (!empty($manager)), сторінка входу
+     * роками не мала перекладів. Глибина рахується токенізатором, бо текстовий
+     * пошук цього не бачить - переміщення в else лишає рядок на місці.
+     */
+    public function testTranslationsAreAssignedOutsideAnyBranch(): void
     {
-        $source = $this->read('backend/index.php');
+        $depth = $this->assignDepth($this->read('backend/index.php'));
 
-        $assign = strpos($source, "\$design->assign('btr', \$backendTranslations);");
-        $this->assertIsInt($assign, "btr має присвоюватись і без менеджера");
+        $this->assertNotNull($depth, "у backend/index.php немає присвоєння btr");
+        $this->assertSame(0, $depth, 'btr присвоюється всередині гілки');
+    }
 
-        // Присвоєння мусить бути поза гілкою про менеджера, інакше сторінка
-        // входу знову лишиться без перекладів.
-        $branch = strpos($source, 'if (!empty($manager)) {');
-        $this->assertIsInt($branch);
-        $this->assertGreaterThan($branch, $assign);
-        $this->assertStringNotContainsString(
-            "initTranslations(\$manager->lang);\n    \$design->assign('btr'",
-            $source
-        );
+    /** @return int|null глибина вкладеності у фігурні дужки або null, якщо не знайдено */
+    private function assignDepth(string $source): ?int
+    {
+        $tokens = token_get_all($source);
+        $depth  = 0;
+
+        for ($i = 0; $i < count($tokens); $i++) {
+            $token = $tokens[$i];
+
+            if ($token === '{') {
+                $depth++;
+                continue;
+            }
+
+            if ($token === '}') {
+                $depth--;
+                continue;
+            }
+
+            if (is_array($token) && $token[0] === T_CURLY_OPEN) {
+                $depth++;
+                continue;
+            }
+
+            if (!is_array($token) || $token[0] !== T_STRING || $token[1] !== 'assign') {
+                continue;
+            }
+
+            // ->assign('btr', ...)
+            $argument = $tokens[$i + 2] ?? null;
+            if (is_array($argument) && $argument[0] === T_CONSTANT_ENCAPSED_STRING
+                && trim($argument[1], "'\"") === 'btr') {
+                return $depth;
+            }
+        }
+
+        return null;
     }
 
     /**
