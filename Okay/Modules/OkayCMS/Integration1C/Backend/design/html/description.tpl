@@ -232,7 +232,7 @@
                                                 <div class="permission_box permission_box--long">
                                                     <span>
                                                         {$btr->okaycms__integration_1c__settings_exportPurchasesDiscountsSeparate|escape}
-                                                        <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->okaycms__integration_1c__settings_exportPurchasesDiscountsSeparate_tooltip|escape}">
+                                                        <i class="fn_tooltips hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->okaycms__integration_1c__settings_exportPurchasesDiscountsSeparate_tooltip|escape}" tabindex="0" role="img" aria-label="{$btr->okaycms__integration_1c__settings_exportPurchasesDiscountsSeparate_tooltip|escape}">
                                                             {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                                         </i>
                                                     </span>

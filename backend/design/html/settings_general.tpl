@@ -48,7 +48,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="heading_label">{$btr->settings_general_sitename|escape}
-                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_general_sitename|escape}">
+                                <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_general_sitename|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_general_sitename|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -58,7 +58,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="heading_label">{$btr->settings_general_date|escape}
-                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_general_date|escape}">
+                                <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_general_date|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_general_date|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -68,7 +68,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="heading_label">{$btr->settings_phone_default_region|escape}
-                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_phone_default_region|escape}">
+                                <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_phone_default_region|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_phone_default_region|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -82,7 +82,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="heading_label">{$btr->settings_phone_default_format|escape}
-                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_phone_default_format|escape}">
+                                <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_phone_default_format|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_phone_default_format|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>

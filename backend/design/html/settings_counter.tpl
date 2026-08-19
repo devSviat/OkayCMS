@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-lg-12 col-md-12">
         <div class="heading_page">{$btr->counters_title|escape}
-            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_counters_title|escape}">
+            <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_counters_title|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_counters_title|escape}">
                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
             </i>
         </div>

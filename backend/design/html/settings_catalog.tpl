@@ -115,7 +115,7 @@
                         <div class="fn_step-8 col-lg-4 col-md-6">
                             <div class="heading_label">
                                 {$btr->settings_catalog_not_in_stock|escape}
-                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_not_in_stock|escape}">
+                                <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_not_in_stock|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_catalog_not_in_stock|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -150,7 +150,7 @@
                         <div class="fn_step-8 col-lg-4 col-md-6">
                             <div class="heading_label">
                                 {$btr->settings_catalog_features_max_count_products|escape}
-                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_features_max_count_products|escape}">
+                                <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_features_max_count_products|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_catalog_features_max_count_products|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -161,7 +161,7 @@
                         <div class="fn_step-8 col-lg-4 col-md-6">
                             <div class="heading_label">
                                 {$btr->settings_catalog_features_cache_ttl|escape} <span class="text_warning">Beta</span>
-                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_features_cache_ttl|escape}">
+                                <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_features_cache_ttl|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_catalog_features_cache_ttl|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -173,7 +173,7 @@
                             <div class="fn_step-9">
                                 <div class="heading_label boxes_inline">
                                     {$btr->settings_catalog_features_cache_deferred|escape}
-                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_features_cache_deferred|escape}">
+                                    <i class="fn_tooltips fn_tip_wide hint-bottom-right-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_features_cache_deferred|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_catalog_features_cache_deferred|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
@@ -195,7 +195,7 @@
                             <div class="fn_step-10">
                                 <div class="heading_label boxes_inline">
                                     {$btr->allow_to_visible_empty_categories|escape}
-                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->allow_to_visible_empty_categories_notice|escape}">
+                                    <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->allow_to_visible_empty_categories_notice|escape}" tabindex="0" role="img" aria-label="{$btr->allow_to_visible_empty_categories_notice|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
@@ -215,7 +215,7 @@
                             <div class="fn_step-10">
                                 <div class="heading_label boxes_inline">
                                     {$btr->settings_hide_single_filters|escape}
-                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_hide_single_filters_notice|escape}">
+                                    <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->settings_hide_single_filters_notice|escape}" tabindex="0" role="img" aria-label="{$btr->settings_hide_single_filters_notice|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
@@ -235,7 +235,7 @@
                             <div class="fn_step-10">
                                 <div class="heading_label boxes_inline">
                                     {$btr->settings_enable_webp|escape}
-                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_enable_webp_notice|escape}"> 
+                                    <i class="fn_tooltips fn_tip_wide hint-bottom-right-t-white-s-small-mobile hint-anim" data-hint="{$btr->settings_enable_webp_notice|escape}" tabindex="0" role="img" aria-label="{$btr->settings_enable_webp_notice|escape}"> 
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
@@ -255,7 +255,7 @@
                             <div class="fn_step-10">
                                 <div class="heading_label boxes_inline">
                                     {$btr->settings_hide_equal_compare_price|escape}
-                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_hide_equal_compare_price_notice|escape}"> 
+                                    <i class="fn_tooltips hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->settings_hide_equal_compare_price_notice|escape}" tabindex="0" role="img" aria-label="{$btr->settings_hide_equal_compare_price_notice|escape}"> 
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
@@ -275,7 +275,7 @@
                             <div class="fn_step-10">
                                 <div class="heading_label boxes_inline">
                                     {$btr->settings_increased_image_size|escape}
-                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->settings_increased_image_size_notice|escape}"> 
+                                    <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->settings_increased_image_size_notice|escape}" tabindex="0" role="img" aria-label="{$btr->settings_increased_image_size_notice|escape}"> 
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
