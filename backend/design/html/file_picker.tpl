@@ -197,6 +197,6 @@
     {/if}
 </div>
 
-<script src="design/js/okay-file-picker.js?v={$config->version|escape}"></script>
+<script src="design/js/okay-file-picker.js?v={$picker_script_version|escape:'url'}"></script>
 </body>
 </html>

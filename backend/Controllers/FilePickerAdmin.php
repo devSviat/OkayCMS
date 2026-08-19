@@ -16,6 +16,8 @@ class FilePickerAdmin extends IndexAdmin
 {
     private const PER_PAGE = 60;
 
+    private const SCRIPT = 'backend/design/js/okay-file-picker.js';
+
     public function fetch(BackendFilePickerHelper $filePickerHelper)
     {
         $type = $this->fileType();
@@ -42,6 +44,9 @@ class FilePickerAdmin extends IndexAdmin
         $this->design->assign('picker_page', $list['page']);
         $this->design->assign('picker_pages_count', $list['pagesCount']);
         $this->design->assign('picker_total', $list['total']);
+        // Версія CMS між правками скрипта не змінюється, тому браузер тримав
+        // би стару копію: мітка часу файла - єдине, що тут справді змінюється.
+        $this->design->assign('picker_script_version', (int)@filemtime($this->config->root_dir . self::SCRIPT));
 
         $this->response->setContent($this->design->fetch('file_picker.tpl'));
     }
