@@ -5211,8 +5211,8 @@ body.menu-pin .page-container {
     float: right;
 }
 #admin_catalog  .sidebar-menu .menu_items > li > a > .arrow::before {
-    float: right;
     display: inline-block;
+    vertical-align: middle;
     width: 14px;
     height: 14px;
     content: "";
