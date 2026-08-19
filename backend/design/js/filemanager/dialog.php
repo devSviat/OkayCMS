@@ -331,8 +331,8 @@ $get_params = http_build_query($get_params);
         <!-- CSS adjustments for browsers with JavaScript disabled -->
         <noscript><link rel="stylesheet" href="css/jquery.fileupload-noscript.css"></noscript>
         <noscript><link rel="stylesheet" href="css/jquery.fileupload-ui-noscript.css"></noscript>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.7.1/skin/blue.monday/jplayer.blue.monday.min.css" />
-        <link rel="stylesheet" href="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.css">
+        <link rel="stylesheet" href="vendor/jplayer.blue.monday.min.css" />
+        <link rel="stylesheet" href="vendor/tui-image-editor.css">
         <link href="css/style.css?v=<?php echo $version; ?>" rel="stylesheet" type="text/css" />
         <!--[if lt IE 8]>
         <style>
@@ -343,22 +343,17 @@ $get_params = http_build_query($get_params);
         </style>
         <![endif]-->
 
-        <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
-        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+        <script src="vendor/jquery-1.12.4.min.js"></script>
+        <script src="vendor/jquery-ui.min.js"></script>
         <script src="js/plugins.js?v=<?php echo $version; ?>"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/jplayer/jquery.jplayer.min.js"></script>
-        <link type="text/css" href="https://uicdn.toast.com/tui-color-picker/v2.2.0/tui-color-picker.css" rel="stylesheet">
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.6.7/fabric.js"></script>
-        <script type="text/javascript" src="https://uicdn.toast.com/tui.code-snippet/v1.5.0/tui-code-snippet.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
-        <script type="text/javascript" src="https://uicdn.toast.com/tui-color-picker/v2.2.0/tui-color-picker.js"></script>
-        <script src="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.js"></script>
+        <script src="vendor/jquery.jplayer.min.js"></script>
+        <link type="text/css" href="vendor/tui-color-picker.min.css" rel="stylesheet">
+        <script src="vendor/fabric.min.js"></script>
+        <script src="vendor/tui-code-snippet.min.js"></script>
+        <script src="vendor/FileSaver.min.js"></script>
+        <script src="vendor/tui-color-picker.min.js"></script>
+        <script src="vendor/tui-image-editor.min.js"></script>
         <script src="js/modernizr.custom.js"></script>
-
-        <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-        <!--[if lt IE 9]>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.6.2/html5shiv.js"></script>
-        <![endif]-->
 
         <script type="text/javascript">
             var ext_img=new Array('<?php echo implode("','", $config['ext_img'])?>');
@@ -370,11 +365,11 @@ $get_params = http_build_query($get_params);
 </head>
 <body>
     <!-- The Templates plugin is included to render the upload/download listings -->
-    <script src="//blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
+    <script src="vendor/tmpl.min.js"></script>
     <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
-    <script src="//blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
+    <script src="vendor/load-image.all.min.js"></script>
     <!-- The Canvas to Blob plugin is included for image resizing functionality -->
-    <script src="//blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
+    <script src="vendor/canvas-to-blob.min.js"></script>
     <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
     <script src="js/jquery.iframe-transport.js"></script>
     <!-- The basic File Upload plugin -->
@@ -1278,7 +1273,10 @@ $files = $sorted;
                         echo "'$aopt_key':".json_encode($aopt_val).",";
                     }
                 } ?>
-            }; 
+            };
+            // Логотип редактора за замовчуванням тягнеться з uicdn.toast.com -
+            // єдиний зовнішній запит, що лишався. Прозорий піксель прибирає його.
+            tuiTheme['common.bi.image'] = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
         </script>
 
         <script>
@@ -1294,6 +1292,7 @@ $files = $sorted;
                      initMenu: 'filter',
                      menuBarPosition: '<?php echo $config['tui_position'] ?>'
                  },
+                usageStatistics: false,
                 cssMaxWidth: 1000, // Component default value: 1000
                 cssMaxHeight: 800,  // Component default value: 800
                 selectionStyle: {
