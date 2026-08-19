@@ -13,7 +13,6 @@ use Okay\Core\TemplateConfig\Css;
 return [
     (new Css('grid.css')),
     (new Css('reboot.css')),
-    (new Css('font-awesome-face.css')),
     (new Css('toastr.css')),
     (new Css('simple-hint.css')),
     (new Css('bootstrap-select.css')),
