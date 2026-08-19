@@ -13,7 +13,7 @@
                         <div class="okay_list_boding okay_list_order_discounted_name">
                             <div class="input-group">
                                 <input name="discounts[{$discount->id}][name]" class="form-control" type="text" value="{$discount->name|escape}">
-                                <a class="fn_tooltips input-group-addon p-0 hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$discount->description|escape}" href="javascript:;" data-src="#popup_order_discount_text_{$purchase->product->id}" data-fancybox="hello_{$purchase->product->id}" role="img" aria-label="{$discount->description|escape}">
+                                <a class="fn_tooltips input-group-addon p-0 hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$discount->description|escape}" href="javascript:;" data-src="#popup_order_discount_text_{$purchase->product->id}" data-fancybox="hello_{$purchase->product->id}" aria-label="{$discount->description|escape}">
                                     {include file='svg_icon.tpl' svgId='order_list'}
                                 </a>
                             </div>

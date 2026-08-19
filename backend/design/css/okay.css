@@ -338,12 +338,23 @@ body:not(.top-nav) header.navbar {
 .fn_tooltips{
     display: none;
 }
-/* Носій підказки - <i>, тож курсив доводиться знімати: раніше плашку малював
-   окремий вузол у body, і вона курсиву не успадковувала. */
 /* Підказки полів лишаються такими, якими їх малював jQuery UI: світла плашка,
-   текст ліворуч, звичайна вага. Носій - <i>, тому курсив доводиться знімати. */
-.fn_tooltips[data-hint]:after{font-style: normal;color: var(--ok-ink);background: var(--ok-surface);border: 1px solid var(--ok-line);box-shadow: var(--ok-shadow-2);}
-.fn_tooltips[data-hint]:after{font-size: 14px;line-height: 1.35;font-weight: 400;text-align: left;padding: 8px;border-radius: var(--ok-radius-control);}
+   текст ліворуч, звичайна вага. Межа не окраса - без неї біла плашка зливається
+   з карткою. Курсив знімаємо, бо носій це <i>, а раніше плашку малював окремий
+   вузол у body. */
+.fn_tooltips[data-hint]:after{
+    font-style: normal;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 400;
+    text-align: left;
+    padding: 8px;
+    border-radius: var(--ok-radius-control);
+    color: var(--ok-ink);
+    background: var(--ok-surface);
+    border: 1px solid var(--ok-line);
+    box-shadow: var(--ok-shadow-2);
+}
 /* Широка плашка там, де для неї заміряно місце на всіх робочих ширинах вікна.
    Решта лишається на бібліотечних 130px: CSS не переставляє плашку, коли місця
    з боку немає, а jQuery UI, який ці підказки малював раніше, це робив. */
