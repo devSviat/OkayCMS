@@ -1,5 +1,7 @@
 # Конфігурація FrankenPHP (Caddy) для OkayCMS — переклад білого списку з
-# dev/config/nginx/templates/default.conf.template.
+# nginx-конфігу. Еталон для звірки лишився в docs/nginx/nginx.conf (для тих,
+# хто ставить магазин на власний nginx); паритет двох файлів стереже
+# tests/Security/PublicSurfaceTest.php.
 #
 # ─────────────────────────── Білий список ───────────────────────────
 #
