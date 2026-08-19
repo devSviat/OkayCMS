@@ -2,13 +2,15 @@
 
 namespace Security;
 
+use Okay\Admin\Helpers\BackendFilePickerHelper;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ReflectionClass;
 
 /**
- * Завантажене через файловий менеджер не має ані виконуватись, ані рендеритись
- * на домені магазину. Межа тримається двома незалежними шарами: allowlist
- * розширень у самому менеджері і deny-правила веб-сервера.
+ * Завантажене через вибирач файлів не має ані виконуватись, ані рендеритись
+ * на домені магазину. Межа тримається двома незалежними шарами: білий список
+ * розширень у помічнику і deny-правила веб-сервера.
  */
 class UploadedContentIsInertTest extends TestCase
 {
@@ -21,8 +23,8 @@ class UploadedContentIsInertTest extends TestCase
         'html', 'htm', 'xhtml', 'xml', 'xsl', 'js', 'css', 'shtml', 'phtml',
     ];
 
-    #[DataProvider('creationAllowlistProvider')]
-    public function testActiveWebContentCannotBeUploadedOrCreated($key)
+    #[DataProvider('allowlistProvider')]
+    public function testActiveWebContentCannotBeUploaded($key)
     {
         $extensions = $this->allowlist($key);
 
@@ -31,40 +33,36 @@ class UploadedContentIsInertTest extends TestCase
         }
     }
 
-    public static function creationAllowlistProvider()
-    {
-        return [
-            'upload'  => ['ext_file'],
-            'edit'    => ['editable_text_file_exts'],
-            'preview' => ['previewable_text_file_exts'],
-        ];
-    }
-
-    #[DataProvider('everyAllowlistProvider')]
+    #[DataProvider('allowlistProvider')]
     public function testExtensionlessFilesAreNotAllowed($key)
     {
         $this->assertNotContains('', $this->allowlist($key), $key . ' дозволяє файл без розширення');
     }
 
-    public static function everyAllowlistProvider()
+    public static function allowlistProvider()
     {
         return [
-            'images'    => ['ext_img'],
-            'files'     => ['ext_file'],
-            'video'     => ['ext_video'],
-            'music'     => ['ext_music'],
-            'misc'      => ['ext_misc'],
-            'edit'      => ['editable_text_file_exts'],
-            'preview'   => ['previewable_text_file_exts'],
+            'images'    => ['IMAGE_EXTENSIONS'],
+            'media'     => ['MEDIA_EXTENSIONS'],
+            'documents' => ['DOCUMENT_EXTENSIONS'],
         ];
     }
 
-    /** Санітайзер діє на завантаженні, але не на створенні файлу текстом. */
-    public function testSvgIsUploadableAsAnImageOnly()
+    /** Санітайзер вибирача діє лише на svg, тож деінде його бути не має. */
+    public function testSvgIsAcceptedAsAnImageOnly()
     {
-        $this->assertContains('svg', $this->allowlist('ext_img'));
-        $this->assertNotContains('svg', $this->allowlist('ext_file'));
-        $this->assertNotContains('svg', $this->allowlist('editable_text_file_exts'));
+        $this->assertContains('svg', $this->allowlist('IMAGE_EXTENSIONS'));
+        $this->assertNotContains('svg', $this->allowlist('MEDIA_EXTENSIONS'));
+        $this->assertNotContains('svg', $this->allowlist('DOCUMENT_EXTENSIONS'));
+    }
+
+    /** Єдине місце, де svg переписується, - завантаження у вибирачі. */
+    public function testUploadedSvgGoesThroughTheSanitizer()
+    {
+        $source = $this->read('backend/Helpers/BackendFilePickerHelper.php');
+
+        $this->assertStringContainsString('SvgSanitizer', $source);
+        $this->assertStringContainsString("\$extension === 'svg'", $source);
     }
 
     /**
@@ -106,25 +104,15 @@ class UploadedContentIsInertTest extends TestCase
     }
 
     /**
-     * З літерала, а не через include: config.php тягне Request і залежить
-     * від оточення веб-запиту.
-     *
      * @return string[]
      */
-    private function allowlist($key)
+    private function allowlist($constant)
     {
-        $source = $this->read('backend/design/js/filemanager/config/config.php');
+        $constants = (new ReflectionClass(BackendFilePickerHelper::class))->getConstants();
 
-        $matched = preg_match(
-            "#'" . preg_quote($key, '#') . "'\s*=>\s*array\((.*?)\)#s",
-            $source,
-            $matches
-        );
-        $this->assertSame(1, $matched, 'не знайдено ' . $key . ' у config.php');
+        $this->assertArrayHasKey($constant, $constants);
 
-        preg_match_all('#[\'"]([^\'"]*)[\'"]#', $matches[1], $values);
-
-        return $values[1];
+        return $constants[$constant];
     }
 
     private function read($file)

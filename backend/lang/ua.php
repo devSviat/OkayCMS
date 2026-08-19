@@ -628,7 +628,6 @@ $lang['theme_perform'] = 'Виконати цю дію ?';
 $lang['theme_perform_yes'] = 'Так';
 $lang['theme_perform_no'] = 'Ні';
 $lang['theme_themes'] = 'Шаблони';
-$lang['tinymce_init_filemanager'] = 'Файловий менеджер';
 $lang['topic_close'] = 'Закрити тему';
 $lang['topic_closed'] = 'Звернення закрито';
 $lang['topic_message'] = 'Повідомлення';

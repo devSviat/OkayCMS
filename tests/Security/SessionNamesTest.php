@@ -55,12 +55,7 @@ class SessionNamesTest extends TestCase
         $this->assertIsString($source, $file);
         $this->assertStringNotContainsString("session_name(md5(\$_SERVER['HTTP_USER_AGENT']))", $source, $file);
 
-        // Точка входу або стартує сесію сама, або делегує це
-        // okay_access.php, який викликає SessionNames::startBackend().
-        $this->assertTrue(
-            strpos($source, 'SessionNames::') !== false || strpos($source, 'okay_access.php') !== false,
-            $file . ': neither starts the session nor delegates to okay_access.php'
-        );
+        $this->assertStringContainsString('SessionNames::', $source, $file . ': сесія стартує повз SessionNames');
     }
 
     public static function entrypointProvider()
@@ -70,9 +65,6 @@ class SessionNamesTest extends TestCase
             'backend'      => ['backend/index.php'],
             'ajax config'  => ['backend/ajax/configure.php'],
             'admintooltip' => ['backend/design/js/admintooltip/admintooltip.php'],
-            'upload'       => ['backend/design/js/filemanager/UploadHandler.php'],
-            'dialog'       => ['backend/design/js/filemanager/dialog.php'],
-            'fm config'    => ['backend/design/js/filemanager/config/config.php'],
             'backend files'=> ['backend/files/index.php'],
         ];
     }
