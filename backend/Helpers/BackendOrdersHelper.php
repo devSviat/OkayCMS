@@ -398,11 +398,13 @@ class BackendOrdersHelper
                 }
             }
 
+            // Видалення товару обнуляє product_id, а null як ключ масиву в PHP 8.5
+            // депрекейтнутий - empty() і isset() від цього не рятують.
             foreach ($purchases as $purchase) {
-                if(!empty($products[$purchase->product_id])) {
+                if ($purchase->product_id !== null && !empty($products[$purchase->product_id])) {
                     $purchase->product = $products[$purchase->product_id];
                 }
-                if (!empty($variants[$purchase->variant_id])) {
+                if ($purchase->variant_id !== null && !empty($variants[$purchase->variant_id])) {
                     $purchase->variant = $variants[$purchase->variant_id];
                 }
                 if (isset($sortedDiscounts[$purchase->id])) {
