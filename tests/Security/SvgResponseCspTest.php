@@ -13,6 +13,22 @@ use PHPUnit\Framework\TestCase;
  */
 class SvgResponseCspTest extends TestCase
 {
+    /**
+     * Apache-хостинги обслуговує .htaccess, і там FilesMatch регістрозалежний,
+     * на відміну від сусідніх RewriteCond із [NC]. Без (?i) файл, збережений
+     * як .SVG, віддавався без політики - перевірено живим Apache.
+     */
+    public function testHtaccessMatchesSvgInAnyCase()
+    {
+        $source = file_get_contents(dirname(__DIR__, 2) . '/.htaccess');
+
+        $this->assertMatchesRegularExpression(
+            '~<FilesMatch "\(\?i\)\\\.svg\$">~',
+            $source,
+            'правило CSP для svg мусить бути регістронезалежним'
+        );
+    }
+
     public function testSvgResponsesCarryTheSandboxPolicy()
     {
         $headers = (new ImageSvg())->getSpecialHeaders();
