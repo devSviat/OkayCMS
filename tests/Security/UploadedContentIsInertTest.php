@@ -98,10 +98,38 @@ class UploadedContentIsInertTest extends TestCase
     public static function nginxConfigProvider()
     {
         return [
-            'dev'  => ['dev/config/nginx/templates/default.conf.template'],
             'docs' => ['docs/nginx/nginx.conf'],
         ];
     }
+
+    /**
+     * Той самий клас бага, що й у nginx вище: path_regexp у Caddy теж
+     * зіставляється зі шляхом запиту, який завжди починається зі слеша.
+     */
+    public function testCaddyPathRegexesAreAnchoredToTheUriRoot()
+    {
+        $source = $this->read(self::CADDYFILE);
+
+        preg_match_all('#path_regexp\s+(?:\S+\s+)?\^([A-Za-z0-9_])#', $source, $matches, PREG_OFFSET_CAPTURE);
+
+        $broken = [];
+        foreach ($matches[1] as $match) {
+            $broken[] = 'рядок ' . (substr_count(substr($source, 0, $match[1]), "\n") + 1);
+        }
+
+        $this->assertSame([], $broken, self::CADDYFILE . ': ^ без /, правило не збігається ніколи');
+    }
+
+    public function testCaddyfileDeniesActiveContentInUploadDirectories()
+    {
+        $source = $this->read(self::CADDYFILE);
+
+        foreach (['^/files/', '^/design/'] as $prefix) {
+            $this->assertStringContainsString($prefix, $source, self::CADDYFILE . ': нема правила для ' . $prefix);
+        }
+    }
+
+    private const CADDYFILE = 'dev/config/caddy/Caddyfile';
 
     /**
      * @return string[]

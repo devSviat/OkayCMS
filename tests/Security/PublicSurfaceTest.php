@@ -106,10 +106,17 @@ class PublicSurfaceTest extends TestCase
         $this->assertSame([], $stale, 'у переліку лишились записи, яких немає в дереві');
     }
 
+    /** Конфіг, за яким працює стек із репозиторію. */
+    private const CADDYFILE = 'dev/config/caddy/Caddyfile';
+
+    /**
+     * Лишився один nginx-конфіг: приклад у docs/ для тих, хто ставить магазин
+     * на власний nginx. Стек із репозиторію обслуговує FrankenPHP, і його
+     * конфіг перевіряють окремі тести нижче — синтаксис інший, інваріанти ті самі.
+     */
     public static function configProvider(): array
     {
         return [
-            'dev template' => ['dev/config/nginx/templates/default.conf.template'],
             'docs example' => ['docs/nginx/nginx.conf'],
         ];
     }
@@ -156,30 +163,189 @@ class PublicSurfaceTest extends TestCase
         );
     }
 
-    /** Приклад із docs/ копіюють на власний хостинг — він не має відставати. */
+    /**
+     * Паритет двох конфігів, які лишились: приклад у docs/ копіюють на власний
+     * nginx, а Caddyfile обслуговує стек із репозиторію. Дозволене дерево має
+     * бути тим самим — інакше магазин поводиться по-різному залежно від того,
+     * як його підняли.
+     *
+     * Голки різні там, де синтаксис не дозволяє однакових: Go RE2 не підтримує
+     * негативний lookahead, тож виняток для files/originals/ у Caddyfile —
+     * окреме правило-заборона, а не (?!originals/) у самій регулярці.
+     */
     #[DataProvider('allowedTreeProvider')]
-    public function testDocsExampleAllowsTheSameTreesAsTheDevTemplate(string $tree): void
+    public function testBothConfigsAllowTheSameTrees(string $nginxNeedle, string $caddyNeedle): void
     {
         $this->assertStringContainsString(
-            $tree,
+            $nginxNeedle,
             $this->config('docs/nginx/nginx.conf'),
-            "приклад у docs/nginx/nginx.conf мусить дозволяти те саме дерево, що й dev-шаблон"
+            'приклад у docs/nginx/nginx.conf мусить дозволяти те саме дерево, що й Caddyfile'
         );
         $this->assertStringContainsString(
-            $tree,
-            $this->config('dev/config/nginx/templates/default.conf.template')
+            $caddyNeedle,
+            $this->config(self::CADDYFILE),
+            'Caddyfile мусить дозволяти те саме дерево, що й приклад у docs/nginx/nginx.conf'
         );
     }
 
     public static function allowedTreeProvider(): array
     {
         return [
-            'design'  => ['^/design/[^/]+/(css|js|images|fonts)/'],
-            'cache'   => ['^/cache/(css|js)/'],
-            'files'   => ['^/files/(?!originals/)'],
-            'modules' => ['^/Okay/Modules/[^/]+/[^/]+/'],
-            'root'    => ['location = /robots.txt'],
+            'design'  => ['^/design/[^/]+/(css|js|images|fonts)/', '^/design/[^/]+/(css|js|images|fonts)/'],
+            'cache'   => ['^/cache/(css|js)/', '^/cache/(css|js)/'],
+            'files'   => ['^/files/(?!originals/)', '^/files/.+\\.'],
+            'modules' => ['^/Okay/Modules/[^/]+/[^/]+/', '^/Okay/Modules/[^/]+/[^/]+/'],
+            'root'    => ['location = /robots.txt', 'path /robots.txt'],
         ];
+    }
+
+    /**
+     * Серце інверсії в термінах Caddy. php_server робить try_files {path} і
+     * вмикає file_server — тобто віддає з диска будь-який наявний файл, і весь
+     * білий список стає декорацією. Фолбек мусить бути переписуванням на
+     * фронт-контролер, без перевірки шляху на диску.
+     */
+    public function testCaddyfileNeverServesFilesFromDisk(): void
+    {
+        $source = $this->config(self::CADDYFILE);
+
+        $this->assertDoesNotMatchRegularExpression(
+            '#^\s*php_server\b#m',
+            $source,
+            'php_server вмикає file_server і try_files {path} — це відкриває все дерево'
+        );
+        $this->assertMatchesRegularExpression(
+            '#rewrite\s+\*\s+/index\.php\s*\n\s*php\s*$#m',
+            $source,
+            'фолбек мусить переписувати на фронт-контролер вітрини, а не пробувати шлях на диску'
+        );
+    }
+
+    /**
+     * Гола директива php виконує запитаний шлях, тож кожен .php у дереві став
+     * би точкою входу. Вона допустима лише після rewrite або зі звуженням до
+     * однієї точки входу матчером.
+     */
+    public function testCaddyfilePhpDirectiveIsAlwaysGuarded(): void
+    {
+        $lines = explode("\n", $this->config(self::CADDYFILE));
+
+        foreach ($lines as $i => $line) {
+            if (!preg_match('#^\s*php\s*$#', $line)) {
+                continue;
+            }
+
+            $previous = '';
+            for ($j = $i - 1; $j >= 0; $j--) {
+                $candidate = trim($lines[$j]);
+                if ($candidate === '' || str_starts_with($candidate, '#')) {
+                    continue;
+                }
+                $previous = $candidate;
+                break;
+            }
+
+            $this->assertMatchesRegularExpression(
+                '#^rewrite\s#',
+                $previous,
+                'рядок ' . ($i + 1) . ": гола php мусить іти одразу після rewrite, "
+                . "інакше вона виконає запитаний шлях"
+            );
+        }
+
+        // Форма з матчером звужує виконання до однієї точки входу — теж дозволена.
+        $this->assertMatchesRegularExpression(
+            '#php\s+@\w+#',
+            implode("\n", $lines),
+            'звуження php матчером мусить лишитись — на ньому тримається backend/files/'
+        );
+    }
+
+    public function testCaddyfileClosesTheVendorTree(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '#path[^\n]*\s/vendor/\*#',
+            $this->config(self::CADDYFILE),
+            'Caddyfile мусить закривати vendor/ окремим правилом-забороною'
+        );
+    }
+
+    public function testCaddyfileCompiledTemplatesAreNotEntryPoints(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '#path[^\n]*\s/backend/design/compiled/\*#',
+            $this->config(self::CADDYFILE),
+            'Caddyfile мусить закривати скомпільовані шаблони адмінки'
+        );
+    }
+
+    /**
+     * Заборони мусять стояти перед дозволами: у Caddy виграє не «найточніше»
+     * правило, як у nginx, а перше, що збіглося в route.
+     */
+    public function testCaddyfileDeniesBeforeItAllows(): void
+    {
+        $source = $this->config(self::CADDYFILE);
+
+        $denyOriginals = strpos($source, '/files/originals/*');
+        $allowFiles    = strpos($source, '^/files/.+\\.');
+
+        $this->assertIsInt($denyOriginals, 'заборони на files/originals/ не знайдено');
+        $this->assertIsInt($allowFiles, 'дозволу на files/ не знайдено');
+        $this->assertLessThan(
+            $allowFiles,
+            $denyOriginals,
+            'files/originals/ мусить закриватись до того, як відкриється files/: '
+            . 'Go RE2 не має негативного lookahead, тож порядок — єдиний важіль'
+        );
+
+        $allowTooltip = strpos($source, 'admintooltip.js');
+        $denyPhp      = strpos($source, '^/backend/design/.*\\.php$');
+
+        $this->assertIsInt($allowTooltip, 'дозволу на admintooltip не знайдено');
+        $this->assertIsInt($denyPhp, 'заборони на .php під backend/design/ не знайдено');
+        $this->assertLessThan(
+            $denyPhp,
+            $allowTooltip,
+            'єдина дозволена точка входу під backend/design/ мусить оброблятись '
+            . 'до загальної заборони .php'
+        );
+    }
+
+    /**
+     * У nginx трійка повторена в кожному локейшені, бо add_header у локейшені
+     * замінює успадковані. У Caddy такої семантики немає, тож трійка стоїть
+     * один раз на сайті — і мусить там бути.
+     */
+    public function testCaddyfileSendsBaselineHeadersSiteWide(): void
+    {
+        $source = $this->config(self::CADDYFILE);
+
+        foreach ([
+            'X-Content-Type-Options nosniff',
+            'X-Frame-Options SAMEORIGIN',
+            'Referrer-Policy strict-origin-when-cross-origin',
+        ] as $header) {
+            $this->assertStringContainsString(
+                '?' . $header,
+                $source,
+                "Caddyfile мусить ставити «{$header}» на рівні сайту, і саме через `?` — "
+                . 'інакше він перетер би заголовок, який уже виставив SecurityHeaders'
+            );
+        }
+    }
+
+    public function testCaddyfileModulePreviewSendsCspForSvg(): void
+    {
+        $source = $this->config(self::CADDYFILE);
+
+        $found = preg_match(
+            '#@module_preview\s+path_regexp[^\n]*\n\s*header\s+@module_preview\s*\{([^}]*)\}#',
+            $source,
+            $matches
+        );
+        $this->assertSame(1, $found, "у Caddyfile не знайдено правила прев'ю модуля");
+        $this->assertStringContainsString("default-src 'none'; sandbox", $matches[1]);
     }
 
     /**
@@ -248,7 +414,7 @@ class PublicSurfaceTest extends TestCase
     public static function previewWhitelistProvider(): array
     {
         return [
-            'dev template' => ['dev/config/nginx/templates/default.conf.template'],
+            'caddyfile'    => [self::CADDYFILE],
             'docs example' => ['docs/nginx/nginx.conf'],
             'htaccess'     => ['.htaccess'],
         ];

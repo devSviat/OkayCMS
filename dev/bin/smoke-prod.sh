@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Smoke-перевірки production-образів і зібраного prod-конфігу. Живого стеку не
-# потребує: збирає одноразові образи стадій `prod` і `nginx-prod`, піднімає їх
-# через `docker run` і додатково звіряє вивід `docker compose ... config`.
+# Smoke-перевірки production-образу і зібраного prod-конфігу. Живого стеку не
+# потребує: збирає одноразовий образ стадії `prod`, піднімає його через
+# `docker run` і додатково звіряє вивід `docker compose ... config`.
+#
+# Образ один: вебсервер і PHP — той самий процес (FrankenPHP).
 #
 # Запуск: dev/bin/smoke-prod.sh
 set -uo pipefail
@@ -15,14 +17,10 @@ set -a; . ./.env; set +a
 
 fails=0
 image_tag="okaycms-smoke-prod:tmp"
-nginx_image_tag="okaycms-smoke-nginx-prod:tmp"
-net_name="okaycms-smoke-net-$$"
-php_stub_name="okaycms-smoke-php-$$"
-nginx_stub_name="okaycms-smoke-nginx-$$"
+app_stub_name="okaycms-smoke-app-$$"
 cleanup() {
-    docker rm -f "$nginx_stub_name" "$php_stub_name" >/dev/null 2>&1 || true
-    docker network rm "$net_name" >/dev/null 2>&1 || true
-    docker rmi -f "$image_tag" "$nginx_image_tag" >/dev/null 2>&1 || true
+    docker rm -f "$app_stub_name" >/dev/null 2>&1 || true
+    docker rmi -f "$image_tag" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
@@ -37,7 +35,7 @@ echo
 
 # run_in_image <shell-command>: запускає одноразовий контейнер щойно
 # зібраного образу (сам видаляється на виході) і забирає вивід. --entrypoint sh
-# обходить реальний php-fpm entrypoint образу, щоб виконати один рядок.
+# обходить реальний entrypoint образу, щоб виконати один рядок.
 run_in_image() {
     docker run --rm --entrypoint sh "$image_tag" -c "$1" 2>&1
 }
@@ -117,91 +115,87 @@ expect_contains "vendor/autoload.php is present (composer install ran)" \
     run_in_image 'test -f /var/www/html/vendor/autoload.php && echo present || echo absent'
 
 echo
-echo "nginx-prod image (regression test: prod nginx must not serve an empty web root)"
-# Регресія, яку це ловить: nginx, зібраний не зі стадії nginx-prod, віддавав
-# 404 на кожен запит, і жодна перевірка цього не бачила.
-if ! docker build -f docker/Dockerfile --target nginx-prod -t "$nginx_image_tag" \
-        --build-arg APP_UID="${APP_UID:-1000}" --build-arg APP_GID="${APP_GID:-1000}" \
-        .. ; then
-    echo "FAIL  could not build the nginx-prod image at all — nothing else in this section can run"
+echo "prod image over HTTP (regression test: the web root must not be empty)"
+# Регресія, яку це ловить: образ, зібраний без дерева застосунку, віддавав 404
+# на кожен запит, і жодна перевірка цього не бачила. Раніше сюди йшла окрема
+# стадія nginx-prod; тепер вебсервер вбудований у той самий прод-образ, тож
+# перевіряється рівно те, що поїде в продакшн.
+# Caddyfile запечений в образ (COPY у стадії base), тож монтувати нічого не
+# треба — на відміну від vhost-шаблону nginx, який підключався ззовні.
+docker run -d --name "$app_stub_name" -p "127.0.0.1::8080" "$image_tag" >/dev/null
+
+# Чекаємо, поки сервер справді почне відповідати, а не фіксований sleep.
+app_port=""
+app_ready=0
+for _ in $(seq 1 30); do
+    app_port=$(docker port "$app_stub_name" 8080/tcp 2>/dev/null | head -1 | cut -d: -f2)
+    if [ -n "$app_port" ] \
+        && curl -sS -o /dev/null "http://127.0.0.1:${app_port}/robots.txt" 2>/dev/null; then
+        app_ready=1
+        break
+    fi
+    sleep 1
+done
+if [ "$app_ready" -ne 1 ]; then
+    echo "FAIL  the prod container did not start serving in time"
     fails=$((fails + 1))
+    docker logs "$app_stub_name" 2>&1 | tail -20
 else
-    docker network create "$net_name" >/dev/null
-    docker run -d --name "$php_stub_name" --network "$net_name" "$image_tag" >/dev/null
-
-    # vhost-шаблон в образ не копіюється — його підключає прод-оверлей
-    # bind-mount'ом. Відтворюємо це руками, щоб перевірка була чесною.
-    docker run -d --name "$nginx_stub_name" --network "$net_name" \
-        -p "127.0.0.1::80" \
-        -e VIRTUAL_HOST="${VIRTUAL_HOST:-okaycms.loc}" \
-        -e FASTCGI="$php_stub_name" \
-        -v "$(pwd)/config/nginx/templates:/etc/nginx/templates:ro" \
-        "$nginx_image_tag" >/dev/null
-
-    # Чекаємо, поки nginx усередині контейнера справді підніметься (шаблон
-    # розгортається entrypoint'ом образу при старті), а не фіксований sleep.
-    nginx_ready=0
-    for _ in $(seq 1 30); do
-        if docker exec "$nginx_stub_name" nginx -t >/dev/null 2>&1; then
-            nginx_ready=1
-            break
+    # robots.txt, а не index.php: без config.local.php застосунок віддає
+    # порожню 500 (коректна прод-поведінка), тож "GET / -> 200" тут не
+    # годиться як ознака присутнього дерева.
+    expect_contains "prod image: robots.txt is served (application tree is present, not an empty web root)" \
+        "200" \
+        sh -c "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${app_port}/robots.txt"
+    expect_contains "prod image: a design/ CSS asset is served" \
+        "200" \
+        sh -c "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${app_port}/design/okay_shop/css/grid.css"
+    # Не 404, а не 200: 500 тут очікувана (див. вище), а 404 означав би
+    # фізично відсутній index.php — симптом старого багу.
+    expect_missing "prod image: / does not 404 (index.php is present and executes, unlike an empty web root)" \
+        "404" \
+        sh -c "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${app_port}/"
+    # Раніше тут ловилась заглушка "Welcome to nginx". Її аналог у FrankenPHP —
+    # штатний Caddyfile образу з коренем /app/public, якого в нашому образі
+    # немає: якби наш конфіг не запікся, / віддавав би 404, що вже перевірено
+    # вище. Лишається довести, що працює саме наш білий список, а не дефолтний
+    # file_server: дозволений шлях віддається, а сусідній у тій самій теці — ні.
+    expect_contains "prod image: the whitelist is in effect (an allowed asset is served)" \
+        "200" \
+        sh -c "curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${app_port}/design/okay_shop/preview.png"
+    expect_missing "prod image: the whitelist is in effect (a sibling .tpl is not served)" \
+        "200" \
+        sh -c "curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${app_port}/design/okay_shop/html/index.tpl"
+    # Білий список кореня, перевірений саме на прод-образі. Тут це важить
+    # найбільше: образ копіює дерево застосунку як є, разом із vendor/,
+    # тестами й дампом бази.
+    #
+    # Перевіряється вміст, а не код відповіді. Після інверсії все, що не
+    # дозволене явно, іде у фронт-контролер, а він у цьому стенді без
+    # config.local.php віддає 500 — тобто «не 404, але й не файл». Значуще
+    # тут одне: вміст файлу назовні не поїхав. Маркер для кожного шляху —
+    # рядок, який у самому файлі точно є.
+    while IFS='|' read -r p marker; do
+        [ -z "$p" ] && continue
+        body=$(curl -sS -H "Host: ${VIRTUAL_HOST:-okaycms.loc}" \
+            "http://127.0.0.1:${app_port}$p" 2>&1)
+        code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${VIRTUAL_HOST:-okaycms.loc}" \
+            "http://127.0.0.1:${app_port}$p" 2>/dev/null)
+        # 000 — curl не достукався. Без цієї гілки недоступний контейнер
+        # давав би "ok" на кожному шляху: тіло з тексту помилки curl із
+        # маркером не збігається ніколи.
+        if [ "$code" = "000" ]; then
+            printf '  FAIL  prod image: %s unreachable (curl failed)\n' "$p"
+            dump_actual_output "$body"
+            fails=$((fails + 1))
+        elif [ "$code" = "200" ] || [[ "$body" == *"$marker"* ]]; then
+            printf '  FAIL  prod image: %s leaks (HTTP %s)\n' "$p" "$code"
+            dump_actual_output "$body"
+            fails=$((fails + 1))
+        else
+            printf '  ok    prod image: %s does not leak (HTTP %s, no "%s" in body)\n' "$p" "$code" "$marker"
         fi
-        sleep 1
-    done
-    if [ "$nginx_ready" -ne 1 ]; then
-        echo "FAIL  nginx-prod container did not become ready in time"
-        fails=$((fails + 1))
-        docker logs "$nginx_stub_name" 2>&1 | tail -20
-    else
-        nginx_port=$(docker port "$nginx_stub_name" 80/tcp | head -1 | cut -d: -f2)
-        # robots.txt, а не index.php: без config.local.php застосунок віддає
-        # порожню 500 (коректна прод-поведінка), тож "GET / -> 200" тут не
-        # годиться як ознака присутнього дерева.
-        expect_contains "nginx-prod: robots.txt is served (application tree is present, not an empty web root)" \
-            "200" \
-            sh -c "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/robots.txt"
-        expect_contains "nginx-prod: a design/ CSS asset is served" \
-            "200" \
-            sh -c "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/design/okay_shop/css/grid.css"
-        # Не 404, а не 200: 500 тут очікувана (див. вище), а 404 означав би
-        # фізично відсутній index.php — симптом старого багу.
-        expect_missing "nginx-prod: / does not 404 (index.php is present and executes, unlike an empty web root)" \
-            "404" \
-            sh -c "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/"
-        expect_missing "nginx-prod: / is not the stock nginx placeholder" \
-            "Welcome to nginx" \
-            curl -sS -H "Host: ${VIRTUAL_HOST:-okaycms.loc}" "http://127.0.0.1:${nginx_port}/"
-        # Білий список кореня, перевірений саме на прод-образі. Тут це важить
-        # найбільше: nginx-образ копіює дерево застосунку як є, разом із
-        # vendor/, тестами й дампом бази, — а конфіг успадковується з того
-        # самого шаблону, що й у dev.
-        #
-        # Перевіряється вміст, а не код відповіді. Після інверсії все, що не
-        # дозволене явно, іде у фронт-контролер, а він у цьому стенді без
-        # config.local.php віддає 500 — тобто «не 404, але й не файл». Значуще
-        # тут одне: вміст файлу назовні не поїхав. Маркер для кожного шляху —
-        # рядок, який у самому файлі точно є.
-        while IFS='|' read -r p marker; do
-            [ -z "$p" ] && continue
-            body=$(curl -sS -H "Host: ${VIRTUAL_HOST:-okaycms.loc}" \
-                "http://127.0.0.1:${nginx_port}$p" 2>&1)
-            code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${VIRTUAL_HOST:-okaycms.loc}" \
-                "http://127.0.0.1:${nginx_port}$p" 2>/dev/null)
-            # 000 — curl не достукався. Без цієї гілки недоступний контейнер
-            # давав би "ok" на кожному шляху: тіло з тексту помилки curl із
-            # маркером не збігається ніколи.
-            if [ "$code" = "000" ]; then
-                printf '  FAIL  nginx-prod: %s unreachable (curl failed)\n' "$p"
-                dump_actual_output "$body"
-                fails=$((fails + 1))
-            elif [ "$code" = "200" ] || [[ "$body" == *"$marker"* ]]; then
-                printf '  FAIL  nginx-prod: %s leaks (HTTP %s)\n' "$p" "$code"
-                dump_actual_output "$body"
-                fails=$((fails + 1))
-            else
-                printf '  ok    nginx-prod: %s does not leak (HTTP %s, no "%s" in body)\n' "$p" "$code" "$marker"
-            fi
-        done <<'PATHS'
+    done <<'PATHS'
 /1DB_changes/okay_clean.sql|CREATE TABLE
 /vendor/composer/installed.json|"packages"
 /vendor/autoload.php|ComposerAutoloader
@@ -218,18 +212,18 @@ else
 /backend/lang/ru.php|<?php
 /design/okay_shop/js.php|<?php
 PATHS
-        # Контроль самого вимірювача: маркер публічного файлу мусить
-        # знаходитись, інакше «маркера немає» нічого не доводить.
-        expect_contains "nginx-prod: the leak check itself works (robots.txt content is found)" \
-            "User-agent" \
-            sh -c "curl -sS -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/robots.txt"
-        # Точна версія PHP у заголовку — джерело вимкнено в okay.ini, який
-        # потрапляє і в прод-образ; nginx ховає його другим рубежем.
-        # X-Powered-CMS: OkayCMS лишається свідомо — версії в ньому немає.
-        expect_missing "nginx-prod: X-Powered-By is not sent" \
-            "X-Powered-By" \
-            sh -c "curl -sSI -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${nginx_port}/robots.txt"
-    fi
+    # Контроль самого вимірювача: маркер публічного файлу мусить
+    # знаходитись, інакше «маркера немає» нічого не доводить.
+    expect_contains "prod image: the leak check itself works (robots.txt content is found)" \
+        "User-agent" \
+        sh -c "curl -sS -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${app_port}/robots.txt"
+    # Точна версія PHP у заголовку — джерело вимкнено в okay.ini, який
+    # потрапляє і в прод-образ; Caddyfile ховає його другим рубежем
+    # (`header -X-Powered-By`).
+    # X-Powered-CMS: OkayCMS лишається свідомо — версії в ньому немає.
+    expect_missing "prod image: X-Powered-By is not sent" \
+        "X-Powered-By" \
+        sh -c "curl -sSI -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${app_port}/robots.txt"
 fi
 
 echo
