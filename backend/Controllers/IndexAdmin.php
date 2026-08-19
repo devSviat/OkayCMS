@@ -297,6 +297,17 @@ class IndexAdmin
             ]);
         }
 
+        // Сторінка входу не має менеджера, тож мову для неї лишаємо тут.
+        if (!empty($this->manager->lang)) {
+            setcookie(SessionNames::ADMIN_LANG_COOKIE, $this->manager->lang, [
+                'expires'  => time() + 60 * 60 * 24 * 365,
+                'path'     => '/',
+                'secure'   => SessionNames::isHttps(),
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+        }
+
         if (isset($_SESSION['show_learn'])) {
             unset($_SESSION['show_learn']);
             $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=LearningAdmin');
