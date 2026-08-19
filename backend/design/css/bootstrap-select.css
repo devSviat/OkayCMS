@@ -519,22 +519,25 @@ dropdown-menu.bottom-up {
 .dropdown-submenu > a:after {
   position: absolute;
   display: inline-block;
-  font-size: 14px;
   right: 7px;
-  top: 7px;
-  font-family: FontAwesome;
-  height: auto;
-  content: "\f105";
-  font-weight: 300;
+  top: 9px;
+  width: 14px;
+  height: 14px;
+  content: "";
+  background-color: currentColor;
+  -webkit-mask: var(--ok-icon-chevron-right) center / 14px no-repeat;
+  mask: var(--ok-icon-chevron-right) center / 14px no-repeat;
 }
 
 .bootstrap-select .caret:before {
-  content: "\f107";
+  content: "";
   display: inline-block;
   border: 0;
-  font-family: FontAwesome;
-  font-style: normal;
-  font-weight: 400;
+  width: 14px;
+  height: 14px;
+  background-color: currentColor;
+  -webkit-mask: var(--ok-icon-chevron-down) center / 14px no-repeat;
+  mask: var(--ok-icon-chevron-down) center / 14px no-repeat;
 }
 
 .dropdown-divider {
