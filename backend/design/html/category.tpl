@@ -95,7 +95,7 @@
                         <div class="fn_step-1">
                             <div class="heading_label heading_label--required">
                                 <span>{$btr->general_name|escape}</span>
-                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_name_category|escape}">
+                                <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_name_category|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_general_name_category|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -130,7 +130,7 @@
                                 <div class="okay_switch clearfix">
                                     <label class="switch_label">
                                         {$btr->general_enable|escape}
-                                        <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_enable_category|escape}">
+                                        <i class="fn_tooltips fn_tip_wide hint-bottom-right-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_enable_category|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_general_enable_category|escape}">
                                             {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                         </i>
                                     </label>
@@ -175,7 +175,7 @@
                             <div class="okay_switch clearfix">
                                 <label class="switch_label">
                                     {$btr->category_on_main|escape}
-                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_category_on_main|escape}">
+                                    <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_category_on_main|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_category_on_main|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </label>
@@ -199,7 +199,7 @@
             <div class="fn_step-4 boxed fn_toggle_wrap min_height_230px">
                 <div class="heading_box">
                     {$btr->general_image|escape}
-                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_image_category|escape}">
+                    <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_image_category|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_general_image_category|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -238,7 +238,7 @@
             <div class="boxed fn_toggle_wrap min_height_230px">
                 <div class="heading_box">
                     {$btr->category_parameters|escape}
-                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_category_parameters|escape}">
+                    <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_category_parameters|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_category_parameters|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -261,7 +261,7 @@
                         <div id="product_categories" class="fn_step-6">
                             <div class="heading_box">
                                 {$btr->category_subcategory|escape}
-                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_category_category|escape}">
+                                <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_category_category|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_general_category_category|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -291,7 +291,7 @@
             <div class="fn_step-7 boxed match fn_toggle_wrap">
                 <div class="heading_box">
                     {$btr->general_metatags|escape}
-                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_metatags|escape}">
+                    <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_metatags|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_general_metatags|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -304,7 +304,7 @@
                             <div class="heading_label heading_label--flex">
                                 <div class="heading_label__start">
                                     Meta-title <span id="fn_meta_title_counter"></span>
-                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_title|escape}">
+                                    <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_title|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_meta_title|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
@@ -320,7 +320,7 @@
                             <div class="heading_label heading_label--flex">
                                 <div class="heading_label__start">
                                     Meta-keywords
-                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_keywords|escape}">
+                                    <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_keywords|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_meta_keywords|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
@@ -337,7 +337,7 @@
                             <div class="heading_label heading_label--flex">
                                 <div class="heading_label__start">
                                     Meta-description <span id="fn_meta_description_counter"></span>
-                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_description|escape}">
+                                    <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_description|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_meta_description|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>

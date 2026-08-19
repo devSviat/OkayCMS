@@ -2,7 +2,7 @@
     <div class="okay_list_head">
         <div class="okay_list_heading okay_list_drag"></div>
         <div class="okay_list_heading okay_list_order_discounted_name">{$btr->order_discounts_name|escape}</div>
-        <div class="okay_list_heading okay_list_count">{$btr->order_discounts_procedure|escape}<i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->order_discount_from_last_discount_tooltip|escape}">
+        <div class="okay_list_heading okay_list_count">{$btr->order_discounts_procedure|escape}<i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->order_discount_from_last_discount_tooltip|escape}" tabindex="0" role="img" aria-label="{$btr->order_discount_from_last_discount_tooltip|escape}">
             {include file='svg_icon.tpl' svgId='icon_tooltips'}
         </i></div>
         <div class="okay_list_heading okay_list_price">{$btr->order_discounts_value|escape}</div>

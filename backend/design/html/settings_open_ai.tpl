@@ -91,7 +91,7 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="heading_label">temperature
-                                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_open_ai_temperature|escape}">
+                                                <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_open_ai_temperature|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_open_ai_temperature|escape}">
                                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                                 </i>
                                             </div>
@@ -101,7 +101,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="heading_label">presence_penalty
-                                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_open_ai_presence_penalty|escape}">
+                                                <i class="fn_tooltips fn_tip_wide hint-bottom-right-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_open_ai_presence_penalty|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_open_ai_presence_penalty|escape}">
                                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                                 </i>
                                             </div>
@@ -111,7 +111,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="heading_label">frequency_penalty
-                                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_open_ai_frequency_penalty|escape}">
+                                                <i class="fn_tooltips hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_open_ai_frequency_penalty|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_open_ai_frequency_penalty|escape}">
                                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                                 </i>
                                             </div>
@@ -121,7 +121,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="heading_label">max_tokens
-                                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_open_ai_max_tokens|escape}">
+                                                <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_open_ai_max_tokens|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_open_ai_max_tokens|escape}">
                                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                                 </i>
                                             </div>

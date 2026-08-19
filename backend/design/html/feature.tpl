@@ -88,7 +88,7 @@
                         <div class="fn_step-1">
                         <div class="heading_label heading_label--required">
                             <span>{$btr->general_name|escape}</span>
-                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_name_feature|escape}">
+                            <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_name_feature|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_general_name_feature|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </div>
@@ -164,7 +164,7 @@
                             <div class="activity_of_switch_item"> {* row block *}
                                 <div class="fn_step-4 okay_switch clearfix">
                                     <label class="switch_label">{$btr->feature_filter|escape}
-                                        <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_url_in_product|escape}">
+                                        <i class="fn_tooltips fn_tip_wide hint-bottom-right-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_url_in_product|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_feature_url_in_product|escape}">
                                             {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                         </i>
                                     </label>
@@ -211,7 +211,7 @@
             <div class="fn_step-5 boxed fn_toggle_wrap min_height_335px">
                 <div class="heading_box">
                     {$btr->feature_in_categories|escape}
-                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_in_categories|escape}">
+                    <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_in_categories|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_feature_in_categories|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -262,7 +262,7 @@
             <div class="fn_step-6 boxed match fn_toggle_wrap min_height_210px">
                 <div class="heading_box">
                     {$btr->general_metatags|escape}
-                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_metatags|escape}">
+                    <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_metatags|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_general_metatags|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -271,14 +271,14 @@
                 </div>
                 <div class="toggle_body_wrap on fn_card">
                     <div class="heading_label" >{$btr->feature_id|escape}
-                        <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_id|escape}">
+                        <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_id|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_feature_id|escape}">
                             {include file='svg_icon.tpl' svgId='icon_tooltips'}
                         </i>
                     </div>
                     <input name="auto_name_id" class="form-control  mb-1" type="text" value="{$feature->auto_name_id|escape}"/>
 
                     <div class="heading_label" >{$btr->feature_value_id|escape}
-                        <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_value_id|escape}">
+                        <i class="fn_tooltips hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_value_id|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_feature_value_id|escape}">
                             {include file='svg_icon.tpl' svgId='icon_tooltips'}
                         </i>
                     </div>
@@ -307,7 +307,7 @@
                     <div class="heading_box heading_box__flex mb-0">
                         <span class="mb-1 mr-1">
                             {$btr->feature_feature_values|escape} ({$feature_values_count})
-                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_feature_values|escape}">
+                            <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_feature_values|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_feature_feature_values|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </span>
@@ -515,7 +515,7 @@
     <div class="fn_step-9 boxed fn_toggle_wrap">
         <div class="heading_box">
             {$btr->feature_union_values|escape}
-            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_union_values|escape}">
+            <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_feature_union_values|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_feature_union_values|escape}">
                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
             </i>
             <div class="toggle_arrow_wrap fn_toggle_card text-primary">

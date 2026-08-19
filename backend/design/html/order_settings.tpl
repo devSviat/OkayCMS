@@ -27,7 +27,7 @@
         <div class="boxed fn_toggle_wrap">
             <div class="heading_box">
                 {$btr->order_settings_statuses|escape}
-                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_order_settings_statuses|escape}">
+                <i class="fn_tooltips hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_order_settings_statuses|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_order_settings_statuses|escape}">
                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                 </i>
                 <div class="box_btn_heading ml-1">

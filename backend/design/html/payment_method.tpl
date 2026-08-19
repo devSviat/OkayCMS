@@ -75,7 +75,7 @@
                         <div class="fn_step-1">
                             <div class="heading_label">
                                 {$btr->general_name|escape}
-                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_name_payments|escape}">
+                                <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_name_payments|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_general_name_payments|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -121,7 +121,7 @@
                             <div class="okay_switch clearfix">
                                 <label class="switch_label">
                                     {$btr->payment_method_auto_submit|escape}
-                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->payment_method_auto_submit_tooltip|escape}">
+                                    <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->payment_method_auto_submit_tooltip|escape}" tabindex="0" role="img" aria-label="{$btr->payment_method_auto_submit_tooltip|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </label>

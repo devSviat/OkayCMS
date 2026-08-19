@@ -130,7 +130,7 @@
                                 <div class="okay_switch clearfix">
                                     <label class="switch_label">
                                         {$btr->author_enable|escape}
-                                        <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_enable_author|escape}">
+                                        <i class="fn_tooltips fn_tip_wide hint-bottom-right-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_enable_author|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_general_enable_author|escape}">
                                             {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                         </i>
                                     </label>
@@ -282,7 +282,7 @@
             <div class="fn_step-5 boxed fn_toggle_wrap min_height_230px">
                 <div class="heading_box">
                     {$btr->general_metatags|escape}
-                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_metatags|escape}">
+                    <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_metatags|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_general_metatags|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -292,13 +292,13 @@
                 <div class="toggle_body_wrap on fn_card row">
                     <div class="col-lg-6 col-md-6">
                         <div class="heading_label" >Meta-title <span id="fn_meta_title_counter"></span>
-                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_title|escape}">
+                            <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_title|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_meta_title|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </div>
                         <input name="meta_title" class="form-control fn_meta_field mb-h" type="text" value="{$author->meta_title|escape}" />
                         <div class="heading_label" >Meta-keywords
-                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_keywords|escape}">
+                            <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_keywords|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_meta_keywords|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </div>
@@ -306,7 +306,7 @@
                     </div>
                     <div class="col-lg-6 col-md-6 pl-0">
                         <div class="heading_label" >Meta-description <span id="fn_meta_description_counter"></span>
-                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_description|escape}">
+                            <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_description|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_meta_description|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </div>
