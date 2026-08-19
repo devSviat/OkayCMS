@@ -1274,8 +1274,7 @@ $files = $sorted;
                     }
                 } ?>
             };
-            // Логотип редактора за замовчуванням тягнеться з uicdn.toast.com -
-            // єдиний зовнішній запит, що лишався. Прозорий піксель прибирає його.
+            // Типовий логотип редактора вантажиться з uicdn.toast.com.
             tuiTheme['common.bi.image'] = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
         </script>
 
