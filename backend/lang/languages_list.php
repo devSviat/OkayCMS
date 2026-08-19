@@ -1,5 +1,8 @@
 <?php
 $langs = array();
+// Українська перша навмисно: цей порядок задає й типовий вибір у селектах мови
+// панелі - жоден із них не має selected, тож браузер бере перший пункт.
+$langs['ua'] = (object)array('name' => 'Ukrainian',     'label' => 'ua', 'href_lang' => 'uk');
 $langs['am'] = (object)array('name' => 'Armenian',      'label' => 'am', 'href_lang' => 'hy');
 $langs['az'] = (object)array('name' => 'Azerbaijani',   'label' => 'az', 'href_lang' => 'az');
 $langs['by'] = (object)array('name' => 'Belorussian',   'label' => 'by', 'href_lang' => 'be');
@@ -28,5 +31,4 @@ $langs['ru'] = (object)array('name' => 'Russian',       'label' => 'ru', 'href_l
 $langs['es'] = (object)array('name' => 'Spanish',       'label' => 'es', 'href_lang' => 'es');
 $langs['se'] = (object)array('name' => 'Swedish',       'label' => 'se', 'href_lang' => 'sv');
 $langs['tr'] = (object)array('name' => 'Turkish',       'label' => 'tr', 'href_lang' => 'tr');
-$langs['ua'] = (object)array('name' => 'Ukrainian',     'label' => 'ua', 'href_lang' => 'uk');
 $langs['uz'] = (object)array('name' => 'Uzbek',         'label' => 'uz', 'href_lang' => 'uz');
