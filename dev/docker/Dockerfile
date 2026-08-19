@@ -51,11 +51,6 @@ ENV PHP_INI_SCAN_DIR="/usr/local/etc/php/conf.d:/usr/local/etc/php/custom.d"
 RUN mkdir -p /usr/local/etc/php/custom.d
 COPY dev/config/php/custom.d/okay.ini /usr/local/etc/php/custom.d/okay.ini
 
-# Шлях саме /etc/frankenphp/Caddyfile: образ запускається з
-# `--config /etc/frankenphp/Caddyfile`, а не з /etc/caddy/, як каже
-# загальна документація Caddy.
-COPY dev/config/caddy/Caddyfile /etc/frankenphp/Caddyfile
-
 # Стан і сертифікати Caddy. Процес працює під www-data (див. USER у стадіях
 # нижче), тож теки мусять належати йому — інакше сервер не стартує.
 RUN chown -R www-data:www-data /data/caddy /config/caddy
@@ -79,6 +74,15 @@ RUN apt-get update \
 COPY dev/config/supercronic/crontab /etc/supercronic/crontab
 
 WORKDIR /var/www/html
+
+# Шлях саме /etc/frankenphp/Caddyfile: образ запускається з
+# `--config /etc/frankenphp/Caddyfile`, а не з /etc/caddy/, як каже загальна
+# документація Caddy.
+#
+# Останнім шаром base навмисно: конфіг правиться найчастіше, а вище лежить
+# завантаження supercronic по мережі — у зворотному порядку кожна правка
+# Caddyfile тягла б його наново.
+COPY dev/config/caddy/Caddyfile /etc/frankenphp/Caddyfile
 
 # Caddyfile слухає :8080, а не :80. Причина — no-new-privileges:true в compose:
 # він блокує file capabilities, тож cap_net_bind_service на бінарнику
