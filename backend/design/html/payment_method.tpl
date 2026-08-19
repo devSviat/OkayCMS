@@ -347,11 +347,11 @@
 {literal}
     <script>
         $(function() {
-            $('div.fn_module_settings').filter(':hidden').find("input, select, textarea").attr("disabled", true);
+            $('div.fn_module_settings').filter(':hidden').find("input, select, textarea").prop("disabled", true);
 
             $('select[name=module]').on('change',function(){
-                $('div.fn_module_settings').hide().find("input, select, textarea").attr("disabled", true);
-                $('div.fn_module_settings[module="'+$(this).val()+'"]').show().find("input, select, textarea").attr("disabled", false);
+                $('div.fn_module_settings').hide().find("input, select, textarea").prop("disabled", true);
+                $('div.fn_module_settings[module="'+$(this).val()+'"]').show().find("input, select, textarea").prop("disabled", false);
                 $('div.fn_module_settings[module="'+$(this).val()+'"]').find('select').selectpicker('refresh');
             });
         });
