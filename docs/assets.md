@@ -67,7 +67,8 @@ public function setDefer($defer)                    // лише Js
 `dir` — шлях від кореня сайту, який заміняє типовий `design/<тема>/{js,css}/`. Крім дерев
 теми віддається ще й `js_libraries/` — місце для сторонніх бібліотек, спільних для тем.
 У репозиторії його немає (єдиний мешканець, jssocials, прибраний), але маршрут лишається
-в `.htaccess` і в конфігу nginx, тож покладена туди бібліотека віддаватиметься:
+в `.htaccess` і в конфігах вебсервера, тож покладена туди бібліотека
+віддаватиметься:
 
 ```smarty
 {js file="lib.min.js" dir='js_libraries/lib/js'}
@@ -247,7 +248,8 @@ tail -n +2 backend/design/js/air-datepicker/air-datepicker.css | sha256sum
 одразу після зміни поля і без об'єкта падає.
 
 Білий список розширень у `BackendFilePickerHelper` мусить лишатись підмножиною того, що
-сервер віддає з `/files/` (`docs/nginx/nginx.conf`, `.htaccess`) — це тримає тест
+сервер віддає з `/files/` (`dev/config/caddy/Caddyfile`, `docs/nginx/nginx.conf`,
+`.htaccess`) — це тримає тест
 `FilePickerUploadWhitelistTest`.
 
 ## Модалки адмінки

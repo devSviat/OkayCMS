@@ -261,6 +261,28 @@ class PublicSurfaceTest extends TestCase
         );
     }
 
+    /**
+     * У nginx умова зіставлялась із $request_uri, а він містить рядок запиту,
+     * тож /backend/index.php?controller=AuthAdmin під `…index\.php$` не
+     * підпадав. path_regexp у Caddy бачить лише шлях, тож без окремої умови
+     * редірект з'їдає параметри — і вхід в адмінку ламається.
+     */
+    public function testCaddyfileIndexPhpRedirectKeepsQueryStrings(): void
+    {
+        $source = $this->config(self::CADDYFILE);
+
+        // Не `[^}]*`: тіло матчера саме містить `}` у плейсхолдері
+        // {http.request.uri.query}, тож блок береться за фіксованим вікном.
+        $start = strpos($source, '@index_php {');
+        $this->assertIsInt($start, 'у Caddyfile не знайдено матчера канонізації index.php');
+
+        $this->assertStringContainsString(
+            'uri.query} == ""',
+            substr($source, $start, 300),
+            'канонізація index.php мусить спрацьовувати лише за порожнього рядка запиту'
+        );
+    }
+
     public function testCaddyfileClosesTheVendorTree(): void
     {
         $this->assertMatchesRegularExpression(

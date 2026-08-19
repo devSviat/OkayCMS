@@ -89,7 +89,16 @@
 		@www header_regexp www Host ^(?i:www\.)(.+)$
 		redir @www {http.request.scheme}://{re.www.1}{uri} 301
 
-		@index_php path_regexp idxphp ^(.*/)index\.php$
+		# Умова в nginx зіставлялась із $request_uri, а він містить рядок
+		# запиту, тож /backend/index.php?controller=AuthAdmin під `…index\.php$`
+		# не підпадав і йшов у фронт-контролер. path_regexp у Caddy бачить лише
+		# шлях, тож без перевірки на порожній query цей редірект з'їдав би
+		# параметри — і вхід в адмінку ламався б: саме туди ядро редіректить
+		# неавторизованого менеджера.
+		@index_php {
+			path_regexp idxphp ^(.*/)index\.php$
+			expression {http.request.uri.query} == ""
+		}
 		redir @index_php {re.idxphp.1} 301
 
 		@index_html path_regexp idxhtml ^(.*/)index\.html

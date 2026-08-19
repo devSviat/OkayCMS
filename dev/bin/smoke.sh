@@ -326,6 +326,14 @@ echo "Public surface"
 expect_status 200 /
 expect_status 200 /robots.txt
 expect_status 302 /backend/
+# Канонізація index.php мусить спрацьовувати лише без рядка запиту. У nginx це
+# виходило само: умова зіставлялась із $request_uri, який містить query, тож
+# /backend/index.php?controller=… під `…index\.php$` не підпадав. У Caddy
+# path_regexp бачить лише шлях — і без окремої умови цей редірект з'їдав
+# параметри, ламаючи вхід в адмінку: саме туди ядро шле неавторизованого
+# менеджера.
+expect_status 301 "/backend/index.php"
+expect_status 200 "/backend/index.php?controller=AuthAdmin"
 # Шлях бандла береться з реальної сторінки, а не зашивається — в імені хеш вмісту.
 asset_path=$(curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/" 2>/dev/null \
     | grep -oE 'cache/(css|js)/[^"]+\.(css|js)' | head -1)
