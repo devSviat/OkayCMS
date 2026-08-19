@@ -12,6 +12,11 @@
 (function ($, A11yDialog) {
     'use strict';
 
+    /* Глобал створюємо до будь-якого запобіжника: index.tpl пише в нього підпис
+       кнопки закриття, і якби його не було, той рядок убив би решту скрипта
+       сторінки. */
+    window.okayModal = window.okayModal || {};
+
     if (!A11yDialog) {
         return;
     }
@@ -88,8 +93,9 @@
         el.className = 'modal fade ' + SHIM;
         el.setAttribute('role', 'dialog');
         el.innerHTML = '<div class="modal-dialog"><div class="modal-content">' +
-            '<button type="button" class="modal_shim_close" data-dismiss="modal" aria-label="Close"></button>' +
+            '<button type="button" class="modal_shim_close" data-dismiss="modal"></button>' +
             '<div class="modal-body"></div></div></div>';
+        el.querySelector('.modal_shim_close').setAttribute('aria-label', window.okayModal.closeLabel || 'Close');
         document.body.appendChild(el);
         return el;
     }

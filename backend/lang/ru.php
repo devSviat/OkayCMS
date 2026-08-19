@@ -106,6 +106,7 @@ $lang['feedbacks_no'] = 'Нет сообщений';
 $lang['feedbacks_all'] = 'Все сообщения';
 $lang['feedbacks_search'] = 'поиск сообщения...';
 $lang['general_cancel'] = 'Отменить';
+$lang['general_close'] = 'Закрыть';
 $lang['general_activities'] = 'Действия';
 $lang['general_add_product'] = 'Выберите товар чтобы добавить его';
 $lang['general_adress'] = 'Адрес';

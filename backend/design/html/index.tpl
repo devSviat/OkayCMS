@@ -68,6 +68,7 @@
     <link rel="icon" href="design/images/favicon.png" type="image/x-icon" />
 
     <script>okayDatepicker.lang = '{$manager->lang|escape:'javascript'}';</script>
+    <script>okayModal.closeLabel = '{$btr->general_close|escape:'javascript'}';</script>
 
     {*Маршрут Controller@method рендерить той самий шаблон, тож суфікс методу
       треба зняти - інакше сторінка лишиться без календаря.*}

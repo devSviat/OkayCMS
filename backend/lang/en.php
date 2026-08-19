@@ -106,6 +106,7 @@ $lang['feedbacks_no'] = 'No feedbacks to display';
 $lang['feedbacks_all'] = 'All feedback';
 $lang['feedbacks_search'] = 'search for feedback ...';
 $lang['general_cancel'] = 'Cancel';
+$lang['general_close'] = 'Close';
 $lang['general_activities'] = 'Activities';
 $lang['general_add_product'] = 'Select a product to add';
 $lang['general_adress'] = 'Address';
