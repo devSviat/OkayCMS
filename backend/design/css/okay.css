@@ -5279,8 +5279,15 @@ body.menu-pin .page-container {
     scrollbar-width: thin;
     scrollbar-color: var(--ok-line-strong) transparent;
 }
+/* Меню бічної панелі - виняток: там смуга не має займати місця. Плагін малював
+   свою поверх вмісту, а рідна класична (Windows, Linux) забирає ширину й зсуває
+   пункти вліво. Прокрутка лишається, зникає тільки жолоб. */
 #admin_catalog .scrollbar-inner{
-    scrollbar-color: var(--ok-chrome-ink-muted) transparent;
+    scrollbar-width: none;
+}
+#admin_catalog .scrollbar-inner::-webkit-scrollbar{
+    width: 0;
+    height: 0;
 }
 #mob_menu {
     top: -100%;
