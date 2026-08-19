@@ -1697,5 +1697,6 @@ $lang['file_picker_up'] = 'Up';
 $lang['file_picker_empty'] = 'No files';
 $lang['file_picker_delete'] = 'Delete';
 $lang['file_picker_delete_confirm'] = 'Delete the file? It may be used in articles.';
-$lang['file_picker_upload_error'] = 'File was not uploaded: type not allowed or write error';
+$lang['file_picker_upload_error'] = 'File was not uploaded: type not allowed, file too large or write error';
+$lang['file_picker_delete_error'] = 'The file was not deleted';
 $lang['file_picker_total'] = 'Files';

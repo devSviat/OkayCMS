@@ -25,9 +25,19 @@
             body: body,
             credentials: 'same-origin'
         }).then(function (response) {
-            return response.json();
+            // Прострочена сесія віддає текст, а не JSON: без цього дія тихо
+            // не робила б нічого і не показала б причини.
+            return response.json().catch(function () {
+                return {error: true};
+            });
+        }, function () {
+            return {error: true};
         });
     }
+
+    // Ім'я живе тут між кліком по хрестику й підтвердженням у модалці:
+    // саму модалку відкриває bootstrap за data-target.
+    var pendingDelete = null;
 
     root.addEventListener('click', function (event) {
         var pick = event.target.closest('.fn_picker_pick');
@@ -37,21 +47,25 @@
         }
 
         var remove = event.target.closest('.fn_picker_delete');
-        if (!remove) {
+        if (remove) {
+            pendingDelete = remove.getAttribute('data-name');
             return;
         }
 
-        if (!window.confirm(root.getAttribute('data-confirm'))) {
+        if (!event.target.closest('.fn_picker_confirm_delete') || pendingDelete === null) {
             return;
         }
 
         var body = new FormData();
-        body.append('name', remove.getAttribute('data-name'));
+        body.append('name', pendingDelete);
+        pendingDelete = null;
 
         post('delete', body).then(function (result) {
             if (result && result.deleted) {
                 window.location.reload();
+                return;
             }
+            window.alert(root.getAttribute('data-delete-error'));
         });
     });
 

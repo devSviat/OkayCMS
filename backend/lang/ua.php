@@ -1690,5 +1690,6 @@ $lang['file_picker_up'] = 'Вгору';
 $lang['file_picker_empty'] = 'Файлів немає';
 $lang['file_picker_delete'] = 'Видалити';
 $lang['file_picker_delete_confirm'] = 'Видалити файл? Він може бути вставлений у статті.';
-$lang['file_picker_upload_error'] = 'Файл не завантажено: недозволений тип або помилка запису';
+$lang['file_picker_upload_error'] = 'Файл не завантажено: недозволений тип, завеликий файл або помилка запису';
+$lang['file_picker_delete_error'] = 'Файл не видалено';
 $lang['file_picker_total'] = 'Файлів';

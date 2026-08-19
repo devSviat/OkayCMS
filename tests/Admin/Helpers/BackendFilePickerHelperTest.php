@@ -153,14 +153,6 @@ class BackendFilePickerHelperTest extends TestCase
         ];
     }
 
-    public function testUploadKeepsTheExtensionOfADoubleNamedFile(): void
-    {
-        $uploaded = $this->helper()->uploadFile($this->file('shell.php.jpg', 'binary'));
-
-        $this->assertSame('shell.php.jpg', $uploaded['name']);
-        $this->assertFileDoesNotExist($this->uploads() . '/shell.php');
-    }
-
     public function testUploadStripsThePathFromTheName(): void
     {
         $uploaded = $this->helper()->uploadFile($this->file('../../evil.jpg', 'binary'));
@@ -178,6 +170,15 @@ class BackendFilePickerHelperTest extends TestCase
 
         $this->assertSame('photo_1.jpg', $uploaded['name']);
         $this->assertSame('photo.jpg', file_get_contents($this->uploads() . '/photo.jpg'));
+    }
+
+    public function testUploadRefusesAFileOverTheSizeLimit(): void
+    {
+        $file = $this->file('huge.jpg', 'binary');
+        $file['size'] = 10485761;
+
+        $this->assertFalse($this->helper()->uploadFile($file));
+        $this->assertFileDoesNotExist($this->uploads() . '/huge.jpg');
     }
 
     public function testUploadRefusesATraversalPath(): void
@@ -233,6 +234,48 @@ class BackendFilePickerHelperTest extends TestCase
 
         $this->assertFalse($this->helper()->deleteFile('', '2026'));
         $this->assertDirectoryExists($this->uploads() . '/2026');
+    }
+
+    /**
+     * Apache із "AddHandler ... .php" шукає своє розширення в будь-якій позиції
+     * імені, тож shell.php.jpg на шаредхостингу виконується. Перевірено в
+     * php:8.4-apache: RemoveType у files/.htaccess цього не зупиняє.
+     */
+    public function testUploadFlattensInnerExtensions(): void
+    {
+        $uploaded = $this->helper()->uploadFile($this->file('shell.php.jpg', 'binary'));
+
+        $this->assertSame('shell_php.jpg', $uploaded['name']);
+        $this->assertFileExists($this->uploads() . '/shell_php.jpg');
+        $this->assertFileDoesNotExist($this->uploads() . '/shell.php.jpg');
+    }
+
+    public function testUploadKeepsASingleDotName(): void
+    {
+        $uploaded = $this->helper()->uploadFile($this->file('photo.jpg', 'binary'));
+
+        $this->assertSame('photo.jpg', $uploaded['name']);
+    }
+
+    public function testNestedFolderIsListed(): void
+    {
+        mkdir($this->uploads() . '/2026/08', 0777, true);
+        file_put_contents($this->uploads() . '/2026/08/nested.jpg', 'x');
+
+        $this->assertSame(['nested.jpg'], $this->names($this->helper()->findFiles('2026/08', 'file', '', 1, 60)));
+    }
+
+    /** Значення з запиту приходить як є, і path[]=x доходить сюди масивом. */
+    public function testNonStringPathIsRefusedEverywhere(): void
+    {
+        $this->give(['photo.jpg']);
+        $helper = $this->helper();
+
+        $this->assertSame([], $helper->findFiles(['x'], 'file', '', 1, 60)['files']);
+        $this->assertFalse($helper->uploadFile($this->file('photo.jpg', 'binary'), ['x']));
+        $this->assertFalse($helper->deleteFile(['x'], 'photo.jpg'));
+        $this->assertNull($helper->parentPath(['x']));
+        $this->assertFileExists($this->uploads() . '/photo.jpg');
     }
 
     public function testParentPathClimbsOneLevelAndStopsAtTheRoot(): void

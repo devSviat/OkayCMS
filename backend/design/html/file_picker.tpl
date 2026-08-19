@@ -20,6 +20,11 @@
             flex: 1 1 auto;
             margin: 0;
         }
+        /* Типовий label в адмінці має нижній відступ, через нього кнопка
+           стояла вище за поле пошуку. */
+        .file_picker__upload {
+            margin: 0;
+        }
         .file_picker__file {
             position: absolute;
             width: 1px;
@@ -104,7 +109,8 @@
 </head>
 <body>
 <div class="file_picker fn_picker" data-session="{$smarty.session.id}" data-path="{$picker_path|escape}"
-     data-confirm="{$btr->file_picker_delete_confirm|escape}" data-error="{$btr->file_picker_upload_error|escape}">
+     data-error="{$btr->file_picker_upload_error|escape}"
+     data-delete-error="{$btr->file_picker_delete_error|escape}">
 
     <div class="file_picker__bar">
         <form class="file_picker__search" method="get" action="index.php">
@@ -115,7 +121,7 @@
                    placeholder="{$btr->file_picker_search|escape}">
         </form>
 
-        <label class="btn btn_small btn-info">
+        <label class="file_picker__upload btn btn_small btn-info">
             <input type="file" class="file_picker__file fn_picker_file" multiple>
             {$btr->file_picker_upload|escape}
         </label>
@@ -123,14 +129,14 @@
 
     <div class="file_picker__grid">
         {if $picker_parent !== null}
-            <a class="file_picker__item" href="index.php?controller=FilePickerAdmin&amp;filetype={$picker_type|escape}&amp;path={$picker_parent|escape}">
+            <a class="file_picker__item" href="index.php?controller=FilePickerAdmin&amp;filetype={$picker_type|escape:'url'}&amp;path={$picker_parent|escape:'url'}">
                 <span class="file_picker__thumb"><span class="file_picker__ext">..</span></span>
                 <span class="file_picker__name">{$btr->file_picker_up|escape}</span>
             </a>
         {/if}
 
         {foreach $picker_folders as $folder}
-            <a class="file_picker__item" href="index.php?controller=FilePickerAdmin&amp;filetype={$picker_type|escape}&amp;path={$folder.path|escape}">
+            <a class="file_picker__item" href="index.php?controller=FilePickerAdmin&amp;filetype={$picker_type|escape:'url'}&amp;path={$folder.path|escape:'url'}">
                 <span class="file_picker__thumb">{include file='svg_icon.tpl' svgId='folder'}</span>
                 <span class="file_picker__name">{$folder.name|escape}</span>
             </a>
@@ -149,6 +155,7 @@
                     <span class="file_picker__name" title="{$file.name|escape}">{$file.name|escape}</span>
                 </button>
                 <button type="button" class="file_picker__delete fn_picker_delete"
+                        data-toggle="modal" data-target="#fn_picker_modal"
                         data-name="{$file.name|escape}" title="{$btr->file_picker_delete|escape}">&times;</button>
             </div>
         {/foreach}
@@ -158,11 +165,33 @@
         <div class="file_picker__empty">{$btr->file_picker_empty|escape}</div>
     {/if}
 
+    {* Підтвердження видалення - модалкою адмінки, а не window.confirm *}
+    <div id="fn_picker_modal" class="modal fade show" role="document">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="card-header">
+                    <div class="heading_modal">{$btr->file_picker_delete_confirm|escape}</div>
+                </div>
+                <div class="modal-body">
+                    <button type="button" class="btn btn_small btn_blue fn_picker_confirm_delete mx-h" data-dismiss="modal">
+                        {include file='svg_icon.tpl' svgId='checked'}
+                        <span>{$btr->index_yes|escape}</span>
+                    </button>
+
+                    <button type="button" class="btn btn_small btn-danger mx-h" data-dismiss="modal">
+                        {include file='svg_icon.tpl' svgId='delete'}
+                        <span>{$btr->index_no|escape}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {if $picker_pages_count > 1}
         <div class="file_picker__pages">
             {for $page=1 to $picker_pages_count}
                 <a class="btn btn_small {if $page == $picker_page}btn-info{/if}"
-                   href="index.php?controller=FilePickerAdmin&amp;filetype={$picker_type|escape}&amp;path={$picker_path|escape}&amp;q={$picker_query|escape}&amp;page={$page}">{$page}</a>
+                   href="index.php?controller=FilePickerAdmin&amp;filetype={$picker_type|escape:'url'}&amp;path={$picker_path|escape:'url'}&amp;q={$picker_query|escape:'url'}&amp;page={$page}">{$page}</a>
             {/for}
         </div>
     {/if}

@@ -19,12 +19,16 @@ class FilePickerAdmin extends IndexAdmin
     public function fetch(BackendFilePickerHelper $filePickerHelper)
     {
         $type = $this->fileType();
-        $path = (string)$this->request->get('path', 'string');
+        // Шлях читаємо сирим: типізований відсів прибирає скісну риску разом
+        // із рештою пунктуації, і вкладена тека стає недосяжною. Межу тут
+        // тримає PathResolver у помічнику.
+        $path  = $this->request->getRawString('path');
+        $query = trim($this->request->getRawString('q'));
 
         $list = $filePickerHelper->findFiles(
             $path,
             $type,
-            trim((string)$this->request->get('q', 'string')),
+            $query,
             (int)$this->request->get('page', 'integer'),
             self::PER_PAGE
         );
@@ -32,7 +36,7 @@ class FilePickerAdmin extends IndexAdmin
         $this->design->assign('picker_type', $type);
         $this->design->assign('picker_path', $path);
         $this->design->assign('picker_parent', $filePickerHelper->parentPath($path));
-        $this->design->assign('picker_query', trim((string)$this->request->get('q', 'string')));
+        $this->design->assign('picker_query', $query);
         $this->design->assign('picker_folders', $list['folders']);
         $this->design->assign('picker_files', $list['files']);
         $this->design->assign('picker_page', $list['page']);
@@ -46,7 +50,7 @@ class FilePickerAdmin extends IndexAdmin
     {
         $uploaded = $filePickerHelper->uploadFile(
             $this->request->files('file'),
-            (string)$this->request->post('path')
+            $this->postedPath()
         );
 
         $this->response->setContent(json_encode(
@@ -57,11 +61,24 @@ class FilePickerAdmin extends IndexAdmin
     public function delete(BackendFilePickerHelper $filePickerHelper)
     {
         $deleted = $filePickerHelper->deleteFile(
-            (string)$this->request->post('path'),
-            (string)$this->request->post('name')
+            $this->postedPath(),
+            $this->request->post('name')
         );
 
         $this->response->setContent(json_encode(['deleted' => $deleted]), RESPONSE_JSON);
+    }
+
+    /**
+     * Нетипізований post() віддає масив як є, а path[]=x після приведення до
+     * рядка став би "Array" плюс попередження. Помічник чекає рядок.
+     *
+     * @return string
+     */
+    private function postedPath()
+    {
+        $path = $this->request->post('path');
+
+        return is_scalar($path) ? (string)$path : '';
     }
 
     /**

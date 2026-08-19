@@ -1689,5 +1689,6 @@ $lang['file_picker_up'] = 'Вверх';
 $lang['file_picker_empty'] = 'Файлов нет';
 $lang['file_picker_delete'] = 'Удалить';
 $lang['file_picker_delete_confirm'] = 'Удалить файл? Он может быть вставлен в статьи.';
-$lang['file_picker_upload_error'] = 'Файл не загружен: недопустимый тип или ошибка записи';
+$lang['file_picker_upload_error'] = 'Файл не загружен: недопустимый тип, слишком большой файл или ошибка записи';
+$lang['file_picker_delete_error'] = 'Файл не удалён';
 $lang['file_picker_total'] = 'Файлов';

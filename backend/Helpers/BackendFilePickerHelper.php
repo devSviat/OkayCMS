@@ -27,6 +27,9 @@ class BackendFilePickerHelper
 
     private const UPLOAD_DIR = 'files/uploads/';
 
+    /** Стільки ж дозволяв попередній менеджер файлів; php.ini на хостингу зазвичай ширший. */
+    private const MAX_UPLOAD_BYTES = 10485760;
+
     private $config;
     private $image;
     private $request;
@@ -39,7 +42,7 @@ class BackendFilePickerHelper
     }
 
     /**
-     * @param string $path   тека всередині files/uploads
+     * @param mixed  $path   тека всередині files/uploads, значення з запиту
      * @param string $type   filetype з TinyMCE: image, media або file
      * @param string $query  пошук за іменем
      * @param int    $page
@@ -118,8 +121,8 @@ class BackendFilePickerHelper
     }
 
     /**
-     * @param array  $file запис із $_FILES
-     * @param string $path тека всередині files/uploads
+     * @param mixed $file запис із $_FILES
+     * @param mixed $path тека всередині files/uploads, значення з запиту
      * @return array{name: string, url: string}|false
      */
     public function uploadFile($file, $path = '')
@@ -127,6 +130,10 @@ class BackendFilePickerHelper
         $result = false;
 
         if (empty($file['name']) || empty($file['tmp_name']) || !empty($file['error'])) {
+            return ExtenderFacade::execute(__METHOD__, $result, func_get_args());
+        }
+
+        if (!empty($file['size']) && $file['size'] > self::MAX_UPLOAD_BYTES) {
             return ExtenderFacade::execute(__METHOD__, $result, func_get_args());
         }
 
@@ -141,6 +148,11 @@ class BackendFilePickerHelper
         if ($name === '' || !in_array($extension, $this->extensionsFor('file'), true)) {
             return ExtenderFacade::execute(__METHOD__, $result, func_get_args());
         }
+
+        // Крапки всередині імені склеюємо: Apache із "AddHandler ... .php"
+        // віддає shell.php.jpg інтерпретатору, бо шукає своє розширення
+        // у будь-якій позиції, а не лише в останній.
+        $name = str_replace('.', '_', (string)pathinfo($name, PATHINFO_FILENAME)) . '.' . $extension;
 
         $name = $this->uniqueName($directory, $name);
 
@@ -161,8 +173,8 @@ class BackendFilePickerHelper
     }
 
     /**
-     * @param string $path тека всередині files/uploads
-     * @param string $name
+     * @param mixed $path тека всередині files/uploads, значення з запиту
+     * @param mixed $name значення з запиту
      * @return bool
      */
     public function deleteFile($path, $name)
@@ -185,20 +197,20 @@ class BackendFilePickerHelper
     /**
      * Тека на рівень вище або null, якщо ми в корені.
      *
-     * @param string $path
+     * @param mixed $path значення з запиту
      * @return string|null
      */
     public function parentPath($path)
     {
-        $path = trim((string)$path, '/');
+        $path   = is_string($path) ? trim($path, '/') : '';
+        $parent = null;
 
-        if ($path === '') {
-            return null;
+        if ($path !== '') {
+            $parent = trim((string)dirname($path), '/');
+            $parent = $parent === '.' ? '' : $parent;
         }
 
-        $parent = trim((string)dirname($path), '/');
-
-        return ExtenderFacade::execute(__METHOD__, $parent === '.' ? '' : $parent, func_get_args());
+        return ExtenderFacade::execute(__METHOD__, $parent, func_get_args());
     }
 
     /**
@@ -228,6 +240,12 @@ class BackendFilePickerHelper
 
     private function resolve($path)
     {
+        // Значення з запиту приходить сюди як є, тож масив чи об'єкт - відмова,
+        // а не приведення до рядка.
+        if (!is_string($path)) {
+            return null;
+        }
+
         $root = rtrim($this->config->root_dir, '/') . '/' . self::UPLOAD_DIR;
 
         if (!is_dir($root)) {
