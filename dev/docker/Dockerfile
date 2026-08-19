@@ -1,31 +1,34 @@
 # syntax=docker/dockerfile:1
 #
 # Контекст білду — корінь репозиторію, тому шляхи в COPY йдуть з префіксом dev/.
-# Стадії: base -> dev | prod -> nginx-prod
+# Стадії: base -> dev | prod
+#
+# Вебсервер і PHP — один процес (FrankenPHP на базі Caddy), тож окремого
+# контейнера nginx і стадії nginx-prod більше немає.
 
 # ─────────────────────────────── base ───────────────────────────────
 # Версії образів запінені до патча, оновлює їх Dependabot (.github/dependabot.yml).
-FROM php:8.5.9-fpm AS base
+# Образ побудований на офіційному php:8.5, Debian 13 (trixie).
+FROM dunglas/frankenphp:1.12.0-php8.5-trixie AS base
 
-# Образи php:*-fpm перезбираються рідше, ніж Debian патчить пакети. Першим
-# шаром — щоб усе нижче лягало на пропатчену базу.
+# Образи оновлюються рідше, ніж Debian патчить пакети. Першим шаром — щоб усе
+# нижче лягало на пропатчену базу.
 RUN apt-get update \
  && apt-get upgrade -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 
-# install-php-extensions сам підтягує системні бібліотеки й прибирає за собою.
-COPY --from=mlocati/php-extension-installer:2.11.12 /usr/bin/install-php-extensions /usr/local/bin/
+# install-php-extensions уже є в образі й сам підтягує системні бібліотеки.
+# opcache, mbstring, curl, json, dom, xmlreader, xmlwriter і SimpleXML
+# скомпільовані в базовий образ, тому тут лише те, чого бракує.
 RUN install-php-extensions \
         pdo_mysql \
         mysqli \
         gd \
         zip \
-        xsl \
-        xmlwriter \
-        opcache
+        xsl
 
-# Образи php:*-fpm мають лише C/POSIX, а ImportAdmin попереджає, коли
-# setlocale не вдається.
+# Базовий образ має лише C/POSIX, а ImportAdmin попереджає, коли setlocale
+# не вдається.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends locales \
  && sed -i 's/^# *\(uk_UA.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
@@ -48,6 +51,15 @@ ENV PHP_INI_SCAN_DIR="/usr/local/etc/php/conf.d:/usr/local/etc/php/custom.d"
 RUN mkdir -p /usr/local/etc/php/custom.d
 COPY dev/config/php/custom.d/okay.ini /usr/local/etc/php/custom.d/okay.ini
 
+# Шлях саме /etc/frankenphp/Caddyfile: образ запускається з
+# `--config /etc/frankenphp/Caddyfile`, а не з /etc/caddy/, як каже
+# загальна документація Caddy.
+COPY dev/config/caddy/Caddyfile /etc/frankenphp/Caddyfile
+
+# Стан і сертифікати Caddy. Процес працює під www-data (див. USER у стадіях
+# нижче), тож теки мусять належати йому — інакше сервер не стартує.
+RUN chown -R www-data:www-data /data/caddy /config/caddy
+
 # Обслуговують сервіс `scheduler`. У base, а не в prod, щоб dev і prod мали ті
 # самі бінарники.
 ARG SUPERCRONIC_VERSION=v0.2.49
@@ -68,6 +80,11 @@ COPY dev/config/supercronic/crontab /etc/supercronic/crontab
 
 WORKDIR /var/www/html
 
+# Caddyfile слухає :8080, а не :80. Причина — no-new-privileges:true в compose:
+# він блокує file capabilities, тож cap_net_bind_service на бінарнику
+# frankenphp під non-root не спрацював би.
+EXPOSE 8080
+
 # ──────────────────────────────── dev ───────────────────────────────
 FROM base AS dev
 
@@ -81,6 +98,11 @@ RUN apt-get update \
 
 COPY dev/config/php/custom.d/dev.ini    /usr/local/etc/php/custom.d/dev.ini
 COPY dev/config/php/custom.d/xdebug.ini /usr/local/etc/php/custom.d/xdebug.ini
+
+# php-fpm скидав привілеї сам: майстер під root, воркери під www-data.
+# У FrankenPHP процес один, тож користувача треба задати явно — інакше
+# compiled/ і cache/ у bind-mount заповнились би файлами root.
+USER www-data
 
 # ─────────────────────────────── prod ───────────────────────────────
 FROM base AS prod
@@ -96,13 +118,3 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progre
  && chown -R www-data:www-data vendor compiled cache files backend/files backend/design/compiled Okay/log Okay/xml/compiled
 
 USER www-data
-
-# ───────────────────────────── nginx-prod ───────────────────────────
-# Статика — з того самого білду, що й PHP-код, тож контейнери не розійдуться.
-FROM nginx:1.29.8-alpine AS nginx-prod
-
-# Те саме, що й apt-get upgrade у base. Сам nginx не рухається — він
-# ставиться з репозиторію nginx.org, а не з alpine/main.
-RUN apk upgrade --no-cache
-
-COPY --from=prod /var/www/html /var/www/html

@@ -20,7 +20,7 @@ wait_for_healthy() {
     else
         # Без jq — жорстко заданий список. Додаючи healthcheck новому сервісу,
         # онови і цей список.
-        services="mariadb php85 nginx scheduler"
+        services="mariadb php85 scheduler"
     fi
 
     printf 'Waiting for services to become healthy: %s\n' "$(echo "$services" | tr '\n' ' ')"
@@ -216,9 +216,17 @@ expect_contains "mariadb is attached to the backend network" \
     docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$mariadb_cid"
 # У dev mariadb додатково у frontend, інакше опублікований порт був би тихим
 # no-op'ом: для internal-мережі Docker не створює NAT. У прод — лише backend.
-expect_contains "nginx (frontend-only) can still resolve php85 over the frontend network" \
-    "php85" \
-    docker compose exec -T nginx getent hosts php85
+# Вебсервер і PHP — один контейнер (FrankenPHP), тож перевіряти нічого
+# резолвити. Лишається структурний факт: php85 мусить бути в обох мережах —
+# у frontend, щоб публікація порту працювала, і в backend, щоб бачити базу.
+frontend_net="$(printf '%s' "${APP_NAME:?err}" | tr '[:upper:]' '[:lower:]')_frontend"
+php_cid=$(docker compose ps -q php85)
+expect_contains "php85 is attached to the frontend network (it is the web tier now)" \
+    "$frontend_net" \
+    docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$php_cid"
+expect_contains "php85 is attached to the backend network (it reaches the database)" \
+    "$backend_net" \
+    docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$php_cid"
 
 echo
 echo "Scheduler"
@@ -234,18 +242,19 @@ expect_contains "supercronic is running inside the scheduler container" \
 
 echo
 echo "Logging"
-expect_contains "nginx access logs reach docker compose logs" \
-    "GET /" \
-    sh -c "curl -sS -o /dev/null -H 'Host: ${VIRTUAL_HOST}' http://127.0.0.1:${HTTP_PORT}/ ; sleep 1 ; docker compose logs --tail=20 nginx"
+# Caddy пише access-лог у JSON, тож маркер — поле методу, а не рядок "GET /".
+expect_contains "access logs reach docker compose logs" \
+    '"method":"GET"' \
+    sh -c "curl -sS -o /dev/null -H 'Host: ${VIRTUAL_HOST}' http://127.0.0.1:${HTTP_PORT}/ ; sleep 1 ; docker compose logs --tail=20 php85"
 # Результат, а не конфіг: запит з унікальним маркером, потім пошук маркера в
 # усьому дереві — не залежить від імені й шляху лог-файлу.
 log_marker="smoke-nolog-$$"
 curl -sS -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
     "http://127.0.0.1:${HTTP_PORT}/${log_marker}" 2>/dev/null || true
 sleep 1
-expect_missing "nginx writes no log files into the working tree" \
+expect_missing "the web server writes no log files into the working tree" \
     "$log_marker" \
-    docker compose exec -T nginx sh -c \
+    docker compose exec -T php85 sh -c \
     "grep -r '$log_marker' /var/www/html 2>/dev/null"
 # Саме grep -r, а не -rl: -l друкує ІМЕНА файлів, а не їх вміст, тож маркера
 # у виводі не було б ніколи і expect_missing проходив би завжди незалежно від
@@ -282,11 +291,12 @@ fi
 
 echo
 echo "Web"
-# Саме з Host: localhost — це точний збіг для штатного default.conf образу.
-# Без заголовка регрес "заглушка Welcome to nginx" не відтворюється.
-expect_missing "http://localhost/ is not the stock nginx placeholder" \
-    "Welcome to nginx" \
-    curl -sS -H "Host: localhost" "http://127.0.0.1:${HTTP_PORT}/"
+# Саме з Host: localhost. Раніше тут ловився регрес "штатний default.conf
+# образу nginx виграв у нашого віртуального хоста". У FrankenPHP конкурентного
+# server-блоку немає, натомість є інший регрес того ж класу: якщо наш Caddyfile
+# не підхопився, працює штатний конфіг образу з коренем /app/public, якого в
+# нашому образі немає — і вітрина не віддається взагалі. Перевірка нижче ловить
+# саме це.
 expect_contains "http://localhost/ serves the storefront" \
     "OkayCMS" \
     curl -sS -H "Host: localhost" "http://127.0.0.1:${HTTP_PORT}/"
@@ -402,11 +412,21 @@ else
     printf '  ok    X-Powered-CMS carries no version\n'
 fi
 # Контроль самого вимірювача: заголовок, який точно є, мусить знаходитись.
-if printf '%s' "$headers" | grep -qi "^Server:"; then
-    printf '  ok    the header check itself works (Server: is found)\n'
+# Раніше якорем був Server: — тепер його прибирає сам Caddyfile (`header
+# -Server`), тож якорем стало Content-Type, який є в кожній відповіді.
+if printf '%s' "$headers" | grep -qi "^Content-Type:"; then
+    printf '  ok    the header check itself works (Content-Type: is found)\n'
 else
-    printf '  FAIL  the header check found no Server: — it proves nothing\n'
+    printf '  FAIL  the header check found no Content-Type: — it proves nothing\n'
     fails=$((fails + 1))
+fi
+
+# Версія сервера в Server: — підказка для сканерів, як і X-Powered-By.
+if printf '%s' "$headers" | grep -qi "^Server:"; then
+    printf '  FAIL  header Server is still sent\n'
+    fails=$((fails + 1))
+else
+    printf '  ok    header Server is not sent\n'
 fi
 
 echo

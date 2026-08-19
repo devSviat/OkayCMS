@@ -1,9 +1,12 @@
 # Для хоста без PaaS чи проксі: додає до docker-compose.prod.yml єдине —
-# опублікований порт nginx. Порядок підключення — dev/README.md.
+# опублікований порт застосунку. Порядок підключення — dev/README.md.
 
 services:
-  nginx:
+  php85:
     ports:
       # 0.0.0.0, а не 127.0.0.1 як у dev: цей файл саме для хоста, що приймає
       # трафік ззовні. Попереду очікується firewall.
-      - '${BIND_IP:-0.0.0.0}:${HTTP_PORT:?err}:80'
+      #
+      # 8080 у контейнері: порт непривілейований, бо no-new-privileges блокує
+      # cap_net_bind_service під non-root.
+      - '${BIND_IP:-0.0.0.0}:${HTTP_PORT:?err}:8080'

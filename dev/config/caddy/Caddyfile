@@ -1,0 +1,263 @@
+# Конфігурація FrankenPHP (Caddy) для OkayCMS — переклад білого списку з
+# dev/config/nginx/templates/default.conf.template.
+#
+# ─────────────────────────── Білий список ───────────────────────────
+#
+# Корінь сайту — весь репозиторій. Чорний список тут неповний за побудовою, тож
+# тримається все на одному рядку в кінці:
+#
+#     route { rewrite * /index.php ; php }
+#
+# Запитаний шлях навмисно не перевіряється на диску: усе, що не дозволене явно
+# вище, іде у фронт-контролер. Щоб опублікувати нове дерево статики, потрібен
+# явний матчер; щоб щось приховати — не потрібно нічого.
+#
+# ────────────────────── Чому не php_server ──────────────────────
+#
+# php_server робить try_files {path} {path}/index.php index.php і вмикає
+# file_server — тобто віддає з диска будь-який наявний файл. Це пряма
+# протилежність моделі вище: відкрились би vendor/, config/, .env і дамп бази.
+#
+# Але й гола директива php небезпечна сама по собі: без rewrite вона виконує
+# запитаний шлях, тож будь-який .php у дереві стає точкою входу. Тому php
+# з'являється лише там, де шлях уже переписано на фронт-контролер або явно
+# звужено до однієї точки входу.
+#
+# ─────────────────────── Порядок має значення ───────────────────────
+#
+# Усе маршрутизування загорнуте в один route{}: усередині нього директиви
+# виконуються в порядку запису, а не в порядку, який Caddy призначає сам.
+#
+# Go RE2 не підтримує негативний lookahead, тож два правила nginx —
+# /files/(?!originals/) і /backend/design/(?!js/admintooltip/) — виражені
+# порядком: спершу заборона (або дозвіл-виняток), потім загальне правило.
+
+{
+	auto_https off
+	frankenphp
+
+	servers {
+		# X-Forwarded-* приймаються лише від проксі у приватних мережах:
+		# у dev його немає взагалі, у prod стек стоїть за фронт-проксі.
+		trusted_proxies static private_ranges
+	}
+}
+
+# Порт непривілейований навмисно: у compose стоїть no-new-privileges:true, а він
+# блокує file capabilities, тож штатний рецепт setcap CAP_NET_BIND_SERVICE для
+# non-root тут не працює. Публікація назовні — через ${HTTP_PORT} у compose.
+#
+# Адреса без хоста — аналог `listen 80 default_server`: сайт відповідає на
+# будь-який Host, а не лише на ${VIRTUAL_HOST}.
+:8080 {
+	root * /var/www/html
+
+	encode zstd gzip
+
+	# Аналог client_max_body_size; узгоджено з upload_max_filesize в okay.ini.
+	request_body {
+		max_size 100MB
+	}
+
+	# Логи йдуть у `docker compose logs`, а не у файли робочого дерева.
+	log {
+		output stdout
+	}
+
+	# Версія сервера в Server: — підказка для сканерів. X-Powered-By глушиться
+	# ще й через expose_php=Off, це другий рубіж.
+	#
+	# Базова трійка заголовків у nginx повторена в кожному локейшені, що віддає
+	# файл, бо add_header у локейшені ЗАМІНЮЄ успадковані. У Caddy цієї
+	# семантики немає, тож трійка ставиться один раз тут. `?` означає «лише
+	# якщо ще не задано» — щоб не перетирати те, що вже виставив SecurityHeaders
+	# на PHP-відповідях.
+	header {
+		-Server
+		-X-Powered-By
+		?X-Content-Type-Options nosniff
+		?X-Frame-Options SAMEORIGIN
+		?Referrer-Policy strict-origin-when-cross-origin
+	}
+
+	route {
+		# ───────────────────────── Редіректи ─────────────────────────
+
+		# У nginx ціль була жорстко https://$server_name — на dev-стеку (HTTP,
+		# нестандартний порт) це редірект у нікуди, і воно суперечило
+		# absolute_redirect off. Тут схема й порт зберігаються.
+		@www header_regexp www Host ^(?i:www\.)(.+)$
+		redir @www {http.request.scheme}://{re.www.1}{uri} 301
+
+		@index_php path_regexp idxphp ^(.*/)index\.php$
+		redir @index_php {re.idxphp.1} 301
+
+		@index_html path_regexp idxhtml ^(.*/)index\.html
+		redir @index_html {re.idxhtml.1} 301
+
+		# Сумісність зі старим URL адмінки; 302, як і в nginx.
+		redir /admin /backend/ temporary
+
+		# ───────────────────────── Заборони ─────────────────────────
+		#
+		# Йдуть перед будь-яким дозволом. files/originals/ — тут, бо далі
+		# правило для files/ не може виразити (?!originals/) регуляркою.
+		@denied path /vendor/* /files/originals/* /backend/lang/* /backend/design/compiled/*
+		respond @denied 404
+
+		# Класові дерева (PSR-4 Okay\Admin\ -> backend/) — не точки входу.
+		@denied_psr4 path_regexp ^/backend/(Controllers|Helpers|Requests|Entities)/
+		respond @denied_psr4 404
+
+		# ─────────────────────── Статика кореня ───────────────────────
+
+		@robots path /robots.txt
+		file_server @robots
+
+		# Стандартний шлях ACME-валідації (Let's Encrypt) для зовнішнього проксі.
+		@wellknown path /.well-known/*
+		file_server @wellknown
+
+		# Не лише .ico: сучасні теми кладуть у корінь favicon.svg або .png.
+		@favicon path_regexp ^/favicon\.(?i:ico|png|svg|gif|jpe?g|webp)$
+		file_server @favicon
+
+		# ─────────────────────── Дерева статики ───────────────────────
+		#
+		# Дозвіл описує і директорію, і розширення: у теми поруч із css/ лежать
+		# html/ з шаблонами, lang/ і js.php.
+
+		@theme_static path_regexp ^/design/[^/]+/(css|js|images|fonts)/.+\.(?i:css|js|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot)$
+		header @theme_static {
+			Cache-Control "public, max-age=31536000"
+			Access-Control-Allow-Origin *
+		}
+		file_server @theme_static
+
+		# Прев'ю теми — перемикач тем в адмінці бере його прямо звідси.
+		@theme_preview path_regexp ^/design/[^/]+/preview\.(?i:png|jpe?g)$
+		header @theme_preview Cache-Control "public, max-age=31536000"
+		file_server @theme_preview
+
+		# Саме (css|js)/, а не весь cache/: поруч лежить cache/codes/ і .map.
+		@cache_bundles path_regexp ^/cache/(css|js)/[^/]+\.(?i:css|js)$
+		header @cache_bundles {
+			Cache-Control "public, max-age=31536000"
+			Access-Control-Allow-Origin *
+		}
+		file_server @cache_bundles
+
+		@js_libraries path_regexp ^/js_libraries/.+\.(?i:css|js|map|png|jpe?g|gif|svg|webp|woff2?|ttf|eot)$
+		header @js_libraries {
+			Cache-Control "public, max-age=31536000"
+			Access-Control-Allow-Origin *
+		}
+		file_server @js_libraries
+
+		# Шаблони адмінки беруть картинки й css прямо з Okay/Modules/.
+		# Решта дерева Okay/ — вихідний код — не віддається.
+		@module_static path_regexp ^/Okay/Modules/[^/]+/[^/]+/(Backend/)?design/.+\.(?i:css|js|png|jpe?g|gif|svg|webp|woff2?|ttf)$
+		header @module_static Cache-Control "public, max-age=31536000"
+		file_server @module_static
+
+		# Прев'ю модуля лежить у його корені, а не під design/. Перелік
+		# розширень мусить збігатися з Module::fileHasAllowImageExtension() —
+		# інакше ядро віддає в шаблон шлях, який сервер не обслуговує, і в
+		# списку модулів адмінки висить бита картинка.
+		#
+		# svg, як і в /files/ нижче, прямою навігацією рендериться як документ і
+		# виконує <script>, а прев'ю кладе в репозиторій автор модуля. Тому CSP:
+		# на <img src="…svg"> вона не впливає.
+		@module_preview path_regexp ^/Okay/Modules/[^/]+/[^/]+/preview\.(?i:png|jpe?g|gif|svg)$
+		header @module_preview {
+			Cache-Control "public, max-age=31536000"
+			Content-Security-Policy "default-src 'none'; sandbox"
+		}
+		file_server @module_preview
+
+		# Завантаження файлового менеджера; originals/ закриті вище.
+		#
+		# Перелік розширень вузький: усе, що браузер рендерить як HTML або
+		# віддає на виконання, дало б тут stored XSS. svg лишається заради
+		# іконок, але санітайзер підключений лише у файловому менеджері
+		# (зображення товарів ідуть повз нього) — звідси CSP.
+		#
+		# Фолбек на фронт-контролер обов'язковий: files/resized/ — це маршрут
+		# (Okay/Core/config/routes.php), копії створюються на перший запит.
+		@files path_regexp ^/files/.+\.(?i:png|jpe?g|gif|svg|webp|ico|pdf|zip|xlsx?|docx?|csv|mp3|mp4|ogg|webm)$
+		route @files {
+			header {
+				Cache-Control "public, max-age=31536000"
+				Content-Security-Policy "default-src 'none'; sandbox"
+			}
+			try_files {path} /index.php
+			@files_front path /index.php
+			php @files_front
+			file_server
+		}
+
+		# ───────────────────────── Адмінка ─────────────────────────
+
+		# Динамічно генерований JS підказок — єдина точка входу PHP під
+		# backend/design/. Має стояти перед забороною .php і перед статикою:
+		# .js інакше віддався б файлом з диска.
+		route /backend/design/js/admintooltip/admintooltip.js {
+			rewrite * /backend/design/js/admintooltip/admintooltip.php
+			php
+		}
+
+		# Решта .php під backend/design/ — не точки входу. js.php і css.php
+		# поруч включаються з коду, по HTTP їх не запитують.
+		@backend_design_php path_regexp ^/backend/design/.*\.php$
+		respond @backend_design_php 404
+
+		# Службові файли адмінки віддаються тільки через PHP-гейт.
+		#
+		# П'яте правило nginx (`rewrite ^(\w+)$ …`) сюди не перенесене: воно
+		# ніколи не спрацьовувало, бо URI завжди починається зі слеша.
+		# Замість наскрізного виконання будь-якого шляху в цьому дереві
+		# виконується рівно одна точка входу, решта — 404.
+		route /backend/files/* {
+			@export path_regexp exp ^/backend/files/export/(.+)\.csv$
+			rewrite @export /backend/files/index.php?file={re.exp.1}&folder=export&ext=csv
+
+			@export_users path_regexp expu ^/backend/files/export_users/(.+)\.csv$
+			rewrite @export_users /backend/files/index.php?file={re.expu.1}&folder=export_users&ext=csv
+
+			@import path_regexp imp ^/backend/files/import/(.+)\.csv$
+			rewrite @import /backend/files/index.php?file={re.imp.1}&folder=import&ext=csv
+
+			@watermark path_regexp wm ^/backend/files/watermark/(.+)\.(png|jpg|jpeg|gif|tif|bmp|ico)$
+			rewrite @watermark /backend/files/index.php?file={re.wm.1}&folder=watermark&ext={re.wm.2}
+
+			@backend_files_entry path /backend/files/index.php
+			php @backend_files_entry
+			respond 404
+		}
+
+		# Статика адмінки — лише під design/ і лише за розширенням. Без цього
+		# віддавались .tpl, .htaccess і сміття вендорних JS-бібліотек
+		# (README, .sh, .yml, Thumbs.db).
+		#
+		# json тут немає навмисно: жоден шаблон його не просить, а package.json
+		# вендорної бібліотеки повідомляв її точну версію без авторизації.
+		@backend_static path_regexp ^/backend/design/.+\.(?i:css|js|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|html?)$
+		file_server @backend_static
+
+		# Усе інше під /backend/ — фронт-контролер, без віддачі файлу з диска.
+		#
+		# Саме /backend/*, без голого /backend: у nginx `location ^~ /backend/`
+		# теж вимагає слеша, тож /backend без нього іде у фронт-контролер
+		# вітрини і дає 404, а не редірект на форму входу.
+		route /backend/* {
+			rewrite * /backend/index.php
+			php
+		}
+
+		# ──────────────── Фронт-контролер вітрини ────────────────
+		#
+		# Запитаний шлях не перевіряється на диску — див. коментар угорі файлу.
+		rewrite * /index.php
+		php
+	}
+}
