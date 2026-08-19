@@ -1681,3 +1681,14 @@ $lang['modules_license_info_text'] = 'Мы не нашли информацию 
 $lang['index_btn_email_info'] = 'ВАЖНО';
 $lang['index_btn_email_info_hint'] = 'Для получения верификации продуктов, обязательно к заполнению поле E-mail, указанный при покупки продукта';
 $lang['button_select_file'] = 'Выберите файл...';
+
+$lang['file_picker_title'] = 'Файлы';
+$lang['file_picker_search'] = 'Поиск по имени';
+$lang['file_picker_upload'] = 'Загрузить';
+$lang['file_picker_up'] = 'Вверх';
+$lang['file_picker_empty'] = 'Файлов нет';
+$lang['file_picker_delete'] = 'Удалить';
+$lang['file_picker_delete_confirm'] = 'Удалить файл? Он может быть вставлен в статьи.';
+$lang['file_picker_upload_error'] = 'Файл не загружен: недопустимый тип, слишком большой файл или ошибка записи';
+$lang['file_picker_delete_error'] = 'Файл не удалён';
+$lang['file_picker_total'] = 'Файлов';

@@ -214,7 +214,7 @@
             selector: "textarea.editor_small",
             height: '300',
             plugins: [
-                "advlist autolink lists link image preview anchor responsivefilemanager",
+                "advlist autolink lists link image preview anchor",
                 "hr visualchars autosave noneditable searchreplace wordcount visualblocks",
                 "code fullscreen save charmap nonbreaking",
                 "insertdatetime media table paste imagetools"
