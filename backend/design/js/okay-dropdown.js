@@ -5,6 +5,9 @@
  * Єдиний споживач в адмінці - bootstrap-select: розмітку кнопки й меню малює
  * він, а клас open чекає ззовні. Тому змінювати тут імена класу й подій не
  * можна - плагін слухає саме їх.
+ *
+ * Клік по полю введення всередині відкритого меню меню не закриває: там живе
+ * пошук по списку.
  */
 (function ($) {
     'use strict';
@@ -108,7 +111,6 @@
 
     $(document)
         .on('click.okay.dropdown', closeAll)
-        .on('click.okay.dropdown', '.dropdown form', function (e) { e.stopPropagation(); })
         .on('click.okay.dropdown', TOGGLE, toggle)
         .on('keydown.okay.dropdown', TOGGLE + ', [role="listbox"]', keydown);
 })(jQuery);
