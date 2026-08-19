@@ -245,7 +245,7 @@
                         <div class="fn_row form-group">
                             <div class="input-group input-group--dabbl">
                                     <span class="fn_social_image input-group-addon input-group-addon--left">
-                                        {include file='svg_icon.tpl' svgId=$social_icons[$social.domain]|default:'brand_unknown'}
+                                        {include file='svg_icon.tpl' svgId=$social_icons[$social.domain|default:'']|default:'brand_unknown'}
                                     </span>
                                 <input class="fn_social_input form-control" type="text" name="socials[][url]" value="{$social.url|escape}"/>
                                 <button type="button" class="input-group-addon fn_delete_social">

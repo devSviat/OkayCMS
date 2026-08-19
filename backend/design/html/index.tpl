@@ -69,6 +69,22 @@
 
     <script>okayDatepicker.lang = '{$manager->lang|escape:'javascript'}';</script>
     <script>okayModal.closeLabel = '{$btr->general_close|escape:'javascript'}';</script>
+    {* bootstrap-select тримає свої підписи в англійських типових значеннях, а
+       i18n-файли плагіна в форку не вендорені: рядки й так живуть у backend/lang. *}
+    <script>
+        {literal}
+        // Плагін зливає цей об'єкт поверх своїх типових значень (bootstrap-select.js:1822),
+        // але сам його не створює - тому присвоюємо цілком, а не по полю.
+        $.fn.selectpicker.defaults = {
+            noneSelectedText: '{/literal}{$btr->general_select_none|escape:'javascript'}{literal}',
+            selectAllText: '{/literal}{$btr->general_select_all|escape:'javascript'}{literal}',
+            deselectAllText: '{/literal}{$btr->general_select_none_action|escape:'javascript'}{literal}',
+            countSelectedText: function (numSelected) {
+                return '{/literal}{$btr->general_select_count|escape:'javascript'}{literal}'.replace('{0}', numSelected);
+            }
+        };
+        {/literal}
+    </script>
 
     {*Маршрут Controller@method рендерить той самий шаблон, тож суфікс методу
       треба зняти - інакше сторінка лишиться без календаря.*}
