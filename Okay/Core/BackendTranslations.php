@@ -29,6 +29,50 @@ class BackendTranslations
         return $this->_initializedLang;
     }
     
+    /**
+     * Мітки мов, для яких у backend/lang/ є файл перекладу.
+     *
+     * @return string[]
+     */
+    public function availableLanguages()
+    {
+        $labels = [];
+
+        foreach (glob('backend/lang/??.php') as $file) {
+            $labels[] = pathinfo($file, PATHINFO_FILENAME);
+        }
+
+        return $labels;
+    }
+
+    /**
+     * Перша з бажаних мов, переклад якої існує.
+     *
+     * Мови магазину й мови адмінки - різні набори: у магазині може стояти
+     * грузинська, для якої файла перекладу немає. Тому вибір явний, а не через
+     * відкат усередині initTranslations().
+     *
+     * @param array $preferred мітки за спаданням пріоритету; одна з них приходить
+     *                          із куки, тож рядками вони бути не зобов'язані
+     * @return string
+     */
+    public function resolveLang(array $preferred)
+    {
+        $available = $this->availableLanguages();
+
+        foreach ($preferred as $label) {
+            if (is_string($label) && in_array($label, $available, true)) {
+                return $label;
+            }
+        }
+
+        if (in_array('en', $available, true) || $available === []) {
+            return 'en';
+        }
+
+        return reset($available);
+    }
+
     public function initTranslations($langLabel = 'en')
     {
         if ($this->_initializedLang === $langLabel) {

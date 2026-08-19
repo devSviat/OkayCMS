@@ -14,6 +14,7 @@ use Okay\Core\ManagerMenu;
 use Okay\Core\Config;
 use Okay\Core\Entity\Entity;
 use Okay\Core\Languages;
+use Okay\Core\Security\SessionNames;
 use Okay\Admin\Helpers\BackendModulesHelper;
 
 ini_set('display_errors', 'off');
@@ -169,10 +170,29 @@ foreach ($modulesBackendControllers as $backendController) {
 }
 
 if (!empty($manager)) {
-
     $backendTranslations->initTranslations($manager->lang);
-    $design->assign('btr', $backendTranslations);
+} else {
+    // Менеджера ще немає, тож мову сторінки входу дають, за спаданням
+    // пріоритету: попередній вхід із цього браузера, головна мова магазину,
+    // решта його ввімкнених мов за порядком. Останню опору додає resolveLang().
+    $preferred = [];
+
+    if (isset($_COOKIE[SessionNames::ADMIN_LANG_COOKIE])) {
+        $preferred[] = $_COOKIE[SessionNames::ADMIN_LANG_COOKIE];
+    }
+
+    foreach ($languages->getAllLanguages() as $language) {
+        // getAllLanguages() віддає і вимкнені мови - на вітрині їх немає,
+        // тож і сторінці входу вони не підходять.
+        if (!empty($language->enabled)) {
+            $preferred[] = $language->label;
+        }
+    }
+
+    $backendTranslations->initTranslations($backendTranslations->resolveLang($preferred));
 }
+
+$design->assign('btr', $backendTranslations);
 
 if (($controllerParams = $module->getBackendControllerParams($backendControllerName)) && in_array($backendControllerName, $modulesBackendControllers)) {
 
