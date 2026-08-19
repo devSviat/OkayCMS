@@ -38,6 +38,7 @@ use Okay\Core\OkayContainer\Reference\ServiceReference as SR;
 use Okay\Admin\Helpers\BackendProductsHelper;
 use Okay\Admin\Helpers\BackendVariantsHelper;
 use Okay\Admin\Helpers\BackendFeaturesHelper;
+use Okay\Admin\Helpers\BackendFilePickerHelper;
 use Okay\Admin\Helpers\BackendBrandsHelper;
 use Okay\Admin\Helpers\BackendCategoriesHelper;
 use Okay\Admin\Helpers\BackendSpecialImagesHelper;
@@ -155,6 +156,14 @@ return [
         'class' => BackendSpecialImagesHelper::class,
         'arguments' => [
             new SR(EntityFactory::class),
+        ]
+    ],
+    BackendFilePickerHelper::class => [
+        'class' => BackendFilePickerHelper::class,
+        'arguments' => [
+            new SR(Config::class),
+            new SR(Image::class),
+            new SR(Request::class),
         ]
     ],
     BackendOrdersHelper::class => [

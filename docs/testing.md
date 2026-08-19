@@ -46,16 +46,16 @@ failOnWarning="true"
 
 ## Що покрито
 
-105 тестових класів. Найбільші групи:
+130 тестових класів. Найбільші групи:
 
 | Каталог | Класів | Про що |
 | ------- | ------ | ------ |
-| `tests/Core/` | 38 | Design і Smarty-плагіни, TemplateConfig, консоль, QueryFactory, модулі, сутності |
-| `tests/Security/` | 35 | CSRF вітрини й адмінки, вхід і відновлення пароля, файловий менеджер, обхід шляхів, заголовки, куки, SVG |
+| `tests/Core/` | 43 | Design і Smarty-плагіни, TemplateConfig, консоль, QueryFactory, модулі, сутності |
+| `tests/Security/` | 43 | CSRF вітрини й адмінки, вхід і відновлення пароля, менеджер і вибирач файлів, обхід шляхів, заголовки, куки, SVG |
 | `tests/TplMod/` | 7 | розбір і друк шаблонів, збіг анкерів `modifications` |
-| `tests/Admin/` | 7 | контролери адмінки |
+| `tests/Admin/` | 11 | контролери адмінки |
 | `tests/Design/` | 5 | компіляція шаблонів тем і заборонені конструкції Smarty 5 |
-| `tests/Modules/`, `tests/Helpers/`, `tests/Seo/`, `tests/Entities/` | 13 | решта |
+| `tests/Modules/`, `tests/Helpers/`, `tests/Seo/`, `tests/Entities/`, `tests/Requests/` | 21 | решта |
 
 ### Тести-запобіжники
 

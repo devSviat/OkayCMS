@@ -8,7 +8,7 @@
             height: 600,
             relative_urls : false,
             plugins: [
-                "advlist autolink quickbars lists link image preview anchor responsivefilemanager emoticons",
+                "advlist autolink quickbars lists link image preview anchor emoticons",
                 "hr visualchars codesample autosave noneditable searchreplace wordcount visualblocks",
                 "code fullscreen save charmap nonbreaking",
                 "insertdatetime media table paste imagetools",
@@ -58,9 +58,42 @@
             "Trebuchet MS=trebuchet ms,geneva;"+
             "Verdana=verdana,geneva;",
             image_advtab: true,
-            external_filemanager_path:"{$rootUrl}/backend/design/js/filemanager/",
-            filemanager_title:"{$btr->tinymce_init_filemanager|escape}" ,
-            external_plugins: { "filemanager" : "{$rootUrl}/backend/design/js/filemanager/plugin.min.js"},
+            file_picker_types: 'file image media',
+            {literal}
+            // Вибирач відкривається в iframe, тому URL повертається повідомленням,
+            // а не значенням: див. backend/design/js/okay-file-picker.js.
+            // TinyMCE 5.0 ще не має onMessage у windowManager.openUrl, тож слухач
+            // один на всі діалоги - інакше закритий без вибору залишав би свій.
+            file_picker_callback: (function () {
+                var pending = null;
+
+                window.addEventListener('message', function (event) {
+                    if (event.origin !== window.location.origin
+                        || !event.data || event.data.okayFilePicker !== true || pending === null) {
+                        return;
+                    }
+
+                    var current = pending;
+                    pending = null;
+                    // Другий аргумент обов'язковий: діалог посилання читає meta.text
+                    // одразу після зміни поля і без об'єкта падає.
+                    current.callback(event.data.url, {});
+                    current.dialog.close();
+                });
+
+                return function (callback, value, meta) {
+                    pending = {
+                        callback: callback,
+                        dialog: tinymce.activeEditor.windowManager.openUrl({
+                            title: '{/literal}{$btr->file_picker_title|escape:javascript}{literal}',
+                            url: '{/literal}{$rootUrl}{literal}/backend/index.php?controller=FilePickerAdmin&filetype=' + meta.filetype,
+                            width: Math.min(window.innerWidth - 80, 1100),
+                            height: Math.min(window.innerHeight - 80, 700)
+                        })
+                    };
+                };
+            }()),
+            {/literal}
 
             style_formats: [
                 { title: 'Headings', items: [

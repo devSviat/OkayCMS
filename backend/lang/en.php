@@ -1689,3 +1689,13 @@ $lang['modules_license_info_text'] = 'We did not find information about purchasi
 $lang['index_btn_email_info'] = 'IMPORTANT';
 $lang['index_btn_email_info_hint'] = 'To receive product verification, you must fill in the E-mail field specified when purchasing the product';
 $lang['button_select_file'] = 'Select a file...';
+
+$lang['file_picker_title'] = 'Files';
+$lang['file_picker_search'] = 'Search by name';
+$lang['file_picker_upload'] = 'Upload';
+$lang['file_picker_up'] = 'Up';
+$lang['file_picker_empty'] = 'No files';
+$lang['file_picker_delete'] = 'Delete';
+$lang['file_picker_delete_confirm'] = 'Delete the file? It may be used in articles.';
+$lang['file_picker_upload_error'] = 'File was not uploaded: type not allowed or write error';
+$lang['file_picker_total'] = 'Files';

@@ -302,7 +302,11 @@ class IndexAdmin
             $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=LearningAdmin');
         }
 
-        if ($this->backendController === 'AuthAdmin' || $this->managers->access($this->managers->getPermissionByController($this->backendController), $this->manager)) {
+        // Вибирач файлів обслуговує редактор на всіх сторінках контенту, тож окремого
+        // дозволу не має: досить бути менеджером, як і в попереднього менеджера файлів.
+        if ($this->backendController === 'AuthAdmin'
+            || $this->backendController === 'FilePickerAdmin'
+            || $this->managers->access($this->managers->getPermissionByController($this->backendController), $this->manager)) {
             return true;
         }
 

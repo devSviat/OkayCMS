@@ -1682,3 +1682,13 @@ $lang['modules_license_info_text'] = 'Ми не знайшли інформац�
 $lang['index_btn_email_info'] = 'ВАЖЛИВО';
 $lang['index_btn_email_info_hint'] = 'Для отримання верифікації продуктів, обов`язково до заповнення поле E-mail, вказане при покупці продукту';
 $lang['button_select_file'] = 'Виберіть файл...';
+
+$lang['file_picker_title'] = 'Файли';
+$lang['file_picker_search'] = 'Пошук за іменем';
+$lang['file_picker_upload'] = 'Завантажити';
+$lang['file_picker_up'] = 'Вгору';
+$lang['file_picker_empty'] = 'Файлів немає';
+$lang['file_picker_delete'] = 'Видалити';
+$lang['file_picker_delete_confirm'] = 'Видалити файл? Він може бути вставлений у статті.';
+$lang['file_picker_upload_error'] = 'Файл не завантажено: недозволений тип або помилка запису';
+$lang['file_picker_total'] = 'Файлів';
