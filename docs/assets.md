@@ -228,11 +228,9 @@ tail -n +2 backend/design/js/air-datepicker/air-datepicker.css | sha256sum
 
 ## Модалки адмінки
 
-Розмітку відкриває наш `backend/design/js/okay-modal.js`: він читає ті самі
-`data-toggle="modal"`, `data-target` і `data-dismiss="modal"`, що читав Bootstrap,
-тож шаблони ядра й модулів не змінюються. Фокус, `Esc` і повернення фокуса після
-закриття тримає **a11y-dialog 8.1.5** (MIT) - до заміни драйвера цього не було
-зовсім: фокус лишався під модалкою, а `Esc` її не закривав.
+Розмітку відкриває `backend/design/js/okay-modal.js`: `data-toggle="modal"` і
+`data-target` відкривають вікно, `data-dismiss="modal"` та клік повз діалог
+закривають. Фокус, `Esc` і повернення фокуса тримає **a11y-dialog 8.1.5** (MIT).
 
 Вендорний файл - `backend/design/js/a11y-dialog/a11y-dialog.js`: мініфікована UMD
 збірка з npm плюс дописаний перший рядок із версією й ліцензією. Звірка:
@@ -245,13 +243,18 @@ tail -n +2 backend/design/js/a11y-dialog/a11y-dialog.js | sha256sum
 Показ малює наш CSS (`.modal.in` в `okay.css`), а не бібліотека: a11y-dialog лише
 знімає й повертає `aria-hidden`.
 
-**Bootstrap JS у бандлі поки лишається - і не заради модалок.** Його `data-api`
-відкриває випадайку `bootstrap-select`: плагін малює кнопку з
-`data-toggle="dropdown"` і сам меню не відкриває. Перевірено на живій сторінці -
-після `$(document).off('.bs.dropdown.data-api')` жоден із 189 селектів не
-розкривається. Тому драйвер вимикає рівно modal-гілку data-api
-(`$(document).off('click.bs.modal.data-api')`), інакше один клік відкривав би
-модалку двічі.
+## Випадайки
+
+`backend/design/js/okay-dropdown.js` перемикає клас `open` на батькові елемента з
+`data-toggle="dropdown"` і шле йому `show/shown/hide/hidden.bs.dropdown`.
+
+Єдиний споживач - `bootstrap-select`: у шаблонах адмінки `data-toggle="dropdown"`
+не пишеться жодного разу, розмітку кнопки й меню створює плагін, а клас `open`
+чекає ззовні й слухає ті чотири події. Тому імена класу й подій тут - контракт із
+плагіном, а не деталь реалізації.
+
+Одне правило неочевидне: клік по полю введення всередині відкритого меню його не
+закриває - там живе пошук по списку.
 
 ## fancyBox: бібліотеки немає, виклики лишились
 

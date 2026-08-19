@@ -1,20 +1,18 @@
 /**
- * Модалки адмінки.
+ * Модалки адмінки: data-toggle="modal" відкриває вікно за data-target,
+ * data-dismiss="modal" і клік повз діалог закривають. Показ малює CSS за класом
+ * in, фокус, Esc і повернення фокуса тримає a11y-dialog.
  *
- * Читає ті самі data-toggle="modal", data-target і data-dismiss="modal", що
- * читав Bootstrap, тож жоден шаблон і жоден модуль не правиться. Фокус, Esc
- * і повернення фокуса після закриття бере на себе a11y-dialog - раніше цього
- * не було зовсім: фокус лишався під модалкою, а Esc її не закривав.
- *
- * Тут же живе шим $.fancybox: у адмінці ця бібліотека жодного разу не
- * працювала лайтбоксом, лише відкривала свій же inline-блок або готовий HTML.
+ * Тут же $.fancybox - назва лишилась публічною для шаблонів і модулів, а під
+ * нею та сама модалка. Підтримані форми: open({src:'#id'}),
+ * open({src:'<html>', type:'html'}), $(el).fancybox(), data-fancybox +
+ * data-src, data-fancybox-close, close().
  */
 (function ($, A11yDialog) {
     'use strict';
 
-    /* Глобал створюємо до будь-якого запобіжника: index.tpl пише в нього підпис
-       кнопки закриття, і якби його не було, той рядок убив би решту скрипта
-       сторінки. */
+    /* До запобіжника: index.tpl пише сюди підпис кнопки закриття, і без цього
+       рядка той скрипт упаде разом з рештою сторінки. */
     window.okayModal = window.okayModal || {};
 
     if (!A11yDialog) {
@@ -23,10 +21,6 @@
 
     var KEY = 'okayModal';
     var SHIM = 'fn_modal_shim';
-
-    /* Bootstrap ще в бандлі заради випадайок bootstrap-select, і його
-       data-api відкрив би ту саму модалку вдруге. */
-    $(document).off('click.bs.modal.data-api');
 
     function dialogFor(el) {
         var dialog = $.data(el, KEY);
@@ -75,8 +69,8 @@
         close($(this).closest('.modal')[0]);
     });
 
-    /* Клік повз діалог закривав модалку й до заміни драйвера - підкладка в
-       адмінці схована, тож ловить його сама .modal на всю ширину вікна. */
+    /* Підкладка в адмінці схована стилями, тож клік повз діалог ловить сама
+       .modal - вона на весь екран. */
     $(document).on('click', '.modal', function (e) {
         if (e.target === this) {
             close(this);
@@ -85,9 +79,8 @@
 
     /* ---- шим fancyBox ------------------------------------------------- */
 
-    /* Inline-вміст живе у своєму місці сторінки: на час показу переносимо
-       його в оболонку, а на закритті повертаємо назад. Інакше друге
-       відкриття не знайде вузла. */
+    /* Inline-вміст на час показу переїжджає в оболонку й повертається на місце
+       при закритті - інакше друге відкриття його не знайде. */
     function shell() {
         var el = document.createElement('div');
         el.className = 'modal fade ' + SHIM;
@@ -118,14 +111,12 @@
             anchor = document.createComment('okay-modal:' + src.slice(1));
             inline.parentNode.insertBefore(anchor, inline);
             body.appendChild(inline);
-            /* Вміст лежить на сторінці схованим - показати його має той, хто
-               відкриває. fancyBox робив те саме, і без цього модалка відкриється
-               порожньою. */
+            /* На сторінці цей блок схований - показує його той, хто відкриває. */
             hidden = inline.style.display;
             inline.style.display = '';
         } else if (opts.type === 'html' && typeof src === 'string') {
-            /* Рядок вставляється як розмітка лише за явного type: 'html' - так
-               само робив fancyBox, і так з чужого src не з'явиться нової дірки. */
+            /* Розмітку вставляємо лише за явного type: 'html' - інакше будь-який
+               src став би точкою вставки HTML. */
             body.innerHTML = src;
         } else {
             el.remove();

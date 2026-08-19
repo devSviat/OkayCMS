@@ -13,7 +13,7 @@ use Okay\Core\TemplateConfig\Js;
 return [
     (new Js('jquery/jquery.js')),
     (new Js('jquery/jquery-migrate.js')),
-    (new Js('bootstrap.min.js')),
+    (new Js('okay-dropdown.js')),
     (new Js('bootstrap-select.js')),
     (new Js('a11y-dialog/a11y-dialog.js')),
     (new Js('okay-modal.js')),
