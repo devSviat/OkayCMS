@@ -6,7 +6,7 @@
         <div class="wrap_heading">
             <div class="box_heading heading_page">
                 {$btr->reportstats_orders|escape}
-                <i class="fn_tooltips" title="{$btr->tooltip_reportstats_orders|escape}">
+                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_reportstats_orders|escape}">
                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                 </i>
             </div>

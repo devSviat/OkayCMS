@@ -57,7 +57,7 @@
                     <div class="col-lg-9 col-md-8 col-sm-12">
                         <div class="heading_label heading_label--required">
                             <span>{$btr->general_name|escape}</span>
-                            <i class="fn_tooltips" title="{$btr->tooltip_banner_name|escape}">
+                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_banner_name|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </div>
@@ -69,7 +69,7 @@
                             <div class=" col-lg-6 col-md-10">
                                 <div class="heading_label heading_label--required" >
                                     <span>{$btr->general_banner_group|escape}</span>
-                                    <i class="fn_tooltips" title="{$btr->tooltip_banner_group|escape}">
+                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_banner_group|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
@@ -82,7 +82,7 @@
                             <div class="col-lg-6 col-md-10">
                                 <div class="heading_label">
                                     <span>{$btr->banners_image_url|escape}</span>
-                                    <i class="fn_tooltips" title="{$btr->tooltip_banner_url|escape}">
+                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_banner_url|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>

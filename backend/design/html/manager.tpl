@@ -80,7 +80,7 @@
                 <div class="toggle_body_wrap on fn_card">
                     <div class="mb-1">
                         <div class="heading_label">{$btr->manager_login|escape}
-                            <i class="fn_tooltips" title="{$btr->tooltip_manager_login|escape}">
+                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_manager_login|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </div>
@@ -92,7 +92,7 @@
                     
                     <div class="mb-1">
                         <div class="heading_label">{$btr->manager_email|escape}
-                            <i class="fn_tooltips" title="{$btr->tooltip_manager_email|escape}">
+                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_manager_email|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </div>
@@ -110,7 +110,7 @@
 
                     <div class="mb-1">
                         <div class="heading_label">{$btr->manager_pass|escape}
-                            <i class="fn_tooltips" title="{$btr->tooltip_manager_pass|escape}">
+                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_manager_pass|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </div>
@@ -203,7 +203,7 @@
             <div class="boxed fn_toggle_wrap min_height_230px">
                 <div class="heading_box">
                     {$btr->manager_rights|escape}
-                    <i class="fn_tooltips" title="{$btr->tooltip_manager_rights|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_manager_rights|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">

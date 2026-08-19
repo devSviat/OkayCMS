@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-lg-12 col-md-12">
         <div class="heading_page">{$btr->stats_stats|escape}
-            <i class="fn_tooltips" title="{$btr->tooltip_stats_stats|escape}">
+            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_stats_stats|escape}">
                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
             </i>
         </div>

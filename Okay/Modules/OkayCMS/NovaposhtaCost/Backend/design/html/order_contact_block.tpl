@@ -49,7 +49,7 @@
         </div>
         <div class="mb-1">
             <div class="heading_label">{$btr->order_np_warehouse}
-                <i class="fn_tooltips" title="{$btr->np_update_address_info|escape}">
+                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->np_update_address_info|escape}">
                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                 </i>
             </div>

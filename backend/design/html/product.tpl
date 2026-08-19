@@ -100,7 +100,7 @@
                         <div class="fn_step-1">
                             <div class="heading_label heading_label--required">
                                 <span>{$btr->general_name|escape}</span>
-                                <i class="fn_tooltips" title="{$btr->tooltip_general_name|escape}">
+                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_name|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>
                             </div>
@@ -135,7 +135,7 @@
                                 <div class="okay_switch clearfix">
                                     <label class="switch_label">
                                         {$btr->general_enable|escape}
-                                        <i class="fn_tooltips" title="{$btr->tooltip_general_enable|escape}">
+                                        <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_enable|escape}">
                                             {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                         </i>
                                     </label>
@@ -169,7 +169,7 @@
                             <div class="okay_switch clearfix">
                                 <label class="switch_label">
                                     {$btr->general_bestseller|escape}
-                                    <i class="fn_tooltips" title="{$btr->tooltip_general_bestseller|escape}">
+                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_bestseller|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </label>
@@ -193,7 +193,7 @@
             <div class="fn_step-5 boxed fn_toggle_wrap min_height_230px">
                 <div class="heading_box">
                     {$btr->product_images|escape}
-                    <i class="fn_tooltips" title="{$btr->tooltip_product_images|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_product_images|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -239,7 +239,7 @@
                 <div class="fn_step-6">
                     <div class="heading_label">
                         {$btr->general_brand|escape}
-                        <i class="fn_tooltips" title="{$btr->tooltip_general_brand|escape}">
+                        <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_brand|escape}">
                             {include file='svg_icon.tpl' svgId='icon_tooltips'}
                         </i>
                     </div>
@@ -256,7 +256,7 @@
                 <div class="fn_step-7">
                     <div class="heading_label heading_label--required">
                         <span>{$btr->general_category|escape}</span>
-                        <i class="fn_tooltips" title="{$btr->tooltip_general_category|escape}">
+                        <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_category|escape}">
                             {include file='svg_icon.tpl' svgId='icon_tooltips'}
                         </i>
                     </div>
@@ -299,7 +299,7 @@
             <div class="fn_step-8 boxed fn_toggle_wrap">
                 <div class="heading_box">
                     {$btr->general_options|escape}
-                    <i class="fn_tooltips" title="{$btr->tooltip_general_options|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_options|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -322,7 +322,7 @@
                                         <div class="okay_list_boding variants_item_sku">
                                             <div class="heading_label">
                                                 {$btr->general_sku|escape}
-                                                <i class="fn_tooltips" title="{$btr->tooltip_general_sku|escape}">
+                                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_sku|escape}">
                                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                                 </i>
                                             </div>
@@ -352,7 +352,7 @@
                                         <div class="okay_list_boding variants_item_weight">
                                             <div class="heading_label">
                                                 {$btr->general_weight|escape}
-                                                <i class="fn_tooltips" title="{$btr->tooltip_general_weight|escape}">
+                                                <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_weight|escape}">
                                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                                 </i>
                                             </div>
@@ -395,7 +395,7 @@
                                     <div class="okay_list_boding variants_item_sku">
                                         <div class="heading_label">
                                             {$btr->general_sku|escape}
-                                            <i class="fn_tooltips" title="{$btr->tooltip_general_sku|escape}">
+                                            <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_sku|escape}">
                                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                             </i>
                                         </div>
@@ -468,7 +468,7 @@
             <div class="fn_step-9 boxed fn_toggle_wrap min_height_230px">
                 <div class="heading_box">
                     {$btr->product_promotions|escape}
-                    <i class="fn_tooltips" title="{$btr->tooltip_product_promotions|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_product_promotions|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -552,7 +552,7 @@
             <div class="fn_step-11 boxed fn_toggle_wrap min_height_210px">
                 <div class="heading_box">
                     {$btr->product_features|escape}
-                    <i class="fn_tooltips" title="{$btr->tooltip_product_features|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_product_features|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -682,7 +682,7 @@
             <div class="fn_step-13 boxed match fn_toggle_wrap">
                 <div class="heading_box">
                     {$btr->general_metatags|escape}
-                    <i class="fn_tooltips" title="{$btr->tooltip_general_metatags|escape}">
+                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_metatags|escape}">
                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                     </i>
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -695,7 +695,7 @@
                             <div class="heading_label heading_label--flex">
                                 <div class="heading_label__start">
                                     Meta-title <span id="fn_meta_title_counter"></span>
-                                    <i class="fn_tooltips" title="{$btr->tooltip_meta_title|escape}">
+                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_title|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
@@ -711,7 +711,7 @@
                             <div class="heading_label heading_label--flex">
                                 <div class="heading_label__start">
                                     Meta-keywords
-                                    <i class="fn_tooltips" title="{$btr->tooltip_meta_keywords|escape}">
+                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_keywords|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
@@ -729,7 +729,7 @@
                             <div class="heading_label heading_label--flex">
                                 <div class="heading_label__start">
                                     Meta-description <span id="fn_meta_description_counter"></span>
-                                    <i class="fn_tooltips" title="{$btr->tooltip_meta_description|escape}">
+                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_meta_description|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </div>
@@ -766,7 +766,7 @@
                         </a>
                         <a href="#tab2" class="heading_box tab_navigation_link">
                             {$btr->general_full_description|escape}
-                            <i style="right: -8px" class="fn_tooltips" title="{$btr->tooltip_general_full_description|escape}">
+                            <i style="right: -8px" class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_full_description|escape}">
                                 {include file='svg_icon.tpl' svgId='icon_tooltips'}
                             </i>
                         </a>

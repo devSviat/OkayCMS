@@ -111,7 +111,7 @@
                             <div class="heading_label">
                                 <span class="boxes_inline heading_label">
                                     {$btr->banner_label_id_group|escape}
-                                    <i class="fn_tooltips" title="{$btr->banner_faq_id_group|escape}">
+                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->banner_faq_id_group|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </span>
@@ -148,7 +148,7 @@
                                     </label>
                                     <label class="boxes_inline heading_label">
                                     {$btr->banner_individual_shortcode|escape}
-                                    <i class="fn_tooltips" title="{$btr->banner_individual_shortcode_description|escape}">
+                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->banner_individual_shortcode_description|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                 </label>
@@ -373,7 +373,7 @@
                             <div class="col-xl-4 col-lg-4 col-md-6 text-muted">
                                 <div class="permission_box">
                                     <span class="switch_label" title="{$btr->banner_settings_rotation_speed}">{$btr->banner_settings_rotation_speed}</span>
-                                    <i class="fn_tooltips" title="{$btr->banner_settings_rotation_speed_title|escape}">
+                                    <i class="fn_tooltips hint-bottom-middle-t-info-s-small-mobile hint-anim" data-hint="{$btr->banner_settings_rotation_speed_title|escape}">
                                         {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                     </i>
                                     <input class="form-control" style="width: 80px;margin-left: 10px" name="settings[rotationSpeed]" type="text" pattern="^[0-9]+$" required
