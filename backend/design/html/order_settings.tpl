@@ -93,7 +93,9 @@
                                             {/if}
                                             <div class="okay_list_boding okay_list_order_stg_sts_label">
                                                 <input  name="statuses[color][]" value="{$order_status->color|escape}" class="hidden">
-                                                <span data-hint="#{$order_status->color|escape}" class="fn_color label_color_item hint-bottom-middle-t-info-s-small-mobile  hint-anim" style="background-color:#{$order_status->color|escape};"></span>
+                                                <span data-hint="#{$order_status->color|escape}" class="label_color_hint hint-bottom-middle-t-info-s-small-mobile hint-anim">
+                                                    <input type="color" class="fn_color label_color_item" value="#{$order_status->color|escape}" aria-label="{$btr->order_settings_select_colour|escape}">
+                                                </span>
                                             </div>
                                             <div class="okay_list_boding okay_list_close">
                                                 {if count($orders_statuses) > 1}
@@ -140,7 +142,9 @@
                                         {/if}
                                         <div class="okay_list_boding okay_list_order_stg_sts_label">
                                             <input name="statuses[color][]" value="" class="hidden">
-                                            <span data-hint="{$btr->order_settings_select_colour|escape}" class="fn_color label_color_item hint-bottom-middle-t-info-s-small-mobile  hint-anim"></span>
+                                            <span data-hint="{$btr->order_settings_select_colour|escape}" class="label_color_hint hint-bottom-middle-t-info-s-small-mobile hint-anim">
+                                                <input type="color" class="fn_color label_color_item" aria-label="{$btr->order_settings_select_colour|escape}">
+                                            </span>
                                         </div>
                                         <div class="okay_list_boding okay_list_close">
                                             {*delete*}
@@ -216,7 +220,9 @@
 
                                         <div class="okay_list_boding okay_list_order_stg_sts_label">
                                             <input  name="labels[color][]" value="{$label->color|escape}" class="hidden">
-                                            <span data-hint="#{$label->color|escape}" class="fn_color label_color_item hint-bottom-middle-t-info-s-small-mobile  hint-anim" style="background-color:#{$label->color|escape};"></span>
+                                            <span data-hint="#{$label->color|escape}" class="label_color_hint hint-bottom-middle-t-info-s-small-mobile hint-anim">
+                                                <input type="color" class="fn_color label_color_item" value="#{$label->color|escape}" aria-label="{$btr->order_settings_select_colour|escape}">
+                                            </span>
                                         </div>
 
                                         <div class="okay_list_boding okay_list_close">
@@ -242,7 +248,9 @@
                                     </div>
                                     <div class="okay_list_boding okay_list_order_stg_sts_label">
                                         <input name="labels[color][]" value="" class="hidden">
-                                        <span data-hint="{$btr->order_settings_select_colour|escape}" class="fn_color label_color_item hint-bottom-middle-t-info-s-small-mobile  hint-anim"></span>
+                                        <span data-hint="{$btr->order_settings_select_colour|escape}" class="label_color_hint hint-bottom-middle-t-info-s-small-mobile hint-anim">
+                                            <input type="color" class="fn_color label_color_item" aria-label="{$btr->order_settings_select_colour|escape}">
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -277,8 +285,6 @@
 
 {* On document load *}
 {literal}
-<link rel="stylesheet" media="screen" type="text/css" href="design/js/colorpicker/css/colorpicker.css" />
-<script type="text/javascript" src="design/js/colorpicker/js/colorpicker.js"></script>
 <script>
     $(function() {
         var new_label = $(".fn_new_label").clone(true);
@@ -324,14 +330,26 @@
             }
         });
 
-        $(document).on("mouseenter click", ".fn_color", function () {
-            var elem = $(this);
-            elem.ColorPicker({
-                onChange: function (hsb, hex, rgb) {
-                    elem.css('backgroundColor', '#' + hex);
-                    elem.prev().val(hex);
-                }
-            });
+        /* Колір статусу зберігається без решітки, тому інпуту віддаємо її окремо.
+           Записуємо назад лише те, що вибрав користувач: у порожнього рядка
+           значення має лишитись порожнім, а не стати чорним. */
+        var colorField = function (input) {
+            return $(input).closest('.okay_list_order_stg_sts_label').find('input.hidden');
+        };
+
+        $('input.fn_color').each(function () {
+            var hex = colorField(this).val();
+            if (/^[0-9a-f]{3}$/i.test(hex)) {
+                hex = hex.replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3');
+            }
+            if (/^[0-9a-f]{6}$/i.test(hex)) {
+                this.value = '#' + hex;
+            }
+        });
+
+        $(document).on('input', 'input.fn_color', function () {
+            colorField(this).val(this.value.replace('#', ''));
+            $(this).closest('[data-hint]').attr('data-hint', this.value);
         });
 
     });

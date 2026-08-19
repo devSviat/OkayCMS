@@ -18,7 +18,6 @@ return [
     (new Css('toastr.css')),
     (new Css('simple-hint.css')),
     (new Css('bootstrap-select.css')),
-    (new Css('jquery.scrollbar.css')),
     (new Css('bootstrap_theme.css')),
     (new Css('okay.css')),
     (new Css('media.css')),

@@ -4251,6 +4251,19 @@ label.switch_label i{
     width: 60px;
     text-align: center;
 }
+/* Нативний вибір кольору: інпут сам малює пляму, тож прибираємо його поля
+   й рамку, а заокруглення успадковуємо від класу самої плями. */
+input[type="color"].fn_color{
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding: 0;
+    background: none;
+}
+input[type="color"].fn_color::-webkit-color-swatch-wrapper{padding: 0;}
+input[type="color"].fn_color::-webkit-color-swatch{border: none; border-radius: inherit;}
+input[type="color"].fn_color::-moz-color-swatch{border: none; border-radius: inherit;}
+.label_color_hint{display: inline-block;}
 .okay_list .okay_list_order_stg_sts_label .label_color_item{
     width: 35px;
     height: 35px;
@@ -5256,12 +5269,18 @@ body.menu-pin .page-container {
     background-color: var(--ok-chrome-raised);
     font-size: 14px;
 }
-#admin_catalog  .scrollbar-inner > .scroll-element.scroll-y{
-    left: 0;
+/* Смуга прокрутки нативна: контейнери й так мають власний overflow, від
+   плагіна лишались тільки товщина й колір. overscroll-behavior замінює його
+   disableBodyScroll - без нього прокрутка списку доходить до кінця і тягне
+   за собою сторінку. */
+.scrollbar-inner,
+.scrollbar-variant{
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ok-line-strong) transparent;
 }
-body.menu-pin #admin_catalog .scrollbar-inner > .scroll-element.scroll-y,
-#admin_catalog:hover .scrollbar-inner > .scroll-element.scroll-y{
-    left: inherit;
+#admin_catalog .scrollbar-inner{
+    scrollbar-color: var(--ok-chrome-ink-muted) transparent;
 }
 #mob_menu {
     top: -100%;
@@ -7409,328 +7428,6 @@ input[type=range]:focus::-ms-fill-upper {
     opacity: 0.7;
     background: var(--ok-surface) url(../images/ajax_preloader.gif) no-repeat center center;
     z-index: var(--ok-z-backdrop);
-}
-
-/***************************************************** select language  */
-.borderRadius {
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-}
-
-.borderRadiusTp {
-    -moz-border-radius: 5px 5px 0 0;
-    border-radius: 5px 5px 0 0;
-}
-
-.borderRadiusBtm {
-    -moz-border-radius: 0 0 5px 5px;
-    border-radius: 0 0 5px 5px;
-}
-
-.ddcommon {
-    position: relative;
-    display: -moz-inline-stack;
-    zoom: 1;
-    display: inline-block;
-    *display: inline;
-    cursor: pointer;
-}
-
-.ddcommon ul {
-    padding: 0;
-    margin: 0;
-}
-
-.ddcommon ul li {
-    list-style-type: none;
-}
-
-.borderRadiusTp ul li:last-child {
-    -moz-border-radius: 0 0 5px 5px;
-    border-radius: 0 0 5px 5px;
-    border-bottom: 0 none var(--ok-line-strong);
-}
-
-.borderRadiusBtm ul li:first-child {
-    -moz-border-radius: 5px 5px 0 0;
-    border-radius: 5px 5px 0 0;
-    border-bottom: 1px solid var(--ok-line-strong);
-}
-
-.ddcommon .disabled img,
-.ddcommon .disabled span,
-.ddcommon.disabledAll {
-    opacity: .5;
-    /* standard: ff gt 1.5, opera, safari */
-    -ms-filter: "alpha(opacity=50)";
-    /* ie 8 */
-    filter: alpha(opacity=50);
-    /* ie lt 7 */
-    -khtml-opacity: .5;
-    /* safari 1.x */
-    -moz-opacity: .5;
-    /* ff lt 1.5, netscape */
-    color: #999999;
-}
-
-.ddcommon .clear {
-    clear: both
-}
-
-.ddcommon .shadow {
-    -moz-box-shadow: 5px 5px 5px -5px var(--ok-ink-muted);
-    -webkit-box-shadow: 5px 5px 5px -5px var(--ok-ink-muted);
-    box-shadow: 5px 5px 5px -5px var(--ok-ink-muted);
-}
-
-.ddcommon input.text {
-    color: #7e7e7e;
-    padding: 0 0 0 0;
-    position: absolute;
-    background: var(--ok-surface);
-    display: block;
-    width: 98%;
-    height: 98%;
-    left: 2px;
-    top: 0;
-    border: none;
-}
-
-.ddOutOfVision {
-    position: relative;
-    display: -moz-inline-stack;
-    display: inline-block;
-    zoom: 1;
-    *display: inline;
-}
-
-.borderRadius .shadow {
-    -moz-box-shadow: 5px 5px 5px -5px var(--ok-ink-muted);
-    -webkit-box-shadow: 5px 5px 5px -5px var(--ok-ink-muted);
-    box-shadow: 5px 5px 5px -5px var(--ok-ink-muted);
-}
-
-.borderRadiusBtm .shadow {
-    -moz-box-shadow: -5px -5px 5px -5px var(--ok-ink-muted);
-    -webkit-box-shadow: -5px -5px 5px -5px var(--ok-ink-muted);
-    box-shadow: -5px -5px 5px -5px var(--ok-ink-muted)
-}
-
-.borderRadiusTp .border,
-.borderRadius .border {
-    -moz-border-radius: 0 0 5px 5px;
-    border-radius: 0 0 5px 5px;
-}
-
-.borderRadiusBtm .border {
-    -moz-border-radius: 5px 5px 0 0;
-    border-radius: 5px 5px 0 0;
-}
-
-img.fnone {
-    float: none !important
-}
-
-.ddcommon .divider {
-    display: none;
-}
-
-.ddcommon .ddArrow {
-    display: inline-block;
-    position: absolute;
-    right: 4px;
-}
-
-.ddcommon .ddArrow:hover {
-    background-position: 0 100%;
-}
-
-.ddcommon .ddTitle {
-    position: relative;
-    display: inline-block;
-    width: 100%;
-    border: 1px solid rgb(123, 123, 123);
-    appearance: none;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-    border-radius: 2px;
-    -webkit-border-radius: 2px;
-    -moz-border-radius: 2px;
-    transition: all 0.2s linear 0s;
-    height: 35px;
-    vertical-align: middle;
-    font-size: 14px;
-    font-weight: normal;
-    outline: 0;
-    line-height: 1.42857143;
-    color: var(--ok-ink);
-    background-color: rgb(255, 255, 255);
-    background-image: none;
-    padding: 1px 25px 1px 6px;
-    z-index: 1;
-}
-
-.ddcommon .ddTitle .ddTitleText {
-    display: block;
-}
-
-.ddcommon .ddTitle .ddTitleText .ddTitleText {
-    padding: 0;
-}
-
-.ddcommon .ddTitle .description {
-    display: block;
-}
-
-.ddcommon .ddTitle .ddTitleText img {
-    position: relative;
-    vertical-align: middle;
-    float: left
-}
-
-.ddcommon .ddChild {
-    position: absolute;
-    display: none;
-    width: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    zoom: 1;
-    z-index: var(--ok-z-dropdown)
-}
-
-.ddcommon .ddChild li {
-    clear: both;
-}
-
-.ddcommon .ddChild li .description {
-    display: block;
-}
-
-.ddcommon .ddChild li img {
-    border: 0 none;
-    position: relative;
-    vertical-align: middle;
-    float: left
-}
-
-.ddcommon .ddChild li.optgroup {
-    padding: 0;
-}
-
-.ddcommon .ddChild li.optgroup .optgroupTitle {
-    padding: 0 5px;
-    font-weight: bold;
-    font-style: italic
-}
-
-.ddcommon .ddChild li.optgroup ul li {
-    padding: 5px 5px 5px 15px
-}
-
-.ddcommon .noBorderTop {
-    border-top: none 0 !important;
-    padding: 0;
-    margin: 0;
-}
-
-
-/*************** default theme **********************/
-
-
-.dd .divider {
-    border-left: 1px solid var(--ok-line-strong);
-    border-right: 1px solid #fff;
-    ;
-    right: 24px;
-}
-.dd .ddArrow{
-    width: 16px;
-    height: 16px;
-    margin-top: 7px;
-}
-.dd .ddArrow:before {
-
-    content: "\f107";
-    display: inline-block;
-    border: 0;
-    font-family: FontAwesome;
-    font-style: normal;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 1.42857143;
-    color: var(--ok-ink);
-}
-
-.dd .ddArrow:hover {
-    background-position: 0 100%;
-}
-
-
-
-.dd .ddTitle .ddTitleText {
-    padding: 5px 20px 5px 5px;
-}
-
-.dd .ddTitle .ddTitleText .ddTitleText {
-    padding: 0;
-}
-
-.dd .ddTitle .description {
-    font-size: 12px;
-    color: #666
-}
-
-.dd .ddTitle .ddTitleText img {
-    padding-right: 5px;
-    max-width: 28px;
-}
-
-.dd .ddChild {
-    border: 1px solid var(--ok-line-strong);
-    background-color: var(--ok-surface);
-    left: -1px;
-}
-
-.dd .ddChild li {
-    padding: 5px;
-    background-color: var(--ok-surface);
-    border-bottom: 1px solid var(--ok-line-strong);
-}
-
-.dd .ddChild li .description {
-    color: #666;
-}
-
-.dd .ddChild li .ddlabel {
-    color: var(--ok-ink);
-}
-
-.dd .ddChild li.hover {
-    background-color: #f2f2f2
-}
-
-.dd .ddChild li img {
-    padding: 0 6px 0 0;
-    max-width: 28px;
-}
-
-.dd .ddChild li.optgroup {
-    padding: 0;
-}
-
-.dd .ddChild li.optgroup .optgroupTitle {
-    padding: 0 5px;
-    font-weight: bold;
-    font-style: italic
-}
-
-.dd .ddChild li.optgroup ul li {
-    padding: 5px 5px 5px 15px
-}
-
-.dd .ddChild li.selected {
-    background-color: #d5d5d5;
-    color: #000;
 }
 
 #footer,

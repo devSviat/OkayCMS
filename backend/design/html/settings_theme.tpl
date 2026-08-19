@@ -373,7 +373,7 @@
                                         </div>
                                         <div class="variables_box__right">
                                             <div class="">
-                                                <span{if !empty($value)} style="background-color: {$value|escape};"{/if} class="fn_color theme_color"></span>
+                                                <input type="color" class="fn_color theme_color" aria-label="{$btr->getTranslation('settings_theme_'|cat:$translation_name)|escape}">
                                                 <input name="css_colors[{$name|escape}]" class="form-control" type="hidden" value="{$value|escape}" />
                                             </div>
                                         </div>
@@ -398,8 +398,6 @@
     {/if}
 </form>
 
-<link rel="stylesheet" media="screen" type="text/css" href="design/js/colorpicker/css/colorpicker.css" />
-<script type="text/javascript" src="design/js/colorpicker/js/colorpicker.js"></script>
 
 <script type="text/javascript" src="design/js/tinymce_jq/tinymce.min.js"></script>
 {literal}
@@ -410,17 +408,21 @@
                 $(this).closest('.fn_row').remove();
             });
 
-            $(document).on("mouseenter click", ".fn_color", function () {
-                var elem = $(this);
-                elem.ColorPicker({
-                    onChange: function (hsb, hex, rgb) {
-                        elem.css('backgroundColor', '#' + hex);
-                        elem.next().val('#' + hex);
-                    },
-                    onBeforeShow: function () {
-                        $(this).ColorPickerSetColor($(this).next().val());
-                    }
-                });
+            /* Серед змінних теми є не лише кольори - тінь лежить цілим значенням
+               box-shadow. Такі значення інпут показати не може, тому вони просто
+               лишаються недоторканими, поки користувач не вибере колір. */
+            $('input.fn_color').each(function () {
+                var raw = $(this).next('input').val();
+                if (/^#[0-9a-f]{3}$/i.test(raw)) {
+                    raw = raw.replace(/^#(.)(.)(.)$/, '#$1$1$2$2$3$3');
+                }
+                if (/^#[0-9a-f]{6}$/i.test(raw)) {
+                    this.value = raw;
+                }
+            });
+
+            $(document).on('input', 'input.fn_color', function () {
+                $(this).next('input').val(this.value);
             });
 
         });
