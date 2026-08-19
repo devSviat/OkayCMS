@@ -79,9 +79,9 @@
             noneSelectedText: '{/literal}{$btr->general_select_none|escape:'javascript'}{literal}',
             selectAllText: '{/literal}{$btr->general_select_all|escape:'javascript'}{literal}',
             deselectAllText: '{/literal}{$btr->general_select_none_action|escape:'javascript'}{literal}',
-            countSelectedText: function (numSelected) {
-                return '{/literal}{$btr->general_select_count|escape:'javascript'}{literal}'.replace('{0}', numSelected);
-            }
+            // {0} підставляє сам плагін (bootstrap-select.js:764), тож тут рядок,
+            // а не функція.
+            countSelectedText: '{/literal}{$btr->general_select_count|escape:'javascript'}{literal}'
         };
         {/literal}
     </script>
