@@ -824,14 +824,9 @@
                         /* evt.items заповнений лише при множинному перетягуванні. */
                         draggedRows = evt.items && evt.items.length ? evt.items : [evt.item];
                         $(".fn_pagination a.droppable").addClass("drop_active");
-                        /* Панель масових дій висить над пагінацією; поки тягнемо, вона
-                           не має перехоплювати події, інакше рядок не донести до номера
-                           сторінки. */
-                        $("body").addClass("fn_sort_dragging");
                     },
                     onEnd: function () {
                         $(".fn_pagination a.droppable").removeClass("drop_active drop_hover");
-                        $("body").removeClass("fn_sort_dragging");
                     },
                     /* Галка й вибір мусять означати те саме: перетягуємо рівно те,
                        що відмічено для масових дій. */
