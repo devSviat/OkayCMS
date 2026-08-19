@@ -246,7 +246,7 @@ class BackendFilePickerHelper
             return null;
         }
 
-        $root = rtrim($this->config->root_dir, '/') . '/' . self::UPLOAD_DIR;
+        $root = rtrim((string)$this->config->get('root_dir'), '/') . '/' . self::UPLOAD_DIR;
 
         if (!is_dir($root)) {
             return null;

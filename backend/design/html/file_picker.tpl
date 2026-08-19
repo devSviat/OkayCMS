@@ -1,6 +1,6 @@
 {$wrapper='' scope=global}
 <!DOCTYPE html>
-<html lang="{$manager->lang|escape}">
+<html lang="{$picker_lang|escape}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,6 +24,11 @@
            стояла вище за поле пошуку. */
         .file_picker__upload {
             margin: 0;
+        }
+        .file_picker__total {
+            font-size: 12px;
+            white-space: nowrap;
+            color: var(--ok-ink-muted);
         }
         .file_picker__file {
             position: absolute;
@@ -120,6 +125,8 @@
             <input type="text" name="q" class="form-control" value="{$picker_query|escape}"
                    placeholder="{$btr->file_picker_search|escape}">
         </form>
+
+        <span class="file_picker__total">{$btr->file_picker_total|escape}: {$picker_total|escape}</span>
 
         <label class="file_picker__upload btn btn_small btn-info">
             <input type="file" class="file_picker__file fn_picker_file" multiple>

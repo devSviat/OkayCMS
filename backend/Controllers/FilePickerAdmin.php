@@ -18,6 +18,9 @@ class FilePickerAdmin extends IndexAdmin
 
     private const SCRIPT = 'backend/design/js/okay-file-picker.js';
 
+    /** В адмінці мова зветься "ua", а в BCP-47 українська це "uk". */
+    private const LANG_TAGS = ['ua' => 'uk'];
+
     public function fetch(BackendFilePickerHelper $filePickerHelper)
     {
         $type = $this->fileType();
@@ -46,7 +49,9 @@ class FilePickerAdmin extends IndexAdmin
         $this->design->assign('picker_total', $list['total']);
         // Версія CMS між правками скрипта не змінюється, тому браузер тримав
         // би стару копію: мітка часу файла - єдине, що тут справді змінюється.
-        $this->design->assign('picker_script_version', (int)@filemtime($this->config->root_dir . self::SCRIPT));
+        $lang = !empty($this->manager->lang) ? $this->manager->lang : 'en';
+        $this->design->assign('picker_lang', self::LANG_TAGS[$lang] ?? $lang);
+        $this->design->assign('picker_script_version', (int)@filemtime($this->config->get('root_dir') . self::SCRIPT));
 
         $this->response->setContent($this->design->fetch('file_picker.tpl'));
     }

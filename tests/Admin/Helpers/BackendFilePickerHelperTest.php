@@ -290,9 +290,8 @@ class BackendFilePickerHelperTest extends TestCase
     private function helper(): BackendFilePickerHelper
     {
         $config = $this->createStub(Config::class);
-        // Config::__get делегує в get(), але в заглушці перекриті обидва.
         $root = $this->root . '/';
-        $config->method('__get')->willReturnCallback(
+        $config->method('get')->willReturnCallback(
             static fn ($name) => $name === 'root_dir' ? $root : null
         );
 
