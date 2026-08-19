@@ -68,6 +68,7 @@
     <link rel="icon" href="design/images/favicon.png" type="image/x-icon" />
 
     <script>okayDatepicker.lang = '{$manager->lang|escape:'javascript'}';</script>
+    <script>okayModal.closeLabel = '{$btr->general_close|escape:'javascript'}';</script>
 
     {*Маршрут Controller@method рендерить той самий шаблон, тож суфікс методу
       треба зняти - інакше сторінка лишиться без календаря.*}
@@ -319,7 +320,7 @@
         </div>
         {*Меню админ. панели*}
         <div class="sidebar sidebar-menu">
-            <div class="scrollbar-inner menu_items">
+            <div class="scrollbar-inner menu_items fn_scroll_overlay">
                 <div>
                     <form class="fn_manager_menu">
                         <input type="hidden" name="object" value="managers" />

@@ -5279,8 +5279,46 @@ body.menu-pin .page-container {
     scrollbar-width: thin;
     scrollbar-color: var(--ok-line-strong) transparent;
 }
+/* Меню бічної панелі - виняток: там смуга не має займати місця. Плагін малював
+   свою поверх вмісту, а рідна класична (Windows, Linux) забирає ширину й зсуває
+   пункти вліво. Прокрутка лишається, зникає тільки жолоб. */
 #admin_catalog .scrollbar-inner{
-    scrollbar-color: var(--ok-chrome-ink-muted) transparent;
+    scrollbar-width: none;
+}
+#admin_catalog .scrollbar-inner::-webkit-scrollbar{
+    width: 0;
+    height: 0;
+}
+/* Смужку малює okay-scrollbar.js: доріжка лежить поверх вмісту, тому ширину
+   контейнера не чіпає. Без скрипта її просто немає - прокрутка від цього не
+   залежить. */
+.okay_scrollbar{
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    right: 3px;
+    width: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+}
+.okay_scrollbar.is-active{
+    opacity: 1;
+    pointer-events: auto;
+}
+.okay_scrollbar__thumb{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.24);
+    cursor: default;
+}
+.okay_scrollbar__thumb:hover,
+.is-dragging .okay_scrollbar__thumb{
+    background-color: rgba(255, 255, 255, 0.42);
 }
 #mob_menu {
     top: -100%;
@@ -7474,6 +7512,10 @@ input[type=range]:focus::-ms-fill-upper {
     transition: transform 0.3s ease-out;
 }
 
+.modal.in {
+    display: block;
+}
+
 .modal.in .modal-dialog {
     -webkit-transform: translate(0, 0);
     -ms-transform: translate(0, 0);
@@ -7501,6 +7543,59 @@ input[type=range]:focus::-ms-fill-upper {
     background-clip: padding-box;
     outline: 0;
     border-radius: 8px;
+}
+
+/* Оболонка, у якій відкривається те, що раніше відкривав fancyBox: ширину
+   задає сам вміст, як задавав і він. */
+.fn_modal_shim {
+    /* Вище бічної панелі: у шкалі z-index модалка під нею, і вузьке вікно
+       підтвердження з нею не перетинається, а вміст завширшки з контент - так. */
+    z-index: var(--ok-z-overlay);
+}
+.fn_modal_shim .modal-dialog {
+    width: -moz-fit-content;
+    width: fit-content;
+    min-width: 320px;
+    max-width: calc(100vw - 40px);
+}
+.fn_modal_shim .modal-body {
+    padding: 0;
+    max-height: calc(100vh - 160px);
+    overflow: auto;
+}
+.modal_shim_close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--ok-ink-muted);
+    cursor: pointer;
+    z-index: 1;
+}
+.modal_shim_close::before,
+.modal_shim_close::after {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 15px;
+    width: 14px;
+    height: 2px;
+    background: currentColor;
+}
+.modal_shim_close::before {
+    transform: rotate(45deg);
+}
+.modal_shim_close::after {
+    transform: rotate(-45deg);
+}
+.modal_shim_close:hover {
+    color: var(--ok-ink);
+    background: var(--ok-sunken);
 }
 
 .modal-backdrop {
@@ -8970,7 +9065,7 @@ input.error {
     width: 500px !important;
     max-width: 100%!important;
 }
-.popup .fancybox-close-small {
+.popup .modal_shim_close {
     right: 5px;
     top: 10px;
 }
@@ -9058,21 +9153,21 @@ input.error {
     transition-duration: .3s;
 }
 
-.fancybox-slide--current .popup_animated,
-.fancybox-slide--current .popup_animated .form__footer,
-.fancybox-slide--current .popup_animated .form__header,
-.fancybox-slide--current .popup_animated .form__body {
+.modal.in .popup_animated,
+.modal.in .popup_animated .form__footer,
+.modal.in .popup_animated .form__header,
+.modal.in .popup_animated .form__body {
     transform: translateY(0);
     opacity: 1;
     transition-duration: .3s;
 }
-.fancybox-slide--current .popup_animated .form__header {
+.modal.in .popup_animated .form__header {
     transition-delay: .1s;
 }
-.fancybox-slide--current .popup_animated .form__body {
+.modal.in .popup_animated .form__body {
     transition-delay: .2s;
 }
-.fancybox-slide--current .popup_animated .form__footer{
+.modal.in .popup_animated .form__footer{
     transition-delay: .4s;
 }
 .discount_change_type {
