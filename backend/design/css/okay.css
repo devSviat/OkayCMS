@@ -5289,6 +5289,37 @@ body.menu-pin .page-container {
     width: 0;
     height: 0;
 }
+/* Смужку малює okay-scrollbar.js: доріжка лежить поверх вмісту, тому ширину
+   контейнера не чіпає. Без скрипта її просто немає - прокрутка від цього не
+   залежить. */
+.okay_scrollbar{
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    right: 3px;
+    width: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+}
+.okay_scrollbar.is-active{
+    opacity: 1;
+    pointer-events: auto;
+}
+.okay_scrollbar__thumb{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.24);
+    cursor: default;
+}
+.okay_scrollbar__thumb:hover,
+.is-dragging .okay_scrollbar__thumb{
+    background-color: rgba(255, 255, 255, 0.42);
+}
 #mob_menu {
     top: -100%;
     position: absolute;

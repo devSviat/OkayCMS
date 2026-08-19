@@ -319,7 +319,7 @@
         </div>
         {*Меню админ. панели*}
         <div class="sidebar sidebar-menu">
-            <div class="scrollbar-inner menu_items">
+            <div class="scrollbar-inner menu_items fn_scroll_overlay">
                 <div>
                     <form class="fn_manager_menu">
                         <input type="hidden" name="object" value="managers" />

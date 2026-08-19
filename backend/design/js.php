@@ -17,6 +17,7 @@ return [
     (new Js('bootstrap-select.js')),
     (new Js('a11y-dialog/a11y-dialog.js')),
     (new Js('okay-modal.js')),
+    (new Js('okay-scrollbar.js')),
     (new Js('intro_js/intro.js')),
     (new Js('toastr.min.js')),
     (new Js('Sortable.js')),
