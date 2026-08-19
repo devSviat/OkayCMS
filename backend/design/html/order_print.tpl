@@ -177,7 +177,7 @@
         z-index: 1100;
     }
     </style>
-    <script src="design/js/jquery/jquery.js?v=3.7.1"></script>
+    <script src="design/js/jquery/jquery.js?v=4.0.0"></script>
     <script>
         $(function(){
             $('.fn_design_block_name').parent().addClass('design_block_parent_element');

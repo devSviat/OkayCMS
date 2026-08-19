@@ -170,32 +170,44 @@
   //</editor-fold>
 
   // Case insensitive contains search
-  $.expr.pseudos.icontains = function (obj, index, meta) {
-    var $obj = $(obj);
-    var haystack = ($obj.data('tokens') || $obj.text()).toString().toUpperCase();
-    return haystack.includes(meta[3].toUpperCase());
-  };
+  $.expr.pseudos.icontains = $.expr.createPseudo(function (arg) {
+    var needle = arg.toUpperCase();
+    return function (obj) {
+      var $obj = $(obj);
+      var haystack = ($obj.data('tokens') || $obj.text()).toString().toUpperCase();
+      return haystack.includes(needle);
+    };
+  });
 
   // Case insensitive begins search
-  $.expr.pseudos.ibegins = function (obj, index, meta) {
-    var $obj = $(obj);
-    var haystack = ($obj.data('tokens') || $obj.text()).toString().toUpperCase();
-    return haystack.startsWith(meta[3].toUpperCase());
-  };
+  $.expr.pseudos.ibegins = $.expr.createPseudo(function (arg) {
+    var needle = arg.toUpperCase();
+    return function (obj) {
+      var $obj = $(obj);
+      var haystack = ($obj.data('tokens') || $obj.text()).toString().toUpperCase();
+      return haystack.startsWith(needle);
+    };
+  });
 
   // Case and accent insensitive contains search
-  $.expr.pseudos.aicontains = function (obj, index, meta) {
-    var $obj = $(obj);
-    var haystack = ($obj.data('tokens') || $obj.data('normalizedText') || $obj.text()).toString().toUpperCase();
-    return haystack.includes(meta[3].toUpperCase());
-  };
+  $.expr.pseudos.aicontains = $.expr.createPseudo(function (arg) {
+    var needle = arg.toUpperCase();
+    return function (obj) {
+      var $obj = $(obj);
+      var haystack = ($obj.data('tokens') || $obj.data('normalizedText') || $obj.text()).toString().toUpperCase();
+      return haystack.includes(needle);
+    };
+  });
 
   // Case and accent insensitive begins search
-  $.expr.pseudos.aibegins = function (obj, index, meta) {
-    var $obj = $(obj);
-    var haystack = ($obj.data('tokens') || $obj.data('normalizedText') || $obj.text()).toString().toUpperCase();
-    return haystack.startsWith(meta[3].toUpperCase());
-  };
+  $.expr.pseudos.aibegins = $.expr.createPseudo(function (arg) {
+    var needle = arg.toUpperCase();
+    return function (obj) {
+      var $obj = $(obj);
+      var haystack = ($obj.data('tokens') || $obj.data('normalizedText') || $obj.text()).toString().toUpperCase();
+      return haystack.startsWith(needle);
+    };
+  });
 
   /**
    * Remove all diatrics from the given text.
@@ -767,7 +779,7 @@
       }
 
       //strip all html-tags and trim the result
-      this.$button.attr('title', $.trim(title.replace(/<[^>]*>?/g, '')));
+      this.$button.attr('title', title.replace(/<[^>]*>?/g, '').trim());
       this.$button.children('.filter-option').html(title);
 
       this.$element.trigger('rendered.bs.select');
@@ -1692,7 +1704,7 @@
 
         $items.each(function () {
           if (!$(this).hasClass('disabled')) {
-            if ($.trim($(this).children('a').text().toLowerCase()).substring(0, 1) == keyCodeMap[e.keyCode]) {
+            if ($(this).children('a').text().toLowerCase().trim().substring(0, 1) == keyCodeMap[e.keyCode]) {
               keyIndex.push($(this).index());
             }
           }
@@ -1702,7 +1714,7 @@
         count++;
         $(document).data('keycount', count);
 
-        prevKey = $.trim($(':focus').text().toLowerCase()).substring(0, 1);
+        prevKey = $(':focus').text().toLowerCase().trim().substring(0, 1);
 
         if (prevKey != keyCodeMap[e.keyCode]) {
           count = 1;
