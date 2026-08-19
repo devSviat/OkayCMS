@@ -170,8 +170,13 @@
 {literal}
     <script type="text/javascript">
         $(function() {
+            {/literal}
+            {* На телефоні поле віддається як type="date", тобто календар дає сам
+               браузер: другий накладався б поверх нативного. *}
+            {if !$is_mobile && !$is_tablet}{literal}
             okayDatepicker('input[name="date_from"]');
             okayDatepicker('input[name="date_to"]');
+            {/literal}{/if}{literal}
             $('button#fn_start').on('click', function() {
                 do_export();
             });

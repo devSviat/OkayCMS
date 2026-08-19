@@ -3640,6 +3640,14 @@ label.switch_label i{
     word-break: normal;
     overflow-wrap: anywhere;
 }
+/* Плагін малює галочку вибраного пункту як <span class="fa fa-check">, а
+   Font Awesome у форку немає - лишалась порожня рамка. Малюємо тим самим
+   набором, що й решта іконок контролів. */
+.bootstrap-select.btn-group.show-tick .dropdown-menu li.selected a span.check-mark{
+    width: 14px;
+    height: 14px;
+    background: var(--ok-icon-check-dark) center / 14px no-repeat;
+}
 .okay_list .okay_list_loc_pos{
     float: right;
 }
