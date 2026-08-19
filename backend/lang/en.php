@@ -629,7 +629,6 @@ $lang['theme_perform'] = 'Do you want to perform this action?';
 $lang['theme_perform_yes'] = 'Yes';
 $lang['theme_perform_no'] = 'No';
 $lang['theme_themes'] = 'Templates';
-$lang['tinymce_init_filemanager'] = 'File manager';
 $lang['topic_close'] = 'Close theme';
 $lang['topic_closed'] = 'Topic is closed';
 $lang['topic_message'] = 'Message';

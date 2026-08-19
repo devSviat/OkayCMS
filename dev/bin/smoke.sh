@@ -332,7 +332,8 @@ for probe in \
     "$(cd .. && ls design/*/preview.png 2>/dev/null | head -1)" \
     "$(cd .. && find backend/design/css -name '*.css' 2>/dev/null | head -1)" \
     "$(cd .. && find Okay/Modules -path '*design/images/*.png' 2>/dev/null | head -1)" \
-    "$(cd .. && ls Okay/Modules/*/*/preview.png 2>/dev/null | head -1)"; do
+    "$(cd .. && ls Okay/Modules/*/*/preview.png 2>/dev/null | head -1)" \
+    "backend/design/js/okay-file-picker.js"; do
     # Порожній probe означає, що дерево переїхало, а не що все гаразд:
     # мовчазний пропуск прибрав би покриття без жодного сигналу.
     if [ -z "$probe" ]; then
@@ -353,7 +354,6 @@ for p in /vendor/composer/installed.json /vendor/autoload.php /vendor/bin/phpuni
          /config/config.php /tests/bootstrap.php /docs/README.md /dev/docker-compose.yml \
          /1DB_changes/okay_clean.sql \
          /backend/design/js.php /backend/lang/ru.php \
-         /backend/design/js/filemanager/config/config.php \
          /design/vibe_shop/js.php /design/vibe_shop/html/index.tpl \
          /Okay/Core/Response.php; do
     expect_status 404 "$p"

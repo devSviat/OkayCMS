@@ -49,7 +49,6 @@ class CookieAttributesTest extends TestCase
             'user referer'     => ['Okay/Core/UserReferer/UserReferer.php'],
             'user helper'      => ['Okay/Helpers/UserHelper.php'],
             'index admin'      => ['backend/Controllers/IndexAdmin.php'],
-            'filemanager'      => ['backend/design/js/filemanager/dialog.php'],
             'storefront index' => ['index.php'],
         ];
     }

@@ -223,14 +223,9 @@ server {
             return 404;
         }
 
-        # Конфіг файлового менеджера — облікові дані й шляхи.
-        location ~ ^/backend/design/js/filemanager/config/ {
-            return 404;
-        }
-
-        # PHP під backend/design/ — лише два дерева справжніх точок входу.
+        # PHP під backend/design/ — одне дерево справжніх точок входу.
         # js.php і css.php поруч включаються з коду, по HTTP їх не запитують.
-        location ~ ^/backend/design/(?!js/(filemanager|admintooltip)/).*\.php$ {
+        location ~ ^/backend/design/(?!js/admintooltip/).*\.php$ {
             return 404;
         }
 

@@ -9,7 +9,6 @@ parameters:
         - backend
     excludePaths:
         - Okay/Modules/*/vendor/*
-        - backend/design/js/filemanager/*
         - backend/design/compiled/*
         - Okay/xml/compiled/*
     bootstrapFiles:

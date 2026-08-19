@@ -33,14 +33,13 @@ RewriteRule ^vendor/.* - [F]
 RewriteRule ^backend/(Controllers|Helpers|Requests|Entities)/ - [R=404,L]
 RewriteRule ^backend/lang/ - [R=404,L]
 RewriteRule ^backend/design/compiled/ - [R=404,L]
-RewriteRule ^backend/design/js/filemanager/config/ - [R=404,L]
 
-# Під backend/design/ — лише статика за розширенням і .php двох точок входу.
+# Під backend/design/ — лише статика за розширенням і .php однієї точки входу.
 # Без цього віддавались .tpl, .htaccess і сміття вендорних JS-бібліотек.
 # json тут немає навмисно: жоден шаблон його не просить, а package.json
 # вендорної бібліотеки повідомляв її точну версію без авторизації.
 RewriteCond $1 !\.(css|js|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|html?)$ [NC]
-RewriteCond $1 !^backend/design/js/(filemanager|admintooltip)/.+\.php$ [NC]
+RewriteCond $1 !^backend/design/js/admintooltip/.+\.php$ [NC]
 RewriteRule ^(backend/design/.*)$ index.php [L,QSA]
 
 # Вихідні файли до ресайзу не публічні.

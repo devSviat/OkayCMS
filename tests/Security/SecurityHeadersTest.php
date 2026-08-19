@@ -4,6 +4,7 @@ namespace Security;
 
 use Okay\Core\Response;
 use Okay\Core\Security\SecurityHeaders;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 
@@ -60,14 +61,28 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringContainsString('Location: ', $body);
     }
 
-    /** Точки входу файлового менеджера обходять Okay\Core\Response. */
-    public function testFilemanagerEntryPointsSendTheSameDefaults()
+    /**
+     * Заголовки ставить Okay\Core\Response, тож точка входу, яка віддає
+     * відповідь повз нього, лишається без них. Раніше такими були процедурні
+     * входи файлового менеджера і їм доводилось слати заголовки самим.
+     */
+    #[DataProvider('entryPointProvider')]
+    public function testEveryEntryPointAnswersThroughResponse($file)
     {
-        $source = file_get_contents(
-            dirname(__DIR__, 2) . '/backend/design/js/filemanager/include/okay_access.php'
-        );
-        $this->assertIsString($source);
+        $source = file_get_contents(dirname(__DIR__, 2) . '/' . $file);
+        $this->assertIsString($source, $file);
 
-        $this->assertStringContainsString('SecurityHeaders::defaults()', $source);
+        $this->assertStringContainsString('Okay\Core\Response', $source, $file);
+    }
+
+    public static function entryPointProvider()
+    {
+        return [
+            'storefront'   => ['index.php'],
+            'backend'      => ['backend/index.php'],
+            'ajax config'  => ['backend/ajax/configure.php'],
+            'admintooltip' => ['backend/design/js/admintooltip/admintooltip.php'],
+            'backend files'=> ['backend/files/index.php'],
+        ];
     }
 }
