@@ -50,9 +50,10 @@ services:
     security_opt:
       - "no-new-privileges:true"
     healthcheck:
-      # Перевіряє, що php-fpm слухає порт, а не лише що живий CLI-бінарник.
-      # Подвоєний $$ обов'язковий — інакше Compose з'їсть $f.
-      test: ["CMD-SHELL", "php -r '$$f=@fsockopen(\"127.0.0.1\", 9000); exit($$f ? 0 : 1);'"]
+      # HTTP-запит, а не перевірка порту: FrankenPHP — це і вебсервер теж, тож
+      # має сенс питати його те, що він реально віддає. robots.txt — статика з
+      # білого списку, вона не тягне ні PHP, ні базу.
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8080/robots.txt"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -89,30 +90,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-
-  nginx:
-    image: nginx:1.29.8-alpine
-    restart: unless-stopped
-    depends_on:
-      php85:
-        condition: service_started
-    environment:
-      TZ: ${TZ:-Europe/Kyiv}
-      # DNS-ім'я сервісу, а не ${APP_NAME}-php85: щоб `docker compose -p
-      # other-name up` теж працював.
-      FASTCGI: php85
-      VIRTUAL_HOST: ${VIRTUAL_HOST:?err}
-    networks:
-      - frontend
-    volumes:
-      - './config/nginx/templates:/etc/nginx/templates:ro'
-    security_opt:
-      - "no-new-privileges:true"
-    healthcheck:
-      test: ["CMD-SHELL", "nginx -t"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
 
   mariadb:
     image: mariadb:10.11.18
