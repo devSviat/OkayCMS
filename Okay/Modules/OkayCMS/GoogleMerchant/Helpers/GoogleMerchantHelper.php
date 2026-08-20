@@ -209,7 +209,8 @@ class GoogleMerchantHelper
         $result['g:condition']['data'] = 'new';
 
         $price = round($product->price, 2);
-        $comparePrice = round($product->compare_price, 2);
+        // compare_price nullable: товар без старої ціни дає null.
+        $comparePrice = round((float)$product->compare_price, 2);
         if (isset($this->allCurrencies[$product->currency_id])) {
             // Переводим в основную валюту сайта
             $variantCurrency = $this->allCurrencies[$product->currency_id];
@@ -245,7 +246,7 @@ class GoogleMerchantHelper
             unset($product->features[$productColor]);
         }
 
-        if (!empty($allCategories[$product->main_category_id])) {
+        if (!empty($product->main_category_id) && !empty($allCategories[$product->main_category_id])) {
             $categoryPath = $allCategories[$product->main_category_id]->path;
 
             $productType = '';

@@ -296,7 +296,10 @@ class XmlFeedHelper
      */
     public function getDescriptionTemplate($product): string
     {
-        $category = $this->allCategories[$product->main_category_id];
+        // main_category_id nullable, а null як індекс масиву - Deprecated,
+        // причому ні ?? ні isset() цього не знімають: індекс обчислюється
+        // раніше. getCategoryField() порожню категорію вже терпить.
+        $category = $this->categoryOfProduct($product);
         $descriptionTemplate = '';
         if ($data = $this->getCategoryField($category, 'auto_description')) {
             $descriptionTemplate = $data;
@@ -314,7 +317,7 @@ class XmlFeedHelper
      */
     public function getAnnotationTemplate($product): string
     {
-        $category = $this->allCategories[$product->main_category_id];
+        $category = $this->categoryOfProduct($product);
         $annotationTemplate = '';
         if ($data = $this->getCategoryField($category, 'auto_annotation')) {
             $annotationTemplate = $data;
@@ -369,6 +372,23 @@ class XmlFeedHelper
         return $mataDataParts; // No ExtenderFacade
     }
 
+    /**
+     * Головна категорія товару або null, якщо її немає.
+     *
+     * @param object $product
+     * @return object|null
+     */
+    private function categoryOfProduct($product)
+    {
+        $categoryId = $product->main_category_id ?? null;
+
+        if (empty($categoryId)) {
+            return null;
+        }
+
+        return $this->allCategories[$categoryId] ?? null;
+    }
+
     public function getCategoryField($category, $fieldName)
     {
         if (empty($category)) {
@@ -402,9 +422,14 @@ class XmlFeedHelper
         return $product; // No ExtenderFacade
     }
 
+    /**
+     * Сюди приходить будь-яке поле товару, зокрема з nullable-колонки: опис,
+     * артикул, бренд. Приведення до рядка лишає результат тим самим, але не
+     * друкує Deprecated у тіло фіда.
+     */
     public function escape($str)
     {
-        return htmlspecialchars(strip_tags($str)); // no ExtenderFacade
+        return htmlspecialchars(strip_tags((string)$str)); // no ExtenderFacade
     }
 
     /**

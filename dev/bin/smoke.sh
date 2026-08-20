@@ -306,11 +306,37 @@ expect_contains "the virtual host still serves the storefront" \
 # Покривають лише GET-рендеринг: логіку відправки форм — ні.
 # Голок кілька: з debug_mode фатал друкується в тіло, а статус лишається 200,
 # тож на код відповіді покладатись не можна.
+# З html_errors (типово увімкнено разом із display_errors) PHP друкує
+# "<b>Deprecated</b>:", тож голка "Deprecated:" такого не бачить. Тому обидві
+# форми - інакше перевірка зелена на сторінці, повній попереджень.
+PHP_DIAGNOSTICS=(
+    "Deprecated:" "Deprecated</b>"
+    "Warning:" "Warning</b>"
+    "Notice:" "Notice</b>"
+    "Fatal error:" "Fatal error</b>"
+    "Parse error:" "Parse error</b>"
+    "Uncaught"
+)
+
 for pg in "/" "/cart" "/blog" "/brands"; do
-    for diagnostic in "Deprecated:" "Warning:" "Notice:" "Fatal error:" "Parse error:" "Uncaught"; do
+    for diagnostic in "${PHP_DIAGNOSTICS[@]}"; do
         expect_missing "no PHP diagnostics leak into the page: ${pg} (${diagnostic})" \
             "$diagnostic" \
             curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}${pg}"
+    done
+done
+
+# Фіди дивиться не людина, а робот магазину — зіпсований вміст тут нікому не
+# впаде в око. Адреси з типового дампа; на іншій базі вони дадуть 404, і
+# перевірка стане беззмістовною, тому першим іде контроль, що фід віддається.
+expect_contains "the product feed is served at all (control for the checks below)" \
+    "<item>" \
+    curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/google/1.xml"
+for feed in "/google/1.xml" "/hotline/feed.xml" "/rozetka/feed.xml"; do
+    for diagnostic in "${PHP_DIAGNOSTICS[@]}" "/var/www/"; do
+        expect_missing "no PHP diagnostics leak into the feed: ${feed} (${diagnostic})" \
+            "$diagnostic" \
+            curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}${feed}"
     done
 done
 
