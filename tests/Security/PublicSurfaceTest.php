@@ -200,10 +200,8 @@ class PublicSurfaceTest extends TestCase
     }
 
     /**
-     * У nginx умова зіставлялась із $request_uri, а він містить рядок запиту,
-     * тож /backend/index.php?controller=AuthAdmin під `…index\.php$` не
-     * підпадав. path_regexp у Caddy бачить лише шлях, тож без окремої умови
-     * редірект з'їдає параметри — і вхід в адмінку ламається.
+     * path_regexp бачить лише шлях, тож без окремої умови на порожній query
+     * редірект зрізає параметри — і вхід в адмінку ламається.
      */
     public function testCaddyfileIndexPhpRedirectKeepsQueryStrings(): void
     {
@@ -222,8 +220,8 @@ class PublicSurfaceTest extends TestCase
     }
 
     /**
-     * Матчер описує рівно один сегмент під backend/ajax/. Ендпоінт, покладений
-     * глибше, під нього не підпаде — а помітно це стане лише в браузері.
+     * Матчер описує рівно один сегмент під backend/ajax/: ендпоінт, покладений
+     * глибше, під нього не підпадає.
      */
     public function testEveryAjaxEndpointTemplatesAskForIsCoveredByTheMatcher(): void
     {
@@ -257,8 +255,8 @@ class PublicSurfaceTest extends TestCase
     /**
      * У Caddy header — обробник у ланцюжку route, тож усе, записане до
      * термінальної php, лягає й на фолбек. А фолбек тут — HTML-сторінка 404
-     * магазину з Set-Cookie: `public, max-age=31536000` на ній конфліктував із
-     * `no-store` від PHP, а `default-src 'none'` знімав із неї стилі.
+     * магазину зі Set-Cookie, якій не можна ні `public, max-age`, ні
+     * `default-src 'none'`.
      */
     public function testCaddyfileFilesHeadersDoNotReachTheFrontController(): void
     {
@@ -282,7 +280,7 @@ class PublicSurfaceTest extends TestCase
 
     /**
      * Помилку file_server Caddy пише повз обробник header сайту, тож без
-     * handle_errors на кожній 404 статики лишався Server: FrankenPHP Caddy.
+     * handle_errors на 404 статики лишається заголовок Server.
      */
     public function testCaddyfileStripsTheServerHeaderFromErrorResponses(): void
     {

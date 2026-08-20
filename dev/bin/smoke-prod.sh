@@ -116,12 +116,10 @@ expect_contains "vendor/autoload.php is present (composer install ran)" \
 
 echo
 echo "prod image over HTTP (regression test: the web root must not be empty)"
-# Регресія, яку це ловить: образ, зібраний без дерева застосунку, віддавав 404
-# на кожен запит, і жодна перевірка цього не бачила. Раніше сюди йшла окрема
-# стадія nginx-prod; тепер вебсервер вбудований у той самий прод-образ, тож
-# перевіряється рівно те, що поїде в продакшн.
-# Caddyfile запечений в образ (COPY у стадії base), тож монтувати нічого не
-# треба — на відміну від vhost-шаблону nginx, який підключався ззовні.
+# Регресія, яку це ловить: образ, зібраний без дерева застосунку, віддає 404 на
+# кожен запит. Вебсервер вбудований у той самий прод-образ, тож перевіряється
+# рівно те, що поїде в продакшн.
+# Caddyfile запечений в образ (COPY у стадії base), тож монтувати нічого не треба.
 if ! docker run -d --name "$app_stub_name" -p "127.0.0.1::8080" "$image_tag" >/dev/null; then
     echo "FAIL  the prod container could not be started"
     fails=$((fails + 1))
@@ -130,11 +128,10 @@ fi
 # Чекаємо, поки сервер справді почне відповідати, а не фіксований sleep.
 app_port=""
 app_ready=0
-# Гейт мусить бути і суворим, і повним. `curl -sS` без -f зараховує будь-яку
-# HTTP-відповідь, включно з 500 на ще не піднятому застосунку, — і давав хибний
-# червоний нижче. А сам robots.txt іде через file_server, тобто не доводить, що
-# PHP уже виконується: тому другим кроком запит у фронт-контролер, від якого без
-# бази очікується 500, а не 404 і не обрив зʼєднання.
+# Гейт мусить бути і суворим, і повним: `curl -sS` без -f зараховує будь-яку
+# відповідь, включно з 500 на ще не піднятому застосунку, а robots.txt іде через
+# file_server і не доводить, що PHP виконується. Звідси другий крок — запит у
+# фронт-контролер, від якого без бази очікується 500.
 for _ in $(seq 1 60); do
     app_port=$(docker port "$app_stub_name" 8080/tcp 2>/dev/null | head -1 | cut -d: -f2)
     [ -n "$app_port" ] || { sleep 1; continue; }
@@ -168,11 +165,8 @@ else
     expect_missing "prod image: / does not 404 (index.php is present and executes, unlike an empty web root)" \
         "404" \
         sh -c "curl -sS -o /dev/null -w '%{http_code}' -H 'Host: ${VIRTUAL_HOST:-okaycms.loc}' http://127.0.0.1:${app_port}/"
-    # Раніше тут ловилась заглушка "Welcome to nginx". Її аналог у FrankenPHP —
-    # штатний Caddyfile образу з коренем /app/public, якого в нашому образі
-    # немає: якби наш конфіг не запікся, / віддавав би 404, що вже перевірено
-    # вище. Лишається довести, що працює саме наш білий список, а не дефолтний
-    # file_server: дозволений шлях віддається, а сусідній у тій самій теці — ні.
+    # Доводить, що діє саме наш білий список, а не дефолтний file_server:
+    # дозволений шлях віддається, а сусідній у тій самій теці — ні.
     expect_contains "prod image: the whitelist is in effect (an allowed asset is served)" \
         "200" \
         sh -c "curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${app_port}/design/okay_shop/preview.png"

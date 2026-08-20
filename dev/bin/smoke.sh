@@ -171,8 +171,7 @@ expect_contains "timezone is Europe/Kyiv" \
     "Europe/Kyiv" \
     docker compose exec -T php85 php -r 'echo ini_get("date.timezone");'
 
-# Порівнюється рядок цілком: `php -m | grep dom` збігається ще й з `random`,
-# тож видалене розширення лишалось непоміченим.
+# Порівнюється рядок цілком: `php -m | grep dom` збігається ще й з `random`.
 loaded_extensions=$(docker compose exec -T php85 php -m 2>/dev/null | tr -d '\r')
 for ext in pdo_mysql mysqli gd zip xsl xmlwriter SimpleXML dom xmlreader curl mbstring json; do
     if printf '%s\n' "$loaded_extensions" | grep -qxi "$ext"; then
@@ -223,9 +222,9 @@ expect_contains "mariadb is attached to the backend network" \
     docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$mariadb_cid"
 # У dev mariadb додатково у frontend, інакше опублікований порт був би тихим
 # no-op'ом: для internal-мережі Docker не створює NAT. У прод — лише backend.
-# Вебсервер і PHP — один контейнер (FrankenPHP), тож перевіряти нічого
-# резолвити. Лишається структурний факт: php85 мусить бути в обох мережах —
-# у frontend, щоб публікація порту працювала, і в backend, щоб бачити базу.
+# Вебсервер і PHP — один контейнер, тож резолвити нічого. Лишається структурний
+# факт: php85 мусить бути в обох мережах — у frontend заради публікації порту, у
+# backend заради бази.
 frontend_net="$(printf '%s' "${APP_NAME:?err}" | tr '[:upper:]' '[:lower:]')_frontend"
 php_cid=$(docker compose ps -q php85)
 expect_contains "php85 is attached to the frontend network (it is the web tier now)" \
@@ -396,14 +395,14 @@ else
 fi
 
 # 404 від file_server Caddy пише повз обробник header сайту, тож без
-# handle_errors тут лишався Server: FrankenPHP Caddy.
+# handle_errors заголовок Server лишається у відповіді.
 expect_missing "a missing static file does not disclose the server software" \
     "Server:" \
     curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
         "http://127.0.0.1:${HTTP_PORT}/js_libraries/smoke-no-such-file.js"
 
-# Той самий обробник знімає з помилки й кеш-заголовки: без цього браузер і CDN
-# запам'ятовували «файла немає» на рік і переживали викладку самого файла.
+# Той самий обробник знімає з помилки й кеш-заголовки: інакше браузер і CDN
+# памʼятають «файла немає» рік і переживають викладку самого файла.
 expect_missing "a missing static file is not cached for a year" \
     "max-age=31536000" \
     curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
@@ -539,8 +538,8 @@ else
     printf '  ok    X-Powered-CMS carries no version\n'
 fi
 # Контроль самого вимірювача: заголовок, який точно є, мусить знаходитись.
-# Раніше якорем був Server: — тепер його прибирає сам Caddyfile (`header
-# -Server`), тож якорем стало Content-Type, який є в кожній відповіді.
+# Якір — Content-Type, бо він є в кожній відповіді: Server прибирає сам
+# Caddyfile, тож на ньому перевірка була б завжди порожньою.
 if printf '%s' "$headers" | grep -qi "^Content-Type:"; then
     printf '  ok    the header check itself works (Content-Type: is found)\n'
 else

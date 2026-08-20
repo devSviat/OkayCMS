@@ -80,8 +80,7 @@ WORKDIR /var/www/html
 # документація Caddy.
 #
 # Останнім шаром base навмисно: конфіг правиться найчастіше, а вище лежить
-# завантаження supercronic по мережі — у зворотному порядку кожна правка
-# Caddyfile тягла б його наново.
+# завантаження supercronic по мережі.
 COPY dev/config/caddy/Caddyfile /etc/frankenphp/Caddyfile
 
 # Caddyfile слухає :8080, а не :80. Причина — no-new-privileges:true в compose:
@@ -110,9 +109,8 @@ ENV COMPOSER_HOME=/var/www/.composer \
     COMPOSER_CACHE_DIR=/var/www/.composer/cache
 RUN mkdir -p "${COMPOSER_CACHE_DIR}" && chown -R www-data:www-data /var/www/.composer
 
-# php-fpm скидав привілеї сам: майстер під root, воркери під www-data.
-# У FrankenPHP процес один, тож користувача треба задати явно — інакше
-# compiled/ і cache/ у bind-mount заповнились би файлами root.
+# Процес один, тож користувача треба задати явно — інакше compiled/ і cache/
+# у bind-mount заповнюються файлами root.
 USER www-data
 
 # ─────────────────────────────── prod ───────────────────────────────
