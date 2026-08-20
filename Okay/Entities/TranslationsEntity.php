@@ -321,11 +321,12 @@ class TranslationsEntity extends Entity
             $fileLangGeneral = __DIR__ . '/../lang_general/' . $langLabel . '.php';
             if (file_exists($fileLangGeneral)) {
                 $lang_general = [];
-                if ($force === false) {
-                    require_once $fileLangGeneral;
-                } else {
-                    require $fileLangGeneral;
-                }
+                // Саме require: файл лише присвоює $lang_general, і повторне
+                // виконання коштує майже нічого. З require_once друге
+                // включення в тому самому процесі лишало б масив порожнім, а
+                // вітрину - без перекладів. Від повторних читань береже кеш у
+                // $generalVars, а не спосіб включення.
+                require $fileLangGeneral;
 
                 foreach ($lang_general as $id => $translationValue) {
                     $translations[$id] = (object) [
@@ -354,11 +355,9 @@ class TranslationsEntity extends Entity
             $langFile = $this->getReadLangFile($langLabel, $this->frontTemplateConfig->getTheme());
             if (file_exists($langFile)) {
                 $lang = array();
-                if ($force === false) {
-                    require_once $langFile;
-                } else {
-                    require $langFile;
-                }
+                // Те саме, що й для загальних перекладів: require_once лишав би
+                // тему без перекладів з другого запиту в процесі.
+                require $langFile;
 
                 foreach ($lang as $id => $translationValue) {
                     $translations[$id] = (object)[

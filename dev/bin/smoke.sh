@@ -711,6 +711,56 @@ else
     fi
 fi
 
+# Переклади теми й ядра приходять із PHP-файлів. Якщо їх включити через
+# require_once, у живому процесі другий запит дістане порожній масив - сторінка
+# лишиться без підписів, а форми без значень у кнопках. Ззовні це виглядає як
+# «нічого не сталось», тож перевіряється явно.
+theme=$(sql "SELECT value FROM ok_settings WHERE param='theme';")
+main_lang=$(sql "SELECT label FROM ok_languages ORDER BY position LIMIT 1;")
+lang_file="design/${theme}/lang/${main_lang}.php"
+
+# Кандидати - досить довгі значення без розмітки, щоб збіг на сторінці не був
+# випадковим.
+candidates=$(docker compose exec -T php85 php -r "
+    \$lang = [];
+    if (!is_file('${lang_file}')) { exit; }
+    require '${lang_file}';
+    foreach (\$lang as \$value) {
+        if (is_string(\$value) && mb_strlen(\$value) >= 8 && !preg_match('~[<>{}\\\\\$]~', \$value)) {
+            echo \$value, PHP_EOL;
+        }
+    }
+" 2>/dev/null | head -60)
+
+jar_t=$(mktemp)
+first_page=$(storefront "$jar_t" "/")
+marker=""
+while IFS= read -r candidate; do
+    [ -n "$candidate" ] || continue
+    if [[ "$first_page" == *"$candidate"* ]]; then
+        marker=$candidate
+        break
+    fi
+done <<< "$candidates"
+
+if [ -z "$marker" ]; then
+    printf '  FAIL  no theme translation from %s is visible on the storefront: the check proves nothing\n' "$lang_file"
+    fails=$((fails + 1))
+else
+    lost=no
+    for _ in 1 2 3 4; do
+        page=$(storefront "$jar_t" "/")
+        [[ "$page" == *"$marker"* ]] || lost=yes
+    done
+    if [ "$lost" = "no" ]; then
+        printf '  ok    theme translations survive later requests in the same process\n'
+    else
+        printf '  FAIL  theme translations vanish after the first request ("%s" is gone)\n' "$marker"
+        fails=$((fails + 1))
+    fi
+fi
+rm -f "$jar_t"
+
 # Привілей менеджера не має переходити на наступний анонімний запит: саме на
 # цьому тримаються показ невидимих сутностей і обхід site_work=off.
 hidden_url=$(sql "SELECT url FROM ok_products WHERE visible=1 ORDER BY id LIMIT 1;")
