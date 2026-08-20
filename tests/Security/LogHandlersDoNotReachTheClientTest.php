@@ -2,10 +2,13 @@
 
 namespace Security;
 
+use FilesystemIterator;
 use Monolog\Handler\HandlerInterface;
 use Okay\Core\OkayContainer\Reference\ServiceReference;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 /**
  * Монолог має три хендлери, які віддають записи не у файл, а у відповідь:
@@ -42,13 +45,17 @@ class LogHandlersDoNotReachTheClientTest extends TestCase
     }
 
     /**
-     * Модулі оголошують сервіси власним Init/services.php — обійти вимогу
-     * там так само просто, як і в ядрі.
+     * Конфіг ядра — не єдиний шлях: модуль оголошує сервіси власним
+     * Init/services.php, а хендлер можна запушити й просто з коду, як це
+     * робить Scheduler. Тому шукаємо по всьому дереву застосунку.
      */
-    public function testNoServiceConfigMentionsAClientFacingHandler(): void
+    public function testNoApplicationSourceMentionsAClientFacingHandler(): void
     {
+        $sources = $this->phpSources();
+        $this->assertNotEmpty($sources, 'Сканувати нічого — перевірка нічого не міряє');
+
         $offenders = [];
-        foreach ($this->serviceConfigFiles() as $file) {
+        foreach ($sources as $file) {
             $source = file_get_contents($file);
             $this->assertIsString($source);
 
@@ -94,12 +101,32 @@ class LogHandlersDoNotReachTheClientTest extends TestCase
     /**
      * @return list<string>
      */
-    private function serviceConfigFiles(): array
+    private function phpSources(): array
     {
-        $files = glob(self::root() . '/Okay/Core/config/*.php') ?: [];
-        $moduleFiles = glob(self::root() . '/Okay/Modules/*/*/Init/services.php') ?: [];
+        $files = [];
+        foreach (['/Okay', '/backend'] as $dir) {
+            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(
+                self::root() . $dir,
+                FilesystemIterator::SKIP_DOTS
+            ));
 
-        return array_values(array_merge($files, $moduleFiles));
+            foreach ($iterator as $file) {
+                if (!$file->isFile() || $file->getExtension() !== 'php' || !$file->isReadable()) {
+                    continue;
+                }
+
+                // backend/files — каталог завантажень, а не код застосунку.
+                if (str_starts_with($file->getPathname(), self::root() . '/backend/files/')) {
+                    continue;
+                }
+
+                $files[] = $file->getPathname();
+            }
+        }
+
+        sort($files);
+
+        return $files;
     }
 
     private function relative(string $file): string
