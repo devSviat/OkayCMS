@@ -63,6 +63,12 @@ class RequestOriginTest extends TestCase
             'non-http scheme'       => ['ftp://shop.example', null],
             'javascript scheme'     => ['javascript:alert(1)', null],
             'site url unparsable'   => ['https://shop.example', null, 'not a url'],
+            // Класична маскувалка: справжній хост тут evil.example.
+            'credentials mask the host' => ['https://shop.example@evil.example', null],
+            // Браузер облікових даних в Origin не шле; раз їх не буває в
+            // чесному заголовку, не приймаємо навіть зі своїм хостом.
+            'credentials, own host'     => ['https://user@shop.example', null],
+            'credentials with password' => ['https://user:pass@shop.example', null],
         ];
     }
 

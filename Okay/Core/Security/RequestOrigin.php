@@ -71,6 +71,12 @@ class RequestOrigin
             return null;
         }
 
+        // Браузер серіалізує Origin як scheme://host[:port] і облікових даних
+        // туди не кладе. Раз їх не буває в чесному заголовку - не приймаємо.
+        if (isset($parsed['user']) || isset($parsed['pass'])) {
+            return null;
+        }
+
         $normalized = $scheme . '://' . strtolower($parsed['host']);
 
         if (isset($parsed['port']) && (int)$parsed['port'] !== self::DEFAULT_PORTS[$scheme]) {
