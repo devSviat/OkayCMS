@@ -9,7 +9,7 @@
 # ─────────────────────────────── base ───────────────────────────────
 # Версії образів запінені до патча, оновлює їх Dependabot (.github/dependabot.yml).
 # Образ побудований на офіційному php:8.5, Debian 13 (trixie).
-FROM dunglas/frankenphp:1.12.0-php8.5-trixie AS base
+FROM dunglas/frankenphp:1.12.7-php8.5-trixie AS base
 
 # Образи оновлюються рідше, ніж Debian патчить пакети. Першим шаром — щоб усе
 # нижче лягало на пропатчену базу.
@@ -102,6 +102,13 @@ RUN apt-get update \
 
 COPY dev/config/php/custom.d/dev.ini    /usr/local/etc/php/custom.d/dev.ini
 COPY dev/config/php/custom.d/xdebug.ini /usr/local/etc/php/custom.d/xdebug.ini
+
+# HOME і XDG_CONFIG_HOME образу належать root, а exec тут іде під www-data:
+# без цього composer щоразу качає все наново («Cannot create cache directory»),
+# а config --global і require падають.
+ENV COMPOSER_HOME=/var/www/.composer \
+    COMPOSER_CACHE_DIR=/var/www/.composer/cache
+RUN mkdir -p "${COMPOSER_CACHE_DIR}" && chown -R www-data:www-data /var/www/.composer
 
 # php-fpm скидав привілеї сам: майстер під root, воркери під www-data.
 # У FrankenPHP процес один, тож користувача треба задати явно — інакше

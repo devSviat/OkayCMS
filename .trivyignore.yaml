@@ -5,4 +5,21 @@
 # інакше allowlist протухає мовчки.
 #
 # purls тут не працюють — Trivy 0.72 мовчки їх не збігає. Тільки id (+ paths).
-vulnerabilities: []
+vulnerabilities:
+  # Обидві — у залежностях, які Caddy вендорить під модулі, що наш Caddyfile не
+  # вмикає: валідація OpenAPI і xDS/gRPC. Коду немає на жодному шляху виконання,
+  # а оновити його можна лише разом із релізом FrankenPHP.
+  - id: GHSA-r277-6w6q-xmqw
+    paths:
+      - usr/local/bin/frankenphp
+    statement: >-
+      kin-openapi, ValidationHandler.Load(). Модуль валідації OpenAPI у
+      конфігурації не вмикається, обробник не створюється.
+    expired_at: 2026-11-20
+  - id: GHSA-hrxh-6v49-42gf
+    paths:
+      - usr/local/bin/frankenphp
+    statement: >-
+      grpc-go, xDS RBAC і HTTP/2. Ні xDS, ні gRPC-сервер у конфігурації не
+      вмикаються.
+    expired_at: 2026-11-20
