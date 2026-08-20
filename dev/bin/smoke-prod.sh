@@ -218,6 +218,7 @@ else
 /Okay/Core/Response.php|class Response
 /backend/lang/ru.php|<?php
 /design/okay_shop/js.php|<?php
+/worker.php|frankenphp_handle_request
 PATHS
     # Контроль самого вимірювача: маркер публічного файлу мусить
     # знаходитись, інакше «маркера немає» нічого не доводить.

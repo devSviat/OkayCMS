@@ -598,36 +598,58 @@ storefront() {
     curl -sS -b "$1" -c "$1" -L -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}$2"
 }
 
-# Поточна валюта видно в перемикачі: is-current стоїть на активному варіанті.
-current_currency() {
-    storefront "$1" "$2" | grep -A2 'is-current' | grep -oP '(?<=<span>)[^<]+' | tail -1
+# Валюта пізнається за міткою **біля числа**, а не за розміткою перемикача:
+# перемикач перелічує всі валюти, тож обидві мітки є на сторінці завжди. Одні
+# теми друкують знак, інші код, і мітка стоїть то перед числом, то після нього -
+# перевіряються всі чотири поєднання, і жодне не залежить від теми.
+#
+# Сторінка читається в змінну, а не в конвеєр: grep -q виходить на першому
+# збігу, і curl падає на SIGPIPE саме тоді, коли мітку знайдено.
+priced_in() { # сторінка, код, знак
+    local page=$1 label
+    for label in "$2" "$3"; do
+        [ -n "$label" ] || continue
+        [[ "$page" =~ [0-9][[:space:]]*"$label" ]] && return 0
+        [[ "$page" =~ "$label"[[:space:]]*[0-9] ]] && return 0
+    done
+    return 1
 }
 
-currency_ids=$(sql "SELECT id FROM ok_currencies WHERE enabled=1 ORDER BY id LIMIT 2;" | tr '\n' ' ')
-cur_a=$(printf '%s' "$currency_ids" | awk '{print $1}')
-cur_b=$(printf '%s' "$currency_ids" | awk '{print $2}')
+currency_pair=$(sql "SELECT CONCAT(id, '|', code, '|', sign) FROM ok_currencies WHERE enabled=1 ORDER BY id LIMIT 2;")
+cur_a=$(printf '%s\n' "$currency_pair" | sed -n 1p | cut -d'|' -f1)
+code_a=$(printf '%s\n' "$currency_pair" | sed -n 1p | cut -d'|' -f2)
+sign_a=$(printf '%s\n' "$currency_pair" | sed -n 1p | cut -d'|' -f3)
+cur_b=$(printf '%s\n' "$currency_pair" | sed -n 2p | cut -d'|' -f1)
+code_b=$(printf '%s\n' "$currency_pair" | sed -n 2p | cut -d'|' -f2)
+sign_b=$(printf '%s\n' "$currency_pair" | sed -n 2p | cut -d'|' -f3)
+priced_page="/products/$(sql "SELECT url FROM ok_products WHERE visible=1 ORDER BY id LIMIT 1;")"
 
-if [ -z "${cur_a:-}" ] || [ -z "${cur_b:-}" ] || [ "$cur_a" = "$cur_b" ]; then
+if [ -z "${cur_a:-}" ] || [ -z "${cur_b:-}" ] || [ "$code_a" = "$code_b" ]; then
     printf '  FAIL  need two enabled currencies to prove sessions do not leak\n'
     fails=$((fails + 1))
 else
     storefront "$jar_a" "/?currency_id=${cur_a}" > /dev/null
     storefront "$jar_b" "/?currency_id=${cur_b}" > /dev/null
 
-    name_a=$(current_currency "$jar_a" "/")
-    name_b=$(current_currency "$jar_b" "/")
+    page_a=$(storefront "$jar_a" "$priced_page")
+    page_b=$(storefront "$jar_b" "$priced_page")
 
-    # Контроль вимірювача: якщо дві сесії не розрізняються з самого початку,
-    # решта перевірки нічого не доводить.
-    if [ -z "$name_a" ] || [ "$name_a" = "$name_b" ]; then
-        printf '  FAIL  the currency probe cannot tell two sessions apart\n'
-        printf '        A=%s B=%s\n' "${name_a:-<empty>}" "${name_b:-<empty>}"
+    # Контроль вимірювача: якщо сторінка не показує знак обраної валюти або
+    # показує обидва, решта перевірки нічого не доводить.
+    if ! priced_in "$page_a" "$code_a" "$sign_a" \
+        || ! priced_in "$page_b" "$code_b" "$sign_b" \
+        || priced_in "$page_a" "$code_b" "$sign_b"; then
+        printf '  FAIL  the currency probe cannot tell two sessions apart on %s\n' "$priced_page"
+        printf '        expected A=%s/%s B=%s/%s\n' "$code_a" "$sign_a" "$code_b" "$sign_b"
         fails=$((fails + 1))
     else
         leaked=no
         for _ in 1 2 3; do
-            [ "$(current_currency "$jar_a" "/")" = "$name_a" ] || leaked=yes
-            [ "$(current_currency "$jar_b" "/")" = "$name_b" ] || leaked=yes
+            page_a=$(storefront "$jar_a" "$priced_page")
+            page_b=$(storefront "$jar_b" "$priced_page")
+            priced_in "$page_a" "$code_a" "$sign_a" || leaked=yes
+            priced_in "$page_b" "$code_b" "$sign_b" || leaked=yes
+            priced_in "$page_a" "$code_b" "$sign_b" && leaked=yes
         done
         if [ "$leaked" = "no" ]; then
             printf '  ok    currency does not leak between two customer sessions\n'
