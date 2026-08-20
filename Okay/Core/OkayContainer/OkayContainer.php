@@ -78,9 +78,15 @@ class OkayContainer implements ContainerInterface
         return $this->serviceStore[$id];
     }
 
+    /**
+     * Параметр з тим самим ключем має замінюватись, а не зшиватись:
+     * array_merge_recursive перетворив би два скаляри на масив із двох копій,
+     * і той, хто читає параметр, дістав би не те, що оголошував.
+     * Поруч bindServices() робить рівно це - звичайний merge.
+     */
     public function bindParameters(array $parameters)
     {
-        $this->parameters = array_merge_recursive($this->parameters, $parameters);
+        $this->parameters = array_replace_recursive($this->parameters, $parameters);
     }
 
     public function bindService($name, $service)
@@ -154,13 +160,23 @@ class OkayContainer implements ContainerInterface
             throw new ContainerException($name.' contains circular reference');
         }
 
+        // Замок тримається лише на час створення: він ловить кільце в
+        // залежностях. Якщо конструктор кинув виняток, замок мусить зникнути
+        // разом зі спробою, інакше наступне звернення до цього ж сервіса
+        // повідомить про кільце замість справжньої причини.
         $entry['lock'] = true;
 
-        $arguments = isset($entry['arguments']) ? $this->resolveArguments($entry['arguments']) : [];
+        try {
+            $arguments = isset($entry['arguments']) ? $this->resolveArguments($entry['arguments']) : [];
 
-        $reflector = new \ReflectionClass($entry['class']);
-        $service = $reflector->newInstanceArgs($arguments);
-        unset($reflector);
+            $reflector = new \ReflectionClass($entry['class']);
+            $service = $reflector->newInstanceArgs($arguments);
+            unset($reflector);
+        } finally {
+            // За ключем, а не через $entry: реєстр сервісів під час резолву
+            // може бути перезібраний (bindServices), і посилання відчепиться.
+            unset($this->services[$name]['lock']);
+        }
 
         return $service;
     }

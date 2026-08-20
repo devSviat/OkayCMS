@@ -50,7 +50,7 @@ failOnWarning="true"
 
 | Каталог | Класів | Про що |
 | ------- | ------ | ------ |
-| `tests/Core/` | 43 | Design і Smarty-плагіни, TemplateConfig, консоль, QueryFactory, модулі, сутності |
+| `tests/Core/` | 45 | Design і Smarty-плагіни, TemplateConfig, консоль, QueryFactory, DI-контейнер, модулі, сутності |
 | `tests/Security/` | 43 | CSRF вітрини й адмінки, вхід і відновлення пароля, вибирач файлів, обхід шляхів, заголовки, куки, SVG, хендлери логу |
 | `tests/TplMod/` | 7 | розбір і друк шаблонів, збіг анкерів `modifications` |
 | `tests/Admin/` | 13 | контролери й помічники адмінки |
