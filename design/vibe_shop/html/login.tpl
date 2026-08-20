@@ -10,6 +10,7 @@
 
     <div class="vs-auth__layout">
         <form method="post" class="fn_validate_login vs-form vs-auth__form">
+            <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
             <h2 class="vs-form__title" data-language="login_title_form">{$lang->login_title_form}</h2>
 
             {* Form error messages *}
