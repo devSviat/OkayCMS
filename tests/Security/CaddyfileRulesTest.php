@@ -377,6 +377,31 @@ class CaddyfileRulesTest extends TestCase
 
     // ───────────────────────────── перевірки ─────────────────────────────
 
+    /**
+     * Адмін-API Caddy увімкнений за замовчуванням, а тут вебсервер і PHP — один
+     * процес під одним UID: код застосунку дістає до 127.0.0.1:2019 звичайним
+     * file_get_contents, а POST /load замінює конфігурацію в памʼяті, тобто
+     * обходить увесь білий список нижче. У зв'язці nginx + php-fpm такої
+     * поверхні не було взагалі.
+     */
+    public function testTheCaddyAdminApiIsDisabled(): void
+    {
+        $source = $this->source();
+
+        // Глобальний блок — від `{` на початку рядка до парної `}` там само;
+        // фіксоване вікно тут не годиться, бо довжина коментарів у ньому росте.
+        $start = (int) strpos($source, "\n{\n");
+        $end = (int) strpos($source, "\n}\n", $start);
+        $global = substr($source, $start, $end - $start);
+
+        $this->assertMatchesRegularExpression(
+            '/^\s*admin\s+off\s*$/m',
+            $global,
+            'у глобальному блоці мусить бути `admin off`: інакше будь-який запис у дерево '
+            . 'чи SSRF із тілом перетворюється на виконання коду через POST /load'
+        );
+    }
+
     /** Сам розбір мусить щось знаходити — інакше решта тестів беззмістовна. */
     public function testTheParserSeesTheWholeChain(): void
     {

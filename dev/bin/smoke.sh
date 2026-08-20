@@ -409,6 +409,14 @@ expect_missing "a missing static file is not cached for a year" \
     curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
         "http://127.0.0.1:${HTTP_PORT}/js_libraries/smoke-no-such-file.js"
 
+# Адмін-API Caddy мусить бути вимкнений: вебсервер і PHP тут один процес під
+# одним UID, тож доступний застосунку control plane означав би виконання коду в
+# обхід усього білого списку. Перевіряється з самого PHP, а не з шела — саме він
+# і був би атакувальником.
+expect_contains "the Caddy admin API is unreachable from application PHP" \
+    "unreachable" \
+    docker compose exec -T php85 php -r 'echo @file_get_contents("http://127.0.0.1:2019/config/") === false ? "unreachable" : "REACHABLE";'
+
 # Класові дерева адмінки (PSR-4) — не точки входу.
 expect_status 404 "/backend/Controllers/IndexAdmin.php"
 expect_status 404 "/backend/Helpers/BackendProductsHelper.php"
