@@ -374,8 +374,18 @@ expect_missing "the storefront 404 page under files/ keeps its stylesheets" \
 
 # Контроль: на справжньому файлі ті самі заголовки мусять бути — інакше дві
 # перевірки вище проходили б і на порожній відповіді.
-real_file=$(cd .. && find files -type f \( -name '*.png' -o -name '*.jpg' \) | head -1)
+# originals/ виключені навмисно: вони свідомо йдуть у фронт-контролер і CSP не
+# отримують, тож як контроль не годяться. sort — щоб вибір не залежав від
+# порядку обходу каталогів, який на іншій машині інший.
+real_file=$(cd .. && find files -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' \) \
+    -not -path 'files/originals/*' | sort | head -1)
 if [ -n "$real_file" ]; then
+    # Спершу довести, що файл узагалі віддається: на 404 перевірка CSP нижче
+    # нічого не означала б.
+    expect_contains "the control file under files/ is served from disk" \
+        "200" \
+        curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${VIRTUAL_HOST}" \
+            "http://127.0.0.1:${HTTP_PORT}/$real_file"
     expect_contains "a real file under files/ still gets the sandbox CSP" \
         "Content-Security-Policy" \
         curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
