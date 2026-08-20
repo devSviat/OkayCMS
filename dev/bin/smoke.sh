@@ -343,6 +343,43 @@ expect_status 404 "/files/originals/logo.png"
 expect_contains "files/originals/ is answered by the storefront, not by a bare server 404" \
     "OkayCMS" \
     curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/files/originals/logo.png"
+
+# Ajax-точки входу адмінки виконуються, а не переписуються на backend/index.php.
+# Статус тут і є розрізнювачем: переписаний шлях віддав би 302 на форму входу,
+# а виконаний скрипт упирається у власний гейт configure.php (E_USER_ERROR).
+expect_status 500 "/backend/ajax/stat.php"
+
+# Заголовки дерева files/ не мусять лягати на фолбек до фронт-контролера: там
+# повна HTML-сторінка 404 із Set-Cookie, і `public, max-age` на ній конфліктує
+# з `no-store` від PHP, а CSP знімає з неї стилі.
+files_fallback() {
+    curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+        "http://127.0.0.1:${HTTP_PORT}/files/smoke-no-such-file.png"
+}
+expect_missing "the storefront 404 page under files/ is not marked publicly cacheable" \
+    "max-age=31536000" files_fallback
+expect_missing "the storefront 404 page under files/ keeps its stylesheets" \
+    "Content-Security-Policy" files_fallback
+
+# Контроль: на справжньому файлі ті самі заголовки мусять бути — інакше дві
+# перевірки вище проходили б і на порожній відповіді.
+real_file=$(cd .. && find files -type f \( -name '*.png' -o -name '*.jpg' \) | head -1)
+if [ -n "$real_file" ]; then
+    expect_contains "a real file under files/ still gets the sandbox CSP" \
+        "Content-Security-Policy" \
+        curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+            "http://127.0.0.1:${HTTP_PORT}/$real_file"
+else
+    printf '  FAIL  %s\n' "no file under files/ to check the CSP control against"
+    fails=$((fails + 1))
+fi
+
+# 404 від file_server Caddy пише повз обробник header сайту, тож без
+# handle_errors тут лишався Server: FrankenPHP Caddy.
+expect_missing "a missing static file does not disclose the server software" \
+    "Server:" \
+    curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+        "http://127.0.0.1:${HTTP_PORT}/js_libraries/smoke-no-such-file.js"
 # Шлях бандла береться з реальної сторінки, а не зашивається — в імені хеш вмісту.
 asset_path=$(curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/" 2>/dev/null \
     | grep -oE 'cache/(css|js)/[^"]+\.(css|js)' | head -1)

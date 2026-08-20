@@ -253,12 +253,21 @@ class PublicSurfaceTest extends TestCase
             );
         }
 
-        // Форма з матчером звужує виконання до однієї точки входу — теж дозволена.
-        $this->assertMatchesRegularExpression(
-            '#php\s+@\w+#',
-            implode("\n", $lines),
-            'звуження php матчером мусить лишитись — на ньому тримається backend/files/'
-        );
+        $source = implode("\n", $lines);
+
+        // Форма з матчером звужує виконання — теж дозволена, але сам матчер
+        // мусить бути прив'язаний до кореня URI: без ^ він ловить збіг будь-де
+        // в шляху, і /files/x/backend/ajax/evil.php став би точкою входу.
+        preg_match_all('#php\s+@(\w+)#', $source, $uses);
+        $this->assertNotEmpty($uses[1], 'звуження php матчером тримає backend/files/ і backend/ajax/');
+
+        foreach (array_unique($uses[1]) as $name) {
+            $this->assertMatchesRegularExpression(
+                '#@' . $name . '\s+path(_regexp)?\s+(\^|/)#',
+                $source,
+                "матчер @$name мусить описувати шлях від кореня URI"
+            );
+        }
     }
 
     /**
@@ -305,6 +314,101 @@ class PublicSurfaceTest extends TestCase
             '/files/originals/* ',
             substr($source, (int) strpos($source, '@denied path'), 120),
             'files/originals/ не має стояти серед шляхів, на які відповідають 404'
+        );
+    }
+
+    /**
+     * Шаблони адмінки б'ють у backend/ajax/*.php напряму. У nginx їх виконує
+     * `location ~ \.ph(p\d*|tml)$` під /backend/; без власного правила
+     * Caddyfile переписує їх на backend/index.php і замість JSON віддає
+     * HTML-сторінку адмінки — з кодом 200, тож на статусі це непомітно.
+     */
+    public function testCaddyfileKeepsBackendAjaxEntryPoints(): void
+    {
+        $source = $this->config(self::CADDYFILE);
+
+        $start = strpos($source, '@backend_ajax');
+        $this->assertIsInt($start, 'у Caddyfile немає правила для backend/ajax/');
+        $this->assertStringContainsString(
+            'php @backend_ajax',
+            substr($source, $start, 200),
+            'матчер backend/ajax/ мусить вести на php, інакше точки входу мовчки зникають'
+        );
+    }
+
+    /**
+     * Матчер описує рівно один сегмент під backend/ajax/. Ендпоінт, покладений
+     * глибше, під нього не підпаде — а помітно це стане лише в браузері.
+     */
+    public function testEveryAjaxEndpointTemplatesAskForIsCoveredByTheMatcher(): void
+    {
+        $referenced = [];
+        $templates = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($this->repoRoot() . '/backend/design/html')
+        );
+
+        foreach ($templates as $file) {
+            if ($file->getExtension() !== 'tpl') {
+                continue;
+            }
+            if (preg_match_all('#ajax/(\S+?\.php)#', (string) file_get_contents($file->getPathname()), $m)) {
+                $referenced = array_merge($referenced, $m[1]);
+            }
+        }
+
+        $referenced = array_unique($referenced);
+        $this->assertNotEmpty($referenced, 'шаблони адмінки мусять посилатись на ajax-ендпоінти');
+
+        foreach ($referenced as $endpoint) {
+            $this->assertFileExists($this->repoRoot() . '/backend/ajax/' . $endpoint);
+            $this->assertStringNotContainsString(
+                '/',
+                $endpoint,
+                "backend/ajax/$endpoint лежить глибше за один сегмент і не підпаде під матчер Caddyfile"
+            );
+        }
+    }
+
+    /**
+     * У Caddy header — обробник у ланцюжку route, тож усе, записане до
+     * термінальної php, лягає й на фолбек. А фолбек тут — HTML-сторінка 404
+     * магазину з Set-Cookie: `public, max-age=31536000` на ній конфліктував із
+     * `no-store` від PHP, а `default-src 'none'` знімав із неї стилі.
+     */
+    public function testCaddyfileFilesHeadersDoNotReachTheFrontController(): void
+    {
+        $source = $this->config(self::CADDYFILE);
+
+        $start = strpos($source, 'route @files {');
+        $this->assertIsInt($start, 'у Caddyfile немає маршруту для files/');
+        $block = substr($source, $start, 600);
+
+        $php = strpos($block, 'php @files_front');
+        $header = strpos($block, 'header {');
+        $this->assertIsInt($php, 'у route @files немає виклику php');
+        $this->assertIsInt($header, 'у route @files немає блоку header');
+
+        $this->assertGreaterThan(
+            $php,
+            $header,
+            'header мусить стояти після php: інакше Cache-Control і CSP лягають на HTML-фолбек'
+        );
+    }
+
+    /**
+     * Помилку file_server Caddy пише повз обробник header сайту, тож без
+     * handle_errors на кожній 404 статики лишався Server: FrankenPHP Caddy.
+     */
+    public function testCaddyfileStripsTheServerHeaderFromErrorResponses(): void
+    {
+        $source = $this->config(self::CADDYFILE);
+
+        $start = strpos($source, 'handle_errors {');
+        $this->assertIsInt($start, 'без handle_errors 404 від file_server лишає заголовок Server');
+        $this->assertStringContainsString(
+            '-Server',
+            substr($source, $start, 200),
+            'handle_errors мусить прибирати Server, інакше -Server на рівні сайту неповний'
         );
     }
 

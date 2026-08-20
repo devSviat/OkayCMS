@@ -56,7 +56,7 @@
 
 	encode zstd gzip
 
-	# Аналог client_max_body_size; узгоджено з upload_max_filesize в okay.ini.
+	# Аналог client_max_body_size — те саме значення, що було в nginx.
 	request_body {
 		max_size 100MB
 	}
@@ -80,6 +80,14 @@
 		?X-Content-Type-Options nosniff
 		?X-Frame-Options SAMEORIGIN
 		?Referrer-Policy strict-origin-when-cross-origin
+	}
+
+	# Помилку file_server (файла немає на диску) Caddy пише повз обробник
+	# header вище, тож на 404 статики лишався Server: FrankenPHP Caddy —
+	# рівно та підказка сканеру, заради якої стоїть `-Server`.
+	handle_errors {
+		header -Server
+		respond "" {err.status_code}
 	}
 
 	route {
@@ -209,15 +217,23 @@
 		#
 		# Фолбек на фронт-контролер обов'язковий: files/resized/ — це маршрут
 		# (Okay/Core/config/routes.php), копії створюються на перший запит.
+		# Заголовки стоять після php навмисно: у Caddy header — обробник у
+		# ланцюжку, і те, що записано до термінальної php, лягає й на
+		# фолбек. А фолбек — це повна HTML-сторінка 404 магазину з
+		# Set-Cookie, і на ній `public, max-age=31536000` конфліктував із
+		# `no-store` від PHP (спільний кеш міг роздати чужу сесію), а
+		# `default-src 'none'` знімав із неї стилі й скрипти. У nginx
+		# перехід на index.php — внутрішній редірект, тож add_header
+		# локейшена туди й не доходив.
 		@files path_regexp ^/files/.+\.(?i:png|jpe?g|gif|svg|webp|ico|pdf|zip|xlsx?|docx?|csv|mp3|mp4|ogg|webm)$
 		route @files {
+			try_files {path} /index.php
+			@files_front path /index.php
+			php @files_front
 			header {
 				Cache-Control "public, max-age=31536000"
 				Content-Security-Policy "default-src 'none'; sandbox"
 			}
-			try_files {path} /index.php
-			@files_front path /index.php
-			php @files_front
 			file_server
 		}
 
@@ -259,6 +275,15 @@
 			php @backend_files_entry
 			respond 404
 		}
+
+		# Ajax-точки входу адмінки: на них ідуть прямі запити з 19 шаблонів
+		# backend/design/html/ і з шаблону модуля Feeds. У nginx їх виконує
+		# `location ~ \.ph(p\d*|tml)$` під /backend/, тобто будь-який .php,
+		# що не потрапив під заборони. Тут матчер звужений до однієї теки й
+		# одного сегмента: нове дерево точок входу вимагатиме явного правила,
+		# а не з'явиться саме собою.
+		@backend_ajax path_regexp ^/backend/ajax/[^/]+\.php$
+		php @backend_ajax
 
 		# Статика адмінки — лише під design/ і лише за розширенням. Без цього
 		# віддавались .tpl, .htaccess і сміття вендорних JS-бібліотек
