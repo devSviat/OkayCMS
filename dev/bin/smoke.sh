@@ -556,6 +556,185 @@ else
 fi
 
 echo
+echo "Isolation between requests"
+# У classic mode процес помирає разом із запитом, тож ці перевірки там
+# тривіально зелені. Сенс вони мають у worker mode, і саме тому ганяються в
+# обох: розбіжність між режимами і є тим, що треба ловити.
+
+sql() {
+    docker compose exec -T mariadb sh -c \
+        "mariadb -uroot -p\"\${MYSQL_ROOT_PASSWORD}\" \"\${MYSQL_DATABASE}\" -N -B -e \"$1\"" 2>/dev/null
+}
+
+# Ціль переписування вітрини і оголошення воркера вмикаються лише разом. Одна
+# без другої дає або воркер, який не отримує запитів, або вітрину, яка виконує
+# скрипт воркера як звичайний.
+front_entry=$(docker compose exec -T php85 sh -c 'printf %s "${OKAY_FRONT_ENTRY:-}"')
+worker_config=$(docker compose exec -T php85 sh -c 'printf %s "${FRANKENPHP_CONFIG:-}"')
+case "$worker_config:$front_entry" in
+    ":/index.php"|":") mode=classic ;;
+    *worker*:/worker.php) mode=worker ;;
+    *) mode=broken ;;
+esac
+if [ "$mode" = "broken" ]; then
+    printf '  FAIL  FRANKENPHP_CONFIG and OKAY_FRONT_ENTRY disagree\n'
+    printf '        FRANKENPHP_CONFIG=%s OKAY_FRONT_ENTRY=%s\n' "$worker_config" "$front_entry"
+    fails=$((fails + 1))
+else
+    printf '  ok    request mode is consistent (%s)\n' "$mode"
+fi
+
+# Скрипт воркера не є публічним файлом: він іде у фронт-контролер, як і будь-що
+# інше поза білим списком.
+expect_contains "worker.php is not served as a file" \
+    "<!DOCTYPE html" \
+    sh -c "curl -sS -H 'Host: ${VIRTUAL_HOST}' 'http://127.0.0.1:${HTTP_PORT}/worker.php'"
+
+jar_a=$(mktemp)
+jar_b=$(mktemp)
+jar_m=$(mktemp)
+
+storefront() {
+    curl -sS -b "$1" -c "$1" -L -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}$2"
+}
+
+# Поточна валюта видно в перемикачі: is-current стоїть на активному варіанті.
+current_currency() {
+    storefront "$1" "$2" | grep -A2 'is-current' | grep -oP '(?<=<span>)[^<]+' | tail -1
+}
+
+currency_ids=$(sql "SELECT id FROM ok_currencies WHERE enabled=1 ORDER BY id LIMIT 2;" | tr '\n' ' ')
+cur_a=$(printf '%s' "$currency_ids" | awk '{print $1}')
+cur_b=$(printf '%s' "$currency_ids" | awk '{print $2}')
+
+if [ -z "${cur_a:-}" ] || [ -z "${cur_b:-}" ] || [ "$cur_a" = "$cur_b" ]; then
+    printf '  FAIL  need two enabled currencies to prove sessions do not leak\n'
+    fails=$((fails + 1))
+else
+    storefront "$jar_a" "/?currency_id=${cur_a}" > /dev/null
+    storefront "$jar_b" "/?currency_id=${cur_b}" > /dev/null
+
+    name_a=$(current_currency "$jar_a" "/")
+    name_b=$(current_currency "$jar_b" "/")
+
+    # Контроль вимірювача: якщо дві сесії не розрізняються з самого початку,
+    # решта перевірки нічого не доводить.
+    if [ -z "$name_a" ] || [ "$name_a" = "$name_b" ]; then
+        printf '  FAIL  the currency probe cannot tell two sessions apart\n'
+        printf '        A=%s B=%s\n' "${name_a:-<empty>}" "${name_b:-<empty>}"
+        fails=$((fails + 1))
+    else
+        leaked=no
+        for _ in 1 2 3; do
+            [ "$(current_currency "$jar_a" "/")" = "$name_a" ] || leaked=yes
+            [ "$(current_currency "$jar_b" "/")" = "$name_b" ] || leaked=yes
+        done
+        if [ "$leaked" = "no" ]; then
+            printf '  ok    currency does not leak between two customer sessions\n'
+        else
+            printf '  FAIL  currency leaks between customer sessions\n'
+            fails=$((fails + 1))
+        fi
+    fi
+
+    # Запит без куки не має успадкувати сесію попереднього відвідувача.
+    anon_sid=$(curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+        "http://127.0.0.1:${HTTP_PORT}/" | tr -d '\r' \
+        | sed -n 's/^[Ss]et-[Cc]ookie: okay_sid=\([^;]*\).*/\1/p' | head -1)
+    a_sid=$(awk '/okay_sid/ {print $7}' "$jar_a" | head -1)
+    if [ -n "$anon_sid" ] && [ "$anon_sid" != "$a_sid" ]; then
+        printf '  ok    an anonymous request starts its own session\n'
+    else
+        printf '  FAIL  an anonymous request reused another visitor session\n'
+        fails=$((fails + 1))
+    fi
+fi
+
+# Кошик покупця: те саме, але видно в грошах. Товар лежить у сесії, тож
+# перевіряється тим самим способом - двома сесіями поперемінно.
+add_to_cart() { # jar, url товару, variant_id
+    local token
+    token=$(storefront "$1" "/products/$2" \
+        | grep -oP 'name="customer_csrf_token"[^>]*value="\K[^"]+' | head -1)
+    curl -sS -b "$1" -c "$1" -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+        -d "customer_csrf_token=${token}&amount=1" \
+        "http://127.0.0.1:${HTTP_PORT}/cart/$3"
+}
+
+cart_variants() {
+    storefront "$1" "/cart" | grep -oP '(?<=cart/remove/)[0-9]+' | sort -u | tr '\n' ' ' | sed 's/ $//'
+}
+
+cart_pair=$(sql "SELECT v.id FROM ok_variants v JOIN ok_products p ON p.id = v.product_id WHERE p.visible = 1 ORDER BY v.id LIMIT 2;" | tr '\n' ' ')
+var_a=$(printf '%s' "$cart_pair" | awk '{print $1}')
+var_b=$(printf '%s' "$cart_pair" | awk '{print $2}')
+product_url=$(sql "SELECT url FROM ok_products WHERE visible=1 ORDER BY id LIMIT 1;")
+
+if [ -z "${var_a:-}" ] || [ -z "${var_b:-}" ] || [ "$var_a" = "$var_b" ]; then
+    printf '  FAIL  need two variants of visible products to check the cart\n'
+    fails=$((fails + 1))
+else
+    add_to_cart "$jar_a" "$product_url" "$var_a"
+    add_to_cart "$jar_b" "$product_url" "$var_b"
+
+    got_a=$(cart_variants "$jar_a")
+    got_b=$(cart_variants "$jar_b")
+
+    if [ "$got_a" != "$var_a" ] || [ "$got_b" != "$var_b" ]; then
+        printf '  FAIL  carts do not hold what was put in them: A=[%s] want %s, B=[%s] want %s\n' \
+            "$got_a" "$var_a" "$got_b" "$var_b"
+        fails=$((fails + 1))
+    else
+        printf '  ok    the cart does not leak between two customer sessions\n'
+    fi
+fi
+
+# Привілей менеджера не має переходити на наступний анонімний запит: саме на
+# цьому тримаються показ невидимих сутностей і обхід site_work=off.
+hidden_url=$(sql "SELECT url FROM ok_products WHERE visible=1 ORDER BY id LIMIT 1;")
+if [ -z "${hidden_url:-}" ]; then
+    printf '  FAIL  no product to check manager privileges with\n'
+    fails=$((fails + 1))
+else
+    csrf=$(curl -sS -c "$jar_m" -H "Host: ${VIRTUAL_HOST}" \
+        "http://127.0.0.1:${HTTP_PORT}/backend/index.php?controller=AuthAdmin" \
+        | grep -oP 'name="session_id"\s+value="\K[^"]+' | head -1)
+    curl -sS -b "$jar_m" -c "$jar_m" -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+        -d "login=admin&password=1234&session_id=${csrf}" \
+        "http://127.0.0.1:${HTTP_PORT}/backend/index.php?controller=AuthAdmin"
+
+    # Що вхід узагалі відбувся: інакше 404 у менеджера читався б як
+    # "привілеїв немає", хоча насправді немає сесії.
+    logged_in=$(curl -sS -o /dev/null -w '%{http_code}' -b "$jar_m" \
+        -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/backend/index.php?controller=ProductsAdmin")
+
+    sql "UPDATE ok_products SET visible=0 WHERE url='${hidden_url}';"
+
+    manager_code=$(curl -sS -o /dev/null -w '%{http_code}' -b "$jar_m" \
+        -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/products/${hidden_url}")
+    anon_code=$(curl -sS -o /dev/null -w '%{http_code}' \
+        -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/products/${hidden_url}")
+
+    sql "UPDATE ok_products SET visible=1 WHERE url='${hidden_url}';"
+
+    if [ "$logged_in" != "200" ]; then
+        printf '  FAIL  the manager probe proves nothing: the admin login did not take (%s)\n' "$logged_in"
+        fails=$((fails + 1))
+    elif [ "$manager_code" != "200" ]; then
+        printf '  FAIL  a logged-in manager got %s on a hidden product: privileges are\n' "$manager_code"
+        printf '        decided once per process instead of once per request\n'
+        fails=$((fails + 1))
+    elif [ "$anon_code" = "404" ]; then
+        printf '  ok    manager privileges do not carry over to the next anonymous request\n'
+    else
+        printf '  FAIL  an anonymous request saw a hidden product (%s) after a manager request\n' "$anon_code"
+        fails=$((fails + 1))
+    fi
+fi
+
+rm -f "$jar_a" "$jar_b" "$jar_m"
+
+echo
 if [ "$fails" -gt 0 ]; then
     printf '%d check(s) failed\n' "$fails"
     exit 1

@@ -103,7 +103,13 @@ jobs:
   # ліміт тіла, заголовки, редіректи. Решта джоб лишається без Docker.
   smoke:
     runs-on: ubuntu-latest
-    name: Smoke (Docker)
+    # Обидва режими на кожному PR: розбіжність між classic і worker і є тим,
+    # заради чого перевірка існує. Один прогін нічого про другий не каже.
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [classic, worker]
+    name: Smoke (Docker, ${{ matrix.mode }})
     steps:
       - uses: actions/checkout@v7
 
@@ -128,6 +134,13 @@ jobs:
           cp dev/.env-example dev/.env
           sed -i "s/^APP_UID=.*/APP_UID=$(id -u)/" dev/.env
           sed -i "s/^APP_GID=.*/APP_GID=$(id -g)/" dev/.env
+
+      - name: Switch to worker mode
+        if: matrix.mode == 'worker'
+        run: |
+          set -euo pipefail
+          sed -i 's|^FRANKENPHP_CONFIG=.*|FRANKENPHP_CONFIG="worker /var/www/html/worker.php 1"|' dev/.env
+          sed -i 's|^OKAY_FRONT_ENTRY=.*|OKAY_FRONT_ENTRY=/worker.php|' dev/.env
 
       - name: Start the stack
         working-directory: dev
