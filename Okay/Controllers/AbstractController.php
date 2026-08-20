@@ -165,6 +165,17 @@ class AbstractController
     {
         $this->serviceLocator->getService(StorefrontGuard::class)->requireCustomerCsrf($asJson);
     }
+
+    /**
+     * Пропускає лише POST зі сторінки цього ж магазину.
+     * Рубіж, який не залежить від того, чи друкує тема токен.
+     *
+     * @return void
+     */
+    protected function requireSameOrigin($asJson = false)
+    {
+        $this->serviceLocator->getService(StorefrontGuard::class)->requireSameOrigin($asJson);
+    }
     
     /*
      * Метод, который вызывается всегда после вызовом метода контроллера.

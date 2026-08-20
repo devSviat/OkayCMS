@@ -126,6 +126,12 @@ class UserController extends AbstractController
             $this->response->redirectTo(Router::generateUrl('user', [], true));
         }
 
+        if ($this->request->method('post')) {
+            // Реєстрація мутує стан, тож охороняється як решта форм вітрини.
+            $this->requireSameOrigin();
+            $this->requireCustomerCsrf();
+        }
+
         if ($this->request->method('post') && ($user = $userRequest->postRegisterUser())) {
             /*Валидация данных клиента*/
             if ($error = $validateHelper->getUserRegisterError($user)) {
@@ -150,6 +156,11 @@ class UserController extends AbstractController
         }
 
         if ($this->request->method('post')) {
+            // Без цього чужа сторінка входить у свій акаунт у браузері жертви,
+            // і подальші її замовлення лягають в чужу історію.
+            $this->requireSameOrigin();
+            $this->requireCustomerCsrf();
+
             $email    = $this->request->post('email');
             $password = $this->request->post('password');
             $this->design->assign('email', $email);
