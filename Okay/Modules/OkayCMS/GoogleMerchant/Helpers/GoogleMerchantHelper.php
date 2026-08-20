@@ -241,7 +241,7 @@ class GoogleMerchantHelper
 
         $productColor = $this->settings->get('okaycms__google_merchant__color');
 
-        if (isset($product->features[$productColor])) {
+        if (!empty($productColor) && isset($product->features[$productColor])) {
             $result['g:color']['data'] = $this->feedHelper->escape($product->features[$productColor]['values_string']);
             unset($product->features[$productColor]);
         }

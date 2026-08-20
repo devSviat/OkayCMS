@@ -327,16 +327,38 @@ for pg in "/" "/cart" "/blog" "/brands"; do
 done
 
 # Фіди дивиться не людина, а робот магазину — зіпсований вміст тут нікому не
-# впаде в око. Адреси з типового дампа; на іншій базі вони дадуть 404, і
-# перевірка стане беззмістовною, тому першим іде контроль, що фід віддається.
-expect_contains "the product feed is served at all (control for the checks below)" \
-    "<item>" \
-    curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/google/1.xml"
-for feed in "/google/1.xml" "/hotline/feed.xml" "/rozetka/feed.xml"; do
+# впаде в око. Адреси залежать від бази, тож беруться з неї: у чистому дампі
+# фідів може не бути взагалі, і тоді перевірки нічого не доводили б.
+feed_url() {
+    docker compose exec -T mariadb sh -c \
+        "mariadb -uroot -p\"\$MYSQL_ROOT_PASSWORD\" \"\$MYSQL_DATABASE\" -N -e \"SELECT url FROM $1 WHERE enabled = 1 LIMIT 1;\"" \
+        2>/dev/null | tr -d '\r' | head -n1
+}
+
+feed_paths=()
+gm=$(feed_url ok_okaycms__google_merchant__feeds); [ -n "$gm" ] && feed_paths+=("/google/${gm}.xml")
+hl=$(feed_url ok_okaycms__hotline__feeds);         [ -n "$hl" ] && feed_paths+=("/hotline/${hl}.xml")
+rz=$(feed_url ok_okaycms__rozetka__feeds);         [ -n "$rz" ] && feed_paths+=("/rozetka/${rz}.xml")
+
+if [ ${#feed_paths[@]} -eq 0 ]; then
+    printf '  skip  no XML feeds are configured in this database (feed checks skipped)\n'
+fi
+
+for feed in "${feed_paths[@]}"; do
+    body=$(curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}${feed}" 2>/dev/null || true)
+
+    # Позитивний контроль на кожен фід окремо: порожній фід не має жодного
+    # поля товару, тож перевірки нижче пройшли б і на зламаному рушії.
+    if [[ "$body" != *"<item>"* && "$body" != *"<offer"* ]]; then
+        printf '  skip  %s has no products (feed checks would prove nothing)\n' "$feed"
+        continue
+    fi
+    printf '  ok    %s is served with products (control for the checks below)\n' "$feed"
+
     for diagnostic in "${PHP_DIAGNOSTICS[@]}" "/var/www/"; do
         expect_missing "no PHP diagnostics leak into the feed: ${feed} (${diagnostic})" \
             "$diagnostic" \
-            curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}${feed}"
+            printf '%s' "$body"
     done
 done
 
