@@ -171,9 +171,15 @@ expect_contains "timezone is Europe/Kyiv" \
     "Europe/Kyiv" \
     docker compose exec -T php85 php -r 'echo ini_get("date.timezone");'
 
+# Порівнюється рядок цілком: `php -m | grep dom` збігається ще й з `random`.
+loaded_extensions=$(docker compose exec -T php85 php -m 2>/dev/null | tr -d '\r')
 for ext in pdo_mysql mysqli gd zip xsl xmlwriter SimpleXML dom xmlreader curl mbstring json; do
-    expect_contains "extension loaded: $ext" "$ext" \
-        docker compose exec -T php85 php -m
+    if printf '%s\n' "$loaded_extensions" | grep -qxi "$ext"; then
+        printf '  ok    %s\n' "extension loaded: $ext"
+    else
+        printf '  FAIL  %s\n' "extension loaded: $ext"
+        fails=$((fails + 1))
+    fi
 done
 
 echo
@@ -298,10 +304,14 @@ expect_contains "the virtual host still serves the storefront" \
 # заголовків і ламає редіректи, а не лише псує вигляд.
 #
 # Покривають лише GET-рендеринг: логіку відправки форм — ні.
+# Голок кілька: з debug_mode фатал друкується в тіло, а статус лишається 200,
+# тож на код відповіді покладатись не можна.
 for pg in "/" "/cart" "/blog" "/brands"; do
-    expect_missing "no PHP diagnostics leak into the page: ${pg}" \
-        "Deprecated:" \
-        curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}${pg}"
+    for diagnostic in "Deprecated:" "Warning:" "Notice:" "Fatal error:" "Parse error:" "Uncaught"; do
+        expect_missing "no PHP diagnostics leak into the page: ${pg} (${diagnostic})" \
+            "$diagnostic" \
+            curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}${pg}"
+    done
 done
 
 echo
@@ -316,6 +326,113 @@ echo "Public surface"
 expect_status 200 /
 expect_status 200 /robots.txt
 expect_status 302 /backend/
+# Канонізація index.php мусить спрацьовувати лише без рядка запиту: умова
+# зіставляється з $request_uri, який містить query, тож
+# /backend/index.php?controller=… під `…index\.php$` не підпадає. Інакше
+# редірект з'їдав би параметри й ламав вхід в адмінку - саме туди ядро шле
+# неавторизованого менеджера.
+expect_status 301 "/backend/index.php"
+expect_status 200 "/backend/index.php?controller=AuthAdmin"
+# Умова стоїть під `~*`, тож канонізація не зважає на регістр.
+expect_status 301 "/INDEX.PHP"
+# Оригінали завантажень назовні не віддаються, але це не серверна 404: і nginx,
+# і .htaccess шлють їх у фронт-контролер, щоб магазин намалював свою сторінку.
+# Перевіряється саме тіло - статус 404 однаковий і в порожньої відповіді.
+expect_status 404 "/files/originals/logo.png"
+expect_contains "files/originals/ is answered by the storefront, not by a bare server 404" \
+    "OkayCMS" \
+    curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/files/originals/logo.png"
+
+# Ajax-точки входу адмінки виконуються, а не переписуються на backend/index.php.
+# Статус тут і є розрізнювачем: переписаний шлях віддав би 302 на форму входу,
+# а виконаний скрипт упирається у власний гейт configure.php (E_USER_ERROR).
+expect_status 500 "/backend/ajax/stat.php"
+
+# Заголовки дерева files/ не мусять лягати на фолбек до фронт-контролера: там
+# повна HTML-сторінка 404 із Set-Cookie, і `public, max-age` на ній конфліктує
+# з `no-store` від PHP, а CSP знімає з неї стилі.
+files_fallback() {
+    curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+        "http://127.0.0.1:${HTTP_PORT}/files/smoke-no-such-file.png"
+}
+expect_missing "the storefront 404 page under files/ is not marked publicly cacheable" \
+    "max-age=31536000" files_fallback
+expect_missing "the storefront 404 page under files/ keeps its stylesheets" \
+    "Content-Security-Policy" files_fallback
+
+# Контроль: на справжньому файлі ті самі заголовки мусять бути - інакше дві
+# перевірки вище проходили б і на порожній відповіді.
+# originals/ виключені навмисно: вони свідомо йдуть у фронт-контролер і CSP не
+# отримують, тож як контроль не годяться. sort - щоб вибір не залежав від
+# порядку обходу каталогів, який на іншій машині інший.
+real_file=$(cd .. && find files -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' \) \
+    -not -path 'files/originals/*' | sort | head -1)
+if [ -n "$real_file" ]; then
+    # Спершу довести, що файл узагалі віддається: на 404 перевірка CSP нижче
+    # нічого не означала б.
+    expect_contains "the control file under files/ is served from disk" \
+        "200" \
+        curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${VIRTUAL_HOST}" \
+            "http://127.0.0.1:${HTTP_PORT}/$real_file"
+    expect_contains "a real file under files/ still gets the sandbox CSP" \
+        "Content-Security-Policy" \
+        curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+            "http://127.0.0.1:${HTTP_PORT}/$real_file"
+else
+    printf '  FAIL  %s\n' "no file under files/ to check the CSP control against"
+    fails=$((fails + 1))
+fi
+
+# server_tokens off лишає сам `Server: nginx`, але без версії - версія і є
+# підказкою для сканерів.
+expect_missing "a missing static file does not disclose the server version" \
+    "nginx/" \
+    curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+        "http://127.0.0.1:${HTTP_PORT}/js_libraries/smoke-no-such-file.js"
+
+# Кеш-заголовки дерев статики не мусять лягати на її ж 404: інакше браузер і CDN
+# памʼятають «файла немає» рік і переживають викладку самого файла.
+expect_missing "a missing static file is not cached for a year" \
+    "max-age=31536000" \
+    curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+        "http://127.0.0.1:${HTTP_PORT}/js_libraries/smoke-no-such-file.js"
+
+# Класові дерева адмінки (PSR-4) - не точки входу.
+expect_status 404 "/backend/Controllers/IndexAdmin.php"
+expect_status 404 "/backend/Helpers/BackendProductsHelper.php"
+
+# Сумісність зі старим URL адмінки і канонізація www.
+expect_status 302 "/admin"
+# Схема тут навмисно не перевіряється: правило nginx піднімає редірект до https,
+# розраховуючи на прод за TLS. Суть перевірки - що префікс www. зникає.
+expect_contains "www. is redirected to the same host without the prefix" \
+    "://${VIRTUAL_HOST}/" \
+    curl -sS -D- -o /dev/null -H "Host: www.${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/"
+
+# Базова трійка заголовків мусить доходити і до PHP-відповіді, і до статики.
+for header in "X-Content-Type-Options: nosniff" "X-Frame-Options: SAMEORIGIN" \
+              "Referrer-Policy: strict-origin-when-cross-origin"; do
+    expect_contains "the storefront sends ${header%%:*}" "$header" \
+        curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/"
+    expect_contains "robots.txt sends ${header%%:*}" "$header" \
+        curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/robots.txt"
+done
+
+# client_max_body_size сам по собі відхиляє запит, а не обрізає тіло мовчки -
+# інакше застосунок отримав би побитий файл замість помилки.
+oversized=$(mktemp)
+head -c 120000000 /dev/zero > "$oversized"
+oversized_code=$(curl -sS -o /dev/null -w '%{http_code}' -H 'Expect:' \
+    -H "Host: ${VIRTUAL_HOST}" --data-binary "@${oversized}" \
+    "http://127.0.0.1:${HTTP_PORT}/" 2>/dev/null || echo "000")
+rm -f "$oversized"
+if [ "$oversized_code" = "413" ]; then
+    printf '  ok    %s\n' "a body over the limit is refused instead of silently truncated"
+else
+    printf '  FAIL  %s\n' "a body over the limit is refused instead of silently truncated"
+    printf '        expected HTTP 413, actual: %s\n' "$oversized_code"
+    fails=$((fails + 1))
+fi
 # Шлях бандла береться з реальної сторінки, а не зашивається — в імені хеш вмісту.
 asset_path=$(curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/" 2>/dev/null \
     | grep -oE 'cache/(css|js)/[^"]+\.(css|js)' | head -1)

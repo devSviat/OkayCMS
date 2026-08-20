@@ -406,6 +406,35 @@ class PublicSurfaceTest extends TestCase
     }
 
     /** З /application/public конфіг не працює взагалі, і це помічають не одразу. */
+    /**
+     * Шаблони адмінки звертаються до backend/ajax/*.php напряму. Видалений або
+     * перейменований скрипт тут не дає ні 404 у логах, ні помилки збірки -
+     * кнопка просто перестає працювати.
+     */
+    public function testEveryAjaxEndpointTemplatesAskForExists(): void
+    {
+        $referenced = [];
+        $templates = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($this->repoRoot() . '/backend/design/html')
+        );
+
+        foreach ($templates as $file) {
+            if ($file->getExtension() !== 'tpl') {
+                continue;
+            }
+            if (preg_match_all('#ajax/(\S+?\.php)#', (string) file_get_contents($file->getPathname()), $m)) {
+                $referenced = array_merge($referenced, $m[1]);
+            }
+        }
+
+        $referenced = array_unique($referenced);
+        $this->assertNotEmpty($referenced, 'шаблони адмінки мусять посилатись на ajax-ендпоінти');
+
+        foreach ($referenced as $endpoint) {
+            $this->assertFileExists($this->repoRoot() . '/backend/ajax/' . $endpoint);
+        }
+    }
+
     public function testDocsExamplePointsAtTheRealRoot(): void
     {
         $source = $this->config('docs/nginx/nginx.conf');
