@@ -130,7 +130,9 @@ final class Kernel
             }
         } catch (TerminateRequest $terminate) {
             // Відповідь уже віддана: редірект, 304 або рання відсічка.
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            // Саме Throwable: під php-fpm TypeError лишав би по собі фатал у
+            // логу PHP, а в живому процесі забрав би з собою весь воркер.
 
             /** @var LoggerInterface $logger */
             $logger = $this->DI->get(LoggerInterface::class);
@@ -156,10 +158,13 @@ final class Kernel
             session_write_close();
         }
 
-        // Закриття сесії не забирає ідентифікатор із модуля сесій: без явного
-        // скидання наступний session_start() перевикористав би сесію
-        // попереднього покупця, бо $_COOKIE скидається, а це - ні.
-        session_id('');
+        // Без закриття сесія лишається активною, і startFrontend() наступного
+        // запиту вийшов би одразу - покупець отримав би $_SESSION попереднього.
+        //
+        // Ідентифікатор при цьому не скидається навмисно: session_id('')
+        // означає для PHP "створити нову", а не "прочитати куку", тож кожен
+        // запит діставав би порожню сесію. Куку читає session_start().
+        $_SESSION = [];
 
         RequestScopedState::reset();
 

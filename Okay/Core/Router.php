@@ -226,7 +226,10 @@ class Router {
                     $method = 'siteDisabled';
                 }
 
-                include_once 'Okay/Core/SmartyPlugins/SmartyPlugins.php';
+                // Саме include: файл реєструє плагіни в поточному інстансі
+                // Smarty, а не оголошує щось один раз. З include_once другий
+                // запит того самого процесу лишався б без плагінів ядра.
+                include 'Okay/Core/SmartyPlugins/SmartyPlugins.php';
 
                 DebugBar::stopMeasure('router');
                 // Если контроллер вернул false, кидаем 404

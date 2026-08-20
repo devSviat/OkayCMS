@@ -59,9 +59,18 @@ class CaddyfileRulesTest extends TestCase
      */
     private const REWRITE_TARGETS = [
         '* /index.php',
+        self::STOREFRONT_ENTRY,
+        '* /worker.php',
         '* /backend/index.php',
         '* /backend/design/js/admintooltip/admintooltip.php',
     ];
+
+    /**
+     * Ціль фолбека вітрини. Підстановка з оточення - єдине місце у файлі, де
+     * ціль не літерал, і саме тому написання тут зафіксоване дослівно: без
+     * цього воно могло б тихо стати {path}, і php виконувала б запитаний шлях.
+     */
+    private const STOREFRONT_ENTRY = '* {$OKAY_FRONT_ENTRY:/index.php}';
 
     /** Дерева, у яких html дозволений — рівно там, де його дозволяє nginx. */
     private const HTML_ALLOWED_UNDER = ['/backend/design/'];
@@ -397,6 +406,32 @@ class CaddyfileRulesTest extends TestCase
     }
 
     /** Сам розбір мусить щось знаходити — інакше решта тестів беззмістовна. */
+    /**
+     * Підстановка з оточення виводить значення за межі файлу, тож аудит правил
+     * перестає бути повним рівно там, де вона стоїть. Дозволені лише дві:
+     * оголошення воркера в глобальному блоці й ціль фолбека вітрини.
+     */
+    public function testOnlyKnownEnvPlaceholdersAppear(): void
+    {
+        preg_match_all('/\{\$([A-Za-z_][A-Za-z0-9_]*)/', $this->source(), $matches);
+
+        $this->assertSame(
+            ['FRANKENPHP_CONFIG', 'OKAY_FRONT_ENTRY'],
+            array_values(array_unique($matches[1])),
+            'нова підстановка з оточення у Caddyfile: правило перестає бути перевірюваним із файлу'
+        );
+    }
+
+    /** Типове значення підстановки мусить лишатись classic mode. */
+    public function testTheStorefrontEntryDefaultsToClassicMode(): void
+    {
+        $this->assertStringContainsString(
+            'rewrite * {$OKAY_FRONT_ENTRY:/index.php}',
+            $this->source(),
+            'без значення в оточенні вітрина мусить іти в index.php'
+        );
+    }
+
     public function testTheParserSeesTheWholeChain(): void
     {
         $rules = $this->topLevelRules();
@@ -510,7 +545,7 @@ class CaddyfileRulesTest extends TestCase
 
         $this->assertSame('rewrite', $beforeLast['directive'], 'перед фінальною php мусить бути rewrite');
         $this->assertSame(
-            '* /index.php',
+            self::STOREFRONT_ENTRY,
             $beforeLast['rest'],
             'фолбек мусить переписувати на фронт-контролер вітрини'
         );

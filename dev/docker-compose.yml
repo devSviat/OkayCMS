@@ -18,6 +18,15 @@ x-php-env: &php-env
   TEST_INTERNAL_EMAIL: ${TEST_INTERNAL_EMAIL:-}
   PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-}
 
+x-worker-env: &worker-env
+  # Обидві вмикаються разом, див. dev/.env-example.
+  FRANKENPHP_CONFIG: ${FRANKENPHP_CONFIG:-}
+  # Типове значення саме тут, а не лише в Caddyfile: Caddy бере {$VAR:типове}
+  # тільки якщо змінна не задана, а порожній рядок підставляє як є - і правило
+  # переписування лишається без цілі. `:-` у compose ловить і порожнє.
+  OKAY_FRONT_ENTRY: ${OKAY_FRONT_ENTRY:-/index.php}
+  MAX_REQUESTS: ${MAX_REQUESTS:-1000}
+
 # Шляхи, у які OkayCMS пише під час роботи. Один якір на обидва сервіси —
 # інакше ціль, не перевизначена для scheduler, губилась би при деплої.
 x-app-volumes: &app-volumes
@@ -38,7 +47,7 @@ services:
     build: *php-build
     restart: unless-stopped
     environment:
-      <<: *php-env
+      <<: [*php-env, *worker-env]
     depends_on:
       mariadb:
         condition: service_healthy
