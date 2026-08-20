@@ -59,8 +59,8 @@ class StorefrontGuard
         }
 
         $matches = RequestOrigin::matchesSite(
-            isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : null,
-            isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null,
+            Request::getOrigin(),
+            Request::getReferer(),
             Request::getDomainWithProtocol()
         );
 

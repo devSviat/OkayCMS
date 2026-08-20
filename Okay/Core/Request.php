@@ -167,6 +167,16 @@ class Request
     {
         return !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null;
     }
+
+    /**
+     * Origin запиту. Браузер ставить його сам, підробити зі сторінки не можна.
+     *
+     * @return string|null
+     */
+    public static function getOrigin()
+    {
+        return !empty($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : null;
+    }
     
     /**
      * Определение request-метода обращения к странице (GET, POST)
