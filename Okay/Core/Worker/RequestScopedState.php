@@ -31,8 +31,9 @@ final class RequestScopedState
         // Логін менеджера з бекендової сесії. Найдорожча з усіх: Router
         // довіряє їй показ вимкнених мов і обхід site_work=off.
         SessionNames::class => ['adminChecked', 'adminLogin'],
-        // Ім'я поточного роута.
-        Router::class => ['currentRouteName'],
+        // Ім'я поточного роута і сам перелік роутів: slug частини з них
+        // будується з URL, який зараз обробляється.
+        Router::class => ['currentRouteName', 'routes', 'routesInitialized'],
         // Дозвіл на SQL у генерації slug і аліаси урлів переглянутих сторінок.
         AbstractRoute::class => ['useSqlToGenerate', 'routeAliases'],
         // Джерело переходу відвідувача.

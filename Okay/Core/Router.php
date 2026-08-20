@@ -25,6 +25,9 @@ class Router {
     private static $routes;
     private static $modulesRoutes;
 
+    /** Роути будуються заново на кожному запиті - див. initializeRoutes(). */
+    private static $routesInitialized = false;
+
     /** @var BRouter */
     private $router;
 
@@ -497,12 +500,14 @@ class Router {
     }
     
     /**
-     * Ім'я роута належить запиту. Перелік роутів - ні: він будується з
-     * конфігів і модулів, тож лишається на місці.
+     * Перелік роутів теж належить запиту: slug частини з них будується з URL,
+     * який зараз обробляється.
      */
     public static function resetRequestState(): void
     {
-        self::$currentRouteName = null;
+        self::$currentRouteName    = null;
+        self::$routes              = [];
+        self::$routesInitialized   = false;
     }
 
     /**
@@ -601,11 +606,21 @@ class Router {
     }
 
     /**
-     * Метод инициализирует системные роуты, вызывать можно сколько угодно, отработает только раз
+     * Метод инициализирует системные роуты, вызывать можно сколько угодно,
+     * отработает один раз за запрос.
+     *
+     * Саме за запит, а не за процес: AbstractRoute::generateRouteParams()
+     * будує slug із URL поточного запиту, тож у живому процесі другий запит
+     * матчився б проти роутів першого. Помітно це на роутах, чий шаблон
+     * залежить від шляху - блог із категорією віддавав 404.
      */
     private static function initializeRoutes()
     {
-        if (($routes = require_once 'Okay/Core/config/routes.php') && is_array($routes)) {
+        if (self::$routesInitialized === true) {
+            return;
+        }
+
+        if (($routes = require 'Okay/Core/config/routes.php') && is_array($routes)) {
             
             if (!empty(self::$modulesRoutes)) {
                 $modulesRoutes = [];
@@ -624,6 +639,7 @@ class Router {
             }
             
             self::$routes = $routes;
+            self::$routesInitialized = true;
         }
     }
     

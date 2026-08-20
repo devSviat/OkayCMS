@@ -804,6 +804,31 @@ else
     fi
 fi
 
+# Slug частини роутів будується з URL запиту, який зараз обробляється. Якщо
+# перелік роутів пережити межу запиту, у живому процесі все, що не збіглося з
+# першим URL, віддає 404 - і це не 404 застосунку, а мовчазна втрата розділу.
+#
+# Роут блогу з категорією саме такий, тож він і править за пробу.
+blog_url=$(curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/all-posts" \
+    | grep -oP 'href="\K/blog/[^"]+' | head -1)
+
+if [ -z "${blog_url:-}" ]; then
+    printf '  FAIL  no path-derived route on /all-posts: the check proves nothing\n'
+    fails=$((fails + 1))
+else
+    # Головна першою: саме вона в живому процесі й лишала по собі свої роути.
+    curl -sS -o /dev/null -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/"
+    route_code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: ${VIRTUAL_HOST}" \
+        "http://127.0.0.1:${HTTP_PORT}${blog_url}")
+
+    if [ "$route_code" = "200" ]; then
+        printf '  ok    routes are rebuilt per request, not per process\n'
+    else
+        printf '  FAIL  %s gave %s after another page: routes outlived the request\n' "$blog_url" "$route_code"
+        fails=$((fails + 1))
+    fi
+fi
+
 rm -f "$jar_a" "$jar_b" "$jar_m"
 
 echo

@@ -44,8 +44,7 @@ class StaticStateGuardTest extends TestCase
         'Okay\Core\ServiceLocator::$instance' => 'локатор живе стільки, скільки процес',
         'Okay\Core\ServiceLocator::$isSingleton' => 'те саме',
 
-        'Okay\Core\Router::$routes' => 'перелік роутів із конфіга і модулів, не з запиту',
-        'Okay\Core\Router::$modulesRoutes' => 'те саме',
+        'Okay\Core\Router::$modulesRoutes' => 'роути модулів; ключі сталі, бутстрап модулів лише перезаписує їх',
         'Okay\Core\Router::$entityFactory' => 'сервіс; конструктор Router перезаписує його на кожному запиті',
         'Okay\Core\Router::$languages' => 'те саме',
         'Okay\Core\Router::$routeFactory' => 'те саме',
