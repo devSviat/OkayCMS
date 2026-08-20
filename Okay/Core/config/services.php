@@ -4,7 +4,6 @@
 namespace Okay\Core;
 
 
-use Monolog\Handler\ChromePHPHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Okay\Core\Log\SafeRotatingFileHandler;
 use Okay\Core\Console\Application AS ConsoleApplication;
@@ -270,12 +269,6 @@ $services = [
             ],
         ]
     ],
-    ChromePHPHandler::class => [
-        'class' => ChromePHPHandler::class,
-        'arguments' => [
-            Logger::DEBUG,
-        ],
-    ],
     RotatingFileHandler::class => [
         'class' => SafeRotatingFileHandler::class,
         'arguments' => [
@@ -288,12 +281,6 @@ $services = [
         'class' => Logger::class,
         'arguments' => [ 'channel-name' ],
         'calls' => [
-            [
-                'method' => 'pushHandler',
-                'arguments' => [
-                    new SR(ChromePHPHandler::class),
-                ]
-            ],
             [
                 'method' => 'pushHandler',
                 'arguments' => [
