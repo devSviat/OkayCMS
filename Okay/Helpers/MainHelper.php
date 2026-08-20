@@ -40,7 +40,7 @@ use Okay\Helpers\MetadataHelpers\MetadataInterface;
 
 class MainHelper
 {
-    private static $initialized = false;
+    private $initialized = false;
     private $allLanguages;
     private $allCurrencies;
     private $currentLanguage;
@@ -178,7 +178,7 @@ class MainHelper
      */
     public function setDesignDataProcedure()
     {
-        if (self::$initialized === true) {
+        if ($this->initialized === true) {
             return;
         }
         
@@ -317,7 +317,7 @@ class MainHelper
             $design->assign('request_data', $requestData);
         }
 
-        self::$initialized = true;
+        $this->initialized = true;
         
         ExtenderFacade::execute(__METHOD__, null, func_get_args());
     }

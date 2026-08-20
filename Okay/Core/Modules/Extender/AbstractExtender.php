@@ -33,7 +33,10 @@ abstract class AbstractExtender
         $extension->class  = $classExtender;
         $extension->method = $methodExtender;
 
-        static::$triggers[$trigger][] = $extension;
+        // Ключ, а не додавання в кінець: бутстрап модулів повторюється на
+        // кожному запиті, і без ключа ланцюг розширень ріс би, а знижка
+        // застосовувалась би стільки разів, скільки запитів обробив процес.
+        static::$triggers[$trigger][$classExtender . '::' . $methodExtender] = $extension;
     }
 
     protected static function compileTrigger($className, $methodName)

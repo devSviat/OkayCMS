@@ -7,6 +7,7 @@ use Okay\Core\Http\TerminateRequest;
 use Okay\Core\Modules\Modules;
 use Okay\Core\OkayContainer\OkayContainer;
 use Okay\Core\Security\SessionNames;
+use Okay\Core\Worker\RequestScopedState;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -159,6 +160,8 @@ final class Kernel
         // скидання наступний session_start() перевикористав би сесію
         // попереднього покупця, бо $_COOKIE скидається, а це - ні.
         session_id('');
+
+        RequestScopedState::reset();
 
         if ($this->booted === true) {
             $this->DI->resetRequestScoped();

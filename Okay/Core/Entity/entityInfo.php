@@ -92,7 +92,11 @@ trait entityInfo
             return (array)static::$defaultOrderFields = $newOrderFields;
         }
 
-        return (array)static::$defaultOrderFields = array_merge($newOrderFields, static::$defaultOrderFields);
+        // unique, бо бутстрап модулів повторюється на кожному запиті, а
+        // перелік тут статичний і без цього ріс би без межі.
+        return (array)static::$defaultOrderFields = array_values(
+            array_unique(array_merge($newOrderFields, static::$defaultOrderFields))
+        );
     }
 
     /**

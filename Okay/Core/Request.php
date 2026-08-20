@@ -343,6 +343,17 @@ class Request
         return null;
     }
 
+    /**
+     * Домен, протокол і підпапка беруться з запиту, поки їх не задали явно.
+     * Задане значення належить тому запиту, який його задав.
+     */
+    public static function resetRequestState(): void
+    {
+        self::$domain   = null;
+        self::$protocol = null;
+        self::$subDir   = null;
+    }
+
     public static function getSubDir()
     {
         if (self::$subDir !== null) {

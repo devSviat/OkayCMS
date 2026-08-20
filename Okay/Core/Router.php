@@ -494,6 +494,15 @@ class Router {
     }
     
     /**
+     * Ім'я роута належить запиту. Перелік роутів - ні: він будується з
+     * конфігів і модулів, тож лишається на місці.
+     */
+    public static function resetRequestState(): void
+    {
+        self::$currentRouteName = null;
+    }
+
+    /**
      * @return string
      *
      * Метод возвращает имя текущего роута

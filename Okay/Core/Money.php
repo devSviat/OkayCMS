@@ -17,8 +17,8 @@ class Money
     
     private $decimalsPoint;
     private $thousandsSeparator;
-    private static $currentCurrency;
-    private static $currencies;
+    private $currentCurrency;
+    private $currencies;
     
     public function __construct(EntityFactory $entityFactory)
     {
@@ -30,7 +30,7 @@ class Money
         if (empty($currency->id)) {
             throw new \Exception('Wrong currency');
         }
-        self::$currencies[$currency->id] = $currency;
+        $this->currencies[$currency->id] = $currency;
     }
 
     public function getCoefMoney()
@@ -60,10 +60,10 @@ class Money
             trigger_error('$currencyId must be is integer', E_USER_WARNING);
         }
         
-        if ($currencyId !== null && !empty(self::$currencies[$currencyId])) {
-            $currency = self::$currencies[$currencyId];
-        } elseif ($currencyId === null && !empty(self::$currentCurrency)) {
-            $currency = self::$currentCurrency;
+        if ($currencyId !== null && !empty($this->currencies[$currencyId])) {
+            $currency = $this->currencies[$currencyId];
+        } elseif ($currencyId === null && !empty($this->currentCurrency)) {
+            $currency = $this->currentCurrency;
         }
         
         if (empty($currency)) {
@@ -71,11 +71,11 @@ class Money
             $currenciesEntity = $this->entityFactory->get(CurrenciesEntity::class);
             if ($currencyId !== null) {
                 $currency = $currenciesEntity->get((int) $currencyId);
-                self::$currencies[$currency->id] = $currency;
+                $this->currencies[$currency->id] = $currency;
             } elseif (isset($_SESSION['currency_id'])) { // todo работа со storage
-                $currency = self::$currentCurrency = $currenciesEntity->get((int)$_SESSION['currency_id']);
+                $currency = $this->currentCurrency = $currenciesEntity->get((int)$_SESSION['currency_id']);
             } else {
-                $currency = self::$currentCurrency = current($currenciesEntity->find(['enabled' => 1]));
+                $currency = $this->currentCurrency = current($currenciesEntity->find(['enabled' => 1]));
             }
         }
         

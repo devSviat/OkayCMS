@@ -43,7 +43,7 @@ class BackendOrderHistoryHelper
     /** @var QueryFactory */
     private $queryFactory;
     
-    private static $purchasesNames;
+    private $purchasesNames;
     
     public function __construct(
         EntityFactory        $entityFactory,
@@ -685,8 +685,8 @@ class BackendOrderHistoryHelper
     private function getPurchaseName($purchase)
     {
         $purchaseName = '';
-        if (isset(self::$purchasesNames[$purchase->id])) {
-            return self::$purchasesNames[$purchase->id];
+        if (isset($this->purchasesNames[$purchase->id])) {
+            return $this->purchasesNames[$purchase->id];
         }
         
         if (!empty($purchase->product_name)) {
@@ -705,7 +705,7 @@ class BackendOrderHistoryHelper
             }
         }
 
-        self::$purchasesNames[$purchase->id] = $purchaseName;
+        $this->purchasesNames[$purchase->id] = $purchaseName;
         
         return $purchaseName;
     }

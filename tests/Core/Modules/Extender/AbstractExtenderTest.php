@@ -70,6 +70,34 @@ class AbstractExtenderTest extends TestCase
         $property->setValue(null, []);
     }
 
+    /**
+     * Бутстрап модулів проходить на кожному запиті. Якщо процес переживає
+     * запит, повторна реєстрація подвоювала б ланцюг - і ланцюгове розширення
+     * застосувало б знижку стільки разів, скільки запитів обробив процес.
+     */
+    public function testRegisteringTheSameExtensionTwiceKeepsOneEntry(): void
+    {
+        $extender = $this->getMockBuilder(AbstractExtender::class)
+            ->onlyMethods(['checkAndCorrectDeprecatedMethod', 'validateExtension'])
+            ->getMock();
+        $extender->expects($this->exactly(3))
+            ->method('checkAndCorrectDeprecatedMethod')
+            ->willReturn(false);
+        $extender->expects($this->exactly(3))->method('validateExtension');
+
+        $property = (new \ReflectionClass($extender))->getProperty('triggers');
+        $property->setValue(null, []);
+
+        for ($i = 0; $i < 3; $i++) {
+            $extender->newExtension('Okay\ClassTest1', 'testMethod1', 'Okay\ClassTest2', 'testMethod2');
+        }
+
+        $triggers = $property->getValue();
+        $property->setValue(null, []);
+
+        $this->assertCount(1, $triggers['Okay\ClassTest1::testMethod1']);
+    }
+
     public function testCompileTrigger()
     {
         /** @var AbstractExtender $abstractExtender */
@@ -212,7 +240,7 @@ class AbstractExtenderTest extends TestCase
                 true,
                 [
                     'Okay\TestClass3::testMethod3' => [
-                        (object) [
+                        'Okay\ClassTest2::testMethod2' => (object) [
                             'class' => 'Okay\ClassTest2',
                             'method' => 'testMethod2'
                         ]
@@ -223,7 +251,7 @@ class AbstractExtenderTest extends TestCase
                 false,
                 [
                     'Okay\ClassTest1::testMethod1' => [
-                        (object) [
+                        'Okay\ClassTest2::testMethod2' => (object) [
                             'class' => 'Okay\ClassTest2',
                             'method' => 'testMethod2'
                         ]

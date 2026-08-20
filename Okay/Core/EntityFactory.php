@@ -15,7 +15,7 @@ class EntityFactory
      */
     private $logger;
     
-    private static $objects = [];
+    private $objects = [];
     
     public function __construct(LoggerInterface $logger)
     {
@@ -32,11 +32,11 @@ class EntityFactory
             throw new \Exception("Class \"{$class}\" must be subclass of \"Okay\Core\Entity\Entity\" class");
         }
 
-        if (empty(self::$objects[$class])) {
-            self::$objects[$class] = $this->create($class);
+        if (empty($this->objects[$class])) {
+            $this->objects[$class] = $this->create($class);
         }
 
-        return self::$objects[$class];
+        return $this->objects[$class];
     }
 
     private function create($class)

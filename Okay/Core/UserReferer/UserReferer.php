@@ -83,6 +83,15 @@ class UserReferer
         return parse_url($url, PHP_URL_HOST) == Request::getDomain();
     }
     
+    /**
+     * Джерело переходу читається з куки відвідувача, тож пам'ять про
+     * попереднього приписала б його трафік чужому.
+     */
+    public static function resetRequestState(): void
+    {
+        self::$userReferer = null;
+    }
+
     public static function getUserReferer()
     {
         if (!empty(self::$userReferer)) {

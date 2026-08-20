@@ -90,7 +90,9 @@ class OkayContainer implements ContainerInterface
 
     public function bindParameters(array $parameters)
     {
-        $this->parameters = array_merge_recursive($this->parameters, $parameters);
+        // Саме replace: merge_recursive на повторній прив'язці того самого
+        // параметра перетворює скаляр на масив із двох однакових значень.
+        $this->parameters = array_replace_recursive($this->parameters, $parameters);
     }
 
     public function bindService($name, $service)

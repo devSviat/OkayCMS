@@ -14,7 +14,7 @@ class MoneyHelper
     private $entityFactory;
     private $settings;
     
-    private static $currencies;
+    private $currencies;
 
     public function __construct(EntityFactory $entityFactory, Settings $settings)
     {
@@ -64,12 +64,12 @@ class MoneyHelper
     
     private function getCurrenciesList()
     {
-        if (empty(self::$currencies)) {
+        if (empty($this->currencies)) {
             /** @var CurrenciesEntity $currenciesEntity */
             $currenciesEntity = $this->entityFactory->get(CurrenciesEntity::class);
-            self::$currencies = $currenciesEntity->mappedBy('id')->find();
+            $this->currencies = $currenciesEntity->mappedBy('id')->find();
         }
         
-        return self::$currencies;
+        return $this->currencies;
     }
 }

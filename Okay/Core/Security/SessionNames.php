@@ -130,6 +130,17 @@ class SessionNames
     }
 
     /**
+     * Мемоїзація тримається рівно один запит. Якщо процес переживає запит,
+     * логін першого менеджера робив би isAdmin() істинним для всіх наступних
+     * анонімних відвідувачів - тобто був би обходом автентифікації.
+     */
+    public static function resetRequestState(): void
+    {
+        self::$adminChecked = false;
+        self::$adminLogin   = null;
+    }
+
+    /**
      * Викликається при зміні рівня привілеїв: вхід, вихід, скидання пароля.
      */
     public static function regenerate()

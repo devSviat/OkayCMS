@@ -32,7 +32,7 @@ class PurchasesEntity extends Entity
     protected static $tableAlias = 'p';
     protected static $langTable;
     protected static $langObject;
-    private static $order;
+    private $order;
     private $useCache = false;
     
     public function useCache($useCache)
@@ -244,9 +244,9 @@ class PurchasesEntity extends Entity
             return $order;
         }
 
-        if (empty(self::$order)) {
-            self::$order = $order;
+        if (empty($this->order)) {
+            $this->order = $order;
         }
-        return self::$order;
+        return $this->order;
     }
 }

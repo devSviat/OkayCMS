@@ -116,6 +116,16 @@ abstract class AbstractRoute
         }
     }
 
+    /**
+     * Обидві властивості належать запиту: прапорець знімає експорт фідів і
+     * ніколи не повертає, а аліаси накопичуються з переглянутих сторінок.
+     */
+    public static function resetRequestState(): void
+    {
+        self::$useSqlToGenerate = true;
+        self::$routeAliases     = null;
+    }
+
     public static function getUrlSlugAlias($url)
     {
         if (!empty(self::$routeAliases[$url])) {

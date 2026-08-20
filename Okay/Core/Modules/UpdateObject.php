@@ -10,13 +10,16 @@ class UpdateObject
 
     public function register($alias, $permission, $entityClassName)
     {
-        if (in_array($alias, array_keys(self::$objects))) {
-            throw new \Exception("Alias \"{$alias}\" already exists");
-        }
-
         $object = new \stdClass();
         $object->permission = $permission;
         $object->entityName = $entityClassName;
+
+        // Повторна реєстрація того самого - не конфлікт: бутстрап модулів
+        // проходить на кожному запиті. Конфлікт - це коли аліас той самий,
+        // а стоїть за ним інше.
+        if (isset(self::$objects[$alias]) && self::$objects[$alias] != $object) {
+            throw new \Exception("Alias \"{$alias}\" already exists");
+        }
 
         self::$objects[$alias] = $object;
     }
