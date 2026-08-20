@@ -83,6 +83,7 @@ $services = [
     ],
     Config::class => [
         'class' => Config::class,
+        'scope' => OkayContainer::SCOPE_WORKER,
         'arguments' => [
             new PR('config.config_file'),
             new PR('config.config_local_file'),
@@ -99,18 +100,24 @@ $services = [
     ],
     AuraQueryFactory::class => [
         'class' => AuraQueryFactory::class,
+        'scope' => OkayContainer::SCOPE_WORKER,
         'arguments' => [
             new PR('db.driver'),
         ],
     ],
     QueryFactory::class => [
         'class' => QueryFactory::class,
+        'scope' => OkayContainer::SCOPE_WORKER,
         'arguments' => [
             new SR(AuraQueryFactory::class),
         ],
     ],
+    // З'єднання лишається теплим, навіть коли обгортка Database
+    // перестворюється: перепідключення на кожному запиті - саме те, чого
+    // worker mode має позбутися.
     ExtendedPdo::class => [
         'class' => ExtendedPdo::class,
+        'scope' => OkayContainer::SCOPE_WORKER,
         'arguments' => [
             new PR('db.dsn'),
             new PR('db.user'),

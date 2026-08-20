@@ -10,6 +10,7 @@ use Okay\Core\OkayContainer\Reference\ParameterReference;
 use Okay\Core\OkayContainer\Reference\ServiceReference;
 use Okay\Core\Config;
 use Okay\Core\Settings;
+use Okay\Core\Worker\ResetsBetweenRequests;
 
 /**
  * A very simple dependency injection container.
@@ -37,6 +38,15 @@ class OkayContainer implements ContainerInterface
     private $serviceStore;
 
     public const SETTINGS_DI = 'SettingsDI';
+
+    /**
+     * Сервіс живе стільки, скільки процес. Оголошується явно і лише там, де
+     * доведено, що стану запиту в ньому немає.
+     */
+    public const SCOPE_WORKER = 'worker';
+
+    /** Типовий скоуп: інстанс не переживає межу запиту. */
+    public const SCOPE_REQUEST = 'request';
 
     public static function getInstance($services = [], $parameters = []): self
     {
@@ -154,15 +164,51 @@ class OkayContainer implements ContainerInterface
             throw new ContainerException($name.' contains circular reference');
         }
 
+        // Замок стереже лише час створення. Якщо лишити його висіти, повторне
+        // створення сервіса - а воно потрібне на кожному запиті - читалося б як
+        // циклічна залежність.
         $entry['lock'] = true;
 
-        $arguments = isset($entry['arguments']) ? $this->resolveArguments($entry['arguments']) : [];
+        try {
+            $arguments = isset($entry['arguments']) ? $this->resolveArguments($entry['arguments']) : [];
 
-        $reflector = new \ReflectionClass($entry['class']);
-        $service = $reflector->newInstanceArgs($arguments);
-        unset($reflector);
+            $reflector = new \ReflectionClass($entry['class']);
+            $service = $reflector->newInstanceArgs($arguments);
+            unset($reflector);
+        } finally {
+            unset($entry['lock']);
+        }
 
         return $service;
+    }
+
+    public function scopeOf(string $id): string
+    {
+        $scope = $this->services[$id]['scope'] ?? self::SCOPE_REQUEST;
+
+        return $scope === self::SCOPE_WORKER ? self::SCOPE_WORKER : self::SCOPE_REQUEST;
+    }
+
+    /**
+     * Межа запиту: request-scoped інстанси викидаються, worker-scoped лишаються.
+     *
+     * Заборонено за замовчуванням - сервіс без явного 'scope' вважається
+     * request-scoped. Новий сервіс не може протекти через недогляд, лише через
+     * свідомо поставлений маркер.
+     */
+    public function resetRequestScoped(): void
+    {
+        foreach ($this->serviceStore as $id => $service) {
+            if ($this->scopeOf($id) === self::SCOPE_WORKER) {
+                if ($service instanceof ResetsBetweenRequests) {
+                    $service->resetRequestState();
+                }
+
+                continue;
+            }
+
+            unset($this->serviceStore[$id]);
+        }
     }
 
     /**

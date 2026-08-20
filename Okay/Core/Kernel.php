@@ -159,5 +159,9 @@ final class Kernel
         // скидання наступний session_start() перевикористав би сесію
         // попереднього покупця, бо $_COOKIE скидається, а це - ні.
         session_id('');
+
+        if ($this->booted === true) {
+            $this->DI->resetRequestScoped();
+        }
     }
 }

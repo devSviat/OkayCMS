@@ -73,14 +73,6 @@ class Database
     }
     
     /**
-     * В деструкторе отсоединяемся от базы
-     */
-    public function __destruct()
-    {
-        $this->pdo->disconnect();
-    }
-    
-    /**
      * @param QueryInterface $query
      * @param bool $debug
      * @return bool
