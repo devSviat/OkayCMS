@@ -188,6 +188,23 @@ docker compose exec scheduler pgrep -fa supercronic
 http. Працює лише для розмірів ресайзу, що збігаються з production. В
 `originals` на локальному сервері нічого не додається, лише в `resized`.
 
+## Worker mode
+
+За замовчуванням стек працює в classic mode. Worker mode тримає застосунок у памʼяті між
+запитами і вмикається двома змінними в `dev/.env` — **обов'язково разом**:
+
+```ini
+FRANKENPHP_CONFIG="worker /var/www/html/worker.php 40"
+OKAY_FRONT_ENTRY=/worker.php
+```
+
+Після зміни — `docker compose up -d php85`. Далі кожна правка PHP-коду вимагає
+`docker compose restart php85`: воркер піднімає застосунок один раз.
+
+Режим стосується **лише вітрини**; адмінка й `/backend/ajax/` лишаються classic.
+Подробиці, пастки й заміри — у
+[`docs/deployment-frankenphp.md`](../docs/deployment-frankenphp.md#worker-mode).
+
 ## Продакшн
 
 **На прод-хості `-f` прапорці обов'язкові. Голий `docker compose up -d`

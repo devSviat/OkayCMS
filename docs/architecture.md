@@ -42,23 +42,32 @@ OkayCMS — PHP-платформа електронної комерції з м
 
 ## Життєвий цикл запиту вітрини
 
-Вхідна точка — `index.php` у корені.
+Вхідні точки — `index.php` і `worker.php` у корені. Обидві — тонкі обгортки навколо
+`Okay\Core\Kernel`, який і володіє життєвим циклом:
 
-1. **`display_errors` вимикається** (`index.php:14`) — до того, як щось може впасти.
-2. **Сесія.** `SessionNames::isAdmin()` читає бекендову сесію, далі
-   `SessionNames::startFrontend()` (`index.php:18-21`). Простори сесій вітрини й адмінки
-   розділені, тож порядок тут важливий: одночасно активною може бути лише одна.
-3. **DI-контейнер** збирається з `Okay/Core/config/container.php` (`index.php:24`), з нього
+| Метод | Коли | Що робить |
+| ----- | ---- | --------- |
+| `boot()` | раз на процес | збирає DI-контейнер і `Config` |
+| `handle()` | на кожен запит | сесія, маршрутизація, відповідь |
+| `terminate()` | межа запиту | закриває сесію, скидає стан запиту |
+
+`index.php` викликає всі три поспіль, `worker.php` крутить `handle()`/`terminate()` у циклі —
+див. [deployment-frankenphp.md](deployment-frankenphp.md#worker-mode).
+
+1. **`display_errors` вимикається** — до того, як щось може впасти.
+2. **DI-контейнер** збирається з `Okay/Core/config/container.php` (`Kernel::boot()`), з нього
    береться `Config` — [di.md](di.md).
-4. **Панель відладки** піднімається, якщо `debug_bar` **і** `debug_mode` увімкнені
-   (`index.php:32-34`).
-5. **Мова.** `Router::resolveCurrentLanguage()` (`index.php:46`) визначає мову з префікса URL
+3. **Сесія.** `SessionNames::isAdmin()` читає бекендову сесію, далі
+   `SessionNames::startFrontend()`. Простори сесій вітрини й адмінки розділені, тож порядок
+   тут важливий: одночасно активною може бути лише одна.
+4. **Панель відладки** піднімається, якщо `debug_bar` **і** `debug_mode` увімкнені.
+5. **Мова.** `Router::resolveCurrentLanguage()` визначає мову з префікса URL
    і редіректить `/<головна-мова>/…` на `/…` з кодом 301.
-6. **`debug_mode`** вмикає `display_errors` і `error_reporting(E_ALL)` (`index.php:48-51`).
-7. **Модулі.** `Modules::startEnabledModules()` (`index.php:80`) реєструє параметри, сервіси,
+6. **`debug_mode`** вмикає `display_errors` і `error_reporting(E_ALL)`.
+7. **Модулі.** `Modules::startEnabledModules()` реєструє параметри, сервіси,
    маршрути й Smarty-плагіни кожного увімкненого модуля та викликає його `Init::init()` —
    [modules/lifecycle.md](modules/lifecycle.md).
-8. **Маршрутизація.** `Router::run()` (`index.php:82`) перебирає маршрути, будує з `slug`
+8. **Маршрутизація.** `Router::run()` перебирає маршрути, будує з `slug`
    регулярний вираз і віддає збіг у `bramus/router` — [routes.md](routes.md).
 9. **Контролер.** `Router::createControllerInstance()` створює контролер **без ін'єкції в
    конструктор** і викликає по черзі `beforeController()`, `onInit()`, метод маршруту,
@@ -67,9 +76,20 @@ OkayCMS — PHP-платформа електронної комерції з м
 10. **Відповідь.** Контролер, який повернув `false`, дає 404 (`ErrorController::pageNotFound`).
     Вміст відправляється в колбеку `bramus/router` через `Response::sendContent()`.
 
-Виняток, що дійшов до `index.php`, логується і віддає 500 — але тільки якщо тіло ще не
+Виняток, що дійшов до `Kernel::handle()`, логується і віддає 500 — але тільки якщо тіло ще не
 відправлене; під `debug_mode` трасування друкується на сторінку. Тут є пастка зі статусом
 відповіді, вона описана в [configuration.md](configuration.md#debug_mode).
+
+### Завершення запиту без exit
+
+`Response::redirectTo()`, `Response::setHeaderLastModify()` на 304 і рання відсічка
+`StorefrontGuard` не викликають `exit`, а кидають `Okay\Core\Http\TerminateRequest`. Код
+нижче виклику не виконується — так само, як від `exit`, — але процес лишається живим.
+Виняток ловить точка входу: `Kernel::handle()` для вітрини, `backend/index.php` для адмінки.
+
+`TerminateRequest` розширює `\Error`, а не `\Exception`, навмисно: ядро ловить
+`catch (\Exception)` навколо контролерів, і виняток-нащадок `Exception` перетворив би
+редірект на порожню 200.
 
 ## Життєвий цикл запиту адмінки
 
