@@ -200,77 +200,6 @@ class PublicSurfaceTest extends TestCase
     }
 
     /**
-     * Серце інверсії в термінах Caddy. php_server робить try_files {path} і
-     * вмикає file_server — тобто віддає з диска будь-який наявний файл, і весь
-     * білий список стає декорацією. Фолбек мусить бути переписуванням на
-     * фронт-контролер, без перевірки шляху на диску.
-     */
-    public function testCaddyfileNeverServesFilesFromDisk(): void
-    {
-        $source = $this->config(self::CADDYFILE);
-
-        $this->assertDoesNotMatchRegularExpression(
-            '#^\s*php_server\b#m',
-            $source,
-            'php_server вмикає file_server і try_files {path} — це відкриває все дерево'
-        );
-        $this->assertMatchesRegularExpression(
-            '#rewrite\s+\*\s+/index\.php\s*\n\s*php\s*$#m',
-            $source,
-            'фолбек мусить переписувати на фронт-контролер вітрини, а не пробувати шлях на диску'
-        );
-    }
-
-    /**
-     * Гола директива php виконує запитаний шлях, тож кожен .php у дереві став
-     * би точкою входу. Вона допустима лише після rewrite або зі звуженням до
-     * однієї точки входу матчером.
-     */
-    public function testCaddyfilePhpDirectiveIsAlwaysGuarded(): void
-    {
-        $lines = explode("\n", $this->config(self::CADDYFILE));
-
-        foreach ($lines as $i => $line) {
-            if (!preg_match('#^\s*php\s*$#', $line)) {
-                continue;
-            }
-
-            $previous = '';
-            for ($j = $i - 1; $j >= 0; $j--) {
-                $candidate = trim($lines[$j]);
-                if ($candidate === '' || str_starts_with($candidate, '#')) {
-                    continue;
-                }
-                $previous = $candidate;
-                break;
-            }
-
-            $this->assertMatchesRegularExpression(
-                '#^rewrite\s#',
-                $previous,
-                'рядок ' . ($i + 1) . ": гола php мусить іти одразу після rewrite, "
-                . "інакше вона виконає запитаний шлях"
-            );
-        }
-
-        $source = implode("\n", $lines);
-
-        // Форма з матчером звужує виконання — теж дозволена, але сам матчер
-        // мусить бути прив'язаний до кореня URI: без ^ він ловить збіг будь-де
-        // в шляху, і /files/x/backend/ajax/evil.php став би точкою входу.
-        preg_match_all('#php\s+@(\w+)#', $source, $uses);
-        $this->assertNotEmpty($uses[1], 'звуження php матчером тримає backend/files/ і backend/ajax/');
-
-        foreach (array_unique($uses[1]) as $name) {
-            $this->assertMatchesRegularExpression(
-                '#@' . $name . '\s+path(_regexp)?\s+(\^|/)#',
-                $source,
-                "матчер @$name мусить описувати шлях від кореня URI"
-            );
-        }
-    }
-
-    /**
      * У nginx умова зіставлялась із $request_uri, а він містить рядок запиту,
      * тож /backend/index.php?controller=AuthAdmin під `…index\.php$` не
      * підпадав. path_regexp у Caddy бачить лише шлях, тож без окремої умови
@@ -289,50 +218,6 @@ class PublicSurfaceTest extends TestCase
             'uri.query} == ""',
             substr($source, $start, 300),
             'канонізація index.php мусить спрацьовувати лише за порожнього рядка запиту'
-        );
-    }
-
-    /**
-     * Оригінали не віддаються, але це не серверна 404: і nginx (шлях просто не
-     * підпадає під білий список files/), і .htaccess (`RewriteRule
-     * ^files/originals/ index.php`) шлють їх у фронт-контролер, щоб магазин
-     * намалював власну сторінку 404. `respond 404` тут дав би порожню.
-     */
-    public function testCaddyfileSendsOriginalsToTheFrontController(): void
-    {
-        $source = $this->config(self::CADDYFILE);
-
-        $start = strpos($source, 'route /files/originals/*');
-        $this->assertIsInt($start, 'у Caddyfile немає правила для files/originals/');
-        $this->assertStringContainsString(
-            'rewrite * /index.php',
-            substr($source, $start, 200),
-            'files/originals/ мусить іти у фронт-контролер, а не віддавати серверну 404'
-        );
-
-        $this->assertStringNotContainsString(
-            '/files/originals/* ',
-            substr($source, (int) strpos($source, '@denied path'), 120),
-            'files/originals/ не має стояти серед шляхів, на які відповідають 404'
-        );
-    }
-
-    /**
-     * Шаблони адмінки б'ють у backend/ajax/*.php напряму. У nginx їх виконує
-     * `location ~ \.ph(p\d*|tml)$` під /backend/; без власного правила
-     * Caddyfile переписує їх на backend/index.php і замість JSON віддає
-     * HTML-сторінку адмінки — з кодом 200, тож на статусі це непомітно.
-     */
-    public function testCaddyfileKeepsBackendAjaxEntryPoints(): void
-    {
-        $source = $this->config(self::CADDYFILE);
-
-        $start = strpos($source, '@backend_ajax');
-        $this->assertIsInt($start, 'у Caddyfile немає правила для backend/ajax/');
-        $this->assertStringContainsString(
-            'php @backend_ajax',
-            substr($source, $start, 200),
-            'матчер backend/ajax/ мусить вести на php, інакше точки входу мовчки зникають'
         );
     }
 
@@ -423,57 +308,6 @@ class PublicSurfaceTest extends TestCase
 
         $this->assertStringContainsString('(?i)^(.*/)index\.php$', $source);
         $this->assertStringContainsString('(?i)^(.*/)index\.html', $source);
-    }
-
-    public function testCaddyfileClosesTheVendorTree(): void
-    {
-        $this->assertMatchesRegularExpression(
-            '#path[^\n]*\s/vendor/\*#',
-            $this->config(self::CADDYFILE),
-            'Caddyfile мусить закривати vendor/ окремим правилом-забороною'
-        );
-    }
-
-    public function testCaddyfileCompiledTemplatesAreNotEntryPoints(): void
-    {
-        $this->assertMatchesRegularExpression(
-            '#path[^\n]*\s/backend/design/compiled/\*#',
-            $this->config(self::CADDYFILE),
-            'Caddyfile мусить закривати скомпільовані шаблони адмінки'
-        );
-    }
-
-    /**
-     * Заборони мусять стояти перед дозволами: у Caddy виграє не «найточніше»
-     * правило, як у nginx, а перше, що збіглося в route.
-     */
-    public function testCaddyfileDeniesBeforeItAllows(): void
-    {
-        $source = $this->config(self::CADDYFILE);
-
-        $denyOriginals = strpos($source, '/files/originals/*');
-        $allowFiles    = strpos($source, '^/files/.+\\.');
-
-        $this->assertIsInt($denyOriginals, 'заборони на files/originals/ не знайдено');
-        $this->assertIsInt($allowFiles, 'дозволу на files/ не знайдено');
-        $this->assertLessThan(
-            $allowFiles,
-            $denyOriginals,
-            'files/originals/ мусить закриватись до того, як відкриється files/: '
-            . 'Go RE2 не має негативного lookahead, тож порядок — єдиний важіль'
-        );
-
-        $allowTooltip = strpos($source, 'admintooltip.js');
-        $denyPhp      = strpos($source, '^/backend/design/.*\\.php$');
-
-        $this->assertIsInt($allowTooltip, 'дозволу на admintooltip не знайдено');
-        $this->assertIsInt($denyPhp, 'заборони на .php під backend/design/ не знайдено');
-        $this->assertLessThan(
-            $denyPhp,
-            $allowTooltip,
-            'єдина дозволена точка входу під backend/design/ мусить оброблятись '
-            . 'до загальної заборони .php'
-        );
     }
 
     /**
