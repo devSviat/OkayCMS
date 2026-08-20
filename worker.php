@@ -16,13 +16,22 @@ $kernel->boot();
 // чистою, тож процес перезапускається за лічильником, а не за симптомом.
 $maxRequests = (int) ($_SERVER['MAX_REQUESTS'] ?? 0);
 
+// Кожні стільки запитів робиться повний прохід по циклах.
+$gcEvery = 100;
+
 for ($handled = 0; $maxRequests === 0 || $handled < $maxRequests; $handled++) {
     $keepRunning = frankenphp_handle_request(static function () use ($kernel) {
         $kernel->handle();
     });
 
     $kernel->terminate();
-    gc_collect_cycles();
+
+    // Не на кожному запиті: повний прохід по циклах коштує більше, ніж уся
+    // економія від теплого процесу. Автоматичний збирач циклів PHP і без
+    // цього працює, а MAX_REQUESTS лишається головним запобіжником.
+    if ($handled % $gcEvery === 0) {
+        gc_collect_cycles();
+    }
 
     if ($keepRunning !== true) {
         break;
