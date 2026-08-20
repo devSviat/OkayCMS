@@ -194,7 +194,7 @@ php-debugbar 3.8.0: булеве значення прив'язки доліта
 
 ## Оточення розробки
 
-Локальне оточення (FrankenPHP + MariaDB) описане окремо — `dev/README.md`. Його змінні
+Локальне оточення (Nginx + php-fpm + MariaDB) описане окремо — `dev/README.md`. Його змінні
 живуть у `dev/.env` (копія з `dev/.env-example`) і з `config/config.local.php` **не
 генеруються**: якщо міняєте `MYSQL_ROOT_PASSWORD` чи `MYSQL_DATABASE` у `dev/.env`, змініть і
 в локальному конфізі.

@@ -20,7 +20,7 @@ wait_for_healthy() {
     else
         # Без jq — жорстко заданий список. Додаючи healthcheck новому сервісу,
         # онови і цей список.
-        services="mariadb php85 scheduler"
+        services="mariadb php85 nginx scheduler"
     fi
 
     printf 'Waiting for services to become healthy: %s\n' "$(echo "$services" | tr '\n' ' ')"
@@ -222,17 +222,9 @@ expect_contains "mariadb is attached to the backend network" \
     docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$mariadb_cid"
 # У dev mariadb додатково у frontend, інакше опублікований порт був би тихим
 # no-op'ом: для internal-мережі Docker не створює NAT. У прод — лише backend.
-# Вебсервер і PHP — один контейнер, тож резолвити нічого. Лишається структурний
-# факт: php85 мусить бути в обох мережах — у frontend заради публікації порту, у
-# backend заради бази.
-frontend_net="$(printf '%s' "${APP_NAME:?err}" | tr '[:upper:]' '[:lower:]')_frontend"
-php_cid=$(docker compose ps -q php85)
-expect_contains "php85 is attached to the frontend network (it is the web tier now)" \
-    "$frontend_net" \
-    docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$php_cid"
-expect_contains "php85 is attached to the backend network (it reaches the database)" \
-    "$backend_net" \
-    docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$php_cid"
+expect_contains "nginx (frontend-only) can still resolve php85 over the frontend network" \
+    "php85" \
+    docker compose exec -T nginx getent hosts php85
 
 echo
 echo "Scheduler"
@@ -248,19 +240,18 @@ expect_contains "supercronic is running inside the scheduler container" \
 
 echo
 echo "Logging"
-# Caddy пише access-лог у JSON, тож маркер — поле методу, а не рядок "GET /".
-expect_contains "access logs reach docker compose logs" \
-    '"method":"GET"' \
-    sh -c "curl -sS -o /dev/null -H 'Host: ${VIRTUAL_HOST}' http://127.0.0.1:${HTTP_PORT}/ ; sleep 1 ; docker compose logs --tail=20 php85"
+expect_contains "nginx access logs reach docker compose logs" \
+    "GET /" \
+    sh -c "curl -sS -o /dev/null -H 'Host: ${VIRTUAL_HOST}' http://127.0.0.1:${HTTP_PORT}/ ; sleep 1 ; docker compose logs --tail=20 nginx"
 # Результат, а не конфіг: запит з унікальним маркером, потім пошук маркера в
 # усьому дереві — не залежить від імені й шляху лог-файлу.
 log_marker="smoke-nolog-$$"
 curl -sS -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
     "http://127.0.0.1:${HTTP_PORT}/${log_marker}" 2>/dev/null || true
 sleep 1
-expect_missing "the web server writes no log files into the working tree" \
+expect_missing "nginx writes no log files into the working tree" \
     "$log_marker" \
-    docker compose exec -T php85 sh -c \
+    docker compose exec -T nginx sh -c \
     "grep -r '$log_marker' /var/www/html 2>/dev/null"
 # Саме grep -r, а не -rl: -l друкує ІМЕНА файлів, а не їх вміст, тож маркера
 # у виводі не було б ніколи і expect_missing проходив би завжди незалежно від
@@ -297,12 +288,11 @@ fi
 
 echo
 echo "Web"
-# Саме з Host: localhost. Раніше тут ловився регрес "штатний default.conf
-# образу nginx виграв у нашого віртуального хоста". У FrankenPHP конкурентного
-# server-блоку немає, натомість є інший регрес того ж класу: якщо наш Caddyfile
-# не підхопився, працює штатний конфіг образу з коренем /app/public, якого в
-# нашому образі немає — і вітрина не віддається взагалі. Перевірка нижче ловить
-# саме це.
+# Саме з Host: localhost — це точний збіг для штатного default.conf образу.
+# Без заголовка регрес "заглушка Welcome to nginx" не відтворюється.
+expect_missing "http://localhost/ is not the stock nginx placeholder" \
+    "Welcome to nginx" \
+    curl -sS -H "Host: localhost" "http://127.0.0.1:${HTTP_PORT}/"
 expect_contains "http://localhost/ serves the storefront" \
     "OkayCMS" \
     curl -sS -H "Host: localhost" "http://127.0.0.1:${HTTP_PORT}/"
@@ -336,19 +326,18 @@ echo "Public surface"
 expect_status 200 /
 expect_status 200 /robots.txt
 expect_status 302 /backend/
-# Канонізація index.php мусить спрацьовувати лише без рядка запиту. У nginx це
-# виходило само: умова зіставлялась із $request_uri, який містить query, тож
-# /backend/index.php?controller=… під `…index\.php$` не підпадав. У Caddy
-# path_regexp бачить лише шлях — і без окремої умови цей редірект з'їдав
-# параметри, ламаючи вхід в адмінку: саме туди ядро шле неавторизованого
-# менеджера.
+# Канонізація index.php мусить спрацьовувати лише без рядка запиту: умова
+# зіставляється з $request_uri, який містить query, тож
+# /backend/index.php?controller=… під `…index\.php$` не підпадає. Інакше
+# редірект з'їдав би параметри й ламав вхід в адмінку - саме туди ядро шле
+# неавторизованого менеджера.
 expect_status 301 "/backend/index.php"
 expect_status 200 "/backend/index.php?controller=AuthAdmin"
-# У nginx умова стоїть під `~*`, тож канонізація не зважає на регістр.
+# Умова стоїть під `~*`, тож канонізація не зважає на регістр.
 expect_status 301 "/INDEX.PHP"
 # Оригінали завантажень назовні не віддаються, але це не серверна 404: і nginx,
 # і .htaccess шлють їх у фронт-контролер, щоб магазин намалював свою сторінку.
-# Перевіряється саме тіло — статус 404 однаковий і в порожньої відповіді.
+# Перевіряється саме тіло - статус 404 однаковий і в порожньої відповіді.
 expect_status 404 "/files/originals/logo.png"
 expect_contains "files/originals/ is answered by the storefront, not by a bare server 404" \
     "OkayCMS" \
@@ -359,9 +348,12 @@ expect_contains "files/originals/ is answered by the storefront, not by a bare s
 # а виконаний скрипт упирається у власний гейт configure.php (E_USER_ERROR).
 expect_status 500 "/backend/ajax/stat.php"
 
-# Заголовки дерева files/ не мусять лягати на фолбек до фронт-контролера: там
-# повна HTML-сторінка 404 із Set-Cookie, і `public, max-age` на ній конфліктує
-# з `no-store` від PHP, а CSP знімає з неї стилі.
+# files/resized/ - маршрут, тож location має try_files на фронт-контролер. Ті
+# кеш-заголовки й CSP, що стоять там для справжніх файлів, на цей фолбек лягати
+# не мусять: приїжджає повна HTML-сторінка 404 із Set-Cookie, `public, max-age`
+# на ній конфліктує з `no-store` від PHP, а sandbox-CSP знімає з неї стилі.
+# Тримає це внутрішній редірект nginx - заголовки бере кінцевий location, - але
+# саме тому перевіряти треба результат, а не конфіг.
 files_fallback() {
     curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
         "http://127.0.0.1:${HTTP_PORT}/files/smoke-no-such-file.png"
@@ -371,10 +363,10 @@ expect_missing "the storefront 404 page under files/ is not marked publicly cach
 expect_missing "the storefront 404 page under files/ keeps its stylesheets" \
     "Content-Security-Policy" files_fallback
 
-# Контроль: на справжньому файлі ті самі заголовки мусять бути — інакше дві
+# Контроль: на справжньому файлі ті самі заголовки мусять бути - інакше дві
 # перевірки вище проходили б і на порожній відповіді.
 # originals/ виключені навмисно: вони свідомо йдуть у фронт-контролер і CSP не
-# отримують, тож як контроль не годяться. sort — щоб вибір не залежав від
+# отримують, тож як контроль не годяться. sort - щоб вибір не залежав від
 # порядку обходу каталогів, який на іншій машині інший.
 real_file=$(cd .. && find files -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' \) \
     -not -path 'files/originals/*' | sort | head -1)
@@ -394,41 +386,33 @@ else
     fails=$((fails + 1))
 fi
 
-# 404 від file_server Caddy пише повз обробник header сайту, тож без
-# handle_errors заголовок Server лишається у відповіді.
-expect_missing "a missing static file does not disclose the server software" \
-    "Server:" \
+# server_tokens off лишає сам `Server: nginx`, але без версії - версія і є
+# підказкою для сканерів.
+expect_missing "a missing static file does not disclose the server version" \
+    "nginx/" \
     curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
         "http://127.0.0.1:${HTTP_PORT}/js_libraries/smoke-no-such-file.js"
 
-# Той самий обробник знімає з помилки й кеш-заголовки: інакше браузер і CDN
+# Кеш-заголовки дерев статики не мусять лягати на її ж 404: інакше браузер і CDN
 # памʼятають «файла немає» рік і переживають викладку самого файла.
 expect_missing "a missing static file is not cached for a year" \
     "max-age=31536000" \
     curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
         "http://127.0.0.1:${HTTP_PORT}/js_libraries/smoke-no-such-file.js"
 
-# Адмін-API Caddy мусить бути вимкнений: вебсервер і PHP тут один процес під
-# одним UID, тож доступний застосунку control plane означав би виконання коду в
-# обхід усього білого списку. Перевіряється з самого PHP, а не з шела — саме він
-# і був би атакувальником.
-expect_contains "the Caddy admin API is unreachable from application PHP" \
-    "unreachable" \
-    docker compose exec -T php85 php -r 'echo @file_get_contents("http://127.0.0.1:2019/config/") === false ? "unreachable" : "REACHABLE";'
-
-# Класові дерева адмінки (PSR-4) — не точки входу.
+# Класові дерева адмінки (PSR-4) - не точки входу.
 expect_status 404 "/backend/Controllers/IndexAdmin.php"
 expect_status 404 "/backend/Helpers/BackendProductsHelper.php"
 
 # Сумісність зі старим URL адмінки і канонізація www.
 expect_status 302 "/admin"
+# Схема тут навмисно не перевіряється: правило nginx піднімає редірект до https,
+# розраховуючи на прод за TLS. Суть перевірки - що префікс www. зникає.
 expect_contains "www. is redirected to the same host without the prefix" \
-    "Location: http://${VIRTUAL_HOST}/" \
+    "://${VIRTUAL_HOST}/" \
     curl -sS -D- -o /dev/null -H "Host: www.${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/"
 
 # Базова трійка заголовків мусить доходити і до PHP-відповіді, і до статики.
-# Ставиться вона через `?` (не перетирати SecurityHeaders), а це рівно те місце,
-# де помилка дає тихо відсутній заголовок.
 for header in "X-Content-Type-Options: nosniff" "X-Frame-Options: SAMEORIGIN" \
               "Referrer-Policy: strict-origin-when-cross-origin"; do
     expect_contains "the storefront sends ${header%%:*}" "$header" \
@@ -437,8 +421,8 @@ for header in "X-Content-Type-Options: nosniff" "X-Frame-Options: SAMEORIGIN" \
         curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/robots.txt"
 done
 
-# request_body max_size сам по собі не відхиляє запит, а мовчки обрізає тіло:
-# застосунок отримав би побитий файл замість помилки.
+# client_max_body_size сам по собі відхиляє запит, а не обрізає тіло мовчки -
+# інакше застосунок отримав би побитий файл замість помилки.
 oversized=$(mktemp)
 head -c 120000000 /dev/zero > "$oversized"
 oversized_code=$(curl -sS -o /dev/null -w '%{http_code}' -H 'Expect:' \
@@ -538,21 +522,11 @@ else
     printf '  ok    X-Powered-CMS carries no version\n'
 fi
 # Контроль самого вимірювача: заголовок, який точно є, мусить знаходитись.
-# Якір — Content-Type, бо він є в кожній відповіді: Server прибирає сам
-# Caddyfile, тож на ньому перевірка була б завжди порожньою.
-if printf '%s' "$headers" | grep -qi "^Content-Type:"; then
-    printf '  ok    the header check itself works (Content-Type: is found)\n'
-else
-    printf '  FAIL  the header check found no Content-Type: — it proves nothing\n'
-    fails=$((fails + 1))
-fi
-
-# Версія сервера в Server: — підказка для сканерів, як і X-Powered-By.
 if printf '%s' "$headers" | grep -qi "^Server:"; then
-    printf '  FAIL  header Server is still sent\n'
-    fails=$((fails + 1))
+    printf '  ok    the header check itself works (Server: is found)\n'
 else
-    printf '  ok    header Server is not sent\n'
+    printf '  FAIL  the header check found no Server: — it proves nothing\n'
+    fails=$((fails + 1))
 fi
 
 echo

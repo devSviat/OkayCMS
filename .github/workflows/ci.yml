@@ -97,10 +97,6 @@ jobs:
 
       - name: Scan for secrets
         run: gitleaks detect --source . --redact --verbose
-
-  # Єдина джоба з Docker: розбір Caddyfile у tests/Security/ ловить дірки в
-  # білому списку, але не бачить того, що видно лише у відповіді — кеш на 404,
-  # ліміт тіла, заголовки, редіректи. Решта джоб лишається без Docker.
   smoke:
     runs-on: ubuntu-latest
     name: Smoke (Docker)
