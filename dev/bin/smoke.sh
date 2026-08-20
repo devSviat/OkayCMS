@@ -348,9 +348,12 @@ expect_contains "files/originals/ is answered by the storefront, not by a bare s
 # а виконаний скрипт упирається у власний гейт configure.php (E_USER_ERROR).
 expect_status 500 "/backend/ajax/stat.php"
 
-# Заголовки дерева files/ не мусять лягати на фолбек до фронт-контролера: там
-# повна HTML-сторінка 404 із Set-Cookie, і `public, max-age` на ній конфліктує
-# з `no-store` від PHP, а CSP знімає з неї стилі.
+# files/resized/ - маршрут, тож location має try_files на фронт-контролер. Ті
+# кеш-заголовки й CSP, що стоять там для справжніх файлів, на цей фолбек лягати
+# не мусять: приїжджає повна HTML-сторінка 404 із Set-Cookie, `public, max-age`
+# на ній конфліктує з `no-store` від PHP, а sandbox-CSP знімає з неї стилі.
+# Тримає це внутрішній редірект nginx - заголовки бере кінцевий location, - але
+# саме тому перевіряти треба результат, а не конфіг.
 files_fallback() {
     curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
         "http://127.0.0.1:${HTTP_PORT}/files/smoke-no-such-file.png"

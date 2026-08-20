@@ -407,6 +407,82 @@ class PublicSurfaceTest extends TestCase
 
     /** З /application/public конфіг не працює взагалі, і це помічають не одразу. */
     /**
+     * Під `/backend/` конфіг виконує будь-який `.php`, який не потрапив під
+     * заборону вище: окремого правила на кожну точку входу там немає. Тож
+     * новий файл усередині цього дерева стає публічно виконуваним мовчки -
+     * ні 404, ні помилки, просто ще один вхід у застосунок.
+     *
+     * Перелік нижче - те, що ним бути й має. Усе інше або йде в заборонене
+     * дерево, або потребує свідомого рішення.
+     */
+    private const BACKEND_ENTRY_POINTS = [
+        'backend/index.php',
+        'backend/files/index.php',
+        'backend/design/js/admintooltip/admintooltip.php',
+    ];
+
+    /** Дерева, які конфіг закриває цілком - їх вміст перевіряти нема потреби. */
+    private const BACKEND_DENIED_TREES = [
+        'backend/Controllers/',
+        'backend/Helpers/',
+        'backend/Requests/',
+        'backend/Entities/',
+        'backend/design/compiled/',
+        'backend/lang/',
+    ];
+
+    public function testEveryExecutablePhpUnderBackendIsAKnownEntryPoint(): void
+    {
+        $unexpected = [];
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($this->repoRoot() . '/backend', \FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->getExtension() !== 'php') {
+                continue;
+            }
+
+            $relative = str_replace($this->repoRoot() . '/', '', $file->getPathname());
+
+            if (in_array($relative, self::BACKEND_ENTRY_POINTS, true)) {
+                continue;
+            }
+
+            // Ajax-ендпоінти - теж точки входу, але їх додають регулярно, тож
+            // вони перелічуються деревом, а не поіменно.
+            if (str_starts_with($relative, 'backend/ajax/')) {
+                continue;
+            }
+
+            foreach (self::BACKEND_DENIED_TREES as $tree) {
+                if (str_starts_with($relative, $tree)) {
+                    continue 2;
+                }
+            }
+
+            // design/ під забороною .php цілком, крім admintooltip - він у
+            // переліку точок входу вище.
+            if (str_starts_with($relative, 'backend/design/')) {
+                continue;
+            }
+
+            $unexpected[] = $relative;
+        }
+
+        sort($unexpected);
+
+        $this->assertSame(
+            [],
+            $unexpected,
+            'під backend/ зʼявився .php поза забороненими деревами й поза переліком точок входу: '
+            . implode(', ', $unexpected)
+            . '. Конфіг вебсервера виконає його як точку входу.'
+        );
+    }
+
+    /**
      * Шаблони адмінки звертаються до backend/ajax/*.php напряму. Видалений або
      * перейменований скрипт тут не дає ні 404 у логах, ні помилки збірки -
      * кнопка просто перестає працювати.
