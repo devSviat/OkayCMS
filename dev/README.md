@@ -1,7 +1,6 @@
 # Docker-оточення OkayCMS
 
-Оточення: FrankenPHP (`php85` — вебсервер і PHP в одному процесі), MariaDB,
-окремий контейнер `scheduler`
+Оточення: Nginx, php-fpm (`php85`), MariaDB, окремий контейнер `scheduler`
 (`./ok scheduler:run` за розкладом), а в dev ще й Mailpit для перехоплення
 пошти. `docker-compose.yml` — база, спільна для dev і prod.
 `docker-compose.override.yml` підвантажується автоматично і додає все
@@ -44,7 +43,7 @@ docker compose up -d
 репозиторію працює так само). Він дочекається, поки всі контейнери стануть
 `healthy` і `db-init` завершиться, і прожене перевірки: PHP-конфіг та
 розширення, базу на named volume, мережеву ізоляцію mariadb, живий scheduler,
-логи вебсервера і обидва поштові шляхи.
+логи nginx і обидва поштові шляхи.
 
 Адмінка після цього доступна на `http://<VIRTUAL_HOST>/admin` (значення
 `VIRTUAL_HOST` — з `.env`, за замовчуванням `okaycms.loc`), логін `admin`,
@@ -66,13 +65,13 @@ docker compose up -d
 | --- | --- |
 | Підняти оточення | `docker compose up -d` |
 | Зупинити (дані лишаються) | `docker compose down` |
-| Логи одного сервісу | `docker compose logs php85` / `scheduler` / `mariadb` |
+| Логи одного сервісу | `docker compose logs nginx` / `php85` / `scheduler` |
 | Логи всіх сервісів у реальному часі | `docker compose logs -f` |
 | Перевірити, що все працює | `./bin/smoke.sh` |
 | PHPUnit | `docker compose exec php85 php vendor/bin/phpunit` |
 | CLI (`./ok`) | `docker compose exec php85 php ok <команда>`, напр. `php ok scheduler:list` |
 
-Логи всіх сервісів (включно з access-логом вебсервера) ідуть у stdout/stderr
+Логи всіх сервісів (включно з access/error nginx) ідуть у stdout/stderr
 контейнера — окремої теки `dev/logs` більше немає.
 
 ## `docker compose down -v` знищує базу даних
@@ -142,7 +141,7 @@ docker compose up -d
 
 ## Порти й доступ до бази
 
-`HTTP_PORT` (застосунок) і `MAILPIT_PORT` (Mailpit) за замовчуванням прив'язані
+`HTTP_PORT` (nginx) і `MAILPIT_PORT` (Mailpit) за замовчуванням прив'язані
 лише до `127.0.0.1` — з інших машин у мережі оточення недоступне. Щоб
 свідомо відкрити їх назовні:
 
@@ -203,8 +202,7 @@ Compose підвантажує його автоматично — без явн
 в `php85`/`scheduler` read-only. Дві форми:
 
 **1. За PaaS/проксі, який сам приєднується до контейнера** (Dokploy, Coolify,
-власний Traefik) — проксі ходить до `php85` мережею `frontend` на порт 8080,
-портів не
+власний Traefik) — проксі ходить до `nginx` мережею `frontend`, портів не
 треба:
 
 ```bash
@@ -212,7 +210,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
 **2. Standalone, без проксі перед оточенням** — третій файл публікує порт
-застосунку і більше нічого; порядок важливий (`prod` перед `standalone`, щоб його
+nginx і більше нічого; порядок важливий (`prod` перед `standalone`, щоб його
 `ports:` ліг поверх того самого сервісу):
 
 ```bash
@@ -276,12 +274,12 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
 
 ## Сканування образів на CVE
 
-`.github/workflows/docker-security.yml` збирає стадію `prod` і проганяє по ній
-Trivy. Сканується зібраний образ, а не базовий тег, тож у той
+`.github/workflows/docker-security.yml` збирає стадії `prod` і `nginx-prod` і
+проганяє по них Trivy. Сканується зібраний образ, а не базовий тег, тож у той
 самий прогін потрапляють і Debian-пакети, і composer-залежності з `vendor/`.
 
 Коли: на push у `main` і щопонеділка о 05:17 UTC. Розклад тут головний — CVE
-проти незмінного `dunglas/frankenphp` з'являються без наших комітів. Прогін за
+проти незмінного `php:8.5-fpm` з'являються без наших комітів. Прогін за
 розкладом збирає образ без кешу, інакше він пересканував би те саме, що й
 минулого тижня.
 
@@ -329,7 +327,7 @@ docker run --rm \
 - **Редагування теми, `robots.txt` чи перекладів адмінки через адмінку тут
   не працює** — файли (`design/*/css/theme-settings.css`, `robots.txt`,
   `design/*/lang/local.*.php`) закомічені в git, потрапляють в образ через
-  `COPY .` і належать `root`, а застосунок у prod виконується під `www-data`.
+  `COPY .` і належать `root`, а php-fpm у prod виконується під `www-data`.
   Це свідоме рішення (тема котиться з репозиторію), але поведінка при спробі
   зберегти різна: `RobotsAdmin` перевіряє `is_writable()` і показує помилку,
   а `CssConfig::updateCssVariables()` цієї перевірки не робить — запис мовчки

@@ -4,21 +4,13 @@
 
 services:
   php85:
-    hostname: ${VIRTUAL_HOST:?err}
     environment:
       # Xdebug 3 читає цю змінну і вона важливіша за ini — режим перемикається
       # без перезбирання образу.
       XDEBUG_MODE: ${XDEBUG_MODE:-off}
       PHP_IDE_CONFIG: serverName=${VIRTUAL_HOST:?err}
-    ports:
-      # Caddyfile слухає 8080: порт непривілейований, бо no-new-privileges
-      # блокує cap_net_bind_service під non-root.
-      - '${BIND_IP:-127.0.0.1}:${HTTP_PORT:?err}:8080'
     volumes:
       - '..:/var/www/html'
-      # Правки Caddyfile підхоплюються перезапуском контейнера, без перезбирання
-      # образу — так само, як раніше шаблони nginx.
-      - './config/caddy/Caddyfile:/etc/frankenphp/Caddyfile:ro'
       # Іменований том поверх bind-mount перекриває його вміст, тож томи
       # базового файлу треба замінити bind'ами на ті самі цілі — інакше файли
       # робочого дерева невидимі в контейнері.
@@ -43,6 +35,13 @@ services:
       - '../cache:/var/www/html/cache'
       - '../Okay/log:/var/www/html/Okay/log'
     tmpfs: !reset null
+
+  nginx:
+    hostname: ${VIRTUAL_HOST:?err}
+    ports:
+      - '${BIND_IP:-127.0.0.1}:${HTTP_PORT:?err}:80'
+    volumes:
+      - '..:/var/www/html'
 
   mariadb:
     # У базовому файлі mariadb лише в internal-мережі, і опублікований порт там

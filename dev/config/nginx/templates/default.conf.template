@@ -2,40 +2,42 @@
 # налаштування сервера — за тоншим тюнінгом зверніться до системного
 # адміністратора.
 #
-# Файл тримається в синхроні з dev/config/nginx/templates/default.conf.template
-# (перевіряється tests/Security/PublicSurfaceTest.php). Відмінності лише в
-# тому, що специфічне для контейнерів: там ${VIRTUAL_HOST}, ${FASTCGI},
-# default_server і логи в stdout, тут — плейсхолдери й файли.
+# Назва файлу — default.conf.template — навмисна: entrypoint образу nginx
+# розгортає /etc/nginx/templates/*.template у /etc/nginx/conf.d/ під тим самим
+# іменем, тож цей файл заміщує штатний default.conf образу. Без цього штатний
+# default.conf лишався б поруч, а його `server_name localhost` є точним збігом
+# для http://localhost/ і виграв би в нашого віртуального хоста.
+#
+# default_server додано, щоб сайт відповідав на будь-який Host — localhost,
+# 127.0.0.1, IP машини — а не лише на ${VIRTUAL_HOST}.
 #
 # ─────────────────────────── Білий список ───────────────────────────
 #
-# Корінь сайту — усе дерево застосунку. Конфіг побудований як білий список:
-# перелічує те, що віддається, а не те, що заборонено. Чорний список тут
-# неповний за побудовою — будь-який новий файл у корені (composer.json,
-# vendor/composer/installed.json, ./ok, дамп бази) віддавався б за
-# замовчуванням, а PHP виконувався б будь-де, де лежить .php, включно зі
-# скомпільованими шаблонами Smarty.
+# Корінь сайту — весь репозиторій: nginx-образ копіює дерево застосунку як є.
+# Чорний список тут неповний за побудовою — так світились installed.json, /ok,
+# /vendor/bin/phpunit, а PHP виконувався будь-де, де лежав .php.
 #
 # Тримається все на одному рядку:
 #
 #     location / { try_files /does_not_exist /index.php?$args; }
 #
-# Кореневий location НЕ пробує віддати файл з диска ($uri тут навмисно немає),
-# тож усе, що не дозволене явно нижче, іде у фронт-контролер і отримує 404
-# застосунку.
-#
-# Правило додавання: щоб опублікувати нове дерево статики, потрібен явний
-# location. Щоб щось приховати — не потрібно нічого.
+# $uri тут навмисно немає: усе, що не дозволене явно, іде у фронт-контролер.
+# Щоб опублікувати нове дерево статики, потрібен явний location; щоб щось
+# приховати — не потрібно нічого.
 
 server {
-    listen 80;
-    server_name DOMAIN_SERVER_NAME;
+    listen 80 default_server;
+    server_name ${VIRTUAL_HOST};
 
     #add_header Strict-Transport-Security "max-age=31536000;";
 
-    # Корінь — каталог, у який розгорнуто OkayCMS.
     set $root_path /var/www/html;
     root $root_path;
+
+    # Без цього nginx будує Location у редіректах як абсолютний URL із $host і
+    # власним портом 80, і опублікований HTTP_PORT губиться — редірект іде в
+    # нікуди щоразу, коли порт не 80.
+    absolute_redirect off;
 
     charset off;
     index index.php;
@@ -44,8 +46,9 @@ server {
     # Версія nginx у Server і на сторінках помилок — підказка для сканерів.
     server_tokens off;
 
-    access_log /var/log/nginx/okaycms.access.log;
-    error_log  /var/log/nginx/okaycms.error.log;
+    # Логи йдуть у `docker compose logs nginx`, а не у файли робочого дерева.
+    access_log /dev/stdout;
+    error_log  /dev/stderr;
 
     gzip on;
     gzip_comp_level 9;
@@ -68,7 +71,7 @@ server {
     }
 
     # ─────────────────────── Статика кореня ───────────────────────
-    # Єдині файли, які віддаються з кореня.
+    # Єдині файли, які віддаються з кореня репозиторію.
     #
     # Захисні заголовки — у кожному локейшені, що віддає файл із диска: серед
     # дозволених розширень є html і svg, тож документи сюди теж потрапляють, а
@@ -176,23 +179,16 @@ server {
         add_header Referrer-Policy strict-origin-when-cross-origin always;
     }
 
-    # Завантаження файлового менеджера. originals/ — вихідні файли до ресайзу,
-    # вони не публічні. Перелік розширень навмисно вузький: усе, що браузер
-    # рендерить як HTML або віддає на виконання, тут дало б stored XSS чи гірше
-    # на домені магазину.
+    # Завантаження файлового менеджера; originals/ не публічні. Перелік
+    # розширень вузький: усе, що браузер рендерить як HTML або віддає на
+    # виконання, дало б тут stored XSS.
     #
-    # svg у переліку лишається — без нього не працюють іконки й логотипи, —
-    # але сам по собі він небезпечний: відкритий прямою навігацією, SVG
-    # рендериться як документ і виконує вбудований <script>. Санітайзер
-    # (Okay\Core\Security\SvgSanitizer) підключений лише у файловому
-    # менеджері, а зображення товарів ідуть повз нього (Okay/Core/Image.php),
-    # тож покладатись на нього не можна. Скрипт усередині глушить CSP нижче:
-    # на <img src="...svg"> вона не впливає, бо там скрипти й так не
-    # виконуються.
+    # svg лишається заради іконок, але прямою навігацією виконує <script>, а
+    # санітайзер підключений лише у файловому менеджері (зображення товарів
+    # ідуть повз нього). Тому CSP нижче; на <img src="...svg"> вона не впливає.
     #
-    # try_files з переходом на index.php обов'язковий: files/resized/ — це
-    # маршрут, зменшені копії створюються на перший запит. Жорсткий 404 тут
-    # ламав би кожну ще не згенеровану картинку.
+    # try_files на index.php обов'язковий: files/resized/ — це маршрут
+    # (Okay/Core/config/routes.php), копії створюються на перший запит.
     location ~ ^/files/(?!originals/).+\.(?i:png|jpe?g|gif|svg|webp|ico|pdf|zip|xlsx?|docx?|csv|mp3|mp4|ogg|webm)$ {
         try_files $uri /index.php?$args;
         access_log off;
@@ -279,14 +275,12 @@ server {
     }
 
     location @php {
-        fastcgi_pass php-fpm:9000;
-        #fastcgi_pass unix:/run/php-fpm/okaycms.sock;
+        fastcgi_pass ${FASTCGI}:9000;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $request_filename;
         fastcgi_param DOCUMENT_ROOT $root_path;
         fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
+        fastcgi_buffering off;
         # Джерело — expose_php у php.ini; це другий рубіж для чужих хостингів.
         fastcgi_hide_header X-Powered-By;
         include fastcgi_params;

@@ -43,16 +43,6 @@ services:
         read_only: true
         bind:
           create_host_path: false
-    # Тепер трафік приймає цей сервіс, а не окремий nginx. Приклад форми міток
-    # Traefik для звірки з робочим стеком — не заготовка для розкоментування.
-    # PaaS підставляє свої сам.
-    #
-    # labels:
-    #   traefik.enable: "true"
-    #   traefik.http.routers.<paas-generated-name>.rule: Host(`example.com`)
-    #   traefik.http.routers.<paas-generated-name>.entrypoints: websecure
-    #   traefik.http.routers.<paas-generated-name>.tls.certresolver: letsencrypt
-    #   traefik.http.services.<paas-generated-name>.loadbalancer.server.port: "8080"
 
   scheduler:
     <<: *prod-limits
@@ -66,6 +56,35 @@ services:
         read_only: true
         bind:
           create_host_path: false
+
+  nginx:
+    <<: *prod-limits
+    # Без цього nginx успадкував би базовий образ із порожнім /var/www/html —
+    # bind-mount із кодом є лише в dev-оверлеї.
+    build:
+      context: ..
+      dockerfile: dev/docker/Dockerfile
+      target: nginx-prod
+      args:
+        APP_UID: ${APP_UID:-1000}
+        APP_GID: ${APP_GID:-1000}
+    image: ${APP_NGINX_IMAGE:-okaycms-nginx}:${APP_IMAGE_TAG:-latest}
+    pull_policy: ${APP_PULL_POLICY:-build}
+    volumes:
+      # Усе, що застосунок пише під час роботи, має бути змонтоване і сюди —
+      # інакше 404 на цих шляхах. Ті самі томи, у які пишуть php85/scheduler.
+      - files:/var/www/html/files:ro
+      - backend_files:/var/www/html/backend/files:ro
+      - app_cache:/var/www/html/cache:ro
+    # Приклад форми міток Traefik для звірки з робочим стеком — не заготовка
+    # для розкоментування. PaaS підставляє свої сам.
+    #
+    # labels:
+    #   traefik.enable: "true"
+    #   traefik.http.routers.<paas-generated-name>.rule: Host(`example.com`)
+    #   traefik.http.routers.<paas-generated-name>.entrypoints: websecure
+    #   traefik.http.routers.<paas-generated-name>.tls.certresolver: letsencrypt
+    #   traefik.http.services.<paas-generated-name>.loadbalancer.server.port: "80"
 
   mariadb:
     <<: *prod-limits

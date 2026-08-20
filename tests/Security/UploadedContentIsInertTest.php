@@ -98,11 +98,10 @@ class UploadedContentIsInertTest extends TestCase
     public static function nginxConfigProvider()
     {
         return [
+            'dev'  => ['dev/config/nginx/templates/default.conf.template'],
             'docs' => ['docs/nginx/nginx.conf'],
         ];
     }
-
-    private const CADDYFILE = 'dev/config/caddy/Caddyfile';
 
     /**
      * @return string[]

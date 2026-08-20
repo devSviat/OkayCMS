@@ -1,4 +1,4 @@
-# Сканує зібраний прод-образ на CVE. Окремий від ci.yml, бо має власний
+# Сканує зібрані прод-образи на CVE. Окремий від ci.yml, бо має власний
 # schedule, а ci.yml лишається швидким і без Docker.
 #
 # Сканується зібраний образ, а не базовий тег: composer-залежності з vendor/
@@ -31,14 +31,13 @@ concurrency:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    name: Trivy (prod image)
+    name: Trivy (prod images)
     steps:
       - uses: actions/checkout@v7
 
       - uses: docker/setup-buildx-action@v4
 
-      # Образ один: вебсервер і PHP — той самий процес (FrankenPHP), окремої
-      # стадії під nginx більше немає.
+      # Обидва образи в одній джобі: nginx-prod — це COPY поверх alpine.
       #
       # no-cache завжди, а не лише за розкладом. Перший шар Dockerfile —
       # apt-get upgrade, і з кешу він приїздить із пакетами того дня, коли його
@@ -58,12 +57,35 @@ jobs:
           pull: true
           no-cache: true
 
+      - name: Build the nginx-prod image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: dev/docker/Dockerfile
+          target: nginx-prod
+          tags: okaycms-nginx:ci
+          load: true
+          pull: true
+          no-cache: true
+
       # ignore-unfixed: CVE без патча в апстрімі полагодити нічим, а постійно
       # червоний CI привчає ігнорувати червоне.
       - name: Trivy gate (app image)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: okaycms:ci
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          trivyignores: .trivyignore.yaml
+
+      # always() — щоб падіння по app-образу не ховало результат по nginx.
+      - name: Trivy gate (nginx image)
+        if: always()
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: okaycms-nginx:ci
           format: table
           severity: HIGH,CRITICAL
           ignore-unfixed: true

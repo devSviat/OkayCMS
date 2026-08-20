@@ -45,7 +45,7 @@ security boundaries, themes and the Docker environment, so a blind merge would u
 ## Commands
 
 ```bash
-cd dev && docker compose up -d         # start the local environment (FrankenPHP + MariaDB)
+cd dev && docker compose up -d         # start the local environment (Nginx + php-fpm + MariaDB)
 dev/bin/smoke.sh                        # verify the environment came up correctly (run from repo root)
 php vendor/bin/phpunit                  # run all tests (config in phpunit.xml, suite dir: tests/)
 php vendor/bin/phpunit tests/Core/      # run tests in a directory
@@ -107,7 +107,6 @@ Service wiring is centralized: core services in `Okay/Core/config/services.php` 
 | Tests, phpstan, phpcs, smoke checks | `docs/testing.md` |
 | Discounts | `docs/discounts.md` |
 | Security boundaries and upgrade notes | `docs/UPGRADE-security.md` |
-| Web server: Caddyfile, deliberate divergences from nginx, worker mode | `docs/deployment-frankenphp.md` |
 | Porting a theme to this fork | `docs/theme-porting.md` |
 | Taking a theme from here to stock OkayCMS | `docs/theme-to-stock.md` |
 | Import / Export | `docs/import.md`, `docs/export.md` |

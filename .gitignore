@@ -25,11 +25,7 @@ files/**/*.*
 !files/**/.gitignore
 !files/lang/*.*
 files/thumbs/*
-# cache/*, а не cache/: git не заходить у виключений каталог, тож !*.keep_folder
-# нижче не зміг би повернути маркер. А каталог мусить існувати у свіжому клоні —
-# dev-оверрайд монтує його бінд-маунтом, і відсутній шлях docker створює від
-# root, після чого застосунок не може створити в ньому cache/css.
-cache/*
+cache/
 
 /Okay/log/*
 config/config.local.php

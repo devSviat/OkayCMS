@@ -106,17 +106,10 @@ class PublicSurfaceTest extends TestCase
         $this->assertSame([], $stale, 'у переліку лишились записи, яких немає в дереві');
     }
 
-    /** Конфіг, за яким працює стек із репозиторію. */
-    private const CADDYFILE = 'dev/config/caddy/Caddyfile';
-
-    /**
-     * Лишився один nginx-конфіг: приклад у docs/ для тих, хто ставить магазин
-     * на власний nginx. Стек із репозиторію обслуговує FrankenPHP, і його
-     * конфіг перевіряють окремі тести нижче — синтаксис інший, інваріанти ті самі.
-     */
     public static function configProvider(): array
     {
         return [
+            'dev template' => ['dev/config/nginx/templates/default.conf.template'],
             'docs example' => ['docs/nginx/nginx.conf'],
         ];
     }
@@ -163,185 +156,30 @@ class PublicSurfaceTest extends TestCase
         );
     }
 
-    /**
-     * Паритет двох конфігів, які лишились: приклад у docs/ копіюють на власний
-     * nginx, а Caddyfile обслуговує стек із репозиторію. Дозволене дерево має
-     * бути тим самим — інакше магазин поводиться по-різному залежно від того,
-     * як його підняли.
-     *
-     * Голки різні там, де синтаксис не дозволяє однакових: Go RE2 не підтримує
-     * негативний lookahead, тож виняток для files/originals/ у Caddyfile —
-     * окреме правило-заборона, а не (?!originals/) у самій регулярці.
-     */
+    /** Приклад із docs/ копіюють на власний хостинг — він не має відставати. */
     #[DataProvider('allowedTreeProvider')]
-    public function testBothConfigsAllowTheSameTrees(string $nginxNeedle, string $caddyNeedle): void
+    public function testDocsExampleAllowsTheSameTreesAsTheDevTemplate(string $tree): void
     {
         $this->assertStringContainsString(
-            $nginxNeedle,
+            $tree,
             $this->config('docs/nginx/nginx.conf'),
-            'приклад у docs/nginx/nginx.conf мусить дозволяти те саме дерево, що й Caddyfile'
+            "приклад у docs/nginx/nginx.conf мусить дозволяти те саме дерево, що й dev-шаблон"
         );
         $this->assertStringContainsString(
-            $caddyNeedle,
-            $this->config(self::CADDYFILE),
-            'Caddyfile мусить дозволяти те саме дерево, що й приклад у docs/nginx/nginx.conf'
+            $tree,
+            $this->config('dev/config/nginx/templates/default.conf.template')
         );
     }
 
     public static function allowedTreeProvider(): array
     {
         return [
-            'design'  => ['^/design/[^/]+/(css|js|images|fonts)/', '^/design/[^/]+/(css|js|images|fonts)/'],
-            'cache'   => ['^/cache/(css|js)/', '^/cache/(css|js)/'],
-            'files'   => ['^/files/(?!originals/)', '^/files/.+\\.'],
-            'modules' => ['^/Okay/Modules/[^/]+/[^/]+/', '^/Okay/Modules/[^/]+/[^/]+/'],
-            'root'    => ['location = /robots.txt', 'path /robots.txt'],
+            'design'  => ['^/design/[^/]+/(css|js|images|fonts)/'],
+            'cache'   => ['^/cache/(css|js)/'],
+            'files'   => ['^/files/(?!originals/)'],
+            'modules' => ['^/Okay/Modules/[^/]+/[^/]+/'],
+            'root'    => ['location = /robots.txt'],
         ];
-    }
-
-    /**
-     * path_regexp бачить лише шлях, тож без окремої умови на порожній query
-     * редірект зрізає параметри — і вхід в адмінку ламається.
-     */
-    public function testCaddyfileIndexPhpRedirectKeepsQueryStrings(): void
-    {
-        $source = $this->config(self::CADDYFILE);
-
-        // Не `[^}]*`: тіло матчера саме містить `}` у плейсхолдері
-        // {http.request.uri.query}, тож блок береться за фіксованим вікном.
-        $start = strpos($source, '@index_php {');
-        $this->assertIsInt($start, 'у Caddyfile не знайдено матчера канонізації index.php');
-
-        $this->assertStringContainsString(
-            'uri.query} == ""',
-            substr($source, $start, 300),
-            'канонізація index.php мусить спрацьовувати лише за порожнього рядка запиту'
-        );
-    }
-
-    /**
-     * Матчер описує рівно один сегмент під backend/ajax/: ендпоінт, покладений
-     * глибше, під нього не підпадає.
-     */
-    public function testEveryAjaxEndpointTemplatesAskForIsCoveredByTheMatcher(): void
-    {
-        $referenced = [];
-        $templates = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($this->repoRoot() . '/backend/design/html')
-        );
-
-        foreach ($templates as $file) {
-            if ($file->getExtension() !== 'tpl') {
-                continue;
-            }
-            if (preg_match_all('#ajax/(\S+?\.php)#', (string) file_get_contents($file->getPathname()), $m)) {
-                $referenced = array_merge($referenced, $m[1]);
-            }
-        }
-
-        $referenced = array_unique($referenced);
-        $this->assertNotEmpty($referenced, 'шаблони адмінки мусять посилатись на ajax-ендпоінти');
-
-        foreach ($referenced as $endpoint) {
-            $this->assertFileExists($this->repoRoot() . '/backend/ajax/' . $endpoint);
-            $this->assertStringNotContainsString(
-                '/',
-                $endpoint,
-                "backend/ajax/$endpoint лежить глибше за один сегмент і не підпаде під матчер Caddyfile"
-            );
-        }
-    }
-
-    /**
-     * У Caddy header — обробник у ланцюжку route, тож усе, записане до
-     * термінальної php, лягає й на фолбек. А фолбек тут — HTML-сторінка 404
-     * магазину зі Set-Cookie, якій не можна ні `public, max-age`, ні
-     * `default-src 'none'`.
-     */
-    public function testCaddyfileFilesHeadersDoNotReachTheFrontController(): void
-    {
-        $source = $this->config(self::CADDYFILE);
-
-        $start = strpos($source, 'route @files {');
-        $this->assertIsInt($start, 'у Caddyfile немає маршруту для files/');
-        $block = substr($source, $start, 600);
-
-        $php = strpos($block, 'php @files_front');
-        $header = strpos($block, 'header {');
-        $this->assertIsInt($php, 'у route @files немає виклику php');
-        $this->assertIsInt($header, 'у route @files немає блоку header');
-
-        $this->assertGreaterThan(
-            $php,
-            $header,
-            'header мусить стояти після php: інакше Cache-Control і CSP лягають на HTML-фолбек'
-        );
-    }
-
-    /**
-     * Помилку file_server Caddy пише повз обробник header сайту, тож без
-     * handle_errors на 404 статики лишається заголовок Server.
-     */
-    public function testCaddyfileStripsTheServerHeaderFromErrorResponses(): void
-    {
-        $source = $this->config(self::CADDYFILE);
-
-        $start = strpos($source, 'handle_errors {');
-        $this->assertIsInt($start, 'без handle_errors 404 від file_server лишає заголовок Server');
-        $this->assertStringContainsString(
-            '-Server',
-            substr($source, $start, 200),
-            'handle_errors мусить прибирати Server, інакше -Server на рівні сайту неповний'
-        );
-    }
-
-    /**
-     * У nginx умова канонізації стоїть під `~*`, тобто без урахування
-     * регістру: /INDEX.PHP теж мусить згортатись, інакше це другий URL на ту
-     * саму сторінку. path_regexp у Caddy регістр враховує, тож потрібен (?i).
-     */
-    public function testCaddyfileIndexCanonicalisationIgnoresCase(): void
-    {
-        $source = $this->config(self::CADDYFILE);
-
-        $this->assertStringContainsString('(?i)^(.*/)index\.php$', $source);
-        $this->assertStringContainsString('(?i)^(.*/)index\.html', $source);
-    }
-
-    /**
-     * У nginx трійка повторена в кожному локейшені, бо add_header у локейшені
-     * замінює успадковані. У Caddy такої семантики немає, тож трійка стоїть
-     * один раз на сайті — і мусить там бути.
-     */
-    public function testCaddyfileSendsBaselineHeadersSiteWide(): void
-    {
-        $source = $this->config(self::CADDYFILE);
-
-        foreach ([
-            'X-Content-Type-Options nosniff',
-            'X-Frame-Options SAMEORIGIN',
-            'Referrer-Policy strict-origin-when-cross-origin',
-        ] as $header) {
-            $this->assertStringContainsString(
-                '?' . $header,
-                $source,
-                "Caddyfile мусить ставити «{$header}» на рівні сайту, і саме через `?` — "
-                . 'інакше він перетер би заголовок, який уже виставив SecurityHeaders'
-            );
-        }
-    }
-
-    public function testCaddyfileModulePreviewSendsCspForSvg(): void
-    {
-        $source = $this->config(self::CADDYFILE);
-
-        $found = preg_match(
-            '#@module_preview\s+path_regexp[^\n]*\n\s*header\s+@module_preview\s*\{([^}]*)\}#',
-            $source,
-            $matches
-        );
-        $this->assertSame(1, $found, "у Caddyfile не знайдено правила прев'ю модуля");
-        $this->assertStringContainsString("default-src 'none'; sandbox", $matches[1]);
     }
 
     /**
@@ -410,7 +248,7 @@ class PublicSurfaceTest extends TestCase
     public static function previewWhitelistProvider(): array
     {
         return [
-            'caddyfile'    => [self::CADDYFILE],
+            'dev template' => ['dev/config/nginx/templates/default.conf.template'],
             'docs example' => ['docs/nginx/nginx.conf'],
             'htaccess'     => ['.htaccess'],
         ];
