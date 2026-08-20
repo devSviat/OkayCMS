@@ -20,11 +20,16 @@ $maxRequests = (int) ($_SERVER['MAX_REQUESTS'] ?? 0);
 $gcEvery = 100;
 
 for ($handled = 0; $maxRequests === 0 || $handled < $maxRequests; $handled++) {
-    $keepRunning = frankenphp_handle_request(static function () use ($kernel) {
-        $kernel->handle();
-    });
-
-    $kernel->terminate();
+    try {
+        $keepRunning = frankenphp_handle_request(static function () use ($kernel) {
+            $kernel->handle();
+        });
+    } finally {
+        // finally, а не наступний рядок: якби запит упав повз обробник у
+        // handle(), стан лишився б неприбраним, і наступний покупець дістав би
+        // привілеї попереднього. Падіння не має ставати витоком.
+        $kernel->terminate();
+    }
 
     // Не на кожному запиті: повний прохід по циклах коштує більше, ніж уся
     // економія від теплого процесу. Автоматичний збирач циклів PHP і без

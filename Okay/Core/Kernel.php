@@ -55,21 +55,24 @@ final class Kernel
         $this->boot();
         $startTime = $startTime ?? microtime(true);
 
-        // Сесія стартує на кожному запиті, а не в boot(): у воркері boot()
-        // відпрацює один раз, і всі покупці ділили б одну сесію.
-        //
-        // isAdmin() строго до startFrontend(): одночасно активною може бути
-        // лише одна сесія, а тут ми на мить читаємо бекендову.
-        SessionNames::isAdmin();
-        SessionNames::startFrontend();
-
-        // Панель відладки вмикається з конфіга (debug_bar у config.local.php).
-        if ($this->config->get('debug_bar') == true && $this->config->get('debug_mode') == true) {
-            DebugBar::init();
-        }
-        DebugBar::startMeasure('init', 'System init');
-
+        // Усе, що стосується запиту, - всередині try: збій на старті сесії
+        // інакше пройшов би повз обробник і в живому процесі забрав би з собою
+        // весь воркер.
         try {
+            // Сесія стартує на кожному запиті, а не в boot(): у воркері boot()
+            // відпрацює один раз, і всі покупці ділили б одну сесію.
+            //
+            // isAdmin() строго до startFrontend(): одночасно активною може бути
+            // лише одна сесія, а тут ми на мить читаємо бекендову.
+            SessionNames::isAdmin();
+            SessionNames::startFrontend();
+
+            // Панель відладки вмикається з конфіга (debug_bar у config.local.php).
+            if ($this->config->get('debug_bar') == true && $this->config->get('debug_mode') == true) {
+                DebugBar::init();
+            }
+            DebugBar::startMeasure('init', 'System init');
+
             /** @var Router $router */
             $router = $this->DI->get(Router::class);
 
