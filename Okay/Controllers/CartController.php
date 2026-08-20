@@ -4,6 +4,7 @@
 namespace Okay\Controllers;
 
 
+use Okay\Core\Http\TerminateRequest;
 use Okay\Helpers\CartHelper;
 use Okay\Helpers\CouponHelper;
 use Okay\Helpers\MetadataHelpers\CartMetadataHelper;
@@ -78,7 +79,8 @@ class CartController extends AbstractController
                 RESPONSE_JSON
             );
             $this->response->sendContent();
-            exit;
+
+            throw new TerminateRequest();
         }
 
         $this->response->redirectTo($url, 303);
@@ -99,7 +101,8 @@ class CartController extends AbstractController
                 RESPONSE_JSON
             );
             $this->response->sendContent();
-            exit;
+
+            throw new TerminateRequest();
         }
 
         $this->design->assign('error', 'cart_empty');

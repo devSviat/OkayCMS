@@ -72,13 +72,17 @@ class SecurityHeadersTest extends TestCase
         $source = file_get_contents(dirname(__DIR__, 2) . '/' . $file);
         $this->assertIsString($source, $file);
 
-        $this->assertStringContainsString('Okay\Core\Response', $source, $file);
+        // Файл усередині Okay\Core посилається на сусіда коротким іменем.
+        $this->assertTrue(
+            str_contains($source, 'Okay\Core\Response') || str_contains($source, 'Response::class'),
+            $file . ': відповідь віддається повз Okay\Core\Response'
+        );
     }
 
     public static function entryPointProvider()
     {
         return [
-            'storefront'   => ['index.php'],
+            'storefront'   => ['Okay/Core/Kernel.php'],
             'backend'      => ['backend/index.php'],
             'ajax config'  => ['backend/ajax/configure.php'],
             'admintooltip' => ['backend/design/js/admintooltip/admintooltip.php'],

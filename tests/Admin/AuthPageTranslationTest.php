@@ -29,10 +29,10 @@ class AuthPageTranslationTest extends TestCase
     }
 
     /**
-     * Присвоєння мусить стояти на верхньому рівні файлу, а не всередині гілки:
-     * саме через те, що воно лежало в if (!empty($manager)), сторінка входу
-     * роками не мала перекладів. Глибина рахується токенізатором, бо текстовий
-     * пошук цього не бачить - переміщення в else лишає рядок на місці.
+     * Присвоєння мусить стояти поза будь-якою гілкою: саме через те, що воно
+     * лежало в if (!empty($manager)), сторінка входу роками не мала
+     * перекладів. Глибина рахується токенізатором, бо текстовий пошук цього не
+     * бачить - переміщення в else лишає рядок на місці.
      */
     public function testTranslationsAreAssignedOutsideAnyBranch(): void
     {
@@ -42,27 +42,39 @@ class AuthPageTranslationTest extends TestCase
         $this->assertSame(0, $depth, 'btr присвоюється всередині гілки');
     }
 
-    /** @return int|null глибина вкладеності у фігурні дужки або null, якщо не знайдено */
+    /** @return int|null глибина вкладеності у гілки або null, якщо не знайдено */
     private function assignDepth(string $source): ?int
     {
         $tokens = token_get_all($source);
-        $depth  = 0;
+        // Блоки try/catch/finally, тіла функцій і інтерполяція - не гілки:
+        // вони не роблять присвоєння умовним, тож у глибину не рахуються.
+        $neutral = [T_TRY, T_CATCH, T_FINALLY, T_FUNCTION, T_FN, T_CLASS];
+        $kinds   = [];
+        $depth   = 0;
+        $nextIsNeutral = false;
 
         for ($i = 0; $i < count($tokens); $i++) {
             $token = $tokens[$i];
 
+            if (is_array($token) && in_array($token[0], $neutral, true)) {
+                $nextIsNeutral = true;
+                continue;
+            }
+
             if ($token === '{') {
-                $depth++;
+                $kinds[] = $nextIsNeutral ? 'neutral' : 'branch';
+                $depth += $nextIsNeutral ? 0 : 1;
+                $nextIsNeutral = false;
                 continue;
             }
 
             if ($token === '}') {
-                $depth--;
+                $depth -= array_pop($kinds) === 'branch' ? 1 : 0;
                 continue;
             }
 
-            if (is_array($token) && $token[0] === T_CURLY_OPEN) {
-                $depth++;
+            if (is_array($token) && ($token[0] === T_CURLY_OPEN || $token[0] === T_DOLLAR_OPEN_CURLY_BRACES)) {
+                $kinds[] = 'neutral';
                 continue;
             }
 

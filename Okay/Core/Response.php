@@ -5,6 +5,7 @@ namespace Okay\Core;
 
 
 use Okay\Core\Adapters\Response\AdapterManager;
+use Okay\Core\Http\TerminateRequest;
 use Okay\Core\Security\SecurityHeaders;
 use Okay\Core\Modules\LicenseModulesTemplates;
 
@@ -97,14 +98,14 @@ class Response
     }
     
     /**
-     * Метод перенаправления на другой ресурс. При помощи функции exit()
-     * прекращает исполнение кода расположенного ниже вызова метода.
+     * Метод перенаправления на другой ресурс. Код ниже вызова не выполняется.
      *
      * @param string $resource
      * @param int $responseCode
      *
      * @return void
      * @throws \Exception
+     * @throws TerminateRequest завжди: метод не повертає керування
      */
     public static function redirectTo(string $resource, int $responseCode = 302): void
     {
@@ -112,16 +113,17 @@ class Response
             throw new \Exception("$responseCode is not a valid redirect response code.");
         }
         
-        // Метод завершується exit'ом повз sendHeaders(), тож заголовки треба
-        // віддати тут. Ключовий на редіректі - Referrer-Policy: саме він
-        // вирішує, який Referer побачить ціль переходу.
+        // Метод не проходить через sendHeaders(), тож заголовки треба віддати
+        // тут. Ключовий на редіректі - Referrer-Policy: саме він вирішує, який
+        // Referer побачить ціль переходу.
         foreach (SecurityHeaders::defaults() as $securityHeader) {
             header($securityHeader);
         }
 
         $headerContent = 'Location: ' . $resource;
         header($headerContent, false, $responseCode);
-        exit;
+
+        throw new TerminateRequest();
     }
     
     public function setStatusCode($statusCode): self
@@ -295,7 +297,8 @@ class Response
         
         if ($ifModifiedSince && $ifModifiedSince >= $lastModifiedUnix) {
             $this->setStatusCode(304)->sendHeaders();
-            exit;
+
+            throw new TerminateRequest();
         }
         
         $this->addHeader('Last-Modified: ' . $lastModified);

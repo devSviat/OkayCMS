@@ -169,12 +169,10 @@ class Router {
 
                     if ($flexibleRoute->hasSlashAtEnd() && $lastSymbolCurrentUrl !== "/") {
                         $this->response->redirectTo($currentUri.'/'.Request::getCurrentQueryString(), 301);
-                        return;
                     }
 
                     if (! $flexibleRoute->hasSlashAtEnd() && $lastSymbolCurrentUrl === "/") {
                         $this->response->redirectTo(mb_substr($currentUri, 0, -1).Request::getCurrentQueryString(), 301);
-                        return;
                     }
                 }
 

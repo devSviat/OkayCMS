@@ -61,7 +61,7 @@ class SessionNamesTest extends TestCase
     public static function entrypointProvider()
     {
         return [
-            'storefront'   => ['index.php'],
+            'storefront'   => ['Okay/Core/Kernel.php'],
             'backend'      => ['backend/index.php'],
             'ajax config'  => ['backend/ajax/configure.php'],
             'admintooltip' => ['backend/design/js/admintooltip/admintooltip.php'],

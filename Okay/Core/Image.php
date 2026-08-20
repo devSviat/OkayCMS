@@ -6,6 +6,7 @@ namespace Okay\Core;
 
 use Okay\Core\Adapters\Resize\AbstractResize;
 use Okay\Core\Adapters\Resize\AdapterManager;
+use Okay\Core\Http\TerminateRequest;
 use Okay\Core\Modules\Extender\ExtenderFacade;
 use Okay\Core\Security\Filemanager\PathResolver;
 use WebPConvert\WebPConvert;
@@ -131,7 +132,7 @@ class Image
 
         list($sourceFile, $width , $height, $setWatermark, $cropParams, $pseudoWebp) = $resizeParams;
 
-        // До перевірки розміру: та робить exit(), тож ворожий шлях не був би
+        // До перевірки розміру: та завершує запит, тож ворожий шлях не був би
         // відхилений як ворожий.
         if (!$this->isRemoteSource($sourceFile) && !PathResolver::isSafeRelativePath($sourceFile)) {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
@@ -145,7 +146,8 @@ class Image
 
         if (!in_array($size, $imageSizes)){
             $this->response->setStatusCode(404)->sendHeaders();
-            exit();
+
+            throw new TerminateRequest();
         }
 
         $originalsDir = $this->rootDir . $originalImagesDir;

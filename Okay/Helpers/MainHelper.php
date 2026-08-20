@@ -466,7 +466,6 @@ class MainHelper
             // Адреса приходить із POST, тому вести з поточного домену не можна.
             if (SafeRedirect::isSameOrigin($prgSeoHide, Request::getDomainWithProtocol())) {
                 Response::redirectTo($prgSeoHide);
-                exit;
             }
         }
         return ExtenderFacade::execute(__METHOD__, null, func_get_args());

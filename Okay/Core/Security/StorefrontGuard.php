@@ -4,6 +4,7 @@
 namespace Okay\Core\Security;
 
 
+use Okay\Core\Http\TerminateRequest;
 use Okay\Core\Request;
 use Okay\Core\Response;
 
@@ -53,6 +54,7 @@ class StorefrontGuard
         }
 
         $this->response->sendContent();
-        exit;
+
+        throw new TerminateRequest();
     }
 }
