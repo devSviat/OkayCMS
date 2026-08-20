@@ -42,6 +42,33 @@ class StorefrontGuard
         }
     }
 
+    /**
+     * Пропускає лише POST, надісланий зі сторінки цього ж магазину.
+     *
+     * Рубіж, який не залежить від шаблону: працює й на темі, що не друкує
+     * токен. Запит без Origin і без Referer відхиляється - доводити
+     * походження мусить клієнт, а не застосунок за нього здогадуватись.
+     *
+     * @param bool $asJson
+     * @return void
+     */
+    public function requireSameOrigin($asJson = false)
+    {
+        if (!$this->request->method('post')) {
+            $this->reject(405, 'Method Not Allowed', $asJson);
+        }
+
+        $matches = RequestOrigin::matchesSite(
+            Request::getOrigin(),
+            Request::getReferer(),
+            Request::getDomainWithProtocol()
+        );
+
+        if (!$matches) {
+            $this->reject(403, 'Forbidden', $asJson);
+        }
+    }
+
     private function reject($statusCode, $message, $asJson)
     {
         $this->response->setStatusCode($statusCode);

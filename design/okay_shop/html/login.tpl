@@ -12,6 +12,7 @@
         <div class="f_row flex-lg-row align-items-md-start">
             <div class="form_wrap f_col-lg-6">
                 <form method="post" class="fn_validate_login form form--boxed">
+                    <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                     <div class="form__header">
                         <div class="form__title">
                             {include file="svg.tpl" svgId="note_icon"}

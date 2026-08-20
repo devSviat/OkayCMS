@@ -26,6 +26,7 @@ class StorefrontCsrfGuardTest extends TestCase
             'wishlist'   => ['Okay/Controllers/WishListController.php', 1],
             'comparison' => ['Okay/Controllers/ComparisonController.php', 1],
             'feedback'   => ['Okay/Controllers/FeedbackController.php', 1],
+            'user'       => ['Okay/Controllers/UserController.php', 2],
             // SubscribeController не успадковує AbstractController, тож бере
             // ту саму охорону сервісом.
             'subscribe'  => [
@@ -100,6 +101,12 @@ class StorefrontCsrfGuardTest extends TestCase
             'comparison' => [
                 \Okay\Controllers\ComparisonController::class, 'ajaxUpdate', '$comparison->addItem(',
             ],
+            'user login' => [
+                \Okay\Controllers\UserController::class, 'login', '$userHelper->login(',
+            ],
+            'user register' => [
+                \Okay\Controllers\UserController::class, 'register', '$userHelper->register(',
+            ],
         ];
     }
 
@@ -138,6 +145,39 @@ class StorefrontCsrfGuardTest extends TestCase
         $this->assertStringContainsString('CustomerCsrfToken::check', $source);
         $this->assertStringContainsString('reject(405', $source);
         $this->assertStringContainsString('reject(403', $source);
+    }
+
+    /**
+     * Другий рубіж не залежить від шаблону, тож лишається робочим і на темі,
+     * яка токен не друкує.
+     */
+    public function testGuardServiceAlsoChecksTheOrigin()
+    {
+        $source = $this->read('Okay/Core/Security/StorefrontGuard.php');
+
+        $this->assertStringContainsString('function requireSameOrigin', $source);
+        $this->assertStringContainsString('RequestOrigin::matchesSite', $source);
+
+        $abstract = $this->read('Okay/Controllers/AbstractController.php');
+        $this->assertStringContainsString('function requireSameOrigin', $abstract);
+    }
+
+    /**
+     * Обидва рубежі, а не один: токен переживає втрату Referer, походження
+     * переживає тему без токена.
+     */
+    #[DataProvider('authMethodProvider')]
+    public function testAuthMethodsRunBothGuards($method)
+    {
+        $body = $this->methodBody(\Okay\Controllers\UserController::class, $method);
+
+        $this->assertStringContainsString('$this->requireSameOrigin(', $body, $method);
+        $this->assertStringContainsString('$this->requireCustomerCsrf(', $body, $method);
+    }
+
+    public static function authMethodProvider()
+    {
+        return ['login' => ['login'], 'register' => ['register']];
     }
 
     #[DataProvider('mutationParamReaderProvider')]
@@ -237,6 +277,10 @@ class StorefrontCsrfGuardTest extends TestCase
             // вимагає токен. Без нього форма зберігала заявку і аж тоді
             // отримувала 403.
             'callback.tpl',
+            // Вхід і реєстрація мутують сесію: без токена чужа сторінка
+            // входила у свій акаунт у браузері жертви.
+            'login.tpl',
+            'register.tpl',
         ];
 
         foreach (['okay_shop', 'vibe_shop'] as $theme) {
