@@ -171,9 +171,16 @@ expect_contains "timezone is Europe/Kyiv" \
     "Europe/Kyiv" \
     docker compose exec -T php85 php -r 'echo ini_get("date.timezone");'
 
+# Порівнюється рядок цілком: `php -m | grep dom` збігається ще й з `random`,
+# тож видалене розширення лишалось непоміченим.
+loaded_extensions=$(docker compose exec -T php85 php -m 2>/dev/null | tr -d '\r')
 for ext in pdo_mysql mysqli gd zip xsl xmlwriter SimpleXML dom xmlreader curl mbstring json; do
-    expect_contains "extension loaded: $ext" "$ext" \
-        docker compose exec -T php85 php -m
+    if printf '%s\n' "$loaded_extensions" | grep -qxi "$ext"; then
+        printf '  ok    %s\n' "extension loaded: $ext"
+    else
+        printf '  FAIL  %s\n' "extension loaded: $ext"
+        fails=$((fails + 1))
+    fi
 done
 
 echo
@@ -308,10 +315,14 @@ expect_contains "the virtual host still serves the storefront" \
 # заголовків і ламає редіректи, а не лише псує вигляд.
 #
 # Покривають лише GET-рендеринг: логіку відправки форм — ні.
+# Голок кілька: з debug_mode фатал друкується в тіло, а статус лишається 200,
+# тож на код відповіді покладатись не можна.
 for pg in "/" "/cart" "/blog" "/brands"; do
-    expect_missing "no PHP diagnostics leak into the page: ${pg}" \
-        "Deprecated:" \
-        curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}${pg}"
+    for diagnostic in "Deprecated:" "Warning:" "Notice:" "Fatal error:" "Parse error:" "Uncaught"; do
+        expect_missing "no PHP diagnostics leak into the page: ${pg} (${diagnostic})" \
+            "$diagnostic" \
+            curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}${pg}"
+    done
 done
 
 echo
@@ -380,6 +391,50 @@ expect_missing "a missing static file does not disclose the server software" \
     "Server:" \
     curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
         "http://127.0.0.1:${HTTP_PORT}/js_libraries/smoke-no-such-file.js"
+
+# Той самий обробник знімає з помилки й кеш-заголовки: без цього браузер і CDN
+# запам'ятовували «файла немає» на рік і переживали викладку самого файла.
+expect_missing "a missing static file is not cached for a year" \
+    "max-age=31536000" \
+    curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" \
+        "http://127.0.0.1:${HTTP_PORT}/js_libraries/smoke-no-such-file.js"
+
+# Класові дерева адмінки (PSR-4) — не точки входу.
+expect_status 404 "/backend/Controllers/IndexAdmin.php"
+expect_status 404 "/backend/Helpers/BackendProductsHelper.php"
+
+# Сумісність зі старим URL адмінки і канонізація www.
+expect_status 302 "/admin"
+expect_contains "www. is redirected to the same host without the prefix" \
+    "Location: http://${VIRTUAL_HOST}/" \
+    curl -sS -D- -o /dev/null -H "Host: www.${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/"
+
+# Базова трійка заголовків мусить доходити і до PHP-відповіді, і до статики.
+# Ставиться вона через `?` (не перетирати SecurityHeaders), а це рівно те місце,
+# де помилка дає тихо відсутній заголовок.
+for header in "X-Content-Type-Options: nosniff" "X-Frame-Options: SAMEORIGIN" \
+              "Referrer-Policy: strict-origin-when-cross-origin"; do
+    expect_contains "the storefront sends ${header%%:*}" "$header" \
+        curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/"
+    expect_contains "robots.txt sends ${header%%:*}" "$header" \
+        curl -sS -D- -o /dev/null -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/robots.txt"
+done
+
+# request_body max_size сам по собі не відхиляє запит, а мовчки обрізає тіло:
+# застосунок отримав би побитий файл замість помилки.
+oversized=$(mktemp)
+head -c 120000000 /dev/zero > "$oversized"
+oversized_code=$(curl -sS -o /dev/null -w '%{http_code}' -H 'Expect:' \
+    -H "Host: ${VIRTUAL_HOST}" --data-binary "@${oversized}" \
+    "http://127.0.0.1:${HTTP_PORT}/" 2>/dev/null || echo "000")
+rm -f "$oversized"
+if [ "$oversized_code" = "413" ]; then
+    printf '  ok    %s\n' "a body over the limit is refused instead of silently truncated"
+else
+    printf '  FAIL  %s\n' "a body over the limit is refused instead of silently truncated"
+    printf '        expected HTTP 413, actual: %s\n' "$oversized_code"
+    fails=$((fails + 1))
+fi
 # Шлях бандла береться з реальної сторінки, а не зашивається — в імені хеш вмісту.
 asset_path=$(curl -sS -H "Host: ${VIRTUAL_HOST}" "http://127.0.0.1:${HTTP_PORT}/" 2>/dev/null \
     | grep -oE 'cache/(css|js)/[^"]+\.(css|js)' | head -1)

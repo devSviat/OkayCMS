@@ -97,3 +97,48 @@ jobs:
 
       - name: Scan for secrets
         run: gitleaks detect --source . --redact --verbose
+
+  # Єдина джоба, що піднімає Docker, і єдина, що перевіряє ПОВЕДІНКУ, а не текст
+  # конфігу. Розбір Caddyfile у tests/Security/ ловить дірки в білому списку, але
+  # не бачить речей, які видно лише у відповіді: кеш на 404, ліміт тіла, заголовки
+  # безпеки, редіректи. Тому ~2 хв на збірку образу тут виправдані, а решта
+  # джоб лишається без Docker і швидкою.
+  smoke:
+    runs-on: ubuntu-latest
+    name: Smoke (Docker)
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: simplexml, xmlreader, pdo, json, curl, mbstring, zip, gd, xsl
+          coverage: none
+          tools: composer:v2
+
+      # vendor/ монтується в контейнер із робочого дерева, тож ставиться тут.
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      # APP_UID/APP_GID беруться з раннера, а не з прикладу: під чужим uid
+      # контейнер не запише в compiled/ і cache/, і магазин віддасть 500.
+      - name: Prepare the environment
+        run: |
+          set -euo pipefail
+          cp config/config.local-example.php config/config.local.php
+          cp dev/.env-example dev/.env
+          sed -i "s/^APP_UID=.*/APP_UID=$(id -u)/" dev/.env
+          sed -i "s/^APP_GID=.*/APP_GID=$(id -g)/" dev/.env
+
+      - name: Start the stack
+        working-directory: dev
+        run: docker compose up -d --build
+
+      - name: Smoke checks
+        run: dev/bin/smoke.sh
+
+      - name: Container logs on failure
+        if: failure()
+        working-directory: dev
+        run: docker compose logs --tail 200

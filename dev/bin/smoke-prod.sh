@@ -122,15 +122,28 @@ echo "prod image over HTTP (regression test: the web root must not be empty)"
 # перевіряється рівно те, що поїде в продакшн.
 # Caddyfile запечений в образ (COPY у стадії base), тож монтувати нічого не
 # треба — на відміну від vhost-шаблону nginx, який підключався ззовні.
-docker run -d --name "$app_stub_name" -p "127.0.0.1::8080" "$image_tag" >/dev/null
+if ! docker run -d --name "$app_stub_name" -p "127.0.0.1::8080" "$image_tag" >/dev/null; then
+    echo "FAIL  the prod container could not be started"
+    fails=$((fails + 1))
+fi
 
 # Чекаємо, поки сервер справді почне відповідати, а не фіксований sleep.
 app_port=""
 app_ready=0
-for _ in $(seq 1 30); do
+# Гейт мусить бути і суворим, і повним. `curl -sS` без -f зараховує будь-яку
+# HTTP-відповідь, включно з 500 на ще не піднятому застосунку, — і давав хибний
+# червоний нижче. А сам robots.txt іде через file_server, тобто не доводить, що
+# PHP уже виконується: тому другим кроком запит у фронт-контролер, від якого без
+# бази очікується 500, а не 404 і не обрив зʼєднання.
+for _ in $(seq 1 60); do
     app_port=$(docker port "$app_stub_name" 8080/tcp 2>/dev/null | head -1 | cut -d: -f2)
-    if [ -n "$app_port" ] \
-        && curl -sS -o /dev/null "http://127.0.0.1:${app_port}/robots.txt" 2>/dev/null; then
+    [ -n "$app_port" ] || { sleep 1; continue; }
+
+    curl -fsS -o /dev/null "http://127.0.0.1:${app_port}/robots.txt" 2>/dev/null || { sleep 1; continue; }
+
+    front_code=$(curl -sS -o /dev/null -w '%{http_code}' \
+        "http://127.0.0.1:${app_port}/" 2>/dev/null || echo "000")
+    if [ "$front_code" = "500" ] || [ "$front_code" = "200" ]; then
         app_ready=1
         break
     fi
