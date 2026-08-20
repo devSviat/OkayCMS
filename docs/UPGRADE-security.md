@@ -367,8 +367,8 @@ location ~* ^/files/.+\.(phtml|php|php3|php4|php5|php6|phps|cgi|exe|pl|asp|aspx|
 піде у fastcgi раніше, ніж спрацює заборона.
 
 **Що робити.** У цьому репозиторії правку вже внесено — і в
-`dev/config/nginx/templates/default.conf.template`, і в рекомендований
-[`docs/nginx/nginx.conf`](nginx/nginx.conf). Якщо ви піднімаєте оточення звідси, конфіг приїде
+[`docs/nginx/nginx.conf`](nginx/nginx.conf), і в `dev/config/caddy/Caddyfile`,
+за яким працює стек із репозиторію. Якщо ви піднімаєте оточення звідси, конфіг приїде
 разом із кодом і робити нічого не треба. Якщо у вас власний nginx — перенесіть блок вище.
 
 **Перевірка.** Запускати з кореня проєкту на сервері: інакше файл ляже не туди, `curl` поверне 404

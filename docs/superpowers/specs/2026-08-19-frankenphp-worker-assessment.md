@@ -82,7 +82,7 @@ $parameters = require_once __DIR__ . '/parameters.php';
 
 - `OkayContainer::__construct` типізований як `array` — виклик із `true` дасть
   `TypeError`;
-- `$entry['lock'] = true` (`OkayContainer.php:157`) ніколи не знімається, тож
+- `$entry['lock'] = true` (`Okay/Core/OkayContainer/OkayContainer.php:157`) ніколи не знімається, тож
   після скидання `serviceStore` кожен сервіс став би «circular reference»;
 - `bindParameters()` робить `array_merge_recursive` — на другому запиті
   скалярні параметри модулів перетворюються на масиви;
