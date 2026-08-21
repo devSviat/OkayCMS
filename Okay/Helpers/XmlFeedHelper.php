@@ -424,12 +424,15 @@ class XmlFeedHelper
 
     /**
      * Сюди приходить будь-яке поле товару, зокрема з nullable-колонки: опис,
-     * артикул, бренд. Приведення до рядка лишає результат тим самим, але не
-     * друкує Deprecated у тіло фіда.
+     * артикул, бренд.
+     *
+     * Знімається саме null, а не будь-який тип: приведення через (string)
+     * перетворило б масив на рядок "Array" і тихо поклало б його у фід,
+     * тоді як зараз такий виклик гучно падає з TypeError.
      */
     public function escape($str)
     {
-        return htmlspecialchars(strip_tags((string)$str)); // no ExtenderFacade
+        return htmlspecialchars(strip_tags($str ?? '')); // no ExtenderFacade
     }
 
     /**

@@ -209,8 +209,9 @@ class GoogleMerchantHelper
         $result['g:condition']['data'] = 'new';
 
         $price = round($product->price, 2);
-        // compare_price nullable: товар без старої ціни дає null.
-        $comparePrice = round((float)$product->compare_price, 2);
+        // compare_price nullable: товар без старої ціни дає null. Знімається
+        // саме null - каст до float ковтав би й типи, на яких round() має падати.
+        $comparePrice = round($product->compare_price ?? 0, 2);
         if (isset($this->allCurrencies[$product->currency_id])) {
             // Переводим в основную валюту сайта
             $variantCurrency = $this->allCurrencies[$product->currency_id];
