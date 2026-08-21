@@ -242,7 +242,10 @@ class HotlineHelper
         $guaranteeShopId = $this->settings->get('okaycms__hotline__guarantee_shop');
         $countryOfOriginParamId = $this->settings->get('okaycms__hotline__country_of_origin');
         
-        if (isset($product->features[$guaranteeId])) {
+        // Id характеристик беруться з налаштувань модуля, і поки їх не
+        // заповнили, там null. isset() null-індекс не рятує - Deprecated
+        // друкується ще до перевірки.
+        if (!empty($guaranteeId) && isset($product->features[$guaranteeId])) {
             $result[] = [
                 'data' => $this->feedHelper->escape($product->features[$guaranteeId]['values_string']),
                 'tag' => 'guarantee',
@@ -253,7 +256,7 @@ class HotlineHelper
             unset($product->features[$guaranteeId]);
         }
 
-        if (isset($product->features[$guaranteeShopId])) {
+        if (!empty($guaranteeShopId) && isset($product->features[$guaranteeShopId])) {
             $result[] = [
                 'data' => $this->feedHelper->escape($product->features[$guaranteeShopId]['values_string']),
                 'tag' => 'guarantee',
@@ -264,7 +267,7 @@ class HotlineHelper
             unset($product->features[$guaranteeShopId]);
         }
 
-        if (isset($product->features[$countryOfOriginParamId])) {
+        if (!empty($countryOfOriginParamId) && isset($product->features[$countryOfOriginParamId])) {
             $result[] = [
                 'data' => $this->feedHelper->escape($product->features[$countryOfOriginParamId]['values_string']),
                 'tag' => 'param',

@@ -209,7 +209,9 @@ class GoogleMerchantHelper
         $result['g:condition']['data'] = 'new';
 
         $price = round($product->price, 2);
-        $comparePrice = round($product->compare_price, 2);
+        // compare_price nullable: товар без старої ціни дає null. Знімається
+        // саме null - каст до float ковтав би й типи, на яких round() має падати.
+        $comparePrice = round($product->compare_price ?? 0, 2);
         if (isset($this->allCurrencies[$product->currency_id])) {
             // Переводим в основную валюту сайта
             $variantCurrency = $this->allCurrencies[$product->currency_id];
@@ -240,12 +242,12 @@ class GoogleMerchantHelper
 
         $productColor = $this->settings->get('okaycms__google_merchant__color');
 
-        if (isset($product->features[$productColor])) {
+        if (!empty($productColor) && isset($product->features[$productColor])) {
             $result['g:color']['data'] = $this->feedHelper->escape($product->features[$productColor]['values_string']);
             unset($product->features[$productColor]);
         }
 
-        if (!empty($allCategories[$product->main_category_id])) {
+        if (!empty($product->main_category_id) && !empty($allCategories[$product->main_category_id])) {
             $categoryPath = $allCategories[$product->main_category_id]->path;
 
             $productType = '';
