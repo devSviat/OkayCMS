@@ -169,6 +169,8 @@ git fetch upstream
 - `html/callback.tpl`
 - `html/product.tpl`
 - `html/product_list.tpl`
+- `html/post.tpl`
+- `html/index.tpl`, `html/blog_sidebar.tpl` (форма підписки)
 - `html/login.tpl`
 - `html/register.tpl`
 - `html/user.tpl`
