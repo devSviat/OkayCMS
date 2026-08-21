@@ -95,6 +95,7 @@
                     </h2>
                     <div class="mobile_tab__content vs-account__panel_body">
                         <form method="post" class="fn_validate_register vs-account__form">
+                            <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                             {if $user_updated}
                                 <p class="vs-note vs-note--ok" role="status">
                                     {include file="svg.tpl" svgId="success_icon"}
