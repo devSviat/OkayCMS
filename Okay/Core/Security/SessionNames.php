@@ -209,6 +209,36 @@ class SessionNames
 
         session_name($name);
         session_set_cookie_params(self::cookieParams());
+
+        // Нова кука у відповідь на міжсайтовий POST затерла б сесію відвідувача.
+        // Сама сесія запиту потрібна - її читає перевірка токена; зайва лише кука.
+        if (self::isCrossSitePostWithoutSession($name)) {
+            @session_start(['use_cookies' => false]);
+            return;
+        }
+
         session_start();
+    }
+
+    /**
+     * Усі три умови разом. Власна форма постить із кукою й зі своїм Origin,
+     * а серверні колбеки платіжних систем Origin не шлють узагалі.
+     */
+    private static function isCrossSitePostWithoutSession($name): bool
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            return false;
+        }
+
+        if (!empty($_COOKIE[$name])) {
+            return false;
+        }
+
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? null;
+        if (empty($origin)) {
+            return false;
+        }
+
+        return !RequestOrigin::matchesSite($origin, null, \Okay\Core\Request::getDomainWithProtocol());
     }
 }

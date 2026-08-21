@@ -9,6 +9,11 @@
 > **Готовий результат уже є.** Гілка `stock/vibe-shop` — це код стокової 4.5.2 плюс
 > `design/vibe_shop`, перенесена за цим документом і перевірена на живому стенді. Якщо вам
 > потрібна сама тема, а не шлях до неї, беріть звідти. Нижче — що саме довелося зробити.
+>
+> Це знімок від 10 серпня 2026, а не дзеркало. Відтоді тема на `main` пішла вперед на 15
+> шаблонів — зокрема `login.tpl`, `register.tpl`, `user.tpl` і `password_remind.tpl`
+> отримали поле CSRF-токена, яке в стоковому порті якраз і прибирається. Звірити:
+> `git log --since=2026-08-10 --name-only main -- design/vibe_shop/html`.
 
 ---
 
@@ -129,6 +134,8 @@ git fetch upstream
 оцінено запуском: **61 із 62 шаблонів `vibe_shop` скомпілювались на Smarty 3.1.40 без жодної
 помилки** (порахувати можна за `compiled/vibe_shop/`).
 
+Шістдесят два, а не шістдесят три, як у темі на `main`: `share.tpl` прибирає крок 7.
+
 Шістдесят другий — `email/email_feedback_answer_to_user.tpl` — не скомпілювався тому, що
 його **ніщо не рендерить**: `Notify::emailFeedbackAnswerFoUser()` бере
 `email/email_answer_to_user.tpl`, а на назву з `feedback` не посилається жоден рядок ні в
@@ -169,6 +176,8 @@ git fetch upstream
 - `html/callback.tpl`
 - `html/product.tpl`
 - `html/product_list.tpl`
+- `html/post.tpl`
+- `html/index.tpl`, `html/blog_sidebar.tpl` (форма підписки)
 - `html/login.tpl`
 - `html/register.tpl`
 - `html/user.tpl`
