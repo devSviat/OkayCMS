@@ -26,7 +26,7 @@ class StorefrontCsrfGuardTest extends TestCase
             'wishlist'   => ['Okay/Controllers/WishListController.php', 1],
             'comparison' => ['Okay/Controllers/ComparisonController.php', 1],
             'feedback'   => ['Okay/Controllers/FeedbackController.php', 1],
-            'user'       => ['Okay/Controllers/UserController.php', 2],
+            'user'       => ['Okay/Controllers/UserController.php', 4],
             // SubscribeController не успадковує AbstractController, тож бере
             // ту саму охорону сервісом.
             'subscribe'  => [
@@ -107,6 +107,18 @@ class StorefrontCsrfGuardTest extends TestCase
             'user register' => [
                 \Okay\Controllers\UserController::class, 'register', '$userHelper->register(',
             ],
+            // Зміна профілю: пошта й пароль користувача.
+            'user profile' => [
+                \Okay\Controllers\UserController::class, 'render', '$usersEntity->update(',
+            ],
+            // Відновлення пароля має дві мутуючі гілки; охорона одна на обидві,
+            // тож перевіряються обидві мутації.
+            'password reset' => [
+                \Okay\Controllers\UserController::class, 'passwordRemind', '$usersEntity->update(',
+            ],
+            'recovery letter' => [
+                \Okay\Controllers\UserController::class, 'passwordRemind', '$notify->emailPasswordRemind(',
+            ],
         ];
     }
 
@@ -177,7 +189,12 @@ class StorefrontCsrfGuardTest extends TestCase
 
     public static function authMethodProvider()
     {
-        return ['login' => ['login'], 'register' => ['register']];
+        return [
+            'login'           => ['login'],
+            'register'        => ['register'],
+            'profile'         => ['render'],
+            'password remind' => ['passwordRemind'],
+        ];
     }
 
     #[DataProvider('mutationParamReaderProvider')]
@@ -265,6 +282,29 @@ class StorefrontCsrfGuardTest extends TestCase
         );
     }
 
+    /**
+     * Наявності токена у файлі замало: у password_remind.tpl форм дві - запит
+     * листа й встановлення нового пароля, - і охорона однаково стосується обох.
+     * Тест вимагає токен у КОЖНІЙ POST-формі таких шаблонів.
+     */
+    #[DataProvider('tokenCarryingTemplateProvider')]
+    public function testEveryPostFormInThoseTemplatesCarriesTheToken($theme, $template)
+    {
+        $source = $this->read('design/' . $theme . '/html/' . $template);
+
+        preg_match_all('~<form[^>]*method=("|\')post\1[^>]*>(.*?)</form>~is', $source, $matches);
+
+        $this->assertNotEmpty($matches[0], "$theme/$template: POST-форм не знайдено - тест застарів");
+
+        foreach ($matches[2] as $i => $body) {
+            $this->assertStringContainsString(
+                'name="customer_csrf_token"',
+                $body,
+                sprintf('%s/%s: форма №%d мутує без токена', $theme, $template, $i + 1)
+            );
+        }
+    }
+
     public static function tokenCarryingTemplateProvider()
     {
         $cases = [];
@@ -281,6 +321,10 @@ class StorefrontCsrfGuardTest extends TestCase
             // входила у свій акаунт у браузері жертви.
             'login.tpl',
             'register.tpl',
+            // Профіль і обидві форми відновлення пароля. У password_remind.tpl
+            // форм дві - і запит листа, і встановлення нового пароля.
+            'user.tpl',
+            'password_remind.tpl',
         ];
 
         foreach (['okay_shop', 'vibe_shop'] as $theme) {

@@ -74,6 +74,7 @@
                     <div class="block block--boxed block--border mobile_tab__content">
                         <div class="block__inner">
                             <form method="post" class="fn_validate_register">
+                                <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                                 {if $user_updated}
                                     <div class="message_success">
                                         {include file="svg.tpl" svgId="success_icon"}

@@ -22,6 +22,7 @@
             <div class="form_wrap f_col-lg-6">
                 <form method="post" class="form form--boxed">
                     <input type="hidden" name="reset_password" value="1">
+                    <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                     <div class="form__header">
                         <div class="form__title">
                             <span class="label_block" data-language="password_remind_new_password">{$lang->password_remind_new_password}</span>
@@ -68,6 +69,7 @@
         </div>
             <div class="form_wrap f_col-lg-6">
                 <form method="post" class="form form--boxed">
+                    <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                     <div class="form__header">
                         <div class="form__title">
                             <span class="label_block" data-language="password_remind_enter_your_email">{$lang->password_remind_enter_your_email}</span>

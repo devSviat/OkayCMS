@@ -22,6 +22,7 @@
             {* Введення нового пароля за підтвердженим посиланням відновлення *}
             <form method="post" class="vs-form vs-auth__form">
                 <input type="hidden" name="reset_password" value="1">
+                <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                 <h2 class="vs-form__title" data-language="password_remind_new_password">{$lang->password_remind_new_password}</h2>
 
                 {* Form error messages *}
@@ -65,6 +66,7 @@
             </div>
         {else}
             <form method="post" class="vs-form vs-auth__form">
+                <input type="hidden" name="customer_csrf_token" value="{$customer_csrf_token|escape}">
                 <h2 class="vs-form__title" data-language="password_remind_enter_your_email">{$lang->password_remind_enter_your_email}</h2>
 
                 {* Form error messages *}

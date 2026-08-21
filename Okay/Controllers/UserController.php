@@ -39,6 +39,14 @@ class UserController extends AbstractController
             $this->response->redirectTo(Router::generateUrl('login', [], true));
         }
 
+        // Зміна імені, пошти й пароля - мутація, тож охороняється як решта
+        // форм вітрини. Анонім сюди не доходить: redirectTo() вище завершує
+        // запит.
+        if ($this->request->method('post')) {
+            $this->requireSameOrigin();
+            $this->requireCustomerCsrf();
+        }
+
         if ($user = $userRequest->postProfileUser()) {
             /*Валидация данных*/
             if ($error = $validateHelper->getUserError($user, $this->user->id)) {
@@ -189,6 +197,14 @@ class UserController extends AbstractController
     
     public function passwordRemind(UsersEntity $usersEntity, Notify $notify, UserHelper $userHelper, RecoveryToken $recoveryToken, $code = '')
     {
+        // Обидві мутуючі гілки нижче - і встановлення нового пароля, і
+        // замовлення листа - охороняються тут разом: замовлення листа не
+        // вимагало навіть сесії, тож чужа сторінка розсилала листи покупцям.
+        if ($this->request->method('post')) {
+            $this->requireSameOrigin();
+            $this->requireCustomerCsrf();
+        }
+
         // Перехід за посиланням відновлення більше не авторизує користувача.
         // Він лише підтверджує токен і відкриває форму нового пароля.
         if (!empty($code)) {
