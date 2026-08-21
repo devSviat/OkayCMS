@@ -368,10 +368,16 @@ class ProductsHelper implements GetListInterface
             }
 
             foreach ($products as $product) {
+                // findOne() на відсутній категорії віддає false, а setUp()
+                // приймає лише ?object - і один товар без головної категорії
+                // валив усю сторінку категорії. Сам помічник порожню категорію
+                // трактує як "немає", тож потрібен саме null.
+                $category = $categoriesEntity->findOne(['id' => $product->main_category_id]);
+
                 $this->productMetadataHelper->setUp(
                     $product,
-                    $categoriesEntity->findOne(['id' => $product->main_category_id]),
-                    $brands[$product->brand_id] ?? null
+                    $category ?: null,
+                    $product->brand_id ? ($brands[$product->brand_id] ?? null) : null
                 );
 
                 if (isset($product->annotation)) {
