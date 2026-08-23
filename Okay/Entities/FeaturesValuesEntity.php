@@ -87,23 +87,64 @@ class FeaturesValuesEntity extends Entity
     {
         $this->select->groupBy([$this->getTableAlias().'.id']);
 
-        $this->select->join('LEFT', '__products_features_values AS pf', 'pf.value_id=fv.id');
-        
+        [$joinProductsValues, $joinFeatures, $joinProducts] = $this->resolveFindJoins($filter);
+
+        if ($joinProductsValues) {
+            $this->select->join('LEFT', '__products_features_values AS pf', 'pf.value_id=fv.id');
+        }
+
         // Нужно фильтр по свойствам применить здесь, чтобы он отработал до всех джоинов
         if (isset($filter['features'])) {
             $this->filter__features($filter['features']);
             unset($filter['features']);
         }
-        
-        $this->select->join('LEFT', '__features AS f', 'f.id=fv.feature_id');
+
+        if ($joinFeatures) {
+            $this->select->join('LEFT', '__features AS f', 'f.id=fv.feature_id');
+        }
         //$this->select->groupBy(['l.value']); // TODO: разобраться, вроде не нужная группировка
         //$this->select->groupBy(['l.translit']);
 
-        if (isset($filter['visible']) || isset($filter['in_stock']) || isset($filter['price'])) {
+        if ($joinProducts) {
             $this->select->join('LEFT', '__products AS p', 'p.id=pf.product_id');
         }
         
         return parent::find($filter);
+    }
+
+    /**
+     * Без фильтра pf раздувает выборку до полутора миллионов строк, которые
+     * GROUP BY тут же схлопывает обратно, поэтому джоины ставим только тем
+     * фильтрам, которые их читают. Фильтр из модуля может опираться на любой
+     * алиас, так что для него оставляем все три.
+     *
+     * Забытый джоин не падает: Database::query() пишет ошибку в лог и возвращает
+     * false, то есть фильтр просто исчезает со страницы.
+     *
+     * @param array $filter
+     * @return bool[] [pf, f, p]
+     */
+    private function resolveFindJoins(array $filter)
+    {
+        foreach (array_keys($filter) as $filterName) {
+            if ($this->modulesFilters->hasFilter(static::class, $filterName)) {
+                return [true, true, true];
+            }
+        }
+
+        // filter__price сюда не входит: он join'ит собственный подзапрос по fv.id
+        $products = isset($filter['visible'])
+            || isset($filter['in_stock'])
+            || isset($filter['features']);
+
+        // p присоединяется через pf, поэтому товары всегда тянут за собой и значения
+        $productsValues = $products
+            || isset($filter['product_id'])
+            || isset($filter['brand_id'])
+            || isset($filter['have_products_in_categories'])
+            || isset($filter['other_filter']);
+
+        return [$productsValues, isset($filter['category_id']), $products];
     }
 
     protected function filter__in_stock()
