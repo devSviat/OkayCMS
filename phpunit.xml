@@ -3,6 +3,7 @@
          failOnDeprecation="true"
          failOnPhpunitDeprecation="true"
          failOnNotice="true"
+         failOnPhpunitNotice="true"
          failOnWarning="true"
          displayDetailsOnPhpunitDeprecations="true"
          displayDetailsOnTestsThatTriggerDeprecations="true"
