@@ -279,11 +279,14 @@ class CatalogHelper
             $filter['product_keyword'] = $keyword;
         }
 
-        if (!empty($this->features)) {
-            $featuresIds = array_keys($this->features);
-            if (!empty($featuresIds)) {
-                $filter['feature_id'] = $featuresIds;
-            }
+        // Свойства фильтра хранит FilterHelper. Без сужения выбираются значения
+        // всего каталога, а вызывающему нужны только эти.
+        $features = $this->filterHelper->getFeatures();
+        if (empty($filter['feature_id']) && !empty($features)) {
+            // id берём из объекта, а не из ключа: getFeatures() расширяемый.
+            $filter['feature_id'] = array_map(static function (object $feature) {
+                return $feature->id;
+            }, $features);
         }
 
         /**
