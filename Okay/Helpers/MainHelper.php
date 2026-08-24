@@ -120,6 +120,39 @@ class MainHelper
     }
 
     /**
+     * Посилання на соцмережі для шаблонів: обрізані, без порожніх.
+     *
+     * Обрізаємо і на читанні, бо у вже збережених налаштуваннях лишився
+     * хвостовий \r від CRLF, а він робить JSON-LD Organization невалідним.
+     *
+     * @param mixed $storedLinks
+     * @return array<int, array{domain: string, url: string}>
+     */
+    public function buildSocialLinks($storedLinks)
+    {
+        // Не array-хінт: налаштування може виявитись рядком, і тоді фаталила б
+        // кожна сторінка вітрини замість одного warning, як було раніше.
+        if (!is_array($storedLinks)) {
+            return ExtenderFacade::execute(__METHOD__, [], func_get_args());
+        }
+
+        $socials = [];
+        foreach ($storedLinks as $socialUrl) {
+            $socialUrl = trim((string)$socialUrl);
+            if ($socialUrl === '') {
+                continue;
+            }
+
+            $socials[] = [
+                'domain' => SocialShare::getSocialDomain($socialUrl),
+                'url'    => $socialUrl,
+            ];
+        }
+
+        return ExtenderFacade::execute(__METHOD__, $socials, func_get_args());
+    }
+
+    /**
      * Метод, который можно расширять модулями. Выполняется перед работой контроллера
      */
     public function commonBeforeControllerProcedure()
@@ -257,17 +290,7 @@ class MainHelper
         $design->assign('keyword', $filterHelper->getKeyword(), true);
 
         if (!empty($settings->get('site_social_links'))) {
-            $socials = [];
-            foreach ($settings->get('site_social_links') as $k=>$socialUrl) {
-                if (empty($socialUrl)) {
-                    continue;
-                }
-                $social['domain'] = SocialShare::getSocialDomain($socialUrl);
-                $social['url'] = $socialUrl;
-                $socials[] = $social;
-            }
-
-            $design->assign('site_social', $socials);
+            $design->assign('site_social', $this->buildSocialLinks($settings->get('site_social_links')));
         }
         
         // Категории товаров
