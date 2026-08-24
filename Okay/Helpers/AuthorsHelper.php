@@ -94,7 +94,7 @@ class AuthorsHelper implements GetListInterface
         $allPages = false;
         if ($currentPage == 'all') {
             $allPages = true;
-            $itemsPerPage = $authorsCount;
+            $itemsPerPage = min($authorsCount, PAGE_ALL_MAX_ITEMS);
         }
 
         // Если не задана, то равна 1

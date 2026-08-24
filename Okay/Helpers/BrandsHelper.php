@@ -235,7 +235,7 @@ class BrandsHelper implements GetListInterface
         $allPages = false;
         if ($currentPage == 'all') {
             $allPages = true;
-            $itemsPerPage = $brandsCount;
+            $itemsPerPage = min($brandsCount, PAGE_ALL_MAX_ITEMS);
         }
 
         // Если не задана, то равна 1

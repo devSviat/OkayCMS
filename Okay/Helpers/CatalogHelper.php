@@ -243,7 +243,7 @@ class CatalogHelper
         $allPages = false;
         if ($currentPage == 'all') {
             $allPages = true;
-            $itemsPerPage = $productsCount;
+            $itemsPerPage = min($productsCount, PAGE_ALL_MAX_ITEMS);
         }
 
         // Если не задана, то равна 1

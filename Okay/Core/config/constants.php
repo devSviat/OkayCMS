@@ -37,3 +37,7 @@ const CANONICAL_WITHOUT_FILTER_FIRST_PAGE = 7;
 const ROBOTS_INDEX_FOLLOW = 1;
 const ROBOTS_NOINDEX_FOLLOW = 2;
 const ROBOTS_NOINDEX_NOFOLLOW = 3;
+
+// Стеля для page-all: без неї сторінка вантажить увесь лістинг одним запитом
+// і на великому каталозі вичерпує пам'ять PHP ще до рендера.
+const PAGE_ALL_MAX_ITEMS = 1000;
