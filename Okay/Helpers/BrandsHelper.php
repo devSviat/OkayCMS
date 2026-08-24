@@ -235,7 +235,7 @@ class BrandsHelper implements GetListInterface
         $allPages = false;
         if ($currentPage == 'all') {
             $allPages = true;
-            $itemsPerPage = $brandsCount;
+            $itemsPerPage = min($brandsCount, PAGE_ALL_MAX_ITEMS);
         }
 
         // Если не задана, то равна 1
@@ -244,6 +244,13 @@ class BrandsHelper implements GetListInterface
         $design->assign('is_all_pages', $allPages);
 
         $pagesNum = !empty($itemsPerPage) ? ceil($brandsCount/$itemsPerPage) : 0;
+
+        // page-all для шаблону — одна сторінка: посилання пагінації рахуються
+        // по $itemsPerPage з налаштувань, тож віджет показав би менше сторінок,
+        // ніж лістинг має насправді.
+        if ($allPages && $pagesNum > 1) {
+            $pagesNum = 1;
+        }
         $design->assign('total_pages_num', $pagesNum);
 
         $filter['page'] = $currentPage;
