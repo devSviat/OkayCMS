@@ -258,8 +258,12 @@ class MainHelper
 
         if (!empty($settings->get('site_social_links'))) {
             $socials = [];
-            foreach ($settings->get('site_social_links') as $k=>$socialUrl) {
-                if (empty($socialUrl)) {
+            foreach ($settings->get('site_social_links') as $socialUrl) {
+                // Обрізаємо тут, а не лише при збереженні: у вже збережених
+                // налаштуваннях лишився хвостовий \r від CRLF, а він робить
+                // JSON-LD Organization невалідним.
+                $socialUrl = trim((string)$socialUrl);
+                if ($socialUrl === '') {
                     continue;
                 }
                 $social['domain'] = SocialShare::getSocialDomain($socialUrl);
