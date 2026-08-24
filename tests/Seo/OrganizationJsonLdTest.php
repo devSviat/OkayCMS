@@ -3,19 +3,17 @@
 namespace Seo;
 
 use Okay\Admin\Helpers\BackendSettingsHelper;
+use Okay\Helpers\MainHelper;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
 /**
- * Посилання на соцмережі приходять із textarea, а браузер шле її вміст із CRLF.
- * Розділення по PHP_EOL лишало на кожному рядку хвостовий \r, і той потрапляв
- * усередину рядка JSON-LD Organization. Для JSON це керуючий символ, тобто весь
- * блок ставав невалідним і пошуковик відкидав його цілком - разом із назвою,
- * логотипом і sameAs, на кожній сторінці сайту.
+ * Керуючий символ усередині рядка робить увесь блок JSON-LD невалідним, і
+ * пошуковик відкидає його цілком - разом із назвою, логотипом і sameAs.
  *
- * Помилка мовчазна: HTML-посилання на вітрині лишались робочими, а розмітка
- * ламалась лише в JSON, куди ніхто не дивиться очима.
+ * Вада мовчазна: HTML-посилання на вітрині лишаються робочими, ламається лише
+ * JSON, куди не дивляться очима.
  */
 class OrganizationJsonLdTest extends TestCase
 {
@@ -34,6 +32,18 @@ class OrganizationJsonLdTest extends TestCase
             'LF'                   => ["https://fb.com/a\nhttps://ig.com/b"],
             'CR'                   => ["https://fb.com/a\rhttps://ig.com/b"],
         ];
+    }
+
+    /**
+     * Байт 0x85 - продовження кирилиці в UTF-8. Розділення регуляркою, яка
+     * його матчить, рве посилання посеред літери й зберігає два побиті рядки.
+     */
+    public function testMultibyteUrlSurvivesSplitting(): void
+    {
+        $this->assertSame(
+            ['https://facebook.com/хата', 'https://ig.com/b'],
+            $this->parse("https://facebook.com/хата\r\nhttps://ig.com/b")
+        );
     }
 
     #[DataProvider('lineEndingsProvider')]
@@ -58,26 +68,12 @@ class OrganizationJsonLdTest extends TestCase
         );
     }
 
-    /**
-     * Показує саму ваду: неочищене значення дає рівно ту помилку, яку віддавав прод.
-     */
-    public function testRawValueWithCarriageReturnBreaksJson(): void
-    {
-        $markup = '{"sameAs":["https://fb.com/a' . "\r" . '"]}';
-
-        $this->assertNull(json_decode($markup, true));
-        $this->assertSame(JSON_ERROR_CTRL_CHAR, json_last_error());
-    }
-
     public function testBlankLinesAreDropped(): void
     {
         $this->assertSame(['https://fb.com/a'], $this->parse("\r\n  \r\nhttps://fb.com/a\r\n\r\n"));
     }
 
-    /**
-     * Ключі мають бути наскрізними: раніше порожні рядки прибирались через
-     * unset(), а діри в ключах перетворюють масив на обʼєкт при json_encode.
-     */
+    /** Порожні рядки прибираються, а не лишають дірки в ключах. */
     public function testKeysAreSequential(): void
     {
         $links = $this->parse("https://a\r\n\r\nhttps://b\r\n\r\nhttps://c");
@@ -93,20 +89,23 @@ class OrganizationJsonLdTest extends TestCase
     }
 
     /**
-     * У вже збережених налаштуваннях хвостовий \r лишився, тож фронт мусить
-     * чистити значення й на читанні - інакше правка спрацює лише після того,
-     * як хтось вручну перезбереже налаштування теми.
-     *
-     * Перевірка по джерелу свідома: цикл живе всередині
-     * MainHelper::setDesignDataProcedure(), яка тягне за собою півядра.
+     * У вже збережених налаштуваннях хвостовий \r лишився, тож фронт чистить
+     * значення й на читанні - інакше правка спрацює лише після того, як хтось
+     * вручну перезбереже налаштування теми.
      */
     public function testFrontNormalisesAlreadyStoredValues(): void
     {
-        $source = file_get_contents(__DIR__ . '/../../Okay/Helpers/MainHelper.php');
+        $helper = (new ReflectionClass(MainHelper::class))->newInstanceWithoutConstructor();
 
-        $this->assertMatchesRegularExpression(
-            '~\$socialUrl\s*=\s*trim\(~',
-            $source,
+        $socials = $helper->buildSocialLinks([
+            "https://www.facebook.com/example/\r",
+            '  https://www.instagram.com/example/  ',
+            '',
+        ]);
+
+        $this->assertSame(
+            ['https://www.facebook.com/example/', 'https://www.instagram.com/example/'],
+            array_column($socials, 'url'),
             'фронт віддає збережене значення як є — старий \r знову потрапить у JSON-LD'
         );
     }

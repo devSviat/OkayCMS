@@ -479,9 +479,10 @@ class BackendSettingsHelper
     /**
      * Рядки з textarea: обрізані, без порожніх, із наскрізними ключами.
      *
-     * Розділення по PHP_EOL лишало хвостовий \r, бо браузер шле CRLF. У JSON-LD
-     * це керуючий символ усередині рядка, від якого блок стає невалідним і
-     * пошуковик відкидає його цілком.
+     * Браузер шле вміст textarea з CRLF, тож розділяємо по всіх видах переносу.
+     * Саме `\R` тут не можна: без модифікатора `u` він матчить байт 0x85, а це
+     * продовження кирилиці в UTF-8, і рядок рветься посеред літери. З `u` він
+     * повертає false на невалідному UTF-8.
      *
      * @param string|null $raw
      * @return string[]
@@ -489,7 +490,7 @@ class BackendSettingsHelper
     public function parseTextareaLines($raw)
     {
         $lines = [];
-        foreach (preg_split('~\R~', (string)$raw) as $line) {
+        foreach (preg_split('~\r\n|[\r\n]~', (string)$raw) as $line) {
             $line = trim($line);
             if ($line !== '') {
                 $lines[] = $line;

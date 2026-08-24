@@ -122,6 +122,33 @@ class MainHelper
     /**
      * Метод, который можно расширять модулями. Выполняется перед работой контроллера
      */
+    /**
+     * Посилання на соцмережі для шаблонів: обрізані, без порожніх.
+     *
+     * Обрізаємо і на читанні, бо у вже збережених налаштуваннях лишився
+     * хвостовий \r від CRLF, а він робить JSON-LD Organization невалідним.
+     *
+     * @param string[] $storedLinks
+     * @return array<int, array{domain: string, url: string}>
+     */
+    public function buildSocialLinks(array $storedLinks)
+    {
+        $socials = [];
+        foreach ($storedLinks as $socialUrl) {
+            $socialUrl = trim((string)$socialUrl);
+            if ($socialUrl === '') {
+                continue;
+            }
+
+            $socials[] = [
+                'domain' => SocialShare::getSocialDomain($socialUrl),
+                'url'    => $socialUrl,
+            ];
+        }
+
+        return ExtenderFacade::execute(__METHOD__, $socials, func_get_args());
+    }
+
     public function commonBeforeControllerProcedure()
     {
         ExtenderFacade::execute(__METHOD__, null, func_get_args());
@@ -257,21 +284,7 @@ class MainHelper
         $design->assign('keyword', $filterHelper->getKeyword(), true);
 
         if (!empty($settings->get('site_social_links'))) {
-            $socials = [];
-            foreach ($settings->get('site_social_links') as $socialUrl) {
-                // Обрізаємо тут, а не лише при збереженні: у вже збережених
-                // налаштуваннях лишився хвостовий \r від CRLF, а він робить
-                // JSON-LD Organization невалідним.
-                $socialUrl = trim((string)$socialUrl);
-                if ($socialUrl === '') {
-                    continue;
-                }
-                $social['domain'] = SocialShare::getSocialDomain($socialUrl);
-                $social['url'] = $socialUrl;
-                $socials[] = $social;
-            }
-
-            $design->assign('site_social', $socials);
+            $design->assign('site_social', $this->buildSocialLinks($settings->get('site_social_links')));
         }
         
         // Категории товаров
