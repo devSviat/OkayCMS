@@ -93,7 +93,7 @@ class BlogController extends AbstractController
         $category = null;
 
         $prefixRoute = $this->settings->get('all_blog_routes_template__default');
-        if (empty($prefix)) {
+        if (empty($prefixRoute)) {
             $prefixRoute = 'all-posts';
         }
 
@@ -140,7 +140,10 @@ class BlogController extends AbstractController
         if (!empty($category)) {
             $canonical = Router::generateUrl('blog_category', ['url' => $category->url], true);
         } else {
-            $canonical = Router::generateUrl('blog', [], true);
+            // Слаг роута — голий плейсхолдер {$url}, а префікс живе в patterns,
+            // які застосовуються лише при матчингу. Без явного параметра
+            // generateUrl() зрізає плейсхолдер і віддає головну, а не блог.
+            $canonical = Router::generateUrl('blog', ['url' => $prefixRoute], true);
         }
 
         if (!empty($currentSort)) {
