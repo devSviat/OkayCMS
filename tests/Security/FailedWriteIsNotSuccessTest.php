@@ -16,13 +16,19 @@ use PHPUnit\Framework\TestCase;
  */
 class FailedWriteIsNotSuccessTest extends TestCase
 {
+    /**
+     * @param string $guard шукана перевірка. Загального `if (empty($` досить не
+     *                      всюди: там, де тим самим виразом валідується ввід,
+     *                      перше входження стоїть задовго до add(), і тест
+     *                      мовчки перевіряє не те місце.
+     */
     #[DataProvider('writeSiteProvider')]
-    public function testResultOfAddIsCheckedBeforeSuccessIsAnnounced($file, $add, $success)
+    public function testResultOfAddIsCheckedBeforeSuccessIsAnnounced($file, $add, $success, $guard = 'if (empty($')
     {
         $source = file_get_contents(dirname(__DIR__, 2) . '/' . $file);
 
         $addAt = strpos($source, $add);
-        $guardAt = strpos($source, 'if (empty($');
+        $guardAt = strpos($source, $guard);
         $successAt = strpos($source, $success);
 
         $this->assertNotFalse($addAt, $add);
