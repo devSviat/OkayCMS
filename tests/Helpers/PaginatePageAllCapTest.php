@@ -35,7 +35,7 @@ class PaginatePageAllCapTest extends TestCase
      *
      * @return callable(array&, mixed): void
      */
-    private function makePaginator(string $helperClass, int $count, Design $design): callable
+    private function makePaginator(string $helperClass, $count, Design $design): callable
     {
         $reflection = new ReflectionClass($helperClass);
         $helper = $reflection->newInstanceWithoutConstructor();
@@ -75,7 +75,7 @@ class PaginatePageAllCapTest extends TestCase
         return $settings;
     }
 
-    private function stubEntity(string $entityClass, int $count): object
+    private function stubEntity(string $entityClass, $count): object
     {
         $entity = $this->createStub($entityClass);
         $entity->method('count')->willReturn($count);
@@ -83,7 +83,7 @@ class PaginatePageAllCapTest extends TestCase
         return $entity;
     }
 
-    private function stubFactory(string $entityClass, int $count): EntityFactory
+    private function stubFactory(string $entityClass, $count): EntityFactory
     {
         $entity = $this->stubEntity($entityClass, $count);
 
@@ -175,6 +175,24 @@ class PaginatePageAllCapTest extends TestCase
         $this->assertSame(24, $filter['limit']);
         $this->assertSame(2, $filter['page']);
         $this->assertFalse($design->assigned['is_all_pages']);
+    }
+
+    /**
+     * count() віддає те, що дав шар БД, а це залежить від налаштувань PDO:
+     * при емуляції підготовлених запитів там числовий рядок. Стеля має
+     * триматись однаково в обох випадках.
+     */
+    #[DataProvider('helpersProvider')]
+    public function testCapHoldsWhenCountComesBackAsString(string $helperClass): void
+    {
+        $design = $this->makeDesign();
+        $paginate = $this->makePaginator($helperClass, '50000', $design);
+
+        $filter = [];
+        $paginate($filter, 'all');
+
+        $this->assertEquals(PAGE_ALL_MAX_ITEMS, $filter['limit']);
+        $this->assertLessThanOrEqual(PAGE_ALL_MAX_ITEMS, (int) $filter['limit']);
     }
 
     public function testCapIsDefinedAndPositive(): void
