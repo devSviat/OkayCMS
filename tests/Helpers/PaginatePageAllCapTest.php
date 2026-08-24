@@ -192,7 +192,6 @@ class PaginatePageAllCapTest extends TestCase
         $paginate($filter, 'all');
 
         $this->assertEquals(PAGE_ALL_MAX_ITEMS, $filter['limit']);
-        $this->assertLessThanOrEqual(PAGE_ALL_MAX_ITEMS, (int) $filter['limit']);
     }
 
     /**
