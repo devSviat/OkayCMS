@@ -144,8 +144,8 @@ class PaginatePageAllCapTest extends TestCase
     }
 
     /**
-     * Порожній лістинг проходить тим самим гілкою і не має давати ані
-     * від'ємного ліміту, ані ділення на нуль.
+     * Захист від нуля в ядрі був і до стелі; тест лише закріплює, що стеля
+     * його не обійшла - min() з нулем дає нуль, а не від'ємне число.
      */
     #[DataProvider('helpersProvider')]
     public function testEmptyListingSurvivesPageAll(string $helperClass): void
@@ -157,7 +157,7 @@ class PaginatePageAllCapTest extends TestCase
         $paginate($filter, 'all');
 
         $this->assertSame(0, $filter['limit']);
-        $this->assertSame(0, $design->assigned['total_pages_num']);
+        $this->assertEquals(0, $design->assigned['total_pages_num']);
     }
 
     /**
@@ -193,6 +193,43 @@ class PaginatePageAllCapTest extends TestCase
 
         $this->assertEquals(PAGE_ALL_MAX_ITEMS, $filter['limit']);
         $this->assertLessThanOrEqual(PAGE_ALL_MAX_ITEMS, (int) $filter['limit']);
+    }
+
+    /**
+     * Головне, чого стеля не сміє зачепити: page-all лишається однією
+     * сторінкою. Інакше ceil($count / стелю) робить із нього багатосторінковий
+     * лістинг, а посилання пагінації ведуть на сторінки по products_num - тобто
+     * віджет показує 8 сторінок там, де їх 326, і туди ж іде rel=next.
+     */
+    #[DataProvider('helpersProvider')]
+    public function testCappedPageAllStaysASinglePage(string $helperClass): void
+    {
+        $design = $this->makeDesign();
+        $paginate = $this->makePaginator($helperClass, 50000, $design);
+
+        $filter = [];
+        $paginate($filter, 'all');
+
+        $this->assertEquals(
+            1,
+            $design->assigned['total_pages_num'],
+            'page-all отримав вигадану пагінацію по стелі'
+        );
+    }
+
+    /**
+     * Лістинг, менший за стелю, теж одна сторінка - як було до правки.
+     */
+    #[DataProvider('helpersProvider')]
+    public function testSmallPageAllIsAlsoASinglePage(string $helperClass): void
+    {
+        $design = $this->makeDesign();
+        $paginate = $this->makePaginator($helperClass, 7, $design);
+
+        $filter = [];
+        $paginate($filter, 'all');
+
+        $this->assertEquals(1, $design->assigned['total_pages_num']);
     }
 
     public function testCapIsDefinedAndPositive(): void
