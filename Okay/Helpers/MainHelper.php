@@ -120,19 +120,22 @@ class MainHelper
     }
 
     /**
-     * Метод, который можно расширять модулями. Выполняется перед работой контроллера
-     */
-    /**
      * Посилання на соцмережі для шаблонів: обрізані, без порожніх.
      *
      * Обрізаємо і на читанні, бо у вже збережених налаштуваннях лишився
      * хвостовий \r від CRLF, а він робить JSON-LD Organization невалідним.
      *
-     * @param string[] $storedLinks
+     * @param mixed $storedLinks
      * @return array<int, array{domain: string, url: string}>
      */
-    public function buildSocialLinks(array $storedLinks)
+    public function buildSocialLinks($storedLinks)
     {
+        // Не array-хінт: налаштування може виявитись рядком, і тоді фаталила б
+        // кожна сторінка вітрини замість одного warning, як було раніше.
+        if (!is_array($storedLinks)) {
+            return ExtenderFacade::execute(__METHOD__, [], func_get_args());
+        }
+
         $socials = [];
         foreach ($storedLinks as $socialUrl) {
             $socialUrl = trim((string)$socialUrl);
@@ -149,6 +152,9 @@ class MainHelper
         return ExtenderFacade::execute(__METHOD__, $socials, func_get_args());
     }
 
+    /**
+     * Метод, который можно расширять модулями. Выполняется перед работой контроллера
+     */
     public function commonBeforeControllerProcedure()
     {
         ExtenderFacade::execute(__METHOD__, null, func_get_args());

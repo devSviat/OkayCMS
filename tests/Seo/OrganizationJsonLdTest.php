@@ -6,6 +6,7 @@ use Okay\Admin\Helpers\BackendSettingsHelper;
 use Okay\Helpers\MainHelper;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Design\TemplateTagInventory;
 use ReflectionClass;
 
 /**
@@ -17,12 +18,99 @@ use ReflectionClass;
  */
 class OrganizationJsonLdTest extends TestCase
 {
+    /**
+     * Рендеримо ту саму конструкцію, що стоїть у head.tpl, справжнім Smarty з
+     * набором тегів проєкту: перевіряти самі значення замало - половина фіксу
+     * живе в розмітці, і повернення до |escape тестом на значеннях не ловиться.
+     */
+    private function renderJsonLdValue($value): string
+    {
+        require_once __DIR__ . '/../Design/TemplateTagInventory.php';
+
+        $compileDir = sys_get_temp_dir() . '/okaycms-jsonld-' . getmypid();
+        $smarty = TemplateTagInventory::createSmarty([sys_get_temp_dir()], $compileDir);
+        $smarty->assign('v', $value);
+
+        return $smarty->fetch('string:{$v|json_encode:JSON_INVALID_UTF8_SUBSTITUTE}');
+    }
+
     /** @return string[] */
     private function parse(?string $raw): array
     {
         $helper = (new ReflectionClass(BackendSettingsHelper::class))->newInstanceWithoutConstructor();
 
         return $helper->parseTextareaLines($raw);
+    }
+
+    public static function hostileMarkupValues(): array
+    {
+        return [
+            'лапки'          => ['Крамниця "Broken"'],
+            'апостроф'       => ["Broken's Store"],
+            'зворотний слеш' => ['Кабель \\ 5м'],
+            'закриття тега'  => ['Broken </script><script>alert(1)</script>'],
+            'перенос рядка'  => ["Broken\r\nStore"],
+            'битий UTF-8'    => ["Shop\xC3\x28"],
+            'кирилиця'       => ['Запчастини «Broken»'],
+        ];
+    }
+
+    /**
+     * Значення в розмітці мусить лишатись валідним JSON за будь-якого вмісту -
+     * саме цього не давали ані відсутнє екранування, ані |escape.
+     */
+    #[DataProvider('hostileMarkupValues')]
+    public function testRenderedValueIsAlwaysValidJson(string $value): void
+    {
+        $rendered = $this->renderJsonLdValue($value);
+
+        $this->assertIsArray(
+            json_decode('{"name":' . $rendered . '}', true),
+            'блок JSON-LD став невалідним на значенні ' . $value
+        );
+        $this->assertStringNotContainsStringIgnoringCase(
+            '</script',
+            $rendered,
+            'значення закриває тег <script> зсередини'
+        );
+    }
+
+    public static function headTemplates(): array
+    {
+        return [
+            'broken_new' => ['design/broken_new/html/head.tpl'],
+            'broken'     => ['design/broken/html/head.tpl'],
+        ];
+    }
+
+    /**
+     * Попередній тест доводить, що json_encode дає валідний JSON; цей - що
+     * шаблон ним і користується. Без другого відкат до |escape лишився б
+     * зеленим: htmlspecialchars - екранування для HTML, а не для JSON.
+     */
+    #[DataProvider('headTemplates')]
+    public function testHeadTemplateEncodesJsonLdValues(string $template): void
+    {
+        $path = __DIR__ . '/../../' . $template;
+        $this->assertFileExists($path, $template . ' переїхав — тест треба оновити');
+
+        $source = file_get_contents($path);
+        preg_match_all('~application/ld\+json.*?</script>~s', $source, $blocks);
+
+        $this->assertNotEmpty($blocks[0], 'у шаблоні не лишилось блоків JSON-LD');
+
+        foreach ($blocks[0] as $block) {
+            $this->assertStringNotContainsString(
+                '|escape}',
+                $block,
+                'у JSON-LD повернулось HTML-екранування'
+            );
+            $this->assertStringContainsString(
+                '|json_encode',
+                $block,
+                'значення JSON-LD підставляються без json_encode'
+            );
+        }
     }
 
     public static function lineEndingsProvider(): array
