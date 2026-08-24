@@ -75,12 +75,18 @@ class OrganizationJsonLdTest extends TestCase
         );
     }
 
+    /**
+     * Теми шукаються на диску, а не перелічуються: цей же тест їде у форк, де
+     * теми звуться інакше, і жорсткий список ловив би лише наші.
+     */
     public static function headTemplates(): array
     {
-        return [
-            'broken_new' => ['design/broken_new/html/head.tpl'],
-            'broken'     => ['design/broken/html/head.tpl'],
-        ];
+        $found = [];
+        foreach (glob(__DIR__ . '/../../design/*/html/head.tpl') ?: [] as $path) {
+            $found[basename(dirname(dirname($path)))] = [$path];
+        }
+
+        return $found;
     }
 
     /**
@@ -89,11 +95,8 @@ class OrganizationJsonLdTest extends TestCase
      * зеленим: htmlspecialchars - екранування для HTML, а не для JSON.
      */
     #[DataProvider('headTemplates')]
-    public function testHeadTemplateEncodesJsonLdValues(string $template): void
+    public function testHeadTemplateEncodesJsonLdValues(string $path): void
     {
-        $path = __DIR__ . '/../../' . $template;
-        $this->assertFileExists($path, $template . ' переїхав — тест треба оновити');
-
         $source = file_get_contents($path);
         preg_match_all('~application/ld\+json.*?</script>~s', $source, $blocks);
 

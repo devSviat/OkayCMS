@@ -65,7 +65,7 @@
     {
         "@context": "https://schema.org/",
         "@type": "WebSite",
-        "name": {/literal}{$settings->site_name|json_encode}{literal},
+        "name": {/literal}{$settings->site_name|json_encode:JSON_INVALID_UTF8_SUBSTITUTE}{literal},
         "url": "{/literal}{url_generator route='main' absolute=1}{literal}",
         "potentialAction": {
         "@type": "SearchAction",
@@ -82,12 +82,12 @@
     {
         "@context": "https://schema.org",
         "@type": "Organization",
-        "name": {/literal}{$settings->site_name|json_encode}{literal},
+        "name": {/literal}{$settings->site_name|json_encode:JSON_INVALID_UTF8_SUBSTITUTE}{literal},
         "url": "{/literal}{url_generator route='main' absolute=1}{literal}",
-        "logo": {/literal}{$logoUrl = $rootUrl|cat:'/'|cat:$config->design_images|cat:$settings->site_logo}{$logoUrl|json_encode}{literal}{/literal}{if $site_social}{literal},
+        "logo": {/literal}{$logoUrl = $rootUrl|cat:'/'|cat:$config->design_images|cat:$settings->site_logo}{$logoUrl|json_encode:JSON_INVALID_UTF8_SUBSTITUTE}{literal}{/literal}{if $site_social}{literal},
         "sameAs": [
         {/literal}{foreach $site_social as $social}{literal}
-            {/literal}{$socialUrl = preg_match('~^https?://~', $social.url) ? $social.url : "https://`$social.url`"}{$socialUrl|json_encode}{literal}{/literal}{if !$social@last}{literal},{/literal}{/if}{literal}
+            {/literal}{$socialUrl = preg_match('~^https?://~', $social.url) ? $social.url : "https://`$social.url`"}{$socialUrl|json_encode:JSON_INVALID_UTF8_SUBSTITUTE}{literal}{/literal}{if !$social@last}{literal},{/literal}{/if}{literal}
         {/literal}{/foreach}{literal}
         ]
         {/literal}{/if}{literal}
