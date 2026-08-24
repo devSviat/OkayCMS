@@ -92,15 +92,12 @@ class CatalogHelper
              */
             $baseFeaturesValues = $this->getBaseFeaturesValues(null, $this->settings->get('missing_products'));
 
-            // Дополняем массив $catalogFilterFeatures значениями, которые в данный момент выбраны
-            // и были изначально, но их фильтрация (по бренду или цене) отсекла.
-            if (!empty($baseFeaturesValues)) {
-                foreach ($baseFeaturesValues as $values) {
-                    foreach ($values as $value) {
-                        if (isset($productsFilter['features'][$value->feature_id][$value->id]) && isset($catalogFeatures[$value->feature_id])) {
-                            $catalogFeatures[$value->feature_id]->features_values[$value->id] = $value;
-                        }
-                    }
+            // Окремою вибіркою по id, а не з $baseFeaturesValues: той при
+            // missing_products=hide уже звужений по in_stock. Без вибраного значення
+            // MetaRobotsHelper кидає «Wrong feature value» — 500 на власному посиланні.
+            foreach ($this->getSelectedFeaturesValues($productsFilter) as $value) {
+                if (isset($catalogFeatures[$value->feature_id])) {
+                    $catalogFeatures[$value->feature_id]->features_values[$value->id] = $value;
                 }
             }
 
@@ -120,7 +117,10 @@ class CatalogHelper
                     // На странице фильтра убираем свойства у которых вообще нет значений (отфильтровались)
                     // или они изначально имели только один вариант выбора
                     if (
-                        ($featuresLimit !== null && $unusedFeatures >= $featuresLimit)
+                        // Обмеження рахуємо лише додатне: викликачі беруть його з
+                        // features_max_count_products, а порожнє поле в адмінці дає 0 —
+                        // це «без обмеження», не «жодного фільтра».
+                        ($featuresLimit > 0 && $unusedFeatures >= $featuresLimit)
                         || !isset($baseFeaturesValues[$feature->id])
                         || ($this->settings->get('hide_single_filters')
                             && ((count($baseFeaturesValues[$feature->id]) <= 1)
@@ -134,6 +134,13 @@ class CatalogHelper
                 }
             }
             foreach ($catalogFeatures as $k => $feature) {
+                // Той самий гард, що й у петлі вище: свойство з вибраним значенням
+                // прибирати не можна, інакше MetaRobotsHelper дістане набір, який
+                // суперечить URL, і кине «Wrong feature id».
+                if (!empty($productsFilter['features'][$feature->id])) {
+                    continue;
+                }
+
                 if (!property_exists($feature, 'features_values') || empty($feature->features_values)) {
                     unset($catalogFeatures[$k]);
                 }
@@ -257,6 +264,32 @@ class CatalogHelper
         }
 
         return ExtenderFacade::execute(__METHOD__, $result, func_get_args());
+    }
+
+    /**
+     * Значення свойств, вибрані у фільтрі, без жодного звуження.
+     *
+     * Порожній масив id у фільтр не потрапляє: Entity відкидає таку умову цілком
+     * і вибрала б усю таблицю.
+     *
+     * @param array<string, mixed> $productsFilter
+     * @return object[]
+     */
+    public function getSelectedFeaturesValues(array $productsFilter): array
+    {
+        $valuesIds = [];
+        foreach ($productsFilter['features'] ?? [] as $values) {
+            foreach (array_keys((array) $values) as $valueId) {
+                $valuesIds[] = (int) $valueId;
+            }
+        }
+
+        $selected = [];
+        if (!empty($valuesIds)) {
+            $selected = $this->filterHelper->getFeaturesValues(['id' => $valuesIds]);
+        }
+
+        return ExtenderFacade::execute(__METHOD__, $selected, func_get_args());
     }
 
     /**

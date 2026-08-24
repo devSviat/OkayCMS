@@ -907,7 +907,9 @@ class FilterHelper
         array_multisort($filter);
         $cacheKey = serialize($filter);
 
-        if (!empty($this->featureValuesCache[$cacheKey])) {
+        // array_key_exists, а не empty: фільтр, який законно нічого не знайшов,
+        // теж має віддаватися з кешу, а не запитуватись щоразу.
+        if (array_key_exists($cacheKey, $this->featureValuesCache)) {
             return ExtenderFacade::execute(__METHOD__, $this->featureValuesCache[$cacheKey], func_get_args());
         }
 
@@ -919,7 +921,7 @@ class FilterHelper
 
         $this->featureValuesCache[$cacheKey] = $featuresValues;
 
-        return ExtenderFacade::execute(__METHOD__, $featuresValues);
+        return ExtenderFacade::execute(__METHOD__, $featuresValues, func_get_args());
     }
     
     private function sortBrands($brandsUrls = [])
