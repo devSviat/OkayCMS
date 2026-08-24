@@ -721,7 +721,9 @@ class BackendOrderHistoryHelper
             $orderHistory = $this->orderHistoryEntity->find(['order_id' => $orderId]);
 
             foreach ($orderHistory as $item) {
-                $item->text = strip_tags($item->text,'<a><p><b><u><s><strong><i><br><span><div><ol><ul><li><table><tbody><tr><td></td><blockquote>');
+                // text у ok_order_history nullable, а strip_tags(null) з 8.1 — deprecated:
+                // при display_errors вивід іде перед заголовками, і сторінка їх уже не віддасть.
+                $item->text = strip_tags((string) $item->text,'<a><p><b><u><s><strong><i><br><span><div><ol><ul><li><table><tbody><tr><td></td><blockquote>');
                 if ($item->manager_id && isset($managers[$item->manager_id])) {
                     $item->manager_name = $managers[$item->manager_id]->login;
                 }
