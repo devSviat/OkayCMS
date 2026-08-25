@@ -17,6 +17,22 @@ class MetaRobotsHelperTest extends TestCase
     }
 
     /**
+     * Налаштування page-all за замовчуванням увімкнене: ці тести перевіряють
+     * саму матрицю канонікалів, а не вимикач.
+     */
+    private function makeMetaRobotsHelper($pageAllMaxItems = PAGE_ALL_MAX_ITEMS): MetaRobotsHelper
+    {
+        $settings = $this->createStub(\Okay\Core\Settings::class);
+        $settings->method('get')->willReturnCallback(
+            static function ($param) use ($pageAllMaxItems) {
+                return $param === 'catalog_page_all_max_items' ? $pageAllMaxItems : null;
+            }
+        );
+
+        return new MetaRobotsHelper($settings);
+    }
+
+    /**
      * @param array $robotsSettings
      * @param array $otherFilters
      * @param $expectedResult
@@ -29,7 +45,7 @@ class MetaRobotsHelperTest extends TestCase
         $reflector = new \ReflectionClass(MetaRobotsHelper::class);
         $method = $reflector->getMethod('getBaseCatalogRobots');
 
-        $metaRobotsHelper = new MetaRobotsHelper;
+        $metaRobotsHelper = $this->makeMetaRobotsHelper();
 
         // Передаем нужные настройки в наш класс
         call_user_func_array([$metaRobotsHelper, 'setParams'], $robotsSettings);
@@ -46,7 +62,7 @@ class MetaRobotsHelperTest extends TestCase
     #[DataProvider('setAvailableFeaturesDataProvider')]
     public function testSetAvailableFeatures(array $features, string $expectedExceptionMessage)
     {
-        $metaRobotsHelper = new MetaRobotsHelper;
+        $metaRobotsHelper = $this->makeMetaRobotsHelper();
 
         $actualResult = '';
         try {
@@ -71,7 +87,7 @@ class MetaRobotsHelperTest extends TestCase
     #[DataProvider('getCatalogPaginationFullFiltersDataProvider')]
     public function testGetCatalogRobots(array $robotsSettings, $page, array $otherFilters, array $featuresFilter, array $brandsFilter, $expectedResult)
     {
-        $metaRobotsHelper = new MetaRobotsHelper;
+        $metaRobotsHelper = $this->makeMetaRobotsHelper();
 
         $metaRobotsHelper->setAvailableFeatures([
             (object)[
@@ -196,7 +212,7 @@ class MetaRobotsHelperTest extends TestCase
         $reflector = new \ReflectionClass(MetaRobotsHelper::class);
         $method = $reflector->getMethod('getCatalogRobotsExecutor');
 
-        $metaRobotsHelper = new MetaRobotsHelper;
+        $metaRobotsHelper = $this->makeMetaRobotsHelper();
 
         // Передаем нужные настройки в наш класс
         call_user_func_array([$metaRobotsHelper, 'setParams'], $robotsSettings);

@@ -70,30 +70,45 @@
                             </div>
                         </div>
                         <div class="fn_step-2 col-lg-4 col-md-6">
+                            <div class="heading_label">
+                                <span>{$btr->settings_catalog_page_all_max_items|escape}</span>
+                                <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->settings_catalog_page_all_max_items_hint|escape}" tabindex="0" role="img" aria-label="{$btr->settings_catalog_page_all_max_items_hint|escape}">
+                                    {include file='svg_icon.tpl' svgId='icon_tooltips'}
+                                </i>
+                            </div>
+                            <div class="mb-1">
+                                <select name="catalog_page_all_max_items" class="selectpicker form-control">
+                                    {foreach PAGE_ALL_ALLOWED_ITEMS as $pageAllOption}
+                                        <option value="{$pageAllOption}" {if $catalog_page_all_max_items == $pageAllOption}selected=""{/if}>{if $pageAllOption == PAGE_ALL_OFF}{$btr->settings_catalog_page_all_max_items_off|escape}{else}{$pageAllOption}{/if}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="fn_step-3 col-lg-4 col-md-6">
                             <div class="heading_label">{$btr->settings_catalog_products_max|escape}</div>
                             <div class="mb-1">
                                 <input name="max_order_amount" class="form-control" type="text" value="{$settings->max_order_amount|escape}" />
                             </div>
                         </div>
-                        <div class="fn_step-3 col-lg-4 col-md-6">
+                        <div class="fn_step-4 col-lg-4 col-md-6">
                             <div class="heading_label">{$btr->settings_catalog_posts_on_page|escape}</div>
                             <div class="mb-1">
                                 <input name="posts_num" class="form-control" type="text" value="{$settings->posts_num|escape}" />
                             </div>
                         </div>
-                        <div class="fn_step-4 col-lg-4 col-md-6">
+                        <div class="fn_step-5 col-lg-4 col-md-6">
                             <div class="heading_label">{$btr->settings_catalog_products_comparcion|escape}</div>
                             <div class="mb-1">
                                 <input name="comparison_count" class="form-control" type="text" value="{$settings->comparison_count|escape}" />
                             </div>
                         </div>
-                        <div class="fn_step-5 col-lg-4 col-md-6">
+                        <div class="fn_step-6 col-lg-4 col-md-6">
                             <div class="heading_label">{$btr->settings_catalog_units|escape}</div>
                             <div class="mb-1">
                                <input name="units" class="form-control" type="text" value="{$settings->units|escape}" />
                             </div>
                         </div>
-                        <div class="fn_step-6 col-lg-4 col-md-6">
+                        <div class="fn_step-7 col-lg-4 col-md-6">
                             <div class="heading_label">{$btr->settings_catalog_cents|escape}</div>
                             <div class="mb-1">
                                <select name="decimals_point" class="selectpicker form-control">
@@ -102,7 +117,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="fn_step-7 col-lg-4 col-md-6">
+                        <div class="fn_step-8 col-lg-4 col-md-6">
                             <div class="heading_label">{$btr->settings_catalog_thousands|escape}</div>
                             <div class="mb-1">
                                <select name="thousands_separator" class="selectpicker form-control">
@@ -112,7 +127,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="fn_step-8 col-lg-4 col-md-6">
+                        <div class="fn_step-9 col-lg-4 col-md-6">
                             <div class="heading_label">
                                 {$btr->settings_catalog_not_in_stock|escape}
                                 <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_not_in_stock|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_catalog_not_in_stock|escape}">
@@ -129,7 +144,7 @@
                         </div>
 
                         <div class="col-lg-4 col-md-6 mt-2">
-                            <div class="fn_step-9">
+                            <div class="fn_step-10">
                                 <div class="heading_label boxes_inline">{$btr->settings_catalog_preorder_not_in_stock|escape}</div>
                                 <div class="boxes_inline">
                                     <div class="okay_switch clearfix">
@@ -147,7 +162,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="fn_step-8 col-lg-4 col-md-6">
+                        <div class="fn_step-9 col-lg-4 col-md-6">
                             <div class="heading_label">
                                 {$btr->settings_catalog_features_max_count_products|escape}
                                 <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_features_max_count_products|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_catalog_features_max_count_products|escape}">
@@ -158,7 +173,7 @@
                                 <input name="features_max_count_products" class="form-control" type="number" value="{$settings->features_max_count_products|escape}" />
                             </div>
                         </div>
-                        <div class="fn_step-8 col-lg-4 col-md-6">
+                        <div class="fn_step-9 col-lg-4 col-md-6">
                             <div class="heading_label">
                                 {$btr->settings_catalog_features_cache_ttl|escape} <span class="text_warning">Beta</span>
                                 <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_features_cache_ttl|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_catalog_features_cache_ttl|escape}">
@@ -170,7 +185,7 @@
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 mt-2">
-                            <div class="fn_step-9">
+                            <div class="fn_step-10">
                                 <div class="heading_label boxes_inline">
                                     {$btr->settings_catalog_features_cache_deferred|escape}
                                     <i class="fn_tooltips fn_tip_wide hint-bottom-right-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_features_cache_deferred|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_catalog_features_cache_deferred|escape}">
@@ -192,7 +207,7 @@
                     
                     <div class="row">
                         <div class="col-lg-4 col-md-6 mt-2">
-                            <div class="fn_step-10">
+                            <div class="fn_step-11">
                                 <div class="heading_label boxes_inline">
                                     {$btr->allow_to_visible_empty_categories|escape}
                                     <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->allow_to_visible_empty_categories_notice|escape}" tabindex="0" role="img" aria-label="{$btr->allow_to_visible_empty_categories_notice|escape}">
@@ -212,7 +227,7 @@
                         </div>
                         
                         <div class="col-lg-4 col-md-6 mt-2">
-                            <div class="fn_step-10">
+                            <div class="fn_step-11">
                                 <div class="heading_label boxes_inline">
                                     {$btr->settings_hide_single_filters|escape}
                                     <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->settings_hide_single_filters_notice|escape}" tabindex="0" role="img" aria-label="{$btr->settings_hide_single_filters_notice|escape}">
@@ -232,7 +247,7 @@
                         </div>
                         
                         <div class="col-lg-4 col-md-6 mt-2">
-                            <div class="fn_step-10">
+                            <div class="fn_step-11">
                                 <div class="heading_label boxes_inline">
                                     {$btr->settings_enable_webp|escape}
                                     <i class="fn_tooltips fn_tip_wide hint-bottom-right-t-white-s-small-mobile hint-anim" data-hint="{$btr->settings_enable_webp_notice|escape}" tabindex="0" role="img" aria-label="{$btr->settings_enable_webp_notice|escape}"> 
@@ -252,7 +267,7 @@
                         </div>
                         
                         <div class="col-lg-4 col-md-6 mt-2">
-                            <div class="fn_step-10">
+                            <div class="fn_step-11">
                                 <div class="heading_label boxes_inline">
                                     {$btr->settings_hide_equal_compare_price|escape}
                                     <i class="fn_tooltips hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->settings_hide_equal_compare_price_notice|escape}" tabindex="0" role="img" aria-label="{$btr->settings_hide_equal_compare_price_notice|escape}"> 
@@ -272,7 +287,7 @@
                         </div>
                         
                         <div class="col-lg-4 col-md-6 mt-2">
-                            <div class="fn_step-10">
+                            <div class="fn_step-11">
                                 <div class="heading_label boxes_inline">
                                     {$btr->settings_increased_image_size|escape}
                                     <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->settings_increased_image_size_notice|escape}" tabindex="0" role="img" aria-label="{$btr->settings_increased_image_size_notice|escape}"> 
@@ -317,7 +332,7 @@
 
     <div class="row">
         <div class="col-lg-12 col-md-12">
-            <div class="fn_step-11 boxed fn_toggle_wrap ">
+            <div class="fn_step-12 boxed fn_toggle_wrap ">
                 <div class="heading_box">
                     {$btr->title_truncate_table|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">
@@ -432,7 +447,7 @@
     {*Параметры элемента*}
     <div class="row">
         <div class="col-lg-12 col-md-12">
-            <div class="fn_step-12 boxed fn_toggle_wrap ">
+            <div class="fn_step-13 boxed fn_toggle_wrap ">
                 <div class="heading_box">
                     {$btr->settings_catalog_watermark|escape}
                     <div class="toggle_arrow_wrap fn_toggle_card text-primary">

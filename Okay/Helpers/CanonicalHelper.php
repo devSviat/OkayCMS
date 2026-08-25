@@ -4,8 +4,12 @@
 namespace Okay\Helpers;
 
 
+use Okay\Core\Settings;
+
 class CanonicalHelper
 {
+    private $settings;
+
     private $catalogPagination;
     private $catalogPageAll;
     private $catalogBrand;
@@ -19,6 +23,28 @@ class CanonicalHelper
     private $maxFeaturesValuesFilterDepth;
     private $maxFilterDepth;
     
+    public function __construct(Settings $settings)
+    {
+        $this->settings = $settings;
+    }
+
+    /**
+     * Вимкнений page-all віддає звичайну першу сторінку, тож канонікал мусить
+     * вести саме на неї.
+     *
+     * Підмінюється налаштування, а не сама сторінка: обнулити $page тут
+     * недостатньо - тоді гілка просто не виконається, ключ 'page' лишиться
+     * невиставленим, і в канонікал піде поточна адреса разом із page-all.
+     */
+    private function catalogPageAllCanonical(): int
+    {
+        if (okay_page_all_max_items($this->settings->get('catalog_page_all_max_items')) === PAGE_ALL_OFF) {
+            return CANONICAL_FIRST_PAGE;
+        }
+
+        return $this->catalogPageAll;
+    }
+
     public function setParams(
         $catalogPagination,
         $catalogPageAll,
@@ -252,7 +278,7 @@ class CanonicalHelper
         
         if (!empty($page)) {
             if ($page == 'all') {
-                switch ($this->catalogPageAll) {
+                switch ($this->catalogPageAllCanonical()) {
                     case CANONICAL_FIRST_PAGE:
                         $result['page'] = null;
                         break;

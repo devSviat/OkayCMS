@@ -662,6 +662,9 @@ return [
     ],
     CanonicalHelper::class => [
         'class' => CanonicalHelper::class,
+        'arguments' => [
+            new SR(Settings::class),
+        ],
         'calls' => [
             [
                 'method' => 'setParams',
@@ -683,6 +686,9 @@ return [
     ],
     MetaRobotsHelper::class => [
         'class' => MetaRobotsHelper::class,
+        'arguments' => [
+            new SR(Settings::class),
+        ],
         'calls' => [
             [
                 'method' => 'setParams',

@@ -133,6 +133,21 @@ class BackendSettingsHelper
         $this->settings->set('decimals_point', $this->request->post('decimals_point', null, ','));
         $this->settings->set('thousands_separator', $this->request->post('thousands_separator'));
         $this->settings->set('products_num', $this->request->post('products_num', 'int', 24));
+
+        // Пишемо, лише коли поле справді прийшло. Нуль тут - легальний вибір
+        // «не показувати», тож відсутнє поле не можна відрізнити від нього за
+        // значенням: будь-який POST без нього тихо вимкнув би page-all. Дефолт
+        // у post() теж не годиться - він підставляється через empty() і зʼїв би
+        // саме нуль.
+        $pageAllMaxItems = $this->request->post('catalog_page_all_max_items');
+        if ($pageAllMaxItems !== null) {
+            $pageAllMaxItems = (int)$pageAllMaxItems;
+            if (!in_array($pageAllMaxItems, PAGE_ALL_ALLOWED_ITEMS, true)) {
+                $pageAllMaxItems = PAGE_ALL_MAX_ITEMS;
+            }
+            $this->settings->set('catalog_page_all_max_items', $pageAllMaxItems);
+        }
+
         $this->settings->set('max_order_amount', $this->request->post('max_order_amount', 'int', 50));
         $this->settings->set('comparison_count', $this->request->post('comparison_count', 'int', 5));
         $this->settings->set('posts_num', $this->request->post('posts_num', 'int', 8));
