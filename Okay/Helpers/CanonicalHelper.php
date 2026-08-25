@@ -4,8 +4,12 @@
 namespace Okay\Helpers;
 
 
+use Okay\Core\Settings;
+
 class CanonicalHelper
 {
+    private $settings;
+
     private $catalogPagination;
     private $catalogPageAll;
     private $catalogBrand;
@@ -19,6 +23,16 @@ class CanonicalHelper
     private $maxFeaturesValuesFilterDepth;
     private $maxFilterDepth;
     
+    public function __construct(Settings $settings)
+    {
+        $this->settings = $settings;
+    }
+
+    private function pageAllIsOff(): bool
+    {
+        return okay_page_all_max_items($this->settings->get('catalog_page_all_max_items')) === PAGE_ALL_OFF;
+    }
+
     public function setParams(
         $catalogPagination,
         $catalogPageAll,
@@ -56,6 +70,35 @@ class CanonicalHelper
      * Определение canonical для категории
      */
     public function getCatalogCanonicalData($page, array $otherFilter, array $featuresFilter, array $brandsFilter)
+    {
+        // Вимкнений page-all віддає звичайну першу сторінку, тож канонікал
+        // рахується так, наче її й запитали: інакше кожне налаштування, яке вміє
+        // вказати на page-all чи лишити поточну адресу, склеїло б каталог на
+        // дубль першої сторінки.
+        $servesFirstPage = $page == 'all' && $this->pageAllIsOff();
+        if ($servesFirstPage) {
+            $page = '';
+        }
+
+        $result = $this->catalogCanonicalData($page, $otherFilter, $featuresFilter, $brandsFilter);
+
+        // Адресу треба ще й явно занулити: без ключа 'page' будівник URL лишає
+        // поточний сегмент, і канонікал стає самопосиланням на page-all.
+        if ($servesFirstPage && is_array($result)) {
+            $result['page'] = null;
+        }
+
+        return $result; // no ExtenderFacade
+    }
+
+    /**
+     * @param string|int $page
+     * @param array $otherFilter
+     * @param array $featuresFilter
+     * @param array $brandsFilter
+     * @return array|false
+     */
+    private function catalogCanonicalData($page, array $otherFilter, array $featuresFilter, array $brandsFilter)
     {
         $result = [];
         
@@ -271,7 +314,9 @@ class CanonicalHelper
                         $result['page'] = $page;
                         break;
                     case CANONICAL_PAGE_ALL:
-                        $result['page'] = 'all';
+                        // Склеювати пагінацію на адресу, якої більше немає,
+                        // нема куди - лишається перша сторінка.
+                        $result['page'] = $this->pageAllIsOff() ? null : 'all';
                         break;
                     case CANONICAL_ABSENT:
                         return false; // no ExtenderFacade

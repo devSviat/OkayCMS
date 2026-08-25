@@ -60,6 +60,14 @@ class SettingsCatalogAdmin extends IndexAdmin
             $this->design->assign('message_success', 'saved');
         }
 
+        // Готове значення, а не сире: інакше шаблон мусив би сам вирішувати,
+        // що робити з незаданим чи зіпсованим налаштуванням, і підсвітив би не
+        // той пункт списку.
+        $this->design->assign(
+            'catalog_page_all_max_items',
+            okay_page_all_max_items($this->settings->get('catalog_page_all_max_items'))
+        );
+
         $this->response->setContent($this->design->fetch('settings_catalog.tpl'));
     }
 }

@@ -5,9 +5,12 @@ namespace Okay\Helpers;
 
 
 use Exception;
+use Okay\Core\Settings;
 
 class MetaRobotsHelper
 {
+    private $settings;
+
     private $catalogPagination;
     private $catalogPageAll;
     private $catalogBrand;
@@ -22,6 +25,31 @@ class MetaRobotsHelper
     private $maxFilterDepth;
     
     private $features = [];
+
+    public function __construct(Settings $settings)
+    {
+        $this->settings = $settings;
+    }
+
+    /**
+     * Вимкнений page-all віддає звичайну першу сторінку, тож окремою адресою
+     * він більше не є. Без цього robots брались би з налаштування для page-all
+     * і могли б закрити від індексації звичайну першу сторінку.
+     *
+     * @param string|int $page
+     * @return string|int
+     */
+    private function normalizePageAll($page)
+    {
+        if ($page == 'all'
+            && okay_page_all_max_items($this->settings->get('catalog_page_all_max_items')) === PAGE_ALL_OFF) {
+            // Саме таке значення приходить із FilterHelper::getCurrentPage()
+            // для першої сторінки.
+            return '';
+        }
+
+        return $page;
+    }
 
     public function setParams(
         $catalogPagination,
@@ -127,6 +155,8 @@ class MetaRobotsHelper
      */
     public function getCatalogRobots($page, array $otherFilter, array $featuresFilter, array $brandsFilter) : int
     {
+        $page = $this->normalizePageAll($page);
+
         // Если хоть одно значение свойства отмечено как не идексировать - страница не индексируется
         if (!empty($featuresFilter)) {
             foreach ($featuresFilter as $featureId=>$values) {

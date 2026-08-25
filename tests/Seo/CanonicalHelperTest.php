@@ -15,6 +15,22 @@ class CanonicalHelperTest extends TestCase
     }
 
     /**
+     * Налаштування page-all за замовчуванням увімкнене: ці тести перевіряють
+     * саму матрицю канонікалів, а не вимикач.
+     */
+    private function makeCanonicalHelper($pageAllMaxItems = PAGE_ALL_MAX_ITEMS): CanonicalHelper
+    {
+        $settings = $this->createStub(\Okay\Core\Settings::class);
+        $settings->method('get')->willReturnCallback(
+            static function ($param) use ($pageAllMaxItems) {
+                return $param === 'catalog_page_all_max_items' ? $pageAllMaxItems : null;
+            }
+        );
+
+        return new CanonicalHelper($settings);
+    }
+
+    /**
      * @param array $canonicalSettings
      * @param $page
      * @param array $featuresFilter
@@ -32,7 +48,7 @@ class CanonicalHelperTest extends TestCase
         $reflector = new \ReflectionClass(CanonicalHelper::class);
         $method = $reflector->getMethod('getCatalogCanonicalDataExecutor');
 
-        $canonicalHelper = new CanonicalHelper;
+        $canonicalHelper = $this->makeCanonicalHelper();
 
         // Передаем нужные настройки в наш класс
         call_user_func_array([$canonicalHelper, 'setParams'], $canonicalSettings);
@@ -56,7 +72,7 @@ class CanonicalHelperTest extends TestCase
         $reflector = new \ReflectionClass(CanonicalHelper::class);
         $method = $reflector->getMethod('getBaseCatalogCanonicalData');
 
-        $canonicalHelper = new CanonicalHelper;
+        $canonicalHelper = $this->makeCanonicalHelper();
 
         // Передаем нужные настройки в наш класс
         call_user_func_array([$canonicalHelper, 'setParams'], $canonicalSettings);
@@ -79,7 +95,7 @@ class CanonicalHelperTest extends TestCase
     #[DataProvider('getCatalogPaginationFullFiltersDataProvider')]
     public function testGetCatalogCanonicalData(array $canonicalSettings, $page, array $otherFilters, array $featuresFilter, array $brandsFilter, $expectedResult)
     {
-        $canonicalHelper = new CanonicalHelper;
+        $canonicalHelper = $this->makeCanonicalHelper();
         
         // Передаем нужные настройки в наш класс
         call_user_func_array([$canonicalHelper, 'setParams'], $canonicalSettings);
