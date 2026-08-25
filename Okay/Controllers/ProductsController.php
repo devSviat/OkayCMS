@@ -148,12 +148,14 @@ class ProductsController extends AbstractController
         $relPrevNext = $this->design->fetch('products_rel_prev_next.tpl');
         $this->design->assign('rel_prev_next', $relPrevNext);
 
-        switch ($metaRobotsHelper->getCatalogRobots(
+        $catalogRobots = $metaRobotsHelper->getCatalogRobots(
             $currentPage,
             $productsFilter['other_filter'] ?? [],
             $metaArray['features_values'] ?? [],
-            $productsFilter['brand_id'] ?? [])
-        ) {
+            $productsFilter['brand_id'] ?? []
+        );
+
+        switch ($catalogRobots) {
             case ROBOTS_NOINDEX_FOLLOW:
                 $this->design->assign('noindex_follow', true);
                 break;
@@ -194,7 +196,9 @@ class ProductsController extends AbstractController
         $allProductsMetadataHelper->setUp(
             $productsFilter['keyword'] ?? '',
             $this->design->getVar('is_all_pages'),
-            $this->design->getVar('current_page_num')
+            $this->design->getVar('current_page_num'),
+            $metaArray,
+            $catalogRobots
         );
 
         $this->setMetadataHelper($allProductsMetadataHelper);
