@@ -7,6 +7,7 @@ namespace Okay\Requests;
 use Okay\Core\Modules\Extender\ExtenderFacade;
 use Okay\Core\Phone;
 use Okay\Core\Request;
+use Okay\Helpers\RatingHelper;
 
 class CommonRequest
 {
@@ -28,9 +29,33 @@ class CommonRequest
             $comment->name = $this->text('name');
             $comment->email = $this->text('email');
             $comment->text = $this->text('text');
+            $comment->rating = $this->commentRating();
         }
 
         return ExtenderFacade::execute(__METHOD__, $comment, func_get_args());
+    }
+
+    /**
+     * Оцінка у відгуку. Не обовʼязкова: відгук без зірок лишається звичайним
+     * коментарем і в середній бал товару не потрапляє.
+     *
+     * Поза шкалою значення відкидається, а не притискається до межі. Бал іде в
+     * `aggregateRating` на сторінці товару, тобто у структуровані дані для
+     * пошуковика, і вигадана там цифра гірша за відсутню.
+     *
+     * @return int|null
+     */
+    private function commentRating()
+    {
+        $posted = $this->request->post('rating');
+
+        if (!is_numeric($posted)) {
+            return null;
+        }
+
+        $rating = (int)$posted;
+
+        return $rating >= RatingHelper::MIN_RATING && $rating <= RatingHelper::MAX_RATING ? $rating : null;
     }
 
     public function postFeedback()

@@ -303,33 +303,6 @@
                 {get_design_block block="post_related_products"}
             </div>
         </div>
-        <div class="col-lg-4">
-            <div class="boxed min_height_230px">
-                <div class="heading_box">
-                    {$btr->post_rating|escape}
-                </div>
-                <div class="toggle_body_wrap on fn_card">
-                    <div class="heading_label">
-                        {$btr->product_rating_value|escape}
-                        <span class="font-weight-bold fn_show_rating">{$post->rating|escape}</span>
-                    </div>
-                    <div class="raiting_boxed">
-                        <input class="fn_rating_value" type="hidden" value="{$post->rating|escape}" name="rating" />
-                        <input class="fn_rating range_input" type="range" min="1" max="5" step="0.1" value="{$post->rating|escape}" />
-
-                        <div class="raiting_range_number">
-                            <span class="float-xs-left">1</span>
-                            <span class="float-xs-right">5</span>
-                        </div>
-                    </div>
-                    <div class="heading_label">
-                        {$btr->product_rating_number|escape}
-                        <input type="text" class="form-control" name="votes" value="{$post->votes|escape}">
-                    </div>
-                </div>
-                {get_design_block block="post_rationg"}
-            </div>
-        </div>
     </div>
     {*Параметры элемента*}
     <div class="row">
@@ -415,10 +388,6 @@
 {literal}
     <script src="design/js/autocomplete/jquery.autocomplete-min.js"></script>
     <script>
-        $(document).on("input", ".fn_rating", function () {
-            $(".fn_show_rating").html($(this).val());
-            $(".fn_rating_value").val($(this).val());
-        });
         
         $(window).on("load", function() {
             /* Єдине поле з часом: PHP малює його як d.m.Y H:i, а без таймпікера

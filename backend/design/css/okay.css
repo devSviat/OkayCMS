@@ -5098,11 +5098,16 @@ body.menu-pin .page-container {
 }
 
 
+/* Брендинг Broken: логотип ширший і нижчий за стоковий, тож вирівнювання
+   базовою лінією (line-height: 44px у смузі 55px) піднімало його над центром.
+   Флекс ставить його на одну вісь із гамбургером.
+   УВАГА: це наша правка поверх ядра — після кожного підтягування okay.css із
+   форку перевіряти, чи вона на місці. */
 #quickview .sidebar_header,
 #admin_catalog .sidebar_header {
-    display: block;
+    display: flex;
+    align-items: center;
     height: 55px;
-    line-height: 44px;
     background-color: var(--ok-chrome);
     border-bottom: 1px solid #232730;
     color: var(--ok-ink-inverse);
@@ -5113,8 +5118,28 @@ body.menu-pin .page-container {
 }
 #quickview .sidebar_header .logo_box,
 #admin_catalog .sidebar_header .logo_box{
-    display: inline-block;
+    display: flex;
+    align-items: center;
     width: 150px;
+    /* float у флекс-контейнері не діє, тож перемикач тримається праворуч
+       відступом. order потрібен через розмітку мобільної панелі: там перемикач
+       стоїть у DOM перед логотипом, і без нього флекс поставив би його ліворуч. */
+    order: 1;
+}
+#quickview .sidebar_header .logo_box img,
+#admin_catalog .sidebar_header .logo_box img{
+    display: block;
+    width: 100%;
+    height: auto;
+}
+#quickview .sidebar_header .menu_switch,
+#admin_catalog .sidebar_header .menu_switch{
+    order: 2;
+    margin-left: auto;
+    padding-top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .fix_logo_img{
@@ -9347,4 +9372,17 @@ textarea:focus-visible,
 .input-group-btn > .btn > svg,
 .btn > span > svg {
     flex-shrink: 0;
+}
+
+/* Оцінка у відгуку в списку коментарів. */
+.comment_rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #f5a623;
+}
+.comment_rating__value {
+  margin-left: 6px;
+  color: #6c757d;
+  font-size: 12px;
 }

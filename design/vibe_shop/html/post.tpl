@@ -118,7 +118,7 @@
                 {/if}
 
                 <div class="vs-post__rate">
-                    <div id="post_{$post->id}" class="product__rating fn_rating vs-rating" data-rating_post_url="{url_generator route='ajax_post_rating'}">
+                    <div id="post_{$post->id}" class="product__rating vs-rating">
                         <span class="vs-rating__label" data-language="post_rating_title">{$lang->post_rating_title}</span>
                         <span class="rating_starOff">
                             <span class="rating_starOn" style="width:{$post->rating*90/5|string_format:'%.0f'}px;"></span>

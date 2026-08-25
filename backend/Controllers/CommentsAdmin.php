@@ -52,6 +52,10 @@ class CommentsAdmin extends IndexAdmin
             $this->design->assign('keyword', $filter['keyword']);
         }
 
+        if (isset($filter['rating'])) {
+            $this->design->assign('rating', $filter['rating']);
+        }
+
         $this->design->assign('pages_count',    ceil($commentsCount/$filter['limit']));
         $this->design->assign('current_page',   $filter['page']);
         $this->design->assign('comments',       $comments);

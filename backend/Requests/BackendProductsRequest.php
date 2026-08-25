@@ -35,8 +35,6 @@ class BackendProductsRequest
 
         $product->annotation  = $this->request->post('annotation');
         $product->description = $this->request->post('description');
-        $product->rating      = $this->request->post('rating', 'float');
-        $product->votes       = $this->request->post('votes', 'integer');
         $product->special     = $this->request->post('special','string');
 
         return ExtenderFacade::execute(__METHOD__, $product, func_get_args());

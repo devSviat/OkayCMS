@@ -351,3 +351,5 @@ $lang['user_wishlist_title'] = 'Featured Products';
 $lang['user_browsed_title'] = 'Products viewed';
 $lang['general_messages_success'] = 'Saved successfully';
 $lang['main_popular_categories'] = 'Popular categories';
+$lang['product_comment_rating'] = 'Your rating';
+$lang['form_enter_rating'] = 'Choose a rating';

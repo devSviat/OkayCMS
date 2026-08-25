@@ -4805,3 +4805,43 @@ table.order_details {
 .discount_tooltip:hover {
   color: #b10707;
 }
+
+/* Оцінка у формі відгуку. Радіо-кнопки, а не віджет на JS: без скрипта форма
+   лишається придатною. Зірки — той самий спрайт, що й у рейтингу товару, тож
+   вибір і показаний бал виглядають однаково. */
+.review_rating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.review_rating__stars {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+.review_rating__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.review_rating__star {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  background: url(../images/rating.png) no-repeat left top;
+}
+.review_rating__star:hover,
+.review_rating__star:hover ~ .review_rating__star,
+.review_rating__input:checked ~ .review_rating__star,
+.review_rating__input:checked + .review_rating__star {
+  background-position: left bottom;
+}
+.review_rating__input:focus-visible + .review_rating__star {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.comment__rating {
+  margin-left: 10px;
+}

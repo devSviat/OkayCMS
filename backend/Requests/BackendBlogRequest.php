@@ -60,8 +60,6 @@ class BackendBlogRequest
         } elseif (empty($post->id)) {
             $post->date = date('Y-m-d H:i:s');
         }
-        $post->rating = $this->request->post('rating', 'float');
-        $post->votes  = $this->request->post('votes', 'integer');
         
         if (($time = strtotime($this->request->post('updated_date'))) > 0) {
             $post->updated_date = date('Y-m-d', $time);

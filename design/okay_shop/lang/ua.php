@@ -351,3 +351,5 @@ $lang['purchase_discount__popup_title'] = 'Скидки на товар';
 $lang['purchase_discount__tooltip'] = 'Скидки на товар';
 $lang['general_messages_success'] = 'Успішно збережено';
 $lang['main_popular_categories'] = 'Популярні категорії';
+$lang['product_comment_rating'] = 'Ваша оцінка';
+$lang['form_enter_rating'] = 'Оберіть оцінку';
