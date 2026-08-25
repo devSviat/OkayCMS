@@ -21,10 +21,10 @@ update_2.3.1.sql
 update_2.4.0.sql
 update_3.0.0_Beta.sql
 update_3.0.1.sql
-update_3.0.2_Beta.sql
 update_3.0.2.sql
-update_3.0.3_Beta.sql
+update_3.0.2_Beta.sql
 update_3.0.3.sql
+update_3.0.3_Beta.sql
 update_3.0.4_Beta.php
 update_3.0.4_Beta.sql
 update_3.1.0.sql
@@ -51,3 +51,4 @@ update_4.3.1.sql
 update_4.4.0.sql
 update_4.5.0.sql
 update_4.5.2.sql
+update_4.5.2_fork.sql

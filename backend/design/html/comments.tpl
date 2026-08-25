@@ -54,6 +54,16 @@
                             <option value="{url keyword=null page=null type=null status='unapproved'}" {if $status == 'unapproved'}selected{/if}>{$btr->comments_filter_unapproved|escape}</option>
                         </select>
                     </div>
+                    <div class="col-lg-3 col-md-3 col-sm-12">
+                        <select class="selectpicker form-control" onchange="location = this.value;">
+                            <option value="{url page=null rating=null}" {if !$rating}selected{/if}>{$btr->comments_rating_all|escape}</option>
+                            {section name=star loop=5}
+                                {assign var="star_value" value=5-$smarty.section.star.index}
+                                <option value="{url page=null rating=$star_value}" {if $rating == $star_value}selected{/if}>{$btr->comments_rating|escape}: {$star_value}</option>
+                            {/section}
+                            <option value="{url page=null rating='none'}" {if $rating == 'none'}selected{/if}>{$btr->comments_rating_none|escape}</option>
+                        </select>
+                    </div>
                     <div class="col-lg-3 col-md-3 col-sm-12 pull-right">
                         <div class="pull-right">
                             <select onchange="location = this.value;" class="selectpicker form-control">
@@ -111,9 +121,26 @@
                                             <div class="okay_list_text_inline text_600 mb-h mr-1">
                                                 {$comment->name|escape}
                                             </div>
+
                                             {if $comment->email}
                                                 <div class="okay_list_text_inline mb-h">
                                                     <span class="text_grey text_bold">Email: </span>  {$comment->email|escape}
+                                                </div>
+                                            {/if}
+                                            {* Відгук без оцінки - звичайний коментар, і в середній бал товару він не входить. *}
+                                            {if $comment->rating}
+                                                <div class="mb-h">
+                                                    <span class="text_grey text_bold">{$btr->comments_rating|escape}:</span>
+                                                    <span class="comment_rating">
+                                                        {section name=star loop=5}
+                                                            {if $smarty.section.star.index < $comment->rating}
+                                                                {include file='svg_icon.tpl' svgId='star_filled'}
+                                                            {else}
+                                                                {include file='svg_icon.tpl' svgId='star'}
+                                                            {/if}
+                                                        {/section}
+                                                        <span class="comment_rating__value">{$comment->rating}/5</span>
+                                                    </span>
                                                 </div>
                                             {/if}
                                             <div class="mb-h">

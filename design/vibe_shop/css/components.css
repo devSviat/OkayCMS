@@ -11306,3 +11306,58 @@ a.top_admin_bookmark::before {
 	background-position: center;
 	background-size: contain;
 }
+
+/* Вибір оцінки у формі відгуку. Радіо-кнопки, а не віджет на JS: без скрипта  */
+/* форма лишається придатною. Маска та сама, що й у показі рейтингу, тож       */
+/* обрана й збережена оцінка виглядають однаково.                              */
+
+.vs-rating-input {
+	display: inline-flex;
+	flex-direction: row-reverse;
+	justify-content: flex-end;
+}
+
+.vs-rating-input__radio {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+}
+
+.vs-rating-input__star {
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	cursor: pointer;
+	background-color: var(--vs-n-500);
+	-webkit-mask: url("../images/rating.svg") no-repeat 0 -18px;
+	-webkit-mask-size: 18px 36px;
+	mask: url("../images/rating.svg") no-repeat 0 -18px;
+	mask-size: 18px 36px;
+}
+
+/* Наведення — попередній перегляд, а не збережене значення, тож фарба на крок */
+/* світліша за ту, якою малюється обране.                                      */
+
+.vs-rating-input__star:hover,
+.vs-rating-input__star:hover ~ .vs-rating-input__star {
+	background-color: var(--vs-text-muted);
+	-webkit-mask-position: 0 0;
+	mask-position: 0 0;
+}
+
+.vs-rating-input__radio:checked ~ .vs-rating-input__star,
+.vs-rating-input__radio:checked + .vs-rating-input__star {
+	background-color: var(--vs-heading);
+	-webkit-mask-position: 0 0;
+	mask-position: 0 0;
+}
+
+.vs-rating-input__radio:focus-visible + .vs-rating-input__star {
+	outline: 2px solid var(--vs-heading);
+	outline-offset: 2px;
+}
+
+.comment__rating {
+	margin-left: 10px;
+}

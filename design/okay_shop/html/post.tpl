@@ -113,7 +113,7 @@
                     {/if}
 
                     <div class="post_share">
-                        <div id="post_{$post->id}" class="post__rating product__rating fn_rating" data-rating_post_url="{url_generator route='ajax_post_rating'}">
+                        <div id="post_{$post->id}" class="post__rating product__rating">
                             <div class="share__text post_share__text">
                                 <span data-language="product_share">{$lang->post_rating_title}</span>
                             </div>

@@ -70,7 +70,9 @@
             {* Rating. The widget is a 90x18 sprite strip driven by scripts.tpl's
                rater: the inline width IS the value, so it stays inline. *}
             <span class="vs-pdp__rating">
-                <span id="product_{$product->id}" class="product__rating fn_rating" data-rating_post_url="{url_generator route='ajax_product_rating'}"{if $product->rating > 0} itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating"{/if}>
+                {* Показ, а не ввід: бал рахується з відгуків, тож окремий клік по зірках
+                   перебивав би його цифрою, під якою немає жодного тексту. *}
+                <span id="product_{$product->id}" class="product__rating"{if $product->rating > 0} itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating"{/if}>
                     <span class="rating_starOff">
                         <span class="rating_starOn" style="width:{$product->rating*90/5|string_format:'%.0f'}px;"></span>
                     </span>
@@ -432,6 +434,12 @@
                                                     <div class="comment__header">
                                                         <div class="comment__author">
                                                             <span class="comment__name">{$comment->name|escape}</span>
+                                                            {* Відгук без зірок лишається звичайним коментарем і в середній бал не входить. *}
+                                                            {if $comment->rating}
+                                                                <span class="comment__rating rating_starOff" role="img" aria-label="{$comment->rating}/5">
+                                                                    <span class="rating_starOn" style="width:{$comment->rating*18}px;"></span>
+                                                                </span>
+                                                            {/if}
                                                             {if !$comment->approved}
                                                                 <span class="comment__status" data-language="post_comment_status">({$lang->post_comment_status})</span>
                                                             {/if}
@@ -476,6 +484,8 @@
                                             <span data-language="form_error_captcha">{$lang->form_error_captcha}</span>
                                         {elseif $error=='empty_name'}
                                             <span data-language="form_enter_name">{$lang->form_enter_name}</span>
+                                        {elseif $error=='empty_rating'}
+                                            <span data-language="form_enter_rating">{$lang->form_enter_rating}</span>
                                         {elseif $error=='empty_comment'}
                                             <span data-language="form_enter_comment">{$lang->form_enter_comment}</span>
                                         {elseif $error=='empty_email'}
@@ -485,6 +495,18 @@
                                         {/if}
                                     </p>
                                 {/if}
+
+                                {* Оцінка: радіо, а не віджет на JS — без скрипта форма
+                                   лишається придатною, а зірки малює маска. *}
+                                <div class="vs-form__row">
+                                    <span class="vs-form__label" data-language="product_comment_rating">{$lang->product_comment_rating}*</span>
+                                    <div class="vs-rating-input">
+                                        {foreach [5,4,3,2,1] as $star}
+                                            <input class="vs-rating-input__radio" type="radio" name="rating" value="{$star}" id="vs_review_rating_{$star}" required=""{if $request_data.rating == $star} checked=""{/if} />
+                                            <label class="vs-rating-input__star" for="vs_review_rating_{$star}" title="{$star}"><span class="vs-sr-only">{$star}</span></label>
+                                        {/foreach}
+                                    </div>
+                                </div>
 
                                 <div class="vs-form__row">
                                     <label class="vs-form__label" for="vs_comment_name">{$lang->form_name}*</label>

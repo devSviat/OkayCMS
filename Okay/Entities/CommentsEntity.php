@@ -22,6 +22,7 @@ class CommentsEntity extends Entity
         'approved',
         'lang_id',
         'user_id',
+        'rating',
     ];
 
     protected static $defaultOrderFields = [
@@ -53,6 +54,26 @@ class CommentsEntity extends Entity
 
     // Фильтровать по IP в чистом виде нам не нужно
     protected function filter__ip($value) {}
+
+    /**
+     * Фільтр за оцінкою у відгуку.
+     *
+     * Окремим методом, а не рівністю поля: «без оцінки» - це NULL, і звичайне
+     * порівняння його не знайде, а порожнє значення фільтра означало б «усі».
+     *
+     * @param string|int $value число зі шкали або 'none'
+     */
+    protected function filter__rating($value)
+    {
+        if ($value === 'none') {
+            $this->select->where('c.rating IS NULL');
+
+            return;
+        }
+
+        $this->select->where('c.rating = :rating');
+        $this->select->bindValue('rating', (int)$value);
+    }
 
     protected function filter__has_parent($value)
     {

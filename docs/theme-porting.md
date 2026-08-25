@@ -493,6 +493,73 @@ page-all»**, поруч із «Кількість товарів на стор�
 Стосується лише `chpu_pagination.tpl` — каталогу й брендів. Блог і автори мають власну
 незмінну межу, тож їхню кнопку в `pagination.tpl` чіпати не треба.
 
+### 9. Оцінка живе всередині відгуку
+
+Рейтинг товару більше не окрема сутність: він **рахується з схвалених відгуків**. Маршрути
+`/ajax/rating` і `/ajax/post_rating` видалені разом із методами контролерів, тож віджет,
+який на них шле POST, тепер б'є в 404.
+
+Що зробити у своїй темі — три правки.
+
+**Перша: вибір оцінки у формі відгуку.** Поле обовʼязкове для товару: відгук без зірок у
+середній бал не входить, і товар лишався б без `aggregateRating` попри наявні відгуки.
+Радіо, а не віджет на JS — без скрипта форма лишається придатною:
+
+```smarty
+<div class="form__group review_rating">
+    <span class="review_rating__label">{$lang->product_comment_rating}*</span>
+    <div class="review_rating__stars">
+        {foreach [5,4,3,2,1] as $star}
+            <input class="review_rating__input" type="radio" name="rating" value="{$star}"
+                   id="review_rating_{$star}" required=""{if $request_data.rating == $star} checked=""{/if} />
+            <label class="review_rating__star" for="review_rating_{$star}" title="{$star}"><span class="sr-only">{$star}</span></label>
+        {/foreach}
+    </div>
+</div>
+```
+
+Порядок `5,4,3,2,1` навмисний: із `flex-direction: row-reverse` зірки читаються зліва
+направо, а `input:checked ~ label` підсвічує всі нижчі. Без цього довелось би або вішати
+JS, або писати правило на кожну комбінацію.
+
+Додайте гілку помилки `empty_rating` поруч із наявними — інакше форма мовчки відмовить:
+
+```smarty
+{elseif $error=='empty_rating'}
+    <span data-language="form_enter_rating">{$lang->form_enter_rating}</span>
+```
+
+**Друга: зірки біля кожного відгуку.** `$comment->rating` порожній у коментаря без оцінки —
+такий лишається звичайним коментарем:
+
+```smarty
+{if $comment->rating}
+    <span class="comment__rating rating_starOff" role="img" aria-label="{$comment->rating}/5">
+        <span class="rating_starOn" style="width:{$comment->rating*18}px;"></span>
+    </span>
+{/if}
+```
+
+**Третя: віджет угорі стає показом.** Приберіть клас `fn_rating` і `data-rating_post_url` —
+лишиться сама розмітка з `aggregateRating`:
+
+```smarty
+<div id="product_{$product->id}" class="product__rating"
+     {if $product->rating > 0} itemprop="aggregateRating" itemscope
+     itemtype="http://schema.org/AggregateRating"{/if}>
+```
+
+Якщо цього не зробити, клік по зірках нічого не збереже, а користувач вважатиме, що
+проголосував.
+
+**Чому голосування прибрано взагалі.** Воно писало бал у товар напряму, повз відгуки й повз
+модерацію, не перевіряючи ні діапазон, ні походження запиту. Після переходу на відгуки воно
+ще й затирало порахований бал: один запит міняв `4.0/1` на `2.5/2`. Два джерела для однієї
+цифри — це друга правда в `aggregateRating`, тобто вигадана оцінка у структурованих даних
+для пошуковика.
+
+Готові приклади — `design/okay_shop` (спрайт) і `design/vibe_shop` (маска з токенами теми).
+
 ## Як переконатись, що тема жива
 
 **Зелені тести цього не доводять — жодної сторінки вони не відкривають.** Пройдіть руками:

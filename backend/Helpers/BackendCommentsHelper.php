@@ -12,6 +12,7 @@ use Okay\Core\Settings;
 use Okay\Entities\BlogEntity;
 use Okay\Entities\CommentsEntity;
 use Okay\Entities\ProductsEntity;
+use Okay\Helpers\RatingHelper;
 
 class BackendCommentsHelper
 {
@@ -24,6 +25,7 @@ class BackendCommentsHelper
      * @var CommentsEntity
      */
     private $commentsEntity;
+    private $ratingHelper;
 
     /**
      * @var ProductsEntity
@@ -49,9 +51,11 @@ class BackendCommentsHelper
         Request       $request,
         EntityFactory $entityFactory,
         Settings      $settings,
-        Notify        $notify
+        Notify        $notify,
+        RatingHelper  $ratingHelper
     ){
         $this->request        = $request;
+        $this->ratingHelper   = $ratingHelper;
         $this->commentsEntity = $entityFactory->get(CommentsEntity::class);
         $this->productsEntity = $entityFactory->get(ProductsEntity::class);
         $this->blogEntity     = $entityFactory->get(BlogEntity::class);
@@ -89,6 +93,12 @@ class BackendCommentsHelper
             $filter['approved'] = 1;
         } elseif ($status == 'unapproved') {
             $filter['approved'] = 0;
+        }
+
+        // Оцінка у відгуку
+        $rating = $this->request->get('rating', 'string');
+        if ($rating === 'none' || (is_numeric($rating) && $rating >= RatingHelper::MIN_RATING && $rating <= RatingHelper::MAX_RATING)) {
+            $filter['rating'] = $rating === 'none' ? 'none' : (int)$rating;
         }
 
         // Поиск
@@ -141,14 +151,55 @@ class BackendCommentsHelper
 
     public function delete($ids)
     {
+        // Цілі треба зняти до видалення: після нього вже нема з чого дізнатись,
+        // якому товару перераховувати бал.
+        $targets = $this->reviewTargets($ids);
+
         ExtenderFacade::execute(__METHOD__, null, func_get_args());
         $this->commentsEntity->delete($ids);
+
+        $this->recalculateRatings($targets);
     }
 
     public function approve($ids)
     {
         $this->commentsEntity->update($ids, array('approved'=>1));
+
+        // Саме тут бал і зʼявляється: новий відгук створюється несхваленим, тож
+        // до модерації в середнє не потрапляє.
+        $this->recalculateRatings($this->reviewTargets($ids));
+
         ExtenderFacade::execute(__METHOD__, null, func_get_args());
+    }
+
+    /**
+     * Обʼєкти, чий середній бал міг змінитись, без повторів.
+     *
+     * @param array|int $ids
+     * @return array<string, array{type: string, id: int}>
+     */
+    private function reviewTargets($ids)
+    {
+        $targets = [];
+        foreach ($this->commentsEntity->noLimit()->find(['id' => (array)$ids]) as $comment) {
+            $targets[$comment->type . ':' . $comment->object_id] = [
+                'type' => $comment->type,
+                'id'   => (int)$comment->object_id,
+            ];
+        }
+
+        return $targets;
+    }
+
+    /**
+     * @param array<string, array{type: string, id: int}> $targets
+     */
+    private function recalculateRatings(array $targets)
+    {
+        foreach ($targets as $target) {
+            $entity = $target['type'] === 'post' ? $this->blogEntity : $this->productsEntity;
+            $this->ratingHelper->recalculateFromReviews($entity, $target['id'], $target['type']);
+        }
     }
 
     public function attachTargetEntitiesToComments($comments)

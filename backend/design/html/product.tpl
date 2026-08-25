@@ -513,43 +513,12 @@
                 {get_design_block block="product_promo_images"}
             </div>
         </div>
-        {*Рейтинг*}
-        <div class="col-lg-4 col-md-12">
-            <div class="fn_step-10 boxed fn_toggle_wrap min_height_230px">
-                <div class="heading_box">
-                    {$btr->product_rating|escape}
-                    <div class="toggle_arrow_wrap fn_toggle_card text-primary">
-                        <a class="btn-minimize" href="javascript:;" ><span class="fn_icon_arrow">{include file='svg_icon.tpl' svgId='chevron_down'}</span></a>
-                    </div>
-                </div>
-                <div class="toggle_body_wrap on fn_card">
-                    <div class="heading_label">
-                        {$btr->product_rating_value|escape}
-                        <span class="font-weight-bold fn_show_rating">{$product->rating|escape}</span>
-                    </div>
-                    <div class="raiting_boxed">
-                        <input class="fn_rating_value" type="hidden" value="{$product->rating|escape}" name="rating" />
-                        <input class="fn_rating range_input" type="range" min="1" max="5" step="0.1" value="{$product->rating|escape}" />
-
-                        <div class="raiting_range_number">
-                            <span class="float-xs-left">1</span>
-                            <span class="float-xs-right">5</span>
-                        </div>
-                    </div>
-                    <div class="heading_label">
-                        {$btr->product_rating_number|escape}
-                        <input type="text" class="form-control" name="votes" value="{$product->votes|escape}">
-                    </div>
-                </div>
-                {get_design_block block="product_rationg"}
-            </div>
-        </div>
     </div>
 
     {*Свойства товара*}
     <div class="row">
         <div class="col-lg-6 col-md-12 pr-0 ">
-            <div class="fn_step-11 boxed fn_toggle_wrap min_height_210px">
+            <div class="fn_step-10 boxed fn_toggle_wrap min_height_210px">
                 <div class="heading_box">
                     {$btr->product_features|escape}
                     <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_product_features|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_product_features|escape}">
@@ -664,7 +633,7 @@
 
         {*Связанные товары*}
         <div class="col-lg-6 col-md-12">
-            <div class="fn_step-12 boxed fn_toggle_wrap min_height_210px">
+            <div class="fn_step-11 boxed fn_toggle_wrap min_height_210px">
                 {backend_compact_product_list title=$btr->general_recommended
                 name="related_products"
                 products=$related_products
@@ -679,7 +648,7 @@
     {*Метаданные товара*}
     <div class="row">
         <div class="col-lg-12 col-md-12">
-            <div class="fn_step-13 boxed match fn_toggle_wrap">
+            <div class="fn_step-12 boxed match fn_toggle_wrap">
                 <div class="heading_box">
                     {$btr->general_metatags|escape}
                     <i class="fn_tooltips fn_tip_wide hint-bottom-left-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_general_metatags|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_general_metatags|escape}">
@@ -757,7 +726,7 @@
     {*Описание элемента*}
     <div class="row">
         <div class="col-lg-12 col-md-12">
-            <div class="fn_step-14 boxed match fn_toggle_wrap tabs">
+            <div class="fn_step-13 boxed match fn_toggle_wrap tabs">
                 <div class="heading_tabs">
                     <div class="tab_navigation">
                         <a href="#tab1" class="heading_box tab_navigation_link">
@@ -787,11 +756,11 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-12 col-md-12 mt-1">
-                        <button id="fast_save_button_and_quit" type="submit" class="fn_step-15 btn btn_small btn_blue float-md-right ml-1" name="apply_and_quit" value="1">
+                        <button id="fast_save_button_and_quit" type="submit" class="fn_step-14 btn btn_small btn_blue float-md-right ml-1" name="apply_and_quit" value="1">
                             {include file='svg_icon.tpl' svgId='checked'}
                             <span>{$btr->general_apply_and_quit|escape}</span>
                         </button>
-                        <button type="submit" class="fn_step-15 btn btn_small btn_blue float-md-right">
+                        <button type="submit" class="fn_step-14 btn btn_small btn_blue float-md-right">
                             {include file='svg_icon.tpl' svgId='checked'}
                             <span>{$btr->general_apply|escape}</span>
                         </button>
@@ -821,10 +790,6 @@
         $(document).on( "click", ".fn_remove_item", function() {
             $(this).closest(".fn_row").fadeOut(200, function() { $(this).remove(); });
             return false;
-        });
-        $(document).on("input", ".fn_rating", function () {
-            $(".fn_show_rating").html($(this).val());
-            $(".fn_rating_value").val($(this).val());
         });
 
         var image_item_clone = $(".fn_new_image_item").clone(true).removeClass('hidden');

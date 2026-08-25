@@ -160,36 +160,6 @@ class BlogController extends AbstractController
         $this->response->setContent('blog.tpl');
     }
 
-    public function rating(BlogEntity $blogEntity)
-    {
-        if (isset($_POST['id']) && is_numeric($_POST['rating'])) {
-            $postId = intval(str_replace('post_', '', $_POST['id']));
-            $rating = floatval($_POST['rating']);
 
-            if (!isset($_SESSION['post_rating_ids'])) {
-                $_SESSION['post_rating_ids'] = [];
-            }
-            if (!in_array($postId, $_SESSION['post_rating_ids'])) {
-                $post = $blogEntity->cols([
-                    'rating',
-                    'votes',
-                ])->get($postId);
-                if(!empty($post)) {
-                    $rate = ($post->rating * $post->votes + $rating) / ($post->votes + 1);
-
-                    $blogEntity->update($postId, ['rating'=>$rate, 'votes' => ($post->votes + 1)]);
-
-                    $_SESSION['post_rating_ids'][] = $postId;
-                    $this->response->setContent(json_encode($rate), RESPONSE_JSON);
-                } else {
-                    $this->response->setContent(json_encode(-1), RESPONSE_JSON);
-                }
-            } else {
-                $this->response->setContent(json_encode(0), RESPONSE_JSON);
-            }
-        } else {
-            $this->response->setContent(json_encode(-1), RESPONSE_JSON);
-        }
-    }
     
 }

@@ -136,20 +136,6 @@ return [
         ],
         'to_front' => true,
     ],
-    'ajax_product_rating' => [
-        'slug' => '/ajax/rating',
-        'params' => [
-            'controller' => 'ProductController',
-            'method' => 'rating',
-        ],
-    ],
-    'ajax_post_rating' => [
-        'slug' => '/ajax/post_rating',
-        'params' => [
-            'controller' => 'BlogController',
-            'method' => 'rating',
-        ],
-    ],
     'products' => [
         'slug' => '/all-products/?{$filtersUrl}',
         'patterns' => [

@@ -160,13 +160,22 @@ class ValidateHelper
         return ExtenderFacade::execute(__METHOD__, $error, func_get_args());
     }
     
-    public function getCommentValidateError($comment): ?string
+    /**
+     * @param object $comment
+     * @param string|null $objectType 'product' вимагає оцінку: середній бал
+     *        рахується з відгуків, тож відгук без зірок у нього не потрапляє
+     *        і сторінка лишається без aggregateRating. У коментарях до статей
+     *        оцінки немає взагалі.
+     */
+    public function getCommentValidateError($comment, $objectType = null): ?string
     {
         $captchaCode =  $this->request->post('captcha_code', 'string');
 
         $error = null;
         if (!$this->validator->isName($comment->name, true)) {
             $error = 'empty_name';
+        } elseif ($objectType === 'product' && empty($comment->rating)) {
+            $error = 'empty_rating';
         } elseif (!$this->validator->isComment($comment->text, true)) {
             $error = 'empty_comment';
         } elseif (!$this->validator->isEmail($comment->email)) {

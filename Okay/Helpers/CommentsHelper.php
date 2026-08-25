@@ -195,7 +195,7 @@ class CommentsHelper implements GetListInterface
         if (($comment = $this->commentsRequest->postComment()) !== null) {
             $this->storefrontGuard->requireCustomerCsrf();
 
-            if ($error = $this->validateHelper->getCommentValidateError($comment)) {
+            if ($error = $this->validateHelper->getCommentValidateError($comment, $objectType)) {
                 $this->design->assign('error', $error);
             } else {
 
