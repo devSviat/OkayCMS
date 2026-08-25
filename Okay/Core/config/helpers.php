@@ -552,6 +552,10 @@ return [
             new SR(StorefrontGuard::class),
             new SR(Request::class),
             new SR(LoggerInterface::class),
+            // Саме сервіс, а не параметр: settingsParameters() фільтрує через
+            // empty(), тож вимкнене автосхвалення (0) не доїхало б сюди взагалі.
+            new SR(Settings::class),
+            new SR(RatingHelper::class),
         ]
     ],
     RatingHelper::class => [
