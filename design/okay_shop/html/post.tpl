@@ -118,7 +118,7 @@
                                 <span data-language="product_share">{$lang->post_rating_title}</span>
                             </div>
                             <span class="rating_starOff">
-                                <span class="rating_starOn" style="width:{$post->rating*90/5|string_format:'%.0f'}px;"></span>
+                                <span class="rating_starOn" style="width:{((($post->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
                             </span>
                             {*Вывод количества голосов данного товара, скрыт ради микроразметки*}
                             {if $post->rating > 0}

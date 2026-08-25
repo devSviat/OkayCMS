@@ -121,7 +121,7 @@
                     <div id="post_{$post->id}" class="product__rating vs-rating">
                         <span class="vs-rating__label" data-language="post_rating_title">{$lang->post_rating_title}</span>
                         <span class="rating_starOff">
-                            <span class="rating_starOn" style="width:{$post->rating*90/5|string_format:'%.0f'}px;"></span>
+                            <span class="rating_starOn" style="width:{((($post->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
                         </span>
                         {if $post->rating > 0}
                             <span class="rating_text">( <span>{$post->votes|string_format:"%.0f"}</span> )</span>
