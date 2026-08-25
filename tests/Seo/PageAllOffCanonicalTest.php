@@ -36,16 +36,20 @@ class PageAllOffCanonicalTest extends TestCase
         return $settings;
     }
 
-    private function canonical($pageAllMaxItems, int $catalogPageAll): CanonicalHelper
-    {
+    private function canonical(
+        $pageAllMaxItems,
+        int $catalogPageAll,
+        int $catalogPagination = CANONICAL_FIRST_PAGE,
+        int $catalogFilterPagination = CANONICAL_WITHOUT_FILTER_FIRST_PAGE
+    ): CanonicalHelper {
         $helper = new CanonicalHelper($this->stubSettings($pageAllMaxItems));
         $helper->setParams(
-            CANONICAL_FIRST_PAGE,
+            $catalogPagination,
             $catalogPageAll,
             CANONICAL_WITHOUT_FILTER,
             CANONICAL_WITHOUT_FILTER,
             CANONICAL_WITHOUT_FILTER,
-            CANONICAL_WITHOUT_FILTER_FIRST_PAGE,
+            $catalogFilterPagination,
             2,
             2,
             2,
@@ -164,5 +168,110 @@ class PageAllOffCanonicalTest extends TestCase
             'поза переліком' => ['750'],
             'число рядком'   => ['500'],
         ];
+    }
+
+    /**
+     * Найсильніша перевірка контракту: за вимкненого page-all його адреса має
+     * давати той самий канонікал, що й звичайна перша сторінка, - у будь-якій
+     * комбінації налаштувань канонікалів і фільтрів. Точкові тести цього не
+     * ловлять: діру дало налаштування пагінації фільтра, до якого гілка page-all
+     * навіть не доходить.
+     */
+    #[DataProvider('canonicalSettingsMatrix')]
+    public function testPageAllMatchesTheFirstPageInEverySettingsCombination(
+        int $catalogPagination,
+        int $catalogPageAll,
+        int $catalogFilterPagination,
+        array $otherFilter,
+        array $brandsFilter
+    ): void {
+        $helper = $this->canonical(PAGE_ALL_OFF, $catalogPageAll, $catalogPagination, $catalogFilterPagination);
+
+        $this->assertSame(
+            $this->comparable($helper->getCatalogCanonicalData('', $otherFilter, [], $brandsFilter)),
+            $this->comparable($helper->getCatalogCanonicalData('all', $otherFilter, [], $brandsFilter)),
+            'адреса page-all канонікалиться інакше, ніж перша сторінка з тим самим фільтром'
+        );
+    }
+
+    public static function canonicalSettingsMatrix(): iterable
+    {
+        require_once 'Okay/Core/config/constants.php';
+
+        $filters = [
+            'без фільтра'  => [[], []],
+            'other_filter' => [['discounted'], []],
+            'brand'        => [[], [7]],
+        ];
+
+        foreach ([CANONICAL_FIRST_PAGE, CANONICAL_CURRENT_PAGE, CANONICAL_PAGE_ALL, CANONICAL_ABSENT] as $pagination) {
+            foreach ([CANONICAL_FIRST_PAGE, CANONICAL_CURRENT_PAGE, CANONICAL_ABSENT] as $pageAll) {
+                $filterPaginations = [
+                    CANONICAL_WITHOUT_FILTER_FIRST_PAGE,
+                    CANONICAL_FIRST_PAGE,
+                    CANONICAL_CURRENT_PAGE,
+                    CANONICAL_ABSENT,
+                ];
+                foreach ($filterPaginations as $filterPagination) {
+                    foreach ($filters as $name => [$otherFilter, $brandsFilter]) {
+                        $key = sprintf('%d/%d/%d %s', $pagination, $pageAll, $filterPagination, $name);
+                        yield $key => [$pagination, $pageAll, $filterPagination, $otherFilter, $brandsFilter];
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Відсутній ключ `page` і `page => null` дають ту саму адресу, тож для
+     * порівняння їх треба звести до спільного вигляду.
+     *
+     * @param array|false $result
+     * @return array|false
+     */
+    private function comparable($result)
+    {
+        if ($result === false) {
+            return false;
+        }
+
+        $result['page'] = $result['page'] ?? null;
+        ksort($result);
+
+        return $result;
+    }
+
+    /**
+     * «Канонікал пагінації → сторінка з усіма товарами» при вимкненому page-all
+     * зібрав би всю пагінацію на адресу, яка тепер дублює першу сторінку.
+     */
+    public function testPaginationGluedToPageAllFallsBackToTheFirstPage(): void
+    {
+        $result = $this->canonical(PAGE_ALL_OFF, CANONICAL_FIRST_PAGE, CANONICAL_PAGE_ALL)
+            ->getCatalogCanonicalData('2', [], [], []);
+
+        $this->assertArrayHasKey('page', $result);
+        $this->assertNull($result['page'], 'пагінація склеєна на адресу, якої більше немає');
+
+        $this->assertSame(
+            'all',
+            $this->canonical(PAGE_ALL_MAX_ITEMS, CANONICAL_FIRST_PAGE, CANONICAL_PAGE_ALL)
+                ->getCatalogCanonicalData('2', [], [], [])['page'],
+            'при робочому page-all налаштування має діяти як раніше'
+        );
+    }
+
+    /**
+     * Гілка page-all у канонікалі спрацьовує лише без фільтра: з фільтром
+     * рішення ухвалює налаштування пагінації фільтра, і воно так само вміє
+     * лишити поточну адресу.
+     */
+    public function testFilteredPageAllDoesNotSelfCanonical(): void
+    {
+        $result = $this->canonical(PAGE_ALL_OFF, CANONICAL_CURRENT_PAGE, CANONICAL_FIRST_PAGE, CANONICAL_CURRENT_PAGE)
+            ->getCatalogCanonicalData('all', ['discounted'], [], []);
+
+        $this->assertArrayHasKey('page', $result);
+        $this->assertNull($result['page'], 'дубль відфільтрованої першої сторінки канонікалиться сам на себе');
     }
 }

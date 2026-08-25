@@ -37,13 +37,15 @@ class MetaRobotsHelper
      * і могли б закрити від індексації звичайну першу сторінку.
      *
      * @param string|int $page
-     * @return string|int|null
+     * @return string|int
      */
     private function normalizePageAll($page)
     {
         if ($page == 'all'
             && okay_page_all_max_items($this->settings->get('catalog_page_all_max_items')) === PAGE_ALL_OFF) {
-            return null;
+            // Саме таке значення приходить із FilterHelper::getCurrentPage()
+            // для першої сторінки.
+            return '';
         }
 
         return $page;

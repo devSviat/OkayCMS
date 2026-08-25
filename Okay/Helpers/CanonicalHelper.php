@@ -28,21 +28,9 @@ class CanonicalHelper
         $this->settings = $settings;
     }
 
-    /**
-     * Вимкнений page-all віддає звичайну першу сторінку, тож канонікал мусить
-     * вести саме на неї.
-     *
-     * Підмінюється налаштування, а не сама сторінка: обнулити $page тут
-     * недостатньо - тоді гілка просто не виконається, ключ 'page' лишиться
-     * невиставленим, і в канонікал піде поточна адреса разом із page-all.
-     */
-    private function catalogPageAllCanonical(): int
+    private function pageAllIsOff(): bool
     {
-        if (okay_page_all_max_items($this->settings->get('catalog_page_all_max_items')) === PAGE_ALL_OFF) {
-            return CANONICAL_FIRST_PAGE;
-        }
-
-        return $this->catalogPageAll;
+        return okay_page_all_max_items($this->settings->get('catalog_page_all_max_items')) === PAGE_ALL_OFF;
     }
 
     public function setParams(
@@ -82,6 +70,35 @@ class CanonicalHelper
      * Определение canonical для категории
      */
     public function getCatalogCanonicalData($page, array $otherFilter, array $featuresFilter, array $brandsFilter)
+    {
+        // Вимкнений page-all віддає звичайну першу сторінку, тож канонікал
+        // рахується так, наче її й запитали: інакше кожне налаштування, яке вміє
+        // вказати на page-all чи лишити поточну адресу, склеїло б каталог на
+        // дубль першої сторінки.
+        $servesFirstPage = $page == 'all' && $this->pageAllIsOff();
+        if ($servesFirstPage) {
+            $page = '';
+        }
+
+        $result = $this->catalogCanonicalData($page, $otherFilter, $featuresFilter, $brandsFilter);
+
+        // Адресу треба ще й явно занулити: без ключа 'page' будівник URL лишає
+        // поточний сегмент, і канонікал стає самопосиланням на page-all.
+        if ($servesFirstPage && is_array($result)) {
+            $result['page'] = null;
+        }
+
+        return $result; // no ExtenderFacade
+    }
+
+    /**
+     * @param string|int $page
+     * @param array $otherFilter
+     * @param array $featuresFilter
+     * @param array $brandsFilter
+     * @return array|false
+     */
+    private function catalogCanonicalData($page, array $otherFilter, array $featuresFilter, array $brandsFilter)
     {
         $result = [];
         
@@ -278,7 +295,7 @@ class CanonicalHelper
         
         if (!empty($page)) {
             if ($page == 'all') {
-                switch ($this->catalogPageAllCanonical()) {
+                switch ($this->catalogPageAll) {
                     case CANONICAL_FIRST_PAGE:
                         $result['page'] = null;
                         break;
@@ -297,7 +314,9 @@ class CanonicalHelper
                         $result['page'] = $page;
                         break;
                     case CANONICAL_PAGE_ALL:
-                        $result['page'] = 'all';
+                        // Склеювати пагінацію на адресу, якої більше немає,
+                        // нема куди - лишається перша сторінка.
+                        $result['page'] = $this->pageAllIsOff() ? null : 'all';
                         break;
                     case CANONICAL_ABSENT:
                         return false; // no ExtenderFacade
