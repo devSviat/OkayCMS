@@ -15,7 +15,15 @@ class SettingsIndexingAdmin extends IndexAdmin
     public function fetch()
     {
         if ($this->request->method('post')) {
-            
+
+            // Без дефолта у post(): він підставляється через empty(), тож
+            // введений нуль перетворився б на нього і вимкнути page-all
+            // не вийшло б.
+            $this->settings->set(
+                'catalog_page_all_max_items',
+                max(0, (int)$this->request->post('catalog_page_all_max_items', 'int'))
+            );
+
             $this->settings->set('canonical_catalog_pagination', 
                 $this->request->post('canonical_catalog_pagination', null, CANONICAL_FIRST_PAGE)
             );

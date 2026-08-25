@@ -24,6 +24,15 @@
                                 <div class="okay_list_row">
                                     <div class="okay_list_boding okay_list_settings_indexing_name">
                                         <div class="mt-h">
+                                            <div class="heading_label">{$btr->settings_indexing_catalog_page_all_max_items}</div>
+                                            <input name="catalog_page_all_max_items" class="form-control col-xs-12" type="number" min="0" value="{($settings->catalog_page_all_max_items|default:PAGE_ALL_MAX_ITEMS)|escape}">
+                                            <div class="text-muted small mt-h">{$btr->settings_indexing_catalog_page_all_max_items_hint|escape}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="okay_list_row">
+                                    <div class="okay_list_boding okay_list_settings_indexing_name">
+                                        <div class="mt-h">
                                             <div class="heading_label">{$btr->settings_indexing_catalog_pagination}</div>
                                             <select name="canonical_catalog_pagination" class="selectpicker form-control col-xs-12 px-0">
                                                 <option value="{CANONICAL_FIRST_PAGE}" {if $settings->canonical_catalog_pagination == CANONICAL_FIRST_PAGE}selected=""{/if}>{$btr->settings_indexing_catalog_pagination_val_1|escape}</option>

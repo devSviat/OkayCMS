@@ -232,10 +232,13 @@ class BrandsHelper implements GetListInterface
         $brandsCount = $this->brandsEntity->count($filter);
 
         // Показать все страницы сразу
+        $maxAllPages = $this->settings->get('catalog_page_all_max_items');
+        $maxAllPages = $maxAllPages === null ? PAGE_ALL_MAX_ITEMS : (int)$maxAllPages;
+
         $allPages = false;
-        if ($currentPage == 'all') {
+        if ($currentPage == 'all' && $maxAllPages > 0) {
             $allPages = true;
-            $itemsPerPage = min($brandsCount, PAGE_ALL_MAX_ITEMS);
+            $itemsPerPage = min($brandsCount, $maxAllPages);
         }
 
         // Если не задана, то равна 1
