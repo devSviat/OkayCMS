@@ -267,11 +267,22 @@ class CommentsHelper implements GetListInterface
      */
     private function recalculateRating($objectType, $objectId)
     {
-        $entity = $this->entityFactory->get(
-            $objectType === 'post' ? BlogEntity::class : ProductsEntity::class
-        );
+        $entities = [
+            'product' => ProductsEntity::class,
+            'post'    => BlogEntity::class,
+        ];
 
-        $this->ratingHelper->recalculateFromReviews($entity, $objectId, $objectType);
+        // Тип приходить ззовні - метод публічний. Невідомий тип за тернарником
+        // «post чи товар» мовчки оновив би товар із тим самим id.
+        if (!isset($entities[$objectType])) {
+            return;
+        }
+
+        $this->ratingHelper->recalculateFromReviews(
+            $this->entityFactory->get($entities[$objectType]),
+            $objectId,
+            $objectType
+        );
     }
 
     /**

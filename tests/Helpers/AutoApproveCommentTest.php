@@ -60,6 +60,37 @@ class AutoApproveCommentTest extends TestCase
     }
 
     /**
+     * addCommentProcedure() публічний, тож тип обʼєкта приходить ззовні.
+     * Невідомий тип не має мовчки оновити товар із тим самим id.
+     */
+    public function testUnknownObjectTypeTouchesNothing(): void
+    {
+        $requested = null;
+        $entityFactory = new class($requested) {
+            public $requested;
+            public function __construct(&$requested) { $this->requested = &$requested; }
+            public function get($class) { $this->requested = $class; return (object)['stub' => true]; }
+        };
+
+        $called = false;
+        $ratingHelper = new class($called) {
+            public $called;
+            public function __construct(&$called) { $this->called = &$called; }
+            public function recalculateFromReviews($entity, $objectId, $objectType = 'product') { $this->called = true; }
+        };
+
+        $reflector = new ReflectionClass(CommentsHelper::class);
+        $helper = $reflector->newInstanceWithoutConstructor();
+        $reflector->getProperty('entityFactory')->setValue($helper, $entityFactory);
+        $reflector->getProperty('ratingHelper')->setValue($helper, $ratingHelper);
+
+        $reflector->getMethod('recalculateRating')->invokeArgs($helper, ['faq', 7]);
+
+        $this->assertNull($requested, 'для невідомого типу сутність не запитується');
+        $this->assertFalse($called, 'для невідомого типу бал не перераховується');
+    }
+
+    /**
      * Налаштування читається з сервісу, а не з параметра контейнера:
      * settingsParameters() фільтрує значення через empty(), тож вимкнене
      * автосхвалення (0) просто не доїхало б до хелпера.
