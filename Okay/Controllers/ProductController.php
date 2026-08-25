@@ -7,6 +7,7 @@ namespace Okay\Controllers;
 use Okay\Core\BrowsedProducts;
 use Okay\Core\Router;
 use Okay\Entities\ProductsEntity;
+use Okay\Helpers\RatingHelper;
 use Okay\Entities\BrandsEntity;
 use Okay\Entities\CategoriesEntity;
 use Okay\Entities\BlogEntity;
@@ -114,35 +115,16 @@ class ProductController extends AbstractController
         $this->response->setContent('product.tpl');
     }
     
-    public function rating(ProductsEntity $productsEntity)
+    public function rating(ProductsEntity $productsEntity, RatingHelper $ratingHelper)
     {
-        if (isset($_POST['id']) && is_numeric($_POST['rating'])) {
-            $productId = intval(str_replace('product_', '', $_POST['id']));
-            $rating = floatval($_POST['rating']);
+        // Бал іде в aggregateRating на сторінці товару, тож ендпоінт мусить
+        // приймати голос лише з самого магазину: чужа форма інакше друкує
+        // цифру в структурованих даних для пошуковика.
+        $this->requireSameOrigin(true);
 
-            if (!isset($_SESSION['rating_ids'])) {
-                $_SESSION['rating_ids'] = [];
-            }
-            if (!in_array($productId, $_SESSION['rating_ids'])) {
-                $product = $productsEntity->cols([
-                    'rating',
-                    'votes',
-                ])->get($productId);
-                if(!empty($product)) {
-                    $rate = ($product->rating * $product->votes + $rating) / ($product->votes + 1);
-                    
-                    $productsEntity->update($productId, ['rating'=>$rate, 'votes' => ($product->votes + 1)]);
-                    
-                    $_SESSION['rating_ids'][] = $productId;
-                    $this->response->setContent(json_encode($rate), RESPONSE_JSON);
-                } else {
-                    $this->response->setContent(json_encode(-1), RESPONSE_JSON);
-                }
-            } else {
-                $this->response->setContent(json_encode(0), RESPONSE_JSON);
-            }
-        } else {
-            $this->response->setContent(json_encode(-1), RESPONSE_JSON);
-        }
+        $this->response->setContent(
+            json_encode($ratingHelper->vote($productsEntity, 'product_', 'rating_ids')),
+            RESPONSE_JSON
+        );
     }
 }

@@ -7,6 +7,7 @@ namespace Okay\Controllers;
 use Okay\Core\Router;
 use Okay\Entities\BlogCategoriesEntity;
 use Okay\Entities\BlogEntity;
+use Okay\Helpers\RatingHelper;
 use Okay\Helpers\BlogHelper;
 use Okay\Helpers\CommentsHelper;
 use Okay\Helpers\MetadataHelpers\BlogCategoryMetadataHelper;
@@ -160,36 +161,16 @@ class BlogController extends AbstractController
         $this->response->setContent('blog.tpl');
     }
 
-    public function rating(BlogEntity $blogEntity)
+    public function rating(BlogEntity $blogEntity, RatingHelper $ratingHelper)
     {
-        if (isset($_POST['id']) && is_numeric($_POST['rating'])) {
-            $postId = intval(str_replace('post_', '', $_POST['id']));
-            $rating = floatval($_POST['rating']);
+        // Та сама причина, що й у товару: бал публічний, тож голос
+        // приймається лише зі сторінки самого магазину.
+        $this->requireSameOrigin(true);
 
-            if (!isset($_SESSION['post_rating_ids'])) {
-                $_SESSION['post_rating_ids'] = [];
-            }
-            if (!in_array($postId, $_SESSION['post_rating_ids'])) {
-                $post = $blogEntity->cols([
-                    'rating',
-                    'votes',
-                ])->get($postId);
-                if(!empty($post)) {
-                    $rate = ($post->rating * $post->votes + $rating) / ($post->votes + 1);
-
-                    $blogEntity->update($postId, ['rating'=>$rate, 'votes' => ($post->votes + 1)]);
-
-                    $_SESSION['post_rating_ids'][] = $postId;
-                    $this->response->setContent(json_encode($rate), RESPONSE_JSON);
-                } else {
-                    $this->response->setContent(json_encode(-1), RESPONSE_JSON);
-                }
-            } else {
-                $this->response->setContent(json_encode(0), RESPONSE_JSON);
-            }
-        } else {
-            $this->response->setContent(json_encode(-1), RESPONSE_JSON);
-        }
+        $this->response->setContent(
+            json_encode($ratingHelper->vote($blogEntity, 'post_', 'post_rating_ids')),
+            RESPONSE_JSON
+        );
     }
     
 }

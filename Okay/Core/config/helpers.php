@@ -74,6 +74,7 @@ use Okay\Helpers\MetaRobotsHelper;
 use Okay\Helpers\NotifyHelper;
 use Okay\Helpers\PagesHelper;
 use Okay\Helpers\PaymentsHelper;
+use Okay\Helpers\RatingHelper;
 use Okay\Helpers\RelatedProductsHelper;
 use Okay\Helpers\CommonHelper;
 use Okay\Helpers\ResizeHelper;
@@ -550,6 +551,12 @@ return [
             new SR(StorefrontGuard::class),
             new SR(Request::class),
             new SR(LoggerInterface::class),
+        ]
+    ],
+    RatingHelper::class => [
+        'class' => RatingHelper::class,
+        'arguments' => [
+            new SR(Request::class),
         ]
     ],
     RelatedProductsHelper::class => [
