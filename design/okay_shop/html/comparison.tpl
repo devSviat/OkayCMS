@@ -46,7 +46,7 @@
                                 {* Rating *}
                                 <div id="product_{$product->id}" class="cprs_rating">
                                     <span class="rating_starOff">
-                                        <span class="rating_starOn" style="width:{$product->rating*90/5|string_format:'%.0f'}px;"></span>
+                                        <span class="rating_starOn" style="width:{((($product->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
                                     </span>
                                 </div>
 

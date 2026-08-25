@@ -267,18 +267,30 @@
     var form_enter_email = "{$lang->form_enter_email|escape}";
     var form_enter_password = "{$lang->form_enter_password|escape}";
     var form_enter_message = "{$lang->form_enter_message|escape}";
+    var form_enter_rating = "{$lang->form_enter_rating|escape}";
 
     if($(".fn_validate_product").length>0) {
         $(".fn_validate_product").validate({
             rules: {
+                rating: "required",
                 name: "required",
                 text: "required",
                 captcha_code: "required"
             },
             messages: {
+                rating: form_enter_rating,
                 name: form_enter_name,
                 text: form_enter_message,
                 captcha_code: form_error_captcha
+            },
+            /* Радіо-група малює пʼять міток; без цього помилка сідає біля
+               першої зірки й розриває ряд. */
+            errorPlacement: function (error, element) {
+                if (element.attr("name") === "rating") {
+                    error.appendTo(element.closest(".review_rating, .vs-form__row"));
+                    return;
+                }
+                error.insertAfter(element);
             }
         });
     }
