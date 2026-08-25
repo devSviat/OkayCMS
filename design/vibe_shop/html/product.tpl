@@ -72,19 +72,19 @@
             <span class="vs-pdp__rating">
                 {* Показ, а не ввід: бал рахується з відгуків, тож окремий клік по зірках
                    перебивав би його цифрою, під якою немає жодного тексту. *}
-                <span id="product_{$product->id}" class="product__rating"{if $product->rating > 0} itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating"{/if}>
-                    <span class="rating_starOff">
-                        <span class="rating_starOn" style="width:{((($product->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
-                    </span>
-                    {if $product->rating > 0}
+                {* Товар без жодної оцінки не показує зірок узагалі: порожній ряд
+                   читається як «нуль із п'яти», хоч насправді ще ніхто не голосував. *}
+                {if $product->votes > 0}
+                    <span id="product_{$product->id}" class="product__rating" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+                        <span class="rating_starOff">
+                            <span class="rating_starOn" style="width:{((($product->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
+                        </span>
                         {* ratingValue видимий навмисно: розмітка мусить повторювати те, що бачить
                            людина, а самі зірки округлені до половини. *}
                         <span class="rating_text"><span itemprop="ratingValue">{$product->rating|string_format:"%.1f"}</span> ( <span itemprop="reviewCount">{$product->votes|string_format:"%.0f"}</span> )</span>
                         <span class="rating_text hidden" itemprop="bestRating">5</span>
-                    {else}
-                        <span class="rating_text hidden">({$product->rating|string_format:"%.1f"})</span>
-                    {/if}
-                </span>
+                    </span>
+                {/if}
             </span>
 
             <a href="#comments" class="fn_anchor_comments vs-pdp__reviews">

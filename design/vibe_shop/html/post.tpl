@@ -118,19 +118,19 @@
                 {/if}
 
                 <div class="vs-post__rate">
-                    <div id="post_{$post->id}" class="product__rating vs-rating">
-                        <span class="vs-rating__label" data-language="post_rating_title">{$lang->post_rating_title}</span>
-                        <span class="rating_starOff">
-                            <span class="rating_starOn" style="width:{((($post->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
-                        </span>
-                        {if $post->rating > 0}
-                            <span class="rating_text">( <span>{$post->votes|string_format:"%.0f"}</span> )</span>
-                            <span class="rating_text hidden">( <span>{$post->rating|string_format:"%.1f"}</span> )</span>
-                            <span class="rating_text hidden" style="display:none;">5</span>
-                        {else}
-                            <span class="rating_text hidden">({$post->rating|string_format:"%.1f"})</span>
-                        {/if}
-                    </div>
+                    {* Стаття без жодної оцінки не показує ні зірок, ні підпису: порожній
+                       ряд читався як «нуль із п'яти». *}
+                    {if $post->votes > 0}
+                        <div id="post_{$post->id}" class="product__rating vs-rating">
+                            <span class="vs-rating__label" data-language="post_rating_title">{$lang->post_rating_title}</span>
+                            <span class="rating_starOff">
+                                <span class="rating_starOn" style="width:{((($post->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
+                            </span>
+                                <span class="rating_text">( <span>{$post->votes|string_format:"%.0f"}</span> )</span>
+                                <span class="rating_text hidden">( <span>{$post->rating|string_format:"%.1f"}</span> )</span>
+                                <span class="rating_text hidden" style="display:none;">5</span>
+                        </div>
+                    {/if}
 
                     {* Share buttons *}
                     {include file="share.tpl" url=$canonical title=$post->name class="vs-post__share"}
