@@ -33,14 +33,24 @@ class NginxCompressionTest extends TestCase
             sprintf('%s: стиснення вимкнено зовсім', $path)
         );
 
-        $this->assertMatchesRegularExpression(
-            '~^\s*gzip_proxied\s+\S+;~m',
-            $config,
+        // Саме `не off`, а не «директива присутня»: `gzip_proxied off;` - це
+        // той самий дефолт, тільки записаний явно, і перевірка на наявність
+        // пропустила б його.
+        preg_match('~^\s*gzip_proxied\s+([^;]+);~m', $config, $proxied);
+
+        $this->assertNotEmpty(
+            $proxied,
             sprintf(
                 '%s: без gzip_proxied діє дефолт off — через Cloudflare чи Traefik '
                 . 'відповіді підуть без стиснення',
                 $path
             )
+        );
+
+        $this->assertNotSame(
+            'off',
+            trim($proxied[1]),
+            sprintf('%s: gzip_proxied off — стиснення за проксі вимкнено', $path)
         );
     }
 
