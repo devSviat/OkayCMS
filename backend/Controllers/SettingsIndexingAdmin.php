@@ -16,17 +16,38 @@ class SettingsIndexingAdmin extends IndexAdmin
     {
         if ($this->request->method('post')) {
 
-            // Без дефолта у post(): він підставляється через empty(), тож
-            // введений нуль перетворився б на нього і вимкнути page-all
-            // не вийшло б.
-            $this->settings->set(
-                'catalog_page_all_max_items',
-                max(0, (int)$this->request->post('catalog_page_all_max_items', 'int'))
+            // Пишемо, лише коли поле справді прийшло. Нуль тут - легальний
+            // вибір «не показувати», тож відсутнє поле не можна відрізнити від
+            // нього за значенням: будь-який POST без нього тихо вимкнув би
+            // page-all. Дефолт у post() теж не годиться - він підставляється
+            // через empty() і зʼїв би саме нуль.
+            $pageAllMaxItems = $this->request->post('catalog_page_all_max_items');
+            if ($pageAllMaxItems !== null) {
+                $pageAllMaxItems = (int)$pageAllMaxItems;
+                if (!in_array($pageAllMaxItems, PAGE_ALL_ALLOWED_ITEMS, true)) {
+                    $pageAllMaxItems = PAGE_ALL_MAX_ITEMS;
+                }
+                $this->settings->set('catalog_page_all_max_items', $pageAllMaxItems);
+            }
+
+            $canonicalCatalogPagination = (int)$this->request->post(
+                'canonical_catalog_pagination',
+                null,
+                CANONICAL_FIRST_PAGE
             );
 
-            $this->settings->set('canonical_catalog_pagination', 
-                $this->request->post('canonical_catalog_pagination', null, CANONICAL_FIRST_PAGE)
-            );
+            // Канонікал на page-all при вимкненому page-all склеїв би сторінки
+            // 2..N із першою: та адреса тепер віддає саме її. Комбінація
+            // виправляється при збереженні, тож у списку одразу видно результат.
+            $pageAllIsOff = okay_page_all_max_items(
+                $this->settings->get('catalog_page_all_max_items')
+            ) === PAGE_ALL_OFF;
+
+            if ($canonicalCatalogPagination === CANONICAL_PAGE_ALL && $pageAllIsOff) {
+                $canonicalCatalogPagination = CANONICAL_FIRST_PAGE;
+            }
+
+            $this->settings->set('canonical_catalog_pagination', $canonicalCatalogPagination);
             $this->settings->set('canonical_catalog_page_all', 
                 $this->request->post('canonical_catalog_page_all', null, CANONICAL_FIRST_PAGE)
             );
@@ -71,6 +92,13 @@ class SettingsIndexingAdmin extends IndexAdmin
             $this->design->assign('message_success', 'saved');
         }
         
+        // Готове значення, а не сире: інакше шаблон мусив би сам вирішувати,
+        // що робити з незаданим налаштуванням.
+        $this->design->assign(
+            'catalog_page_all_max_items',
+            okay_page_all_max_items($this->settings->get('catalog_page_all_max_items'))
+        );
+
         $this->response->setContent('settings_indexing.tpl');
     }
 }

@@ -300,6 +300,66 @@ class PaginatePageAllCapTest extends TestCase
         $this->assertSame(PAGE_ALL_MAX_ITEMS, $filter['limit']);
     }
 
+    /**
+     * Settings::get() віддає те, що лежить у БД, а це рядки. Саме заради них у
+     * хелперах стоїть (int), і саме цей шлях лишався непокритим.
+     */
+    #[DataProvider('settingAwareHelpersProvider')]
+    public function testStringSettingBehavesLikeItsNumber(string $helperClass): void
+    {
+        $design = $this->makeDesign();
+        $paginate = $this->makePaginator($helperClass, 50000, $design, '250');
+
+        $filter = [];
+        $paginate($filter, 'all');
+
+        $this->assertSame(250, $filter['limit']);
+
+        $offDesign = $this->makeDesign();
+        $offPaginate = $this->makePaginator($helperClass, 50000, $offDesign, '0');
+
+        $offFilter = [];
+        $offPaginate($offFilter, 'all');
+
+        $this->assertSame(24, $offFilter['limit'], 'рядковий нуль не вимкнув page-all');
+        $this->assertFalse($offDesign->assigned['page_all_enabled']);
+    }
+
+    /**
+     * Порожній рядок - це «не задано», а не нуль: інакше шаблон і PHP
+     * розійшлися б, бо модифікатор default у Smarty теж вважає його незаданим.
+     */
+    #[DataProvider('settingAwareHelpersProvider')]
+    public function testEmptyStringMeansUnset(string $helperClass): void
+    {
+        $design = $this->makeDesign();
+        $paginate = $this->makePaginator($helperClass, 50000, $design, '');
+
+        $filter = [];
+        $paginate($filter, 'all');
+
+        $this->assertSame(PAGE_ALL_MAX_ITEMS, $filter['limit']);
+        $this->assertTrue($design->assigned['page_all_enabled']);
+    }
+
+    /**
+     * Шаблон бере готове рішення - без нього він повторював би цю логіку
+     * іншою мовою, і на сміттєвому значенні кнопка показувалась би там, де
+     * page-all уже вимкнено.
+     */
+    #[DataProvider('settingAwareHelpersProvider')]
+    public function testGarbageValueDisablesConsistently(string $helperClass): void
+    {
+        $design = $this->makeDesign();
+        $paginate = $this->makePaginator($helperClass, 50000, $design, 'abc');
+
+        $filter = [];
+        $paginate($filter, 'all');
+
+        $this->assertSame(24, $filter['limit']);
+        $this->assertFalse($design->assigned['page_all_enabled'], 'кнопка лишилась би, а page-all уже не працює');
+    }
+
     public function testCapIsDefinedAndPositive(): void
     {
         $this->assertTrue(defined('PAGE_ALL_MAX_ITEMS'));

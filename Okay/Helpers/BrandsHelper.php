@@ -232,11 +232,15 @@ class BrandsHelper implements GetListInterface
         $brandsCount = $this->brandsEntity->count($filter);
 
         // Показать все страницы сразу
-        $maxAllPages = $this->settings->get('catalog_page_all_max_items');
-        $maxAllPages = $maxAllPages === null ? PAGE_ALL_MAX_ITEMS : (int)$maxAllPages;
+        $maxAllPages = okay_page_all_max_items($this->settings->get('catalog_page_all_max_items'));
+
+        // Шаблон бере готове рішення, а не повторює цю логіку: порівняння
+        // рядка з нулем у Smarty дало б інший результат, і кнопка «всі»
+        // показувалась би там, де page-all уже вимкнено.
+        $design->assign('page_all_enabled', $maxAllPages > PAGE_ALL_OFF);
 
         $allPages = false;
-        if ($currentPage == 'all' && $maxAllPages > 0) {
+        if ($currentPage == 'all' && $maxAllPages > PAGE_ALL_OFF) {
             $allPages = true;
             $itemsPerPage = min($brandsCount, $maxAllPages);
         }

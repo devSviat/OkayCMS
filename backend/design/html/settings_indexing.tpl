@@ -25,7 +25,11 @@
                                     <div class="okay_list_boding okay_list_settings_indexing_name">
                                         <div class="mt-h">
                                             <div class="heading_label">{$btr->settings_indexing_catalog_page_all_max_items}</div>
-                                            <input name="catalog_page_all_max_items" class="form-control col-xs-12" type="number" min="0" value="{($settings->catalog_page_all_max_items|default:PAGE_ALL_MAX_ITEMS)|escape}">
+                                            <select name="catalog_page_all_max_items" class="selectpicker form-control col-xs-12 px-0">
+                                                {foreach PAGE_ALL_ALLOWED_ITEMS as $pageAllOption}
+                                                    <option value="{$pageAllOption}" {if $catalog_page_all_max_items == $pageAllOption}selected=""{/if}>{if $pageAllOption == PAGE_ALL_OFF}{$btr->settings_indexing_catalog_page_all_max_items_off|escape}{else}{$pageAllOption}{/if}</option>
+                                                {/foreach}
+                                            </select>
                                             <div class="text-muted small mt-h">{$btr->settings_indexing_catalog_page_all_max_items_hint|escape}</div>
                                         </div>
                                     </div>

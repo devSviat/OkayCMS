@@ -125,3 +125,28 @@ if(!function_exists('http_build_query')) {
         return    implode($sep, $ret);
     };
 };
+
+if (!function_exists('okay_page_all_max_items')) {
+    /**
+     * Скільки записів віддає page-all за збереженим налаштуванням.
+     *
+     * Єдине місце, де це вирішується. Логіку легко повторити ще раз у
+     * контролері чи шаблоні - і саме так зʼявляється розходження: порівняння
+     * рядка з нулем у PHP і в Smarty дає різний результат, тож кнопка «всі»
+     * показувалась би там, де page-all уже вимкнено.
+     *
+     * Порожній рядок - те саме, що не задане: так само вважає модифікатор
+     * default у Smarty, і так само поводиться свіжовстановлений магазин.
+     *
+     * @param mixed $stored значення з налаштувань; null або '' - не задане
+     * @return int PAGE_ALL_OFF означає, що page-all віддає першу сторінку
+     */
+    function okay_page_all_max_items($stored): int
+    {
+        if ($stored === null || $stored === '') {
+            return PAGE_ALL_MAX_ITEMS;
+        }
+
+        return max(PAGE_ALL_OFF, (int)$stored);
+    }
+}
