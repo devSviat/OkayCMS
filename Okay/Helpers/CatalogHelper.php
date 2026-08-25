@@ -240,10 +240,17 @@ class CatalogHelper
         $productsCount = $this->productsEntity->count($filter);
 
         // Показать все страницы сразу
+        $maxAllPages = okay_page_all_max_items($this->settings->get('catalog_page_all_max_items'));
+
+        // Шаблон бере готове рішення, а не повторює цю логіку: порівняння
+        // рядка з нулем у Smarty дало б інший результат, і кнопка «всі»
+        // показувалась би там, де page-all уже вимкнено.
+        $design->assign('page_all_enabled', $maxAllPages > PAGE_ALL_OFF);
+
         $allPages = false;
-        if ($currentPage == 'all') {
+        if ($currentPage == 'all' && $maxAllPages > PAGE_ALL_OFF) {
             $allPages = true;
-            $itemsPerPage = min($productsCount, PAGE_ALL_MAX_ITEMS);
+            $itemsPerPage = min($productsCount, $maxAllPages);
         }
 
         // Если не задана, то равна 1

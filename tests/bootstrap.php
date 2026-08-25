@@ -7,3 +7,4 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../Okay/Core/config/constants.php';
+require_once __DIR__ . '/../Okay/Core/config/functions.php';

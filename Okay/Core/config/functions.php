@@ -125,3 +125,33 @@ if(!function_exists('http_build_query')) {
         return    implode($sep, $ret);
     };
 };
+
+if (!function_exists('okay_page_all_max_items')) {
+    /**
+     * Скільки записів віддає page-all за збереженим налаштуванням.
+     *
+     * Єдине місце, де це вирішується. Логіку легко повторити ще раз у
+     * контролері чи шаблоні - і саме так зʼявляється розходження: порівняння
+     * рядка з нулем у PHP і в Smarty дає різний результат, тож кнопка «всі»
+     * показувалась би там, де page-all уже вимкнено.
+     *
+     * Приймається лише значення з PAGE_ALL_ALLOWED_ITEMS. Налаштування може
+     * прийти не з адмінки - міграцією, модулем, прямим SQL, - а довільне число
+     * повертає ту саму нестачу пам'яті, заради якої стеля й існує. Нерозпізнане
+     * значення трактується як незадане: зникла кнопка виглядала б як свідомий
+     * вибір, а список в адмінці підсвітив би не той рядок.
+     *
+     * @param mixed $stored значення з налаштувань; null або '' - не задане
+     * @return int PAGE_ALL_OFF означає, що page-all віддає першу сторінку
+     */
+    function okay_page_all_max_items($stored): int
+    {
+        if (!is_numeric($stored)) {
+            return PAGE_ALL_MAX_ITEMS;
+        }
+
+        $value = (int)$stored;
+
+        return in_array($value, PAGE_ALL_ALLOWED_ITEMS, true) ? $value : PAGE_ALL_MAX_ITEMS;
+    }
+}

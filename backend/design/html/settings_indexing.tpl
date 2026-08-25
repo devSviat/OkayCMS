@@ -24,6 +24,19 @@
                                 <div class="okay_list_row">
                                     <div class="okay_list_boding okay_list_settings_indexing_name">
                                         <div class="mt-h">
+                                            <div class="heading_label">{$btr->settings_indexing_catalog_page_all_max_items}</div>
+                                            <select name="catalog_page_all_max_items" class="selectpicker form-control col-xs-12 px-0">
+                                                {foreach PAGE_ALL_ALLOWED_ITEMS as $pageAllOption}
+                                                    <option value="{$pageAllOption}" {if $catalog_page_all_max_items == $pageAllOption}selected=""{/if}>{if $pageAllOption == PAGE_ALL_OFF}{$btr->settings_indexing_catalog_page_all_max_items_off|escape}{else}{$pageAllOption}{/if}</option>
+                                                {/foreach}
+                                            </select>
+                                            <div class="text-muted small mt-h">{$btr->settings_indexing_catalog_page_all_max_items_hint|escape}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="okay_list_row">
+                                    <div class="okay_list_boding okay_list_settings_indexing_name">
+                                        <div class="mt-h">
                                             <div class="heading_label">{$btr->settings_indexing_catalog_pagination}</div>
                                             <select name="canonical_catalog_pagination" class="selectpicker form-control col-xs-12 px-0">
                                                 <option value="{CANONICAL_FIRST_PAGE}" {if $settings->canonical_catalog_pagination == CANONICAL_FIRST_PAGE}selected=""{/if}>{$btr->settings_indexing_catalog_pagination_val_1|escape}</option>
