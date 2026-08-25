@@ -157,7 +157,7 @@
                 <div class="vs-card__rating">
                     {if $product->votes > 0}
                         <span class="rating_starOff" aria-hidden="true">
-                            <span class="rating_starOn" style="width:{$product->rating*60/5|string_format:'%.0f'}px;"></span>
+                            <span class="rating_starOn" style="width:{((($product->rating*2)|round)/2)*12|string_format:'%.0f'}px;"></span>
                         </span>
                         <span class="vs-card__votes"><span class="vs-sr-only">{$lang->product_rating}: {$product->rating|string_format:"%.1f"} / 5.</span>({$product->votes|string_format:"%.0f"})</span>
                     {/if}
