@@ -197,4 +197,91 @@ class RatingEndpointTest extends TestCase
 
         return $entity;
     }
+
+    /**
+     * Нескалярний `id` не можна приводити до рядка: `Array to string
+     * conversion` під суворим обробником помилок кладе весь запит.
+     */
+    public function testNonScalarIdIsRejectedWithoutAWarning(): void
+    {
+        $raised = null;
+        set_error_handler(static function ($number, $string) use (&$raised) {
+            $raised = $string;
+
+            return true;
+        });
+
+        try {
+            $result = (new RatingHelper($this->requestWith([1, 2], '5')))
+                ->vote($this->entityThatMustNotBeTouched(), 'product_', 'test_nonscalar');
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertNull($raised, 'приведення нескалярного id підняло помилку PHP');
+        $this->assertSame((float)RatingHelper::REJECTED, $result);
+    }
+
+    public static function storedRatingsProvider(): array
+    {
+        return [
+            'у межах'      => ['4.5', 4.5],
+            'нуль легальний' => ['0', 0.0],
+            'верхня межа'  => ['5', 5.0],
+            'вище шкали'   => ['50', 5.0],
+            'захмарне'     => ['999999', 5.0],
+            'відʼємне'     => ['-3', 0.0],
+            'нечислове'    => ['abc', 0.0],
+        ];
+    }
+
+    /**
+     * Другі двері до тієї самої недостовірної розмітки: у формі товару та
+     * поста бал виставляють напряму, повз голосування.
+     */
+    #[DataProvider('storedRatingsProvider')]
+    public function testStoredRatingStaysWithinTheScale($posted, float $expected): void
+    {
+        $this->assertSame($expected, RatingHelper::clampStoredRating($posted));
+    }
+
+    /**
+     * Кількість голосів іде в `reviewCount`, тож відʼємною бути не може.
+     */
+    public function testVotesNeverGoNegative(): void
+    {
+        $this->assertSame(0, RatingHelper::clampVotes('-5'));
+        $this->assertSame(0, RatingHelper::clampVotes('abc'));
+        $this->assertSame(12, RatingHelper::clampVotes('12'));
+    }
+
+    /**
+     * Межа мусить бути на сервері, а не в шаблоні: поле `rating` у формі
+     * приховане, і його значення приходить готовим.
+     */
+    #[DataProvider('adminRequestProvider')]
+    public function testAdminFormCannotStoreAnOutOfScaleRating(string $path): void
+    {
+        $source = $this->source($path);
+
+        $this->assertMatchesRegularExpression(
+            '~rating\s*=\s*RatingHelper::clampStoredRating\(~',
+            $source,
+            sprintf('%s: бал із форми йде в базу без перевірки шкали', basename($path))
+        );
+
+        $this->assertMatchesRegularExpression(
+            '~votes\s*=\s*RatingHelper::clampVotes\(~',
+            $source,
+            sprintf('%s: кількість голосів із форми не перевіряється', basename($path))
+        );
+    }
+
+    public static function adminRequestProvider(): array
+    {
+        return [
+            'товар' => ['backend/Requests/BackendProductsRequest.php'],
+            'пост'  => ['backend/Requests/BackendBlogRequest.php'],
+        ];
+    }
 }

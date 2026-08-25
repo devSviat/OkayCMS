@@ -6,6 +6,7 @@ namespace Okay\Admin\Requests;
 
 use Okay\Core\Request;
 use Okay\Core\Modules\Extender\ExtenderFacade;
+use Okay\Helpers\RatingHelper;
 
 class BackendProductsRequest
 {
@@ -35,8 +36,11 @@ class BackendProductsRequest
 
         $product->annotation  = $this->request->post('annotation');
         $product->description = $this->request->post('description');
-        $product->rating      = $this->request->post('rating', 'float');
-        $product->votes       = $this->request->post('votes', 'integer');
+        // Поле приховане й заповнюється віджетом зірок, тож значення поза
+        // шкалою - це поламаний або підроблений POST. Бал іде в aggregateRating,
+        // тому межу тримає сервер, а не форма.
+        $product->rating      = RatingHelper::clampStoredRating($this->request->post('rating'));
+        $product->votes       = RatingHelper::clampVotes($this->request->post('votes'));
         $product->special     = $this->request->post('special','string');
 
         return ExtenderFacade::execute(__METHOD__, $product, func_get_args());

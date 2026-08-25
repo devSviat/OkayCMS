@@ -41,7 +41,10 @@ class RatingHelper
      */
     public function vote(Entity $entity, $idPrefix, $sessionKey)
     {
-        $objectId = (int)str_replace($idPrefix, '', (string)$this->request->post('id'));
+        $postedId = $this->request->post('id');
+        // Нескалярне значення приводити до рядка не можна: `Array to string
+        // conversion` під суворим обробником помилок кладе весь запит.
+        $objectId = is_scalar($postedId) ? (int)str_replace($idPrefix, '', (string)$postedId) : 0;
         $rating   = $this->normalizeRating($this->request->post('rating'));
 
         if ($objectId <= 0 || $rating === null) {
@@ -67,6 +70,35 @@ class RatingHelper
         $_SESSION[$sessionKey][] = $objectId;
 
         return ExtenderFacade::execute(__METHOD__, (float)$rate, func_get_args());
+    }
+
+    /**
+     * Збережений середній бал у межах шкали. Нуль легальний - він означає, що
+     * товар ще не оцінювали.
+     *
+     * Потрібно там, де бал виставляють напряму, а не голосом: у формі товару
+     * та поста адмінки. Двері різні, наслідок один - недостовірна цифра в
+     * `aggregateRating`.
+     *
+     * @param mixed $posted
+     * @return float
+     */
+    public static function clampStoredRating($posted)
+    {
+        $rating = is_numeric($posted) ? (float)$posted : 0.0;
+
+        return max(0.0, min((float)self::MAX_RATING, $rating));
+    }
+
+    /**
+     * Кількість голосів не може бути відʼємною: вона йде в `reviewCount`.
+     *
+     * @param mixed $posted
+     * @return int
+     */
+    public static function clampVotes($posted)
+    {
+        return max(0, is_numeric($posted) ? (int)$posted : 0);
     }
 
     /**

@@ -7,6 +7,7 @@ namespace Okay\Admin\Requests;
 use Okay\Core\Modules\Extender\ExtenderFacade;
 use Okay\Core\Request;
 use Okay\Core\Translit;
+use Okay\Helpers\RatingHelper;
 
 class BackendBlogRequest
 {
@@ -60,8 +61,11 @@ class BackendBlogRequest
         } elseif (empty($post->id)) {
             $post->date = date('Y-m-d H:i:s');
         }
-        $post->rating = $this->request->post('rating', 'float');
-        $post->votes  = $this->request->post('votes', 'integer');
+        // Поле приховане й заповнюється віджетом зірок, тож значення поза
+        // шкалою - це поламаний або підроблений POST. Бал іде в aggregateRating,
+        // тому межу тримає сервер, а не форма.
+        $post->rating = RatingHelper::clampStoredRating($this->request->post('rating'));
+        $post->votes  = RatingHelper::clampVotes($this->request->post('votes'));
         
         if (($time = strtotime($this->request->post('updated_date'))) > 0) {
             $post->updated_date = date('Y-m-d', $time);
