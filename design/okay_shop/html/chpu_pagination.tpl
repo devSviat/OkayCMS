@@ -63,10 +63,13 @@
             </li>
         {/if}
 
-        {* Display all pages *}
+        {* Display all pages. Нуль у налаштуванні означає, що page-all віддає
+           звичайну першу сторінку, тож кнопка стала б мовчазною пусткою. *}
+        {if $page_all_enabled}
         <li class="pagination__item">
             <a class="fn_sort_pagination_link pagination__link" href="{furl page=all}" data-language="pagination_all">{$lang->pagination_all}</a>
         </li>
+        {/if}
 
         {* Link to the next page *}
         {if $current_page_num < $total_pages_num}
