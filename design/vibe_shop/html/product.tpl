@@ -208,11 +208,14 @@
                     <div class="vs-buybox__offer" itemprop="offers" itemscope="" itemtype="http://schema.org/Offer">
                         <span class="hidden">
                             <link itemprop="url" href="{url_generator route="product" url=$product->url absolute=1}" />
-                            <time itemprop="priceValidUntil" datetime="{$product->created|date:'Ymd'}"></time>
                             {if $product->variant->stock > 0}
+                                <time itemprop="priceValidUntil" datetime="{'now +1 year'|strtotime|date_format:'%Y-%m-%d'}"></time>
                                 <link itemprop="availability" href="https://schema.org/InStock" />
                             {else}
-                                <link itemprop="availability" href="http://schema.org/OutOfStock" />
+                                {* Ціна на відсутній товар не гарантована, тож дати дійсності в неї немає.
+                                   Дата в минулому читається як протермінована пропозиція, і Google
+                                   знімає rich result. *}
+                                <link itemprop="availability" href="https://schema.org/OutOfStock" />
                             {/if}
                             <link itemprop="itemCondition" href="https://schema.org/NewCondition" />
                             <span itemprop="seller" itemscope itemtype="http://schema.org/Organization">
