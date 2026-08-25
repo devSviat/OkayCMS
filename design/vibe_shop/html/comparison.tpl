@@ -48,9 +48,14 @@
                                bare value with nothing naming it is not a
                                comparison. *}
                             <div id="product_{$product->id}" class="cprs_rating vs-compare__cell vs-rating" data-label="{$lang->product_rating|escape}">
-                                <span class="rating_starOff">
-                                    <span class="rating_starOn" style="width:{((($product->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
-                                </span>
+                                {* Комірка лишається навіть без оцінок - інакше поїде вирівнювання
+                                   рядків таблиці. Порожній ряд зірок звідси прибрано: він читався
+                                   як «нуль із п'яти». *}
+                                {if $product->votes > 0}
+                                    <span class="rating_starOff">
+                                        <span class="rating_starOn" style="width:{((($product->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
+                                    </span>
+                                {/if}
                             </div>
 
                             {* Feature value *}

@@ -113,23 +113,21 @@
                     {/if}
 
                     <div class="post_share">
-                        <div id="post_{$post->id}" class="post__rating product__rating">
-                            <div class="share__text post_share__text">
-                                <span data-language="product_share">{$lang->post_rating_title}</span>
+                        {* Стаття без жодної оцінки не показує ні зірок, ні підпису: порожній
+                           ряд читався як «нуль із п'яти». *}
+                        {if $post->votes > 0}
+                            <div id="post_{$post->id}" class="post__rating product__rating">
+                                <div class="share__text post_share__text">
+                                    <span data-language="product_share">{$lang->post_rating_title}</span>
+                                </div>
+                                <span class="rating_starOff">
+                                    <span class="rating_starOn" style="width:{((($post->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
+                                </span>
+                                <span class="rating_text">( <span>{$post->votes|string_format:"%.0f"}</span> )</span>
+                                <span class="rating_text hidden">( <span>{$post->rating|string_format:"%.1f"}</span> )</span>
+                                <span class="rating_text hidden" style="display:none;">5</span>
                             </div>
-                            <span class="rating_starOff">
-                                <span class="rating_starOn" style="width:{((($post->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
-                            </span>
-                            {*Вывод количества голосов данного товара, скрыт ради микроразметки*}
-                            {if $post->rating > 0}
-                            <span class="rating_text">( <span>{$post->votes|string_format:"%.0f"}</span> )</span>
-                            <span class="rating_text hidden">( <span>{$post->rating|string_format:"%.1f"}</span> )</span>
-                            {*Вывод лучшей оценки товара для микроразметки*}
-                            <span class="rating_text hidden" style="display:none;">5</span>
-                            {else}
-                            <span class="rating_text hidden">({$post->rating|string_format:"%.1f"})</span>
-                            {/if}
-                        </div>
+                        {/if}
 
                         {* Share buttons *}
                         <div class="post_share_boxed">

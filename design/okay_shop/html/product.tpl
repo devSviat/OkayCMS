@@ -92,21 +92,19 @@
 {*                            <div class="details_boxed__title" data-language="product_rating">{$lang->product_rating}:</div>*}
                             {* Показ, а не ввід: бал рахується з відгуків, тож окремий клік по зірках
                                перебивав би його цифрою, під якою немає жодного тексту. *}
-                            <div id="product_{$product->id}" class="product__rating" {if $product->rating > 0} itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating"{/if}>
-                                <span class="rating_starOff">
-                                    <span class="rating_starOn" style="width:{((($product->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
-                                </span>
-                                {*Вывод количества голосов данного товара, скрыт ради микроразметки*}
-                                {if $product->rating > 0}
-                                {* ratingValue видимий навмисно: розмітка мусить повторювати те, що бачить
-                                   людина, а самі зірки округлені до половини. *}
-                                <span class="rating_text"><span itemprop="ratingValue">{$product->rating|string_format:"%.1f"}</span> ( <span itemprop="reviewCount">{$product->votes|string_format:"%.0f"}</span> )</span>
-                                {*Вывод лучшей оценки товара для микроразметки*}
-                                <span class="rating_text hidden" itemprop="bestRating" style="display:none;">5</span>
-                                {else}
-                                <span class="rating_text hidden">({$product->rating|string_format:"%.1f"})</span>
-                                {/if}
-                            </div>
+                            {* Товар без жодної оцінки не показує зірок узагалі: порожній ряд
+                               читається як «нуль із п'яти», хоч насправді ще ніхто не голосував. *}
+                            {if $product->votes > 0}
+                                <div id="product_{$product->id}" class="product__rating" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+                                    <span class="rating_starOff">
+                                        <span class="rating_starOn" style="width:{((($product->rating*2)|round)/2)*18|string_format:'%.0f'}px;"></span>
+                                    </span>
+                                    {* ratingValue видимий навмисно: розмітка мусить повторювати те, що бачить
+                                       людина, а самі зірки округлені до половини. *}
+                                    <span class="rating_text"><span itemprop="ratingValue">{$product->rating|string_format:"%.1f"}</span> ( <span itemprop="reviewCount">{$product->votes|string_format:"%.0f"}</span> )</span>
+                                    <span class="rating_text hidden" itemprop="bestRating" style="display:none;">5</span>
+                                </div>
+                            {/if}
                         </div>
                         {* Product brand *}
                         {if !empty($brand)}
