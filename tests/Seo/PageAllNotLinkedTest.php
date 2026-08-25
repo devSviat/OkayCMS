@@ -15,34 +15,66 @@ use PHPUnit\Framework\TestCase;
  * сортування, тож робот заходив туди в кожній комбінації фасетів. У sitemap ці
  * URL не потрапляють — посилання було єдиним джерелом відкриття.
  *
- * Тест тримає одне: жоден фронтовий шаблон пагінації більше не лінкує page=all.
- * Він НЕ прикриває сам фатал — стеля в paginate() досі окрема задача, і
- * налаштування robots_catalog_page_all тут не рятує: MetaRobotsHelper викликають
- * лише контролери каталогу, а на фатальному URL мета-тег не встигає вийти.
+ * Тест тримає контракт змінної `page_all_enabled`: там, де page-all вимикається
+ * налаштуванням, кнопка мусить зникати разом із ним, а там, де не вимикається,
+ * умови бути не повинно — вона була б завжди хибною й тихо ховала робочу кнопку.
  */
 class PageAllNotLinkedTest extends TestCase
 {
+    private const GUARD = 'page_all_enabled';
 
-    #[DataProvider('frontPaginationProvider')]
+    /**
+     * Каталог і бренди: page-all тут вимикається з адмінки, тож кнопка мусить
+     * бути під умовою.
+     */
+    #[DataProvider('switchablePaginationProvider')]
     public function testPageAllLinkIsNeverUnconditional(string $path): void
     {
         // Регексп, а не підрядок: {url page='all'} і {furl page="all"} —
         // те саме посилання, і літеральний пошук їх би пропустив.
         $source = file_get_contents($path);
-        if (!preg_match('~page\s*=\s*[\'"]?all~', $source)) {
+        if (!preg_match_all('~page\s*=\s*[\'"]?all~', $source, $links, PREG_OFFSET_CAPTURE)) {
             // Кнопки немає взагалі — саме так у темах Broken. Стерегти нічого.
             $this->assertStringNotContainsString('page=all', $source);
 
             return;
         }
 
-        // Якщо кнопка є, вона мусить зникати разом із самою можливістю:
-        // при вимкненому page-all адреса віддає ту саму сторінку, тож напис
-        // обіцяв би всі товари й не давав нічого.
-        $this->assertMatchesRegularExpression(
-            '~\{if[^}]*page_all_enabled[^}]*\}~',
-            $source,
-            'посилання «всі» без умови: при вимкненому page-all воно веде на ту саму сторінку'
+        $guarded = $this->guardedRanges($source);
+
+        foreach ($links[0] as [$link, $offset]) {
+            $this->assertTrue(
+                $this->isInside($offset, $guarded),
+                sprintf(
+                    '%s: посилання «всі» поза умовою {if $%s} — при вимкненому page-all '
+                    . 'воно веде на ту саму сторінку',
+                    basename($path),
+                    self::GUARD
+                )
+            );
+        }
+    }
+
+    /**
+     * Блог, автори й лендинги акцій: page-all тут лишився на константі й не
+     * вимикається, а `page_all_enabled` присвоюють лише CatalogHelper і
+     * BrandsHelper. Скопійована сюди умова була б завжди хибною.
+     *
+     * Що кнопки в цих шаблонах узагалі немає — рішення тем Broken заради
+     * краулінгового бюджету, а не інваріант рушія: у темах форку вона лишається
+     * робочою, тож тест її відсутності тут не вимагає.
+     */
+    #[DataProvider('fixedPaginationProvider')]
+    public function testFixedPaginationDoesNotUseTheSwitch(string $path): void
+    {
+        $this->assertStringNotContainsString(
+            self::GUARD,
+            file_get_contents($path),
+            sprintf(
+                '%s: %s тут ніхто не присвоює — умова завжди хибна, і кнопка зникає мовчки',
+                basename($path),
+                self::GUARD
+            )
         );
     }
 
@@ -57,26 +89,84 @@ class PageAllNotLinkedTest extends TestCase
         $this->assertSame(
             [],
             $found ?: [],
-            'у Sviat/Promo зʼявився власний шаблон пагінації — його треба додати у FRONT_PAGINATION'
+            'у Sviat/Promo зʼявився власний шаблон пагінації — його теж треба перевіряти'
         );
     }
 
+    public static function switchablePaginationProvider(): array
+    {
+        return self::themeTemplates('chpu_pagination.tpl');
+    }
+
+    public static function fixedPaginationProvider(): array
+    {
+        return self::themeTemplates('pagination.tpl');
+    }
+
     /**
-     * Лише `chpu_pagination.tpl` — каталог і бренди, тобто те, що вимикається
-     * налаштуванням. `pagination.tpl` (блог, автори, лендинги акцій) сюди не
-     * входить свідомо: там page-all лишився на константі й не вимикається, тож
-     * безумовна кнопка нічого не обіцяє даремно.
-     *
      * Теми шукаються на диску: той самий тест їде у форк, де вони звуться
      * інакше, і жорсткий список ловив би лише наші.
      */
-    public static function frontPaginationProvider(): array
+    private static function themeTemplates(string $name): array
     {
         $found = [];
-        foreach (glob(dirname(__DIR__, 2) . '/design/*/html/chpu_pagination.tpl') ?: [] as $path) {
+        foreach (glob(dirname(__DIR__, 2) . '/design/*/html/' . $name) ?: [] as $path) {
             $found[basename(dirname(dirname($path)))] = [$path];
         }
 
         return $found;
+    }
+
+    /**
+     * Межі блоків `{if ...page_all_enabled...}` ... `{/if}` з урахуванням
+     * вкладеності: без неї достатньо було б згадати змінну будь-де у файлі,
+     * і безумовне посилання нижче лишилось би непоміченим.
+     *
+     * @return array<int, array{0: int, 1: int}>
+     */
+    private function guardedRanges(string $source): array
+    {
+        preg_match_all('~\{if\b~', $source, $opens, PREG_OFFSET_CAPTURE);
+        preg_match_all('~\{/if\}~', $source, $closes, PREG_OFFSET_CAPTURE);
+
+        $tokens = [];
+        foreach ($opens[0] as [$text, $offset]) {
+            $tokens[$offset] = 'open';
+        }
+        foreach ($closes[0] as [$text, $offset]) {
+            $tokens[$offset] = 'close';
+        }
+        ksort($tokens);
+
+        $ranges = [];
+        $stack  = [];
+        foreach ($tokens as $offset => $type) {
+            if ($type === 'open') {
+                $tag = substr($source, $offset, (int)strpos($source, '}', $offset) - $offset + 1);
+                $stack[] = [$offset, str_contains($tag, self::GUARD)];
+                continue;
+            }
+
+            $opened = array_pop($stack);
+            if ($opened !== null && $opened[1]) {
+                $ranges[] = [$opened[0], $offset];
+            }
+        }
+
+        return $ranges;
+    }
+
+    /**
+     * @param array<int, array{0: int, 1: int}> $ranges
+     */
+    private function isInside(int $offset, array $ranges): bool
+    {
+        foreach ($ranges as [$from, $to]) {
+            if ($offset > $from && $offset < $to) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

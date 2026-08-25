@@ -23,9 +23,22 @@ class PageAllMaxItemsTest extends TestCase
             'нуль числом'      => [0, PAGE_ALL_OFF],
             'число рядком'     => ['500', 500],
             'число'            => [500, 500],
-            'відʼємне'         => ['-5', PAGE_ALL_OFF],
-            'нечислове'        => ['abc', PAGE_ALL_OFF],
+            'відʼємне'         => ['-5', PAGE_ALL_MAX_ITEMS],
+            'нечислове'        => ['abc', PAGE_ALL_MAX_ITEMS],
+            'поза переліком'   => ['750', PAGE_ALL_MAX_ITEMS],
+            'захмарне'         => ['999999', PAGE_ALL_MAX_ITEMS],
         ];
+    }
+
+    /**
+     * Білий список тримає саме функція, а не форма: налаштування може прийти
+     * міграцією, модулем або прямим SQL, і тоді довільне число повертає ту саму
+     * нестачу пам'яті, заради якої стеля існує.
+     */
+    #[DataProvider('storedValues')]
+    public function testResultIsAlwaysAnOfferedChoice($stored, int $ignored): void
+    {
+        $this->assertContains(okay_page_all_max_items($stored), PAGE_ALL_ALLOWED_ITEMS);
     }
 
     #[DataProvider('storedValues')]
@@ -52,6 +65,23 @@ class PageAllMaxItemsTest extends TestCase
     {
         foreach (['-1', '-1000', -7] as $stored) {
             $this->assertGreaterThanOrEqual(PAGE_ALL_OFF, okay_page_all_max_items($stored));
+        }
+    }
+
+    /**
+     * Вимкнути page-all має право лише збережений нуль. Зіпсоване значення, що
+     * приводиться до нуля, вимикало б функцію мовчки й невідворотно.
+     */
+    public function testOnlyAStoredZeroTurnsPageAllOff(): void
+    {
+        $this->assertSame(PAGE_ALL_OFF, okay_page_all_max_items('0'));
+
+        foreach (['abc', '-5', '', null, [], false] as $stored) {
+            $this->assertNotSame(
+                PAGE_ALL_OFF,
+                okay_page_all_max_items($stored),
+                'сміття у налаштуванні вимкнуло page-all'
+            );
         }
     }
 }

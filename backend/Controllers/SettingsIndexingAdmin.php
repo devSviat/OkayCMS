@@ -36,21 +36,33 @@ class SettingsIndexingAdmin extends IndexAdmin
                 CANONICAL_FIRST_PAGE
             );
 
-            // Канонікал на page-all при вимкненому page-all склеїв би сторінки
-            // 2..N із першою: та адреса тепер віддає саме її. Комбінація
-            // виправляється при збереженні, тож у списку одразу видно результат.
+            // Значення з цього ж POST, а не перечитане з налаштувань: інакше
+            // виправлення нижче мовчки залежало б від того, що set() уже
+            // відпрацював вище.
             $pageAllIsOff = okay_page_all_max_items(
-                $this->settings->get('catalog_page_all_max_items')
+                $pageAllMaxItems ?? $this->settings->get('catalog_page_all_max_items')
             ) === PAGE_ALL_OFF;
 
+            // При вимкненому page-all його адреса віддає першу сторінку. Канонікал
+            // на неї склеїв би сторінки 2..N із першою, а самопосилання зробило б
+            // із дубля окрему індексовану адресу. Комбінація виправляється при
+            // збереженні, тож у списку одразу видно результат.
             if ($canonicalCatalogPagination === CANONICAL_PAGE_ALL && $pageAllIsOff) {
                 $canonicalCatalogPagination = CANONICAL_FIRST_PAGE;
             }
 
-            $this->settings->set('canonical_catalog_pagination', $canonicalCatalogPagination);
-            $this->settings->set('canonical_catalog_page_all', 
-                $this->request->post('canonical_catalog_page_all', null, CANONICAL_FIRST_PAGE)
+            $canonicalCatalogPageAll = (int)$this->request->post(
+                'canonical_catalog_page_all',
+                null,
+                CANONICAL_FIRST_PAGE
             );
+
+            if ($pageAllIsOff) {
+                $canonicalCatalogPageAll = CANONICAL_FIRST_PAGE;
+            }
+
+            $this->settings->set('canonical_catalog_pagination', $canonicalCatalogPagination);
+            $this->settings->set('canonical_catalog_page_all', $canonicalCatalogPageAll);
             $this->settings->set('canonical_category_brand', 
                 $this->request->post('canonical_category_brand', null, CANONICAL_WITHOUT_FILTER)
             );

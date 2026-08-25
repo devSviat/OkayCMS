@@ -276,12 +276,12 @@ class PaginatePageAllCapTest extends TestCase
     public function testSettingOverridesTheDefaultCap(string $helperClass): void
     {
         $design = $this->makeDesign();
-        $paginate = $this->makePaginator($helperClass, 50000, $design, 250);
+        $paginate = $this->makePaginator($helperClass, 50000, $design, 500);
 
         $filter = [];
         $paginate($filter, 'all');
 
-        $this->assertSame(250, $filter['limit']);
+        $this->assertSame(500, $filter['limit']);
         $this->assertTrue($design->assigned['is_all_pages']);
     }
 
@@ -308,12 +308,12 @@ class PaginatePageAllCapTest extends TestCase
     public function testStringSettingBehavesLikeItsNumber(string $helperClass): void
     {
         $design = $this->makeDesign();
-        $paginate = $this->makePaginator($helperClass, 50000, $design, '250');
+        $paginate = $this->makePaginator($helperClass, 50000, $design, '500');
 
         $filter = [];
         $paginate($filter, 'all');
 
-        $this->assertSame(250, $filter['limit']);
+        $this->assertSame(500, $filter['limit']);
 
         $offDesign = $this->makeDesign();
         $offPaginate = $this->makePaginator($helperClass, 50000, $offDesign, '0');
@@ -343,21 +343,33 @@ class PaginatePageAllCapTest extends TestCase
     }
 
     /**
-     * Шаблон бере готове рішення - без нього він повторював би цю логіку
-     * іншою мовою, і на сміттєвому значенні кнопка показувалась би там, де
-     * page-all уже вимкнено.
+     * Значення, якого немає в переліку, трактується як незадане. Вимикати
+     * page-all має право лише свідомий нуль: зіпсоване число інакше гасило б
+     * функцію мовчки, а надто велике повертало б вичерпання пам'яті.
      */
-    #[DataProvider('settingAwareHelpersProvider')]
-    public function testGarbageValueDisablesConsistently(string $helperClass): void
+    #[DataProvider('unrecognisedSettingsProvider')]
+    public function testUnrecognisedValueFallsBackToTheConstant(string $helperClass, $stored): void
     {
         $design = $this->makeDesign();
-        $paginate = $this->makePaginator($helperClass, 50000, $design, 'abc');
+        $paginate = $this->makePaginator($helperClass, 50000, $design, $stored);
 
         $filter = [];
         $paginate($filter, 'all');
 
-        $this->assertSame(24, $filter['limit']);
-        $this->assertFalse($design->assigned['page_all_enabled'], 'кнопка лишилась би, а page-all уже не працює');
+        $this->assertSame(PAGE_ALL_MAX_ITEMS, $filter['limit']);
+        $this->assertTrue($design->assigned['page_all_enabled']);
+    }
+
+    public static function unrecognisedSettingsProvider(): array
+    {
+        $cases = [];
+        foreach (self::settingAwareHelpersProvider() as $label => [$helperClass]) {
+            foreach (['нечислове' => 'abc', 'поза переліком' => '750', 'захмарне' => '999999'] as $what => $stored) {
+                $cases["$label, $what"] = [$helperClass, $stored];
+            }
+        }
+
+        return $cases;
     }
 
     public function testCapIsDefinedAndPositive(): void

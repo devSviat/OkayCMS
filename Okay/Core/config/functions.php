@@ -135,18 +135,23 @@ if (!function_exists('okay_page_all_max_items')) {
      * рядка з нулем у PHP і в Smarty дає різний результат, тож кнопка «всі»
      * показувалась би там, де page-all уже вимкнено.
      *
-     * Порожній рядок - те саме, що не задане: так само вважає модифікатор
-     * default у Smarty, і так само поводиться свіжовстановлений магазин.
+     * Приймається лише значення з PAGE_ALL_ALLOWED_ITEMS. Налаштування може
+     * прийти не з адмінки - міграцією, модулем, прямим SQL, - а довільне число
+     * повертає ту саму нестачу пам'яті, заради якої стеля й існує. Нерозпізнане
+     * значення трактується як незадане: зникла кнопка виглядала б як свідомий
+     * вибір, а список в адмінці підсвітив би не той рядок.
      *
      * @param mixed $stored значення з налаштувань; null або '' - не задане
      * @return int PAGE_ALL_OFF означає, що page-all віддає першу сторінку
      */
     function okay_page_all_max_items($stored): int
     {
-        if ($stored === null || $stored === '') {
+        if (!is_numeric($stored)) {
             return PAGE_ALL_MAX_ITEMS;
         }
 
-        return max(PAGE_ALL_OFF, (int)$stored);
+        $value = (int)$stored;
+
+        return in_array($value, PAGE_ALL_ALLOWED_ITEMS, true) ? $value : PAGE_ALL_MAX_ITEMS;
     }
 }
