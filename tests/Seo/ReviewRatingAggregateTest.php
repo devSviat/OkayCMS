@@ -45,6 +45,9 @@ class ReviewRatingAggregateTest extends TestCase
     /**
      * У вибірку мусять іти лише схвалені відгуки цього обʼєкта: інакше бал
      * зʼявився б до модерації, і накрутити його міг би будь-хто.
+     *
+     * `has_parent => false` відсікає відповіді адміна — вони лежать у тій самій
+     * таблиці з тим самим `object_id` і відгуками не є.
      */
     public function testOnlyApprovedReviewsOfThisObjectAreAsked(): void
     {
@@ -53,7 +56,7 @@ class ReviewRatingAggregateTest extends TestCase
         $helper->recalculateFromReviews($this->objectEntity(), 7, 'post');
 
         $this->assertSame(
-            ['object_id' => 7, 'type' => 'post', 'approved' => 1],
+            ['object_id' => 7, 'type' => 'post', 'approved' => 1, 'has_parent' => false],
             $captured,
             'фільтр вибірки змінився — у середнє можуть потрапити чужі або несхвалені відгуки'
         );

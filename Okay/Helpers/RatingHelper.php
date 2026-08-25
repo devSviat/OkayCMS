@@ -50,9 +50,14 @@ class RatingHelper
     {
         $ratings = [];
         foreach ($this->commentsEntity->noLimit()->find([
-            'object_id' => (int)$objectId,
-            'type'      => $objectType,
-            'approved'  => 1,
+            'object_id'  => (int)$objectId,
+            'type'       => $objectType,
+            'approved'   => 1,
+            // Відповідь адміна лежить у тій самій таблиці з тим самим
+            // object_id. Оцінки в неї зараз узятись нізвідки, але покладатись
+            // на це не варто: середній бал рахується з відгуків, а відповідь
+            // відгуком не є.
+            'has_parent' => false,
         ]) as $comment) {
             if ($comment->rating !== null && $comment->rating > 0) {
                 $ratings[] = (int)$comment->rating;
