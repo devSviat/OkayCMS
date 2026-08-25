@@ -14,6 +14,7 @@ use Okay\Core\Response;
 use Okay\Core\Security\FormToken;
 use Okay\Core\Security\SafeRedirect;
 use Okay\Core\Security\StorefrontGuard;
+use Okay\Core\Settings;
 use Okay\Entities\BlogEntity;
 use Okay\Entities\CommentsEntity;
 use Okay\Entities\ProductsEntity;
@@ -36,6 +37,8 @@ class CommentsHelper implements GetListInterface
     private $storefrontGuard;
     private $request;
     private $logger;
+    private $settings;
+    private $ratingHelper;
 
     public function __construct(
         EntityFactory   $entityFactory,
@@ -47,7 +50,9 @@ class CommentsHelper implements GetListInterface
         Languages       $languages,
         StorefrontGuard $storefrontGuard,
         Request         $request,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        Settings        $settings,
+        RatingHelper    $ratingHelper
     ) {
         $this->logger = $logger;
         $this->entityFactory = $entityFactory;
@@ -58,6 +63,8 @@ class CommentsHelper implements GetListInterface
         $this->languages = $languages;
         $this->mainHelper = $mainHelper;
         $this->storefrontGuard = $storefrontGuard;
+        $this->settings = $settings;
+        $this->ratingHelper = $ratingHelper;
         $this->request = $request;
         $this->user = $mainHelper->getCurrentUser();
     }
@@ -221,6 +228,11 @@ class CommentsHelper implements GetListInterface
                     $comment->user_id = $user->id;
                 }
 
+                $autoApproved = (bool)$this->settings->get('auto_approved');
+                if ($autoApproved) {
+                    $comment->approved = 1;
+                }
+
                 // Добавляем комментарий в базу
                 $commentId = $commentsEntity->add($comment);
 
@@ -233,6 +245,12 @@ class CommentsHelper implements GetListInterface
                     return;
                 }
 
+                // Без модерації нікому перерахувати середній бал: він зʼявляється
+                // в BackendCommentsHelper::approve(), куди такий відгук не потрапить.
+                if ($autoApproved) {
+                    $this->recalculateRating($objectType, $objectId);
+                }
+
                 // Отправляем email
                 $this->notify->emailCommentAdmin($commentId);
 
@@ -241,6 +259,30 @@ class CommentsHelper implements GetListInterface
                 Response::redirectTo($this->backUrl('#comment_' . $commentId));
             }
         }
+    }
+
+    /**
+     * Бал рахується з відгуків, тож новий схвалений відгук його змінює.
+     * Повторює те, що робить адмінка при схваленні.
+     */
+    private function recalculateRating($objectType, $objectId)
+    {
+        $entities = [
+            'product' => ProductsEntity::class,
+            'post'    => BlogEntity::class,
+        ];
+
+        // Тип приходить ззовні - метод публічний. Невідомий тип за тернарником
+        // «post чи товар» мовчки оновив би товар із тим самим id.
+        if (!isset($entities[$objectType])) {
+            return;
+        }
+
+        $this->ratingHelper->recalculateFromReviews(
+            $this->entityFactory->get($entities[$objectType]),
+            $objectId,
+            $objectType
+        );
     }
 
     /**
