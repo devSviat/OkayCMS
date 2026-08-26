@@ -173,6 +173,10 @@
                             <span class="hidden">
                                 <link itemprop="url" href="{url_generator route="product" url=$product->url absolute=1}" />
                                 {if $product->variant->stock > 0}
+                                {* Дата останньої зміни запису - єдина правдива відповідь на питання
+                                   «відколи діє ця ціна»: у варіантів власної дати немає, а created
+                                   стверджував би, що ціна не мінялась від заведення товару. *}
+                                <time itemprop="validFrom" datetime="{$product->last_modify|date_format:'%Y-%m-%d'}"></time>
                                 <time itemprop="priceValidUntil" datetime="{'now +1 year'|strtotime|date_format:'%Y-%m-%d'}"></time>
                                 <link itemprop="availability" href="https://schema.org/InStock" />
                                 {else}
