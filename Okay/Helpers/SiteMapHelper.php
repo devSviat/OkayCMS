@@ -29,6 +29,20 @@ class SiteMapHelper
     private $params = [];
 
     const MAX_URLS = 50000;
+
+    /**
+     * Сторінки авторизації: рядок у `__pages` вмикає маршрут і тримає мета-теги,
+     * а віддає їх UserController із noindex. У мапі сайту вони перетворюються на
+     * помилку «Submitted URL marked noindex».
+     *
+     * user/logout сюди не входить: він лише редиректить, сторінки не рендерить
+     * і рядка в поставці не має.
+     */
+    const NOINDEX_PAGES = [
+        'user/login',
+        'user/register',
+        'user/password_remind',
+    ];
     
     public function __construct(EntityFactory $entityFactory, Response $response, MainHelper $mainHelper, Settings $settings)
     {
@@ -108,7 +122,7 @@ class SiteMapHelper
         $this->write($page, true);
         
         foreach ($pagesEntity->find(['visible'=>1]) as $p) {
-            if ($p->url && $p->url != '404') {
+            if ($p->url && $p->url != '404' && !in_array($p->url, self::NOINDEX_PAGES, true)) {
                 $lastModify = [];
                 if ($p->url == 'blog') {
                     $lastModify = $blogEntity->cols(['last_modify'])->order('last_modify_desc')->find(['limit'=>1]);
