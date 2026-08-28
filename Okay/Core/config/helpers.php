@@ -617,6 +617,9 @@ return [
             new SR(Response::class),
             new SR(MainHelper::class),
             new SR(Settings::class),
+            new SR(FilterHelper::class),
+            new SR(MetaRobotsHelper::class),
+            new SR(CanonicalHelper::class),
         ]
     ],
     ComparisonHelper::class => [

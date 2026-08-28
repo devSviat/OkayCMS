@@ -22,7 +22,10 @@ class SiteMapHelper
     private $entityFactory;
     private $response;
     private $settings;
-    
+    private $filterHelper;
+    private $metaRobotsHelper;
+    private $canonicalHelper;
+
     private $language;
     private $siteMapIndex = 1;
     private $urlIndex = 0;
@@ -43,12 +46,28 @@ class SiteMapHelper
         'user/register',
         'user/password_remind',
     ];
-    
-    public function __construct(EntityFactory $entityFactory, Response $response, MainHelper $mainHelper, Settings $settings)
-    {
+
+    /**
+     * Налаштування бренд-фільтра дивляться лише на кількість обраних брендів,
+     * тож для перевірки вистачає масиву з одного будь-якого елемента.
+     */
+    private const ONE_BRAND_SELECTED = [0];
+
+    public function __construct(
+        EntityFactory $entityFactory,
+        Response $response,
+        MainHelper $mainHelper,
+        Settings $settings,
+        FilterHelper $filterHelper,
+        MetaRobotsHelper $metaRobotsHelper,
+        CanonicalHelper $canonicalHelper
+    ) {
         $this->entityFactory = $entityFactory;
         $this->response = $response;
         $this->settings = $settings;
+        $this->filterHelper = $filterHelper;
+        $this->metaRobotsHelper = $metaRobotsHelper;
+        $this->canonicalHelper = $canonicalHelper;
         $this->language = $mainHelper->getCurrentLanguage();
 
         if ($argv = Request::getArgv()) {
@@ -226,6 +245,98 @@ class SiteMapHelper
             $brand = ExtenderFacade::execute(__METHOD__, $brand, func_get_args());
             $this->write($brand, true);
         }
+    }
+
+    /**
+     * Адреси виду /catalog/{категорія}/brand-{бренд}.
+     *
+     * Без lastmod: він коштував би запиту на кожну комбінацію замість одного
+     * на категорію. Фільтри по властивостях сюди не входять — їх кількість це
+     * категорії × значення властивостей, тобто десятки тисяч адрес.
+     */
+    public function writeCategoryBrandsProcedure()
+    {
+        if (!$this->brandFiltersAreOwnPages()) {
+            return;
+        }
+
+        /** @var CategoriesEntity $categoriesEntity */
+        $categoriesEntity = $this->entityFactory->get(CategoriesEntity::class);
+
+        foreach ($categoriesEntity->find() as $c) {
+            if (!$this->categoryIsReachable($c)) {
+                continue;
+            }
+
+            $brandsFilter = $this->filterHelper->prepareFilterGetBrands([
+                'category_id' => $c->children,
+            ]);
+
+            // getBrands() віддає порожньо, коли бренд у категорії один: такий
+            // фільтр показав би саму категорію. Власний запит це загубить.
+            foreach ($this->filterHelper->getBrands($brandsFilter) as $brand) {
+                // Без url фільтр випав би з адреси, лишивши дублікат категорії.
+                if (empty($brand->url)) {
+                    continue;
+                }
+
+                $categoryBrand = [
+                    'url' => Router::generateUrl('category', [
+                        'url'        => $c->url,
+                        'filtersUrl' => ['brand' => $brand->url],
+                    ], true),
+                    'changefreq' => 'weekly',
+                    'priority' => '0.5',
+                ];
+
+                $categoryBrand = ExtenderFacade::execute(__METHOD__, $categoryBrand, func_get_args());
+                $this->write($categoryBrand, true);
+            }
+        }
+    }
+
+    /**
+     * canonical_category_brand за замовчуванням дорівнює CANONICAL_WITHOUT_FILTER:
+     * бренд-фільтр канонікалиться на категорію й окремою сторінкою не є.
+     * Обидва налаштування вже в памʼяті, тож перевірка не коштує запитів.
+     */
+    private function brandFiltersAreOwnPages(): bool
+    {
+        if ($this->metaRobotsHelper->getCatalogRobots('', [], [], self::ONE_BRAND_SELECTED) !== ROBOTS_INDEX_FOLLOW) {
+            return false;
+        }
+
+        $canonical = $this->canonicalHelper->getCatalogCanonicalData('', [], [], self::ONE_BRAND_SELECTED);
+
+        // false — CANONICAL_ABSENT, тега немає, склеювати нічого.
+        if (!is_array($canonical)) {
+            return true;
+        }
+
+        // Хелпер віддає частини адреси, які треба прибрати; обнулений 'brand'
+        // і означає «канонікал веде на категорію».
+        return !array_key_exists('brand', $canonical) || $canonical['brand'] !== null;
+    }
+
+    /**
+     * Прихований предок ховає всю гілку, тож власного visible замало.
+     * $category->path містить і саму категорію, і всіх її предків.
+     */
+    private function categoryIsReachable($category): bool
+    {
+        // children порожній лише за зламаного дерева, але тоді фільтр по
+        // category_id вироджується й віддає весь каталог.
+        if (empty($category->children) || empty($category->visible)) {
+            return false;
+        }
+
+        foreach ((array)$category->path as $ancestor) {
+            if (empty($ancestor->visible)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function writeProductsProcedure()
