@@ -46,32 +46,73 @@ class BrandsEntity extends Entity
     protected static $tableAlias = 'b';
     protected static $alternativeIdField = 'url';
     
+    private bool $productsJoined = false;
+
+    public function flush()
+    {
+        $this->productsJoined = false;
+        parent::flush();
+    }
+
+    /**
+     * Джойн товарів приносить собі той фільтр, якому потрібен аліас p — так
+     * само, як filter__category_id приносить __products_categories. Без такого
+     * фільтра цей LEFT JOIN не дає ні колонки, ні умови, а лише розмножує
+     * рядки на кожен товар бренду, щоб DISTINCT їх схлопнув.
+     */
+    private function joinProducts(): void
+    {
+        if ($this->productsJoined) {
+            return;
+        }
+
+        $this->productsJoined = true;
+        $this->select->join('left', '__products AS p', 'p.brand_id=b.id');
+    }
+
+    /**
+     * Фільтр із модуля міг писатись з розрахунку на завжди присутній p, а про
+     * його вміст ядро нічого не знає — такому лишаємо join як було.
+     */
+    private function joinProductsForModuleFilters(array $filter): void
+    {
+        foreach (array_keys($filter) as $filterName) {
+            if ($this->modulesFilters->hasFilter(static::class, $filterName)) {
+                $this->joinProducts();
+                return;
+            }
+        }
+    }
+
     public function find(array $filter = [])
     {
         $this->select->distinct(true);
-        $this->select->join('left', '__products AS p', 'p.brand_id=b.id');
+        $this->joinProductsForModuleFilters($filter);
         return parent::find($filter);
     }
     
     public function count(array $filter = [])
     {
-        $this->select->join('left', '__products AS p', 'p.brand_id=b.id');
+        $this->joinProductsForModuleFilters($filter);
         return parent::count($filter);
     }
 
     protected function filter__product_visible($productVisible)
     {
+        $this->joinProducts();
         $this->select->where('p.visible = ' . (int)$productVisible);
     }
     
     protected function filter__product_id($productsIds)
     {
+        $this->joinProducts();
         $this->select->where('p.id IN (:products_ids)');
         $this->select->bindValue('products_ids', (array)$productsIds);
     }
     
     protected function filter__category_id($categoryId)
     {
+        $this->joinProducts();
         $this->select->join('LEFT', '__products_categories pc', 'p.id = pc.product_id');
         $this->select->where('pc.category_id IN (:categories_ids)')
             ->bindValue('categories_ids', (array)$categoryId);
@@ -88,6 +129,8 @@ class BrandsEntity extends Entity
         if (empty($filters)) {
             return;
         }
+
+        $this->joinProducts();
 
         if ($otherFilter = $this->executeOtherFilter($filters)) {
             $this->select->where("(" . implode(' OR ', $otherFilter) . ")");
@@ -128,6 +171,7 @@ class BrandsEntity extends Entity
     
     protected function filter__features($features, $filter)
     {
+        $this->joinProducts();
         $subQuery = $this->queryFactory->newSelect();
         // Алиас для таблицы без языков
         $optionsPx = 'fv';
