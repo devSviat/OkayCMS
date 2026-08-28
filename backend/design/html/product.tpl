@@ -513,6 +513,39 @@
                 {get_design_block block="product_promo_images"}
             </div>
         </div>
+        {*Оцінка з відгуків*}
+        <div class="col-lg-4 col-md-12">
+            <div class="boxed min_height_230px">
+                <div class="heading_box">
+                    {$btr->product_rating|escape}
+                </div>
+                <div class="toggle_body_wrap on fn_card">
+                    {* Тільки показ: бал — похідна від схвалених відгуків, а не окреме поле.
+                       Редагований, він пережив би рівно до наступного перерахунку. *}
+                    {if $product->votes}
+                        <div class="comment_rating mb-1">
+                            {section name=star loop=5}
+                                {if $smarty.section.star.index < $product->rating}
+                                    {include file='svg_icon.tpl' svgId='star_filled'}
+                                {else}
+                                    {include file='svg_icon.tpl' svgId='star'}
+                                {/if}
+                            {/section}
+                            <span class="comment_rating__value">{$product->rating|string_format:"%.1f"}/5</span>
+                        </div>
+                        <div class="text_grey mb-1">
+                            {$btr->product_rating_from_reviews|escape}: {$product->votes|intval}
+                        </div>
+                    {else}
+                        <div class="text_grey mb-1">{$btr->product_rating_none|escape}</div>
+                    {/if}
+                    <a class="btn btn_small btn-outline-info" href="index.php?controller=CommentsAdmin&amp;type=product&amp;object_id={$product->id|intval}">
+                        {$btr->product_rating_open_reviews|escape}
+                    </a>
+                </div>
+                {get_design_block block="product_rating_summary"}
+            </div>
+        </div>
     </div>
 
     {*Свойства товара*}
