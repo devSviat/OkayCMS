@@ -300,7 +300,7 @@ class SiteMapHelper
      * бренд-фільтр канонікалиться на категорію й окремою сторінкою не є.
      * Обидва налаштування вже в памʼяті, тож перевірка не коштує запитів.
      */
-    private function brandFiltersAreOwnPages()
+    private function brandFiltersAreOwnPages(): bool
     {
         if ($this->metaRobotsHelper->getCatalogRobots('', [], [], self::ONE_BRAND_SELECTED) !== ROBOTS_INDEX_FOLLOW) {
             return false;
@@ -322,7 +322,7 @@ class SiteMapHelper
      * Прихований предок ховає всю гілку, тож власного visible замало.
      * $category->path містить і саму категорію, і всіх її предків.
      */
-    private function categoryIsReachable($category)
+    private function categoryIsReachable($category): bool
     {
         // children порожній лише за зламаного дерева, але тоді фільтр по
         // category_id вироджується й віддає весь каталог.
