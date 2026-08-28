@@ -47,11 +47,11 @@
                 <div class="row">
                     <div class="col-lg-3 col-md-3 col-sm-12">
                         <select class="selectpicker form-control" onchange="location = this.value;">
-                            <option value="{url keyword=null page=null type=null status=null}" {if !$type}selected{/if}>{$btr->comments_all|escape}</option>
-                            <option value="{url keyword=null page=null type=product status=null}" {if $type == 'product'}selected{/if}>{$btr->comments_to_products|escape}</option>
-                            <option value="{url keyword=null page=null type=post status=null}" {if $type == 'post'}selected{/if}>{$btr->comments_to_articles|escape}</option>
-                            <option value="{url keyword=null page=null type=null status='approved'}" {if $status == 'approved'}selected{/if}>{$btr->comments_filter_approved|escape}</option>
-                            <option value="{url keyword=null page=null type=null status='unapproved'}" {if $status == 'unapproved'}selected{/if}>{$btr->comments_filter_unapproved|escape}</option>
+                            <option value="{url keyword=null page=null type=null status=null object_id=null}" {if !$type}selected{/if}>{$btr->comments_all|escape}</option>
+                            <option value="{url keyword=null page=null type=product status=null object_id=null}" {if $type == 'product'}selected{/if}>{$btr->comments_to_products|escape}</option>
+                            <option value="{url keyword=null page=null type=post status=null object_id=null}" {if $type == 'post'}selected{/if}>{$btr->comments_to_articles|escape}</option>
+                            <option value="{url keyword=null page=null type=null status='approved' object_id=null}" {if $status == 'approved'}selected{/if}>{$btr->comments_filter_approved|escape}</option>
+                            <option value="{url keyword=null page=null type=null status='unapproved' object_id=null}" {if $status == 'unapproved'}selected{/if}>{$btr->comments_filter_unapproved|escape}</option>
                         </select>
                     </div>
                     <div class="col-lg-3 col-md-3 col-sm-12">

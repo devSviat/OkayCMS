@@ -95,6 +95,11 @@ class BackendCommentsHelper
             $filter['approved'] = 0;
         }
 
+        // Конкретний обʼєкт: посилання зі сторінки товару в адмінці
+        if ($objectId = $this->request->get('object_id', 'integer')) {
+            $filter['object_id'] = $objectId;
+        }
+
         // Оцінка у відгуку
         $rating = $this->request->get('rating', 'string');
         if ($rating === 'none' || (is_numeric($rating) && $rating >= RatingHelper::MIN_RATING && $rating <= RatingHelper::MAX_RATING)) {
