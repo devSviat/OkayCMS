@@ -3390,9 +3390,13 @@ body.hc-nav-open {
 	animation: vs-shimmer var(--vs-dur-loop) ease-in-out infinite;
 }
 
+/* Крок рядка тримається за .vs-filter-group__head (min-height 52px плюс
+   волосінь): скелет існує саме щоб зарезервувати місце, і власний крок звів
+   би нанівець його єдину роботу. */
+
 .vs-skeleton--filter {
 	height: 44px;
-	margin-bottom: var(--vs-space-3);
+	margin-bottom: var(--vs-space-2);
 }
 
 @keyframes vs-shimmer {
