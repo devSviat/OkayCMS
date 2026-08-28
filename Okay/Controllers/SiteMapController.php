@@ -29,6 +29,7 @@ class SiteMapController extends AbstractController
         $siteMapHelper->writeBlogProcedure();
         $siteMapHelper->writeCategoriesProcedure();
         $siteMapHelper->writeBrandsProcedure();
+        $siteMapHelper->writeCategoryBrandsProcedure();
         $siteMapHelper->writeCustomProcedure();
         $siteMapHelper->writeProductsProcedure();
 
