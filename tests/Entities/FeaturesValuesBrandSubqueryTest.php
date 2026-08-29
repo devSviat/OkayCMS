@@ -9,16 +9,10 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
 /**
- * getSelect() ставить DISTINCT кожній вибірці, бо повній вибірці товару його
- * джойни справді дублюють рядки. Підзапиту filter__brand він шкодить: проєкція
- * там одна колонка, дублі схлопує GROUP BY fv.id зовнішнього запиту, а DISTINCT
- * змушує матеріалізувати весь джойн products × products_features_values
- * замість піти по індексу.
+ * Регресія тиха: сторінка лишається правильною, лише повільнішою, — тож ловить
+ * її тільки перевірка згенерованого SQL.
  *
- * Регресія тиха — сторінка лишається правильною, лише повільнішою, — тож
- * ловити її може тільки перевірка згенерованого SQL.
- *
- * Вибірки тут будуються голою Aura, а не Okay\Core\QueryFactory: обгортка в
+ * Вибірки будуються голою Aura, а не Okay\Core\QueryFactory: обгортка в
  * конструкторі тягне Database через ServiceLocator, а в CI бази немає.
  */
 class FeaturesValuesBrandSubqueryTest extends TestCase
@@ -43,11 +37,7 @@ class FeaturesValuesBrandSubqueryTest extends TestCase
         self::assertStringContainsString('`pfv`.`value_id`', self::buildBrandFilterSql());
     }
 
-    /**
-     * Безпечність зняття DISTINCT тримається на тому, що підзапит нічого не
-     * додає у проєкцію зовнішнього запиту: інакше його дублі стали б видимими,
-     * і жодна дедуплікація по fv.id їх би не сховала.
-     */
+    /** Дублі підзапиту стануть видимими, щойно він потрапить у проєкцію. */
     public function testSubqueryStaysOutOfOuterProjection(): void
     {
         $sql = self::buildBrandFilterSql();
