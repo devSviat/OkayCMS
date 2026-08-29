@@ -486,13 +486,20 @@ class CategoriesEntity extends Entity
 
         $categoriesIdsWithProducts = [];
 
+        // EXISTS зупиняється на першому товарі категорії, а не матеріалізує
+        // рядок на кожну пару (категорія × товар) по всьому каталогу.
+        // Підзапит без AS/ON навмисно: Aura квотує вміст where() і на
+        // "AS alias ON" ламає лапки, віддаючи невалідний SQL без помилки.
         $select = $this->queryFactory->newSelect()
-            ->cols(['category_id'])
-            ->from('__products_categories pc')
-            ->innerJoin(CategoriesEntity::getTable() . ' AS c', 'c.id=pc.category_id AND c.visible=1')
-            ->leftJoin(ProductsEntity::getTable() . ' AS p', 'p.id = pc.product_id')
-            ->where('p.visible = 1')
-            ->groupBy(['pc.category_id']);
+            ->cols(['c.id AS category_id'])
+            ->from(CategoriesEntity::getTable() . ' AS c')
+            ->where('c.visible = 1')
+            ->where(
+                'EXISTS (SELECT 1 FROM __products_categories pc, '
+                . ProductsEntity::getTable() . ' p'
+                . ' WHERE p.id = pc.product_id AND p.visible = 1'
+                . ' AND pc.category_id = c.id)'
+            );
 
         foreach ($select->results('category_id') as $result) {
             $categoriesIdsWithProducts[$result] = $result;
