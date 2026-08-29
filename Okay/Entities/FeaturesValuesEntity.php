@@ -503,9 +503,11 @@ class FeaturesValuesEntity extends Entity
         $productsSelect = $productsEntity->getSelect(['brand' => $value, 'visible' => 1]);
 
         // DISTINCT прийшов з getSelect() і потрібен лише повній вибірці товару.
-        // Тут проєкція — один value_id, а дублі й так схлопує GROUP BY fv.id
-        // зовнішнього запиту; натомість він змушує матеріалізувати весь джойн
-        // products × products_features_values замість піти по індексу.
+        // У похідній таблиці він блокує derived merge, тож база матеріалізує
+        // весь джойн products × products_features_values замість піти по індексу.
+        // Знімати його безпечно, поки підзапит не дає колонок у зовнішню
+        // проєкцію, а точки входу дедуплікують по fv.id: GROUP BY у find(),
+        // COUNT(DISTINCT) у count(), DISTINCT у getSelect().
         $productsSelect
             ->distinct(false)
             ->resetCols()

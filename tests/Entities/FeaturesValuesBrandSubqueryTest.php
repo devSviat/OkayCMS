@@ -43,6 +43,19 @@ class FeaturesValuesBrandSubqueryTest extends TestCase
         self::assertStringContainsString('`pfv`.`value_id`', self::buildBrandFilterSql());
     }
 
+    /**
+     * Безпечність зняття DISTINCT тримається на тому, що підзапит нічого не
+     * додає у проєкцію зовнішнього запиту: інакше його дублі стали б видимими,
+     * і жодна дедуплікація по fv.id їх би не сховала.
+     */
+    public function testSubqueryStaysOutOfOuterProjection(): void
+    {
+        $sql = self::buildBrandFilterSql();
+        $projection = substr($sql, 0, strpos($sql, 'FROM'));
+
+        self::assertStringNotContainsString('filter__brand__p', $projection);
+    }
+
     private static function buildBrandFilterSql(): string
     {
         $own = (new AuraQueryFactory('mysql'))->newSelect();
