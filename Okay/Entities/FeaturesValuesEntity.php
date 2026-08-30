@@ -39,6 +39,9 @@ class FeaturesValuesEntity extends Entity
     protected static $langTable = 'features_values';
     protected static $tableAlias = 'fv';
 
+    /** @var bool Чи роздув поточний find() вибірку джойном pf. Поза find() — консервативне true. */
+    private $productsValuesJoined = true;
+
     public function add($featureValue) {
 
         $featureValue = (object)$featureValue;
@@ -86,6 +89,7 @@ class FeaturesValuesEntity extends Entity
         $this->select->groupBy([$this->getTableAlias().'.id']);
 
         [$joinProductsValues, $joinFeatures, $joinProducts] = $this->resolveFindJoins($filter);
+        $this->productsValuesJoined = $joinProductsValues;
 
         if ($joinProductsValues) {
             $this->select->join('LEFT', '__products_features_values AS pf', 'pf.value_id=fv.id');
@@ -106,8 +110,12 @@ class FeaturesValuesEntity extends Entity
         if ($joinProducts) {
             $this->select->join('LEFT', '__products AS p', 'p.id=pf.product_id');
         }
-        
-        return parent::find($filter);
+
+        try {
+            return parent::find($filter);
+        } finally {
+            $this->productsValuesJoined = true;
+        }
     }
 
     /**
@@ -494,16 +502,15 @@ class FeaturesValuesEntity extends Entity
 
         $productsSelect = $productsEntity->getSelect(['brand' => $value, 'visible' => 1]);
 
-        // DISTINCT прийшов з getSelect() і потрібен лише повній вибірці товару, а
-        // тут блокує derived merge: база матеріалізує весь джойн
-        // products × products_features_values замість піти по індексу. Знімати
-        // безпечно, поки підзапит не дає колонок у проєкцію, а точки входу
-        // дедуплікують по fv.id. У filter__product_keyword навпаки — там умова
-        // сканує все, і DISTINCT стискає потік ще до джойна.
         $productsSelect
-            ->distinct(false)
             ->resetCols()
             ->resetOrderBy();
+
+        // DISTINCT блокує derived merge, але дедуплікує підзапит: знімати його
+        // безпечно лише поки джойн pf не роздув зовнішню вибірку.
+        if (!$this->productsValuesJoined) {
+            $productsSelect->distinct(false);
+        }
 
         $productsSelect
             ->join(
