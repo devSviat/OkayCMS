@@ -1,0 +1,69 @@
+name: Tag release
+
+# Реліз-флоу: розробка йде PR-ами в dev, реліз — PR dev -> main із версією
+# в назві (напр. "okaycms-fork/v1.1.0 — ..." або просто "v1.1.0: ...").
+# Після мержу цей workflow ставить тег okaycms-fork/vX.Y.Z і запускає
+# release.yml. PR у main без версії в назві — не реліз: тег не ставиться,
+# лише warning у лог.
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  actions: write
+  pull-requests: read
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Знайти release-PR і витягти версію
+        id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Назва PR — недовірений вхід: тільки через змінну, без
+          # інтерполяції в скрипт.
+          PR_TITLE="$(gh pr list --repo "$GITHUB_REPOSITORY" --state merged \
+            --base main --search "$GITHUB_SHA" --json title --jq '.[0].title // empty')"
+
+          if [[ -z "$PR_TITLE" ]]; then
+            echo "::warning::Пуш у main без PR — тег не ставиться"
+            echo "version=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$PR_TITLE" =~ (okaycms-fork/)?v([0-9]+\.[0-9]+\.[0-9]+)([^0-9.]|$) ]]; then
+            echo "version=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::У назві PR немає версії vX.Y.Z — це не release-PR, тег не ставиться"
+            echo "version=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Поставити тег
+        if: steps.version.outputs.version != ''
+        id: tag
+        run: |
+          TAG="okaycms-fork/v${{ steps.version.outputs.version }}"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" > /dev/null 2>&1; then
+            echo "::error::Тег $TAG уже існує — версія в назві release-PR має бути новою"
+            exit 1
+          fi
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Запустити release.yml
+        if: steps.version.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Push тегу через GITHUB_TOKEN не породжує подію для release.yml
+          # (захист GitHub від рекурсії) — викликаємо явно, з ref на тег.
+          gh workflow run release.yml --repo "$GITHUB_REPOSITORY" \
+            --ref "refs/tags/${{ steps.tag.outputs.tag }}"
