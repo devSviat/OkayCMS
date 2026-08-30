@@ -39,6 +39,17 @@ class MaintenanceMode
     }
 
     /**
+     * index.php читає токен із суперглобалів, де PHP розбирає
+     * `?core_updater_token[]=x` у масив — allowsRequest() навмисно лишає
+     * строгий `?string`, тож межа коерції винесена сюди, окремо
+     * тестованою, замість мовчазного ослаблення типу параметра.
+     */
+    public static function normalizeToken(mixed $raw): ?string
+    {
+        return is_string($raw) ? $raw : null;
+    }
+
+    /**
      * Битий JSON у прапорці трактується як активний режим без токен-обходу
      * (fail-closed) — краще зайвий 503, ніж витік вітрини під час апдейту.
      */

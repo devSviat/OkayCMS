@@ -35,6 +35,38 @@ class MaintenanceModeTest extends TestCase
         );
     }
 
+    /**
+     * index.php не може покластися на автозавантаження класу перед
+     * check-ом самого прапорця (гейт стоїть до DI), тож дублює цей шлях
+     * літералом 'config/.maintenance'. Цей тест — контракт, який ловить
+     * розходження, якщо суфікс колись зміниться в одному місці й не в
+     * другому.
+     */
+    public function testFlagPathContractStaysConfigDotMaintenance(): void
+    {
+        $this->assertSame('/app/config/.maintenance', MaintenanceMode::flagPath('/app'));
+    }
+
+    public function testNormalizeTokenPassesThroughStrings(): void
+    {
+        $this->assertSame('abc', MaintenanceMode::normalizeToken('abc'));
+    }
+
+    public function testNormalizeTokenPassesThroughNull(): void
+    {
+        $this->assertNull(MaintenanceMode::normalizeToken(null));
+    }
+
+    /**
+     * PHP розбирає ?core_updater_token[]=x у масив — normalizeToken()
+     * мусить звести це до null, а не дати TypeError долетіти до
+     * allowsRequest(), яка навмисно лишається строго ?string.
+     */
+    public function testNormalizeTokenTreatsArrayAsAbsentTokenInsteadOfFatal(): void
+    {
+        $this->assertNull(MaintenanceMode::normalizeToken(['x']));
+    }
+
     public function testEnableWritesJsonWithStartedAtAndTokenAndReturnsToken(): void
     {
         mkdir($this->tmpDir . '/config');

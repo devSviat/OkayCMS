@@ -20,12 +20,24 @@ require_once('vendor/autoload.php');
 // сторінка технічних робіт не має права впасти через них.
 // backend/index.php свідомо без цього гейта: адмінка мусить лишатись
 // живою, щоб бачити прогрес і статус оновлення.
-if (class_exists(\Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::class)) {
-    $maintenanceFlag = __DIR__ . '/config/.maintenance';
-    if (!\Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::allowsRequest(
-        $maintenanceFlag,
+// file_exists() йде першим і без нього — єдина ціна цього блоку на
+// кожному хіті вітрини; class_exists (з можливим автозавантаженням)
+// рахується лише коли прапорець реально лежить на диску. Шлях зібраний
+// літералом, а не через MaintenanceMode::flagPath(__DIR__), бо клас тут
+// ще не гарантовано автозавантажений — тримати його синхронним з
+// контрактом flagPath() ('config/.maintenance') покриває
+// MaintenanceModeTest::testFlagPathContractStaysConfigDotMaintenance.
+$maintenanceFlag = __DIR__ . '/config/.maintenance';
+if (file_exists($maintenanceFlag)
+    && class_exists(\Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::class)
+) {
+    // Суперглобалі можуть віддати масив (?core_updater_token[]=x) —
+    // normalizeToken() зводить це до null замість TypeError у allowsRequest().
+    $providedToken = \Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::normalizeToken(
         $_SERVER['HTTP_X_CORE_UPDATER_TOKEN'] ?? ($_GET['core_updater_token'] ?? null)
-    )) {
+    );
+
+    if (!\Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::allowsRequest($maintenanceFlag, $providedToken)) {
         http_response_code(503);
         header('Retry-After: 120');
         echo \Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::renderPage();
