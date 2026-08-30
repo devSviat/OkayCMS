@@ -63,4 +63,11 @@ class CoreMigratorTest extends TestCase
         $this->assertStringStartsWith('ALTER TABLE', trim($statements[1]));
         $this->assertStringNotContainsString('--', $statements[0]);
     }
+
+    public function testApplyWithoutDbDependenciesThrowsLogicException(): void
+    {
+        $this->expectException(\LogicException::class);
+
+        (new CoreMigrator())->apply(__DIR__);
+    }
 }

@@ -52,6 +52,7 @@ use Okay\Core\Security\AdminRecoveryToken;
 use Okay\Core\Security\AttemptLimiter;
 use Okay\Core\Security\RecoveryToken;
 use Okay\Core\Security\StorefrontGuard;
+use Okay\Core\Release\CoreMigrator;
 
 $services = [
     BRouter::class => [
@@ -360,6 +361,14 @@ $services = [
             new SR(Database::class),
             new SR(Config::class),
             new SR(QueryFactory::class),
+        ],
+    ],
+    CoreMigrator::class => [
+        'class' => CoreMigrator::class,
+        'arguments' => [
+            new SR(ExtendedPdo::class),
+            new SR(EntityFactory::class),
+            new SR(Config::class),
         ],
     ],
     ImportCore::class => [
