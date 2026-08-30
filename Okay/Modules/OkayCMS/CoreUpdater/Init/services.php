@@ -5,6 +5,7 @@ namespace Okay\Modules\OkayCMS\CoreUpdater;
 use Okay\Core\Config;
 use Okay\Core\OkayContainer\Reference\ServiceReference as SR;
 use Okay\Core\Settings;
+use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateBackup;
 use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateCheckHelper;
 use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateDownloader;
 use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateStatus;
@@ -25,6 +26,12 @@ return [
     ],
     UpdateDownloader::class => [
         'class' => UpdateDownloader::class,
+        'arguments' => [
+            new SR(Config::class),
+        ],
+    ],
+    UpdateBackup::class => [
+        'class' => UpdateBackup::class,
         'arguments' => [
             new SR(Config::class),
         ],
