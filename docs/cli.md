@@ -23,6 +23,7 @@ cd dev && docker compose exec php85 php ok <команда>
 | `scheduler:run` | виконує всі готові до запуску задачі |
 | `scheduler:task <task_id>` | виконує одну задачу |
 | `scheduler:list` | показує перелік зареєстрованих задач |
+| `release:build-package` | збирає пакет релізу форку (zip + `manifest.json` + `checksums.txt`) |
 
 ### `database:deploy`
 
@@ -60,6 +61,19 @@ php ok module:check-modifications [--all] [--theme=okay_shop] [-v]
 є мертвий анкер або модуль, увімкнений у базі, але відсутній у коді.
 
 Що саме перевіряється й чого перевірка не робить — [tpl-modifications.md](tpl-modifications.md#як-перевірити-що-анкери-живі).
+
+### `release:build-package`
+
+```bash
+php ok release:build-package --fork-version=1.1.0 [--repo-path=…] [--output-dir=build/release] [--manifest=release-manifest.json] [--migrations=release-migrations/pending] [--upstream-base=…]
+```
+
+Пакує репозиторій у пакет релізу форку — вхід `UpdateDownloader`/`UpdatePackage` на
+боці CMS: `manifest.json` (шлях → sha256), `checksums.txt` для самого архіву, і
+`release-migrations/pending/*.up.sql`. `--upstream-base` типово береться з
+`Config::$version` за `--repo-path`. Викликається з `.github/workflows/release.yml`
+при тегуванні релізу — вручну лише для локальної перевірки пакування. Що споживає
+результат на боці інсталяції — [updates.md](updates.md).
 
 ## Своя команда
 
