@@ -1,0 +1,19 @@
+{
+    "include": [
+        "Okay/Core/",
+        "Okay/Controllers/",
+        "Okay/Entities/",
+        "Okay/Helpers/",
+        "Okay/Requests/",
+        "backend/",
+        "Okay/Modules/OkayCMS/",
+        "composer.json",
+        "composer.lock",
+        "ok",
+        "index.php",
+        "1DB_changes/"
+    ],
+    "exclude": [
+        "backend/design/"
+    ]
+}
