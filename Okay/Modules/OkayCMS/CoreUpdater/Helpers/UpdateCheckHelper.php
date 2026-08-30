@@ -113,17 +113,44 @@ class UpdateCheckHelper
 
     /**
      * Помилка перевірки не має права зіпсувати робочий стан кешу: старий
-     * снапшот повертається як є, з доданим lastError, і в Settings не пишеться.
+     * снапшот повертається як є (добитий до повного контракту check()), з
+     * доданим lastError, і в Settings не пишеться.
      *
      * @param array<string, mixed>|null $snapshot
      * @return array<string, mixed>
      */
     private function withError(?array $snapshot, string $message): array
     {
-        $result = $snapshot ?? [];
+        return self::buildErrorResult($snapshot, $this->config->forkVersion, $message);
+    }
+
+    /**
+     * Чиста функція без залежностей — окремо, щоб покрити юніт-тестом без
+     * мережі й без Settings/DB.
+     *
+     * @param array<string, mixed>|null $snapshot
+     * @return array<string, mixed>
+     */
+    public static function buildErrorResult(?array $snapshot, string $installed, string $message): array
+    {
+        $result = array_merge(self::emptySnapshot($installed), $snapshot ?? []);
         $result['lastError'] = $message;
 
         return $result;
+    }
+
+    /**
+     * @return array{checkedAt: ?int, etag: ?string, installed: string, latest: ?array, updateAvailable: bool}
+     */
+    private static function emptySnapshot(string $installed): array
+    {
+        return [
+            'checkedAt' => null,
+            'etag' => null,
+            'installed' => $installed,
+            'latest' => null,
+            'updateAvailable' => false,
+        ];
     }
 
     private static function extractEtag(string $headers): ?string
