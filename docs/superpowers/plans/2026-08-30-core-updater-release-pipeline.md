@@ -827,8 +827,11 @@ the full existing suite still passing with the new file present (Step 3).
   [--upstream-base=X.Y.Z]`. Exit code `Command::SUCCESS` (0) /
   `Command::FAILURE` (1). This is what Task 7's `release.yml` invokes.
   `--repo-path` defaults to the command file's own repo root
-  (`dirname(__DIR__, 4)` from
-  `Okay/Core/Console/Commands/Release/ReleaseBuildPackageCommand.php`);
+  (`dirname(__DIR__, 5)` from
+  `Okay/Core/Console/Commands/Release/ReleaseBuildPackageCommand.php` — the
+  same depth `DatabaseDeployCommand` already uses from the same nesting
+  level, `Okay/Core/Console/Commands/Database/DatabaseDeployCommand.php:16`,
+  confirmed against that file rather than counted freehand);
   `--upstream-base` defaults to `Config::$version` read from
   `{repo-path}/config/config.php` when the option is omitted.
 
@@ -859,7 +862,7 @@ class ReleaseBuildPackageCommand extends Command
 {
     protected function configure(): void
     {
-        $defaultRepoPath = dirname(__DIR__, 4);
+        $defaultRepoPath = dirname(__DIR__, 5);
 
         $this
             ->addOption('fork-version', null, InputOption::VALUE_REQUIRED, 'Fork version being released, e.g. 1.1.0')
