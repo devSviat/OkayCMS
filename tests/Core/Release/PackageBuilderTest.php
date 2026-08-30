@@ -85,6 +85,45 @@ class PackageBuilderTest extends TestCase
         }
     }
 
+    public function testBuildProducesZipVersionJsonAndChecksums(): void
+    {
+        $outputDir = sys_get_temp_dir() . '/package-builder-output-' . uniqid();
+        mkdir($outputDir, 0777, true);
+
+        $builder = new PackageBuilder();
+
+        try {
+            $result = $builder->build(
+                $this->fixturesDir . '/sample-repo',
+                $this->fixturesDir . '/sample-manifest.json',
+                '1.1.0',
+                '4.6.0',
+                $outputDir
+            );
+
+            $this->assertSame($outputDir . '/okaycms-fork-v1.1.0.zip', $result['zipPath']);
+            $this->assertFileExists($result['zipPath']);
+            $this->assertFileExists($result['versionJsonPath']);
+            $this->assertFileExists($result['checksumsPath']);
+
+            $zip = new \ZipArchive();
+            $zip->open($result['zipPath']);
+            $this->assertNotFalse($zip->locateName('version.json'));
+            $this->assertNotFalse($zip->locateName('manifest.json'));
+            $this->assertNotFalse($zip->locateName('payload/Okay/Core/Foo.php'));
+            $this->assertFalse($zip->locateName('payload/backend/design/theme.tpl'));
+            $zip->close();
+
+            $checksums = file_get_contents($result['checksumsPath']);
+            $expectedZipHash = hash_file('sha256', $result['zipPath']);
+            $expectedVersionHash = hash_file('sha256', $result['versionJsonPath']);
+            $this->assertStringContainsString("{$expectedZipHash}  okaycms-fork-v1.1.0.zip", $checksums);
+            $this->assertStringContainsString("{$expectedVersionHash}  version.json", $checksums);
+        } finally {
+            $this->removeDirectory($outputDir);
+        }
+    }
+
     private function removeDirectory(string $dir): void
     {
         if (!is_dir($dir)) {
