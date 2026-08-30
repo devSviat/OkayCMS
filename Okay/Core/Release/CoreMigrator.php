@@ -70,10 +70,17 @@ class CoreMigrator
                 }
             }
 
-            $migrationsEntity->add([
+            // Entity::add() ніколи не кидає — Database::query() ловить \Exception
+            // сам і повертає false; без цієї перевірки "стоп на помилці"
+            // не діяв би саме на записі в трекер.
+            if (!$migrationsEntity->add([
                 'name' => $migration['name'],
                 'applied_at' => date('Y-m-d H:i:s'),
-            ]);
+            ])) {
+                throw new \RuntimeException(
+                    "Core-міграція {$migration['name']} виконалась, але запис у трекер не вдався"
+                );
+            }
             $appliedNow[] = $migration['name'];
         }
 
