@@ -100,7 +100,7 @@ jobs:
           LATEST_OTHER="$(git tag --list 'okaycms-fork/v*' \
             | sed 's|^okaycms-fork/v||' \
             | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
-            | grep -vx "$VERSION" | sort -V | tail -1)"
+            | grep -vxF "$VERSION" | sort -V | tail -1)"
 
           if [[ -n "$LATEST_OTHER" ]]; then
             HIGHEST="$(printf '%s\n%s\n' "$VERSION" "$LATEST_OTHER" | sort -V | tail -1)"
@@ -139,7 +139,7 @@ jobs:
           # Нотатки: від попереднього тегу форку. Без цього GitHub узяв би
           # за старт найближчий апстрімний тег (4.5.2) і перший реліз
           # отримав би нотатки на весь розрив форку з апстрімом.
-          PREV="$(git tag --list 'okaycms-fork/v*' | grep -vx "$TAG" | sort -V | tail -1)"
+          PREV="$(git tag --list 'okaycms-fork/v*' | grep -vxF "$TAG" | sort -V | tail -1)"
           if [[ -n "$PREV" ]]; then
             NOTES_ARGS=(--generate-notes --notes-start-tag "$PREV")
           else

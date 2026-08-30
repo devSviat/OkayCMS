@@ -67,7 +67,11 @@ jobs:
         if: steps.version.outputs.version != ''
         run: |
           VERSION="${{ steps.version.outputs.version }}"
+          # Теги, що вже вказують на поточний коміт, — не "попередня версія",
+          # а слід перерваного попереднього рану цього ж релізу: без фільтра
+          # ре-ран порівнював би версію сам із собою і падав.
           LATEST="$(git ls-remote --tags origin 'refs/tags/okaycms-fork/v*' \
+            | grep -v "^$GITHUB_SHA[[:space:]]" \
             | awk -F'refs/tags/okaycms-fork/v' '{print $2}' \
             | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)"
 
