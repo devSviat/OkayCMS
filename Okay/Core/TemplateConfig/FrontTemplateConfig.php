@@ -342,12 +342,9 @@ class FrontTemplateConfig
         // Подключаем динамический JS (scripts.tpl)
         $dynamicJsFile = "design/" . $this->getTheme() . "/html/scripts.tpl";
         if (is_file($dynamicJsFile)) {
-            $filename = md5_file($dynamicJsFile) . json_encode($_GET);
-            if (isset($_SESSION['dynamic_js'])) {
-                $filename .= json_encode($_SESSION['dynamic_js']);
-            }
-
-            $filename = md5($filename);
+            // Той самий ключ, під яким сторінка склала свої змінні: інакше скрипт
+            // забере знімок сусідньої вкладки.
+            $filename = $design->getDynamicJsPageKey() ?: md5(md5_file($dynamicJsFile) . json_encode($_GET));
 
             $getParams = (!empty($_GET) ? "?" . http_build_query($_GET) : '');
             $footer .= "<script src=\"" . Router::generateUrl('dynamic_js', ['fileId' => $filename]) . $getParams . "\"" . ($this->scriptsDefer == true ? " defer" : '') . "></script>" . PHP_EOL;
@@ -356,6 +353,24 @@ class FrontTemplateConfig
         }
 
         return $footer;
+    }
+
+    /**
+     * Ключ, що звʼязує сторінку з її окремим запитом за scripts.tpl. Береться з
+     * адреси сторінки цілком: імені маршруту замало — його ділять і дві
+     * категорії, і дві мови однієї сторінки.
+     *
+     * @param string $requestUri
+     * @return string
+     */
+    public function getDynamicJsPageKey($requestUri)
+    {
+        $dynamicJsFile = "design/" . $this->getTheme() . "/html/scripts.tpl";
+
+        return md5(implode('|', [
+            is_file($dynamicJsFile) ? md5_file($dynamicJsFile) : '',
+            $requestUri,
+        ]));
     }
 
     public function clearCompiled()

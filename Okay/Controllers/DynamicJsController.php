@@ -4,6 +4,7 @@
 namespace Okay\Controllers;
 
 
+use Okay\Core\Design;
 use Okay\Core\TemplateConfig\FrontTemplateConfig;
 use Okay\Core\TemplateConfig\JsConfig;
 
@@ -19,13 +20,17 @@ class DynamicJsController extends AbstractController
         $dynamicJs = '';
         
         if (is_file($dynamicJsFile)) {
-            if (!empty($_SESSION['dynamic_js']['controller'])) {
-                $this->design->assign('controller', $_SESSION['dynamic_js']['controller']);
+            // Знімок тієї сторінки, яка видала цю адресу. Спільний слот лишається
+            // запасним шляхом для скриптів, замовлених ще до появи знімків.
+            $page = $_SESSION[Design::DYNAMIC_JS_PAGES][$fileId] ?? $_SESSION['dynamic_js'] ?? [];
+
+            if (!empty($page['controller'])) {
+                $this->design->assign('controller', $page['controller']);
             }
-    
-            if (isset($_SESSION['dynamic_js']['vars'])) {
+
+            if (isset($page['vars'])) {
                 // Передаем глобальные переменные в шаблон
-                foreach ($_SESSION['dynamic_js']['vars'] as $var => $value) {
+                foreach ($page['vars'] as $var => $value) {
                     $this->design->assign($var, $value);
                 }
             }
