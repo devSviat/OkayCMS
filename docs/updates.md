@@ -51,12 +51,12 @@ ETag-кондиційний (`If-None-Match`); `304` лише освіжає `ch
 | ---- | --------- |
 | `download` | качає `{version}.zip` і `checksums.txt` у `files/tmp/updates/{version}/` (лише з `TRUSTED_ASSET_URL_PREFIX` — `https://github.com/devSviat/OkayCMS/releases/download/`) |
 | `verify` | звіряє sha256 архіву з `checksums.txt`, розпаковує, тоді звіряє **кожен** файл з `manifest.json` проти дерева й перевіряє шляхи на вихід за межі кореня (`assertSafePaths`) |
-| `preflight` | `assertInstallable` (мінімальний PHP, downgrade guard — пакет мусить бути новіший за встановлену версію); корінь доступний для запису; вільного місця ≥ 3× розміру розпакованого пакета; якщо `composer.lock` пакета відрізняється — composer має бути доступний; якщо `version.json` каже `requiresMigrations` — має бути доступний `mysqldump` |
+| `preflight` | `assertInstallable` (мінімальний PHP, downgrade guard — пакет мусить бути новіший за встановлену версію); корінь доступний для запису; вільного місця > 3× розміру розпакованого пакета; якщо `composer.lock` пакета відрізняється — composer має бути доступний; якщо `version.json` каже `requiresMigrations` — має бути доступний `mysqldump` |
 | `backup` | архівує у `files/backups/` файли з `manifest.json`, що фізично існують зараз (лише їх і перезапише apply); якщо є `.up.sql`-міграції — дампить `mysqldump`-ом лише зачеплені ними таблиці (розпізнані по `__marker` у SQL, той самий регекс, що й `CoreMigrator::prefixTables()`) |
 | `maintenance_on` | вмикає прапорець `config/.maintenance` із одноразовим токеном |
 | `apply_files` | spool-and-swap: кожен файл із `manifest.json` копіюється поруч (`{файл}.core-update.tmp`) і атомарно `rename()`-иться поверх цілі; нічого не видаляється. Тоді, якщо `composer.lock` пакета відрізняється від поточного — `composer install --no-dev --optimize-autoloader` |
 | `migrations` | `CoreMigrator::apply()` накочує `.up.sql` із пакета (трекер `ok_core_migrations`) |
-| `cache_clear` | `Design::clearCompiled()` + `opcache_reset()`, якщо OPcache увімкнено |
+| `cache_clear` | `Design::clearCompiled()` + `opcache_reset()`, якщо розширення завантажене |
 | `health_check` | HTTP GET на `/?core_updater_health=1` з токеном у заголовку `X-Core-Updater-Token`; очікує JSON із `forkVersion`, **точно** новою версією |
 | `finalize` | знімає `config/.maintenance`, прибирає `files/tmp/updates/{version}/` і старі бекапи (`pruneOldBackups`, лишає 3 найновіші файли — з провалу тут прогін уже не падає, лише пише `finalizeWarning`) |
 
@@ -122,14 +122,6 @@ Health-check відповідає **без DI й без БД** — `index.php` �
   (zip-и й sql-дампи — один спільний пул за mtime, не по три кожного
   типу) — знімайте копію деінде, якщо потрібно тримати довше трьох
   прогонів.
-- Зняти технічні роботи вручну — видалити `config/.maintenance`
-  (`index.php` перевіряє лише `file_exists()`, більше ніякого стану
-  немає).
-- Обійти технічні роботи, не знімаючи прапорець (щоб довести перевірку
-  до кінця) — заголовок `X-Core-Updater-Token` або `?core_updater_token=`
-  з токеном, який зберігається в самому `config/.maintenance` (JSON
-  `{"startedAt": …, "token": "…"}`). Битий/нечитний JSON трактується як
-  **закритий** доступ (fail-closed) — жодного токена не пройде.
 - **Перерваний прогін** (процес убили, OOM, — `flock` звільняється
   автоматично разом із процесом, тож новий `run()` спокійно стартує) не
   лишає явного «failed»: `step` так і завис на останньому записаному
@@ -138,6 +130,19 @@ Health-check відповідає **без DI й без БД** — `index.php` �
   оновлювався понад `STALE_AFTER_SECONDS` (600 с) — це ознака для UI/адміна,
   що прогін мертвий і безпечно запускати новий, а не намагатись
   «дочекатись» цього.
+- Зняти технічні роботи вручну — видалити `config/.maintenance`.
+  **Лише після підтвердження, що прогін мертвий**: стан у `Settings`-ключі
+  `core_updater__run` не в термінальному кроці **і** `updatedAt` старший
+  за 10 хв (логіка `UpdateStatus::isStale()` вище), або процес гарантовано
+  вбитий. `index.php` перевіряє лише `file_exists()`, більше ніякого
+  стану немає — видалення прапорця під час **живого** `apply_files`/
+  `migrations` відкриє вітрину над напівзастосованим ядром, це гірше за
+  сторінку технічних робіт.
+- Обійти технічні роботи, не знімаючи прапорець (щоб довести перевірку
+  до кінця) — заголовок `X-Core-Updater-Token` або `?core_updater_token=`
+  з токеном, який зберігається в самому `config/.maintenance` (JSON
+  `{"startedAt": …, "token": "…"}`). Битий/нечитний JSON трактується як
+  **закритий** доступ (fail-closed) — жодного токена не пройде.
 
 ## Обмеження діалекту core-міграцій
 
