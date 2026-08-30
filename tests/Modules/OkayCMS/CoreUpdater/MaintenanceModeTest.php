@@ -85,6 +85,30 @@ class MaintenanceModeTest extends TestCase
         $this->assertLessThanOrEqual($after, $decoded['startedAt']);
     }
 
+    /**
+     * Мовчазний провал запису віддав би валідний токен при ВІДКРИТІЙ вітрині:
+     * увесь apply пройшов би поверх живого сайту, а відкат потім рапортував
+     * би успіх.
+     *
+     * Каталог робиться недосяжним через звичайний файл на місці сегмента
+     * шляху, а не через права: у контейнері тести йдуть від root, для якого
+     * chmod 0500 не перешкода.
+     */
+    public function testEnableThrowsWhenTheFlagCannotBeWritten(): void
+    {
+        $blocker = $this->tmpDir . '/config';
+        file_put_contents($blocker, 'не каталог, а файл');
+
+        try {
+            $this->expectException(\RuntimeException::class);
+            $this->expectExceptionMessageMatches('/config\/\.maintenance/');
+
+            MaintenanceMode::enable($blocker . '/.maintenance');
+        } finally {
+            unlink($blocker);
+        }
+    }
+
     public function testDisableRemovesFlagFile(): void
     {
         mkdir($this->tmpDir . '/config');

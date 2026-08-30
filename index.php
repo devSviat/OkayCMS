@@ -28,9 +28,24 @@ require_once('vendor/autoload.php');
 // контрактом flagPath() ('config/.maintenance') покриває
 // MaintenanceModeTest::testFlagPathContractStaysConfigDotMaintenance.
 $maintenanceFlag = __DIR__ . '/config/.maintenance';
-if (file_exists($maintenanceFlag)
-    && class_exists(\Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::class)
-) {
+if (file_exists($maintenanceFlag)) {
+    // Прапорець лежить, а класу немає — рівно те, що видно посеред
+    // apply_files, коли autoload уже не знаходить ні старий, ні новий файл.
+    // Провалитись повз гейт тут означало б відкрити вітрину над
+    // напівзастосованим ядром, тому 503 віддається інлайном, без єдиної
+    // залежності, яка могла б не завантажитись.
+    if (!class_exists(\Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::class)) {
+        http_response_code(503);
+        header('Retry-After: 120');
+        header('Content-Type: text/html; charset=utf-8');
+        echo '<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8">'
+            . '<title>Технічні роботи</title></head><body>'
+            . '<h1>503 Сервіс тимчасово недоступний</h1>'
+            . '<p>Триває оновлення. Спробуйте, будь ласка, за кілька хвилин.</p>'
+            . '</body></html>';
+        exit;
+    }
+
     // Суперглобалі можуть віддати масив (?core_updater_token[]=x) —
     // normalizeToken() зводить це до null замість TypeError у allowsRequest().
     $providedToken = \Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::normalizeToken(

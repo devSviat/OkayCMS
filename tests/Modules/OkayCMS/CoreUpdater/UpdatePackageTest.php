@@ -277,4 +277,27 @@ class UpdatePackageTest extends TestCase
 
         UpdatePackage::assertInstallable($meta, '1.2.0', '8.5.0');
     }
+
+    /**
+     * Доїзд обірваного посеред apply прогону: Config.php на диску вже несе
+     * НОВУ версію, тож без послаблення guard відмовляв би саме в тій дії,
+     * яка лікує напівзастосоване дерево.
+     */
+    public function testAssertInstallableAllowsEqualVersionWhenResumingADeadRun(): void
+    {
+        $meta = UpdatePackage::readVersionMeta(self::FIXTURES);
+
+        UpdatePackage::assertInstallable($meta, '1.2.0', '8.5.0', true);
+        $this->addToAssertionCount(1);
+    }
+
+    /** Прапорець доїзду послаблює guard рівно до `>=` — downgrade лишається закритим. */
+    public function testAssertInstallableStillRefusesDowngradeWhenResumingADeadRun(): void
+    {
+        $meta = json_decode(file_get_contents(self::FIXTURES . '/version-lower.json'), true);
+
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::assertInstallable($meta, '1.2.0', '8.5.0', true);
+    }
 }

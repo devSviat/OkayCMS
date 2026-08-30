@@ -188,9 +188,19 @@ class UpdatePackage
      * @param array<string, mixed> $versionMeta довільний масив, а не гарантовано
      *     readVersionMeta() — forkVersion/minPhp перевіряються тут самі, не лише
      *     покладаючись на типи виклику.
+     * @param bool $allowSameVersion послаблює downgrade guard до `>=` для
+     *     єдиного випадку — доїзду обірваного посеред apply прогону на ТУ САМУ
+     *     версію. Там Config.php на диску вже новий, тож строгий `>` відмовив
+     *     би саме в тій дії, яка й лікує стан; повторне застосування безпечне
+     *     (файли ідемпотентні через rename, міграції прикриті трекером).
+     *     Downgrade лишається забороненим і з прапорцем.
      */
-    public static function assertInstallable(array $versionMeta, string $installedVersion, string $phpVersion): void
-    {
+    public static function assertInstallable(
+        array $versionMeta,
+        string $installedVersion,
+        string $phpVersion,
+        bool $allowSameVersion = false
+    ): void {
         $forkVersion = $versionMeta['forkVersion'] ?? null;
         $minPhp = $versionMeta['minPhp'] ?? null;
 
@@ -201,7 +211,8 @@ class UpdatePackage
             );
         }
 
-        if (!is_string($forkVersion) || $forkVersion === '' || !version_compare($forkVersion, $installedVersion, '>')) {
+        $operator = $allowSameVersion ? '>=' : '>';
+        if (!is_string($forkVersion) || $forkVersion === '' || !version_compare($forkVersion, $installedVersion, $operator)) {
             throw new \RuntimeException(
                 "Версія пакета ({$forkVersion}) не новіша за встановлену ({$installedVersion}) — "
                 . 'оновлення не буде застосовано.'

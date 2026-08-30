@@ -14,22 +14,28 @@ class MaintenanceMode
         return $rootDir . '/config/.maintenance';
     }
 
+    /**
+     * Результат запису перевіряється обов'язково: мовчазний провал віддав би
+     * валідний токен при відкритій вітрині — увесь apply пройшов би поверх
+     * живого сайту, а відкат потім рапортував би успіх.
+     */
     public static function enable(string $flagPath): string
     {
         $token = bin2hex(random_bytes(16));
 
-        file_put_contents($flagPath, json_encode([
-            'startedAt' => time(),
-            'token' => $token,
-        ]));
+        $payload = json_encode(['startedAt' => time(), 'token' => $token]);
+        if (@file_put_contents($flagPath, $payload) === false) {
+            throw new \RuntimeException("Не вдалося виставити прапорець технічних робіт: {$flagPath}");
+        }
 
         return $token;
     }
 
+    /** Провал unlink() мусить бути гучним: інакше сайт лишається закритим зі статусом «done». */
     public static function disable(string $flagPath): void
     {
-        if (is_file($flagPath)) {
-            unlink($flagPath);
+        if (is_file($flagPath) && !@unlink($flagPath)) {
+            throw new \RuntimeException("Не вдалося зняти прапорець технічних робіт: {$flagPath}");
         }
     }
 
