@@ -36,6 +36,19 @@ class UpdateRunner
 
     private const MIN_FREE_SPACE_MULTIPLIER = 3;
 
+    /** Ім'я пробного файлу pre-flight; воно ж у `release-manifest.json` серед exclude. */
+    private const WRITE_PROBE_NAME = '.core-updater-write-probe';
+
+    /**
+     * Health-check після apply б'ється в PHP-FPM, який щойно перечитує
+     * підмінені файли — перша спроба ловить і холодний opcache, і не
+     * дорозігнаний пул. Ретраї лише розтягують те саме питання в часі,
+     * рішення по кожній відповіді лишається строгим.
+     */
+    private const HEALTH_CHECK_ATTEMPTS = 4;
+
+    private const HEALTH_CHECK_RETRY_DELAY = 2;
+
     /**
      * Крок → назва методу-обробника, у порядку UpdateStatus::STEPS. ЄДИНЕ
      * джерело правди диспетчерування (dispatchStep() читає саме звідси, а
@@ -100,9 +113,13 @@ class UpdateRunner
     }
 
     /**
+     * @param ?string $targetVersion очікувана версія релізу. Явне значення
+     *     працює як запобіжник виклику ("онови до 1.2.0"), а не як вибір
+     *     версії: качається завжди останній реліз зі снапшота, і розбіжність
+     *     зупиняє прогін. Довільну ціль (у т.ч. відкат на нижчу) вмикає Plan D.
      * @return array<string, mixed> фінальний стан прогону (те саме, що поверне наступний UpdateStatus::load())
      */
-    public function run(): array
+    public function run(?string $targetVersion = null): array
     {
         ignore_user_abort(true);
         set_time_limit(0);
@@ -119,13 +136,13 @@ class UpdateRunner
         }
 
         try {
-            return $this->runLocked($rootDir);
+            return $this->runLocked($rootDir, $targetVersion);
         } finally {
             $lock->release();
         }
     }
 
-    private function runLocked(string $rootDir): array
+    private function runLocked(string $rootDir, ?string $targetVersion): array
     {
         $snapshot = $this->checkHelper->getSnapshot() ?? $this->checkHelper->check(true);
         $latest = $snapshot['latest'] ?? null;
@@ -135,6 +152,14 @@ class UpdateRunner
 
         $toVersion = $latest['forkVersion'];
         $fromVersion = $this->config->forkVersion;
+
+        if ($targetVersion !== null && $targetVersion !== $toVersion) {
+            throw new \RuntimeException(
+                "Цільова версія {$targetVersion} не збігається з доступним релізом {$toVersion}."
+            );
+        }
+
+        $resumesDeadRun = $this->resumesDeadRun($toVersion);
 
         $state = UpdateStatus::fresh($fromVersion, $toVersion);
         $this->status->save($state);
@@ -149,7 +174,10 @@ class UpdateRunner
             'toVersion' => $toVersion,
             'fromVersion' => $fromVersion,
             'latest' => $latest,
+            'resumesDeadRun' => $resumesDeadRun,
         ];
+
+        $this->logLine($ctx, "run {$fromVersion} → {$toVersion}" . ($resumesDeadRun ? ' (доїзд мертвого прогону)' : ''));
 
         foreach (UpdateStatus::STEPS as $index => $step) {
             // Перший крок advance() не потребує: fresh() уже поставив його
@@ -158,6 +186,8 @@ class UpdateRunner
                 $state = UpdateStatus::advance($state, $step);
                 $this->status->save($state);
             }
+
+            $this->logLine($ctx, "step: {$step}");
 
             try {
                 $ctx = $this->dispatchStep($step, $ctx);
@@ -171,6 +201,27 @@ class UpdateRunner
         $this->status->save($state);
 
         return $state;
+    }
+
+    /**
+     * Обірваний посеред apply прогін на ТУ САМУ версію — єдиний випадок, коли
+     * downgrade guard треба послабити: Config.php на диску вже новий, тож
+     * строгий `>` відмовляє саме в тій дії, що лікує напівзастосоване дерево.
+     * Умови всі три разом: збережений стан є, він на цю ж версію, він не
+     * термінальний і вже протух (isStale) — тобто процес гарантовано мертвий.
+     */
+    private function resumesDeadRun(string $toVersion): bool
+    {
+        $previous = $this->status->load();
+        if ($previous === null || ($previous['toVersion'] ?? null) !== $toVersion) {
+            return false;
+        }
+
+        if (in_array($previous['step'] ?? null, UpdateStatus::TERMINAL_STEPS, true)) {
+            return false;
+        }
+
+        return UpdateStatus::isStale($previous, time());
     }
 
     /** @param array<string, mixed> $ctx @return array<string, mixed> */
@@ -239,7 +290,23 @@ class UpdateRunner
     /** @param array<string, mixed> $ctx @return array<string, mixed> */
     private function stepPreflight(array $ctx): array
     {
-        UpdatePackage::assertInstallable($ctx['versionMeta'], $ctx['fromVersion'], PHP_VERSION);
+        // Тег релізу і version.json усередині пакета — два незалежних джерела
+        // версії; розбіжність означає, що до тегу причепили чужий архів.
+        $packageVersion = $ctx['versionMeta']['forkVersion'] ?? null;
+        if ($packageVersion !== $ctx['toVersion']) {
+            throw new \RuntimeException(sprintf(
+                'version.json пакета заявляє версію %s, а реліз-тег — %s: пакет не відповідає релізу.',
+                is_string($packageVersion) ? $packageVersion : 'н/д',
+                $ctx['toVersion']
+            ));
+        }
+
+        UpdatePackage::assertInstallable(
+            $ctx['versionMeta'],
+            $ctx['fromVersion'],
+            PHP_VERSION,
+            (bool) ($ctx['resumesDeadRun'] ?? false)
+        );
 
         $this->assertWritable($ctx['rootDir']);
         $this->assertEnoughDiskSpace($ctx['rootDir'], $ctx['extractDir']);
@@ -271,6 +338,8 @@ class UpdateRunner
             throw new \RuntimeException("Не вдалося створити каталог бекапів: {$backupsDir}");
         }
 
+        $this->protectBackupsDir($backupsDir);
+
         $backupList = UpdateBackup::collectBackupList($rootDir, $ctx['manifestFiles']);
         $backupZipPath = $backupsDir . '/pre-update-' . $ctx['fromVersion'] . '-to-' . $ctx['toVersion'] . '-' . time() . '.zip';
 
@@ -284,11 +353,20 @@ class UpdateRunner
             // мовчки лишає шлях порожнім) — тому один маркер-запис;
             // UpdateApplier::restoreFiles() зобов'язаний його пропускати.
             $zip = new \ZipArchive();
-            $zip->open($backupZipPath, \ZipArchive::CREATE);
-            $zip->addFromString(UpdateBackup::EMPTY_BACKUP_MARKER, '');
-            $zip->close();
+            $openResult = $zip->open($backupZipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+            if ($openResult !== true) {
+                throw new \RuntimeException("Не вдалося створити архів бекапу {$backupZipPath} (код {$openResult}).");
+            }
+            if (!$zip->addFromString(UpdateBackup::EMPTY_BACKUP_MARKER, '')) {
+                $zip->close();
+                throw new \RuntimeException("Не вдалося записати маркер порожнього бекапу в {$backupZipPath}.");
+            }
+            if (!$zip->close()) {
+                throw new \RuntimeException("Помилка при закритті архіву бекапу {$backupZipPath}.");
+            }
         }
         $ctx['backupZipPath'] = $backupZipPath;
+        $this->logLine($ctx, 'backup: ' . $backupZipPath . ' (' . count($backupList) . ' файлів)');
 
         $migrationsDir = $ctx['extractDir'] . '/migrations';
         $ctx['migrationsDir'] = $migrationsDir;
@@ -305,6 +383,7 @@ class UpdateRunner
                 $dumpPath = $backupsDir . '/pre-update-' . $ctx['fromVersion'] . '-to-' . $ctx['toVersion'] . '-' . time() . '.sql';
                 $this->backup->dumpTables($tables, $dumpPath);
                 $ctx['migrationsDumpPath'] = $dumpPath;
+                $this->logLine($ctx, 'dump: ' . $dumpPath . ' (' . implode(', ', $tables) . ')');
             }
         }
 
@@ -330,10 +409,15 @@ class UpdateRunner
             $ctx['rootDir'],
             $ctx['manifestFiles']
         );
+        $this->logLine($ctx, 'applied ' . count($ctx['appliedPaths']) . ' файлів:');
+        foreach ($ctx['appliedPaths'] as $path) {
+            $this->logLine($ctx, '  ' . $path);
+        }
 
         $composerOutput = $this->applier->runComposerIfNeeded($ctx['rootDir'], $ctx['extractDir'] . '/payload');
         if ($composerOutput !== null) {
             $ctx['composerOutput'] = $composerOutput;
+            $this->logLine($ctx, 'composer: ' . $composerOutput);
         }
 
         return $ctx;
@@ -343,6 +427,9 @@ class UpdateRunner
     private function stepMigrations(array $ctx): array
     {
         $ctx['appliedMigrations'] = $this->migrator->apply($ctx['migrationsDir']);
+        if ($ctx['appliedMigrations'] !== []) {
+            $this->logLine($ctx, 'migrations: ' . implode(', ', $ctx['appliedMigrations']));
+        }
 
         return $ctx;
     }
@@ -370,6 +457,10 @@ class UpdateRunner
     {
         MaintenanceMode::disable($ctx['maintenanceFlagPath']);
 
+        // Останній рядок журналу: далі його каталог видаляється разом із
+        // рештою тимчасових файлів, тож писати після цього нікуди.
+        $this->logLine($ctx, 'finalize: технічні роботи знято, оновлення завершено');
+
         // Прибирання тимчасових файлів — best-effort: сайт уже підтверджено
         // живим на новій версії (health_check щойно пройшов), провал тут не
         // має права зіпсувати завершений успішний прогін.
@@ -391,58 +482,106 @@ class UpdateRunner
     // --- health-check ---
 
     /**
-     * cURL на `{root}/?core_updater_health=1` з токеном обходу maintenance
-     * mode У ЗАГОЛОВКУ (не query-параметром — той лишає слід в access-логах).
-     * Порівняння forkVersion зі СТРОГОЮ рівністю, не "не порожньо": так
-     * відсіюється кешована проксі-сторінка старої версії.
+     * Рішення по ОДНІЙ відповіді health-ендпоінта. Виділено окремо й статично
+     * саме тому, що це єдине місце, де розходяться forward- і rollback-гілки
+     * (див. $acceptVersionlessOk) — решта checkHealth() це cURL, який у тесті
+     * все одно підміняється.
+     *
+     * @param bool $acceptVersionlessOk лише для rollback: відновлена версія
+     *     може бути СТАРІШОЮ за появу health-ендпоінта — її index.php не знає
+     *     ні прапорця, ні `?core_updater_health`, тож віддає звичайну
+     *     сторінку. 200 звідти доводить рівно те, що треба довести: сайт
+     *     живий. Forward-гілка лишається строгою — там нова версія
+     *     ЗОБОВ'ЯЗАНА відповісти своїм JSON.
      */
-    public function checkHealth(string $token, string $expectedForkVersion, ?string $rootUrl = null): bool
-    {
-        $rootUrl = $rootUrl ?? $this->resolveRootUrl();
-        $url = rtrim($rootUrl, '/') . '/?core_updater_health=1';
-
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => ['X-Core-Updater-Token: ' . $token],
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_TIMEOUT => 20,
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
-        ]);
-
-        $response = curl_exec($ch);
-        $errno = curl_errno($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($errno !== 0 || !is_string($response) || $httpCode !== 200) {
+    public static function isHealthyResponse(
+        int $errno,
+        int $httpCode,
+        ?string $body,
+        string $expectedForkVersion,
+        bool $acceptVersionlessOk
+    ): bool {
+        if ($errno !== 0 || $body === null || $httpCode !== 200) {
             return false;
         }
 
-        $data = json_decode($response, true);
+        $data = json_decode($body, true);
         $forkVersion = is_array($data) ? ($data['forkVersion'] ?? null) : null;
 
-        return is_string($forkVersion) && $forkVersion === $expectedForkVersion;
+        if (is_string($forkVersion)) {
+            return $forkVersion === $expectedForkVersion;
+        }
+
+        return $acceptVersionlessOk;
     }
 
     /**
-     * Request::getDomainWithProtocol() читає $_SERVER['HTTP_HOST'], якого
-     * немає в CLI (`ok core:update`) — Request::getDomain() тоді повертає
-     * ''. Фолбек — налаштування self::SETTING_ROOT_URL (Plan D додасть
-     * адмінську форму для нього); без жодного з двох — явна помилка, а не
-     * тихий запит на "http://".
+     * cURL на `{root}/?core_updater_health=1` з токеном обходу maintenance
+     * mode У ЗАГОЛОВКУ (не query-параметром — той лишає слід в access-логах);
+     * рішення по кожній відповіді — isHealthyResponse().
+     *
+     * Ретраї всередині, а не навколо виклику: для решти коду це одне питання
+     * «сайт живий?», і підміна методу в тестах має накривати його цілком.
+     */
+    public function checkHealth(string $token, string $expectedForkVersion, bool $acceptVersionlessOk = false): bool
+    {
+        $url = rtrim($this->resolveRootUrl(), '/') . '/?core_updater_health=1';
+
+        for ($attempt = 1; $attempt <= self::HEALTH_CHECK_ATTEMPTS; $attempt++) {
+            if ($attempt > 1) {
+                sleep(self::HEALTH_CHECK_RETRY_DELAY);
+            }
+
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => ['X-Core-Updater-Token: ' . $token],
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_TIMEOUT => 20,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+            ]);
+
+            $response = curl_exec($ch);
+            $errno = curl_errno($ch);
+            $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            $healthy = self::isHealthyResponse(
+                $errno,
+                $httpCode,
+                is_string($response) ? $response : null,
+                $expectedForkVersion,
+                $acceptVersionlessOk
+            );
+
+            if ($healthy) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Налаштування має пріоритет над Request: у HTTP-запиті хост приходить
+     * від клієнта (Host/X-Forwarded-Host), і на проксі чи multi-domain
+     * інсталяції він не зобов'язаний бути адресою, за якою сайт реально
+     * відповідає сам собі. Request::getRootUrl(), а не
+     * getDomainWithProtocol() — він включає підпапку, тож інсталяція в
+     * підкаталозі не питає корінь чужого сайту. Без жодного з двох джерел
+     * (CLI без HTTP_HOST і без ключа) — явна помилка, а не запит на "http://".
      */
     private function resolveRootUrl(): string
     {
-        if (Request::getDomain() !== '') {
-            return Request::getDomainWithProtocol();
-        }
-
         $configured = $this->settings->get(self::SETTING_ROOT_URL);
         if (is_string($configured) && $configured !== '') {
             return $configured;
+        }
+
+        if (Request::getDomain() !== '') {
+            return Request::getRootUrl();
         }
 
         throw new \RuntimeException(
@@ -464,13 +603,25 @@ class UpdateRunner
         $rollbackNeeded = self::needsRollback($state);
         $failedState = UpdateStatus::fail($state, $e->getMessage());
 
+        // Причина провалу лягає в Settings ДО відкату, а не після: rollback
+        // сам ходить у мережу й у файли й цілком може не пережити цього
+        // процесу. Тоді єдине, що лишиться адмінці — цей запис; без нього
+        // вона бачила б застиглий робочий крок і жодного пояснення.
+        $this->status->save($failedState);
+        $this->logLine($ctx, 'failed на кроці ' . ($state['step'] ?? '?') . ': ' . $e->getMessage());
+
         if (!$rollbackNeeded) {
             // Мінор: провал ДО apply_files, коли maintenance_on уже встиг
             // виставити прапорець — нічого в файлах/БД не чіпалось, тож
             // прапорець знімається одразу, а не висить до ручного втручання.
             if (isset($ctx['maintenanceFlagPath']) && MaintenanceMode::isActive($ctx['maintenanceFlagPath'])) {
-                MaintenanceMode::disable($ctx['maintenanceFlagPath']);
-                $failedState['maintenanceDisabledAfterFailure'] = true;
+                try {
+                    MaintenanceMode::disable($ctx['maintenanceFlagPath']);
+                    $failedState['maintenanceDisabledAfterFailure'] = true;
+                } catch (\Throwable $disableError) {
+                    $failedState['requiresManualIntervention'] = true;
+                    $failedState['manualInterventionReason'] = $disableError->getMessage();
+                }
             }
 
             $this->status->save($failedState);
@@ -516,7 +667,10 @@ class UpdateRunner
         $healthy = false;
         if (isset($ctx['maintenanceToken'])) {
             try {
-                $healthy = $this->checkHealth($ctx['maintenanceToken'], $ctx['fromVersion']);
+                // acceptVersionlessOk: відновлена версія може не мати
+                // health-ендпоінта взагалі (перше в житті інсталяції
+                // оновлення відкочується на код без нього).
+                $healthy = $this->checkHealth($ctx['maintenanceToken'], $ctx['fromVersion'], true);
             } catch (\Throwable $e) {
                 $healthy = false;
             }
@@ -527,8 +681,18 @@ class UpdateRunner
             $state['restoreError'] = $restoreError;
         }
 
+        // Шляхи до бекапів — у стані, а не лише в логу: після rollback саме
+        // вони потрібні тому, хто добиратиме дані руками.
+        $state['backupZipPath'] = $ctx['backupZipPath'] ?? null;
+        $state['migrationsDumpPath'] = $ctx['migrationsDumpPath'] ?? null;
+
         if ($healthy && isset($ctx['maintenanceFlagPath'])) {
-            MaintenanceMode::disable($ctx['maintenanceFlagPath']);
+            try {
+                MaintenanceMode::disable($ctx['maintenanceFlagPath']);
+            } catch (\Throwable $disableError) {
+                $state['requiresManualIntervention'] = true;
+                $state['manualInterventionReason'] = $disableError->getMessage();
+            }
         } else {
             $state['requiresManualIntervention'] = true;
             $state['manualInterventionReason'] = 'Health-check після rollback не підтвердив стару версію — '
@@ -536,6 +700,7 @@ class UpdateRunner
         }
 
         $this->status->save($state);
+        $this->logLine($ctx, 'rolled_back' . ($restoreError !== null ? ' (restoreError: ' . $restoreError . ')' : ''));
 
         return $state;
     }
@@ -548,11 +713,72 @@ class UpdateRunner
             throw new \RuntimeException("Корінь сайту недоступний для запису: {$rootDir}");
         }
 
-        $probe = $rootDir . '/Okay/Core/.core-updater-write-probe';
-        if (@file_put_contents($probe, '') === false) {
-            throw new \RuntimeException('Не вдалося записати пробний файл у Okay/Core — застосування файлів ядра буде неможливим.');
+        $this->assertDirWritable(
+            $rootDir . '/Okay/Core',
+            'застосування файлів ядра буде неможливим'
+        );
+
+        // config/ окремо від кореня: саме туди пишеться прапорець технічних
+        // робіт, і провал там означав би apply над відкритою вітриною.
+        $this->assertDirWritable(
+            $rootDir . '/config',
+            'прапорець технічних робіт не вдасться виставити'
+        );
+    }
+
+    private function assertDirWritable(string $dir, string $consequence): void
+    {
+        $probe = $dir . '/' . self::WRITE_PROBE_NAME;
+
+        try {
+            if (@file_put_contents($probe, '') === false) {
+                throw new \RuntimeException("Каталог {$dir} недоступний для запису — {$consequence}.");
+            }
+        } finally {
+            @unlink($probe);
         }
-        @unlink($probe);
+    }
+
+    /**
+     * Бекапи містять повні копії core-файлів, а кореневий .htaccess віддає
+     * `files/**.zip` напряму — без цього файлу архів качається будь-ким, хто
+     * вгадає ім'я. Каталогу немає в репозиторії (створюється тут), тож
+     * репозиторний files/backups/.htaccess прикриває лише свіжий клон;
+     * best-effort, бо на nginx правило й так у конфізі.
+     */
+    private function protectBackupsDir(string $backupsDir): void
+    {
+        $htaccess = $backupsDir . '/.htaccess';
+        if (!is_file($htaccess)) {
+            @file_put_contents($htaccess, "order deny,allow \ndeny from all\n");
+        }
+    }
+
+    /**
+     * Журнал прогону — `files/tmp/updates/{version}/apply.log`. Свідомо
+     * найтонший можливий: помилка запису логу не має права зупинити чи
+     * зіпсувати оновлення, тому все під @ і без винятків назовні.
+     *
+     * @param array<string, mixed> $ctx
+     */
+    private function logLine(array $ctx, string $message): void
+    {
+        $rootDir = $ctx['rootDir'] ?? null;
+        $version = $ctx['toVersion'] ?? null;
+        if (!is_string($rootDir) || !is_string($version)) {
+            return;
+        }
+
+        $dir = $rootDir . '/files/tmp/updates/' . $version;
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0777, true);
+        }
+
+        @file_put_contents(
+            $dir . '/apply.log',
+            '[' . date('Y-m-d H:i:s') . '] ' . $message . PHP_EOL,
+            FILE_APPEND
+        );
     }
 
     private function assertEnoughDiskSpace(string $rootDir, string $extractDir): void

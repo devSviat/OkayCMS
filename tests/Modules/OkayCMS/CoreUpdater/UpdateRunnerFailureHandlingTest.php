@@ -118,12 +118,52 @@ class UpdateRunnerFailureHandlingTest extends TestCase
         $applier = $this->createMock(UpdateApplier::class);
         $applier->expects($this->once())->method('restoreFiles')->with($backupZip, $this->tmpDir);
 
+        // Два записи, у цьому порядку: 'failed' лягає на диск ДО відкату (той
+        // сам ходить у мережу й у файли і може не пережити процес), 'rolled_back'
+        // — після. Без першого запису обірваний відкат лишав би адмінці
+        // застиглий робочий крок і жодного пояснення.
+        $saved = [];
         $status = $this->createMock(UpdateStatus::class);
-        $status->expects($this->once())->method('save')->with($this->callback(
-            fn (array $saved) => $saved['step'] === UpdateStatus::STEP_ROLLED_BACK
-        ));
+        $status->expects($this->exactly(2))->method('save')
+            ->willReturnCallback(function (array $state) use (&$saved): void {
+                $saved[] = $state['step'];
+            });
 
         $runner = $this->buildRunner($applier, $status, [true]);
+
+        $state = ['step' => UpdateStatus::STEP_APPLY_FILES, 'fromVersion' => '1.0.0', 'toVersion' => '1.1.0', 'updatedAt' => time()];
+        $ctx = [
+            'rootDir' => $this->tmpDir,
+            'backupZipPath' => $backupZip,
+            'migrationsDumpPath' => $this->tmpDir . '/dump.sql',
+            'maintenanceFlagPath' => $flagPath,
+            'maintenanceToken' => 'tok',
+            'fromVersion' => '1.0.0',
+        ];
+
+        $result = $this->invokeHandleFailure($runner, $state, $ctx, new \RuntimeException('apply failed'));
+
+        $this->assertSame([UpdateStatus::STEP_FAILED, UpdateStatus::STEP_ROLLED_BACK], $saved);
+        $this->assertSame(UpdateStatus::STEP_ROLLED_BACK, $result['step']);
+        $this->assertArrayNotHasKey('requiresManualIntervention', $result);
+        $this->assertFalse(MaintenanceMode::isActive($flagPath), 'maintenance знімається, коли rollback здоровий');
+
+        // Шляхи до бекапів — у самому стані: після відкату саме вони потрібні
+        // тому, хто добиратиме дані руками.
+        $this->assertSame($backupZip, $result['backupZipPath']);
+        $this->assertSame($this->tmpDir . '/dump.sql', $result['migrationsDumpPath']);
+    }
+
+    public function testRolledBackStateCarriesNullPathsWhenThereWasNoDump(): void
+    {
+        $backupZip = $this->makeBackupZip();
+        $flagPath = $this->writeMaintenanceFlag();
+
+        $runner = $this->buildRunner(
+            $this->createStub(UpdateApplier::class),
+            $this->createStub(UpdateStatus::class),
+            [true]
+        );
 
         $state = ['step' => UpdateStatus::STEP_APPLY_FILES, 'fromVersion' => '1.0.0', 'toVersion' => '1.1.0', 'updatedAt' => time()];
         $ctx = [
@@ -136,9 +176,8 @@ class UpdateRunnerFailureHandlingTest extends TestCase
 
         $result = $this->invokeHandleFailure($runner, $state, $ctx, new \RuntimeException('apply failed'));
 
-        $this->assertSame(UpdateStatus::STEP_ROLLED_BACK, $result['step']);
-        $this->assertArrayNotHasKey('requiresManualIntervention', $result);
-        $this->assertFalse(MaintenanceMode::isActive($flagPath), 'maintenance знімається, коли rollback здоровий');
+        $this->assertArrayHasKey('migrationsDumpPath', $result);
+        $this->assertNull($result['migrationsDumpPath']);
     }
 
     // --- trace (c): post-apply health-check фейл → rollback-гілка ---
@@ -152,7 +191,7 @@ class UpdateRunnerFailureHandlingTest extends TestCase
         $applier->expects($this->once())->method('restoreFiles')->with($backupZip, $this->tmpDir);
 
         $status = $this->createMock(UpdateStatus::class);
-        $status->expects($this->once())->method('save');
+        $status->expects($this->exactly(2))->method('save');
 
         $runner = $this->buildRunner($applier, $status, [true]);
 
@@ -186,7 +225,7 @@ class UpdateRunnerFailureHandlingTest extends TestCase
         $applier->expects($this->once())->method('restoreFiles');
 
         $status = $this->createMock(UpdateStatus::class);
-        $status->expects($this->once())->method('save');
+        $status->expects($this->exactly(2))->method('save');
 
         // Старий health-check не проходить (наприклад, схема вже частково
         // мігрована) — навмисно перевіряє manual-intervention ГІЛКУ поруч
@@ -225,7 +264,7 @@ class UpdateRunnerFailureHandlingTest extends TestCase
         $applier->expects($this->once())->method('restoreFiles')->willThrowException(new \RuntimeException('archive is corrupt'));
 
         $status = $this->createMock(UpdateStatus::class);
-        $status->expects($this->once())->method('save');
+        $status->expects($this->exactly(2))->method('save');
 
         $runner = $this->buildRunner($applier, $status, [false]);
 
@@ -255,7 +294,7 @@ class UpdateRunnerFailureHandlingTest extends TestCase
         $applier->expects($this->never())->method('restoreFiles');
 
         $status = $this->createMock(UpdateStatus::class);
-        $status->expects($this->once())->method('save')->with($this->callback(
+        $status->expects($this->exactly(2))->method('save')->with($this->callback(
             fn (array $saved) => $saved['step'] === UpdateStatus::STEP_FAILED
         ));
 
@@ -277,7 +316,7 @@ class UpdateRunnerFailureHandlingTest extends TestCase
         $applier->expects($this->never())->method('restoreFiles');
 
         $status = $this->createMock(UpdateStatus::class);
-        $status->expects($this->once())->method('save');
+        $status->expects($this->exactly(2))->method('save');
 
         $runner = $this->buildRunner($applier, $status, []);
 
@@ -317,7 +356,7 @@ class TestableUpdateRunner extends UpdateRunner
         $this->healthResponses = $healthResponses;
     }
 
-    public function checkHealth(string $token, string $expectedForkVersion, ?string $rootUrl = null): bool
+    public function checkHealth(string $token, string $expectedForkVersion, bool $acceptVersionlessOk = false): bool
     {
         if ($this->healthResponses === []) {
             throw new \LogicException('TestableUpdateRunner: черга healthResponses вичерпана.');
