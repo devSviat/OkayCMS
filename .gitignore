@@ -1,6 +1,7 @@
 compiled/*/*.php
 Okay/xml/compiled/*.php
 /vendor/
+/build/
 backend/design/compiled/*.php
 backend/files/*/*.*
 !backend/files/*/.keep_folder

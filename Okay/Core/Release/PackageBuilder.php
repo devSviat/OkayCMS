@@ -143,7 +143,10 @@ class PackageBuilder
     private function assembleZip(string $stagingDir, string $zipPath): void
     {
         $zip = new \ZipArchive();
-        $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $openResult = $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        if ($openResult !== true) {
+            throw new \RuntimeException("Failed to open zip archive at {$zipPath} (code {$openResult})");
+        }
 
         $zip->addFile($stagingDir . '/version.json', 'version.json');
         $zip->addFile($stagingDir . '/manifest.json', 'manifest.json');
@@ -164,15 +167,31 @@ class PackageBuilder
             }
         }
 
-        $zip->close();
+        if ($zip->close() !== true) {
+            throw new \RuntimeException("Failed to write zip archive at {$zipPath}");
+        }
     }
 
     private function readMinPhp(string $repoPath): string
     {
         $composerJson = json_decode(file_get_contents($repoPath . '/composer.json'), true);
 
-        return $composerJson['require']['php'] ?? throw new \RuntimeException(
+        $constraint = $composerJson['require']['php'] ?? throw new \RuntimeException(
             "composer.json at {$repoPath} has no 'require.php' constraint"
         );
+
+        return $this->normalizeMinPhp($constraint);
+    }
+
+    /** Turns a composer constraint (`^8.4`, `>=8.4`) into a floor version comparable via version_compare(). */
+    private function normalizeMinPhp(string $constraint): string
+    {
+        $version = preg_replace('/^(\^|>=\s*)/', '', trim($constraint));
+
+        if (preg_match('/^\d+\.\d+$/', $version)) {
+            $version .= '.0';
+        }
+
+        return $version;
     }
 }

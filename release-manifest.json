@@ -5,6 +5,8 @@
         "Okay/Entities/",
         "Okay/Helpers/",
         "Okay/Requests/",
+        "Okay/lang_general/",
+        "Okay/xml/opensearch.xml.tpl",
         "backend/",
         "Okay/Modules/OkayCMS/",
         "composer.json",
@@ -14,6 +16,10 @@
         "1DB_changes/"
     ],
     "exclude": [
-        "backend/design/"
+        "backend/design/",
+        "backend/files/",
+        "Okay/Modules/OkayCMS/AutoDeploy/log/",
+        "Okay/Modules/OkayCMS/AutoDeploy/tmp/",
+        "Okay/Modules/OkayCMS/Integration1C/temp/"
     ]
 }
