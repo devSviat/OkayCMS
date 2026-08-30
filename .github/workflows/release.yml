@@ -5,14 +5,16 @@ on:
     tags:
       - 'okaycms-fork/v*'
 
+# Кожна джоба отримує лише те, що їй треба: test лише читає, публікацію
+# релізу робить тільки build-and-release.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   # ci.yml не оголошує `on: workflow_call`, тож викликати його як reusable
   # workflow не можна. Чіпати спільний ci.yml заради цього — поза межами
   # задачі, тож тестова джоба тут — копія `tests` з ci.yml (без static-analysis/
-  # secrets/smoke: реліз блокує лише реальний прогін тестів).
+  # secrets/smoke: реліз блокує лише той самий набір кроків, що й `tests`).
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -37,6 +39,9 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Composer audit
+        run: composer audit --locked --abandoned=report
+
       - name: PHPCompatibility
         run: vendor/bin/phpcs -q
 
@@ -46,6 +51,8 @@ jobs:
   build-and-release:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
 
