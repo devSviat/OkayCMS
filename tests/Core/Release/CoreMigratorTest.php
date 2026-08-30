@@ -2,6 +2,7 @@
 
 namespace Core\Release;
 
+use Okay\Core\Release\CoreMigrationException;
 use Okay\Core\Release\CoreMigrator;
 use PHPUnit\Framework\TestCase;
 
@@ -69,5 +70,57 @@ class CoreMigratorTest extends TestCase
         $this->expectException(\LogicException::class);
 
         (new CoreMigrator())->apply(__DIR__);
+    }
+
+    public function testPendingSortsNaturallyNotLexically(): void
+    {
+        $dir = sys_get_temp_dir() . '/core-migrator-natsort-' . uniqid();
+        mkdir($dir);
+        touch($dir . '/1.2.0_add_index.up.sql');
+        touch($dir . '/1.11.0_add_column.up.sql');
+
+        try {
+            $migrator = new CoreMigrator();
+
+            // strcmp сортує "1.11.0_*" перед "1.2.0_*" (посимвольно '1' < '2');
+            // натуральне порівняння читає "11" і "2" як числа.
+            $this->assertSame(
+                ['1.2.0_add_index.up.sql', '1.11.0_add_column.up.sql'],
+                array_column($migrator->pending($dir, []), 'name')
+            );
+        } finally {
+            unlink($dir . '/1.2.0_add_index.up.sql');
+            unlink($dir . '/1.11.0_add_column.up.sql');
+            rmdir($dir);
+        }
+    }
+
+    public function testPrefixTablesRewritesDoubleUnderscoreMarker(): void
+    {
+        $migrator = new CoreMigrator();
+
+        $sql = $migrator->prefixTables(
+            'SELECT * FROM `__test_table` WHERE id = 1',
+            'ok_'
+        );
+
+        $this->assertSame('SELECT * FROM `ok_test_table` WHERE id = 1', $sql);
+    }
+
+    public function testPrefixTablesLeavesQuotedDoubleUnderscoreAlone(): void
+    {
+        $migrator = new CoreMigrator();
+
+        $sql = $migrator->prefixTables("SELECT '__not_a_table'", 'ok_');
+
+        $this->assertSame("SELECT '__not_a_table'", $sql);
+    }
+
+    public function testCoreMigrationExceptionCarriesAppliedNames(): void
+    {
+        $exception = new CoreMigrationException('впала', ['1.1.0_a.up.sql'], null);
+
+        $this->assertSame(['1.1.0_a.up.sql'], $exception->appliedNames);
+        $this->assertSame('впала', $exception->getMessage());
     }
 }
