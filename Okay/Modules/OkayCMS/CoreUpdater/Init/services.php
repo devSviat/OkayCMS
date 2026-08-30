@@ -2,4 +2,17 @@
 
 namespace Okay\Modules\OkayCMS\CoreUpdater;
 
-return [];
+use Okay\Core\Config;
+use Okay\Core\OkayContainer\Reference\ServiceReference as SR;
+use Okay\Core\Settings;
+use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateCheckHelper;
+
+return [
+    UpdateCheckHelper::class => [
+        'class' => UpdateCheckHelper::class,
+        'arguments' => [
+            new SR(Settings::class),
+            new SR(Config::class),
+        ],
+    ],
+];

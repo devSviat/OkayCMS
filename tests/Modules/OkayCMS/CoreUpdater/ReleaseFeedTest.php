@@ -51,6 +51,17 @@ class ReleaseFeedTest extends TestCase
         $this->assertNull(ReleaseFeed::parseLatest('[]'));
     }
 
+    public function testParseLatestSkipsReleaseWhoseZipNameEncodesADifferentVersionThanItsTag(): void
+    {
+        // v2.0.0 сам себе дискваліфікує: зип названо під v1.9.9, тому
+        // очікуваного okaycms-fork-v2.0.0.zip серед asset'ів немає і
+        // mapAssets() не знаходить 'zip' — лишається лише повний v1.0.0.
+        $result = ReleaseFeed::parseLatest(self::fixture('releases-mismatched-zip-version.json'));
+
+        $this->assertNotNull($result);
+        $this->assertSame('1.0.0', $result['forkVersion']);
+    }
+
     #[DataProvider('newerThanInstalledProvider')]
     public function testIsNewerThanInstalled(string $candidate, string $installed, bool $expected): void
     {

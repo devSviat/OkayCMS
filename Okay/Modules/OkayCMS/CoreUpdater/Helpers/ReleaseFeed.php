@@ -74,11 +74,14 @@ class ReleaseFeed
             return null;
         }
 
+        $publishedAt = $release['published_at'] ?? null;
+        $notesUrl = $release['html_url'] ?? null;
+
         return [
             'forkVersion' => $version,
             'tag' => $tag,
-            'publishedAt' => $release['published_at'] ?? null,
-            'notesUrl' => $release['html_url'] ?? null,
+            'publishedAt' => is_string($publishedAt) ? $publishedAt : null,
+            'notesUrl' => is_string($notesUrl) ? $notesUrl : null,
             'assets' => $assets,
         ];
     }
