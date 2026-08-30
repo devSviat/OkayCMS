@@ -74,6 +74,11 @@ class UpdateApplier
      * (UpdateBackup::createFilesBackup()) поверх $rootDir — той самий
      * tmp+rename патерн, у зворотньому напрямку.
      *
+     * UpdateBackup::EMPTY_BACKUP_MARKER пропускається: це технічний
+     * маркер-запис, яким UpdateRunner::stepBackup() змушує libzip реально
+     * записати порожній backup-архів на диск, а не частина сайту — інакше
+     * rollback лишав би stray `{rootDir}/.empty`.
+     *
      * @return list<string> відновлені відносні шляхи, у порядку архіву
      * @throws UpdateApplyException якщо файл не вдалось відновити — несе
      *     перелік уже відновлених файлів
@@ -93,7 +98,10 @@ class UpdateApplier
         try {
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $relativePath = $zip->getNameIndex($i);
-                if ($relativePath === false || str_ends_with($relativePath, '/')) {
+                if ($relativePath === false
+                    || str_ends_with($relativePath, '/')
+                    || $relativePath === UpdateBackup::EMPTY_BACKUP_MARKER
+                ) {
                     continue;
                 }
 

@@ -4,6 +4,7 @@ namespace Modules\OkayCMS\CoreUpdater;
 
 use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateApplier;
 use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateApplyException;
+use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateBackup;
 use PHPUnit\Framework\TestCase;
 
 class UpdateApplierTest extends TestCase
@@ -237,6 +238,27 @@ class UpdateApplierTest extends TestCase
 
         $this->assertSame(['Okay/Core/Gone.php'], $restored);
         $this->assertSame('<?php // restored', file_get_contents($rootDir . '/Okay/Core/Gone.php'));
+    }
+
+    public function testRestoreFilesSkipsEmptyBackupMarkerAndRestoresOnlyRealFiles(): void
+    {
+        $rootDir = $this->tmpDir . '/root';
+
+        $backupZipPath = $this->tmpDir . '/backup.zip';
+        $zip = new \ZipArchive();
+        $zip->open($backupZipPath, \ZipArchive::CREATE);
+        // Той самий маркер, яким UpdateRunner::stepBackup() змушує libzip
+        // реально записати порожній backup-архів на диск (спорожнілий
+        // ZipArchive без записів libzip мовчки не пише файл узагалі).
+        $zip->addFromString(UpdateBackup::EMPTY_BACKUP_MARKER, '');
+        $zip->addFromString('Okay/Core/Foo.php', '<?php // restored');
+        $zip->close();
+
+        $restored = $this->applier->restoreFiles($backupZipPath, $rootDir);
+
+        $this->assertSame(['Okay/Core/Foo.php'], $restored);
+        $this->assertSame('<?php // restored', file_get_contents($rootDir . '/Okay/Core/Foo.php'));
+        $this->assertFileDoesNotExist($rootDir . '/' . UpdateBackup::EMPTY_BACKUP_MARKER);
     }
 
     public function testRestoreFilesThrowsWithRestoredListSoFarOnFailure(): void

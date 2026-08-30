@@ -281,10 +281,11 @@ class UpdateRunner
             // (напр. дуже маленький реліз) — все одно архів, щоб rollback-
             // гілка мала що відкривати без спецвипадку "нема бекапу". Архів
             // БЕЗ жодного запису libzip на диск не пише взагалі (close()
-            // мовчки лишає шлях порожнім) — тому один порожній маркер-файл.
+            // мовчки лишає шлях порожнім) — тому один маркер-запис;
+            // UpdateApplier::restoreFiles() зобов'язаний його пропускати.
             $zip = new \ZipArchive();
             $zip->open($backupZipPath, \ZipArchive::CREATE);
-            $zip->addFromString('.empty', '');
+            $zip->addFromString(UpdateBackup::EMPTY_BACKUP_MARKER, '');
             $zip->close();
         }
         $ctx['backupZipPath'] = $backupZipPath;

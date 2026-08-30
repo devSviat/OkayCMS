@@ -20,6 +20,16 @@ use Symfony\Component\Process\Process;
 class UpdateBackup
 {
     /**
+     * Маркер-запис, який UpdateRunner::stepBackup() кладе в backup-архів,
+     * коли бекапити фізично нічого (порожній $backupList) — ZipArchive із
+     * НУЛЬ записів libzip мовчки не пише на диск при close(), тож без
+     * маркера шлях бекапу вказував би в нікуди. UpdateApplier::restoreFiles()
+     * зобов'язаний його пропускати — інакше rollback лишає stray-файл
+     * `{rootDir}/.empty` у корені сайту.
+     */
+    public const EMPTY_BACKUP_MARKER = '.empty';
+
+    /**
      * Той самий патерн, що CoreMigrator::prefixTables()
      * (Okay/Core/Release/CoreMigrator.php) — тримати синхронізованим при
      * зміні того методу. Група 2 включає один "межовий" символ одразу

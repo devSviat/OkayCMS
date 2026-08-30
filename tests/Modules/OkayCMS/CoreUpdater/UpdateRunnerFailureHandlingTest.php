@@ -63,8 +63,10 @@ class UpdateRunnerFailureHandlingTest extends TestCase
         $zip = new \ZipArchive();
         $zip->open($path, \ZipArchive::CREATE);
         // Порожній ZipArchive (нуль записів) libzip мовчки НЕ пише на диск
-        // на close() — той самий підводний камінь, що й у stepBackup().
-        $zip->addFromString('.empty', '');
+        // на close() — той самий підводний камінь, що й у stepBackup();
+        // маркер той самий, restoreFiles() зобов'язаний його пропускати
+        // (окремо перевірено в UpdateApplierTest, тут restoreFiles мокнутий).
+        $zip->addFromString(UpdateBackup::EMPTY_BACKUP_MARKER, '');
         $zip->close();
 
         return $path;
