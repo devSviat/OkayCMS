@@ -1,0 +1,44 @@
+[
+    {
+        "tag_name": "okaycms-fork/v1.0.0",
+        "draft": false,
+        "prerelease": false,
+        "published_at": "2026-01-10T00:00:00Z",
+        "html_url": "https://github.com/devSviat/OkayCMS/releases/tag/okaycms-fork%2Fv1.0.0",
+        "assets": [
+            {
+                "name": "okaycms-fork-v1.0.0.zip",
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.0.0/okaycms-fork-v1.0.0.zip"
+            },
+            {
+                "name": "version.json",
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.0.0/version.json"
+            },
+            {
+                "name": "checksums.txt",
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.0.0/checksums.txt"
+            }
+        ]
+    },
+    {
+        "tag_name": "okaycms-fork/v2.0.0",
+        "draft": false,
+        "prerelease": false,
+        "published_at": "2026-03-01T00:00:00Z",
+        "html_url": "https://github.com/devSviat/OkayCMS/releases/tag/okaycms-fork%2Fv2.0.0",
+        "assets": [
+            {
+                "name": "okaycms-fork-v1.9.9.zip",
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v2.0.0/okaycms-fork-v1.9.9.zip"
+            },
+            {
+                "name": "version.json",
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v2.0.0/version.json"
+            },
+            {
+                "name": "checksums.txt",
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v2.0.0/checksums.txt"
+            }
+        ]
+    }
+]
