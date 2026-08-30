@@ -6,6 +6,7 @@ use Okay\Core\Config;
 use Okay\Core\OkayContainer\Reference\ServiceReference as SR;
 use Okay\Core\Settings;
 use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateCheckHelper;
+use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateDownloader;
 use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateStatus;
 
 return [
@@ -20,6 +21,12 @@ return [
         'class' => UpdateStatus::class,
         'arguments' => [
             new SR(Settings::class),
+        ],
+    ],
+    UpdateDownloader::class => [
+        'class' => UpdateDownloader::class,
+        'arguments' => [
+            new SR(Config::class),
         ],
     ],
 ];
