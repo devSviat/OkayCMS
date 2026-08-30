@@ -29,11 +29,13 @@ class UpdateBackup
 
     /**
      * Стейтменти, що реально можуть зіпсувати дані таблиці. SELECT та інші
-     * читальні запити міграціям не властиві й тут не ціль.
+     * читальні запити міграціям не властиві й тут не ціль. Перевіряється
+     * лише проти ПОЧАТКУ стейтмента (один раз на елемент вхідного масиву),
+     * а не рядок за рядком — див. контракт extractTouchedTables().
      */
-    private const STATEMENT_TYPE_PATTERN = '/^\s*(?:CREATE\s+TABLE(?:\s+IF\s+NOT\s+EXISTS)?'
-        . '|ALTER\s+TABLE|INSERT\s+(?:IGNORE\s+)?INTO|UPDATE|DROP\s+TABLE(?:\s+IF\s+EXISTS)?'
-        . '|RENAME\s+TABLE)\b/i';
+    private const STATEMENT_TYPE_PATTERN = '/^\s*(?:CREATE\s+(?:TABLE(?:\s+IF\s+NOT\s+EXISTS)?|(?:UNIQUE\s+)?INDEX)'
+        . '|ALTER\s+TABLE|INSERT\s+(?:IGNORE\s+)?INTO|REPLACE\s+INTO|UPDATE'
+        . '|DROP\s+(?:TABLE(?:\s+IF\s+EXISTS)?|INDEX)|TRUNCATE\s+TABLE|RENAME\s+TABLE)\b/i';
 
     public function __construct(private readonly Config $config)
     {
@@ -62,28 +64,35 @@ class UpdateBackup
 
     /**
      * Імена таблиць, яких торкаються SQL-міграції — щоб дамп бекапу не тяг
-     * усю базу, а лише те, що апдейт реально змінює. Сканує по рядках:
-     * рядок без DDL/DML-ключового слова або без `__`-маркера просто
-     * ігнорується.
+     * усю базу, а лише те, що апдейт реально змінює.
      *
-     * @param string[] $migrationSqlContents вміст .up.sql файлів
+     * Контракт входу: КОЖЕН елемент — уже ОДИН SQL-стейтмент (той вигляд,
+     * що дає CoreMigrator::splitSqlFile(), Okay/Core/Release/CoreMigrator.php),
+     * не вміст цілого .up.sql файлу. Причина: тип стейтмента визначається
+     * ОДИН раз по початку елемента, а не рядок за рядком — інакше маркер
+     * на продовженні багаторядкового `ALTER TABLE\n\`__products\`\n...`
+     * чи `RENAME TABLE\n\`__a\` TO \`__b\`,\n...` мовчки губився б. Якщо
+     * стейтмент пройшов класифікацію — маркери шукаються по ВСЬОМУ його
+     * тексту, включно з `FOREIGN KEY ... REFERENCES \`__other\`` усередині
+     * CREATE TABLE: ціль FK свідомо теж вважається "torched" — зайвий рядок
+     * у дампі дешевший за таблицю, яку забули забекапити.
+     *
+     * @param string[] $migrationSqlContents по одному SQL-стейтменту на елемент
      * @return list<string> унікальні імена таблиць, уже з префіксом
      */
     public static function extractTouchedTables(array $migrationSqlContents, string $prefix): array
     {
         $tables = [];
 
-        foreach ($migrationSqlContents as $sql) {
-            foreach (preg_split('/\r\n|\r|\n/', $sql) as $line) {
-                if (!preg_match(self::STATEMENT_TYPE_PATTERN, $line)) {
-                    continue;
-                }
+        foreach ($migrationSqlContents as $statement) {
+            if (!preg_match(self::STATEMENT_TYPE_PATTERN, $statement)) {
+                continue;
+            }
 
-                if (preg_match_all(self::MARKER_PATTERN, $line, $matches)) {
-                    foreach ($matches[2] as $marker) {
-                        // Останній символ групи 2 — межовий, не частина назви.
-                        $tables[$prefix . substr($marker, 0, -1)] = true;
-                    }
+            if (preg_match_all(self::MARKER_PATTERN, $statement, $matches)) {
+                foreach ($matches[2] as $marker) {
+                    // Останній символ групи 2 — межовий, не частина назви.
+                    $tables[$prefix . substr($marker, 0, -1)] = true;
                 }
             }
         }

@@ -129,22 +129,92 @@ class UpdateBackupTest extends TestCase
         );
     }
 
-    public function testExtractTouchedTablesDeduplicatesAcrossFilesAndStatements(): void
+    public function testExtractTouchedTablesFindsMarkerInCreateIndexOnTable(): void
     {
-        $migration1 = 'ALTER TABLE `__products` ADD COLUMN `a` INT;';
-        $migration2 = "UPDATE `__products` SET `a` = 1;\nALTER TABLE `__products` ADD COLUMN `b` INT;";
+        // Та сама форма, що tests/Core/Release/fixtures/migrations/1.2.0_add_index.up.sql
+        // (там таблиця без маркера — це фікстура CoreMigrator::apply(), не нашого коду).
+        $sql = 'CREATE INDEX idx_r ON `__test_a` (r);';
+
+        $this->assertSame(['ok_test_a'], UpdateBackup::extractTouchedTables([$sql], 'ok_'));
+    }
+
+    public function testExtractTouchedTablesFindsMarkerInDropIndex(): void
+    {
+        $sql = 'DROP INDEX idx_r ON `__test_a`;';
+
+        $this->assertSame(['ok_test_a'], UpdateBackup::extractTouchedTables([$sql], 'ok_'));
+    }
+
+    public function testExtractTouchedTablesFindsMarkerInTruncateTable(): void
+    {
+        $sql = 'TRUNCATE TABLE `__products`;';
+
+        $this->assertSame(['ok_products'], UpdateBackup::extractTouchedTables([$sql], 'ok_'));
+    }
+
+    public function testExtractTouchedTablesFindsMarkerInReplaceInto(): void
+    {
+        $sql = "REPLACE INTO `__settings` (`key`, `value`) VALUES ('a', 'b');";
+
+        $this->assertSame(['ok_settings'], UpdateBackup::extractTouchedTables([$sql], 'ok_'));
+    }
+
+    public function testExtractTouchedTablesFindsMarkerOnContinuationLineOfMultilineAlterTable(): void
+    {
+        $sql = "ALTER TABLE\n    `__products`\nADD COLUMN `a` INT;";
+
+        $this->assertSame(['ok_products'], UpdateBackup::extractTouchedTables([$sql], 'ok_'));
+    }
+
+    public function testExtractTouchedTablesFindsAllMarkersInMultilineRenameTableWithMultiplePairs(): void
+    {
+        $sql = "RENAME TABLE\n    `__old_a` TO `__new_a`,\n    `__old_b` TO `__new_b`;";
 
         $this->assertSame(
-            ['ok_products'],
-            UpdateBackup::extractTouchedTables([$migration1, $migration2], 'ok_')
+            ['ok_old_a', 'ok_new_a', 'ok_old_b', 'ok_new_b'],
+            UpdateBackup::extractTouchedTables([$sql], 'ok_')
         );
     }
 
-    public function testExtractTouchedTablesIgnoresLinesWithoutMarkers(): void
+    /**
+     * Свідоме рішення: ціль FOREIGN KEY REFERENCES теж вважається "torched",
+     * хоча міграція формально пише лише в __order_items. Зайвий рядок у
+     * дампі — прийнятна ціна, відсутній — ні.
+     */
+    public function testExtractTouchedTablesCollectsForeignKeyReferenceTargetInsideCreateTable(): void
     {
-        $sql = "-- коментар без маркера\nSELECT * FROM `ok_products`;\nALTER TABLE `__products` ADD COLUMN `a` INT;\n\n";
+        $sql = "CREATE TABLE `__order_items` (\n"
+            . "    `order_id` INT,\n"
+            . "    FOREIGN KEY (`order_id`) REFERENCES `__orders` (`id`)\n"
+            . ');';
 
-        $this->assertSame(['ok_products'], UpdateBackup::extractTouchedTables([$sql], 'ok_'));
+        $this->assertSame(
+            ['ok_order_items', 'ok_orders'],
+            UpdateBackup::extractTouchedTables([$sql], 'ok_')
+        );
+    }
+
+    public function testExtractTouchedTablesDeduplicatesAcrossStatements(): void
+    {
+        $statement1 = 'ALTER TABLE `__products` ADD COLUMN `a` INT;';
+        $statement2 = "UPDATE `__products` SET `a` = 1;";
+        $statement3 = 'ALTER TABLE `__products` ADD COLUMN `b` INT;';
+
+        $this->assertSame(
+            ['ok_products'],
+            UpdateBackup::extractTouchedTables([$statement1, $statement2, $statement3], 'ok_')
+        );
+    }
+
+    public function testExtractTouchedTablesIgnoresStatementsWithoutMarkers(): void
+    {
+        $withoutMarker = 'ALTER TABLE `plain_table` ADD COLUMN `a` INT;';
+        $withMarker = 'ALTER TABLE `__products` ADD COLUMN `a` INT;';
+
+        $this->assertSame(
+            ['ok_products'],
+            UpdateBackup::extractTouchedTables([$withoutMarker, $withMarker], 'ok_')
+        );
     }
 
     public function testExtractTouchedTablesIgnoresQuotedDoubleUnderscoreNotFollowingKeyword(): void
@@ -154,9 +224,9 @@ class UpdateBackupTest extends TestCase
         $this->assertSame(['ok_settings'], UpdateBackup::extractTouchedTables([$sql], 'ok_'));
     }
 
-    public function testExtractTouchedTablesReturnsEmptyForNonDdlDmlContent(): void
+    public function testExtractTouchedTablesReturnsEmptyForNonDdlDmlStatement(): void
     {
-        $sql = "SELECT * FROM `__products`;\n-- __commented_table";
+        $sql = 'SELECT * FROM `__products`;';
 
         $this->assertSame([], UpdateBackup::extractTouchedTables([$sql], 'ok_'));
     }
