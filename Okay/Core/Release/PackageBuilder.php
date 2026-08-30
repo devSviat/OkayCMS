@@ -91,23 +91,27 @@ class PackageBuilder
         $stagingDir = sys_get_temp_dir() . '/okaycms-release-staging-' . uniqid();
         mkdir($stagingDir, 0777, true);
 
-        $staged = $this->stage($repoPath, $manifestPath, $forkVersion, $upstreamBase, $stagingDir, $migrationsPath);
+        try {
+            $staged = $this->stage($repoPath, $manifestPath, $forkVersion, $upstreamBase, $stagingDir, $migrationsPath);
 
-        $zipPath = $outputDir . '/okaycms-fork-v' . $forkVersion . '.zip';
-        $this->assembleZip($stagingDir, $zipPath);
+            $zipPath = $outputDir . '/okaycms-fork-v' . $forkVersion . '.zip';
+            $this->assembleZip($stagingDir, $zipPath);
 
-        $versionJsonPath = $outputDir . '/version.json';
-        copy($stagingDir . '/version.json', $versionJsonPath);
+            $versionJsonPath = $outputDir . '/version.json';
+            copy($stagingDir . '/version.json', $versionJsonPath);
 
-        $checksumsPath = $outputDir . '/checksums.txt';
-        $checksums = sprintf(
-            "%s  %s\n%s  %s\n",
-            hash_file('sha256', $zipPath),
-            basename($zipPath),
-            hash_file('sha256', $versionJsonPath),
-            basename($versionJsonPath)
-        );
-        file_put_contents($checksumsPath, $checksums);
+            $checksumsPath = $outputDir . '/checksums.txt';
+            $checksums = sprintf(
+                "%s  %s\n%s  %s\n",
+                hash_file('sha256', $zipPath),
+                basename($zipPath),
+                hash_file('sha256', $versionJsonPath),
+                basename($versionJsonPath)
+            );
+            file_put_contents($checksumsPath, $checksums);
+        } finally {
+            $this->removeDirectory($stagingDir);
+        }
 
         return [
             'zipPath' => $zipPath,
@@ -116,6 +120,24 @@ class PackageBuilder
             'fileCount' => $staged['fileCount'],
             'migrationsCount' => $staged['migrationsCount'],
         ];
+    }
+
+    private function removeDirectory(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($iterator as $file) {
+            $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+        }
+
+        rmdir($dir);
     }
 
     private function assembleZip(string $stagingDir, string $zipPath): void
