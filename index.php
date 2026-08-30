@@ -43,6 +43,18 @@ if (file_exists($maintenanceFlag)
         echo \Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::renderPage();
         exit;
     }
+
+    // Health-check пробою UpdateRunner (спек §8.11): якщо ми тут — токен
+    // уже пройшов allowsRequest() вище. Відповідь без DI й без БД: клас
+    // читається через ReflectionClass, конструктор не викликається —
+    // доводить лише, що autoload підхопив нові core-файли після apply.
+    if (isset($_GET['core_updater_health'])) {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'forkVersion' => (new \ReflectionClass(\Okay\Core\Config::class))->getDefaultProperties()['forkVersion'],
+        ]);
+        exit;
+    }
 }
 
 // Має відбутися до старту сесії вітрини: одночасно активною може бути
