@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'okaycms-fork/v*'
+  # Тег, який ставить tag-release.yml через GITHUB_TOKEN, не породжує
+  # push-подію для інших workflow (захист GitHub від рекурсії), тому
+  # tag-release.yml викликає цей workflow напряму, з ref на щойно
+  # створений тег.
+  workflow_dispatch:
 
 # Кожна джоба отримує лише те, що їй треба: test лише читає, публікацію
 # релізу робить тільки build-and-release.
@@ -55,12 +60,34 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Потрібна повна історія: перевірка нижче з'ясовує, чи тег
+          # досяжний з main.
+          fetch-depth: 0
 
-      - name: Extract fork version from tag
+      - name: Validate tag and extract fork version
         id: version
         run: |
+          # Глоб тригера ширший за формат релізу: тег на кшталт
+          # okaycms-fork/v1.0.0-rc1 зібрався б і опублікувався, але
+          # клієнтський фільтр (спек §2) його ніколи не побачить.
+          # Падаємо раніше збірки.
+          if [[ ! "$GITHUB_REF" =~ ^refs/tags/okaycms-fork/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Тег '$GITHUB_REF' не відповідає формату okaycms-fork/vX.Y.Z"
+            exit 1
+          fi
           TAG="${GITHUB_REF#refs/tags/okaycms-fork/v}"
           echo "version=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag commit is on main
+        run: |
+          # Реліз збирається лише з коміта, що вже влитий у main —
+          # тег на довільній гілці не має стати публічним пакетом.
+          git fetch origin main --quiet
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Коміт тегу не досяжний з main — реліз можливий лише з main"
+            exit 1
+          fi
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
