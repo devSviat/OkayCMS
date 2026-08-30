@@ -16,6 +16,7 @@
         "1DB_changes/"
     ],
     "exclude": [
+        "Okay/Core/.core-updater-write-probe",
         "backend/design/",
         "backend/files/",
         "Okay/Modules/OkayCMS/AutoDeploy/log/",
