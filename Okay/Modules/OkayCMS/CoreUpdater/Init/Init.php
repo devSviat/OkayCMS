@@ -4,7 +4,9 @@ namespace Okay\Modules\OkayCMS\CoreUpdater\Init;
 
 use Okay\Core\Modules\AbstractInit;
 use Okay\Core\Release\CoreMigrator;
+use Okay\Core\Scheduler\Schedule;
 use Okay\Core\ServiceLocator;
+use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateCheckHelper;
 
 class Init extends AbstractInit
 {
@@ -19,5 +21,12 @@ class Init extends AbstractInit
 
     public function init()
     {
+        $this->registerSchedule(
+            (new Schedule([UpdateCheckHelper::class, 'check']))
+                ->name('Check for core updates')
+                ->time('30 4 * * *')
+                ->overlap(false)
+                ->timeout(60)
+        );
     }
 }
