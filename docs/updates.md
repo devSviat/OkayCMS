@@ -16,6 +16,11 @@
 CLI-команди — це конвеєр без UI (Plan D). Запустити оновлення можна лише
 програмно: резолвнути `UpdateRunner` через DI і викликати `run()`.
 
+`run()` качає **останній** реліз зі снапшота. Необов'язковий аргумент
+`run('1.2.0')` — не вибір версії, а запобіжник виклику: якщо останній реліз
+виявився іншим, прогін падає ще до завантаження. Довільну ціль (у тому числі
+відкат на нижчу версію) вмикає Plan D.
+
 ## Перевірка оновлень
 
 `UpdateCheckHelper::check()` б'є в GitHub Releases репозиторію
@@ -51,13 +56,13 @@ ETag-кондиційний (`If-None-Match`); `304` лише освіжає `ch
 | ---- | --------- |
 | `download` | качає `{version}.zip` і `checksums.txt` у `files/tmp/updates/{version}/` (лише з `TRUSTED_ASSET_URL_PREFIX` — `https://github.com/devSviat/OkayCMS/releases/download/`) |
 | `verify` | звіряє sha256 архіву з `checksums.txt`, розпаковує, тоді звіряє **кожен** файл з `manifest.json` проти дерева й перевіряє шляхи на вихід за межі кореня (`assertSafePaths`) |
-| `preflight` | `assertInstallable` (мінімальний PHP, downgrade guard — пакет мусить бути новіший за встановлену версію); корінь доступний для запису; вільного місця > 3× розміру розпакованого пакета; якщо `composer.lock` пакета відрізняється — composer має бути доступний; якщо `version.json` каже `requiresMigrations` — має бути доступний `mysqldump` |
+| `preflight` | версія у `version.json` пакета мусить збігатися з версією релізу (інакше до тегу причепили чужий архів); `assertInstallable` (мінімальний PHP, downgrade guard — пакет мусить бути новіший за встановлену версію); корінь, `Okay/Core/` і `config/` доступні для запису (пробний файл, який одразу прибирається); вільного місця > 3× розміру розпакованого пакета; якщо `composer.lock` пакета відрізняється — composer має бути доступний; якщо `version.json` каже `requiresMigrations` — має бути доступний `mysqldump` |
 | `backup` | архівує у `files/backups/` файли з `manifest.json`, що фізично існують зараз (лише їх і перезапише apply); якщо є `.up.sql`-міграції — дампить `mysqldump`-ом лише зачеплені ними таблиці (розпізнані по `__marker` у SQL, той самий регекс, що й `CoreMigrator::prefixTables()`) |
 | `maintenance_on` | вмикає прапорець `config/.maintenance` із одноразовим токеном |
 | `apply_files` | spool-and-swap: кожен файл із `manifest.json` копіюється поруч (`{файл}.core-update.tmp`) і атомарно `rename()`-иться поверх цілі; нічого не видаляється. Тоді, якщо `composer.lock` пакета відрізняється від поточного — `composer install --no-dev --optimize-autoloader` |
 | `migrations` | `CoreMigrator::apply()` накочує `.up.sql` із пакета (трекер `ok_core_migrations`) |
 | `cache_clear` | `Design::clearCompiled()` + `opcache_reset()`, якщо розширення завантажене |
-| `health_check` | HTTP GET на `/?core_updater_health=1` з токеном у заголовку `X-Core-Updater-Token`; очікує JSON із `forkVersion`, **точно** новою версією |
+| `health_check` | HTTP GET на `/?core_updater_health=1` з токеном у заголовку `X-Core-Updater-Token`; очікує JSON із `forkVersion`, **точно** новою версією. До 4 спроб із паузою 2 с — перша може застати ще не перечитаний пул FPM |
 | `finalize` | знімає `config/.maintenance`, прибирає `files/tmp/updates/{version}/` і старі бекапи (`pruneOldBackups`, лишає 3 найновіші файли — з провалу тут прогін уже не падає, лише пише `finalizeWarning`) |
 
 Health-check відповідає **без DI й без БД** — `index.php` читає
@@ -67,13 +72,29 @@ Health-check відповідає **без DI й без БД** — `index.php` �
 `apply_files` реально підхопив нові core-файли, не піднімаючи роутер чи
 БД під технічними роботами.
 
-`root_url` для health-check у звичайному HTTP-запиті бере
-`Request::getDomain()`; для CLI-контексту (`Request::getDomain()` пустий,
-`$_SERVER['HTTP_HOST']` немає) — фолбек на ключ `Settings`
-`core_updater__root_url` (`UpdateRunner::SETTING_ROOT_URL`). Адмінської
-форми для цього ключа поки немає (Plan D) — ставиться напряму в
-`Settings`; без жодного з двох джерел `run()` кидає явний виняток замість
+`root_url` для health-check береться **спершу** з ключа `Settings`
+`core_updater__root_url` (`UpdateRunner::SETTING_ROOT_URL`) і лише потім з
+`Request::getRootUrl()` (домен разом із підпапкою). Саме такий порядок, а не
+навпаки: у HTTP-запиті хост приходить від клієнта (`Host`/
+`X-Forwarded-Host`) і на проксі чи multi-domain інсталяції не зобов'язаний
+бути адресою, за якою сайт відповідає сам собі. Адмінської форми для ключа
+поки немає (Plan D) — ставиться напряму в `Settings`; без жодного з двох
+джерел (CLI без `HTTP_HOST` і без ключа) `run()` кидає явний виняток замість
 тихого запиту на `http://`.
+
+**На проді з `opcache.validate_timestamps=0`** health-check із CLI побачить
+новий код лише після перезапуску пулу: `opcache_reset()` із CLI-процесу не
+торкається кешу FPM. Перезавантажте FPM (`systemctl reload php-fpm`,
+`docker compose restart php-fpm`) — інакше 4 спроби вичерпаються на старій
+версії й прогін піде у відкат при цілком справному оновленні.
+
+### Журнал прогону
+
+`files/tmp/updates/{version}/apply.log` — по рядку на кожен перехід кроку,
+плюс перелік застосованих файлів, вивід composer, імена накочених міграцій
+і запис про провал/відкат. Пишеться best-effort: помилка запису логу не
+зупиняє оновлення. `finalize` прибирає каталог разом із логом — на успішному
+прогоні його не лишається, він потрібен саме для розбору невдалих.
 
 ## Відновлення після збою
 
@@ -87,6 +108,17 @@ Health-check відповідає **без DI й без БД** — `index.php` �
 викликати `UpdateRunner::run()` ще раз — він завжди стартує з нуля
 (`UpdateStatus::fresh()`), не продовжує перерваний прогін.
 
+**Прогін, обірваний посеред `apply_files`** (процес убили, OOM), — окремий
+випадок: `Config.php` на диску вже може нести НОВУ версію, і звичайний
+downgrade guard відмовив би саме в тій дії, яка лікує напівзастосоване
+дерево. Тому `run()` перед перевіркою версії дивиться на збережений стан:
+якщо він на **ту саму** цільову версію, не в термінальному кроці й уже
+протух за `UpdateStatus::isStale()` (тобто процес гарантовано мертвий) —
+guard послаблюється з `>` до `>=` і повторне застосування тієї ж версії
+проходить. Це безпечно: файли кладуться через `rename()` поверх цілі
+(ідемпотентно), а міграції прикриті трекером `ok_core_migrations`.
+Downgrade лишається забороненим і в цьому режимі.
+
 **Провал від `apply_files` до `health_check` включно**
 (`UpdateRunner::needsRollback()`) — файли вже могли змінитись, конвеєр
 іде в rollback-гілку:
@@ -95,12 +127,26 @@ Health-check відповідає **без DI й без БД** — `index.php` �
    (`files/backups/pre-update-{from}-to-{to}-{ts}.zip`) тим самим
    spool-and-swap назад.
 2. Повторний health-check — тепер очікує **стару** версію
-   (`fromVersion`).
+   (`fromVersion`). Ця перевірка м'якша за пряму: HTTP 200 без JSON
+   (чи без `forkVersion`) теж вважається здоровим. Причина — перше в житті
+   інсталяції оновлення відкочується на версію, чий `index.php` ще не має
+   health-ендпоінта взагалі: він просто віддає вітрину, і 200 звідти
+   доводить рівно те, що треба довести. Чужа версія в JSON здоровою не
+   вважається й тут.
 3. Якщо старий код підтвердив себе живим — `config/.maintenance`
    знімається, стан `rolled_back`. Якщо ні — прапорець лишається
    увімкненим, стан отримує `requiresManualIntervention: true` й
    `manualInterventionReason`: сайт свідомо лишається закритим, поки
    хтось не розбереться руками.
+
+Стан `rolled_back` несе `backupZipPath` і `migrationsDumpPath` (обидва
+`null`, якщо відповідного файлу не було) — щоб не шукати їх у каталозі
+руками.
+
+Провал пишеться в `Settings` двічі: `failed` — одразу, ДО відкату, і
+`rolled_back` — після. Відкат сам ходить у мережу й у файли й може не
+пережити процес; без першого запису від нього лишався б застиглий робочий
+крок і жодного пояснення.
 
 **Core-міграції НЕ відкочуються** — DDL rollback ненадійний. Rollback-стан
 несе `rolledBackMigrations` (імена застосованих файлів, з
@@ -118,6 +164,13 @@ Health-check відповідає **без DI й без БД** — `index.php` �
   `files/backups/pre-update-{from}-to-{to}-{ts}.sql`, звичайний вивід
   `mysqldump --single-transaction --no-tablespaces`; заливається як
   завжди (`mysql < файл.sql`).
+- **`files/backups/` не має бути публічним.** Кореневий `.htaccess` віддає
+  `files/**.zip` напряму, а імена бекапів передбачувані — тому в каталозі
+  лежить власний `.htaccess` з `deny from all`, і `stepBackup` дописує його
+  наново, якщо каталогу ще не було. Для nginx те саме робить
+  `location ^~ /files/backups/ { return 404; }` (є в
+  [`docs/nginx/nginx.conf`](nginx/nginx.conf) і в dev-шаблоні) — префіксний
+  збіг `^~` обов'язковий, інакше правило за розширенням перебиває заборону.
 - `finalize` тримає лише **3 найновіших файли в `files/backups/` разом**
   (zip-и й sql-дампи — один спільний пул за mtime, не по три кожного
   типу) — знімайте копію деінде, якщо потрібно тримати довше трьох
@@ -157,5 +210,10 @@ Core-міграції (`.up.sql` у пакеті релізу) парсятьс�
   `ModuleParamsDTO::fromArray()` кладе його в `okayVersion` лише для
   відображення (`backend/design/html/module_list.tpl`) — install/update
   модуля цей ключ ніяк не перевіряє й ним не блокується.
-- Root URL для health-check у CLI-контексті — `Settings`-ключ
-  `core_updater__root_url`, без адмінської форми (Plan D, див. вище).
+- Root URL для health-check — `Settings`-ключ `core_updater__root_url`,
+  без адмінської форми (Plan D, див. вище).
+- **Об'єктний кеш крок `cache_clear` не чистить.** У стоковому форку його
+  просто немає: `Design::clearCompiled()` + `opcache_reset()` вичерпують усе,
+  що треба скинути. Інсталяція з модулем об'єктного кешу (Redis тощо) мусить
+  скинути його сама після оновлення ядра — кеш може тримати відрендерені
+  фрагменти й дані, зібрані старим кодом.
