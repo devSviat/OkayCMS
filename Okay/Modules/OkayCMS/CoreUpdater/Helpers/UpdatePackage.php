@@ -65,14 +65,32 @@ class UpdatePackage
      * часткового "ок" не буває. Файли, присутні в дереві, але не заявлені
      * в manifest, тут навіть не розглядаються (ігноруються навмисно).
      *
-     * @param array<string, string> $manifestFiles відносний шлях => sha256
+     * Порожній manifest — це не "нічого перевіряти", а ознака битого/
+     * обрізаного білда: він самоузгоджено пройде будь-яку перевірку
+     * checksums і мовчки "оновить" нуль файлів, тож тут це явний фейл.
+     *
+     * @param array<string, mixed> $manifestFiles відносний шлях => sha256;
+     *     значення типізовано широко — сирий, ще неперевірений manifest.json
+     *     може містити будь-що.
      * @return list<string> перевірені відносні шляхи, у порядку manifest
      */
     public static function verifyExtractedFiles(string $extractedDir, array $manifestFiles): array
     {
+        if ($manifestFiles === []) {
+            throw new \RuntimeException(
+                'manifest.json не містить жодного файлу — пакет схожий на битий білд, перевірку зупинено.'
+            );
+        }
+
         $verified = [];
 
         foreach ($manifestFiles as $relativePath => $expectedHash) {
+            if (!is_string($expectedHash) || $expectedHash === '') {
+                throw new \RuntimeException(
+                    "Некоректний sha256 у manifest.json для файлу {$relativePath}."
+                );
+            }
+
             $fullPath = rtrim($extractedDir, '/') . '/' . $relativePath;
 
             if (!is_file($fullPath)) {
@@ -98,6 +116,10 @@ class UpdatePackage
      * Захист від виходу за межі кореня (спек §5, defense-in-depth):
      * жоден шлях із manifest.json не може бути абсолютним, містити `..`
      * як окремий сегмент чи використовувати `\` як роздільник.
+     *
+     * Порожній `$manifestFiles` тут навмисно проходить без винятку — метод
+     * перевіряє шляхи, яких немає, а не факт "порожнього пакета" (це
+     * робить verifyExtractedFiles()).
      *
      * @param array<array-key, string> $manifestFiles відносний шлях => sha256 —
      *     ключі типізовані широко: json_decode() перетворює числові рядки-ключі

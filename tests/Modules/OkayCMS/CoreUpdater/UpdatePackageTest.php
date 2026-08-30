@@ -108,6 +108,27 @@ class UpdatePackageTest extends TestCase
     }
 
     /**
+     * Порожній manifest самоузгоджено "проходить" будь-яку перевірку
+     * checksums і мовчки застосував би нуль файлів — тут це явний фейл,
+     * а не порожній список без роботи.
+     */
+    public function testVerifyExtractedFilesThrowsOnEmptyManifest(): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::verifyExtractedFiles(self::FIXTURES . '/payload', []);
+    }
+
+    public function testVerifyExtractedFilesThrowsOnNonStringHashInManifest(): void
+    {
+        $manifest = json_decode(file_get_contents(self::FIXTURES . '/manifest-non-string-hash.json'), true)['files'];
+
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::verifyExtractedFiles(self::FIXTURES . '/payload', $manifest);
+    }
+
+    /**
      * "Ніяких часткових ок" — якщо третій файл зі списку битий, перші два
      * не мають повернутись як частково перевірений результат.
      */
@@ -160,6 +181,16 @@ class UpdatePackageTest extends TestCase
         UpdatePackage::assertSafePaths($manifest);
     }
 
+    /**
+     * Свідомий вибір: assertSafePaths() перевіряє шляхи, яких немає —
+     * "пакет без файлів" ловить verifyExtractedFiles(), не цей метод.
+     */
+    public function testAssertSafePathsPassesOnEmptyManifest(): void
+    {
+        UpdatePackage::assertSafePaths([]);
+        $this->addToAssertionCount(1);
+    }
+
     // --- readVersionMeta ---
 
     public function testReadVersionMetaReturnsTypedFields(): void
@@ -180,6 +211,34 @@ class UpdatePackageTest extends TestCase
         $this->expectException(\RuntimeException::class);
 
         UpdatePackage::readVersionMeta(self::FIXTURES . '/payload');
+    }
+
+    public function testReadVersionMetaThrowsOnMalformedJson(): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::readVersionMeta(self::FIXTURES . '/version-variants/broken-json');
+    }
+
+    public function testReadVersionMetaThrowsWhenJsonIsNotAnObject(): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::readVersionMeta(self::FIXTURES . '/version-variants/not-object');
+    }
+
+    public function testReadVersionMetaThrowsWhenForkVersionIsMissing(): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::readVersionMeta(self::FIXTURES . '/version-variants/no-fork-version');
+    }
+
+    public function testReadVersionMetaThrowsWhenForkVersionIsEmpty(): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::readVersionMeta(self::FIXTURES . '/version-variants/empty-fork-version');
     }
 
     // --- assertInstallable ---
