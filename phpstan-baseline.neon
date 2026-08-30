@@ -1123,6 +1123,12 @@ parameters:
 			path: Okay/Core/Recaptcha.php
 
 		-
+			message: '#^Dead catch \- PDOException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: Okay/Core/Release/CoreMigrator.php
+
+		-
 			message: '#^Method Okay\\Core\\Request\:\:method\(\) should return string but returns bool\.$#'
 			identifier: return.type
 			count: 1

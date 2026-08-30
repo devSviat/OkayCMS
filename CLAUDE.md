@@ -10,7 +10,8 @@ OkayCMS (fork) — PHP e-commerce platform with a modular architecture, custom D
 
 | Branch | What it is |
 | ------ | ---------- |
-| `main` | This fork's line of development. Default branch — every PR targets it. |
+| `dev` | This fork's line of development. Default branch — every feature PR targets it. |
+| `main` | The release line. Reached only via a `dev → main` release PR (title `okaycms-fork/vX.Y.Z ...`); merging it triggers the tag and image build. |
 | `master` | A mirror of `OkayCMS/OkayCMS@master`. Nothing of ours is ever committed here. |
 | `develop` | The upstream `develop` line, kept for the same reason. |
 
