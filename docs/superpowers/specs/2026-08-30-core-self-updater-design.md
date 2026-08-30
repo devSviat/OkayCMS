@@ -195,8 +195,11 @@ Per-file checksum у `manifest.json` дозволяє звірити ціліс�
 "track applied by filename in a DB table", що вже перевірений у
 `AutoDeploy::MigrationsEntity`, але власна таблиця:
 
-- `ok_core_migrations` (`id`, `name`, `applied_at`) — створюється
-  міграцією самого CoreUpdater-модуля при його першому встановленні.
+- `ok_core_migrations` (`id`, `name`, `applied_at`) — самостворюваний
+  трекер (`CoreMigrator::ensureTable()`, `CREATE TABLE IF NOT EXISTS`),
+  щоб міграціонер працював з CLI під час оновлення незалежно від
+  порядку встановлення модулів; метод `install()` CoreUpdater-модуля
+  може викликати `ensureTable()`, але ніщо від нього не залежить.
 - Файли `migrations/{fork-version}_{опис}.up.sql` у пакеті релізу —
   застосовуються по черзі, кожен в окремій транзакції, кожен написаний
   ідемпотентно (`CREATE TABLE IF NOT EXISTS`, перевірка через
