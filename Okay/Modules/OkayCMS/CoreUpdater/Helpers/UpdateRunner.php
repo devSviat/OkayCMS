@@ -37,10 +37,11 @@ class UpdateRunner
     private const MIN_FREE_SPACE_MULTIPLIER = 3;
 
     /**
-     * Крок → назва методу-обробника, у порядку UpdateStatus::STEPS.
-     * Фактичне диспетчерування в run() іде через типізований match()
-     * (щоб PHPStan бачив кожен виклик) — ця мапа лише контракт, який
-     * тестує повноту й порядок: кожен крок зі спеку §8 має обробник.
+     * Крок → назва методу-обробника, у порядку UpdateStatus::STEPS. ЄДИНЕ
+     * джерело правди диспетчерування (dispatchStep() читає саме звідси, а
+     * не з окремого switch/match) — інакше тест повноти перевіряв би
+     * декоративну константу, а реальний диспетчер міг би непомітно
+     * розійтись із нею.
      *
      * @var array<string, string>
      */
@@ -175,22 +176,15 @@ class UpdateRunner
     /** @param array<string, mixed> $ctx @return array<string, mixed> */
     private function dispatchStep(string $step, array $ctx): array
     {
-        return match ($step) {
-            UpdateStatus::STEP_DOWNLOAD => $this->stepDownload($ctx),
-            UpdateStatus::STEP_VERIFY => $this->stepVerify($ctx),
-            UpdateStatus::STEP_PREFLIGHT => $this->stepPreflight($ctx),
-            UpdateStatus::STEP_BACKUP => $this->stepBackup($ctx),
-            UpdateStatus::STEP_MAINTENANCE_ON => $this->stepMaintenanceOn($ctx),
-            UpdateStatus::STEP_APPLY_FILES => $this->stepApplyFiles($ctx),
-            UpdateStatus::STEP_MIGRATIONS => $this->stepMigrations($ctx),
-            UpdateStatus::STEP_CACHE_CLEAR => $this->stepCacheClear($ctx),
-            UpdateStatus::STEP_HEALTH_CHECK => $this->stepHealthCheck($ctx),
-            UpdateStatus::STEP_FINALIZE => $this->stepFinalize($ctx),
-            // UpdateStatus::STEPS типізовано як list<string> — PHPStan не
-            // звужує це до літерального union, тож дефолт потрібен лише
-            // йому; на практиці сюди приходять виключно значення STEPS.
-            default => throw new \LogicException("UpdateRunner: невідомий крок '{$step}'"),
-        };
+        $method = self::STEP_HANDLERS[$step] ?? null;
+        if ($method === null) {
+            throw new \LogicException("UpdateRunner: невідомий крок '{$step}'");
+        }
+
+        /** @var array<string, mixed> $result динамічний виклик — PHPStan не бачить сигнатуру методу з рядка */
+        $result = $this->{$method}($ctx);
+
+        return $result;
     }
 
     // --- кроки ---
@@ -284,10 +278,13 @@ class UpdateRunner
             $this->backup->createFilesBackup($rootDir, $backupList, $backupZipPath);
         } else {
             // Немає жодного файлу поточного дерева, який апдейт перезапише
-            // (напр. дуже маленький реліз) — все одно порожній архів, щоб
-            // rollback-гілка мала що відкривати без спецвипадку "нема бекапу".
+            // (напр. дуже маленький реліз) — все одно архів, щоб rollback-
+            // гілка мала що відкривати без спецвипадку "нема бекапу". Архів
+            // БЕЗ жодного запису libzip на диск не пише взагалі (close()
+            // мовчки лишає шлях порожнім) — тому один порожній маркер-файл.
             $zip = new \ZipArchive();
             $zip->open($backupZipPath, \ZipArchive::CREATE);
+            $zip->addFromString('.empty', '');
             $zip->close();
         }
         $ctx['backupZipPath'] = $backupZipPath;
@@ -458,9 +455,23 @@ class UpdateRunner
     /** @param array<string, mixed> $state @param array<string, mixed> $ctx @return array<string, mixed> */
     private function handleFailure(array $state, array $ctx, \Throwable $e): array
     {
+        // needsRollback() МУСИТЬ дивитись на крок, на якому стався провал —
+        // тобто на $state ДО fail(). UpdateStatus::fail() переписує 'step'
+        // на 'failed', якого нема в STEPS; рахувати needsRollback() ПІСЛЯ
+        // fail() означає array_search()=false на кожному фейлі — rollback
+        // не спрацював би НІКОЛИ.
+        $rollbackNeeded = self::needsRollback($state);
         $failedState = UpdateStatus::fail($state, $e->getMessage());
 
-        if (!self::needsRollback($failedState)) {
+        if (!$rollbackNeeded) {
+            // Мінор: провал ДО apply_files, коли maintenance_on уже встиг
+            // виставити прапорець — нічого в файлах/БД не чіпалось, тож
+            // прапорець знімається одразу, а не висить до ручного втручання.
+            if (isset($ctx['maintenanceFlagPath']) && MaintenanceMode::isActive($ctx['maintenanceFlagPath'])) {
+                MaintenanceMode::disable($ctx['maintenanceFlagPath']);
+                $failedState['maintenanceDisabledAfterFailure'] = true;
+            }
+
             $this->status->save($failedState);
 
             return $failedState;
@@ -490,7 +501,11 @@ class UpdateRunner
         if (isset($ctx['backupZipPath']) && is_file($ctx['backupZipPath'])) {
             try {
                 $this->applier->restoreFiles($ctx['backupZipPath'], $ctx['rootDir']);
-            } catch (UpdateApplyException $e) {
+            } catch (\Throwable $e) {
+                // \Throwable, не лише UpdateApplyException: ZipArchive::open()
+                // на битому/відсутньому архіві кидає голий RuntimeException —
+                // він мусить лишити стан 'rolled_back'+manual-intervention, а
+                // не пролетіти повз rollback() неспійманим.
                 $restoreError = $e->getMessage();
             }
         } else {
