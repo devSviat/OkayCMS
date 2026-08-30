@@ -39,7 +39,6 @@ class FeaturesValuesEntity extends Entity
     protected static $langTable = 'features_values';
     protected static $tableAlias = 'fv';
 
-    /*добавление значения свойства*/
     public function add($featureValue) {
 
         $featureValue = (object)$featureValue;
@@ -58,7 +57,6 @@ class FeaturesValuesEntity extends Entity
         return parent::add($featureValue);
     }
 
-    /*Обновление значения свойства*/
     public function update($ids, $featureValue)
     {
         $featureValue = (object)$featureValue;
@@ -68,7 +66,7 @@ class FeaturesValuesEntity extends Entity
         }
 
         if (empty($featureValue->translit)) {
-            // если не передали транслит, попробуем найти его в базе
+            // Трансліту не передали: беремо наявний із бази, інакше складаємо з назви.
             if ($translit = $this->cols(['translit'])->findOne(['id' => $ids])) {
                 $featureValue->translit = $translit;
             } elseif (!empty($featureValue->value)) {
@@ -93,7 +91,7 @@ class FeaturesValuesEntity extends Entity
             $this->select->join('LEFT', '__products_features_values AS pf', 'pf.value_id=fv.id');
         }
 
-        // Нужно фильтр по свойствам применить здесь, чтобы он отработал до всех джоинов
+        // Фільтр по властивостях має відпрацювати до всіх джойнів, тому він тут.
         if (isset($filter['features'])) {
             $this->filter__features($filter['features']);
             unset($filter['features']);
@@ -113,13 +111,12 @@ class FeaturesValuesEntity extends Entity
     }
 
     /**
-     * Без фильтра pf раздувает выборку до полутора миллионов строк, которые
-     * GROUP BY тут же схлопывает обратно, поэтому джоины ставим только тем
-     * фильтрам, которые их читают. Фильтр из модуля может опираться на любой
-     * алиас, так что для него оставляем все три.
+     * Без фільтра pf роздуває вибірку, яку GROUP BY тут же схлопує назад, тож
+     * джойни ставимо лише тим фільтрам, що їх читають. Фільтр із модуля може
+     * спиратись на будь-який аліас, тому для нього лишаємо всі три.
      *
-     * Забытый джоин не падает: Database::query() пишет ошибку в лог и возвращает
-     * false, то есть фильтр просто исчезает со страницы.
+     * Забутий джойн не падає: Database::query() пише помилку в лог і повертає
+     * false, тобто фільтр просто зникає зі сторінки.
      *
      * @param array $filter
      * @return bool[] [pf, f, p]
@@ -132,12 +129,12 @@ class FeaturesValuesEntity extends Entity
             }
         }
 
-        // filter__price сюда не входит: он join'ит собственный подзапрос по fv.id
+        // filter__price сюди не входить: він джойнить власний підзапит по fv.id
         $products = isset($filter['visible'])
             || isset($filter['in_stock'])
             || isset($filter['features']);
 
-        // p присоединяется через pf, поэтому товары всегда тянут за собой и значения
+        // p приєднується через pf, тому товари завжди тягнуть за собою й значення
         $productsValues = $products
             || isset($filter['product_id'])
             || isset($filter['brand_id'])
@@ -152,7 +149,6 @@ class FeaturesValuesEntity extends Entity
         $this->select->where("(SELECT count(*)>0 FROM __variants pv WHERE pv.product_id=p.id AND (pv.stock IS NULL OR pv.stock>0) LIMIT 1) = 1");
     }
     
-    /*Удаление значения свойства*/
     public function delete($ids = null)
     {
         if (parent::delete($ids)) {
@@ -207,13 +203,13 @@ class FeaturesValuesEntity extends Entity
                 ->cols(['DISTINCT(pf.product_id)'])
                 ->join('LEFT', '__features_values AS fv', 'fv.id=pf.value_id');
 
-            // Алиас для таблицы без языков
+            // Аліас таблиці без мов
             $optionsPx = 'fv';
             
             if (!empty($this->lang->getLangId())) {
                 $subQuery->where('lfv.lang_id=' . (int)$this->lang->getLangId())
                     ->join('LEFT', '__lang_features_values AS lfv', 'fv.id=lfv.feature_value_id');
-                // Алиас для таблицы с языками
+                // Аліас таблиці з мовами
                 $optionsPx = 'lfv';
             }
             
@@ -260,7 +256,7 @@ class FeaturesValuesEntity extends Entity
     
     protected function filter__category_id($categoriesIds)
     {
-        // Берём значения тех свойств, которые назначены на указанные категории
+        // Беремо значення тих властивостей, що призначені вказаним категоріям
         $this->select->join('INNER', '__categories_features AS cf', 'cf.feature_id=f.id AND cf.category_id IN (:category_id)')
             ->bindValue('category_id', (array)$categoriesIds);
     }
@@ -306,7 +302,7 @@ class FeaturesValuesEntity extends Entity
     /**
      * @param array $features
      * example $features[feature_id] = [value1_id, value2_id ...]
-     * Метод возвращает только мультиязычные поля значений свойств, используется для построения alternate на странице фильтра
+     * Повертає лише мультимовні поля значень властивостей — для alternate на сторінці фільтра
      * @return array
      * result [
      *  lang_id => [
@@ -357,7 +353,6 @@ class FeaturesValuesEntity extends Entity
         return ExtenderFacade::execute([static::class, __FUNCTION__], $result, func_get_args());
     }
     
-    /*добавление значения свойства товара*/
     public function addProductValue($productId, $valueId)
     {
 
@@ -385,8 +380,6 @@ class FeaturesValuesEntity extends Entity
     }
 
     /**
-     * Метод возвращает ID всех значений свойств товаров
-     * 
      * @param array $productIds
      * @return array
      * @throws \Exception
@@ -415,7 +408,6 @@ class FeaturesValuesEntity extends Entity
         return ExtenderFacade::execute([static::class, __FUNCTION__], [], func_get_args());
     }
 
-    /*удаление связки значения свойства и товара*/
     public function deleteProductValue($productsIds, $valuesIds = null, $featuresIds = null)
     {
         $productIdFilter  = '';
@@ -423,7 +415,7 @@ class FeaturesValuesEntity extends Entity
         $featureIdFilter  = '';
         $featureIdJoin    = '';
 
-        /*Удаляем только если передали хотябы один аргумент*/
+        // Без жодного аргументу запит лишився б без WHERE і зніс би всі зв'язки.
         if (empty($productsIds) && empty($valuesIds) && empty($featuresIds)) {
             return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
         }
