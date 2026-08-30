@@ -84,18 +84,23 @@ core-специфічні DB-міграції нового зразка (§7).
 ```
 checkout
 composer install --no-dev --optimize-autoloader
-той самий тестовий набір, що й ci.yml (винести спільні кроки в
-  composite action, щоб не розходитись з ci.yml з часом)
+той самий тестовий набір, що й ci.yml — включно з composer audit
+  (реалізовано ручною копією джоби tests, бо ci.yml не має
+  workflow_call; борг: винести спільні кроки в composite action,
+  щоб не розходитись — розходження вже один раз сталося)
 build:
   - зібрати core-дерево за explicit allow-list з release-manifest.json (§5)
   - version.json:   {forkVersion, upstreamBase, minPhp, releasedAt,
                       requiresMigrations: bool}
+                    minPhp — конкретна нижня межа версії (8.4.0),
+                    нормалізована з composer-констрейнта, придатна
+                    для version_compare()
   - manifest.json:  повний список core-шляхів у пакеті, sha256 на кожен файл
-  - CHANGELOG-фрагмент (з CHANGELOG.md або git log діапазону між тегами)
   - okaycms-fork-vX.Y.Z.zip
   - checksums.txt:  sha256 на сам zip і на version.json окремо
 gh release create okaycms-fork/vX.Y.Z
-  --title, --notes (з CHANGELOG-фрагменту)
+  --title, --generate-notes (нотатки генерує GitHub з PR/комітів
+                             діапазону; окремий CHANGELOG.md не ведемо)
   --attach okaycms-fork-vX.Y.Z.zip
   --attach checksums.txt
   --attach version.json   (некомпресований, окремий asset — щоб
@@ -130,10 +135,28 @@ Explicit allow-list у `release-manifest.json` (корінь форку, ком�
 
 **У пакеті (перезаписується):**
 `Okay/Core/`, `Okay/Controllers/`, `Okay/Entities/`, `Okay/Helpers/`,
-`Okay/Requests/`, `Okay/Extenders/` (базові, не модульні),
-`backend/` **крім** `backend/design/` (див. edge case нижче),
+`Okay/Requests/`, `Okay/lang_general/` (мовні файли ядра),
+`Okay/xml/opensearch.xml.tpl`,
+`backend/` **крім** `backend/design/` (див. edge case нижче) і **крім**
+runtime-writable піддерев (`backend/files/` — користувацькі
+вивантаження; аналогічно виключені `Okay/Modules/OkayCMS/AutoDeploy/{log,tmp}/`
+та `Okay/Modules/OkayCMS/Integration1C/temp/` — інакше локальна збірка
+релізу на живій інсталяції запакувала б клієнтські дані в публічний
+asset),
 `Okay/Modules/OkayCMS/*`, `composer.json`, `composer.lock`, `ok`,
 `index.php`, нові файли `1DB_changes/` (додаються, старі не чіпаються).
+
+Каталогу `Okay/Extenders/` у форку не існує (екстендери живуть у
+модулях) — рання версія цього документа помилково його називала.
+
+Кореневі `.htaccess` і `robots.txt` у пакет **не входять** — свідомо.
+Для цільової аудиторії (класичний хостинг без Docker) `.htaccess` —
+головний важіль безпеки периметра, але він же і найчастіше локально
+кастомізований (редиректи, ліміти хостера); мовчки перезаписувати його
+оновленням небезпечніше, ніж не доставити правку. Якщо колись
+знадобиться доставити критичну зміну `.htaccess` — це буде явний,
+окремо задокументований крок міграції в нотатках релізу, не тихий
+перезапис.
 
 `vendor/` **не входить у zip** — перегенерується на сервері командою
 `composer install` за оновленим `composer.lock` під час apply (§8, крок
