@@ -286,8 +286,10 @@ class MainHelper
         $design->assign('payment_methods', $this->getPaymentMethods());
         $design->assign('phone_example', $phone->getPhoneExample());
 
+        // У знімок не кладемо: footer() пересилає весь $_GET в адресу скрипта, а
+        // getKeyword() читає саме звідти. Копія лише плодила знімок на кожному
+        // ajax-запиті, витісняючи знімки справжніх сторінок.
         $design->assign('keyword', $filterHelper->getKeyword());
-        $design->assign('keyword', $filterHelper->getKeyword(), true);
 
         if (!empty($settings->get('site_social_links'))) {
             $design->assign('site_social', $this->buildSocialLinks($settings->get('site_social_links')));
@@ -459,6 +461,17 @@ class MainHelper
             unset($_SESSION['dynamic_js']);
             $route = $router->getRouteByName($routeName);
             $_SESSION['dynamic_js']['controller'] = $route['params']['controller'];
+
+            /** @var FrontTemplateConfig $frontTemplateConfig */
+            $frontTemplateConfig = $this->SL->getService(FrontTemplateConfig::class);
+            $pageKey = $frontTemplateConfig->getDynamicJsPageKey(Request::getRequestUri());
+
+            $this->resetDynamicJsPage($pageKey);
+
+            // Скриптові маршрути ключа не отримують: вони знімок лише читають.
+            $this->SL->getService(Design::class)->setDynamicJsPageKey($pageKey);
+
+            $this->forgetStaleDynamicJsPages();
         }
 
         if (($routeName = $router->getCurrentRouteName()) != 'common_js') {
@@ -466,6 +479,38 @@ class MainHelper
             $_SESSION['common_js']['controller'] = $route['params']['controller'];
         }
         return ExtenderFacade::execute(__METHOD__, null, func_get_args());
+    }
+
+    /**
+     * Знімок сторінки складається наново, як і спільний слот: інакше змінні
+     * минулого візиту - передусім прапорці форм - лишались би в ньому назавжди.
+     * Заразом запис повертається в кінець черги витіснення.
+     *
+     * @param string $pageKey
+     * @return void
+     */
+    private function resetDynamicJsPage($pageKey)
+    {
+        unset($_SESSION[Design::DYNAMIC_JS_PAGES][$pageKey]);
+    }
+
+    /**
+     * Тримає знімки в межах стелі, лишаючи найсвіжіші.
+     *
+     * @return void
+     */
+    private function forgetStaleDynamicJsPages()
+    {
+        if (empty($_SESSION[Design::DYNAMIC_JS_PAGES])) {
+            return;
+        }
+
+        $_SESSION[Design::DYNAMIC_JS_PAGES] = array_slice(
+            $_SESSION[Design::DYNAMIC_JS_PAGES],
+            -Design::DYNAMIC_JS_PAGES_LIMIT,
+            null,
+            true
+        );
     }
 
     /**

@@ -18,6 +18,12 @@ class Design
     const TEMPLATES_DEFAULT = 'default';
     const TEMPLATES_MODULE = 'module';
 
+    /** Змінні scripts.tpl, по одному знімку на сторінку, що видала адресу скрипта. */
+    const DYNAMIC_JS_PAGES = 'dynamic_js_pages';
+
+    /** Скрипт забирають одразу за сторінкою, тож глибина потрібна лише проти паралельних вкладок. */
+    const DYNAMIC_JS_PAGES_LIMIT = 5;
+
     /**
      * Smarty забороняє статичний доступ до незареєстрованого класу. Пошук іде за
      * літеральним токеном, як його написано в шаблоні, тож "\Okay\Core\Phone" і
@@ -83,6 +89,16 @@ class Design
 
     /** @var int глибина вкладених fetch() з примусовою мініфікацією */
     private $forceMinifyDepth = 0;
+
+    /**
+     * Ключ сторінки, яка зараз малюється, для знімка змінних scripts.tpl.
+     * Живе лише в межах запиту: у сесії він застоювався б і на запитах, що
+     * не проходять через activateDynamicJs() (адмінка), клав присвоєння в
+     * знімок сторонньої сторінки.
+     *
+     * @var string|null
+     */
+    private $dynamicJsPageKey;
     
 
     /**
@@ -316,12 +332,36 @@ class Design
      */
     public function assign($var, $value, $dynamicJs = false)
     {
-        
+
         if ($dynamicJs === true) {
             $_SESSION['dynamic_js']['vars'][$var] = $value;
+
+            // Спільний слот переживає лише одну сторінку в польоті, тож дублюємо
+            // змінну під ключем тієї сторінки, яка й видасть адресу скрипта.
+            if ($this->dynamicJsPageKey !== null) {
+                $_SESSION[self::DYNAMIC_JS_PAGES][$this->dynamicJsPageKey]['controller'] = $_SESSION['dynamic_js']['controller'] ?? null;
+                $_SESSION[self::DYNAMIC_JS_PAGES][$this->dynamicJsPageKey]['vars'][$var] = $value;
+            }
         }
-        
+
         return $this->smarty->assign($var, $value);
+    }
+
+    /**
+     * @param string|null $pageKey
+     * @return void
+     */
+    public function setDynamicJsPageKey($pageKey)
+    {
+        $this->dynamicJsPageKey = $pageKey;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDynamicJsPageKey()
+    {
+        return $this->dynamicJsPageKey;
     }
 
     /**

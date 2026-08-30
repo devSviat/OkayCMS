@@ -78,6 +78,7 @@ failOnWarning="true"
 | `Security/NoDatabaseChangeTest`, `Security/UpgradeNotesTest` | розійтись зі станом, зафіксованим ітерацією безпеки |
 | `Entities/FeaturesValuesBrandSubqueryTest` | зняти `DISTINCT` у підзапиті `filter__brand` там, де зовнішню вибірку роздув джойн `pf`, або лишити його там, де не роздув |
 | `Entities/FeaturesBrandSubqueryTest` | повернути `DISTINCT` у підзапит `filter__brand` у `FeaturesEntity` — блок фільтрів лишиться правильним, лише повільнішим |
+| `Core/DynamicJsPageIsolationTest` | повернути спільний на всю сесію слот змінних `scripts.tpl`, перестати скидати знімок на візиті або знову класти в нього `keyword` — блок фільтрів підміниться чужим, прапорець форми застрягне, а живий пошук витіснить знімки сторінок |
 
 Причини кожного описані в докблоці самого тесту — там же історія, чому він з'явився.
 
