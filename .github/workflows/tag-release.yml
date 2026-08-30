@@ -94,7 +94,9 @@ jobs:
         id: tag
         run: |
           TAG="okaycms-fork/v${{ steps.version.outputs.version }}"
-          EXISTING="$(git ls-remote --tags origin "refs/tags/$TAG" | awk '{print $1}')"
+          # NR==1: annotated тег дав би два рядки (tag-обʼєкт + peeled) і
+          # багаторядковий EXISTING завжди виглядав би як "інший коміт".
+          EXISTING="$(git ls-remote --tags origin "refs/tags/$TAG" | awk 'NR==1{print $1}')"
 
           if [[ -n "$EXISTING" && "$EXISTING" != "$GITHUB_SHA" ]]; then
             echo "::error::Тег $TAG уже існує і вказує на інший коміт ($EXISTING)"
