@@ -76,7 +76,8 @@ failOnWarning="true"
 | `Core/Console/CommandNamesTest` | лишити команду без `#[AsCommand]` — це кладе весь `./ok` |
 | `Core/QueryFactory/NoPositionalBindsTest` | позиційні `?` у `where()`, яких aura 3 не вміє |
 | `Security/NoDatabaseChangeTest`, `Security/UpgradeNotesTest` | розійтись зі станом, зафіксованим ітерацією безпеки |
-| `Entities/FeaturesValuesBrandSubqueryTest` | повернути `DISTINCT` у підзапит `filter__brand` — сторінка лишиться правильною, лише повільнішою |
+| `Entities/FeaturesValuesBrandSubqueryTest` | зняти `DISTINCT` у підзапиті `filter__brand` там, де зовнішню вибірку роздув джойн `pf`, або лишити його там, де не роздув |
+| `Entities/FeaturesBrandSubqueryTest` | повернути `DISTINCT` у підзапит `filter__brand` у `FeaturesEntity` — блок фільтрів лишиться правильним, лише повільнішим |
 
 Причини кожного описані в докблоці самого тесту — там же історія, чому він з'явився.
 

@@ -432,7 +432,10 @@ class FeaturesEntity extends Entity
 
         $productsSelect = $productsEntity->getSelect(['brand' => $value, 'visible' => 1]);
 
+        // Джойн іде по feature_id, і дублі підзапиту схлопує зовнішній DISTINCT,
+        // тож derived merge тут блокувати нема потреби.
         $productsSelect
+            ->distinct(false)
             ->resetCols()
             ->resetOrderBy();
 
