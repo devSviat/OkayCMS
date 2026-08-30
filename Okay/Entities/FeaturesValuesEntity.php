@@ -502,7 +502,14 @@ class FeaturesValuesEntity extends Entity
 
         $productsSelect = $productsEntity->getSelect(['brand' => $value, 'visible' => 1]);
 
+        // DISTINCT прийшов з getSelect() і потрібен лише повній вибірці товару, а
+        // тут блокує derived merge: база матеріалізує весь джойн
+        // products × products_features_values замість піти по індексу. Знімати
+        // безпечно, поки підзапит не дає колонок у проєкцію, а точки входу
+        // дедуплікують по fv.id. У filter__product_keyword навпаки — там умова
+        // сканує все, і DISTINCT стискає потік ще до джойна.
         $productsSelect
+            ->distinct(false)
             ->resetCols()
             ->resetOrderBy();
 
