@@ -15,6 +15,24 @@ ini_set('display_errors', 'off');
 
 require_once('vendor/autoload.php');
 
+// Оновлення ядра: вітрина закрита, health-check проходить за токеном
+// з прапорця (див. CoreUpdater/MaintenanceMode). До DI й БД навмисно —
+// сторінка технічних робіт не має права впасти через них.
+// backend/index.php свідомо без цього гейта: адмінка мусить лишатись
+// живою, щоб бачити прогрес і статус оновлення.
+if (class_exists(\Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::class)) {
+    $maintenanceFlag = __DIR__ . '/config/.maintenance';
+    if (!\Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::allowsRequest(
+        $maintenanceFlag,
+        $_SERVER['HTTP_X_CORE_UPDATER_TOKEN'] ?? ($_GET['core_updater_token'] ?? null)
+    )) {
+        http_response_code(503);
+        header('Retry-After: 120');
+        echo \Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::renderPage();
+        exit;
+    }
+}
+
 // Має відбутися до старту сесії вітрини: одночасно активною може бути
 // лише одна сесія, а тут ми на мить читаємо бекендову.
 \Okay\Core\Security\SessionNames::isAdmin();

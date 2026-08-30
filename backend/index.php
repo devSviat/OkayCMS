@@ -26,6 +26,8 @@ chdir('..');
 
 require_once('vendor/autoload.php');
 
+// Без гейта техробіт з index.php: під час оновлення ядра адмінка мусить
+// лишатись живою, щоб бачити прогрес і статус (CoreUpdater/MaintenanceMode).
 $DI = include 'Okay/Core/config/container.php';
 
 /**
