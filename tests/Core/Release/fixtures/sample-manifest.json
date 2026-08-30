@@ -1,0 +1,9 @@
+{
+    "include": [
+        "Okay/Core/",
+        "backend/"
+    ],
+    "exclude": [
+        "backend/design/"
+    ]
+}

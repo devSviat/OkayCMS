@@ -1,0 +1,25 @@
+{
+    "include": [
+        "Okay/Core/",
+        "Okay/Controllers/",
+        "Okay/Entities/",
+        "Okay/Helpers/",
+        "Okay/Requests/",
+        "Okay/lang_general/",
+        "Okay/xml/opensearch.xml.tpl",
+        "backend/",
+        "Okay/Modules/OkayCMS/",
+        "composer.json",
+        "composer.lock",
+        "ok",
+        "index.php",
+        "1DB_changes/"
+    ],
+    "exclude": [
+        "backend/design/",
+        "backend/files/",
+        "Okay/Modules/OkayCMS/AutoDeploy/log/",
+        "Okay/Modules/OkayCMS/AutoDeploy/tmp/",
+        "Okay/Modules/OkayCMS/Integration1C/temp/"
+    ]
+}

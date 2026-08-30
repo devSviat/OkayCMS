@@ -1,0 +1,88 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'okaycms-fork/v*'
+
+# Кожна джоба отримує лише те, що їй треба: test лише читає, публікацію
+# релізу робить тільки build-and-release.
+permissions:
+  contents: read
+
+jobs:
+  # ci.yml не оголошує `on: workflow_call`, тож викликати його як reusable
+  # workflow не можна. Чіпати спільний ci.yml заради цього — поза межами
+  # задачі, тож тестова джоба тут — копія `tests` з ci.yml (без static-analysis/
+  # secrets/smoke: реліз блокує лише той самий набір кроків, що й `tests`).
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+    name: PHP ${{ matrix.php }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: simplexml, xmlreader, pdo, json, curl, mbstring, zip, gd, xsl
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Composer audit
+        run: composer audit --locked --abandoned=report
+
+      - name: PHPCompatibility
+        run: vendor/bin/phpcs -q
+
+      - name: PHPUnit
+        run: vendor/bin/phpunit
+
+  build-and-release:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Extract fork version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/okaycms-fork/v}"
+          echo "version=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: simplexml, xmlreader, pdo, json, curl, mbstring, zip, gd, xsl
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Build release package
+        run: php ok release:build-package --fork-version="${{ steps.version.outputs.version }}" --output-dir=build/release
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "okaycms-fork/v${{ steps.version.outputs.version }}" \
+            --title "OkayCMS Fork v${{ steps.version.outputs.version }}" \
+            --generate-notes \
+            "build/release/okaycms-fork-v${{ steps.version.outputs.version }}.zip" \
+            "build/release/version.json" \
+            "build/release/checksums.txt"
