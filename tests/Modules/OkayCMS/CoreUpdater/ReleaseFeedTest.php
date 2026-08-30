@@ -22,10 +22,11 @@ class ReleaseFeedTest extends TestCase
             'tag' => 'okaycms-fork/v1.1.0',
             'publishedAt' => '2026-02-15T00:00:00Z',
             'notesUrl' => 'https://github.com/devSviat/OkayCMS/releases/tag/okaycms-fork%2Fv1.1.0',
+            'notesBody' => 'Release notes for 1.1.0',
             'assets' => [
-                'zip' => 'https://example.com/releases/1.1.0/okaycms-fork-v1.1.0.zip',
-                'versionJson' => 'https://example.com/releases/1.1.0/version.json',
-                'checksums' => 'https://example.com/releases/1.1.0/checksums.txt',
+                'zip' => 'https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.1.0/okaycms-fork-v1.1.0.zip',
+                'versionJson' => 'https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.1.0/version.json',
+                'checksums' => 'https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.1.0/checksums.txt',
             ],
         ], $result);
     }
@@ -91,5 +92,92 @@ class ReleaseFeedTest extends TestCase
             'missing checkedAt' => [[], 2000, 3600, false],
             'broken checkedAt' => [['checkedAt' => 'not-a-timestamp'], 2000, 3600, false],
         ];
+    }
+
+    public function testParseLatestSkipsAssetWithNonStringDownloadUrl(): void
+    {
+        // v2.0.0 має нечислове поле browser_download_url у zip-асеті,
+        // тому набір неповний і весь реліз відсіюється, лишається v1.0.0.
+        $result = ReleaseFeed::parseLatest(self::fixture('releases-non-string-asset-url.json'));
+
+        $this->assertNotNull($result);
+        $this->assertSame('1.0.0', $result['forkVersion']);
+    }
+
+    public function testParseLatestSkipsAssetsFromUntrustedOrigin(): void
+    {
+        // v2.0.0 має zip по http:// і version.json з чужого хоста —
+        // жодне з них не проходить перевірку префіксу, реліз відсіюється.
+        $result = ReleaseFeed::parseLatest(self::fixture('releases-untrusted-asset-url.json'));
+
+        $this->assertNotNull($result);
+        $this->assertSame('1.0.0', $result['forkVersion']);
+    }
+
+    #[DataProvider('refreshInstalledProvider')]
+    public function testRefreshInstalled(array $snapshot, string $installed, bool $expectedUpdateAvailable): void
+    {
+        $result = ReleaseFeed::refreshInstalled($snapshot, $installed);
+
+        $this->assertSame($installed, $result['installed']);
+        $this->assertSame($expectedUpdateAvailable, $result['updateAvailable']);
+    }
+
+    public static function refreshInstalledProvider(): array
+    {
+        return [
+            'update available then applied flips to false' => [
+                ['installed' => '1.0.0', 'updateAvailable' => true, 'latest' => ['forkVersion' => '1.1.0']],
+                '1.1.0',
+                false,
+            ],
+            'missing latest stays false' => [
+                ['installed' => '1.0.0', 'updateAvailable' => false, 'latest' => null],
+                '1.0.0',
+                false,
+            ],
+            'genuinely newer release stays true' => [
+                ['installed' => '1.0.0', 'updateAvailable' => true, 'latest' => ['forkVersion' => '1.1.0']],
+                '1.0.0',
+                true,
+            ],
+        ];
+    }
+
+    public function testParseVersionMetaReadsAllFieldsFromValidJson(): void
+    {
+        $json = json_encode([
+            'upstreamBase' => '4.5.2',
+            'minPhp' => '8.4',
+            'requiresMigrations' => true,
+            'releasedAt' => '2026-02-15T00:00:00Z',
+        ]);
+
+        $this->assertSame([
+            'upstreamBase' => '4.5.2',
+            'minPhp' => '8.4',
+            'requiresMigrations' => true,
+            'releasedAt' => '2026-02-15T00:00:00Z',
+        ], ReleaseFeed::parseVersionMeta($json));
+    }
+
+    public function testParseVersionMetaFillsMissingOrMistypedFieldsWithNull(): void
+    {
+        $json = json_encode([
+            'upstreamBase' => '4.5.2',
+            'minPhp' => 12345,
+        ]);
+
+        $this->assertSame([
+            'upstreamBase' => '4.5.2',
+            'minPhp' => null,
+            'requiresMigrations' => null,
+            'releasedAt' => null,
+        ], ReleaseFeed::parseVersionMeta($json));
+    }
+
+    public function testParseVersionMetaReturnsNullOnBrokenJson(): void
+    {
+        $this->assertNull(ReleaseFeed::parseVersionMeta('{not valid json'));
     }
 }

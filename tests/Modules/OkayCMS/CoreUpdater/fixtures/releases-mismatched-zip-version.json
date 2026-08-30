@@ -8,15 +8,15 @@
         "assets": [
             {
                 "name": "okaycms-fork-v1.0.0.zip",
-                "browser_download_url": "https://example.com/releases/1.0.0/okaycms-fork-v1.0.0.zip"
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.0.0/okaycms-fork-v1.0.0.zip"
             },
             {
                 "name": "version.json",
-                "browser_download_url": "https://example.com/releases/1.0.0/version.json"
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.0.0/version.json"
             },
             {
                 "name": "checksums.txt",
-                "browser_download_url": "https://example.com/releases/1.0.0/checksums.txt"
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.0.0/checksums.txt"
             }
         ]
     },
@@ -29,15 +29,15 @@
         "assets": [
             {
                 "name": "okaycms-fork-v1.9.9.zip",
-                "browser_download_url": "https://example.com/releases/2.0.0/okaycms-fork-v1.9.9.zip"
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v2.0.0/okaycms-fork-v1.9.9.zip"
             },
             {
                 "name": "version.json",
-                "browser_download_url": "https://example.com/releases/2.0.0/version.json"
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v2.0.0/version.json"
             },
             {
                 "name": "checksums.txt",
-                "browser_download_url": "https://example.com/releases/2.0.0/checksums.txt"
+                "browser_download_url": "https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v2.0.0/checksums.txt"
             }
         ]
     }

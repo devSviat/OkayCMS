@@ -11,7 +11,14 @@ class ReleaseFeed
     private const TAG_PATTERN = '#^okaycms-fork/v(\d+\.\d+\.\d+)$#';
 
     /**
-     * @return array{forkVersion: string, tag: string, publishedAt: ?string, notesUrl: ?string, assets: array{zip: string, versionJson: string, checksums: string}}|null
+     * Довіряємо asset-посиланням лише з нашого репозиторію релізів —
+     * інакше зловмисний конкурентний release ('assets' підробити не можна,
+     * а от чужий 'browser_download_url' у власному релізі — можна).
+     */
+    public const TRUSTED_ASSET_URL_PREFIX = 'https://github.com/devSviat/OkayCMS/releases/download/';
+
+    /**
+     * @return array{forkVersion: string, tag: string, publishedAt: ?string, notesUrl: ?string, notesBody: ?string, assets: array{zip: string, versionJson: string, checksums: string}}|null
      */
     public static function parseLatest(string $releasesJson): ?array
     {
@@ -53,6 +60,48 @@ class ReleaseFeed
         return $checkedAt + $ttlSeconds > $nowTs;
     }
 
+    /**
+     * Оновлює installed/updateAvailable в снапшоті поточною версією форку —
+     * ці два поля не можна віддавати «як застигли на момент check()»,
+     * інакше щойно застосоване оновлення й далі показує стару картину.
+     *
+     * @param array<string, mixed> $snapshot
+     * @return array<string, mixed>
+     */
+    public static function refreshInstalled(array $snapshot, string $installed): array
+    {
+        $snapshot['installed'] = $installed;
+
+        $latestVersion = $snapshot['latest']['forkVersion'] ?? null;
+        $snapshot['updateAvailable'] = is_string($latestVersion)
+            && self::isNewerThanInstalled($latestVersion, $installed);
+
+        return $snapshot;
+    }
+
+    /**
+     * Розбір version.json — метадані релізу поза списком GitHub Releases
+     * (мінімальна версія PHP, чи потрібні міграції тощо). Кожне поле
+     * валідується окремо: часткові чи биті дані одних ключів не мають
+     * ламати решту.
+     *
+     * @return array{upstreamBase: ?string, minPhp: ?string, requiresMigrations: ?bool, releasedAt: ?string}|null
+     */
+    public static function parseVersionMeta(string $json): ?array
+    {
+        $data = json_decode($json, true);
+        if (!is_array($data)) {
+            return null;
+        }
+
+        return [
+            'upstreamBase' => is_string($data['upstreamBase'] ?? null) ? $data['upstreamBase'] : null,
+            'minPhp' => is_string($data['minPhp'] ?? null) ? $data['minPhp'] : null,
+            'requiresMigrations' => is_bool($data['requiresMigrations'] ?? null) ? $data['requiresMigrations'] : null,
+            'releasedAt' => is_string($data['releasedAt'] ?? null) ? $data['releasedAt'] : null,
+        ];
+    }
+
     private static function toCandidate(mixed $release): ?array
     {
         if (!is_array($release)) {
@@ -76,12 +125,14 @@ class ReleaseFeed
 
         $publishedAt = $release['published_at'] ?? null;
         $notesUrl = $release['html_url'] ?? null;
+        $notesBody = $release['body'] ?? null;
 
         return [
             'forkVersion' => $version,
             'tag' => $tag,
             'publishedAt' => is_string($publishedAt) ? $publishedAt : null,
             'notesUrl' => is_string($notesUrl) ? $notesUrl : null,
+            'notesBody' => is_string($notesBody) ? $notesBody : null,
             'assets' => $assets,
         ];
     }
@@ -99,6 +150,11 @@ class ReleaseFeed
                 continue;
             }
 
+            $url = $asset['browser_download_url'];
+            if (!is_string($url) || !str_starts_with($url, self::TRUSTED_ASSET_URL_PREFIX)) {
+                continue;
+            }
+
             $key = match ($asset['name']) {
                 $zipName => 'zip',
                 'version.json' => 'versionJson',
@@ -106,7 +162,7 @@ class ReleaseFeed
                 default => null,
             };
             if ($key !== null) {
-                $map[$key] = $asset['browser_download_url'];
+                $map[$key] = $url;
             }
         }
 
