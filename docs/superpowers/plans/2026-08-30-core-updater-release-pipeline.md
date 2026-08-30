@@ -60,8 +60,8 @@ side — nothing here reads a package back or applies it (that is Plan C, the
 - Tests: `tests/Core/Release/ReleaseManifestTest.php`,
   `tests/Core/Release/PackageBuilderTest.php`,
   `tests/Core/Release/ReleaseManifestPathsExistTest.php` (guard test against
-  the real repo tree),
-  `tests/Core/Console/Commands/Release/ReleaseBuildPackageCommandTest.php`.
+  the real repo tree). `ReleaseBuildPackageCommand` (Task 5) has no
+  PHPUnit test — see that task's rationale.
 - Fixtures: `tests/Core/Release/fixtures/sample-repo/` — a tiny fake tree
   used by `ReleaseManifestTest`/`PackageBuilderTest` so tests don't walk the
   real ~5000-file repo.
@@ -329,6 +329,11 @@ git commit -m "feat(release): парсинг release-manifest.json і резол
 **Files:**
 - Create: `Okay/Core/Release/PackageBuilder.php`
 - Create: `tests/Core/Release/PackageBuilderTest.php`
+- Create fixture: `tests/Core/Release/fixtures/sample-repo/composer.json`
+  (Task 1's fixture tree has no `composer.json` — `PackageBuilder` reads
+  one from `{repoPath}/composer.json` unconditionally, so this task's test
+  needs it, and it stays in place for Task 3's test too, which reuses the
+  same fixture directory)
 
 **Interfaces:**
 - Consumes: `ReleaseManifest::__construct(string $manifestPath)`,
@@ -345,6 +350,17 @@ git commit -m "feat(release): парсинг release-manifest.json і резол
 no drift between the package metadata and the actual composer constraint).
 
 - [ ] **Step 1: Write the failing test**
+
+Add the missing fixture file first:
+
+```json
+// tests/Core/Release/fixtures/sample-repo/composer.json
+{
+    "require": {
+        "php": "^8.4"
+    }
+}
+```
 
 ```php
 <?php
@@ -776,10 +792,32 @@ git commit -m "docs(release): конвенція release-migrations/pending дл
 
 ### Task 5: `ReleaseBuildPackageCommand`
 
+**No PHPUnit test in this task — see rationale below.** This is a
+deliberate, verified deviation from the plan's usual TDD cycle, not a
+shortcut: `Okay\Core\Console\Command::__construct()`
+(`Okay/Core/Console/Command.php:29-35`) unconditionally calls
+`ServiceLocator::getInstance()` and resolves `QuestionHelper` through it —
+so *instantiating any Command subclass at all*, even with an empty
+constructor, boots the full DI container
+(`ServiceLocator::__construct()` includes `Okay/Core/config/container.php`
+— `Okay/Core/ServiceLocator.php:21`). `ServiceLocator::$instance` is a
+process-wide static singleton (`Okay/Core/ServiceLocator.php:16`), and this
+project's test suite runs 3000+ tests in one PHPUnit process — the first
+test to trigger that bootstrap would leave global static state for every
+test that runs after it, an ordering hazard none of this codebase's
+existing tests accept: `tests/Core/Console/CommandNamesTest.php` checks
+every command in `Okay/Core/Console/Commands` via `\ReflectionClass`
+without ever calling `new` on one, and no test file exists for
+`DatabaseDeployCommand` at all. This task follows that same, already
+-established precedent instead of introducing the first singleton-booting
+command test in the suite. `PackageBuilder` — the class doing all the
+actual work — is already fully covered by Tasks 2 and 3's tests; this task
+adds only a thin CLI wrapper around it, verified by hand (Step 2) and by
+the full existing suite still passing with the new file present (Step 3).
+
 **Files:**
 - Create: `Okay/Core/Console/Commands/Release/ReleaseBuildPackageCommand.php`
 - Modify: `Okay/Core/Console/Application.php`
-- Create: `tests/Core/Console/Commands/Release/ReleaseBuildPackageCommandTest.php`
 
 **Interfaces:**
 - Consumes: `PackageBuilder::build(...)` (Task 3).
@@ -794,83 +832,7 @@ git commit -m "docs(release): конвенція release-migrations/pending дл
   `--upstream-base` defaults to `Config::$version` read from
   `{repo-path}/config/config.php` when the option is omitted.
 
-- [ ] **Step 1: Write the failing test**
-
-```php
-<?php
-
-namespace Core\Console\Commands\Release;
-
-use Okay\Core\Console\Commands\Release\ReleaseBuildPackageCommand;
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Tester\CommandTester;
-
-class ReleaseBuildPackageCommandTest extends TestCase
-{
-    public function testBuildsPackageIntoRequestedOutputDir(): void
-    {
-        $repoRoot = dirname(__DIR__, 4) . '/Release/fixtures/sample-repo';
-        $manifest = dirname(__DIR__, 4) . '/Release/fixtures/sample-manifest.json';
-        $outputDir = sys_get_temp_dir() . '/release-command-output-' . uniqid();
-
-        $application = new Application();
-        $command = new ReleaseBuildPackageCommand();
-        $application->add($command);
-
-        $tester = new CommandTester($command);
-        $exitCode = $tester->execute([
-            '--fork-version' => '1.1.0',
-            '--repo-path' => $repoRoot,
-            '--upstream-base' => '4.6.0',
-            '--output-dir' => $outputDir,
-            '--manifest' => $manifest,
-        ]);
-
-        $this->assertSame(0, $exitCode);
-        $this->assertFileExists($outputDir . '/okaycms-fork-v1.1.0.zip');
-        $this->assertStringContainsString('okaycms-fork-v1.1.0.zip', $tester->getDisplay());
-
-        $this->removeDirectory($outputDir);
-    }
-
-    private function removeDirectory(string $dir): void
-    {
-        if (!is_dir($dir)) {
-            return;
-        }
-
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST
-        );
-
-        foreach ($iterator as $file) {
-            $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
-        }
-
-        rmdir($dir);
-    }
-}
-```
-
-Note: this test passes `--repo-path`/`--upstream-base` as CLI options
-instead of relying on `handle(Config $config)` type-hint injection — see
-Step 3 for why: `Command::execute()`'s `MethodDI::getMethodArguments()`
-(`Okay/Core/OkayContainer/MethodDI.php:13`) resolves a type-hinted
-`Config $config` parameter via `ServiceLocator::getInstance()`, which pulls
-in the full DI container bootstrap (`Okay/Core/config/services.php`) — not
-just `Config`'s own (cheap, file-based) constructor. That's a heavier
-dependency than a unit test needs, in the same spirit as this project's
-`ci-phpunit-has-no-database` constraint (avoid framework-wide bootstrap in
-unit tests, even where the specific class being avoided isn't a DB
-connection itself).
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Expected: FAIL — class not found.
-
-- [ ] **Step 3: Write minimal implementation**
+- [ ] **Step 1: Write the implementation**
 
 Zero-argument constructor (inherited from `Command`, no override needed) —
 `Application::registerCommand()` instantiates every command with
@@ -879,7 +841,7 @@ Zero-argument constructor (inherited from `Command`, no override needed) —
 this plan); this command must not require that to change. `repoPath` and
 `upstreamBase` become CLI options instead of constructor arguments, each
 with a computed default so production usage needs no flags at all while
-tests can still point them at a fixture tree:
+manual verification (Step 2) can still point them at a scratch directory:
 
 ```php
 <?php
@@ -953,24 +915,37 @@ exist (`Config::initConfig()` already guards that path with
 Register the class in `Okay/Core/Console/Application.php`'s `$commands`
 array — a one-line addition, no other change to that file.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 2: Verify by hand against the real repo tree**
 
-Expected: PASS.
+Run inside a working checkout (this repo itself is a valid target — it has
+a real `composer.json`, `release-manifest.json` from Task 1, and
+`release-migrations/pending/` from Task 4):
 
-- [ ] **Step 5: Run the full existing test suite**
+```bash
+php ok release:build-package --fork-version=0.0.0-smoke-test --output-dir=/tmp/okaycms-release-smoke
+```
+
+Expected: exit code 0, `Package built: /tmp/okaycms-release-smoke/okaycms-fork-v0.0.0-smoke-test.zip`
+printed, and the zip/`version.json`/`checksums.txt` actually present at
+that path with plausible contents (`unzip -l` the zip; a file count in the
+thousands, not zero — this repo's real core tree, not the tiny fixture).
+Delete `/tmp/okaycms-release-smoke` afterward — it is a manual scratch
+artifact, not part of the repo.
+
+- [ ] **Step 3: Run the full existing test suite**
 
 Run: `vendor/bin/phpunit`
-Expected: PASS, including the existing `tests/Core/Console/CommandNamesTest.php`
-guard test (it scans `Okay/Core/Console/Commands` automatically — the new
-class must carry `#[AsCommand]` and no `$defaultName`, both already true
-above).
+Expected: PASS (no regression), including the existing
+`tests/Core/Console/CommandNamesTest.php` guard test — it scans
+`Okay/Core/Console/Commands` automatically, so the new class is picked up
+without any test-file change; it must carry `#[AsCommand]` and no
+`$defaultName`, both already true above.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add Okay/Core/Console/Commands/Release/ReleaseBuildPackageCommand.php \
-  Okay/Core/Console/Application.php \
-  tests/Core/Console/Commands/Release/ReleaseBuildPackageCommandTest.php
+  Okay/Core/Console/Application.php
 git commit -m "feat(release): команда ok release:build-package"
 ```
 
@@ -1205,18 +1180,30 @@ side (Plan C). §5 (core/user-data boundary) — Task 1. §6 (package format) �
 Task 2/3. §7 (migrations bundling, not application) — Task 4. §13 (repo
 structural changes relevant to this plan) — Tasks 1, 4, 5, 7, 8.
 
-**Placeholder scan:** no TBD/TODO; the two spots that say "read the file
-again at implementation time" (Task 5 Application wiring, Task 7 `ci.yml`
-reusability) are deliberate — they point at real, existing files whose exact
-current shape must be re-verified rather than guessed from this plan's
-memory of them, per the user's explicit instruction to verify each stage
-against reality, not assume.
+**Placeholder scan:** no TBD/TODO. Task 7's `ci.yml`-reusability question
+("read the file again at implementation time") is deliberate — it points at
+a real, existing file whose exact current shape must be re-verified rather
+than guessed from this plan's memory of it, per the user's explicit
+instruction to verify each stage against reality, not assume. Task 5's
+equivalent question (`Application::registerCommand()`'s instantiation
+pattern) was *resolved* during this pre-flight scan, not left open — it was
+read directly (`Okay/Core/Console/Application.php`, confirmed on
+2026-08-30), which is what surfaced the constructor conflict with the
+plan's first draft; the plan text above already reflects the fix (no
+constructor arguments, CLI options with computed defaults instead) rather
+than pointing at an open question.
 
 **Type/interface consistency:** `PackageBuilder::build()`'s return array
 keys (`zipPath`, `versionJsonPath`, `checksumsPath`, `fileCount`,
 `migrationsCount`) are used identically in Task 3's test and Task 5's
 command. `ReleaseManifest::resolveFiles()`'s signature is unchanged from
-Task 1 through Task 6.
+Task 1 through Task 6. Task 5 carries no PHPUnit test (see its own
+rationale: any `Okay\Core\Console\Command` subclass boots the process-wide
+`ServiceLocator` singleton on construction — verified by reading
+`Okay/Core/Console/Command.php` and `Okay/Core/ServiceLocator.php` during
+this same pre-flight pass, not assumed) — its correctness rests on Tasks
+2-3's `PackageBuilder` tests plus Step 2's manual CLI run against the real
+repo tree.
 
 **Scope check:** this plan stops at "a package exists on GitHub Releases,
 correctly filtered from upstream tags." It deliberately does not implement
