@@ -7,6 +7,7 @@ namespace Okay\Core\Console;
 use Okay\Core\Console\Commands\Database\DatabaseDeployCommand;
 use Okay\Core\Console\Commands\Module\ModuleCheckModificationsCommand;
 use Okay\Core\Console\Commands\Module\ModuleCreateCommand;
+use Okay\Core\Console\Commands\Release\ReleaseBuildPackageCommand;
 use Okay\Core\Console\Commands\Scheduler\SchedulerListCommand;
 use Okay\Core\Console\Commands\Scheduler\SchedulerRunCommand;
 use Okay\Core\Console\Commands\Scheduler\SchedulerTaskCommand;
@@ -21,6 +22,7 @@ class Application extends SymfonyApplication
         SchedulerRunCommand::class,
         SchedulerTaskCommand::class,
         SchedulerListCommand::class,
+        ReleaseBuildPackageCommand::class,
     ];
 
     public function __construct()
