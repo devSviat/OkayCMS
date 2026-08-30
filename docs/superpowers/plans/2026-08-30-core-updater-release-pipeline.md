@@ -782,13 +782,17 @@ git commit -m "docs(release): конвенція release-migrations/pending дл
 - Create: `tests/Core/Console/Commands/Release/ReleaseBuildPackageCommandTest.php`
 
 **Interfaces:**
-- Consumes: `PackageBuilder::build(...)` (Task 3), `Config::$version`
-  (existing, spec §1 — this is the `upstreamBase` source), root path via
-  `Config::get('root_dir')` (existing, `Okay/Core/Config.php:137`).
+- Consumes: `PackageBuilder::build(...)` (Task 3).
 - Produces: CLI command `ok release:build-package --fork-version=X.Y.Z
-  [--output-dir=build/release] [--manifest=release-manifest.json]
-  [--migrations=release-migrations/pending]`. Exit code `Command::SUCCESS`
-  (0) / `Command::FAILURE` (1). This is what Task 6's `release.yml` invokes.
+  [--repo-path=...] [--output-dir=build/release]
+  [--manifest=release-manifest.json] [--migrations=release-migrations/pending]
+  [--upstream-base=X.Y.Z]`. Exit code `Command::SUCCESS` (0) /
+  `Command::FAILURE` (1). This is what Task 7's `release.yml` invokes.
+  `--repo-path` defaults to the command file's own repo root
+  (`dirname(__DIR__, 4)` from
+  `Okay/Core/Console/Commands/Release/ReleaseBuildPackageCommand.php`);
+  `--upstream-base` defaults to `Config::$version` read from
+  `{repo-path}/config/config.php` when the option is omitted.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -811,12 +815,14 @@ class ReleaseBuildPackageCommandTest extends TestCase
         $outputDir = sys_get_temp_dir() . '/release-command-output-' . uniqid();
 
         $application = new Application();
-        $command = new ReleaseBuildPackageCommand($repoRoot, '4.6.0');
+        $command = new ReleaseBuildPackageCommand();
         $application->add($command);
 
         $tester = new CommandTester($command);
         $exitCode = $tester->execute([
             '--fork-version' => '1.1.0',
+            '--repo-path' => $repoRoot,
+            '--upstream-base' => '4.6.0',
             '--output-dir' => $outputDir,
             '--manifest' => $manifest,
         ]);
@@ -848,12 +854,17 @@ class ReleaseBuildPackageCommandTest extends TestCase
 }
 ```
 
-Note: this test constructs `ReleaseBuildPackageCommand` directly with
-`$repoRoot`/`$upstreamBase` constructor arguments instead of going through
-`handle(Config $config)` — see Step 3 for why, and re-read against
-`docs/testing.md`'s guidance on avoiding full-framework bootstrap in unit
-tests (matches the project's `ci-phpunit-has-no-database` constraint: no
-`Config`/DB bootstrap available in the CI test run).
+Note: this test passes `--repo-path`/`--upstream-base` as CLI options
+instead of relying on `handle(Config $config)` type-hint injection — see
+Step 3 for why: `Command::execute()`'s `MethodDI::getMethodArguments()`
+(`Okay/Core/OkayContainer/MethodDI.php:13`) resolves a type-hinted
+`Config $config` parameter via `ServiceLocator::getInstance()`, which pulls
+in the full DI container bootstrap (`Okay/Core/config/services.php`) — not
+just `Config`'s own (cheap, file-based) constructor. That's a heavier
+dependency than a unit test needs, in the same spirit as this project's
+`ci-phpunit-has-no-database` constraint (avoid framework-wide bootstrap in
+unit tests, even where the specific class being avoided isn't a DB
+connection itself).
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -861,20 +872,21 @@ Expected: FAIL — class not found.
 
 - [ ] **Step 3: Write minimal implementation**
 
-`Config` requires real `.ini` files and DB-adjacent bootstrap to construct
-(`Config::__construct(string $configFile, string $configLocalFile)` reads
-and hashes real files) — exactly the kind of dependency `docs/testing.md`'s
-guard tests avoid pulling into a unit test per the project's established
-`ci-phpunit-has-no-database` pattern. So this command takes `repoPath` and
-`upstreamBase` as **constructor** arguments (supplied by the DI container in
-production, and directly by the test in isolation) instead of resolving
-`Config` inside `handle()`:
+Zero-argument constructor (inherited from `Command`, no override needed) —
+`Application::registerCommand()` instantiates every command with
+`new $commandClass()` and nothing else
+(`Okay/Core/Console/Application.php`, confirmed by reading it while writing
+this plan); this command must not require that to change. `repoPath` and
+`upstreamBase` become CLI options instead of constructor arguments, each
+with a computed default so production usage needs no flags at all while
+tests can still point them at a fixture tree:
 
 ```php
 <?php
 
 namespace Okay\Core\Console\Commands\Release;
 
+use Okay\Core\Config;
 use Okay\Core\Console\Command;
 use Okay\Core\Release\PackageBuilder;
 use Symfony\Component\Console\Input\InputOption;
@@ -883,20 +895,17 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'release:build-package', description: 'Builds a fork release package (zip + manifest + checksums).')]
 class ReleaseBuildPackageCommand extends Command
 {
-    public function __construct(
-        private readonly string $repoPath,
-        private readonly string $upstreamBase
-    ) {
-        parent::__construct();
-    }
-
     protected function configure(): void
     {
+        $defaultRepoPath = dirname(__DIR__, 4);
+
         $this
             ->addOption('fork-version', null, InputOption::VALUE_REQUIRED, 'Fork version being released, e.g. 1.1.0')
-            ->addOption('output-dir', null, InputOption::VALUE_REQUIRED, 'Where to write the package', $this->repoPath . '/build/release')
-            ->addOption('manifest', null, InputOption::VALUE_REQUIRED, 'Path to release-manifest.json', $this->repoPath . '/release-manifest.json')
-            ->addOption('migrations', null, InputOption::VALUE_REQUIRED, 'Pending core migrations directory', $this->repoPath . '/release-migrations/pending');
+            ->addOption('repo-path', null, InputOption::VALUE_REQUIRED, 'Repository root to package', $defaultRepoPath)
+            ->addOption('output-dir', null, InputOption::VALUE_REQUIRED, 'Where to write the package', $defaultRepoPath . '/build/release')
+            ->addOption('manifest', null, InputOption::VALUE_REQUIRED, 'Path to release-manifest.json', $defaultRepoPath . '/release-manifest.json')
+            ->addOption('migrations', null, InputOption::VALUE_REQUIRED, 'Pending core migrations directory', $defaultRepoPath . '/release-migrations/pending')
+            ->addOption('upstream-base', null, InputOption::VALUE_REQUIRED, 'Upstream OkayCMS version this release is based on (defaults to Config::$version at --repo-path)');
     }
 
     protected function handle(): int
@@ -907,13 +916,21 @@ class ReleaseBuildPackageCommand extends Command
             return Command::FAILURE;
         }
 
+        $repoPath = $this->input->getOption('repo-path');
+        $upstreamBase = $this->input->getOption('upstream-base');
+
+        if (empty($upstreamBase)) {
+            $config = new Config($repoPath . '/config/config.php', $repoPath . '/config/config.local.php');
+            $upstreamBase = $config->version;
+        }
+
         $builder = new PackageBuilder();
 
         $result = $builder->build(
-            $this->repoPath,
+            $repoPath,
             $this->input->getOption('manifest'),
             $forkVersion,
-            $this->upstreamBase,
+            $upstreamBase,
             $this->input->getOption('output-dir'),
             $this->input->getOption('migrations')
         );
@@ -926,21 +943,15 @@ class ReleaseBuildPackageCommand extends Command
 }
 ```
 
-`Command::execute()` (base class, `Okay/Core/Console/Command.php`) resolves
-`handle()`'s arguments via `MethodDI` reflection — a zero-argument `handle()`
-is valid, `MethodDI` simply has nothing to resolve.
+`Config`'s constructor only parses `.ini` files and computes a salt hash —
+no DB connection, no `ServiceLocator` — so calling `new Config(...)`
+directly here (not through `handle()`'s type-hinted DI resolution) stays
+cheap and side-effect-free even when `config/config.local.php` doesn't
+exist (`Config::initConfig()` already guards that path with
+`file_exists()`).
 
-Register it in `Okay/Core/Console/Application.php`. This class is
-constructed with two scalar arguments the container needs to supply — check
-how `Application::registerCommand()` currently instantiates commands
-(`new $commandClass()`, no arguments) before wiring this in: it needs a
-small change to pass `$config->get('root_dir')` and `$config->version` for
-this one command, since the existing loop assumes zero-argument
-constructors. Read `Okay/Core/Console/Application.php` and
-`Okay/Core/config/services.php` again at implementation time to confirm the
-container is the right place for this vs. special-casing it in
-`Application`'s constructor — this is exactly the kind of thing the spec
-asked to verify against real code, not assume from this plan.
+Register the class in `Okay/Core/Console/Application.php`'s `$commands`
+array — a one-line addition, no other change to that file.
 
 - [ ] **Step 4: Run test to verify it passes**
 
