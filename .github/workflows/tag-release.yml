@@ -1,15 +1,20 @@
 name: Tag release
 
-# Реліз-флоу: розробка йде PR-ами в dev, реліз — PR dev -> main із версією
-# в назві (напр. "okaycms-fork/v1.1.0 — ..." або просто "v1.1.0: ...").
-# Після мержу цей workflow ставить тег okaycms-fork/vX.Y.Z і запускає
-# release.yml. PR у main без версії в назві — не реліз: тег не ставиться,
-# лише warning у лог.
+# Реліз-флоу: розробка йде PR-ами в dev, реліз — PR dev -> main, назва якого
+# ПОЧИНАЄТЬСЯ з "okaycms-fork/vX.Y.Z" (напр. "okaycms-fork/v1.1.0 — ...").
+# Після мержу цей workflow ставить тег і запускає release.yml. PR у main з
+# будь-якою іншою назвою — не реліз. Версія мусить бути рівно наступною за
+# останнім тегом: patch+1, minor+1 або major+1 — одруки на кшталт v1.10
+# відсікаються до створення тегу.
 
 on:
   push:
     branches:
       - main
+
+concurrency:
+  group: tag-release
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -27,35 +32,79 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Назва PR — недовірений вхід: тільки через змінну, без
-          # інтерполяції в скрипт.
-          PR_TITLE="$(gh pr list --repo "$GITHUB_REPOSITORY" --state merged \
-            --base main --search "$GITHUB_SHA" --json title --jq '.[0].title // empty')"
+          # Точний ендпоінт замість search-індексу: індексація пошуку
+          # відстає від push-події, і порожня відповідь виглядала б як
+          # "не реліз" — тиха зелена невдача. Ретрай покриває коротку
+          # затримку самого API.
+          PR_TITLE=""
+          for i in 1 2 3 4 5; do
+            PR_TITLE="$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" \
+              --jq '[.[] | select(.base.ref == "main")][0].title // empty')"
+            [[ -n "$PR_TITLE" ]] && break
+            sleep 5
+          done
 
           if [[ -z "$PR_TITLE" ]]; then
-            echo "::warning::Пуш у main без PR — тег не ставиться"
+            # Прямий push у main заборонено ruleset-ом без винятків, тож
+            # відсутність PR — аномалія, а не легітимний шлях.
+            echo "::error::Не знайдено PR для $GITHUB_SHA — це не мерж PR у main"
+            exit 1
+          fi
+
+          # Назва PR — недовірений вхід (PR може відкрити будь-хто):
+          # тільки через змінну, без інтерполяції в скрипт; реліз — лише
+          # explicit opt-in з обов'язковим префіксом на початку назви.
+          # Хвіст лише пробіл/двокрапка/кінець: "-rc1" після версії не має
+          # мінтити фінальний тег цієї версії.
+          if [[ "$PR_TITLE" =~ ^okaycms-fork/v([0-9]+\.[0-9]+\.[0-9]+)([[:space:]:]|$) ]]; then
+            echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "Назва PR не починається з okaycms-fork/vX.Y.Z — не реліз, тег не ставиться"
             echo "version=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Перевірити, що версія — наступна за останнім тегом
+        if: steps.version.outputs.version != ''
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          LATEST="$(git ls-remote --tags origin 'refs/tags/okaycms-fork/v*' \
+            | awk -F'refs/tags/okaycms-fork/v' '{print $2}' \
+            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)"
+
+          if [[ -z "$LATEST" ]]; then
+            echo "Перший реліз ($VERSION) — попереднього тегу немає, перевірка інкременту пропущена"
             exit 0
           fi
 
-          if [[ "$PR_TITLE" =~ (okaycms-fork/)?v([0-9]+\.[0-9]+\.[0-9]+)([^0-9.]|$) ]]; then
-            echo "version=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::У назві PR немає версії vX.Y.Z — це не release-PR, тег не ставиться"
-            echo "version=" >> "$GITHUB_OUTPUT"
-          fi
+          IFS=. read -r MA MI PA <<< "$LATEST"
+          ALLOWED=("$MA.$MI.$((PA+1))" "$MA.$((MI+1)).0" "$((MA+1)).0.0")
+          for a in "${ALLOWED[@]}"; do
+            [[ "$VERSION" == "$a" ]] && exit 0
+          done
+
+          echo "::error::Версія $VERSION не є наступною за $LATEST — дозволені: ${ALLOWED[*]}"
+          exit 1
 
       - name: Поставити тег
         if: steps.version.outputs.version != ''
         id: tag
         run: |
           TAG="okaycms-fork/v${{ steps.version.outputs.version }}"
-          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" > /dev/null 2>&1; then
-            echo "::error::Тег $TAG уже існує — версія в назві release-PR має бути новою"
+          EXISTING="$(git ls-remote --tags origin "refs/tags/$TAG" | awk '{print $1}')"
+
+          if [[ -n "$EXISTING" && "$EXISTING" != "$GITHUB_SHA" ]]; then
+            echo "::error::Тег $TAG уже існує і вказує на інший коміт ($EXISTING)"
             exit 1
           fi
-          git tag "$TAG" "$GITHUB_SHA"
-          git push origin "refs/tags/$TAG"
+
+          if [[ -z "$EXISTING" ]]; then
+            git tag "$TAG" "$GITHUB_SHA"
+            git push origin "refs/tags/$TAG"
+          else
+            # Тег на цьому ж коміті вже є — це ре-ран після збою на кроці
+            # диспатчу; йдемо далі, щоб диспатч усе-таки відбувся.
+            echo "Тег $TAG уже вказує на $GITHUB_SHA — пропускаю створення, лишається диспатч"
+          fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Запустити release.yml

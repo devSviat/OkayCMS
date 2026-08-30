@@ -26,7 +26,9 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.4', '8.5']
-    name: PHP ${{ matrix.php }}
+    # Не "PHP X.Y", як у ci.yml: на реліз-коміті в main осідають check-run'и
+    # і від ci.yml, і звідси; однакові імена змішали б їх із required checks.
+    name: Release tests (PHP ${{ matrix.php }})
     steps:
       - uses: actions/checkout@v7
 
@@ -89,6 +91,25 @@ jobs:
             exit 1
           fi
 
+      - name: Verify version is monotonically newer
+        run: |
+          # Страхує ручний шлях (тег, поставлений адміном повз tag-release):
+          # версія нижча за вже опубліковану не має стати релізом — клієнтський
+          # фільтр "остання версія" її ніколи не покаже, а стеля лишиться.
+          VERSION="${{ steps.version.outputs.version }}"
+          LATEST_OTHER="$(git tag --list 'okaycms-fork/v*' \
+            | sed 's|^okaycms-fork/v||' \
+            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+            | grep -vx "$VERSION" | sort -V | tail -1)"
+
+          if [[ -n "$LATEST_OTHER" ]]; then
+            HIGHEST="$(printf '%s\n%s\n' "$VERSION" "$LATEST_OTHER" | sort -V | tail -1)"
+            if [[ "$HIGHEST" != "$VERSION" ]]; then
+              echo "::error::Версія $VERSION нижча за вже існуючу $LATEST_OTHER — downgrade-реліз заборонено"
+              exit 1
+            fi
+          fi
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -107,9 +128,31 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "okaycms-fork/v${{ steps.version.outputs.version }}" \
-            --title "OkayCMS Fork v${{ steps.version.outputs.version }}" \
-            --generate-notes \
-            "build/release/okaycms-fork-v${{ steps.version.outputs.version }}.zip" \
-            "build/release/version.json" \
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="okaycms-fork/v${VERSION}"
+          ASSETS=(
+            "build/release/okaycms-fork-v${VERSION}.zip"
+            "build/release/version.json"
             "build/release/checksums.txt"
+          )
+
+          # Нотатки: від попереднього тегу форку. Без цього GitHub узяв би
+          # за старт найближчий апстрімний тег (4.5.2) і перший реліз
+          # отримав би нотатки на весь розрив форку з апстрімом.
+          PREV="$(git tag --list 'okaycms-fork/v*' | grep -vx "$TAG" | sort -V | tail -1)"
+          if [[ -n "$PREV" ]]; then
+            NOTES_ARGS=(--generate-notes --notes-start-tag "$PREV")
+          else
+            NOTES_ARGS=(--notes "Перший публічний реліз форку OkayCMS (base: OkayCMS 4.5.2).")
+          fi
+
+          # Ідемпотентність: ре-ран після збою завантаження asset'а не має
+          # падати на "release already exists".
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" --clobber "${ASSETS[@]}"
+          else
+            gh release create "$TAG" \
+              --title "OkayCMS Fork v${VERSION}" \
+              "${NOTES_ARGS[@]}" \
+              "${ASSETS[@]}"
+          fi
