@@ -26,11 +26,26 @@ class ModuleOrphanRowTest extends TestCase
 
         $module = new Module($logger, $this->createStub(LicenseModulesTemplates::class));
 
-        // trigger_error(E_USER_WARNING) усередині — PHPUnit підвищує його до
-        // винятку, тому глушимо саме його, а не перевірку логера нижче.
-        $notExists = @$module->moduleDirectoryNotExists('NoSuchVendor', 'NoSuchModule');
+        // Ні виводу, ні trigger_error: обидва друкують у тіло відповіді до
+        // заголовків при display_errors, і наступний header() падає з
+        // "headers already sent" — валився кошик і редиректи вітрини.
+        $raised = [];
+        set_error_handler(static function (int $no, string $str) use (&$raised): bool {
+            $raised[] = $str;
+            return true;
+        });
+
+        ob_start();
+        try {
+            $notExists = $module->moduleDirectoryNotExists('NoSuchVendor', 'NoSuchModule');
+        } finally {
+            $output = ob_get_clean();
+            restore_error_handler();
+        }
 
         $this->assertTrue($notExists);
+        $this->assertSame('', $output, 'Гілка відсутнього модуля не має нічого друкувати');
+        $this->assertSame([], $raised, 'Гілка відсутнього модуля не має піднімати PHP-помилок');
     }
 
     public function testExistingModuleDirectoryIsNotReported(): void

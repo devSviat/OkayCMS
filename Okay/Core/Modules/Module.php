@@ -283,11 +283,15 @@ class Module
             return false;
         }
 
-        $moduleNotExistsMsg = 'Module "' . $vendor . '/' . $moduleName . '" installed but not exists';
-        trigger_error($moduleNotExistsMsg, E_USER_WARNING);
-        // Monolog прибрав addWarning() у 2.0: виклик кидав Error і клав усю
-        // адмінку, хоча сенс гілки протилежний — пропустити відсутній модуль.
-        $this->logger->warning($moduleNotExistsMsg);
+        // Лише в лог: стан «рядок є, каталогу немає» очікуваний (модуль
+        // прибрали руками або він переїхав у ядро), і ця гілка має тихо
+        // пропустити модуль. trigger_error() тут при display_errors друкував
+        // текст у тіло відповіді ДО заголовків, і кожен наступний header()
+        // падав з "headers already sent" — ламався кошик і редиректи вітрини.
+        // Monolog прибрав addWarning() у 2.0, тому warning().
+        $this->logger->warning(
+            'Module "' . $vendor . '/' . $moduleName . '" installed but not exists'
+        );
         return true;
     }
 
