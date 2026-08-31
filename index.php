@@ -34,7 +34,7 @@ if (file_exists($maintenanceFlag)) {
     // Провалитись повз гейт тут означало б відкрити вітрину над
     // напівзастосованим ядром, тому 503 віддається інлайном, без єдиної
     // залежності, яка могла б не завантажитись.
-    if (!class_exists(\Okay\Modules\Sviat\CoreUpdater\Helpers\MaintenanceMode::class)) {
+    if (!class_exists(\Okay\Core\Update\MaintenanceMode::class)) {
         http_response_code(503);
         header('Retry-After: 120');
         header('Content-Type: text/html; charset=utf-8');
@@ -48,14 +48,14 @@ if (file_exists($maintenanceFlag)) {
 
     // Суперглобалі можуть віддати масив (?core_updater_token[]=x) —
     // normalizeToken() зводить це до null замість TypeError у allowsRequest().
-    $providedToken = \Okay\Modules\Sviat\CoreUpdater\Helpers\MaintenanceMode::normalizeToken(
+    $providedToken = \Okay\Core\Update\MaintenanceMode::normalizeToken(
         $_SERVER['HTTP_X_CORE_UPDATER_TOKEN'] ?? ($_GET['core_updater_token'] ?? null)
     );
 
-    if (!\Okay\Modules\Sviat\CoreUpdater\Helpers\MaintenanceMode::allowsRequest($maintenanceFlag, $providedToken)) {
+    if (!\Okay\Core\Update\MaintenanceMode::allowsRequest($maintenanceFlag, $providedToken)) {
         http_response_code(503);
         header('Retry-After: 120');
-        echo \Okay\Modules\Sviat\CoreUpdater\Helpers\MaintenanceMode::renderPage();
+        echo \Okay\Core\Update\MaintenanceMode::renderPage();
         exit;
     }
 

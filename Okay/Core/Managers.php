@@ -67,6 +67,7 @@ class Managers
         'system_modules',
         'settings_indexing',
         'open_ai',
+        'core_updater',
     ];
 
     // Соответствие модулей и названий соответствующих прав
@@ -116,6 +117,7 @@ class Managers
         'SettingsCounterAdmin'  => 'settings_counter',
         'SettingsFeedAdmin'     => 'settings',
         'SystemAdmin'           => 'settings',
+        'CoreUpdaterAdmin'      => 'core_updater',
         'SettingsOpenAiAdmin'   => 'settings',
         'CurrencyAdmin'         => 'currency',
         'DeliveriesAdmin'       => 'delivery',
