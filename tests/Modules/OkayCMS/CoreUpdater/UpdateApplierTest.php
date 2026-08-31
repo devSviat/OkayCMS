@@ -97,6 +97,20 @@ class UpdateApplierTest extends TestCase
         $this->assertSame('<?php // updated', file_get_contents($rootDir . '/Okay/Core/Existing.php'));
     }
 
+    public function testApplyFilesKeepsExecutableBitOfReplacedFile(): void
+    {
+        $payloadDir = $this->tmpDir . '/payload';
+        $rootDir = $this->tmpDir . '/root';
+        $this->writeFile($payloadDir . '/ok', '#!/usr/bin/env php updated');
+        $this->writeFile($rootDir . '/ok', '#!/usr/bin/env php old');
+        chmod($rootDir . '/ok', 0755);
+
+        $this->applier->applyFiles($payloadDir, $rootDir, ['ok' => 'hash']);
+
+        $this->assertTrue(is_executable($rootDir . '/ok'));
+        $this->assertSame('#!/usr/bin/env php updated', file_get_contents($rootDir . '/ok'));
+    }
+
     public function testApplyFilesCreatesNestedDirectoriesAsNeeded(): void
     {
         $payloadDir = $this->tmpDir . '/payload';

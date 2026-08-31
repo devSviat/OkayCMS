@@ -235,7 +235,7 @@
                                         {include file='svg_icon.tpl' svgId='refresh_icon'}
                                     {/if}
                                 </span>
-                                <span class="step_label">{$btr->$stepLangKey|escape}</span>
+                                <span class="step_label">{$btr->getTranslation($stepLangKey)|escape}</span>
                             </li>
                         {/if}
                     {/foreach}
