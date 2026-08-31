@@ -123,4 +123,39 @@ class CoreMigratorTest extends TestCase
         $this->assertSame(['1.1.0_a.up.sql'], $exception->appliedNames);
         $this->assertSame('впала', $exception->getMessage());
     }
+
+    /**
+     * Маркер `__` у лапках префікса не отримує — так задумано (тест вище),
+     * інакше підстановка калічила б рядкові літерали. Тому міграція, яка
+     * питає `INFORMATION_SCHEMA` про `'__comments'`, шукає таблицю з таким
+     * буквальним іменем: перевірка проходить, не знаходить нічого і мовчки
+     * вирішує не те. Пастка з тих, що вилазять уже на чужій базі.
+     */
+    public function testShippedMigrationsDoNotQuoteTheTableMarker(): void
+    {
+        $migrationsDir = dirname(__DIR__, 3) . '/dev/release-migrations';
+        if (!is_dir($migrationsDir)) {
+            $this->markTestSkipped('жодної core-міграції ще немає');
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($migrationsDir, \FilesystemIterator::SKIP_DOTS)
+        );
+
+        $checked = 0;
+        foreach ($iterator as $file) {
+            if (!$file->isFile() || !str_ends_with($file->getFilename(), '.up.sql')) {
+                continue;
+            }
+
+            $checked++;
+            $this->assertDoesNotMatchRegularExpression(
+                '/[\'"]__[a-z_]+/i',
+                file_get_contents($file->getPathname()),
+                $file->getFilename() . ': маркер `__` у лапках не отримає префікса'
+            );
+        }
+
+        $this->assertGreaterThan(0, $checked, 'жодного .up.sql не перевірено');
+    }
 }
