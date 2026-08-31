@@ -11,6 +11,9 @@ use Okay\Modules\OkayCMS\Feeds\Core\Presets\AbstractPresetAdapter;
 
 class FacebookAdapter extends AbstractPresetAdapter
 {
+    /** Стеля Facebook для description — 9999 символів. */
+    private const DESCRIPTION_MAX_LENGTH = 9999;
+
     /** @var string */
     static protected $headerTemplate = 'presets/facebook/header.tpl';
 
@@ -104,7 +107,12 @@ class FacebookAdapter extends AbstractPresetAdapter
                 $result['description']['data'] = '<![CDATA['. ($product->description ?? $product->annotation) .']]>';
             }
         } else {
-            $result['description']['data'] = $this->xmlFeedHelper->escape($product->description ?? $product->annotation);
+            // Facebook відкидає товар цілком, якщо description довший за
+            // 9999 символів, — без обрізання довгий опис коштує позиції у фіді,
+            // а не попередження.
+            $result['description']['data'] = $this->xmlFeedHelper->escape(
+                mb_substr((string) ($product->description ?? $product->annotation), 0, self::DESCRIPTION_MAX_LENGTH)
+            );
         }
 
         $result['id']['data'] = $this->xmlFeedHelper->escape($product->variant_id);
