@@ -227,6 +227,38 @@ class CoreUpdaterViewModelTest extends TestCase
         $this->assertNull($result['installedUpstreamBase']);
     }
 
+    /**
+     * Снапшот — кеш перевірки оновлень, і до першої перевірки його немає.
+     * Версія збірки при цьому відома завжди (літерал у Config), тож рядок
+     * «Встановлена збірка» не має лишатись порожнім лише тому, що ніхто ще
+     * не натиснув «Перевірити зараз».
+     */
+    public function testInstalledFallsBackToForkVersionWithoutSnapshot(): void
+    {
+        $result = CoreUpdaterViewModel::build(null, null, self::NOW, '4.5.2', '1.3.3');
+
+        $this->assertSame('no_data', $result['mode']);
+        $this->assertSame('1.3.3', $result['installed']);
+    }
+
+    /** Контроль до попереднього: без запасного значення поле й досі порожнє. */
+    public function testInstalledStaysNullWithoutSnapshotAndWithoutFallback(): void
+    {
+        $result = CoreUpdaterViewModel::build(null, null, self::NOW, '4.5.2');
+
+        $this->assertNull($result['installed']);
+    }
+
+    /** Снапшот, коли він є, лишається джерелом істини — запасне значення його не перебиває. */
+    public function testSnapshotInstalledWinsOverForkVersionFallback(): void
+    {
+        $snapshot = $this->snapshot(['installed' => '1.2.0', 'updateAvailable' => false]);
+
+        $result = CoreUpdaterViewModel::build($snapshot, null, self::NOW, '4.5.2', '1.3.3');
+
+        $this->assertSame('1.2.0', $result['installed']);
+    }
+
     public function testSnapshotLastErrorIsExposedAlongsideUpToDateMode(): void
     {
         $snapshot = $this->snapshot(['updateAvailable' => false, 'lastError' => 'HTTP 500', 'checkedAt' => self::NOW - 10]);
