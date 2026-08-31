@@ -21,8 +21,8 @@
 
 {*Основний блок*}
 <div class="row">
-    <div class="col-xs-12">
-        <div class="boxed" style="max-width: 800px;margin: 0 auto;">
+    <div class="col-md-12">
+        <div class="boxed">
 
             {if $vm.lastError}
                 <div class="alert alert--icon alert--warning">
@@ -48,7 +48,7 @@
                             <div class="alert__title">{$btr->core_updater_up_to_date_text|escape}</div>
                         </div>
                     </div>
-                    <div class="row d_flex">
+                    <div class="row mt-2">
                         <div class="col-md-12">
                             <p><b>{$btr->core_updater_installed_label|escape}:</b> {$vm.installed|escape}{if $vm.installedUpstreamBase} ({$btr->core_updater_based_on_label|escape} {$vm.installedUpstreamBase|escape}){/if}</p>
                             {if $vm.checkedAt}
@@ -65,7 +65,7 @@
                             </div>
                         </div>
                     {/if}
-                    <div class="row d_flex">
+                    <div class="row mt-2">
                         <div class="col-md-6">
                             <p class="text_grey">{$btr->core_updater_installed_label|escape}</p>
                             <h4>{$vm.installed|escape}</h4>
@@ -95,7 +95,7 @@
                     </div>
 
                     {if $vm.latest.notesBody}
-                        <div class="row d_flex">
+                        <div class="row mt-3">
                             <div class="col-md-12">
                                 <h5>{$btr->core_updater_whats_new_label|escape}</h5>
                                 <div>{$vm.latest.notesBody|escape|nl2br}</div>
@@ -103,7 +103,7 @@
                         </div>
                     {/if}
 
-                    <div class="row d_flex">
+                    <div class="row mt-3">
                         <div class="col-md-12">
                             <button type="button" class="btn btn_small btn-warning fn_start_update">
                                 {include file='svg_icon.tpl' svgId='refresh_icon'}
@@ -119,7 +119,7 @@
                             <p>{$btr->core_updater_stale_run_maintenance_warning|escape}</p>
                         </div>
                     </div>
-                    <div class="row d_flex">
+                    <div class="row mt-3">
                         <div class="col-md-12">
                             <button type="button" class="btn btn_small btn-warning fn_start_update">
                                 {include file='svg_icon.tpl' svgId='refresh_icon'}
@@ -186,7 +186,7 @@
                     {/if}
 
                     {if $vm.canStartUpdate}
-                        <div class="row d_flex">
+                        <div class="row">
                             <div class="col-md-12">
                                 <button type="button" class="btn btn_small btn-warning fn_start_update">
                                     {include file='svg_icon.tpl' svgId='refresh_icon'}
@@ -243,6 +243,105 @@
             </div>
 
         </div>
+    </div>
+</div>
+
+{*Довідка й налаштування — ховаються на час прогону, щоб не відволікати від прогресу*}
+<div class="row fn_side_panels"{if $vm.mode == 'running'} style="display:none;"{/if}>
+
+    {*Паспорт системи: обидві версії разом, щоб не шукати їх по адмінці*}
+    <div class="col-lg-6 col-md-12 mb-2">
+        <div class="boxed">
+            <div class="heading_box mb-2">{$btr->core_updater_current_state_title|escape}</div>
+            <table class="table_default">
+                <tr class="table_default__row">
+                    <td class="table_default__item text_grey">{$btr->core_updater_build_label|escape}</td>
+                    <td class="table_default__item"><strong>{$vm.installed|escape}</strong></td>
+                </tr>
+                {if $vm.installedUpstreamBase}
+                    <tr class="table_default__row">
+                        <td class="table_default__item text_grey">{$btr->core_updater_based_on_label|escape}</td>
+                        <td class="table_default__item">OkayCMS {$vm.installedUpstreamBase|escape}</td>
+                    </tr>
+                {/if}
+                <tr class="table_default__row">
+                    <td class="table_default__item text_grey">{$btr->core_updater_last_check_label|escape}</td>
+                    <td class="table_default__item fn_last_check">
+                        {if $vm.checkedAt}{$vm.checkedAt|date_format:"%d.%m.%Y %H:%M"|escape}{else}&mdash;{/if}
+                    </td>
+                </tr>
+            </table>
+            <p class="text_grey font_12 mt-2">{$btr->core_updater_schedule_hint|escape}</p>
+        </div>
+    </div>
+
+    {*Резервні копії: відповідь на «а копія взагалі є?» без походу по SSH*}
+    <div class="col-lg-6 col-md-12 mb-2">
+        <div class="boxed">
+            <div class="heading_box mb-2">{$btr->core_updater_backups_title|escape}</div>
+            {if $backups}
+                <table class="table_default">
+                    {foreach $backups as $backup}
+                        <tr class="table_default__row">
+                            <td class="table_default__item">{$backup.name|escape}</td>
+                            <td class="table_default__item text_grey">{if $backup.size >= 1048576}{($backup.size/1048576)|string_format:"%.1f"}&nbsp;MB{else}{($backup.size/1024)|string_format:"%.0f"}&nbsp;KB{/if}</td>
+                            <td class="table_default__item text_grey">{$backup.date|date_format:"%d.%m.%Y %H:%M"|escape}</td>
+                        </tr>
+                    {/foreach}
+                </table>
+            {else}
+                <p class="text_grey">{$btr->core_updater_backups_empty|escape}</p>
+            {/if}
+            <p class="text_grey font_12 mt-2">{$btr->core_updater_backups_hint|escape}</p>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="boxed">
+            <div class="heading_box mb-2">{$btr->core_updater_settings_title|escape}</div>
+            <form method="post" action="index.php?controller=CoreUpdaterAdmin@saveSettings">
+                <input type="hidden" name="session_id" value="{$smarty.session.id}">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="heading_label">{$btr->core_updater_root_url_label|escape}</div>
+                            <input class="form-control" type="text" name="core_updater_root_url"
+                                   value="{$updater_settings.rootUrl|escape}"
+                                   placeholder="{$updater_settings.detectedRootUrl|escape}">
+                            <p class="text_grey font_12 mt-1">{$btr->core_updater_root_url_hint|escape}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="heading_label">{$btr->core_updater_auto_check_title|escape}</div>
+                            <div class="activity_of_switch activity_of_switch--left">
+                                <div class="activity_of_switch_item">
+                                    <div class="okay_switch clearfix">
+                                        <label class="switch_label" for="core_updater_auto_check">{$btr->core_updater_auto_check_label|escape}</label>
+                                        <label class="switch switch-default">
+                                            <input class="switch-input" name="core_updater_auto_check" value="1"
+                                                   type="checkbox" id="core_updater_auto_check"{if $updater_settings.autoCheck} checked{/if}>
+                                            <span class="switch-label"></span>
+                                            <span class="switch-handle"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text_grey font_12 mt-1">{$btr->core_updater_auto_check_hint|escape}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn_blue mt-2">{$btr->core_updater_settings_save|escape}</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-12 mb-2">
+        <a class="font_12" href="https://github.com/devSviat/OkayCMS/blob/main/docs/updates.md" target="_blank" rel="noopener">
+            {$btr->core_updater_docs_link_label|escape}
+        </a>
     </div>
 </div>
 
@@ -366,7 +465,15 @@
 
     $(document).on('click', '.fn_check_now', function () {
         var btn = $(this);
+        var label = btn.find('span');
+        var labelText = label.text();
+
+        // Без цього клік виглядав як «нічого не сталося»: запит іде мовчки, а
+        // коли нової версії немає — сторінка перезавантажується в той самий
+        // вигляд. Тому спершу видимий прогрес, а в кінці — прямий вердикт.
         btn.prop('disabled', true);
+        label.text("{$btr->core_updater_checking|escape:'javascript'}");
+
         $.ajax({
             type: 'post',
             dataType: 'json',
@@ -377,10 +484,35 @@
             success: function (data) {
                 if (data && data.error) {
                     coreUpdaterHandleAjaxError(data);
+                    label.text(labelText);
                     btn.prop('disabled', false);
                     return;
                 }
-                location.reload();
+
+                // Є що ставити — перемальовуємо сторінку, щоб показати картку
+                // з версією, нотатками й кнопкою оновлення.
+                if (data && data.mode === 'update_available') {
+                    location.reload();
+                    return;
+                }
+
+                if (data && data.lastError) {
+                    toastr.error(data.lastError);
+                } else {
+                    toastr.success("{$btr->core_updater_up_to_date_text|escape:'javascript'}");
+                }
+
+                if (data && data.checkedAt) {
+                    var d = new Date(data.checkedAt * 1000);
+                    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+                    $('.fn_last_check').text(
+                        pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear()
+                        + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes())
+                    );
+                }
+
+                label.text(labelText);
+                btn.prop('disabled', false);
             },
             error: function (jqXHR) {
                 // Пре-диспетчерська CSRF-перевірка (backend/index.php) віддає 403 ще
@@ -391,6 +523,7 @@
                 } else {
                     toastr.error("{$btr->core_updater_ajax_error|escape:'javascript'}");
                 }
+                label.text(labelText);
                 btn.prop('disabled', false);
             }
         });

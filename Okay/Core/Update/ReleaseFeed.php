@@ -132,9 +132,35 @@ class ReleaseFeed
             'tag' => $tag,
             'publishedAt' => is_string($publishedAt) ? $publishedAt : null,
             'notesUrl' => is_string($notesUrl) ? $notesUrl : null,
-            'notesBody' => is_string($notesBody) ? $notesBody : null,
+            'notesBody' => is_string($notesBody) ? self::plainNotes($notesBody) : null,
             'assets' => $assets,
         ];
+    }
+
+    /**
+     * Нотатки релізу — markdown, а показуються в адмінці як текст: без чистки
+     * читач бачив «## What's Changed» і «**Full Changelog**» як сміття.
+     * Повноцінний рендер markdown тут зайвий — прибираємо лише розмітку,
+     * яка найчастіше трапляється в автогенерованих нотатках GitHub.
+     */
+    public static function plainNotes(string $body): string
+    {
+        $body = preg_replace('/^#{1,6}\s+/m', '', $body);          // заголовки
+        $body = preg_replace('/\*\*(.+?)\*\*/s', '$1', $body);     // жирний
+        $body = preg_replace('/\[(.+?)\]\((.+?)\)/', '$1', $body); // markdown-посилання → текст
+
+        // Хвіст автогенерації GitHub: «by @author in https://…/pull/123».
+        // Авторство й номер PR читачеві адмінки нічого не кажуть, а довгі
+        // URL ламали рядки й перетворювали список на кашу.
+        $body = preg_replace('/\s+by\s+@[\w-]+(\s+in\s+\S+)?/u', '', $body);
+
+        // Рядок «Full Changelog: …» дублює посилання «Переглянути зміни».
+        $body = preg_replace('/^\s*Full Changelog:.*$/mi', '', $body);
+
+        $body = preg_replace('/^\s*[-*]\s+/m', '• ', $body);       // марковані списки
+        $body = preg_replace('/\n{3,}/', "\n\n", $body);           // зайві порожні рядки
+
+        return trim($body);
     }
 
     /**

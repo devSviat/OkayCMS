@@ -12,6 +12,10 @@ use Okay\Core\Settings;
 class UpdateCheckHelper
 {
     public const SETTING_SNAPSHOT = 'core_updater__snapshot';
+
+    /** '0' вимикає планову перевірку; порожньо або '1' — увімкнена (типово). */
+    public const SETTING_AUTO_CHECK = 'core_updater__auto_check';
+
     public const TTL = 21600;
     public const REPO = 'devSviat/OkayCMS';
 
@@ -29,6 +33,20 @@ class UpdateCheckHelper
     /**
      * @return array{checkedAt: ?int, etag: ?string, installed: string, latest: ?array, updateAvailable: bool, lastError?: string, lastErrorAt?: int}
      */
+    /**
+     * Точка входу планової задачі (`Scheduler::registerCoreSchedules()`).
+     * Окремо від `check()`, щоб вимикач автоперевірки в адмінці глушив саме
+     * фонові походи в мережу, а кнопка «Перевірити зараз» лишалась робочою.
+     */
+    public function checkScheduled(): void
+    {
+        if ($this->settings->get(self::SETTING_AUTO_CHECK) === '0') {
+            return;
+        }
+
+        $this->check();
+    }
+
     public function check(bool $force = false): array
     {
         $snapshot = $this->getSnapshot();
