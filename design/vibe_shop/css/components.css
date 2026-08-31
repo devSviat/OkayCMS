@@ -11328,37 +11328,40 @@ a.top_admin_bookmark::before {
 	opacity: 0;
 }
 
+/* Поле вводу оцінки більше за зірки показу: тут по них треба влучити пальцем, */
+/* а не прочитати. Маска векторна, тож масштаб дає лише зміна розмірів.         */
+
 .vs-rating-input__star {
-	width: 18px;
-	height: 18px;
+	width: 26px;
+	height: 26px;
 	margin: 0;
 	cursor: pointer;
-	background-color: var(--vs-n-500);
-	-webkit-mask: url("../images/rating.svg") no-repeat 0 -18px;
-	-webkit-mask-size: 18px 36px;
-	mask: url("../images/rating.svg") no-repeat 0 -18px;
-	mask-size: 18px 36px;
+	background-color: var(--vs-n-400);
+	-webkit-mask: url("../images/rating.svg") no-repeat 0 -26px;
+	-webkit-mask-size: 26px 52px;
+	mask: url("../images/rating.svg") no-repeat 0 -26px;
+	mask-size: 26px 52px;
 }
 
-/* Наведення — попередній перегляд, а не збережене значення, тож фарба на крок */
-/* світліша за ту, якою малюється обране.                                      */
+/* Наведення — попередній перегляд, а не збережене значення, тож фарба світліша */
+/* за ту, якою малюється обране.                                               */
 
 .vs-rating-input__star:hover,
 .vs-rating-input__star:hover ~ .vs-rating-input__star {
-	background-color: var(--vs-text-muted);
+	background-color: var(--vs-star-hover);
 	-webkit-mask-position: 0 0;
 	mask-position: 0 0;
 }
 
 .vs-rating-input__radio:checked ~ .vs-rating-input__star,
 .vs-rating-input__radio:checked + .vs-rating-input__star {
-	background-color: var(--vs-heading);
+	background-color: var(--vs-star);
 	-webkit-mask-position: 0 0;
 	mask-position: 0 0;
 }
 
 .vs-rating-input__radio:focus-visible + .vs-rating-input__star {
-	outline: 2px solid var(--vs-heading);
+	outline: 2px solid var(--vs-star);
 	outline-offset: 2px;
 }
 

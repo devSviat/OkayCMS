@@ -10,11 +10,11 @@ namespace Okay\Core\Update;
 class CoreUpdaterViewModel
 {
     /**
-     * Скільки часу успішний результат прогону лишається новиною. Стан прогону
-     * живе в Settings назавжди, тож без цього вікна «Оновлення завершено»
-     * висіло б на сторінці й через місяць — повідомлення про подію, якої вже
-     * ніхто не пам'ятає. Невдалий прогін під вікно НЕ підпадає: він вимагає
-     * дії, тож лишається видимим, поки його не витіснить наступний прогін.
+     * Стеля на випадок, якщо позначку «показано» не вдалось записати.
+     * Штатно успішний результат зникає після першого ж перегляду
+     * (`UpdateStatus::markResultSeen()`); це вікно лише не дає йому висіти
+     * вічно, коли запис у Settings не пройшов. Невдалий прогін під вікно НЕ
+     * підпадає: він вимагає дії, тож лишається видимим до наступного прогону.
      */
     public const RESULT_FRESH_SECONDS = 86400;
 
@@ -50,10 +50,13 @@ class CoreUpdaterViewModel
 
         $updatedAt = is_int($runState['updatedAt'] ?? null) ? $runState['updatedAt'] : null;
         $resultIsFresh = $updatedAt !== null && ($nowTs - $updatedAt) < self::RESULT_FRESH_SECONDS;
+        $resultSeen = isset($runState['resultSeenAt']);
 
-        // Успішний прогін застаріває як новина: далі сторінка говорить про
-        // поточний стан, а не про те, що колись усе вдалося.
-        $staleSuccess = $isTerminal && $step === UpdateStatus::STEP_DONE && !$resultIsFresh;
+        // Успішний результат — новина одного перегляду: далі сторінка
+        // говорить про поточний стан, а не про те, що колись усе вдалося.
+        $staleSuccess = $isTerminal
+            && $step === UpdateStatus::STEP_DONE
+            && ($resultSeen || !$resultIsFresh);
 
         if ($runState !== null && !$isTerminal && !$isStale) {
             $mode = 'running';
@@ -71,7 +74,7 @@ class CoreUpdaterViewModel
             $mode = 'update_available';
             $canStartUpdate = true;
             $canCheckNow = true;
-            $previousRunDone = $resultIsFresh;
+            $previousRunDone = !$staleSuccess;
         } elseif ($isTerminal && !$staleSuccess) {
             /** @var string $step тут це один з UpdateStatus::TERMINAL_STEPS */
             $mode = $step;
@@ -118,6 +121,7 @@ class CoreUpdaterViewModel
             'step' => $step,
             'stepIndex' => $stepIndex === false ? null : $stepIndex,
             'stepsTotal' => count(UpdateStatus::STEPS),
+            'updatedAt' => is_int($runState['updatedAt'] ?? null) ? $runState['updatedAt'] : null,
             'error' => is_string($runState['error'] ?? null) ? $runState['error'] : null,
             'rolledBackMigrations' => is_array($runState['rolledBackMigrations'] ?? null)
                 ? $runState['rolledBackMigrations']

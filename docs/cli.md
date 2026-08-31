@@ -65,17 +65,32 @@ php ok module:check-modifications [--all] [--theme=okay_shop] [-v]
 ### `release:build-package`
 
 ```bash
-php ok release:build-package --fork-version=1.1.0 [--repo-path=…] [--output-dir=build/release] [--manifest=release-manifest.json] [--migrations=dev/release-migrations] [--upstream-base=…]
+php ok release:build-package --fork-version=1.1.0 [--repo-path=…] [--output-dir=build/release] [--manifest=release-manifest.json] [--migrations=1DB_changes/fork] [--upstream-base=…]
 ```
 
 Пакує репозиторій у пакет релізу форку — вхід `UpdateDownloader`/`UpdatePackage` на
 боці CMS: `manifest.json` (шлях → sha256), `checksums.txt` для самого архіву, і
-**всі** `.up.sql` з `dev/release-migrations/` (рекурсивно, не лише нові з часу
+**всі** `.up.sql` з `1DB_changes/fork/` (рекурсивно, не лише нові з часу
 попереднього релізу — [чому](updates.md#оновлення-через-кілька-версій)).
 `--upstream-base` типово береться з
 `Config::$version` за `--repo-path`. Викликається з `.github/workflows/release.yml`
 при тегуванні релізу — вручну лише для локальної перевірки пакування. Що споживає
 результат на боці інсталяції — [updates.md](updates.md).
+
+### `core:migrate`
+
+```bash
+php ok core:migrate
+```
+
+Застосовує core-міграції форку з `1DB_changes/fork/` — другий шлях
+доставки для інсталяцій, які оновлюються **деплоєм із гіта чи образом**, а не
+самооновленням з адмінки. Безпечно ганяти на кожному деплої: трекер
+`ok_core_migrations` спільний з оновлювачем, застосоване пропускається.
+
+Ненульовий код виходу — міграція впала; тоді команда друкує, що встигло
+застосуватись до падіння. Формат файлів і обмеження діалекту —
+[updates.md](updates.md#core-міграції-форку).
 
 ## Своя команда
 

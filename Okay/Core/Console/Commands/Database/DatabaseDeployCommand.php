@@ -6,6 +6,7 @@ use Aura\Sql\ExtendedPdo;
 use Okay\Core\Config;
 use Okay\Core\Console\Command;
 use Okay\Core\DataCleaner;
+use Okay\Core\Release\CoreMigrator;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Attribute\AsCommand;
 
@@ -84,11 +85,33 @@ class DatabaseDeployCommand extends Command
             $dataCleaner->clearCatalogData();
         }
 
+        // Дамп — стоковий 4.5.2, схемні зміни форку живуть окремо. Без цього
+        // кроку свіжа інсталяція народжується зі схемою, старшою за код: поля
+        // сутностей немає в таблиці, вибірка падає, а помилку SQL ковтає
+        // обробник — сторінка просто віддає порожній список.
+        $this->applyForkMigrations();
+
         $this->output->writeln("\nDatabase deployed successfully!");
         $this->output->writeln("***************************");
 
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Той самий шлях, що і `ok core:migrate`: спільний трекер
+     * `ok_core_migrations`, тож повторне застосування виключене.
+     */
+    private function applyForkMigrations(): void
+    {
+        /** @var CoreMigrator $migrator */
+        $migrator = $this->serviceLocator->getService(CoreMigrator::class);
+
+        $applied = $migrator->apply(dirname(__DIR__, 5) . '/1DB_changes/fork');
+
+        foreach ($applied as $name) {
+            $this->output->writeln('Core-міграція застосована: ' . $name);
+        }
     }
 
     private function restore(ExtendedPdo $pdo, string $filename): void
