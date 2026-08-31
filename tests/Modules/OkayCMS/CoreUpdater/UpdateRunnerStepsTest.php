@@ -179,4 +179,77 @@ class UpdateRunnerStepsTest extends TestCase
     {
         $this->assertFalse(UpdateRunner::isHealthyResponse(0, 200, '{"forkVersion":"1.2.0"}', '1.1.0', true));
     }
+
+    // --- resumesDeadRun(): єдине місце, що послаблює downgrade guard ---
+
+    /** @param array<string, mixed>|null $savedState */
+    private function invokeResumesDeadRun(?array $savedState, string $toVersion): bool
+    {
+        $status = $this->createStub(UpdateStatus::class);
+        $status->method('load')->willReturn($savedState);
+
+        $runner = new UpdateRunner(
+            $this->createStub(UpdateCheckHelper::class),
+            $status,
+            $this->createStub(UpdateDownloader::class),
+            $this->createStub(UpdateBackup::class),
+            $this->createStub(UpdateApplier::class),
+            $this->createStub(CoreMigrator::class),
+            $this->createStub(Settings::class),
+            $this->createStub(Config::class),
+            $this->createStub(Design::class)
+        );
+
+        return (new \ReflectionMethod(UpdateRunner::class, 'resumesDeadRun'))
+            ->invoke($runner, $toVersion);
+    }
+
+    public function testResumesDeadRunAllowsSameVersionNonTerminalStaleState(): void
+    {
+        $this->assertTrue($this->invokeResumesDeadRun([
+            'step' => UpdateStatus::STEP_APPLY_FILES,
+            'toVersion' => '1.1.0',
+            'updatedAt' => time() - 601,
+        ], '1.1.0'));
+    }
+
+    /**
+     * Протухлий стан на ІНШУ версію не сміє послабити guard — інакше тег
+     * v1.2.0 поверх мертвого прогону v1.1.0 отримав би резюм-виняток.
+     */
+    public function testResumesDeadRunRefusesADifferentTargetVersion(): void
+    {
+        $this->assertFalse($this->invokeResumesDeadRun([
+            'step' => UpdateStatus::STEP_APPLY_FILES,
+            'toVersion' => '1.1.0',
+            'updatedAt' => time() - 601,
+        ], '1.2.0'));
+    }
+
+    /** Термінальний стан — завершений прогін, не мертвий: резюм заборонено. */
+    public function testResumesDeadRunRefusesATerminalState(): void
+    {
+        foreach (UpdateStatus::TERMINAL_STEPS as $terminal) {
+            $this->assertFalse($this->invokeResumesDeadRun([
+                'step' => $terminal,
+                'toVersion' => '1.1.0',
+                'updatedAt' => time() - 601,
+            ], '1.1.0'), "step={$terminal}");
+        }
+    }
+
+    /** Свіжий (не stale) прогін — можливо, живий процес: резюм заборонено. */
+    public function testResumesDeadRunRefusesAFreshNonStaleState(): void
+    {
+        $this->assertFalse($this->invokeResumesDeadRun([
+            'step' => UpdateStatus::STEP_APPLY_FILES,
+            'toVersion' => '1.1.0',
+            'updatedAt' => time(),
+        ], '1.1.0'));
+    }
+
+    public function testResumesDeadRunRefusesWhenNoStateSaved(): void
+    {
+        $this->assertFalse($this->invokeResumesDeadRun(null, '1.1.0'));
+    }
 }
