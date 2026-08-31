@@ -285,7 +285,9 @@ class Module
 
         $moduleNotExistsMsg = 'Module "' . $vendor . '/' . $moduleName . '" installed but not exists';
         trigger_error($moduleNotExistsMsg, E_USER_WARNING);
-        $this->logger->addWarning($moduleNotExistsMsg);
+        // Monolog прибрав addWarning() у 2.0: виклик кидав Error і клав усю
+        // адмінку, хоча сенс гілки протилежний — пропустити відсутній модуль.
+        $this->logger->warning($moduleNotExistsMsg);
         return true;
     }
 
