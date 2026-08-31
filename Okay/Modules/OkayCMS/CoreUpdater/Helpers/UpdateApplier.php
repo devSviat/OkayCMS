@@ -145,6 +145,12 @@ class UpdateApplier
             throw new \RuntimeException("Не вдалося скопіювати {$sourcePath} у {$tmpPath}.");
         }
 
+        // ZIP не переносить unix-права, тому виконуваність успадковуємо від
+        // файлу, що заміняється — інакше `./ok` після оновлення втрачає +x.
+        if (is_file($targetPath) && is_executable($targetPath)) {
+            @chmod($tmpPath, fileperms($targetPath) & 0777);
+        }
+
         $this->rename($tmpPath, $targetPath);
     }
 

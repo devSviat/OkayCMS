@@ -66,7 +66,6 @@ class UpdateCheckHelper
         $error = curl_error($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        curl_close($ch);
 
         if ($errno !== 0 || !is_string($response)) {
             return $this->withError($snapshot, "cURL error #{$errno}: {$error}");
@@ -79,6 +78,15 @@ class UpdateCheckHelper
             $merged = array_diff_key($merged, ['lastError' => true, 'lastErrorAt' => true]);
             $merged['checkedAt'] = time();
             $merged = ReleaseFeed::refreshInstalled($merged, $this->config->forkVersion);
+
+            // 304 лишає latest як був; якщо попередній side-fetch по
+            // version.json не вдався, meta так і висіла б порожньою.
+            if (is_array($merged['latest'] ?? null) && ($merged['latest']['meta'] ?? null) === null) {
+                $metaResult = $this->fetchVersionMeta($merged['latest']['assets']['versionJson']);
+                if ($metaResult['meta'] !== null) {
+                    $merged['latest']['meta'] = $metaResult['meta'];
+                }
+            }
 
             $this->settings->set(self::SETTING_SNAPSHOT, $merged);
 
@@ -140,12 +148,15 @@ class UpdateCheckHelper
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 20);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+        // Ассети GitHub-релізу віддаються 302-редиректом на CDN.
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+        curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
 
         $response = curl_exec($ch);
         $errno = curl_errno($ch);
         $error = curl_error($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
         if ($errno !== 0 || !is_string($response)) {
             return ['meta' => null, 'error' => "cURL error #{$errno}: {$error}"];
