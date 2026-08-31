@@ -6,9 +6,12 @@ namespace Okay\Modules\OkayCMS\GoogleMerchant\Init;
 
 use Okay\Admin\Helpers\BackendExportHelper;
 use Okay\Admin\Helpers\BackendImportHelper;
+use Okay\Core\Database;
 use Okay\Core\Design;
 use Okay\Core\Modules\AbstractInit;
 use Okay\Core\Modules\EntityField;
+use Okay\Core\QueryFactory;
+use Okay\Core\ServiceLocator;
 use Okay\Entities\BrandsEntity;
 use Okay\Entities\CategoriesEntity;
 use Okay\Entities\ProductsEntity;
@@ -21,6 +24,13 @@ class Init extends AbstractInit
     const TO_FEED_FIELD = 'to__okaycms__google_merchant';
     const FILTER_FEEDS  = 'okaycms__google_merchant__feeds';
     const PERMISSION    = 'okaycms__google_merchant';
+
+    /**
+     * Індекс під вибірки зв'язків за типом сутності — саме так їх читає
+     * адмінка. Єдиний існуючий індекс починається з feed_id, тож для таких
+     * запитів (і для DELETE у GoogleMerchantRelationsEntity) непридатний.
+     */
+    const RELATIONS_INDEX = 'idx_gm_relations_type_include_feed';
 
     public function install()
     {
@@ -44,8 +54,40 @@ class Init extends AbstractInit
             $entityTypeField,
             $includeField,
         ]);
+
+        $this->createRelationsIndex();
     }
-    
+
+    /**
+     * 1.0.1 — індекс на таблицю зв'язків.
+     */
+    public function update_1_0_1()
+    {
+        $this->createRelationsIndex();
+    }
+
+    private function createRelationsIndex()
+    {
+        // В update_x_y_z() немає DI, тому сервіси беремо через ServiceLocator.
+        $SL = ServiceLocator::getInstance();
+
+        /** @var QueryFactory $queryFactory */
+        $queryFactory = $SL->getService(QueryFactory::class);
+
+        /** @var Database $db */
+        $db = $SL->getService(Database::class);
+
+        // CREATE INDEX IF NOT EXISTS підтримує MariaDB (стек проєкту), тож
+        // метод безпечно викликати і з install(), і з update_1_0_1().
+        $sql = $queryFactory->newSqlQuery();
+        $sql->setStatement(
+            'CREATE INDEX IF NOT EXISTS ' . self::RELATIONS_INDEX
+            . ' ON ' . GoogleMerchantRelationsEntity::getTable() . ' (entity_type, `include`, feed_id)'
+        );
+
+        $db->query($sql);
+    }
+
     public function init()
     {
         $this->addPermission(self::PERMISSION);
