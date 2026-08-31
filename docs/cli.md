@@ -65,12 +65,12 @@ php ok module:check-modifications [--all] [--theme=okay_shop] [-v]
 ### `release:build-package`
 
 ```bash
-php ok release:build-package --fork-version=1.1.0 [--repo-path=…] [--output-dir=build/release] [--manifest=release-manifest.json] [--migrations=release-migrations] [--upstream-base=…]
+php ok release:build-package --fork-version=1.1.0 [--repo-path=…] [--output-dir=build/release] [--manifest=release-manifest.json] [--migrations=dev/release-migrations] [--upstream-base=…]
 ```
 
 Пакує репозиторій у пакет релізу форку — вхід `UpdateDownloader`/`UpdatePackage` на
 боці CMS: `manifest.json` (шлях → sha256), `checksums.txt` для самого архіву, і
-**всі** `.up.sql` з `release-migrations/` (рекурсивно, не лише нові з часу
+**всі** `.up.sql` з `dev/release-migrations/` (рекурсивно, не лише нові з часу
 попереднього релізу — [чому](updates.md#оновлення-через-кілька-версій)).
 `--upstream-base` типово береться з
 `Config::$version` за `--repo-path`. Викликається з `.github/workflows/release.yml`

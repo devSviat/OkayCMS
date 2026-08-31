@@ -20,7 +20,10 @@ class ReleaseBuildPackageCommand extends Command
             ->addOption('repo-path', null, InputOption::VALUE_REQUIRED, 'Repository root to package', $defaultRepoPath)
             ->addOption('output-dir', null, InputOption::VALUE_REQUIRED, 'Where to write the package', $defaultRepoPath . '/build/release')
             ->addOption('manifest', null, InputOption::VALUE_REQUIRED, 'Path to release-manifest.json', $defaultRepoPath . '/release-manifest.json')
-            ->addOption('migrations', null, InputOption::VALUE_REQUIRED, 'Core migrations directory (recursive)', $defaultRepoPath . '/release-migrations')
+            // dev/, а не корінь: корінь репозиторію — це корінь сайту, і кожен
+            // запис там тримається лише на allow-list веб-сервера. dev/ не
+            // входить у release-manifest.json, тож на інсталяції не потрапляє.
+            ->addOption('migrations', null, InputOption::VALUE_REQUIRED, 'Core migrations directory (recursive)', $defaultRepoPath . '/dev/release-migrations')
             ->addOption('upstream-base', null, InputOption::VALUE_REQUIRED, 'Upstream OkayCMS version this release is based on (defaults to Config::$version at --repo-path)');
     }
 

@@ -44,14 +44,10 @@ class PublicSurfaceTest extends TestCase
      * взагалі: його маршрут лишається в .htaccess і в конфігах nginx як місце
      * для сторонніх бібліотек магазину (docs/assets.md), тож каталог може
      * зʼявитись і мусить лишатись класифікованим.
-     *
-     * release-migrations/ зʼявиться з першою core-міграцією форку
-     * (docs/updates.md) — це SQL, віддавати його назовні не можна.
      */
     private const RUNTIME_ROOT_ENTRIES = [
         'cache',
         'js_libraries',
-        'release-migrations',
     ];
 
     private function repoRoot(): string
