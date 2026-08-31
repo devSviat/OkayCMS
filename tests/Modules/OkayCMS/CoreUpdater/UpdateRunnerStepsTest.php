@@ -138,6 +138,76 @@ class UpdateRunnerStepsTest extends TestCase
         ]);
     }
 
+    // --- preflight: проба self-request ---
+
+    /**
+     * Проба стоїть ОСТАННЬОЮ в stepPreflight: до неї мають дійти лише
+     * прогони, що пройшли решту перевірок. Тут — що вона взагалі
+     * викликається і її провал зупиняє preflight (пул з одним воркером).
+     */
+    public function testPreflightAbortsWhenSelfRequestProbeFails(): void
+    {
+        $baseDir = sys_get_temp_dir() . '/runner-probe-test-' . uniqid('', true);
+        $rootDir = $baseDir . '/root';
+        $extractDir = $baseDir . '/extract';
+        mkdir($extractDir . '/payload', 0777, true);
+        mkdir($rootDir . '/Okay/Core', 0777, true);
+        mkdir($rootDir . '/config', 0777, true);
+
+        $runner = $this->getMockBuilder(UpdateRunner::class)
+            ->setConstructorArgs([
+                $this->createStub(UpdateCheckHelper::class),
+                $this->createStub(UpdateStatus::class),
+                $this->createStub(UpdateDownloader::class),
+                $this->createStub(UpdateBackup::class),
+                $this->createStub(UpdateApplier::class),
+                $this->createStub(CoreMigrator::class),
+                $this->createStub(Settings::class),
+                $this->createStub(Config::class),
+                $this->createStub(Design::class),
+            ])
+            ->onlyMethods(['assertSelfRequestPossible'])
+            ->getMock();
+        $runner->expects($this->once())
+            ->method('assertSelfRequestPossible')
+            ->willThrowException(new \RuntimeException('Сайт не відповів сам собі'));
+
+        try {
+            $this->expectException(\RuntimeException::class);
+            $this->expectExceptionMessageMatches('/не відповів сам собі/');
+
+            (new \ReflectionMethod(UpdateRunner::class, 'stepPreflight'))->invoke($runner, [
+                'rootDir' => $rootDir,
+                'toVersion' => '1.2.0',
+                'fromVersion' => '1.1.0',
+                'versionMeta' => ['forkVersion' => '1.2.0'],
+                'extractDir' => $extractDir,
+            ]);
+        } finally {
+            rmdir($extractDir . '/payload');
+            rmdir($extractDir);
+            rmdir($rootDir . '/Okay/Core');
+            rmdir($rootDir . '/Okay');
+            rmdir($rootDir . '/config');
+            rmdir($rootDir);
+            rmdir($baseDir);
+        }
+    }
+
+    public function testSelfRequestProofAcceptsAnyCompletedHttpResponse(): void
+    {
+        $this->assertTrue(UpdateRunner::isSelfRequestProof(0, 200));
+        $this->assertTrue(UpdateRunner::isSelfRequestProof(0, 500));
+        $this->assertTrue(UpdateRunner::isSelfRequestProof(0, 503));
+    }
+
+    public function testSelfRequestProofRejectsTimeoutAndTransportFailures(): void
+    {
+        $this->assertFalse(UpdateRunner::isSelfRequestProof(28, 0));
+        $this->assertFalse(UpdateRunner::isSelfRequestProof(7, 0));
+        $this->assertFalse(UpdateRunner::isSelfRequestProof(0, 0));
+    }
+
     // --- health-check: рішення по одній відповіді ---
 
     public function testHealthResponseIsHealthyOnlyForTheExpectedVersion(): void
