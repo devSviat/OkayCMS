@@ -50,7 +50,7 @@
                     </div>
                     <div class="row d_flex">
                         <div class="col-md-12">
-                            <p><b>{$btr->core_updater_installed_label|escape}:</b> {$vm.installed|escape}</p>
+                            <p><b>{$btr->core_updater_installed_label|escape}:</b> {$vm.installed|escape}{if $vm.installedUpstreamBase} ({$btr->core_updater_based_on_label|escape} {$vm.installedUpstreamBase|escape}){/if}</p>
                             {if $vm.checkedAt}
                                 <p class="text_grey"><b>{$btr->core_updater_last_check_label|escape}:</b> {$vm.checkedAt|date_format:"%d.%m.%Y %H:%M"|escape}</p>
                             {/if}
@@ -58,15 +58,25 @@
                     </div>
 
                 {elseif $vm.mode == 'update_available'}
+                    {if $vm.previousRunDone}
+                        <div class="alert alert--icon alert--success">
+                            <div class="alert__content">
+                                <p>{$btr->core_updater_previous_run_done_text|escape}</p>
+                            </div>
+                        </div>
+                    {/if}
                     <div class="row d_flex">
                         <div class="col-md-6">
                             <p class="text_grey">{$btr->core_updater_installed_label|escape}</p>
                             <h4>{$vm.installed|escape}</h4>
+                            {if $vm.installedUpstreamBase}
+                                <p class="text_grey">{$btr->core_updater_based_on_label|escape}: {$vm.installedUpstreamBase|escape}</p>
+                            {/if}
                         </div>
                         <div class="col-md-6">
                             <p class="text_grey">{$btr->core_updater_available_label|escape}</p>
                             <h4>{$vm.latest.forkVersion|escape}</h4>
-                            {if $vm.latest.meta.upstreamBase}
+                            {if $vm.latest.meta && $vm.latest.meta.upstreamBase}
                                 <p><b>{$btr->core_updater_based_on_label|escape}:</b> {$vm.latest.meta.upstreamBase|escape}</p>
                             {/if}
                             {if $vm.latest.publishedAt}
@@ -75,7 +85,7 @@
                             {if $vm.latest.notesUrl}
                                 <p><a href="{$vm.latest.notesUrl|escape}" target="_blank" rel="noopener">{$btr->core_updater_view_changes|escape}</a></p>
                             {/if}
-                            {if $vm.latest.meta.requiresMigrations}
+                            {if $vm.latest.meta && $vm.latest.meta.requiresMigrations}
                                 <p class="text_attention">
                                     {include file='svg_icon.tpl' svgId='warn_icon'}
                                     <span>{$btr->core_updater_requires_migrations_badge|escape}</span>
@@ -106,6 +116,7 @@
                     <div class="alert alert--icon alert--warning">
                         <div class="alert__content">
                             <div class="alert__title">{$btr->core_updater_stale_run_text|escape}</div>
+                            <p>{$btr->core_updater_stale_run_maintenance_warning|escape}</p>
                         </div>
                     </div>
                     <div class="row d_flex">
@@ -145,8 +156,9 @@
                                             <li>{$migration|escape}</li>
                                         {/foreach}
                                     </ul>
-                                {else}
                                     <p>{$btr->core_updater_migrations_not_rolled_back|escape}</p>
+                                {else}
+                                    <p>{$btr->core_updater_no_migrations_applied_text|escape}</p>
                                 {/if}
                                 <p>
                                     <a href="https://github.com/devSviat/OkayCMS/blob/main/docs/updates.md" target="_blank" rel="noopener">
@@ -208,7 +220,7 @@
                 {if $vm.run && $vm.run.stepIndex !== null}{$runStepIndex = $vm.run.stepIndex}{/if}
                 {* 10 = кількість UpdateStatus::STEPS; steps_lang_keys додає ще 3 TERMINAL_STEPS поверх них *}
                 {$stepsTotal = 10}
-                {if $vm.run.stepsTotal}{$stepsTotal = $vm.run.stepsTotal}{/if}
+                {if $vm.run && $vm.run.stepsTotal}{$stepsTotal = $vm.run.stepsTotal}{/if}
 
                 <p><span class="fn_step_counter">{$runStepIndex+1} / {$stepsTotal}</span></p>
 
@@ -280,11 +292,13 @@
     function coreUpdaterShowRunningPanel() {
         $('.fn_mode_panel').hide();
         $('.fn_running_panel').show();
+        $('.fn_check_now').prop('disabled', true).hide();
     }
 
     function coreUpdaterShowModePanel() {
         $('.fn_running_panel').hide();
         $('.fn_mode_panel').show();
+        $('.fn_check_now').prop('disabled', false).show();
     }
 
     function coreUpdaterStopPolling() {
@@ -312,18 +326,30 @@
         $('.fn_step_counter').text((vm.run.stepIndex + 1) + ' / ' + vm.run.stepsTotal);
     }
 
+    var coreUpdaterPollErrorShown = false;
+
     function coreUpdaterPoll() {
         coreUpdaterStopPolling();
+        coreUpdaterPollErrorShown = false;
         coreUpdaterPollInterval = setInterval(function () {
             $.ajax({
                 type: 'get',
                 dataType: 'json',
                 url: "{url controller='OkayCMS.CoreUpdater.CoreUpdaterAdmin@status'}",
                 success: function (vm) {
-                    coreUpdaterUpdateProgress(vm);
                     if (vm && (vm.mode === 'done' || vm.mode === 'failed' || vm.mode === 'rolled_back')) {
                         coreUpdaterStopPolling();
                         location.reload();
+                        return;
+                    }
+                    coreUpdaterUpdateProgress(vm);
+                },
+                error: function () {
+                    // Оновлення на сервері триває незалежно від поллінгу — не гасимо
+                    // інтервал, лише один раз попереджаємо, що зв'язок перервався.
+                    if (!coreUpdaterPollErrorShown) {
+                        coreUpdaterPollErrorShown = true;
+                        toastr.warning("{$btr->core_updater_poll_lost_text|escape:'javascript'}");
                     }
                 }
             });
@@ -356,8 +382,15 @@
                 }
                 location.reload();
             },
-            error: function () {
-                toastr.error("{$btr->core_updater_ajax_error|escape:'javascript'}");
+            error: function (jqXHR) {
+                // Пре-диспетчерська CSRF-перевірка (backend/index.php) віддає 403 ще
+                // до виклику контролера — така відповідь потрапляє сюди, а не в
+                // success із полем error, рівним 'csrf'.
+                if (jqXHR && jqXHR.status === 403) {
+                    toastr.error("{$btr->core_updater_csrf_error|escape:'javascript'}");
+                } else {
+                    toastr.error("{$btr->core_updater_ajax_error|escape:'javascript'}");
+                }
                 btn.prop('disabled', false);
             }
         });
@@ -399,7 +432,18 @@
                 }
                 $btn.prop('disabled', false);
             },
-            error: function () {
+            error: function (jqXHR) {
+                // 403 — пре-диспетчерська CSRF-перевірка відмовила ще до контролера:
+                // прогону не було й перевіряти status() нема сенсу, на відміну від
+                // решти помилок (там сервер міг таки почати прогін).
+                if (jqXHR && jqXHR.status === 403) {
+                    coreUpdaterStopPolling();
+                    coreUpdaterShowModePanel();
+                    toastr.error("{$btr->core_updater_csrf_error|escape:'javascript'}");
+                    $btn.prop('disabled', false);
+                    return;
+                }
+
                 // POST виконується синхронно і може тривати хвилини — ajax error тут
                 // не обов'язково означає провал оновлення: з'єднання браузера могло
                 // обірватись (таймаут/мережа), поки сервер продовжує прогін. Перевіряємо
