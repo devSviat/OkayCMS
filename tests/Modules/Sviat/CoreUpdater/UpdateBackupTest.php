@@ -38,6 +38,20 @@ class UpdateBackupTest extends TestCase
         rmdir($dir);
     }
 
+    // --- вимкнення TLS для mysqldump ---
+
+    public function testSslDisableOptionMatchesClientFlavour(): void
+    {
+        $this->assertSame(
+            '--skip-ssl',
+            UpdateBackup::sslDisableOptionFor('mysqldump from 11.8.4-MariaDB, client 10.19')
+        );
+        $this->assertSame(
+            '--ssl-mode=DISABLED',
+            UpdateBackup::sslDisableOptionFor('mysqldump  Ver 8.0.43 for Linux on x86_64 (MySQL Community Server - GPL)')
+        );
+    }
+
     // --- collectBackupList ---
 
     public function testCollectBackupListReturnsOnlyFilesThatExistNow(): void
