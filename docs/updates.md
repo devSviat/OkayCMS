@@ -119,8 +119,43 @@ FAQ тощо). Не чіпається нічого з цього:
 Таблиця-трекер `ok_core_migrations` самостворювана
 (`CoreMigrator::ensureTable()` при першому `apply()`).
 
-Що входить у пакет релізу й формат `manifest.json`/`checksums.txt` —
-`docs/superpowers/specs/2026-08-30-core-self-updater-design.md`, §5-§7.
+## Формат пакета релізу
+
+```
+okaycms-fork-v1.3.2.zip
+├── version.json     forkVersion, upstreamBase, minPhp, releasedAt,
+│                    requiresMigrations
+├── manifest.json    повний перелік core-шляхів пакета + sha256 на кожен
+├── migrations/      усі core-міграції форку (див. нижче)
+└── payload/         дзеркало core-дерева, 1:1 з переліком у manifest.json
+```
+
+Поруч із архівом реліз несе `checksums.txt` — sha256 самого zip; він
+звіряється до розпакування, а `manifest.json` дає пофайлову звірку після.
+
+Межа «ядро проти даних магазину» — явний allow-list у
+`release-manifest.json`, а не «все, крім винятків». У пакет входять
+`Okay/Core|Controllers|Entities|Helpers|Requests|lang_general`, `backend/`
+(крім `backend/design/` і `backend/files/`), штатні модулі
+`Okay/Modules/OkayCMS/*`, `composer.json`/`composer.lock`, `ok`,
+`index.php`, `1DB_changes/`.
+
+**Не входить ніколи:** сторонні модулі (будь-який вендор поза
+`release-manifest.json`), `design/*`, `backend/design/*`, `config/*`,
+`files/*`, `cache/*`, `compiled/*`, `Okay/log/*`.
+
+Кореневих `.htaccess` і `robots.txt` у пакеті теж немає — свідомо. На
+класичному хостингу `.htaccess` і головний важіль безпеки периметра, і
+найчастіше локально дописаний; тихо перезаписати його оновленням гірше,
+ніж не доставити правку. Якщо колись знадобиться критична зміна — це буде
+окремий крок у нотатках релізу, не мовчазний перезапис.
+
+`vendor/` у zip не їде: перегенерується на сервері за оновленим
+`composer.lock`. Інакше пакет роздувається й везе ризик бінарної
+несумісності між збірками PHP.
+
+Оновлювач довіряє **лише** переліку з `manifest.json` конкретного релізу:
+шлях поза цим переліком не чіпається, навіть якщо фізично лежить у zip.
 
 Програмний запуск: резолвнути `UpdateRunner` через DI і викликати `run()`.
 CLI-команди оновлення немає. `run()` качає **останній** реліз зі снапшота;
@@ -353,7 +388,7 @@ apply:  1.2.0_b, 1.11.0_c   (1.1.0_a пропущено, порядок нату
 | Інсталяція | Хто застосовує | Звідки бере |
 | --- | --- | --- |
 | Самооновлення з адмінки | крок `migrations` прогону | `migrations/` у пакеті релізу |
-| Деплой із гіта чи образом (broken) | `php ok core:migrate` на деплої | `1DB_changes/fork/` у дереві |
+| Деплой із гіта чи образом | `php ok core:migrate` на деплої | `1DB_changes/fork/` у дереві |
 | Свіжа інсталяція | `ok database:deploy` після заливки дампа | те саме |
 
 Трекер `ok_core_migrations` спільний для всіх трьох, тож одна міграція не
