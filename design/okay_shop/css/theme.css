@@ -1787,19 +1787,43 @@ a.filter__catalog_link svg {
   -ms-flex-align: center;
   align-items: center;
 }
+/* Порожній ряд малює псевдоелемент, а НЕ маска на самій коробці: маска
+   обрізає елемент РАЗОМ із нащадками як одну групу, тож контурний трафарет
+   звів би вкладений залитий ряд до того самого контуру, і залитий не
+   намалювався б за жодного рейтингу. Псевдоелемент у дереві малювання —
+   сусід дитини, а не предок, тож його маска зупиняється на ньому самому. */
 .rating_starOff {
+  position: relative;
   display: inline-block;
   vertical-align: top;
-}
-.rating_starOff,
-.rating_starOn {
   width: 90px;
   height: 18px;
-  background: url(../images/rating.png) repeat-x left top;
 }
+.rating_starOff::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 90px;
+  height: 18px;
+  -webkit-mask: url(../images/rating.svg) repeat-x 0 -18px;
+  -webkit-mask-size: 18px 36px;
+  mask: url(../images/rating.svg) repeat-x 0 -18px;
+  mask-size: 18px 36px;
+  background-color: var(--okay-star-empty);
+}
+/* position: relative лише щоб залитий ряд малювався поверх трафарету —
+   обидва тоді з z-index auto, і порядок у дереві вирішує. Ширину не чіпаємо:
+   її задає шаблон інлайном як поточне значення рейтингу. */
 .rating_starOn {
+  position: relative;
   display: block;
-  background-position: left bottom;
+  height: 18px;
+  -webkit-mask: url(../images/rating.svg) repeat-x 0 0;
+  -webkit-mask-size: 18px 36px;
+  mask: url(../images/rating.svg) repeat-x 0 0;
+  mask-size: 18px 36px;
+  background-color: var(--okay-star);
 }
 .rating_text {
   vertical-align: middle;
@@ -4825,21 +4849,33 @@ table.order_details {
   height: 1px;
   opacity: 0;
 }
+/* Поле вводу більше за зірки показу: по ньому треба влучити пальцем, а не
+   прочитати його. Маска векторна, тож масштаб дає лише зміна розмірів. */
 .review_rating__star {
-  width: 18px;
-  height: 18px;
+  width: 26px;
+  height: 26px;
   margin: 0;
   cursor: pointer;
-  background: url(../images/rating.png) no-repeat left top;
+  -webkit-mask: url(../images/rating.svg) no-repeat 0 -26px;
+  -webkit-mask-size: 26px 52px;
+  mask: url(../images/rating.svg) no-repeat 0 -26px;
+  mask-size: 26px 52px;
+  background-color: var(--okay-star-empty);
 }
 .review_rating__star:hover,
-.review_rating__star:hover ~ .review_rating__star,
+.review_rating__star:hover ~ .review_rating__star {
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  background-color: var(--okay-star-hover);
+}
 .review_rating__input:checked ~ .review_rating__star,
 .review_rating__input:checked + .review_rating__star {
-  background-position: left bottom;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  background-color: var(--okay-star);
 }
 .review_rating__input:focus-visible + .review_rating__star {
-  outline: 2px solid currentColor;
+  outline: 2px solid var(--okay-star);
   outline-offset: 2px;
 }
 .comment__rating {
