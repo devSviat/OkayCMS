@@ -335,7 +335,7 @@
             $.ajax({
                 type: 'get',
                 dataType: 'json',
-                url: "{url controller='Sviat.CoreUpdater.CoreUpdaterAdmin@status'}",
+                url: "{url controller='CoreUpdaterAdmin@status'}",
                 success: function (vm) {
                     if (vm && (vm.mode === 'done' || vm.mode === 'failed' || vm.mode === 'rolled_back')) {
                         coreUpdaterStopPolling();
@@ -370,7 +370,7 @@
         $.ajax({
             type: 'post',
             dataType: 'json',
-            url: "{url controller='Sviat.CoreUpdater.CoreUpdaterAdmin@checkNow'}",
+            url: "{url controller='CoreUpdaterAdmin@checkNow'}",
             data: {
                 session_id: '{$smarty.session.id}',
             },
@@ -418,7 +418,7 @@
         $.ajax({
             type: 'post',
             dataType: 'json',
-            url: "{url controller='Sviat.CoreUpdater.CoreUpdaterAdmin@startUpdate'}",
+            url: "{url controller='CoreUpdaterAdmin@startUpdate'}",
             data: {
                 session_id: '{$smarty.session.id}',
             },
@@ -452,7 +452,7 @@
                 $.ajax({
                     type: 'get',
                     dataType: 'json',
-                    url: "{url controller='Sviat.CoreUpdater.CoreUpdaterAdmin@status'}",
+                    url: "{url controller='CoreUpdaterAdmin@status'}",
                     success: function (vm) {
                         var alive = vm && (vm.mode === 'running' || vm.mode === 'done'
                             || vm.mode === 'failed' || vm.mode === 'rolled_back');

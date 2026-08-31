@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Sviat\CoreUpdater;
+namespace Core\Update;
 
 use Okay\Core\Update\UpdateStatus;
 use PHPUnit\Framework\Attributes\DataProvider;

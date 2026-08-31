@@ -96,6 +96,7 @@ class ManagerMenu
             'learning_title'             => ['LearningAdmin'],
             'left_managers_title'        => ['ManagersAdmin', 'ManagerAdmin'],
             'left_system_title'          => ['SystemAdmin'],
+            'left_core_updater_title'    => ['CoreUpdaterAdmin'],
         ],
         'left_modules' => [
             'left_modules_list'          => ['ModulesAdmin'],

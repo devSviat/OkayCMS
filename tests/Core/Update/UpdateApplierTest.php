@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Sviat\CoreUpdater;
+namespace Core\Update;
 
 use Okay\Core\Update\UpdateApplier;
 use Okay\Core\Update\UpdateApplyException;

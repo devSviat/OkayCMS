@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Sviat\CoreUpdater;
+namespace Core\Update;
 
 use Okay\Core\Update\UpdateCheckHelper;
 use PHPUnit\Framework\TestCase;

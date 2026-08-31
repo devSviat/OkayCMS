@@ -1,8 +1,7 @@
 <?php
 
-namespace Okay\Modules\Sviat\CoreUpdater\Backend\Controllers;
+namespace Okay\Admin\Controllers;
 
-use Okay\Admin\Controllers\IndexAdmin;
 use Okay\Core\Config;
 use Okay\Core\Update\CoreUpdaterViewModel;
 use Okay\Core\Update\UpdateCheckHelper;
