@@ -192,6 +192,15 @@ server {
     #
     # try_files на index.php обов'язковий: files/resized/ — це маршрут
     # (Okay/Core/config/routes.php), копії створюються на перший запит.
+
+    # Бекапи оновлення ядра — повні копії core-файлів під іменем, яке
+    # вгадується (pre-update-{from}-to-{to}-{ts}.zip), а .zip є у переліку
+    # розширень нижче. ^~ обов'язковий: без нього правило за розширенням
+    # перебиває заборону.
+    location ^~ /files/backups/ {
+        return 404;
+    }
+
     location ~ ^/files/(?!originals/).+\.(?i:png|jpe?g|gif|svg|webp|ico|pdf|zip|xlsx?|docx?|csv|mp3|mp4|ogg|webm)$ {
         try_files $uri /index.php?$args;
         access_log off;

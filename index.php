@@ -15,6 +15,63 @@ ini_set('display_errors', 'off');
 
 require_once('vendor/autoload.php');
 
+// Оновлення ядра: вітрина закрита, health-check проходить за токеном
+// з прапорця (див. CoreUpdater/MaintenanceMode). До DI й БД навмисно —
+// сторінка технічних робіт не має права впасти через них.
+// backend/index.php свідомо без цього гейта: адмінка мусить лишатись
+// живою, щоб бачити прогрес і статус оновлення.
+// file_exists() йде першим і без нього — єдина ціна цього блоку на
+// кожному хіті вітрини; class_exists (з можливим автозавантаженням)
+// рахується лише коли прапорець реально лежить на диску. Шлях зібраний
+// літералом, а не через MaintenanceMode::flagPath(__DIR__), бо клас тут
+// ще не гарантовано автозавантажений — тримати його синхронним з
+// контрактом flagPath() ('config/.maintenance') покриває
+// MaintenanceModeTest::testFlagPathContractStaysConfigDotMaintenance.
+$maintenanceFlag = __DIR__ . '/config/.maintenance';
+if (file_exists($maintenanceFlag)) {
+    // Прапорець лежить, а класу немає — рівно те, що видно посеред
+    // apply_files, коли autoload уже не знаходить ні старий, ні новий файл.
+    // Провалитись повз гейт тут означало б відкрити вітрину над
+    // напівзастосованим ядром, тому 503 віддається інлайном, без єдиної
+    // залежності, яка могла б не завантажитись.
+    if (!class_exists(\Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::class)) {
+        http_response_code(503);
+        header('Retry-After: 120');
+        header('Content-Type: text/html; charset=utf-8');
+        echo '<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8">'
+            . '<title>Технічні роботи</title></head><body>'
+            . '<h1>503 Сервіс тимчасово недоступний</h1>'
+            . '<p>Триває оновлення. Спробуйте, будь ласка, за кілька хвилин.</p>'
+            . '</body></html>';
+        exit;
+    }
+
+    // Суперглобалі можуть віддати масив (?core_updater_token[]=x) —
+    // normalizeToken() зводить це до null замість TypeError у allowsRequest().
+    $providedToken = \Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::normalizeToken(
+        $_SERVER['HTTP_X_CORE_UPDATER_TOKEN'] ?? ($_GET['core_updater_token'] ?? null)
+    );
+
+    if (!\Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::allowsRequest($maintenanceFlag, $providedToken)) {
+        http_response_code(503);
+        header('Retry-After: 120');
+        echo \Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::renderPage();
+        exit;
+    }
+
+    // Health-check пробою UpdateRunner (спек §8.11): якщо ми тут — токен
+    // уже пройшов allowsRequest() вище. Відповідь без DI й без БД: клас
+    // читається через ReflectionClass, конструктор не викликається —
+    // доводить лише, що autoload підхопив нові core-файли після apply.
+    if (isset($_GET['core_updater_health'])) {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'forkVersion' => (new \ReflectionClass(\Okay\Core\Config::class))->getDefaultProperties()['forkVersion'],
+        ]);
+        exit;
+    }
+}
+
 // Має відбутися до старту сесії вітрини: одночасно активною може бути
 // лише одна сесія, а тут ми на мить читаємо бекендову.
 \Okay\Core\Security\SessionNames::isAdmin();

@@ -1,0 +1,7 @@
+{
+    "forkVersion": "1.0.0",
+    "upstreamBase": "4.6.0",
+    "minPhp": "8.4.0",
+    "releasedAt": "2026-02-01T00:00:00Z",
+    "requiresMigrations": false
+}
