@@ -185,3 +185,27 @@ $lang['okay_cms__feeds__feed__settings__prom_ua__sales_max_length'] = "Допу�
 $lang['okay_cms__feeds__feed__settings__prom_ua__country_of_origin'] = "Країна виробник (country_of_origin)";
 $lang['okay_cms__feeds__feed__settings__prom_ua__feed_name'] = "Назва фіда";
 $lang['okay_cms__feeds__feed__categories_settings__prom_ua__external_id'] = "Зовнішній ID";
+
+// Налаштування Epitsentr
+$lang['okay_cms__feeds__feed__settings__epitsentr__upload_without_images'] = "Вивантажувати товари без зображень";
+$lang['okay_cms__feeds__feed__settings__epitsentr__upload_only_in_stock_products'] = "Вивантажувати тільки товари, які є у наявності";
+$lang['okay_cms__feeds__feed__settings__epitsentr__store'] = "Можна купити в роздрібному магазині";
+$lang['okay_cms__feeds__feed__settings__epitsentr__pickup'] = "Можливість самовивозу з пункту видачі";
+$lang['okay_cms__feeds__feed__settings__epitsentr__use_full_description'] = "Використовувати повний опис (якщо вимкнено передається короткий опис)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__has_manufacturer_warranty'] = "У товарів є гарантія виробника";
+$lang['okay_cms__feeds__feed__settings__epitsentr__no_export_without_price'] = "Не вивантажувати товари з ціною 0";
+$lang['okay_cms__feeds__feed__settings__epitsentr__delivery'] = "Можливість кур'єрської доставки";
+$lang['okay_cms__feeds__feed__settings__epitsentr__adult'] = "Товари для дорослих (adult)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__company'] = "Повне найменування компанії, що володіє магазином";
+$lang['okay_cms__feeds__feed__settings__epitsentr__sales_max_length'] = "Допустима довжина тексту в елементі - 50 символів";
+$lang['okay_cms__feeds__feed__settings__epitsentr__country_of_origin'] = "Країна виробник (country_of_origin)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__feed_name'] = "Назва фіда";
+$lang['okay_cms__feeds__feed__settings__epitsentr__enable_auto_discounts'] = "Вмикати автоматичний розрахунок і показ знижок (enable_auto_discounts)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__count'] = "Передавати загальну кількість товару, доступну для продажу (count)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__description_in_html'] = "Передавати у фід повний опис у html";
+$lang['okay_cms__feeds__feed__settings__epitsentr__description_in_html_info'] = "При включенні цієї галочки повний опис не буде очищатися від html тегів і для коректної передачі тегів у фіди html текст буде обернутий в CDATA";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brands_external_ids'] = "Зовнішні ID брендів";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brand_name'] = "Назва бренду";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brand_external_id'] = "Зовнішній ID в Епіцентрі";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brand_external_id_placeholder'] = "Введіть зовнішній ID";
+$lang['okay_cms__feeds__feed__categories_settings__epitsentr__external_id'] = "Зовнішній ID";
