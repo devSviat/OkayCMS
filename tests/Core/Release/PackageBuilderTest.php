@@ -85,6 +85,72 @@ class PackageBuilderTest extends TestCase
         }
     }
 
+    /**
+     * Оновлювач качає лише ОСТАННІЙ реліз, тож пакет мусить нести всю історію
+     * міграцій, включно з розкладеними по підкаталогах — інакше інсталяція,
+     * що стрибає через кілька версій, не побачить міграції проміжних релізів.
+     */
+    public function testStageBundlesMigrationsFromNestedDirectories(): void
+    {
+        $migrationsSource = $this->stagingDir . '/../all-migrations-' . uniqid();
+        mkdir($migrationsSource . '/1.x', 0777, true);
+        mkdir($migrationsSource . '/2.x', 0777, true);
+        file_put_contents($migrationsSource . '/1.x/1.2.0_old.up.sql', 'ALTER TABLE ok_a ADD COLUMN x INT;');
+        file_put_contents($migrationsSource . '/2.x/2.0.0_new.up.sql', 'ALTER TABLE ok_b ADD COLUMN y INT;');
+        file_put_contents($migrationsSource . '/README.md', 'не міграція');
+
+        $builder = new PackageBuilder();
+
+        try {
+            $result = $builder->stage(
+                $this->fixturesDir . '/sample-repo',
+                $this->fixturesDir . '/sample-manifest.json',
+                '2.0.0',
+                '4.6.0',
+                $this->stagingDir,
+                $migrationsSource
+            );
+
+            $this->assertSame(2, $result['migrationsCount']);
+            $this->assertFileExists($this->stagingDir . '/migrations/1.2.0_old.up.sql');
+            $this->assertFileExists($this->stagingDir . '/migrations/2.0.0_new.up.sql');
+            $this->assertFileDoesNotExist($this->stagingDir . '/migrations/README.md');
+        } finally {
+            $this->removeDirectory($migrationsSource);
+        }
+    }
+
+    /**
+     * Ім'я файлу — ключ трекера `ok_core_migrations`, тож два однойменних
+     * файли в різних підкаталогах зробили б застосування недетермінованим.
+     */
+    public function testStageRefusesDuplicateMigrationNames(): void
+    {
+        $migrationsSource = $this->stagingDir . '/../dup-migrations-' . uniqid();
+        mkdir($migrationsSource . '/a', 0777, true);
+        mkdir($migrationsSource . '/b', 0777, true);
+        file_put_contents($migrationsSource . '/a/1.0.0_same.up.sql', 'SELECT 1;');
+        file_put_contents($migrationsSource . '/b/1.0.0_same.up.sql', 'SELECT 2;');
+
+        $builder = new PackageBuilder();
+
+        try {
+            $this->expectException(\RuntimeException::class);
+            $this->expectExceptionMessageMatches('/Дублікат імені core-міграції/');
+
+            $builder->stage(
+                $this->fixturesDir . '/sample-repo',
+                $this->fixturesDir . '/sample-manifest.json',
+                '1.0.0',
+                '4.6.0',
+                $this->stagingDir,
+                $migrationsSource
+            );
+        } finally {
+            $this->removeDirectory($migrationsSource);
+        }
+    }
+
     public function testBuildProducesZipVersionJsonAndChecksums(): void
     {
         $outputDir = sys_get_temp_dir() . '/package-builder-output-' . uniqid();

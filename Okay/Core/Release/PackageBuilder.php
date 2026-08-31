@@ -58,6 +58,18 @@ class PackageBuilder
         ];
     }
 
+    /**
+     * Кожен пакет несе ВСЮ історію core-міграцій, а не лише нові з часу
+     * попереднього релізу: оновлювач качає тільки останній реліз, тож при
+     * стрибку через версії (1.0.1 → 1.3.1) міграції проміжних релізів інакше
+     * не потрапили б нікуди й були б втрачені назавжди. Повторне застосування
+     * не страшне — CoreMigrator веде трекер `ok_core_migrations` за іменем
+     * файлу й пропускає вже застосовані.
+     *
+     * Обхід рекурсивний, тож історію можна розкладати по підкаталогах.
+     * Імена мусять бути унікальними в межах усього дерева — саме ім'я є
+     * ключем ідемпотентності в трекері.
+     */
     private function copyMigrations(?string $migrationsPath, string $targetDir): int
     {
         mkdir($targetDir, 0777, true);
@@ -66,13 +78,43 @@ class PackageBuilder
             return 0;
         }
 
-        $count = 0;
-        foreach (glob($migrationsPath . '/*.up.sql') as $migrationFile) {
-            copy($migrationFile, $targetDir . '/' . basename($migrationFile));
-            $count++;
+        $seen = [];
+        foreach ($this->findMigrationFiles($migrationsPath) as $migrationFile) {
+            $name = basename($migrationFile);
+
+            if (isset($seen[$name])) {
+                throw new \RuntimeException(sprintf(
+                    'Дублікат імені core-міграції "%s": %s і %s. Ім\'я — ключ трекера, воно мусить бути унікальним.',
+                    $name,
+                    $seen[$name],
+                    $migrationFile
+                ));
+            }
+
+            $seen[$name] = $migrationFile;
+            copy($migrationFile, $targetDir . '/' . $name);
         }
 
-        return $count;
+        return count($seen);
+    }
+
+    /** @return list<string> усі *.up.sql у дереві, у стабільному порядку */
+    private function findMigrationFiles(string $migrationsPath): array
+    {
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($migrationsPath, \FilesystemIterator::SKIP_DOTS)
+        );
+
+        $files = [];
+        foreach ($iterator as $file) {
+            if ($file->isFile() && str_ends_with($file->getFilename(), '.up.sql')) {
+                $files[] = $file->getPathname();
+            }
+        }
+
+        sort($files);
+
+        return $files;
     }
 
     /** @return array{zipPath: string, versionJsonPath: string, checksumsPath: string, fileCount: int, migrationsCount: int} */
