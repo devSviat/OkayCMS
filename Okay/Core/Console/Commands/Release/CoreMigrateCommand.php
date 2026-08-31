@@ -31,6 +31,17 @@ class CoreMigrateCommand extends Command
     {
         $migrationsDir = dirname(__DIR__, 5) . '/1DB_changes/fork';
 
+        // Без каталогу pending() віддає порожньо, і команда відрапортувала б
+        // «немає нових» — та сама тиха розбіжність схем, заради якої вона й
+        // існує. Реальний випадок: збірка образу, що виключає 1DB_changes/.
+        if (!is_dir($migrationsDir)) {
+            $this->output->writeln(
+                '<error>Каталог core-міграцій не знайдено: ' . $migrationsDir . '</error>'
+            );
+
+            return Command::FAILURE;
+        }
+
         try {
             $applied = $migrator->apply($migrationsDir);
         } catch (CoreMigrationException $e) {

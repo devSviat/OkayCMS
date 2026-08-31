@@ -11,6 +11,67 @@ namespace Okay\Core\Update;
 class UpdatePackage
 {
     /**
+     * Каталоги, які належать інсталяції, а не ядру. Пакет не має права
+     * заявляти в них жодного шляху — навіть цілком справжній пакет,
+     * зібраний із помилкою в `release-manifest.json`.
+     *
+     * Порівняння регістронезалежне: на FS, що не розрізняє регістр,
+     * `CONFIG/config.local.php` перезаписав би `config/config.local.php`.
+     */
+    private const OUTSIDE_CORE_PREFIXES = [
+        'config/',
+        'files/',
+        'design/',
+        'cache/',
+        'compiled/',
+        'vendor/',
+        'Okay/log/',
+        'backend/files/',
+        'backend/design/',
+        // Живий стан штатних модулів. На боці збірки він виключений
+        // (`release-manifest.json`), але саме цей однобічний запобіжник PR і
+        // прибирає: маніфест, що загубив ці винятки, перезаписав би робочі
+        // дані модуля.
+        'Okay/Modules/OkayCMS/AutoDeploy/log/',
+        'Okay/Modules/OkayCMS/AutoDeploy/tmp/',
+        'Okay/Modules/OkayCMS/Integration1C/temp/',
+    ];
+
+    /**
+     * Кореневі файли, яких оновлення не везе свідомо: `.htaccess` — головний
+     * важіль безпеки периметра на класичному хостингу й найчастіше локально
+     * дописаний, `robots.txt` — рішення власника магазину.
+     */
+    private const OUTSIDE_CORE_FILES = [
+        '.htaccess',
+        'robots.txt',
+    ];
+
+    /** Єдиний вендор модулів, який постачається разом із ядром. */
+    private const CORE_MODULE_VENDOR = 'okaycms';
+
+    /**
+     * Виняток із `backend/design/`: сторінка оновлювача мусить оновлюватись
+     * разом із ним, інакше правку в ній не доставити ніколи. Живе ТУТ, у коді
+     * інсталяції, а не в пакеті — інакше межу визначав би той, від кого її й
+     * треба захищати.
+     *
+     * Простір імен, а не перелік файлів, і це принципово. Перевірку виконує
+     * код ІНСТАЛЯЦІЇ, тобто старий: поіменний перелік означав би, що реліз,
+     * якому знадобився другий файл сторінки (розділити шаблон, додати свій
+     * css), відхиляється цілком кожною вже встановленою інсталяцією — на
+     * кроці verify, з ручним лікуванням на кожній. Guard-тест такого не
+     * зловив би: він ганяє НОВИЙ перелік проти НОВОГО маніфесту й лишався б
+     * зеленим.
+     *
+     * Тому все, що зветься `core_updater*` під `backend/design/`, дозволене
+     * наперед. Вийти за цей простір усе одно означає дві версії: спершу
+     * реліз, що розширює виняток, і лише наступний — той, що везе файл.
+     */
+    private const CORE_OWNED_PREFIX = 'backend/design/';
+    private const CORE_OWNED_BASENAME_PREFIX = 'core_updater';
+
+    /**
      * Розбирає `checksums.txt` у форматі `{sha256}  {name}\n`, як пише
      * `PackageBuilder::build()`.
      *
@@ -144,8 +205,151 @@ class UpdatePackage
                 if ($segment === '..') {
                     throw new \RuntimeException("Шлях у manifest.json виходить за межі кореня: {$path}");
                 }
+
+                // `.` не виводить за межі кореня, зате ламає порівняння з
+                // префіксом: "./config/x" не починається з "config/", а на
+                // диску вказує рівно туди. Коректному маніфесту такий
+                // сегмент не потрібен узагалі.
+                if ($segment === '.') {
+                    throw new \RuntimeException("Шлях у manifest.json містить сегмент \".\": {$path}");
+                }
+
+                // Win32 зрізає хвостові крапки й пробіли в іменах: "config."
+                // і "config " відкриваються як "config". Той самий клас
+                // обходу, що й регістр, — і тут уже є обробка "C:/", тобто
+                // Windows у моделі загроз.
+                if (rtrim($segment, ' .') !== $segment) {
+                    throw new \RuntimeException(
+                        "Сегмент шляху з хвостовою крапкою чи пробілом: {$path}"
+                    );
+                }
             }
         }
+    }
+
+    /**
+     * Межа «ядро проти магазину» на боці ЗАСТОСУВАННЯ.
+     *
+     * `release-manifest.json` описує цю межу на боці збірки пакета — тобто її
+     * тримає той, хто реліз збирає. Для інсталяції це означає, що єдиний
+     * запобіжник від пакета, який заявив `design/`, `config/` чи чужий модуль,
+     * лежить у чужому репозиторії. Тут та сама межа перевіряється ще раз,
+     * власним кодом, до будь-яких змін на диску.
+     *
+     * Це deny-list, а не allow-list, і свідомо. Allow-list мусив би
+     * дзеркалити перелік core-шляхів, а він росте з версіями: інсталяція на
+     * 1.3.3 відмовила б оновленню, яке додає новий каталог ядра, і зламала б
+     * сумісність уперед. Deny-list закриває те, що не може бути законним
+     * НІКОЛИ, і не заважає ядру рости.
+     *
+     * Викликається на кроці `verify`, поруч з assertSafePaths() — до бекапу,
+     * технічних робіт і підміни файлів. Порушення зупиняє прогін цілком, а не
+     * пропускає окремий шлях: пакет, який заявив чуже, зібраний не так, як
+     * задумано, і застосовувати з нього решту — здогадка.
+     *
+     * @param array<array-key, string> $manifestFiles відносний шлях => sha256
+     * @throws \RuntimeException з переліком УСІХ порушень, а не першого
+     */
+    public static function assertPathsWithinCoreBoundary(array $manifestFiles): void
+    {
+        $violations = [];
+
+        foreach (array_keys($manifestFiles) as $path) {
+            $path = (string) $path;
+            if (self::isUpdaterOwnAsset($path)) {
+                continue;
+            }
+
+            $reason = self::boundaryViolationReason($path);
+            if ($reason !== null) {
+                $violations[] = $path . ' — ' . $reason;
+            }
+        }
+
+        if ($violations !== []) {
+            throw new \RuntimeException(
+                "Пакет заявляє шляхи поза ядром — оновлення зупинено до будь-яких змін:\n"
+                . implode("\n", $violations)
+            );
+        }
+    }
+
+    /**
+     * Прибирає сегменти `.` і порожні (подвійний слеш) — на диску вони нічого
+     * не значать, а порівняння з префіксом ламають: "./config/x" не
+     * починається з "config/", хоча вказує рівно туди.
+     *
+     * assertSafePaths() такий шлях і так відхиляє, але межа не має залежати
+     * від того, що хтось викликав її першою: це другий рубіж, а не наслідок
+     * першого.
+     */
+    private static function normalizePath(string $path): string
+    {
+        $segments = [];
+        foreach (explode('/', $path) as $segment) {
+            // Хвостові крапки й пробіли Win32 зрізає сам — порівнювати треба
+            // з тим, що реально відкриється на диску.
+            $segment = rtrim($segment, ' .');
+            if ($segment === '' || $segment === '.') {
+                continue;
+            }
+
+            $segments[] = $segment;
+        }
+
+        return implode('/', $segments);
+    }
+
+    /**
+     * Власні файли сторінки оновлювача — єдине, що ядро возить під
+     * `backend/design/`. Простір імен, а не перелік: чому саме так — у
+     * коментарі до CORE_OWNED_BASENAME_PREFIX.
+     */
+    private static function isUpdaterOwnAsset(string $path): bool
+    {
+        $normalized = mb_strtolower(self::normalizePath($path));
+
+        if (!str_starts_with($normalized, self::CORE_OWNED_PREFIX)) {
+            return false;
+        }
+
+        return str_starts_with(basename($normalized), self::CORE_OWNED_BASENAME_PREFIX);
+    }
+
+    /** @return ?string причина відмови, або null якщо шлях у межах ядра */
+    private static function boundaryViolationReason(string $path): ?string
+    {
+        $lower = mb_strtolower(self::normalizePath($path));
+
+        foreach (self::OUTSIDE_CORE_FILES as $file) {
+            if ($lower === mb_strtolower($file)) {
+                return 'кореневий файл інсталяції, оновленням не постачається';
+            }
+        }
+
+        foreach (self::OUTSIDE_CORE_PREFIXES as $prefix) {
+            if (str_starts_with($lower, mb_strtolower($prefix))) {
+                return 'каталог належить інсталяції, не ядру';
+            }
+        }
+
+        // Модулі: разом із ядром їде лише вендор OkayCMS. Решта — сторонні
+        // або власні модулі магазину, і оновлення ядра їх не чіпає.
+        if ($lower === 'okay/modules' || str_starts_with($lower, 'okay/modules/')) {
+            // Після нормалізації порожніх сегментів немає, тож "вендор" —
+            // це рівно третій сегмент, і він існує лише коли шлях глибший за
+            // сам каталог модулів.
+            $segments = explode('/', $lower);
+            if (count($segments) < 4) {
+                return 'шлях у Okay/Modules/ без вендора й модуля';
+            }
+
+            if ($segments[2] !== self::CORE_MODULE_VENDOR) {
+                return 'модуль вендора "' . $segments[2] . '" не постачається з ядром';
+            }
+        }
+
+        return null;
     }
 
     /**

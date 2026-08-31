@@ -17,7 +17,7 @@ class CoreUpdaterAdmin extends IndexAdmin
     public function fetch(UpdateCheckHelper $checkHelper, UpdateStatus $status, Config $config, Settings $settings)
     {
         $runState = $status->load();
-        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $runState, time(), $config->version);
+        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $runState, time(), $config->version, $config->forkVersion);
 
         // Результат успішного прогону — новина одного перегляду. Позначаємо
         // саме тут, а не в status(): поллінг ходить туди ще під час прогону й
@@ -92,7 +92,7 @@ class CoreUpdaterAdmin extends IndexAdmin
 
         $checkHelper->check(true);
 
-        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), null, time(), $config->version);
+        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), null, time(), $config->version, $config->forkVersion);
         $this->response->setContent(json_encode($vm), RESPONSE_JSON);
     }
 
@@ -102,7 +102,7 @@ class CoreUpdaterAdmin extends IndexAdmin
             return;
         }
 
-        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time(), $config->version);
+        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time(), $config->version, $config->forkVersion);
         if (!$vm['canStartUpdate']) {
             $this->response->setContent(json_encode(['error' => 'cannot_start']), RESPONSE_JSON);
             return;
@@ -124,13 +124,13 @@ class CoreUpdaterAdmin extends IndexAdmin
             return;
         }
 
-        $finalVm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time(), $config->version);
+        $finalVm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time(), $config->version, $config->forkVersion);
         $this->response->setContent(json_encode($finalVm), RESPONSE_JSON);
     }
 
     public function status(UpdateCheckHelper $checkHelper, UpdateStatus $status, Config $config)
     {
-        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time(), $config->version);
+        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time(), $config->version, $config->forkVersion);
         $this->response->setContent(json_encode($vm), RESPONSE_JSON);
     }
 

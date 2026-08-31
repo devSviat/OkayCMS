@@ -1,5 +1,27 @@
 {$meta_title = $btr->core_updater_meta_title scope=global}
 
+{*
+    Застереження про повну резервну копію. Показується тричі — над «Оновити»,
+    над «Продовжити оновлення» і в діалозі підтвердження, — тож живе функцією:
+    розійтись формулюванням між трьома екранами не можна, це читалось би як
+    різні вимоги.
+
+    Окремим шаблоном зробити не можна: `backend/design/` у пакет релізу не
+    входить, туди потрапляють лише поіменно перелічені файли, і новий
+    `{include}` на цільовій інсталяції не знайшов би файлу зовсім.
+
+    $btr передається явно, а не береться зі скоупу: у Smarty 5 покладатись на
+    видимість зовнішніх змінних усередині {function} не варто.
+*}
+{function name='core_updater_backup_warning'}
+    <div class="alert alert--icon alert--warning mt-3">
+        <div class="alert__content">
+            <div class="alert__title">{$btr->core_updater_backup_warning_title|escape}</div>
+            <p>{$btr->core_updater_backup_warning_text|escape}</p>
+        </div>
+    </div>
+{/function}
+
 {*Назва сторінки*}
 <div class="row">
     <div class="col-lg-12 col-md-12">
@@ -103,6 +125,8 @@
                         </div>
                     {/if}
 
+                    {call name='core_updater_backup_warning' btr=$btr}
+
                     <div class="row mt-3">
                         <div class="col-md-12">
                             <button type="button" class="btn btn_small btn-warning fn_start_update">
@@ -119,6 +143,8 @@
                             <p>{$btr->core_updater_stale_run_maintenance_warning|escape}</p>
                         </div>
                     </div>
+                    {call name='core_updater_backup_warning' btr=$btr}
+
                     <div class="row mt-3">
                         <div class="col-md-12">
                             <button type="button" class="btn btn_small btn-warning fn_start_update">
@@ -355,6 +381,7 @@
     </div>
     <div class="modal-body">
         <p>{$btr->core_updater_confirm_text|escape}</p>
+        {call name='core_updater_backup_warning' btr=$btr}
         <button type="button" class="btn btn_small btn_blue fn_confirm_start_update">
             {include file='svg_icon.tpl' svgId='checked'}
             <span>{$btr->core_updater_confirm_yes|escape}</span>

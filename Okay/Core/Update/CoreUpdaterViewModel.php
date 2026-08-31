@@ -22,6 +22,11 @@ class CoreUpdaterViewModel
      * @param ?array<string, mixed> $snapshot UpdateCheckHelper::check()/getSnapshot()
      * @param ?array<string, mixed> $runState UpdateStatus::load()
      * @param ?string $installedUpstreamBase Config::$version — апстрім-база встановленої збірки (спек §10)
+     * @param ?string $installedForkVersion Config::$forkVersion — запасне джерело
+     *     для `installed`. Снапшот — кеш перевірки оновлень, і до першої
+     *     перевірки його немає; сама ж версія збірки відома завжди й мережі
+     *     не потребує, тож порожній рядок «Встановлена збірка» на свіжій
+     *     інсталяції був би не станом, а артефактом джерела даних.
      * @return array{
      *     mode: string,
      *     installed: ?string,
@@ -35,9 +40,14 @@ class CoreUpdaterViewModel
      *     previousRunDone: bool,
      * }
      */
-    public static function build(?array $snapshot, ?array $runState, int $nowTs, ?string $installedUpstreamBase = null): array
-    {
-        $installed = is_string($snapshot['installed'] ?? null) ? $snapshot['installed'] : null;
+    public static function build(
+        ?array $snapshot,
+        ?array $runState,
+        int $nowTs,
+        ?string $installedUpstreamBase = null,
+        ?string $installedForkVersion = null
+    ): array {
+        $installed = is_string($snapshot['installed'] ?? null) ? $snapshot['installed'] : $installedForkVersion;
         $latest = is_array($snapshot['latest'] ?? null) ? $snapshot['latest'] : null;
         $checkedAt = is_int($snapshot['checkedAt'] ?? null) ? $snapshot['checkedAt'] : null;
         $lastError = is_string($snapshot['lastError'] ?? null) ? $snapshot['lastError'] : null;
