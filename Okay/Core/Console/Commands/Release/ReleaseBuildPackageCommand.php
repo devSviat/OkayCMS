@@ -20,7 +20,10 @@ class ReleaseBuildPackageCommand extends Command
             ->addOption('repo-path', null, InputOption::VALUE_REQUIRED, 'Repository root to package', $defaultRepoPath)
             ->addOption('output-dir', null, InputOption::VALUE_REQUIRED, 'Where to write the package', $defaultRepoPath . '/build/release')
             ->addOption('manifest', null, InputOption::VALUE_REQUIRED, 'Path to release-manifest.json', $defaultRepoPath . '/release-manifest.json')
-            ->addOption('migrations', null, InputOption::VALUE_REQUIRED, 'Core migrations directory (recursive)', $defaultRepoPath . '/release-migrations')
+            // dev/, а не корінь: корінь репозиторію — це корінь сайту, і кожен
+            // запис там тримається лише на allow-list веб-сервера. dev/ не
+            // входить у release-manifest.json, тож на інсталяції не потрапляє.
+            ->addOption('migrations', null, InputOption::VALUE_REQUIRED, 'Core migrations directory (recursive)', $defaultRepoPath . '/dev/release-migrations')
             ->addOption('upstream-base', null, InputOption::VALUE_REQUIRED, 'Upstream OkayCMS version this release is based on (defaults to Config::$version at --repo-path)');
     }
 
@@ -41,6 +44,7 @@ class ReleaseBuildPackageCommand extends Command
         }
 
         $builder = new PackageBuilder();
+        $migrationsPath = $this->input->getOption('migrations');
 
         $result = $builder->build(
             $repoPath,
@@ -48,11 +52,18 @@ class ReleaseBuildPackageCommand extends Command
             $forkVersion,
             $upstreamBase,
             $this->input->getOption('output-dir'),
-            $this->input->getOption('migrations')
+            $migrationsPath
         );
 
         $this->output->writeln("Package built: {$result['zipPath']}");
         $this->output->writeln("Files: {$result['fileCount']}, migrations: {$result['migrationsCount']}");
+
+        // Каталогу немає, поки жодна версія не міняла схему — стан нормальний,
+        // але «0 міграцій» через друкарську помилку в --migrations виглядав би
+        // так само, а помітили б це вже на проді.
+        if (!is_dir($migrationsPath)) {
+            $this->output->writeln("<comment>Каталогу {$migrationsPath} немає — жодної core-міграції в пакеті.</comment>");
+        }
 
         return Command::SUCCESS;
     }

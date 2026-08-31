@@ -249,6 +249,53 @@ class CoreUpdaterViewModelTest extends TestCase
         ], $overrides);
     }
 
+    /**
+     * Стан прогону живе в Settings назавжди, тож без вікна свіжості
+     * «Оновлення завершено» висіло б на сторінці й через місяць.
+     */
+    public function testStaleSuccessfulRunStopsBeingShownAsResult(): void
+    {
+        $runState = $this->runState(UpdateStatus::STEP_DONE, self::NOW - CoreUpdaterViewModel::RESULT_FRESH_SECONDS - 1);
+
+        $vm = CoreUpdaterViewModel::build($this->snapshot(['updateAvailable' => false]), $runState, self::NOW);
+
+        $this->assertSame('up_to_date', $vm['mode']);
+        $this->assertFalse($vm['previousRunDone']);
+    }
+
+    public function testFreshSuccessfulRunIsStillShownAsResult(): void
+    {
+        $runState = $this->runState(UpdateStatus::STEP_DONE, self::NOW - 60);
+
+        $vm = CoreUpdaterViewModel::build($this->snapshot(['updateAvailable' => false]), $runState, self::NOW);
+
+        $this->assertSame(UpdateStatus::STEP_DONE, $vm['mode']);
+    }
+
+    /**
+     * Невдалий прогін під вікно свіжості не підпадає: він вимагає дії —
+     * можливо, лишились технічні роботи або напівзастосоване дерево.
+     */
+    public function testStaleFailedRunRemainsVisible(): void
+    {
+        $runState = $this->runState(UpdateStatus::STEP_FAILED, self::NOW - CoreUpdaterViewModel::RESULT_FRESH_SECONDS * 30);
+
+        $vm = CoreUpdaterViewModel::build($this->snapshot(['updateAvailable' => false]), $runState, self::NOW);
+
+        $this->assertSame(UpdateStatus::STEP_FAILED, $vm['mode']);
+    }
+
+    public function testStaleSuccessfulRunDoesNotAnnouncePreviousRunWhenUpdateAvailable(): void
+    {
+        $runState = $this->runState(UpdateStatus::STEP_DONE, self::NOW - CoreUpdaterViewModel::RESULT_FRESH_SECONDS - 1);
+
+        $vm = CoreUpdaterViewModel::build($this->snapshot(['updateAvailable' => true, 'latest' => ['forkVersion' => '1.1.0']]), $runState, self::NOW);
+
+        $this->assertSame('update_available', $vm['mode']);
+        $this->assertTrue($vm['canStartUpdate']);
+        $this->assertFalse($vm['previousRunDone']);
+    }
+
     /** @return array<string, mixed> */
     private function runState(string $step, int $updatedAt): array
     {

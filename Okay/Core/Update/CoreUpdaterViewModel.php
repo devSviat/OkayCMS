@@ -10,6 +10,15 @@ namespace Okay\Core\Update;
 class CoreUpdaterViewModel
 {
     /**
+     * Скільки часу успішний результат прогону лишається новиною. Стан прогону
+     * живе в Settings назавжди, тож без цього вікна «Оновлення завершено»
+     * висіло б на сторінці й через місяць — повідомлення про подію, якої вже
+     * ніхто не пам'ятає. Невдалий прогін під вікно НЕ підпадає: він вимагає
+     * дії, тож лишається видимим, поки його не витіснить наступний прогін.
+     */
+    public const RESULT_FRESH_SECONDS = 86400;
+
+    /**
      * @param ?array<string, mixed> $snapshot UpdateCheckHelper::check()/getSnapshot()
      * @param ?array<string, mixed> $runState UpdateStatus::load()
      * @param ?string $installedUpstreamBase Config::$version — апстрім-база встановленої збірки (спек §10)
@@ -39,6 +48,13 @@ class CoreUpdaterViewModel
         $isStale = $runState !== null && !$isTerminal && UpdateStatus::isStale($runState, $nowTs);
         $previousRunDone = false;
 
+        $updatedAt = is_int($runState['updatedAt'] ?? null) ? $runState['updatedAt'] : null;
+        $resultIsFresh = $updatedAt !== null && ($nowTs - $updatedAt) < self::RESULT_FRESH_SECONDS;
+
+        // Успішний прогін застаріває як новина: далі сторінка говорить про
+        // поточний стан, а не про те, що колись усе вдалося.
+        $staleSuccess = $isTerminal && $step === UpdateStatus::STEP_DONE && !$resultIsFresh;
+
         if ($runState !== null && !$isTerminal && !$isStale) {
             $mode = 'running';
             $canStartUpdate = false;
@@ -55,8 +71,8 @@ class CoreUpdaterViewModel
             $mode = 'update_available';
             $canStartUpdate = true;
             $canCheckNow = true;
-            $previousRunDone = true;
-        } elseif ($isTerminal) {
+            $previousRunDone = $resultIsFresh;
+        } elseif ($isTerminal && !$staleSuccess) {
             /** @var string $step тут це один з UpdateStatus::TERMINAL_STEPS */
             $mode = $step;
             $canStartUpdate = $updateAvailable;

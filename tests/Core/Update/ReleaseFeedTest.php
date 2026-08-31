@@ -180,4 +180,34 @@ class ReleaseFeedTest extends TestCase
     {
         $this->assertNull(ReleaseFeed::parseVersionMeta('{not valid json'));
     }
+
+    /**
+     * Нотатки показуються в адмінці як текст, тож markdown і хвіст
+     * автогенерації GitHub («by @author in <URL>») читались як сміття, а
+     * довгі посилання ламали список на кашу.
+     */
+    public function testPlainNotesStripsMarkdownAndGithubNoise(): void
+    {
+        $raw = "## What's Changed\n"
+            . "* Перший фікс by @devSviat in https://github.com/devSviat/OkayCMS/pull/238\n"
+            . "* Другий фікс by @someone\n"
+            . "\n\n\n"
+            . "**Full Changelog**: https://github.com/devSviat/OkayCMS/compare/a...b";
+
+        $notes = ReleaseFeed::plainNotes($raw);
+
+        $this->assertStringNotContainsString('##', $notes);
+        $this->assertStringNotContainsString('**', $notes);
+        $this->assertStringNotContainsString('@devSviat', $notes);
+        $this->assertStringNotContainsString('github.com', $notes);
+        $this->assertStringNotContainsString('Full Changelog', $notes);
+        $this->assertStringContainsString('• Перший фікс', $notes);
+        $this->assertStringContainsString('• Другий фікс', $notes);
+        $this->assertStringNotContainsString("\n\n\n", $notes);
+    }
+
+    public function testPlainNotesKeepsPlainTextIntact(): void
+    {
+        $this->assertSame('Просто текст без розмітки', ReleaseFeed::plainNotes('Просто текст без розмітки'));
+    }
 }

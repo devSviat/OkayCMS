@@ -132,13 +132,16 @@
             </div>
             <div class="admin_switches admin_switches_three">
                 <div class="box_adswitch">
+                    {* Цифра в бейджі — апстрімна версія OkayCMS, до якої всі
+                       звикли; версія збірки форку йде в підказці, щоб «1.3.1»
+                       поруч із «4.5.2» не читалось як «стара версія». *}
                     {if !empty($has_new_version)}
-                        <a class="btn_admin btn_version_old hint-bottom-middle-t-info-s-small-mobile  hint-anim" data-hint="{$btr->index_btn_version_old|escape} {$has_new_version.version|escape}" {if $has_new_version.info_href}target="_blank" href="{$has_new_version.info_href|escape}"{else}href="javascript:;"{/if}>
+                        <a class="btn_admin btn_version_old hint-bottom-middle-t-info-s-small-mobile  hint-anim" data-hint="OkayCMS {$config->version|escape}, {$btr->index_build_label|escape} {$config->forkVersion|escape}. {$btr->index_btn_version_old|escape} {$has_new_version.version|escape}" {if $has_new_version.info_href}href="{$has_new_version.info_href|escape}"{else}href="javascript:;"{/if}>
                             {include file='svg_icon.tpl' svgId='no_icon'}
                             <span class="">Version {$config->version|escape}</span>
                         </a>
                     {else}
-                        <div class="btn_admin btn_version_new hint-bottom-middle-t-info-s-small-mobile  hint-anim" data-hint="{$btr->index_btn_version_new|escape}">
+                        <div class="btn_admin btn_version_new hint-bottom-middle-t-info-s-small-mobile  hint-anim" data-hint="OkayCMS {$config->version|escape}, {$btr->index_build_label|escape} {$config->forkVersion|escape}. {$btr->index_btn_version_new|escape}">
                             {include file='svg_icon.tpl' svgId='yes_icon'}
                             <span class="">Version {$config->version|escape}</span>
                         </div>
@@ -438,7 +441,7 @@
                 </div>
                 <footer id="footer" class="">
                     <div class="col-md-12 font_12 text_white">
-                        <a href="https://okay-cms.com">OkayCMS</a> &copy; {$smarty.now|date_format:"%Y"} v.{$config->version|escape} | {$btr->index_logged|escape}
+                        <a href="https://okay-cms.com">OkayCMS</a> &copy; {$smarty.now|date_format:"%Y"} v.{$config->version|escape} ({$btr->index_build_label|escape} {$config->forkVersion|escape}) | {$btr->index_logged|escape}
                         <a href="index.php?controller=ManagerAdmin&id={$manager->id}">{$manager->login|escape}</a>
                         (<form method="post" action="" class="admin_exit__form admin_exit__form--inline">
                             <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
