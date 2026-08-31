@@ -118,6 +118,43 @@ class UpdatePackageBoundaryTest extends TestCase
         ]);
     }
 
+    /**
+     * `./config/x` не починається з `config/`, а на диску вказує рівно туди:
+     * copy() у `{root}/./config/x` перезаписує `{root}/config/x`. Перевірено
+     * на справжніх файлах — обхід був реальний, не теоретичний.
+     *
+     * Закрито двома рубежами: assertSafePaths() відхиляє сегмент `.` як
+     * некоректний шлях, а межа однаково нормалізує шлях сама — вона не має
+     * залежати від того, що першу викликали.
+     */
+    #[DataProvider('dotSegmentBypassProvider')]
+    public function testDotSegmentDoesNotBypassTheBoundary(string $path): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)]);
+    }
+
+    /** @return array<string, array{string}> */
+    public static function dotSegmentBypassProvider(): array
+    {
+        return [
+            'доступи до бази через ./'  => ['./config/config.local.php'],
+            'чужий модуль через ./'     => ['./Okay/Modules/Sviat/Redis/Init/Init.php'],
+            'тема через ./'             => ['./design/vibe_shop/css/theme.css'],
+            'сегмент . усередині'       => ['config/./config.local.php'],
+            'подвійний слеш'            => ['config//config.local.php'],
+        ];
+    }
+
+    /** Той самий сегмент відхиляє й перевірка коректності шляху, окремо від межі. */
+    public function testAssertSafePathsRejectsDotSegment(): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::assertSafePaths(['./config/config.local.php' => str_repeat('a', 64)]);
+    }
+
     /** Повідомлення несе ВСІ порушення: інакше кожен прогін показував би одне наступне. */
     public function testAllViolationsAreReportedAtOnce(): void
     {

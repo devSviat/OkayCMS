@@ -187,6 +187,14 @@ class UpdatePackage
                 if ($segment === '..') {
                     throw new \RuntimeException("Шлях у manifest.json виходить за межі кореня: {$path}");
                 }
+
+                // `.` не виводить за межі кореня, зате ламає порівняння з
+                // префіксом: "./config/x" не починається з "config/", а на
+                // диску вказує рівно туди. Коректному маніфесту такий
+                // сегмент не потрібен узагалі.
+                if ($segment === '.') {
+                    throw new \RuntimeException("Шлях у manifest.json містить сегмент \".\": {$path}");
+                }
             }
         }
     }
@@ -238,10 +246,29 @@ class UpdatePackage
         }
     }
 
+    /**
+     * Прибирає сегменти `.` і порожні (подвійний слеш) — на диску вони нічого
+     * не значать, а порівняння з префіксом ламають: "./config/x" не
+     * починається з "config/", хоча вказує рівно туди.
+     *
+     * assertSafePaths() такий шлях і так відхиляє, але межа не має залежати
+     * від того, що хтось викликав її першою: це другий рубіж, а не наслідок
+     * першого.
+     */
+    private static function normalizePath(string $path): string
+    {
+        $segments = array_filter(
+            explode('/', $path),
+            static fn (string $segment): bool => $segment !== '' && $segment !== '.'
+        );
+
+        return implode('/', $segments);
+    }
+
     /** @return ?string причина відмови, або null якщо шлях у межах ядра */
     private static function boundaryViolationReason(string $path): ?string
     {
-        $lower = mb_strtolower($path);
+        $lower = mb_strtolower(self::normalizePath($path));
 
         foreach (self::OUTSIDE_CORE_FILES as $file) {
             if ($lower === mb_strtolower($file)) {
