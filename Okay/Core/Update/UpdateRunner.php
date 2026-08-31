@@ -280,6 +280,7 @@ class UpdateRunner
         }
 
         UpdatePackage::assertSafePaths($manifestFiles);
+        UpdatePackage::assertPathsWithinCoreBoundary($manifestFiles);
         UpdatePackage::verifyExtractedFiles($extractDir . '/payload', $manifestFiles);
 
         $ctx['extractDir'] = $extractDir;

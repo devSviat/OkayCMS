@@ -11,6 +11,49 @@ namespace Okay\Core\Update;
 class UpdatePackage
 {
     /**
+     * Каталоги, які належать інсталяції, а не ядру. Пакет не має права
+     * заявляти в них жодного шляху — навіть цілком справжній пакет,
+     * зібраний із помилкою в `release-manifest.json`.
+     *
+     * Порівняння регістронезалежне: на FS, що не розрізняє регістр,
+     * `CONFIG/config.local.php` перезаписав би `config/config.local.php`.
+     */
+    private const OUTSIDE_CORE_PREFIXES = [
+        'config/',
+        'files/',
+        'design/',
+        'cache/',
+        'compiled/',
+        'vendor/',
+        'Okay/log/',
+        'backend/files/',
+        'backend/design/',
+    ];
+
+    /**
+     * Кореневі файли, яких оновлення не везе свідомо: `.htaccess` — головний
+     * важіль безпеки периметра на класичному хостингу й найчастіше локально
+     * дописаний, `robots.txt` — рішення власника магазину.
+     */
+    private const OUTSIDE_CORE_FILES = [
+        '.htaccess',
+        'robots.txt',
+    ];
+
+    /** Єдиний вендор модулів, який постачається разом із ядром. */
+    private const CORE_MODULE_VENDOR = 'okaycms';
+
+    /**
+     * Виняток із `backend/design/`: сторінка оновлювача мусить оновлюватись
+     * разом із ним, інакше правку в ній не доставити ніколи. Перелік живе
+     * ТУТ, у коді інсталяції, а не в пакеті — інакше межу визначав би той,
+     * від кого її й треба захищати.
+     */
+    private const CORE_OWNED_EXCEPTIONS = [
+        'backend/design/html/core_updater.tpl',
+    ];
+
+    /**
      * Розбирає `checksums.txt` у форматі `{sha256}  {name}\n`, як пише
      * `PackageBuilder::build()`.
      *
@@ -146,6 +189,88 @@ class UpdatePackage
                 }
             }
         }
+    }
+
+    /**
+     * Межа «ядро проти магазину» на боці ЗАСТОСУВАННЯ.
+     *
+     * `release-manifest.json` описує цю межу на боці збірки пакета — тобто її
+     * тримає той, хто реліз збирає. Для інсталяції це означає, що єдиний
+     * запобіжник від пакета, який заявив `design/`, `config/` чи чужий модуль,
+     * лежить у чужому репозиторії. Тут та сама межа перевіряється ще раз,
+     * власним кодом, до будь-яких змін на диску.
+     *
+     * Це deny-list, а не allow-list, і свідомо. Allow-list мусив би
+     * дзеркалити перелік core-шляхів, а він росте з версіями: інсталяція на
+     * 1.3.3 відмовила б оновленню, яке додає новий каталог ядра, і зламала б
+     * сумісність уперед. Deny-list закриває те, що не може бути законним
+     * НІКОЛИ, і не заважає ядру рости.
+     *
+     * Викликається на кроці `verify`, поруч з assertSafePaths() — до бекапу,
+     * технічних робіт і підміни файлів. Порушення зупиняє прогін цілком, а не
+     * пропускає окремий шлях: пакет, який заявив чуже, зібраний не так, як
+     * задумано, і застосовувати з нього решту — здогадка.
+     *
+     * @param array<array-key, string> $manifestFiles відносний шлях => sha256
+     * @throws \RuntimeException з переліком УСІХ порушень, а не першого
+     */
+    public static function assertPathsWithinCoreBoundary(array $manifestFiles): void
+    {
+        $violations = [];
+
+        foreach (array_keys($manifestFiles) as $path) {
+            $path = (string) $path;
+            if (in_array($path, self::CORE_OWNED_EXCEPTIONS, true)) {
+                continue;
+            }
+
+            $reason = self::boundaryViolationReason($path);
+            if ($reason !== null) {
+                $violations[] = $path . ' — ' . $reason;
+            }
+        }
+
+        if ($violations !== []) {
+            throw new \RuntimeException(
+                "Пакет заявляє шляхи поза ядром — оновлення зупинено до будь-яких змін:\n"
+                . implode("\n", $violations)
+            );
+        }
+    }
+
+    /** @return ?string причина відмови, або null якщо шлях у межах ядра */
+    private static function boundaryViolationReason(string $path): ?string
+    {
+        $lower = mb_strtolower($path);
+
+        foreach (self::OUTSIDE_CORE_FILES as $file) {
+            if ($lower === mb_strtolower($file)) {
+                return 'кореневий файл інсталяції, оновленням не постачається';
+            }
+        }
+
+        foreach (self::OUTSIDE_CORE_PREFIXES as $prefix) {
+            if (str_starts_with($lower, mb_strtolower($prefix))) {
+                return 'каталог належить інсталяції, не ядру';
+            }
+        }
+
+        // Модулі: разом із ядром їде лише вендор OkayCMS. Решта — сторонні
+        // або власні модулі магазину, і оновлення ядра їх не чіпає.
+        if (str_starts_with($lower, 'okay/modules/')) {
+            $segments = explode('/', $lower);
+            $vendor = $segments[2] ?? '';
+
+            if ($vendor === '') {
+                return 'шлях модуля без вендора';
+            }
+
+            if ($vendor !== self::CORE_MODULE_VENDOR) {
+                return 'модуль вендора "' . $vendor . '" не постачається з ядром';
+            }
+        }
+
+        return null;
     }
 
     /**
