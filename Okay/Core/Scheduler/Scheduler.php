@@ -4,6 +4,7 @@ namespace Okay\Core\Scheduler;
 
 use Monolog\Logger;
 use Okay\Core\Log\SafeRotatingFileHandler;
+use Okay\Core\Update\UpdateCheckHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
@@ -28,6 +29,25 @@ class Scheduler
         $logger = new Logger('Scheduler');
         $logger->pushHandler(new SafeRotatingFileHandler($loggerDir.'/scheduler/scheduler.log', 10));
         $this->pushLogger($logger);
+
+        $this->registerCoreSchedules();
+    }
+
+    /**
+     * Вбудовані задачі самого ядра форку — реєструються завжди, незалежно
+     * від модулів (модулі наповнюють $tasks через AbstractInit). Callable
+     * задається class-string'ом і резолвиться через DI лише при виконанні
+     * (scheduler:task), тож інстанс тут не потрібен.
+     */
+    private function registerCoreSchedules(): void
+    {
+        $this->registerSchedule(
+            (new Schedule([UpdateCheckHelper::class, 'check']))
+                ->name('Check for core updates')
+                ->time('30 4 * * *')
+                ->overlap(false)
+                ->timeout(60)
+        );
     }
 
     public function registerSchedule(Schedule $schedule): void

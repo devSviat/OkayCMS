@@ -371,6 +371,48 @@ $services = [
             new SR(Config::class),
         ],
     ],
+    Update\UpdateCheckHelper::class => [
+        'class' => Update\UpdateCheckHelper::class,
+        'arguments' => [
+            new SR(Settings::class),
+            new SR(Config::class),
+        ],
+    ],
+    Update\UpdateStatus::class => [
+        'class' => Update\UpdateStatus::class,
+        'arguments' => [
+            new SR(Settings::class),
+        ],
+    ],
+    Update\UpdateDownloader::class => [
+        'class' => Update\UpdateDownloader::class,
+        'arguments' => [
+            new SR(Config::class),
+        ],
+    ],
+    Update\UpdateBackup::class => [
+        'class' => Update\UpdateBackup::class,
+        'arguments' => [
+            new SR(Config::class),
+        ],
+    ],
+    Update\UpdateApplier::class => [
+        'class' => Update\UpdateApplier::class,
+    ],
+    Update\UpdateRunner::class => [
+        'class' => Update\UpdateRunner::class,
+        'arguments' => [
+            new SR(Update\UpdateCheckHelper::class),
+            new SR(Update\UpdateStatus::class),
+            new SR(Update\UpdateDownloader::class),
+            new SR(Update\UpdateBackup::class),
+            new SR(Update\UpdateApplier::class),
+            new SR(CoreMigrator::class),
+            new SR(Settings::class),
+            new SR(Config::class),
+            new SR(Design::class),
+        ],
+    ],
     ImportCore::class => [
         'class' => ImportCore::class
     ],
