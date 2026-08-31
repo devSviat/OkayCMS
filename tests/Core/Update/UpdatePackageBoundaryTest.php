@@ -62,7 +62,11 @@ class UpdatePackageBoundaryTest extends TestCase
             'периметр apache'      => ['.htaccess'],
             'правила індексації'   => ['robots.txt'],
             'сторонній модуль'     => ['Okay/Modules/Sviat/Redis/Init/Init.php'],
-            'модуль без вендора'   => ['Okay/Modules/Init.php'],
+            'файл просто в Modules/' => ['Okay/Modules/Init.php'],
+            'сам каталог модулів'    => ['Okay/Modules/'],
+            'лог штатного модуля'    => ['Okay/Modules/OkayCMS/AutoDeploy/log/deploy.log'],
+            'tmp штатного модуля'    => ['Okay/Modules/OkayCMS/AutoDeploy/tmp/build.zip'],
+            'temp Integration1C'     => ['Okay/Modules/OkayCMS/Integration1C/temp/1c.xml'],
         ];
     }
 
@@ -96,13 +100,49 @@ class UpdatePackageBoundaryTest extends TestCase
      * каталозі, і виняток для неї свідомий: без нього правку в самій сторінці
      * оновлення не доставити ніколи.
      */
-    public function testUpdaterOwnTemplateIsTheDocumentedException(): void
+    #[DataProvider('updaterOwnAssetsProvider')]
+    public function testUpdaterOwnAssetIsTheDocumentedException(string $path): void
     {
-        UpdatePackage::assertPathsWithinCoreBoundary([
-            'backend/design/html/core_updater.tpl' => str_repeat('a', 64),
-        ]);
+        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)]);
 
         $this->addToAssertionCount(1);
+    }
+
+    /**
+     * Виняток — простір імен, а не поіменний перелік, і саме це тут
+     * зафіксовано. Перевірку виконує код ІНСТАЛЯЦІЇ, тобто старий: якби
+     * дозволявся лише сьогоднішній файл, реліз, якому знадобився другий,
+     * відхилявся б цілком кожною вже встановленою інсталяцією.
+     *
+     * @return array<string, array{string}>
+     */
+    public static function updaterOwnAssetsProvider(): array
+    {
+        return [
+            'сьогоднішній шаблон'   => ['backend/design/html/core_updater.tpl'],
+            'розділений шаблон'     => ['backend/design/html/core_updater_steps.tpl'],
+            'власний css сторінки'  => ['backend/design/css/core_updater.css'],
+        ];
+    }
+
+    /** Простір імен вузький: решта теми адмінки лишається закритою. */
+    #[DataProvider('adminThemeFilesProvider')]
+    public function testOtherAdminThemeFilesStayDenied(string $path): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)]);
+    }
+
+    /** @return array<string, array{string}> */
+    public static function adminThemeFilesProvider(): array
+    {
+        return [
+            'головний шаблон' => ['backend/design/html/index.tpl'],
+            'стилі адмінки'   => ['backend/design/css/okay.css'],
+            'логотип'         => ['backend/design/images/logo_dark.svg'],
+            'схоже ім\'я не в тому місці' => ['design/vibe_shop/core_updater.css'],
+        ];
     }
 
     /**
@@ -153,6 +193,38 @@ class UpdatePackageBoundaryTest extends TestCase
         $this->expectException(\RuntimeException::class);
 
         UpdatePackage::assertSafePaths(['./config/config.local.php' => str_repeat('a', 64)]);
+    }
+
+    /**
+     * Win32 зрізає хвостові крапки й пробіли в іменах, тож "config." на
+     * диску відкриється як "config". Той самий клас обходу, що й регістр —
+     * і Windows у моделі загроз уже є, assertSafePaths() відхиляє "C:/".
+     */
+    #[DataProvider('win32FoldingProvider')]
+    public function testWin32NameFoldingDoesNotBypassTheBoundary(string $path): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)]);
+    }
+
+    /** @return array<string, array{string}> */
+    public static function win32FoldingProvider(): array
+    {
+        return [
+            'хвостова крапка в каталозі' => ['config./config.local.php'],
+            'хвостовий пробіл'           => ['config /config.local.php'],
+            'крапка в імені файлу'       => ['.htaccess.'],
+            'тема з крапкою'             => ['design./vibe_shop/theme.css'],
+        ];
+    }
+
+    /** Той самий хвіст відхиляє й перевірка коректності шляху, окремо від межі. */
+    public function testAssertSafePathsRejectsTrailingDotSegment(): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::assertSafePaths(['config./config.local.php' => str_repeat('a', 64)]);
     }
 
     /** Повідомлення несе ВСІ порушення: інакше кожен прогін показував би одне наступне. */
