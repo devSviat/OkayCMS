@@ -119,17 +119,27 @@ class CoreUpdaterViewModelTest extends TestCase
         $this->assertTrue($result['canCheckNow']);
     }
 
-    public function testDoneRunWithNewReleaseCanStartUpdate(): void
+    public function testDoneRunWithNewReleaseReopensAsUpdateAvailable(): void
     {
+        // C2: 'done' лишається лише коли новішого релізу нема — інакше кнопка
+        // старту наступного оновлення була б назавжди недосяжна.
         $snapshot = $this->snapshot(['updateAvailable' => true]);
         $runState = $this->runState(UpdateStatus::STEP_DONE, self::NOW - 5);
         $runState['finalizeWarning'] = 'не вдалося прибрати тимчасові файли';
 
         $result = CoreUpdaterViewModel::build($snapshot, $runState, self::NOW);
 
-        $this->assertSame('done', $result['mode']);
+        $this->assertSame('update_available', $result['mode']);
         $this->assertTrue($result['canStartUpdate']);
+        $this->assertTrue($result['previousRunDone']);
         $this->assertSame('не вдалося прибрати тимчасові файли', $result['run']['finalizeWarning']);
+    }
+
+    public function testPreviousRunDoneIsFalseInAllOtherModes(): void
+    {
+        $result = CoreUpdaterViewModel::build(null, null, self::NOW);
+
+        $this->assertFalse($result['previousRunDone']);
     }
 
     public function testFailedRunExposesErrorAndManualInterventionFlags(): void
@@ -199,6 +209,22 @@ class CoreUpdaterViewModelTest extends TestCase
             $result['run']['stepIndex']
         );
         $this->assertSame(count(UpdateStatus::STEPS), $result['run']['stepsTotal']);
+    }
+
+    public function testInstalledUpstreamBaseIsPassedThroughWhenGiven(): void
+    {
+        $snapshot = $this->snapshot(['updateAvailable' => false]);
+
+        $result = CoreUpdaterViewModel::build($snapshot, null, self::NOW, '4.5.2');
+
+        $this->assertSame('4.5.2', $result['installedUpstreamBase']);
+    }
+
+    public function testInstalledUpstreamBaseDefaultsToNull(): void
+    {
+        $result = CoreUpdaterViewModel::build(null, null, self::NOW);
+
+        $this->assertNull($result['installedUpstreamBase']);
     }
 
     public function testSnapshotLastErrorIsExposedAlongsideUpToDateMode(): void

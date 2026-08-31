@@ -12,18 +12,21 @@ class CoreUpdaterViewModel
     /**
      * @param ?array<string, mixed> $snapshot UpdateCheckHelper::check()/getSnapshot()
      * @param ?array<string, mixed> $runState UpdateStatus::load()
+     * @param ?string $installedUpstreamBase Config::$version — апстрім-база встановленої збірки (спек §10)
      * @return array{
      *     mode: string,
      *     installed: ?string,
+     *     installedUpstreamBase: ?string,
      *     latest: ?array<string, mixed>,
      *     checkedAt: ?int,
      *     lastError: ?string,
      *     run: ?array<string, mixed>,
      *     canStartUpdate: bool,
      *     canCheckNow: bool,
+     *     previousRunDone: bool,
      * }
      */
-    public static function build(?array $snapshot, ?array $runState, int $nowTs): array
+    public static function build(?array $snapshot, ?array $runState, int $nowTs, ?string $installedUpstreamBase = null): array
     {
         $installed = is_string($snapshot['installed'] ?? null) ? $snapshot['installed'] : null;
         $latest = is_array($snapshot['latest'] ?? null) ? $snapshot['latest'] : null;
@@ -34,6 +37,7 @@ class CoreUpdaterViewModel
         $step = $runState['step'] ?? null;
         $isTerminal = $runState !== null && in_array($step, UpdateStatus::TERMINAL_STEPS, true);
         $isStale = $runState !== null && !$isTerminal && UpdateStatus::isStale($runState, $nowTs);
+        $previousRunDone = false;
 
         if ($runState !== null && !$isTerminal && !$isStale) {
             $mode = 'running';
@@ -45,6 +49,13 @@ class CoreUpdaterViewModel
             $mode = 'stale_run';
             $canStartUpdate = true;
             $canCheckNow = true;
+        } elseif ($isTerminal && $step === UpdateStatus::STEP_DONE && $updateAvailable) {
+            // 'done' незнищенний інакше: без цієї гілки прогін-у-минулому
+            // назавжди ховає кнопку старту наступного оновлення.
+            $mode = 'update_available';
+            $canStartUpdate = true;
+            $canCheckNow = true;
+            $previousRunDone = true;
         } elseif ($isTerminal) {
             /** @var string $step тут це один з UpdateStatus::TERMINAL_STEPS */
             $mode = $step;
@@ -67,12 +78,14 @@ class CoreUpdaterViewModel
         return [
             'mode' => $mode,
             'installed' => $installed,
+            'installedUpstreamBase' => $installedUpstreamBase,
             'latest' => $latest,
             'checkedAt' => $checkedAt,
             'lastError' => $lastError,
             'run' => $runState !== null ? self::buildRun($runState) : null,
             'canStartUpdate' => $canStartUpdate,
             'canCheckNow' => $canCheckNow,
+            'previousRunDone' => $previousRunDone,
         ];
     }
 

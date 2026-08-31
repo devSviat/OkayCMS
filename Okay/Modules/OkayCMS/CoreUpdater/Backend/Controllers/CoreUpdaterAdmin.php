@@ -3,6 +3,7 @@
 namespace Okay\Modules\OkayCMS\CoreUpdater\Backend\Controllers;
 
 use Okay\Admin\Controllers\IndexAdmin;
+use Okay\Core\Config;
 use Okay\Modules\OkayCMS\CoreUpdater\Helpers\CoreUpdaterViewModel;
 use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateCheckHelper;
 use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateRunner;
@@ -10,9 +11,9 @@ use Okay\Modules\OkayCMS\CoreUpdater\Helpers\UpdateStatus;
 
 class CoreUpdaterAdmin extends IndexAdmin
 {
-    public function fetch(UpdateCheckHelper $checkHelper, UpdateStatus $status)
+    public function fetch(UpdateCheckHelper $checkHelper, UpdateStatus $status, Config $config)
     {
-        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time());
+        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time(), $config->version);
 
         $this->design->assign('vm', $vm);
         $this->design->assign('steps_lang_keys', self::stepsLangKeys());
@@ -20,7 +21,7 @@ class CoreUpdaterAdmin extends IndexAdmin
         $this->response->setContent($this->design->fetch('core_updater.tpl'));
     }
 
-    public function checkNow(UpdateCheckHelper $checkHelper)
+    public function checkNow(UpdateCheckHelper $checkHelper, Config $config)
     {
         if (!$this->assertValidPost()) {
             return;
@@ -28,21 +29,27 @@ class CoreUpdaterAdmin extends IndexAdmin
 
         $checkHelper->check(true);
 
-        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), null, time());
+        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), null, time(), $config->version);
         $this->response->setContent(json_encode($vm), RESPONSE_JSON);
     }
 
-    public function startUpdate(UpdateRunner $runner, UpdateCheckHelper $checkHelper, UpdateStatus $status)
+    public function startUpdate(UpdateRunner $runner, UpdateCheckHelper $checkHelper, UpdateStatus $status, Config $config)
     {
         if (!$this->assertValidPost()) {
             return;
         }
 
-        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time());
+        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time(), $config->version);
         if (!$vm['canStartUpdate']) {
             $this->response->setContent(json_encode(['error' => 'cannot_start']), RESPONSE_JSON);
             return;
         }
+
+        // Диспетчер бекенду тримає сесію відкритою до кінця запиту, тож без
+        // явного закриття лока паралельний GET на status() (та ж сесія)
+        // блокується на файловому локі сесії аж до завершення багатохвилинного
+        // run() — поллінг прогресу інакше "зависає" на весь час оновлення.
+        session_write_close();
 
         // run() сам виставляє ignore_user_abort(true)/set_time_limit(0) і
         // виконується синхронно в цьому запиті (спек §8) — паралельний GET
@@ -54,20 +61,20 @@ class CoreUpdaterAdmin extends IndexAdmin
             return;
         }
 
-        $finalVm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time());
+        $finalVm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time(), $config->version);
         $this->response->setContent(json_encode($finalVm), RESPONSE_JSON);
     }
 
-    public function status(UpdateCheckHelper $checkHelper, UpdateStatus $status)
+    public function status(UpdateCheckHelper $checkHelper, UpdateStatus $status, Config $config)
     {
-        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time());
+        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time(), $config->version);
         $this->response->setContent(json_encode($vm), RESPONSE_JSON);
     }
 
     /**
-     * Невалідний/протухлий CSRF-токен лишає $_POST порожнім без винятку
-     * (Request::checkSession()) — тут це єдина ознака, за якою відрізнити
-     * підроблений чи протермінований POST від справжнього.
+     * Порожній $_POST тут відсікає лише GET-виклик мутуючих екшенів через цей
+     * URL (диспетчер бекенду сам перевіряє CSRF-токен ще до виклику методу) —
+     * назва історична, а не повторна перевірка токена.
      */
     private function assertValidPost(): bool
     {
