@@ -42,7 +42,7 @@ class Scheduler
     private function registerCoreSchedules(): void
     {
         $this->registerSchedule(
-            (new Schedule([UpdateCheckHelper::class, 'check']))
+            (new Schedule([UpdateCheckHelper::class, 'checkScheduled']))
                 ->name('Check for core updates')
                 ->time('30 4 * * *')
                 ->overlap(false)

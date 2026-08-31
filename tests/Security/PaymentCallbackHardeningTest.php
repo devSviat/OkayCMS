@@ -116,13 +116,30 @@ class PaymentCallbackHardeningTest extends TestCase
     }
 
     /**
-     * Відповідь версійного сервісу осідає в сесії та рендериться в адмінці.
+     * Індикатор версії в шапці раніше сам ходив на okay-cms.com, і його
+     * відповідь рендерилась в адмінці — звідси була вимога перевіряти
+     * сертифікат. Тепер він читає готовий снапшот самооновлення, тож у
+     * бекенд-контролері не має лишитись жодного зовнішнього запиту: інакше
+     * повертається і ризик MITM, і затримка всередині чужого запиту.
      */
-    public function testAdminVersionCheckVerifiesTheServerCertificate()
+    public function testAdminVersionCheckMakesNoOutboundRequest()
     {
         $source = $this->source('backend/Controllers/IndexAdmin.php');
 
-        $this->assertStringContainsString('CURLOPT_SSL_VERIFYPEER, 2', $source);
+        $this->assertStringNotContainsString('curl_init', $source);
+        $this->assertStringNotContainsString('okay-cms.com', $source);
+    }
+
+    /**
+     * Сам запит по релізах форку лишається мережевим — там перевірка
+     * сертифіката обов'язкова.
+     */
+    public function testForkReleaseCheckVerifiesTheServerCertificate()
+    {
+        $source = $this->source('Okay/Core/Update/UpdateCheckHelper.php');
+
+        $this->assertStringNotContainsString('CURLOPT_SSL_VERIFYPEER, false', $source);
         $this->assertStringNotContainsString('CURLOPT_SSL_VERIFYPEER, 0', $source);
+        $this->assertStringNotContainsString('CURLOPT_SSL_VERIFYHOST, 0', $source);
     }
 }

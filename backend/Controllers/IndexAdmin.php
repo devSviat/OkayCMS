@@ -24,10 +24,10 @@ use Okay\Core\ManagerMenu;
 use Okay\Core\TemplateConfig\BackendTemplateConfig;
 use Okay\Core\TemplateConfig\FrontTemplateConfig;
 use Okay\Core\Translit;
+use Okay\Core\Update\UpdateCheckHelper;
 use Okay\Entities\ManagersEntity;
 use Okay\Entities\LanguagesEntity;
 use Okay\Entities\CurrenciesEntity;
-use Okay\Entities\ModulesEntity;
 use Okay\Entities\SupportInfoEntity;
 
 class IndexAdmin
@@ -122,7 +122,8 @@ class IndexAdmin
         Module $module,
         BackendPostRedirectGet $postRedirectGet,
         FrontTemplateConfig $frontTemplateConfig,
-        BackendTemplateConfig $backendTemplateConfig
+        BackendTemplateConfig $backendTemplateConfig,
+        UpdateCheckHelper $updateCheckHelper
     ) {
         $this->design        = $design;
         $this->request       = $request;
@@ -149,59 +150,25 @@ class IndexAdmin
 
         $this->design->assign('rootUrl', $this->request->getRootUrl());
 
-        // Перевірка версії кешується на добу в ok_settings. Раніше кеш жив у
-        // $_SESSION, тож блокуючий запит на okay-cms.com припадав на перший
-        // запит кожної нової сесії (~0.3 с, а без інтернету - 3 с на
-        // CONNECTTIMEOUT). Сторінка логіну версію не показує, тому анонімний
-        // відвідувач нікуди не ходить.
-        $lastVersionData = $this->settings->get('last_version_data');
-        if (!empty($this->manager)
-            && $this->settings->get('last_version_check_date') != date('Y-m-d')) {
-            $modulesEntity = $this->entityFactory->get(ModulesEntity::class);
-            $modules = $modulesEntity->cols(['module_name'])->find();
-            $themes = [];
-            if(is_dir('design/')){
-                $dirs = scandir('design/');
-                foreach($dirs as $dir){
-                    if($dir != '.' && $dir != '..' && $dir != '.htaccess'){
-                        $themes [] = $dir;
-                    }
-                }
-            }
-
-            $query = http_build_query([
-                'domain'  => Request::getDomain(),
-                'version' => $config->version,
-                'modules' => $modules,
-                'themes'  => $themes
+        // Індикатор версії в шапці показує стан ФОРКУ, а не апстріму.
+        // Раніше тут був щоденний запит на сайт апстріму: він порівнював
+        // апстрімні релізи OkayCMS з $config->version і, коли апстрім
+        // випускав новішу, кликав оновитись — а цей код оновлюється лише
+        // релізами okaycms-fork/*, і апстрімна версія сюди не приїде.
+        // Тобто заклик вів у нікуди. Тепер дані беруться з готового снапшота
+        // самооновлення: без мережі (його наповнює планова задача) і без
+        // додаткової затримки в чужому запиті.
+        $forkSnapshot = $updateCheckHelper->getSnapshot();
+        if (!empty($forkSnapshot['updateAvailable'])
+            && !empty($forkSnapshot['latest']['forkVersion'])) {
+            $design->assign('has_new_version', [
+                'version' => $forkSnapshot['latest']['forkVersion'],
+                // Посилання лише тим, хто справді може оновити: інакше клік
+                // привів би на сторінку, яку доступ не пустить.
+                'info_href' => !empty($this->manager) && $managers->access('core_updater', $this->manager)
+                    ? $this->request->getRootUrl() . '/backend/index.php?controller=CoreUpdaterAdmin'
+                    : null,
             ]);
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, 'https://okay-cms.com/last_version.json?' . $query);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-            // Відповідь зберігається і рендериться в адмінці, тому без
-            // перевірки сертифіката MITM підставляв туди свій вміст.
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 2);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            // Перевірку версії ніхто не просив, і вона трапляється всередині
-            // чужого запиту, тож чекати на неї 10 с нема підстав. Здоровий
-            // сервіс відповідає за ~0.3 с.
-            curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-            $versionData = curl_exec($ch);
-
-            // Порожній масив, а не false: Settings::set кастує скаляри в рядок,
-            // і false перетворився б на '', який не відрізнити від "не питали".
-            $lastVersionData = $versionData ? (array)json_decode($versionData, true) : [];
-            $this->settings->set('last_version_data', $lastVersionData);
-            $this->settings->set('last_version_check_date', date('Y-m-d'));
-        }
-
-        if (!empty($lastVersionData['version'])
-            && $module->getMathVersion($lastVersionData['version']) > $module->getMathVersion($config->version)) {
-            $design->assign('has_new_version', $lastVersionData);
         }
         
         $design->assign('manager', $this->manager);
