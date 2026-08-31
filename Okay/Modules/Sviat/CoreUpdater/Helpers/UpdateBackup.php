@@ -161,6 +161,24 @@ class UpdateBackup
         }
     }
 
+    /**
+     * Синтаксис вимкнення TLS у двох клієнтів різний і взаємно невалідний:
+     * MariaDB знає --skip-ssl (і не знає --ssl-mode), Oracle MySQL 8 —
+     * навпаки. Розрізняються по виводу `mysqldump --version`.
+     */
+    public static function sslDisableOptionFor(string $versionOutput): string
+    {
+        return stripos($versionOutput, 'mariadb') !== false ? '--skip-ssl' : '--ssl-mode=DISABLED';
+    }
+
+    private function sslDisableOption(): string
+    {
+        $process = new Process(['mysqldump', '--version']);
+        $process->run();
+
+        return self::sslDisableOptionFor($process->getOutput());
+    }
+
     public function isMysqldumpAvailable(): bool
     {
         try {
@@ -193,6 +211,11 @@ class UpdateBackup
                 'mysqldump',
                 '--single-transaction',
                 '--no-tablespaces',
+                // Сайт ходить у БД без TLS (PDO без ssl-опцій), а
+                // mariadb-client 11.8+ типово ВИМАГАЄ TLS і падає з
+                // "SSL is required, but the server does not support it".
+                // Дамп мусить віддзеркалювати підключення застосунку.
+                $this->sslDisableOption(),
                 '-h', (string) $this->config->get('db_server'),
                 '-u', (string) $this->config->get('db_user'),
                 (string) $this->config->get('db_name'),
