@@ -32,7 +32,7 @@ class UpdateDownloader
         $targetDir = rtrim((string) $this->config->get('root_dir'), '/')
             . '/files/tmp/updates/' . $version;
 
-        if (!is_dir($targetDir) && !mkdir($targetDir, 0777, true) && !is_dir($targetDir)) {
+        if (!is_dir($targetDir) && !mkdir($targetDir, 0700, true) && !is_dir($targetDir)) {
             throw new \RuntimeException("Не вдалося створити каталог для завантаження: {$targetDir}");
         }
 
@@ -108,7 +108,7 @@ class UpdateDownloader
 
     public function extract(string $zipPath, string $targetDir): void
     {
-        if (!is_dir($targetDir) && !mkdir($targetDir, 0777, true) && !is_dir($targetDir)) {
+        if (!is_dir($targetDir) && !mkdir($targetDir, 0700, true) && !is_dir($targetDir)) {
             throw new \RuntimeException("Не вдалося створити каталог для розпакування: {$targetDir}");
         }
 
@@ -118,6 +118,17 @@ class UpdateDownloader
             throw new \RuntimeException("Не вдалося відкрити архів {$zipPath} (код {$openResult}).");
         }
 
+        // Перевірка ДО extractTo(): manifest-звірка шляхів (assertSafePaths)
+        // стоїть пізніше й захищає лише застосування, а не сам запис на диск.
+        // Тут відкидаємо traversal, абсолютні шляхи й symlink-записи ще до
+        // матеріалізації — extractTo() інакше створив би їх на диску.
+        try {
+            $this->assertZipEntriesSafe($zip);
+        } catch (\Throwable $e) {
+            $zip->close();
+            throw $e;
+        }
+
         if (!$zip->extractTo($targetDir)) {
             $zip->close();
             throw new \RuntimeException("Не вдалося розпакувати архів {$zipPath} у {$targetDir}.");
@@ -125,6 +136,51 @@ class UpdateDownloader
 
         if ($zip->close() !== true) {
             throw new \RuntimeException("Помилка при закритті архіву {$zipPath}.");
+        }
+    }
+
+    /**
+     * Symlink-запис у zip на POSIX матеріалізується справжнім симлінком, а
+     * `..`/абсолютний шлях виводить запис за межі каталогу розпакування.
+     * Перевіряється по кожному запису архіву перед extractTo().
+     *
+     * @throws \RuntimeException на першому небезпечному записі
+     */
+    private function assertZipEntriesSafe(\ZipArchive $zip): void
+    {
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $stat = $zip->statIndex($i);
+            if ($stat === false) {
+                throw new \RuntimeException("Не вдалося прочитати запис архіву №{$i}.");
+            }
+
+            self::assertEntryNameSafe((string) $stat['name']);
+
+            // unix-права у старших 16 бітах external_attr; S_IFLNK = 0xA000.
+            $unixMode = ($zip->getExternalAttributesIndex($i, $opsys, $attr) && $opsys === \ZipArchive::OPSYS_UNIX)
+                ? ($attr >> 16)
+                : 0;
+            if (($unixMode & 0xF000) === 0xA000) {
+                throw new \RuntimeException("Архів містить symlink-запис (заборонено): {$stat['name']}");
+            }
+        }
+    }
+
+    public static function assertEntryNameSafe(string $name): void
+    {
+        if ($name === '' || str_contains($name, "\0")) {
+            throw new \RuntimeException('Архів містить запис із порожнім чи нуль-байтовим ім\'ям.');
+        }
+
+        $normalized = str_replace('\\', '/', $name);
+        if ($normalized[0] === '/' || preg_match('#^[A-Za-z]:/#', $normalized)) {
+            throw new \RuntimeException("Архів містить абсолютний шлях (заборонено): {$name}");
+        }
+
+        foreach (explode('/', $normalized) as $segment) {
+            if ($segment === '..') {
+                throw new \RuntimeException("Архів містить перехід за межі каталогу (заборонено): {$name}");
+            }
         }
     }
 }
