@@ -1,6 +1,6 @@
 # Оновлення ядра (self-updater)
 
-Модуль `Okay/Modules/OkayCMS/CoreUpdater` перевіряє релізи форку
+Модуль `Okay/Modules/Sviat/CoreUpdater` перевіряє релізи форку
 (`devSviat/OkayCMS` на GitHub) і вміє накотити новий core-код + core-міграції
 без `git`/`composer` на сервері — під типову інсталяцію форку: файли на
 диску, `www-data` пише напряму. Що саме входить у пакет релізу й формат
@@ -56,7 +56,7 @@ ETag-кондиційний (`If-None-Match`); `304` лише освіжає `ch
 | ---- | --------- |
 | `download` | качає `{version}.zip` і `checksums.txt` у `files/tmp/updates/{version}/` (лише з `TRUSTED_ASSET_URL_PREFIX` — `https://github.com/devSviat/OkayCMS/releases/download/`) |
 | `verify` | звіряє sha256 архіву з `checksums.txt`, розпаковує, тоді звіряє **кожен** файл з `manifest.json` проти дерева й перевіряє шляхи на вихід за межі кореня (`assertSafePaths`) |
-| `preflight` | версія у `version.json` пакета мусить збігатися з версією релізу (інакше до тегу причепили чужий архів); `assertInstallable` (мінімальний PHP, downgrade guard — пакет мусить бути новіший за встановлену версію); корінь, `Okay/Core/` і `config/` доступні для запису (пробний файл, який одразу прибирається); вільного місця > 3× розміру розпакованого пакета; якщо `composer.lock` пакета відрізняється — composer має бути доступний; якщо `version.json` каже `requiresMigrations` — має бути доступний `mysqldump` |
+| `preflight` | версія у `version.json` пакета мусить збігатися з версією релізу (інакше до тегу причепили чужий архів); `assertInstallable` (мінімальний PHP, downgrade guard — пакет мусить бути новіший за встановлену версію); корінь, `Okay/Core/` і `config/` доступні для запису (пробний файл, який одразу прибирається); вільного місця > 3× розміру розпакованого пакета; якщо `composer.lock` пакета відрізняється — composer має бути доступний; якщо `version.json` каже `requiresMigrations` — має бути доступний `mysqldump`; проба self-request (GET на корінь сайту, таймаут 10 с) — health-check і rollback запитують сайт самі себе, тож PHP-FPM мусить мати **щонайменше 2 вільні воркери** (`pm.max_children=1` зупиняє оновлення тут, до будь-яких змін, а не хибним rollback'ом із закритою вітриною) |
 | `backup` | архівує у `files/backups/` файли з `manifest.json`, що фізично існують зараз (лише їх і перезапише apply); якщо є `.up.sql`-міграції — дампить `mysqldump`-ом лише зачеплені ними таблиці (розпізнані по `__marker` у SQL, той самий регекс, що й `CoreMigrator::prefixTables()`) |
 | `maintenance_on` | вмикає прапорець `config/.maintenance` із одноразовим токеном |
 | `apply_files` | spool-and-swap: кожен файл із `manifest.json` копіюється поруч (`{файл}.core-update.tmp`) і атомарно `rename()`-иться поверх цілі; нічого не видаляється. Тоді, якщо `composer.lock` пакета відрізняється від поточного — `composer install --no-dev --optimize-autoloader` |
@@ -223,3 +223,13 @@ Core-міграції (`.up.sql` у пакеті релізу) парсятьс�
   health-check кожного оновлення на цю версію провалиться (маркер не
   збігся). `release.yml` перевіряє це до збірки і падає з явною помилкою —
   бамп має бути окремим комітом у гілці релізу до мержу в `main`.
+- **З v1.2.0 модуль живе у `Okay/Modules/Sviat/CoreUpdater/`** (вендор
+  Sviat, контролер `Sviat.CoreUpdater.CoreUpdaterAdmin`). Реєстрацію в
+  `__modules` переводить core-міграція релізу; старий каталог
+  `Okay/Modules/OkayCMS/CoreUpdater/` apply не видаляє (він нічого не
+  видаляє взагалі) — приберіть його руками після оновлення, інакше в
+  «Мої модулі» висітиме привид старого модуля як «доступний до
+  встановлення». Модулі вендорів із
+  `LicenseModulesTemplates::OWN_VENDORS` не проходять зовнішнє
+  ліцензування okay-cms — власний модуль сайту не може бути вимкнений
+  чужим ліцензійним сервером.

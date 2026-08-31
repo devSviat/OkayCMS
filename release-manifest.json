@@ -9,6 +9,7 @@
         "Okay/xml/opensearch.xml.tpl",
         "backend/",
         "Okay/Modules/OkayCMS/",
+        "Okay/Modules/Sviat/CoreUpdater/",
         "composer.json",
         "composer.lock",
         "ok",

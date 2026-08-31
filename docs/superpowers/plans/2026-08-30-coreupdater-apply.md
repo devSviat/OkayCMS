@@ -8,7 +8,7 @@ health check → finalize, with rollback on failure — headless (invocable
 runner + status snapshot), UI comes in Plan D.
 
 **Architecture:** All new classes live in the CoreUpdater module
-(`Okay/Modules/OkayCMS/CoreUpdater/Helpers/Update*`), except one deliberate
+(`Okay/Modules/Sviat/CoreUpdater/Helpers/Update*`), except one deliberate
 core change: the maintenance-mode gate in `index.php` (checked between
 autoload and sessions — before DI/DB). Same testing split as C1: every
 decision that can be pure IS pure and fixture-tested (checksum parsing,
@@ -54,7 +54,7 @@ pre-download gate, origin-pinned asset URLs) and Plan B's
 ## File Structure
 
 - `index.php` — modify: maintenance gate (the plan's only core-file edit).
-- `Okay/Modules/OkayCMS/CoreUpdater/Helpers/MaintenanceMode.php` — flag
+- `Okay/Modules/Sviat/CoreUpdater/Helpers/MaintenanceMode.php` — flag
   file lifecycle + token bypass (pure logic on injected paths).
 - `.../Helpers/UpdateStatus.php` — Settings-backed step/progress snapshot
   for polling; pure state-transition core.
@@ -76,7 +76,7 @@ pre-download gate, origin-pinned asset URLs) and Plan B's
   `files/tmp/`), step sequence, UpdateStatus updates, health check,
   finalize/rollback. Thin by nature; its step-ORDER table is a pure
   constant tested for completeness against spec §8.
-- Tests under `tests/Modules/OkayCMS/CoreUpdater/` + fixtures.
+- Tests under `tests/Modules/Sviat/CoreUpdater/` + fixtures.
 - `docs/updates.md` — NEW (spec §15 step 8 pulled in here for the
   apply-side content that now exists): операційний опис процедури,
   відновлення після збою, обмеження діалекту міграцій (посилання), нотатки
@@ -88,9 +88,9 @@ pre-download gate, origin-pinned asset URLs) and Plan B's
 ### Task 1: `MaintenanceMode` + gate в `index.php`
 
 **Files:**
-- Create: `Okay/Modules/OkayCMS/CoreUpdater/Helpers/MaintenanceMode.php`
+- Create: `Okay/Modules/Sviat/CoreUpdater/Helpers/MaintenanceMode.php`
 - Modify: `index.php`
-- Create: `tests/Modules/OkayCMS/CoreUpdater/MaintenanceModeTest.php`
+- Create: `tests/Modules/Sviat/CoreUpdater/MaintenanceModeTest.php`
 
 **Interfaces:**
 - `MaintenanceMode` — ВСІ методи статичні й працюють з переданим шляхом
@@ -113,13 +113,13 @@ pre-download gate, origin-pinned asset URLs) and Plan B's
   // Оновлення ядра: вітрина закрита, health-check проходить за токеном
   // з прапорця (див. CoreUpdater/MaintenanceMode).
   $maintenanceFlag = __DIR__ . '/config/.maintenance';
-  if (!\Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::allowsRequest(
+  if (!\Okay\Modules\Sviat\CoreUpdater\Helpers\MaintenanceMode::allowsRequest(
       $maintenanceFlag,
       $_SERVER['HTTP_X_CORE_UPDATER_TOKEN'] ?? ($_GET['core_updater_token'] ?? null)
   )) {
       http_response_code(503);
       header('Retry-After: 120');
-      echo \Okay\Modules\OkayCMS\CoreUpdater\Helpers\MaintenanceMode::renderPage();
+      echo \Okay\Modules\Sviat\CoreUpdater\Helpers\MaintenanceMode::renderPage();
       exit;
   }
   ```
@@ -149,7 +149,7 @@ runtime, не в репозиторії; але `docs/UPGRADE-security.md`-ко�
 
 **Files:**
 - Create: `.../Helpers/UpdateStatus.php`
-- Create: `tests/Modules/OkayCMS/CoreUpdater/UpdateStatusTest.php`
+- Create: `tests/Modules/Sviat/CoreUpdater/UpdateStatusTest.php`
 
 **Interfaces:**
 - Кроки — константа-послідовність (public const STEPS) рівно зі спека §8:
@@ -178,7 +178,7 @@ Commit: `feat(coreupdater): статус прогону оновлення дл�
 
 **Files:**
 - Create: `.../Helpers/UpdatePackage.php`
-- Create: `tests/Modules/OkayCMS/CoreUpdater/UpdatePackageTest.php` +
+- Create: `tests/Modules/Sviat/CoreUpdater/UpdatePackageTest.php` +
   fixtures (мінізбірка: `manifest.json` на 3 файли, `version.json`,
   `checksums.txt`, дерево `payload/` — і навмисно біті варіанти)
 
@@ -239,7 +239,7 @@ Commit: `feat(coreupdater): завантаження і розпакування
 
 **Files:**
 - Create: `.../Helpers/UpdateBackup.php`
-- Create: `tests/Modules/OkayCMS/CoreUpdater/UpdateBackupTest.php` (pure
+- Create: `tests/Modules/Sviat/CoreUpdater/UpdateBackupTest.php` (pure
   частини на fixture-деревах у temp)
 - Modify: `.../Init/services.php`
 
@@ -275,7 +275,7 @@ Commit: `feat(coreupdater): резервна копія файлів і дамп
 
 **Files:**
 - Create: `.../Helpers/UpdateApplier.php`
-- Create: `tests/Modules/OkayCMS/CoreUpdater/UpdateApplierTest.php`
+- Create: `tests/Modules/Sviat/CoreUpdater/UpdateApplierTest.php`
 - Modify: `.../Init/services.php`
 
 **Interfaces:**
@@ -311,7 +311,7 @@ Commit: `feat(coreupdater): застосування файлів spool-and-swap
 
 **Files:**
 - Create: `.../Helpers/UpdateRunner.php`
-- Create: `tests/Modules/OkayCMS/CoreUpdater/UpdateRunnerStepsTest.php`
+- Create: `tests/Modules/Sviat/CoreUpdater/UpdateRunnerStepsTest.php`
 - Modify: `.../Init/services.php`
 
 **Interfaces:**

@@ -53,22 +53,22 @@ downgrade-UX свідомо відкладено). Живий прогін — P
 
 ## File Structure
 
-- `Okay/Modules/OkayCMS/CoreUpdater/Helpers/CoreUpdaterViewModel.php` —
+- `Okay/Modules/Sviat/CoreUpdater/Helpers/CoreUpdaterViewModel.php` —
   pure: снапшот+стан прогону → дані для tpl і status-ендпоінта.
 - `.../Backend/Controllers/CoreUpdaterAdmin.php` — fetch + 3 AJAX.
 - `.../Backend/design/html/core_updater.tpl` — сторінка + інлайн-JS.
 - `.../Backend/lang/ua.php`, `ru.php`, `en.php`.
 - `.../Init/Init.php` — реєстрація контролера/permission/меню/main
   controller.
-- Tests: `tests/Modules/OkayCMS/CoreUpdater/CoreUpdaterViewModelTest.php`.
+- Tests: `tests/Modules/Sviat/CoreUpdater/CoreUpdaterViewModelTest.php`.
 
 ---
 
 ### Task 1: `CoreUpdaterViewModel` (pure, tested)
 
 **Files:**
-- Create: `Okay/Modules/OkayCMS/CoreUpdater/Helpers/CoreUpdaterViewModel.php`
-- Create: `tests/Modules/OkayCMS/CoreUpdater/CoreUpdaterViewModelTest.php`
+- Create: `Okay/Modules/Sviat/CoreUpdater/Helpers/CoreUpdaterViewModel.php`
+- Create: `tests/Modules/Sviat/CoreUpdater/CoreUpdaterViewModelTest.php`
 
 **Interfaces:**
 - `CoreUpdaterViewModel::build(?array $snapshot, ?array $runState, int $nowTs): array`
@@ -196,7 +196,7 @@ FAQ-прикладом меню) → suite+phpstan (парс) → commit
   fancybox-inline за AutoDeploy-прецедентом — обрати одну, зазначити.
   Текст: попередження про maintenance-режим на час оновлення + бекап.
 - Інлайн `<script>` (jQuery):
-  - «Перевірити зараз»: `$.ajax POST {url controller='OkayCMS.CoreUpdater.CoreUpdaterAdmin@checkNow'}`
+  - «Перевірити зараз»: `$.ajax POST {url controller='Sviat.CoreUpdater.CoreUpdaterAdmin@checkNow'}`
     з `session_id:'{$smarty.session.id}'` → перерендер простіше за все
     `location.reload()` після success (toastr.success/error за
     результатом).
