@@ -4,10 +4,10 @@ namespace Okay\Modules\Sviat\CoreUpdater\Backend\Controllers;
 
 use Okay\Admin\Controllers\IndexAdmin;
 use Okay\Core\Config;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\CoreUpdaterViewModel;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateCheckHelper;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateRunner;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateStatus;
+use Okay\Core\Update\CoreUpdaterViewModel;
+use Okay\Core\Update\UpdateCheckHelper;
+use Okay\Core\Update\UpdateRunner;
+use Okay\Core\Update\UpdateStatus;
 
 class CoreUpdaterAdmin extends IndexAdmin
 {

@@ -2,7 +2,7 @@
 
 namespace Modules\Sviat\CoreUpdater;
 
-use Okay\Modules\Sviat\CoreUpdater\Helpers\ReleaseFeed;
+use Okay\Core\Update\ReleaseFeed;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

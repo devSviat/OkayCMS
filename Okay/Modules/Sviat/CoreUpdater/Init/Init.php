@@ -6,7 +6,7 @@ use Okay\Core\Modules\AbstractInit;
 use Okay\Core\Release\CoreMigrator;
 use Okay\Core\Scheduler\Schedule;
 use Okay\Core\ServiceLocator;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateCheckHelper;
+use Okay\Core\Update\UpdateCheckHelper;
 
 class Init extends AbstractInit
 {

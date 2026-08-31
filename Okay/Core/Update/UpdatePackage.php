@@ -1,6 +1,6 @@
 <?php
 
-namespace Okay\Modules\Sviat\CoreUpdater\Helpers;
+namespace Okay\Core\Update;
 
 /**
  * Верифікація пакета оновлення ядра (спек §5, §8 крок 4, §11) — усі методи

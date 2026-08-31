@@ -1,6 +1,6 @@
 <?php
 
-namespace Okay\Modules\Sviat\CoreUpdater\Helpers;
+namespace Okay\Core\Update;
 
 /**
  * Прапорець технічних робіт на час застосування оновлення ядра. Усі методи

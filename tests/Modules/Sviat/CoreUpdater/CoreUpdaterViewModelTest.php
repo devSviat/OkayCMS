@@ -2,8 +2,8 @@
 
 namespace Modules\Sviat\CoreUpdater;
 
-use Okay\Modules\Sviat\CoreUpdater\Helpers\CoreUpdaterViewModel;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateStatus;
+use Okay\Core\Update\CoreUpdaterViewModel;
+use Okay\Core\Update\UpdateStatus;
 use PHPUnit\Framework\TestCase;
 
 class CoreUpdaterViewModelTest extends TestCase

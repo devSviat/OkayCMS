@@ -2,9 +2,9 @@
 
 namespace Modules\Sviat\CoreUpdater;
 
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateApplier;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateApplyException;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateBackup;
+use Okay\Core\Update\UpdateApplier;
+use Okay\Core\Update\UpdateApplyException;
+use Okay\Core\Update\UpdateBackup;
 use PHPUnit\Framework\TestCase;
 
 class UpdateApplierTest extends TestCase

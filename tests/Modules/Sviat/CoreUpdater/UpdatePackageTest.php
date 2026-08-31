@@ -2,7 +2,7 @@
 
 namespace Modules\Sviat\CoreUpdater;
 
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdatePackage;
+use Okay\Core\Update\UpdatePackage;
 use PHPUnit\Framework\TestCase;
 
 class UpdatePackageTest extends TestCase

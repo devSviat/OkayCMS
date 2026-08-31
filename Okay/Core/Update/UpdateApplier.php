@@ -1,6 +1,6 @@
 <?php
 
-namespace Okay\Modules\Sviat\CoreUpdater\Helpers;
+namespace Okay\Core\Update;
 
 use Okay\Core\Design;
 use Symfony\Component\Process\Process;

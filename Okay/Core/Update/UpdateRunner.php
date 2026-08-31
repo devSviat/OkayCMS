@@ -1,6 +1,6 @@
 <?php
 
-namespace Okay\Modules\Sviat\CoreUpdater\Helpers;
+namespace Okay\Core\Update;
 
 use Okay\Core\Config;
 use Okay\Core\Design;

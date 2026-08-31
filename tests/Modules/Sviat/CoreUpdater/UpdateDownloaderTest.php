@@ -2,7 +2,7 @@
 
 namespace Modules\Sviat\CoreUpdater;
 
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateDownloader;
+use Okay\Core\Update\UpdateDownloader;
 use PHPUnit\Framework\TestCase;
 
 class UpdateDownloaderTest extends TestCase

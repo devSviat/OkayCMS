@@ -1,6 +1,6 @@
 <?php
 
-namespace Okay\Modules\Sviat\CoreUpdater\Helpers;
+namespace Okay\Core\Update;
 
 /**
  * Несе перелік файлів, застосованих (чи відновлених) у цьому запуску до

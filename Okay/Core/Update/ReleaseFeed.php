@@ -1,6 +1,6 @@
 <?php
 
-namespace Okay\Modules\Sviat\CoreUpdater\Helpers;
+namespace Okay\Core\Update;
 
 /**
  * Розбір GitHub Releases JSON і вибір найновішого валідного fork-релізу.

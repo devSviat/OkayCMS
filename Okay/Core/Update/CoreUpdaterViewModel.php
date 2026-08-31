@@ -1,6 +1,6 @@
 <?php
 
-namespace Okay\Modules\Sviat\CoreUpdater\Helpers;
+namespace Okay\Core\Update;
 
 /**
  * Зведення снапшота перевірки (UpdateCheckHelper) і стану прогону

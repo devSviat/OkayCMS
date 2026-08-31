@@ -6,12 +6,12 @@ use Okay\Core\Config;
 use Okay\Core\Design;
 use Okay\Core\Release\CoreMigrator;
 use Okay\Core\Settings;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateApplier;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateBackup;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateCheckHelper;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateDownloader;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateRunner;
-use Okay\Modules\Sviat\CoreUpdater\Helpers\UpdateStatus;
+use Okay\Core\Update\UpdateApplier;
+use Okay\Core\Update\UpdateBackup;
+use Okay\Core\Update\UpdateCheckHelper;
+use Okay\Core\Update\UpdateDownloader;
+use Okay\Core\Update\UpdateRunner;
+use Okay\Core\Update\UpdateStatus;
 use PHPUnit\Framework\TestCase;
 
 class UpdateRunnerStepsTest extends TestCase

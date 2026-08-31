@@ -2,7 +2,7 @@
 
 namespace Modules\Sviat\CoreUpdater;
 
-use Okay\Modules\Sviat\CoreUpdater\Helpers\MaintenanceMode;
+use Okay\Core\Update\MaintenanceMode;
 use PHPUnit\Framework\TestCase;
 
 class MaintenanceModeTest extends TestCase
