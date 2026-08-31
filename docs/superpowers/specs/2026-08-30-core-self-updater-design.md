@@ -215,7 +215,7 @@ Per-file checksum у `manifest.json` дозволяє звірити ціліс�
 
 ## 8. Потік оновлення (`CoreUpdater`)
 
-Новий core-модуль `Okay/Modules/OkayCMS/CoreUpdater/` (той самий патерн
+Новий core-модуль `Okay/Modules/Sviat/CoreUpdater/` (той самий патерн
 модуля, що й AutoDeploy). Він сам входить у "core"-перелік §5 — самозаміна
 відбувається на кроці apply так само, як і решта core-файлів: до моменту
 запуску apply() працює стара версія модуля, після — нова, наступний
@@ -349,7 +349,7 @@ AJAX-запитом, не єдиний довгий HTTP-виклик.
 ## 13. Зміни в структурі форку
 
 - `Okay/Core/Config.php` — нове поле `$forkVersion`.
-- Новий модуль `Okay/Modules/OkayCMS/CoreUpdater/` (Init, Controllers,
+- Новий модуль `Okay/Modules/Sviat/CoreUpdater/` (Init, Controllers,
   Helpers, `migrations/` для власних core-diff'ів, backend-контролер +
   tpl сторінки "Оновлення").
 - Нова таблиця `ok_core_migrations`.

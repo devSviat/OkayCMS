@@ -13,6 +13,9 @@ use Okay\Entities\ModulesEntity;
 
 class LicenseModulesTemplates
 {
+    /** Вендори самого форку — поза зовнішнім ліцензуванням. */
+    public const OWN_VENDORS = ['Sviat'];
+
     private QueryFactory $queryFactory;
 
     private Database $db;
@@ -127,6 +130,12 @@ class LicenseModulesTemplates
 
     public function isLicensedModule(string $vendor, string $moduleName): bool
     {
+        // Власні модулі форку: ліцензійний сервер okay-cms їх не знає і не
+        // мусить — інакше зовнішній сервіс міг би вимкнути модулі сайту.
+        if (in_array($vendor, self::OWN_VENDORS, true)) {
+            return true;
+        }
+
         if ($this->licenseDTO && !is_null($this->licenseDTO->getModulesLicenses())) {
             $moduleHash = md5(sprintf('%s/%s/%s',
                 Request::getDomain(),

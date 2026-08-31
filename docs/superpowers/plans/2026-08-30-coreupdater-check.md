@@ -7,7 +7,7 @@ GitHub Releases, caches the result (with ETag) in Settings, and exposes a
 "latest available release vs installed forkVersion" snapshot for the future
 apply-side (Plan C2) and admin UI (Plan D).
 
-**Architecture:** New module `Okay/Modules/OkayCMS/CoreUpdater/`. HTTP layer
+**Architecture:** New module `Okay/Modules/Sviat/CoreUpdater/`. HTTP layer
 follows the codebase's house pattern (raw cURL, as in `Okay/Core/Support.php:152-160`
 — Guzzle is present in vendor but unused by core; do not introduce it). All
 parsing/decision logic is pure and unit-tested against fixture JSON (CI has
@@ -47,19 +47,19 @@ UI) are explicitly out of scope.
 
 ## File Structure
 
-- `Okay/Modules/OkayCMS/CoreUpdater/Init/Init.php` — install()/init(),
+- `Okay/Modules/Sviat/CoreUpdater/Init/Init.php` — install()/init(),
   schedule registration.
-- `Okay/Modules/OkayCMS/CoreUpdater/Init/module.json` — `{"Okay": "4.5.2",
+- `Okay/Modules/Sviat/CoreUpdater/Init/module.json` — `{"Okay": "4.5.2",
   "version": "1.0.0", ...}`.
-- `Okay/Modules/OkayCMS/CoreUpdater/Init/services.php` — DI for the two
+- `Okay/Modules/Sviat/CoreUpdater/Init/services.php` — DI for the two
   services below.
-- `Okay/Modules/OkayCMS/CoreUpdater/Helpers/ReleaseFeed.php` — pure:
+- `Okay/Modules/Sviat/CoreUpdater/Helpers/ReleaseFeed.php` — pure:
   parse GitHub `/releases` JSON, filter fork releases, pick latest, compare
   with installed version, decide snapshot freshness.
-- `Okay/Modules/OkayCMS/CoreUpdater/Helpers/UpdateCheckHelper.php` — glue:
+- `Okay/Modules/Sviat/CoreUpdater/Helpers/UpdateCheckHelper.php` — glue:
   cURL call with ETag, Settings read/write of the snapshot, called by the
   scheduler.
-- Tests: `tests/Modules/OkayCMS/CoreUpdater/ReleaseFeedTest.php` +
+- Tests: `tests/Modules/Sviat/CoreUpdater/ReleaseFeedTest.php` +
   fixtures (`releases.json`, `releases-with-noise.json`).
 
 ---
@@ -67,9 +67,9 @@ UI) are explicitly out of scope.
 ### Task 1: Module skeleton
 
 **Files:**
-- Create: `Okay/Modules/OkayCMS/CoreUpdater/Init/Init.php`
-- Create: `Okay/Modules/OkayCMS/CoreUpdater/Init/module.json`
-- Create: `Okay/Modules/OkayCMS/CoreUpdater/Init/services.php`
+- Create: `Okay/Modules/Sviat/CoreUpdater/Init/Init.php`
+- Create: `Okay/Modules/Sviat/CoreUpdater/Init/module.json`
+- Create: `Okay/Modules/Sviat/CoreUpdater/Init/services.php`
 
 **Interfaces:**
 - Produces: installable module `OkayCMS/CoreUpdater`. `install()` calls
@@ -95,7 +95,7 @@ UI) are explicitly out of scope.
 ```php
 <?php
 
-namespace Okay\Modules\OkayCMS\CoreUpdater\Init;
+namespace Okay\Modules\Sviat\CoreUpdater\Init;
 
 use Okay\Core\Modules\AbstractInit;
 use Okay\Core\Release\CoreMigrator;
@@ -123,7 +123,7 @@ AutoDeploy; поки що порожній масив, Task 3 наповнить
 ```php
 <?php
 
-namespace Okay\Modules\OkayCMS\CoreUpdater;
+namespace Okay\Modules\Sviat\CoreUpdater;
 
 $services = [];
 
@@ -142,7 +142,7 @@ Run: `vendor/bin/phpunit` → PASS, no regression.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add Okay/Modules/OkayCMS/CoreUpdater
+git add Okay/Modules/Sviat/CoreUpdater
 git commit -m "feat(coreupdater): скелет модуля OkayCMS/CoreUpdater"
 ```
 
@@ -151,13 +151,13 @@ git commit -m "feat(coreupdater): скелет модуля OkayCMS/CoreUpdater"
 ### Task 2: `ReleaseFeed` — pure parsing/decision logic
 
 **Files:**
-- Create: `Okay/Modules/OkayCMS/CoreUpdater/Helpers/ReleaseFeed.php`
-- Create: `tests/Modules/OkayCMS/CoreUpdater/ReleaseFeedTest.php`
+- Create: `Okay/Modules/Sviat/CoreUpdater/Helpers/ReleaseFeed.php`
+- Create: `tests/Modules/Sviat/CoreUpdater/ReleaseFeedTest.php`
 - Create fixtures:
-  `tests/Modules/OkayCMS/CoreUpdater/fixtures/releases.json` (two valid fork
+  `tests/Modules/Sviat/CoreUpdater/fixtures/releases.json` (two valid fork
   releases 1.1.0 і 1.0.0, кожен з assets: zip + version.json + checksums.txt,
   browser_download_url поля)
-  `tests/Modules/OkayCMS/CoreUpdater/fixtures/releases-with-noise.json`
+  `tests/Modules/Sviat/CoreUpdater/fixtures/releases-with-noise.json`
   (валідний 1.1.0 + записи-шум: тег `4.6.0`, тег `okaycms-fork/v1.2.0-rc1`,
   драфт `"draft": true`, prerelease `"prerelease": true`)
 
@@ -200,7 +200,7 @@ checksums.txt — parseLatest поверне 1.1.0); битий JSON → null; �
 - [ ] **Step 5: Commit**
 
 ```bash
-git add Okay/Modules/OkayCMS/CoreUpdater/Helpers/ReleaseFeed.php tests/Modules/OkayCMS/CoreUpdater
+git add Okay/Modules/Sviat/CoreUpdater/Helpers/ReleaseFeed.php tests/Modules/Sviat/CoreUpdater
 git commit -m "feat(coreupdater): ReleaseFeed — розбір GitHub Releases і вибір валідного релізу форку"
 ```
 
@@ -213,8 +213,8 @@ CI; the pure decisions it delegates to are covered by Task 2; the glue is
 verified in Plan E on the dev stand, including a real GitHub call).
 
 **Files:**
-- Create: `Okay/Modules/OkayCMS/CoreUpdater/Helpers/UpdateCheckHelper.php`
-- Modify: `Okay/Modules/OkayCMS/CoreUpdater/Init/services.php`
+- Create: `Okay/Modules/Sviat/CoreUpdater/Helpers/UpdateCheckHelper.php`
+- Modify: `Okay/Modules/Sviat/CoreUpdater/Init/services.php`
 
 **Interfaces:**
 - Consumes: `Okay\Core\Settings` (get/set — масиви серіалізуються
@@ -247,7 +247,7 @@ verified in Plan E on the dev stand, including a real GitHub call).
 - [ ] **Step 3: Commit**
 
 ```bash
-git add Okay/Modules/OkayCMS/CoreUpdater
+git add Okay/Modules/Sviat/CoreUpdater
 git commit -m "feat(coreupdater): перевірка релізів з ETag і кешем у Settings"
 ```
 
@@ -256,7 +256,7 @@ git commit -m "feat(coreupdater): перевірка релізів з ETag і �
 ### Task 4: Scheduler registration
 
 **Files:**
-- Modify: `Okay/Modules/OkayCMS/CoreUpdater/Init/Init.php`
+- Modify: `Okay/Modules/Sviat/CoreUpdater/Init/Init.php`
 
 **Interfaces:**
 - Consumes: `UpdateCheckHelper::check()` (Task 3),
@@ -273,7 +273,7 @@ git commit -m "feat(coreupdater): перевірка релізів з ETag і �
 - [ ] **Step 3: Commit**
 
 ```bash
-git add Okay/Modules/OkayCMS/CoreUpdater/Init/Init.php
+git add Okay/Modules/Sviat/CoreUpdater/Init/Init.php
 git commit -m "feat(coreupdater): щоденна фонова перевірка оновлень через scheduler"
 ```
 
