@@ -93,7 +93,7 @@ class NPCacheHelper
         // Повертаємо мову
         $this->languages->setLangId($currentLangId);
 
-        return ceil($citiesDTO->getTotalCount() / $limit);
+        return $this->pagesLeft($citiesDTO->getTotalCount(), $limit, $page, empty($citiesDTO->getCities()));
     }
 
     public function updateWarehousesCache(string $warehouseType, int $page, int $limit): ?int
@@ -160,7 +160,25 @@ class NPCacheHelper
         // Повертаємо мову
         $this->languages->setLangId($currentLangId);
 
-        return ceil($warehousesDTO->getTotalCount() / $limit);
+        return $this->pagesLeft($warehousesDTO->getTotalCount(), $limit, $page, empty($warehousesDTO->getWarehouses()));
+    }
+
+    /**
+     * Скільки сторінок ще гортати. Порожня сторінка — остання, навіть якщо
+     * totalCount обіцяє більше.
+     *
+     * НП не завжди фільтрує totalCount за TypeOfWarehouseRef: для типу
+     * «Поштове відділення з обмеженням» він віддає 13.5 тис. — стільки ж,
+     * скільки для звичайного «Поштове(ий)», — і при цьому жодного рядка
+     * цього типу в data немає. Без цієї межі кожен прогін витрачав на такий
+     * тип 14 запитів, з яких не імпортується нічого, а свій ліміт НП віддає
+     * кодом 200 з errors: ["To many requests"].
+     */
+    private function pagesLeft(int $totalCount, int $limit, int $page, bool $pageWasEmpty): int
+    {
+        $pages = (int)ceil($totalCount / $limit);
+
+        return $pageWasEmpty ? min($pages, $page) : $pages;
     }
 
     /**
