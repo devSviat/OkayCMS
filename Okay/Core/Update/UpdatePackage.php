@@ -28,6 +28,13 @@ class UpdatePackage
         'Okay/log/',
         'backend/files/',
         'backend/design/',
+        // Живий стан штатних модулів. На боці збірки він виключений
+        // (`release-manifest.json`), але саме цей однобічний запобіжник PR і
+        // прибирає: маніфест, що загубив ці винятки, перезаписав би робочі
+        // дані модуля.
+        'Okay/Modules/OkayCMS/AutoDeploy/log/',
+        'Okay/Modules/OkayCMS/AutoDeploy/tmp/',
+        'Okay/Modules/OkayCMS/Integration1C/temp/',
     ];
 
     /**
@@ -45,13 +52,24 @@ class UpdatePackage
 
     /**
      * Виняток із `backend/design/`: сторінка оновлювача мусить оновлюватись
-     * разом із ним, інакше правку в ній не доставити ніколи. Перелік живе
-     * ТУТ, у коді інсталяції, а не в пакеті — інакше межу визначав би той,
-     * від кого її й треба захищати.
+     * разом із ним, інакше правку в ній не доставити ніколи. Живе ТУТ, у коді
+     * інсталяції, а не в пакеті — інакше межу визначав би той, від кого її й
+     * треба захищати.
+     *
+     * Простір імен, а не перелік файлів, і це принципово. Перевірку виконує
+     * код ІНСТАЛЯЦІЇ, тобто старий: поіменний перелік означав би, що реліз,
+     * якому знадобився другий файл сторінки (розділити шаблон, додати свій
+     * css), відхиляється цілком кожною вже встановленою інсталяцією — на
+     * кроці verify, з ручним лікуванням на кожній. Guard-тест такого не
+     * зловив би: він ганяє НОВИЙ перелік проти НОВОГО маніфесту й лишався б
+     * зеленим.
+     *
+     * Тому все, що зветься `core_updater*` під `backend/design/`, дозволене
+     * наперед. Вийти за цей простір усе одно означає дві версії: спершу
+     * реліз, що розширює виняток, і лише наступний — той, що везе файл.
      */
-    private const CORE_OWNED_EXCEPTIONS = [
-        'backend/design/html/core_updater.tpl',
-    ];
+    private const CORE_OWNED_PREFIX = 'backend/design/';
+    private const CORE_OWNED_BASENAME_PREFIX = 'core_updater';
 
     /**
      * Розбирає `checksums.txt` у форматі `{sha256}  {name}\n`, як пише
@@ -195,6 +213,16 @@ class UpdatePackage
                 if ($segment === '.') {
                     throw new \RuntimeException("Шлях у manifest.json містить сегмент \".\": {$path}");
                 }
+
+                // Win32 зрізає хвостові крапки й пробіли в іменах: "config."
+                // і "config " відкриваються як "config". Той самий клас
+                // обходу, що й регістр, — і тут уже є обробка "C:/", тобто
+                // Windows у моделі загроз.
+                if (rtrim($segment, ' .') !== $segment) {
+                    throw new \RuntimeException(
+                        "Сегмент шляху з хвостовою крапкою чи пробілом: {$path}"
+                    );
+                }
             }
         }
     }
@@ -228,7 +256,7 @@ class UpdatePackage
 
         foreach (array_keys($manifestFiles) as $path) {
             $path = (string) $path;
-            if (in_array($path, self::CORE_OWNED_EXCEPTIONS, true)) {
+            if (self::isUpdaterOwnAsset($path)) {
                 continue;
             }
 
@@ -257,12 +285,35 @@ class UpdatePackage
      */
     private static function normalizePath(string $path): string
     {
-        $segments = array_filter(
-            explode('/', $path),
-            static fn (string $segment): bool => $segment !== '' && $segment !== '.'
-        );
+        $segments = [];
+        foreach (explode('/', $path) as $segment) {
+            // Хвостові крапки й пробіли Win32 зрізає сам — порівнювати треба
+            // з тим, що реально відкриється на диску.
+            $segment = rtrim($segment, ' .');
+            if ($segment === '' || $segment === '.') {
+                continue;
+            }
+
+            $segments[] = $segment;
+        }
 
         return implode('/', $segments);
+    }
+
+    /**
+     * Власні файли сторінки оновлювача — єдине, що ядро возить під
+     * `backend/design/`. Простір імен, а не перелік: чому саме так — у
+     * коментарі до CORE_OWNED_BASENAME_PREFIX.
+     */
+    private static function isUpdaterOwnAsset(string $path): bool
+    {
+        $normalized = mb_strtolower(self::normalizePath($path));
+
+        if (!str_starts_with($normalized, self::CORE_OWNED_PREFIX)) {
+            return false;
+        }
+
+        return str_starts_with(basename($normalized), self::CORE_OWNED_BASENAME_PREFIX);
     }
 
     /** @return ?string причина відмови, або null якщо шлях у межах ядра */
@@ -284,16 +335,17 @@ class UpdatePackage
 
         // Модулі: разом із ядром їде лише вендор OkayCMS. Решта — сторонні
         // або власні модулі магазину, і оновлення ядра їх не чіпає.
-        if (str_starts_with($lower, 'okay/modules/')) {
+        if ($lower === 'okay/modules' || str_starts_with($lower, 'okay/modules/')) {
+            // Після нормалізації порожніх сегментів немає, тож "вендор" —
+            // це рівно третій сегмент, і він існує лише коли шлях глибший за
+            // сам каталог модулів.
             $segments = explode('/', $lower);
-            $vendor = $segments[2] ?? '';
-
-            if ($vendor === '') {
-                return 'шлях модуля без вендора';
+            if (count($segments) < 4) {
+                return 'шлях у Okay/Modules/ без вендора й модуля';
             }
 
-            if ($vendor !== self::CORE_MODULE_VENDOR) {
-                return 'модуль вендора "' . $vendor . '" не постачається з ядром';
+            if ($segments[2] !== self::CORE_MODULE_VENDOR) {
+                return 'модуль вендора "' . $segments[2] . '" не постачається з ядром';
             }
         }
 
