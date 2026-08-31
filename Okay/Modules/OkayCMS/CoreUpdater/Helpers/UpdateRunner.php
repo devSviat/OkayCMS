@@ -546,7 +546,6 @@ class UpdateRunner
             $response = curl_exec($ch);
             $errno = curl_errno($ch);
             $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
 
             $healthy = self::isHealthyResponse(
                 $errno,
