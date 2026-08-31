@@ -45,13 +45,13 @@ class OrganizationJsonLdTest extends TestCase
     public static function hostileMarkupValues(): array
     {
         return [
-            'лапки'          => ['Крамниця "Broken"'],
-            'апостроф'       => ["Broken's Store"],
+            'лапки'          => ['Крамниця "Ромашка"'],
+            'апостроф'       => ["Roma's Store"],
             'зворотний слеш' => ['Кабель \\ 5м'],
-            'закриття тега'  => ['Broken </script><script>alert(1)</script>'],
-            'перенос рядка'  => ["Broken\r\nStore"],
+            'закриття тега'  => ['Ромашка </script><script>alert(1)</script>'],
+            'перенос рядка'  => ["Ромашка\r\nStore"],
             'битий UTF-8'    => ["Shop\xC3\x28"],
-            'кирилиця'       => ['Запчастини «Broken»'],
+            'кирилиця'       => ['Запчастини «Ромашка»'],
         ];
     }
 

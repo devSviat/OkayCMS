@@ -34,7 +34,7 @@ class PageAllNotLinkedTest extends TestCase
         // те саме посилання, і літеральний пошук їх би пропустив.
         $source = file_get_contents($path);
         if (!preg_match_all('~page\s*=\s*[\'"]?all~', $source, $links, PREG_OFFSET_CAPTURE)) {
-            // Кнопки немає взагалі — саме так у темах Broken. Стерегти нічого.
+            // Кнопки немає взагалі — так буває в темах. Стерегти нічого.
             $this->assertStringNotContainsString('page=all', $source);
 
             return;
@@ -60,9 +60,9 @@ class PageAllNotLinkedTest extends TestCase
      * вимикається, а `page_all_enabled` присвоюють лише CatalogHelper і
      * BrandsHelper. Скопійована сюди умова була б завжди хибною.
      *
-     * Що кнопки в цих шаблонах узагалі немає — рішення тем Broken заради
-     * краулінгового бюджету, а не інваріант рушія: у темах форку вона лишається
-     * робочою, тож тест її відсутності тут не вимагає.
+     * Що кнопки в цих шаблонах може не бути взагалі — рішення конкретної
+     * теми заради краулінгового бюджету, а не інваріант рушія: у штатних темах
+     * вона лишається робочою, тож тест її відсутності тут не вимагає.
      */
     #[DataProvider('fixedPaginationProvider')]
     public function testFixedPaginationDoesNotUseTheSwitch(string $path): void

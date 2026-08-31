@@ -133,7 +133,7 @@ class CoreMigratorTest extends TestCase
      */
     public function testShippedMigrationsDoNotQuoteTheTableMarker(): void
     {
-        $migrationsDir = dirname(__DIR__, 3) . '/dev/release-migrations';
+        $migrationsDir = dirname(__DIR__, 3) . '/1DB_changes/fork';
         if (!is_dir($migrationsDir)) {
             $this->markTestSkipped('жодної core-міграції ще немає');
         }

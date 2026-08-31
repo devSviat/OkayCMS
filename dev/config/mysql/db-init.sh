@@ -6,7 +6,7 @@ set -eu
 
 run_sql() {
     mariadb --host=mariadb --user=root --password="${MYSQL_ROOT_PASSWORD}" \
-            --database="${MYSQL_DATABASE}"
+            --database="${MYSQL_DATABASE}" "$@"
 }
 
 echo "db-init: resetting the 'admin' manager to the default password"
@@ -38,5 +38,35 @@ INSERT INTO ok_settings (param, value) VALUES ('smtp_port', '1025')
 ON DUPLICATE KEY UPDATE value = VALUES(value);
 SQL
 fi
+
+echo "db-init: applying fork core migrations"
+# Базу піднімає штатний entrypoint образу з 1DB_changes/okay_clean.sql, а той
+# дамп — стоковий 4.5.2: схемні зміни форку живуть окремими міграціями. Тут
+# їх немає чим застосувати штатно (у цьому контейнері немає PHP), тому те
+# саме робиться руками — маркер `__` замінюється префіксом, як це робить
+# CoreMigrator::prefixTables(). Трекер спільний, тож пізніший
+# `php ok core:migrate` ці ж міграції пропустить.
+run_sql <<'SQL'
+CREATE TABLE IF NOT EXISTS ok_core_migrations (
+    id INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    applied_at DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+SQL
+
+for migration in /fork-migrations/*.up.sql; do
+    [ -f "$migration" ] || continue
+    name="$(basename "$migration")"
+
+    applied="$(printf 'SELECT COUNT(*) FROM ok_core_migrations WHERE name = "%s";\n' "$name" \
+        | run_sql --skip-column-names)"
+    [ "$applied" = "0" ] || continue
+
+    echo "db-init: applying $name"
+    sed 's/`__/`ok_/g' "$migration" | run_sql
+    printf 'INSERT INTO ok_core_migrations (name, applied_at) VALUES ("%s", NOW());\n' "$name" | run_sql
+done
 
 echo "db-init: done"

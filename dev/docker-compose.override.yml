@@ -71,6 +71,7 @@ services:
       - backend
     volumes:
       - './config/mysql/db-init.sh:/db-init.sh:ro'
+      - '../1DB_changes/fork:/fork-migrations:ro'
     entrypoint: ["/bin/sh", "/db-init.sh"]
 
   mailpit:

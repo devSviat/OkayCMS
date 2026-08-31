@@ -285,6 +285,33 @@ class CoreUpdaterViewModelTest extends TestCase
         $this->assertSame(UpdateStatus::STEP_FAILED, $vm['mode']);
     }
 
+    /**
+     * Штатний шлях зникнення результату — не час, а перегляд: інакше зелене
+     * «Оновлення завершено» вітало б адміна на кожному відкритті сторінки
+     * цілу добу й читалось як «щойно оновились».
+     */
+    public function testSeenSuccessfulRunStopsBeingShownEvenWhileFresh(): void
+    {
+        $runState = $this->runState(UpdateStatus::STEP_DONE, self::NOW - 60);
+        $runState['resultSeenAt'] = self::NOW - 30;
+
+        $vm = CoreUpdaterViewModel::build($this->snapshot(['updateAvailable' => false]), $runState, self::NOW);
+
+        $this->assertSame('up_to_date', $vm['mode']);
+        $this->assertFalse($vm['previousRunDone']);
+    }
+
+    /** Невдалий прогін позначка «показано» не ховає — він вимагає дії. */
+    public function testSeenFailedRunRemainsVisible(): void
+    {
+        $runState = $this->runState(UpdateStatus::STEP_FAILED, self::NOW - 60);
+        $runState['resultSeenAt'] = self::NOW - 30;
+
+        $vm = CoreUpdaterViewModel::build($this->snapshot(['updateAvailable' => false]), $runState, self::NOW);
+
+        $this->assertSame(UpdateStatus::STEP_FAILED, $vm['mode']);
+    }
+
     public function testStaleSuccessfulRunDoesNotAnnouncePreviousRunWhenUpdateAvailable(): void
     {
         $runState = $this->runState(UpdateStatus::STEP_DONE, self::NOW - CoreUpdaterViewModel::RESULT_FRESH_SECONDS - 1);

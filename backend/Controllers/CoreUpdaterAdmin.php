@@ -16,7 +16,15 @@ class CoreUpdaterAdmin extends IndexAdmin
 
     public function fetch(UpdateCheckHelper $checkHelper, UpdateStatus $status, Config $config, Settings $settings)
     {
-        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $status->load(), time(), $config->version);
+        $runState = $status->load();
+        $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $runState, time(), $config->version);
+
+        // Результат успішного прогону — новина одного перегляду. Позначаємо
+        // саме тут, а не в status(): поллінг ходить туди ще під час прогону й
+        // з'їв би позначку до того, як сторінка покаже результат.
+        if ($runState !== null && ($vm['mode'] === UpdateStatus::STEP_DONE || $vm['previousRunDone'])) {
+            $status->markResultSeen($runState);
+        }
 
         $this->design->assign('vm', $vm);
         $this->design->assign('steps_lang_keys', self::stepsLangKeys());
