@@ -32,7 +32,7 @@ class PublicSurfaceTest extends TestCase
         '1DB_changes', 'backend', 'CLAUDE.md', 'compiled', 'composer.json',
         'composer.lock', 'config', 'design', 'dev', 'docs', 'files',
         'LICENSE.md', 'ok', 'Okay', 'phpcs.xml.dist', 'phpstan-baseline.neon',
-        'phpstan.neon', 'phpunit.xml', 'PRODUCT.md', 'README.md', 'release-manifest.json', 'release-migrations', 'tests', 'vendor',
+        'phpstan.neon', 'phpunit.xml', 'PRODUCT.md', 'README.md', 'release-manifest.json', 'tests', 'vendor',
     ];
 
     /**
@@ -44,10 +44,14 @@ class PublicSurfaceTest extends TestCase
      * взагалі: його маршрут лишається в .htaccess і в конфігах nginx як місце
      * для сторонніх бібліотек магазину (docs/assets.md), тож каталог може
      * зʼявитись і мусить лишатись класифікованим.
+     *
+     * release-migrations/ зʼявиться з першою core-міграцією форку
+     * (docs/updates.md) — це SQL, віддавати його назовні не можна.
      */
     private const RUNTIME_ROOT_ENTRIES = [
         'cache',
         'js_libraries',
+        'release-migrations',
     ];
 
     private function repoRoot(): string

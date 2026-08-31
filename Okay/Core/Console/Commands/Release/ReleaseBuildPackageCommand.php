@@ -41,6 +41,7 @@ class ReleaseBuildPackageCommand extends Command
         }
 
         $builder = new PackageBuilder();
+        $migrationsPath = $this->input->getOption('migrations');
 
         $result = $builder->build(
             $repoPath,
@@ -48,11 +49,18 @@ class ReleaseBuildPackageCommand extends Command
             $forkVersion,
             $upstreamBase,
             $this->input->getOption('output-dir'),
-            $this->input->getOption('migrations')
+            $migrationsPath
         );
 
         $this->output->writeln("Package built: {$result['zipPath']}");
         $this->output->writeln("Files: {$result['fileCount']}, migrations: {$result['migrationsCount']}");
+
+        // Каталогу немає, поки жодна версія не міняла схему — стан нормальний,
+        // але «0 міграцій» через друкарську помилку в --migrations виглядав би
+        // так само, а помітили б це вже на проді.
+        if (!is_dir($migrationsPath)) {
+            $this->output->writeln("<comment>Каталогу {$migrationsPath} немає — жодної core-міграції в пакеті.</comment>");
+        }
 
         return Command::SUCCESS;
     }
