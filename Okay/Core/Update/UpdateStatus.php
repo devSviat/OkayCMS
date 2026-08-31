@@ -68,6 +68,21 @@ class UpdateStatus
     }
 
     /**
+     * Позначає результат прогону показаним. Стан прогону живе в Settings
+     * вічно, тож без позначки зелене «Оновлення завершено» вітало б адміна
+     * на кожному відкритті сторінки — і читалось як «щойно оновились».
+     */
+    public function markResultSeen(array $state): void
+    {
+        if (isset($state['resultSeenAt'])) {
+            return;
+        }
+
+        $state['resultSeenAt'] = time();
+        $this->save($state);
+    }
+
+    /**
      * Початковий стан щойно створеного прогону — перший крок STEPS.
      */
     public static function fresh(string $fromVersion, string $toVersion): array

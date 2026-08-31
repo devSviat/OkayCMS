@@ -200,7 +200,10 @@
                     <div class="alert alert--center alert--icon alert--success">
                         <div class="alert__content">
                             <div class="alert__title">{$btr->core_updater_step_done|escape}</div>
-                            <p><b>{$btr->core_updater_installed_label|escape}:</b> {$vm.installed|escape}</p>
+                            <p>
+                                <b>{$btr->core_updater_installed_label|escape}:</b> {$vm.installed|escape}
+                                {if $vm.run.updatedAt} &middot; {$vm.run.updatedAt|date_format:"%d.%m.%Y %H:%M"}{/if}
+                            </p>
                         </div>
                     </div>
                     {if $vm.run.finalizeWarning}
