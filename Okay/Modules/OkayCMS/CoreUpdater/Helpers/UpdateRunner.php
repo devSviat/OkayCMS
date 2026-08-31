@@ -49,6 +49,8 @@ class UpdateRunner
 
     private const HEALTH_CHECK_RETRY_DELAY = 2;
 
+    private const SELF_REQUEST_PROBE_TIMEOUT = 10;
+
     /**
      * Крок → назва методу-обробника, у порядку UpdateStatus::STEPS. ЄДИНЕ
      * джерело правди диспетчерування (dispatchStep() читає саме звідси, а
@@ -326,7 +328,57 @@ class UpdateRunner
             );
         }
 
+        $this->assertSelfRequestPossible();
+
         return $ctx;
+    }
+
+    /**
+     * Health-check і rollback роблять self-request, поки ЦЕЙ запит тримає
+     * воркер. Пул, що не може обслужити другий запит паралельно (наприклад,
+     * pm.max_children=1), гарантує провал health-check уже ПІСЛЯ заміни
+     * файлів — із сайтом, залишеним у техроботах. Проба зупиняє такий
+     * прогін до будь-яких змін; будь-яка HTTP-відповідь (навіть 500)
+     * доводить вільний воркер.
+     */
+    public function assertSelfRequestPossible(): void
+    {
+        $url = rtrim($this->resolveRootUrl(), '/') . '/';
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => self::SELF_REQUEST_PROBE_TIMEOUT,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+        ]);
+
+        curl_exec($ch);
+        $errno = curl_errno($ch);
+        $error = curl_error($ch);
+        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (!self::isSelfRequestProof($errno, $httpCode)) {
+            throw new \RuntimeException(sprintf(
+                'Сайт не відповів сам собі за %d с (%s): health-check після заміни файлів упаде так само. '
+                . 'Найчастіша причина — PHP-FPM з одним воркером (pm.max_children=1); потрібно щонайменше '
+                . '2 вільні воркери. Оновлення зупинено до будь-яких змін.',
+                self::SELF_REQUEST_PROBE_TIMEOUT,
+                $errno !== 0 ? "cURL #{$errno}: {$error}" : 'відповідь без HTTP-коду'
+            ));
+        }
+    }
+
+    /**
+     * Чиста функція рішення проби (без cURL) — покривається юніт-тестом.
+     * Код відповіді байдужий: проба доводить наявність вільного воркера,
+     * а не здоров'я сторінки.
+     */
+    public static function isSelfRequestProof(int $errno, int $httpCode): bool
+    {
+        return $errno === 0 && $httpCode > 0;
     }
 
     /** @param array<string, mixed> $ctx @return array<string, mixed> */
