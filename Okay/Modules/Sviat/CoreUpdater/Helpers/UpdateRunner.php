@@ -386,7 +386,7 @@ class UpdateRunner
     {
         $rootDir = $ctx['rootDir'];
         $backupsDir = $rootDir . '/files/backups';
-        if (!is_dir($backupsDir) && !mkdir($backupsDir, 0777, true) && !is_dir($backupsDir)) {
+        if (!is_dir($backupsDir) && !mkdir($backupsDir, 0700, true) && !is_dir($backupsDir)) {
             throw new \RuntimeException("Не вдалося створити каталог бекапів: {$backupsDir}");
         }
 
@@ -799,9 +799,16 @@ class UpdateRunner
      */
     private function protectBackupsDir(string $backupsDir): void
     {
+        // Обидва синтаксиси: Require (Apache 2.4/mod_authz_core) як основний,
+        // order/deny (2.2/mod_access_compat) як запасний — 2.2-директиви без
+        // mod_access_compat на 2.4 не діють мовчки, лишаючи бекапи відкритими.
         $htaccess = $backupsDir . '/.htaccess';
         if (!is_file($htaccess)) {
-            @file_put_contents($htaccess, "order deny,allow \ndeny from all\n");
+            @file_put_contents(
+                $htaccess,
+                "<IfModule mod_authz_core.c>\n    Require all denied\n</IfModule>\n"
+                . "<IfModule !mod_authz_core.c>\n    order deny,allow\n    deny from all\n</IfModule>\n"
+            );
         }
     }
 
@@ -822,7 +829,7 @@ class UpdateRunner
 
         $dir = $rootDir . '/files/tmp/updates/' . $version;
         if (!is_dir($dir)) {
-            @mkdir($dir, 0777, true);
+            @mkdir($dir, 0700, true);
         }
 
         @file_put_contents(
