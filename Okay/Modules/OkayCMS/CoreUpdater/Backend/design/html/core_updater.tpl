@@ -203,7 +203,7 @@
             </div>
 
             {*Панель прогресу — в розмітці завжди, показується для running і одразу після старту з JS*}
-            <div class="fn_running_panel core_updater_steps"{if $vm.mode != 'running'} style="display:none;"{/if}>
+            <div class="fn_running_panel core_updater_steps" data-initial-mode="{$vm.mode|escape}"{if $vm.mode != 'running'} style="display:none;"{/if}>
                 {$runStepIndex = -1}
                 {if $vm.run && $vm.run.stepIndex !== null}{$runStepIndex = $vm.run.stepIndex}{/if}
                 {* 10 = кількість UpdateStatus::STEPS; steps_lang_keys додає ще 3 TERMINAL_STEPS поверх них *}
@@ -263,21 +263,35 @@
 </style>
 
 <script>
+    var coreUpdaterPollInterval = null;
+
     function coreUpdaterHandleAjaxError(data) {
         if (data && data.error === 'csrf') {
-            toastr.error("{$btr->core_updater_csrf_error|escape}");
+            toastr.error("{$btr->core_updater_csrf_error|escape:'javascript'}");
         } else if (data && data.error === 'cannot_start') {
-            toastr.error("{$btr->core_updater_cannot_start|escape}");
+            toastr.error("{$btr->core_updater_cannot_start|escape:'javascript'}");
         } else if (data && data.error) {
-            toastr.error(data.message ? data.message : "{$btr->core_updater_start_failed|escape}");
+            toastr.error(data.message ? data.message : "{$btr->core_updater_start_failed|escape:'javascript'}");
         } else {
-            toastr.error("{$btr->core_updater_ajax_error|escape}");
+            toastr.error("{$btr->core_updater_ajax_error|escape:'javascript'}");
         }
     }
 
     function coreUpdaterShowRunningPanel() {
         $('.fn_mode_panel').hide();
         $('.fn_running_panel').show();
+    }
+
+    function coreUpdaterShowModePanel() {
+        $('.fn_running_panel').hide();
+        $('.fn_mode_panel').show();
+    }
+
+    function coreUpdaterStopPolling() {
+        if (coreUpdaterPollInterval) {
+            clearInterval(coreUpdaterPollInterval);
+            coreUpdaterPollInterval = null;
+        }
     }
 
     function coreUpdaterUpdateProgress(vm) {
@@ -299,7 +313,8 @@
     }
 
     function coreUpdaterPoll() {
-        var pollInterval = setInterval(function () {
+        coreUpdaterStopPolling();
+        coreUpdaterPollInterval = setInterval(function () {
             $.ajax({
                 type: 'get',
                 dataType: 'json',
@@ -307,13 +322,21 @@
                 success: function (vm) {
                     coreUpdaterUpdateProgress(vm);
                     if (vm && (vm.mode === 'done' || vm.mode === 'failed' || vm.mode === 'rolled_back')) {
-                        clearInterval(pollInterval);
+                        coreUpdaterStopPolling();
                         location.reload();
                     }
                 }
             });
         }, 3000);
     }
+
+    $(function () {
+        // Сторінку відкрили/оновили ПІД ЧАС прогону — панель уже відрендерена
+        // сервером у стані running, лишається тільки підхопити поллінг.
+        if ($('.fn_running_panel').attr('data-initial-mode') === 'running') {
+            coreUpdaterPoll();
+        }
+    });
 
     $(document).on('click', '.fn_check_now', function () {
         var btn = $(this);
@@ -331,11 +354,10 @@
                     btn.prop('disabled', false);
                     return;
                 }
-                toastr.success("{$btr->core_updater_check_success|escape}");
                 location.reload();
             },
             error: function () {
-                toastr.error("{$btr->core_updater_ajax_error|escape}");
+                toastr.error("{$btr->core_updater_ajax_error|escape:'javascript'}");
                 btn.prop('disabled', false);
             }
         });
@@ -354,6 +376,8 @@
     });
 
     $(document).on('click', '.fn_confirm_start_update', function () {
+        var $btn = $(this);
+        $btn.prop('disabled', true);
         $.fancybox.close();
         coreUpdaterShowRunningPanel();
         coreUpdaterPoll();
@@ -367,8 +391,47 @@
             },
             success: function (data) {
                 if (data && data.error) {
+                    // Сервер відповів синхронно й одразу відмовив (csrf/cannot_start/
+                    // start_failed) — прогону не було, відкочуємо оптимістичний UI.
+                    coreUpdaterStopPolling();
+                    coreUpdaterShowModePanel();
                     coreUpdaterHandleAjaxError(data);
                 }
+                $btn.prop('disabled', false);
+            },
+            error: function () {
+                // POST виконується синхронно і може тривати хвилини — ajax error тут
+                // не обов'язково означає провал оновлення: з'єднання браузера могло
+                // обірватись (таймаут/мережа), поки сервер продовжує прогін. Перевіряємо
+                // реальний стан через status: якщо сервер уже в running чи в термінальному
+                // кроці — оновлення живе, лишаємо поллінг; інакше це справжній збій.
+                $.ajax({
+                    type: 'get',
+                    dataType: 'json',
+                    url: "{url controller='OkayCMS.CoreUpdater.CoreUpdaterAdmin@status'}",
+                    success: function (vm) {
+                        var alive = vm && (vm.mode === 'running' || vm.mode === 'done'
+                            || vm.mode === 'failed' || vm.mode === 'rolled_back');
+                        if (alive) {
+                            coreUpdaterUpdateProgress(vm);
+                            if (vm.mode !== 'running') {
+                                coreUpdaterStopPolling();
+                                location.reload();
+                            }
+                        } else {
+                            coreUpdaterStopPolling();
+                            coreUpdaterShowModePanel();
+                            toastr.error("{$btr->core_updater_ajax_error|escape:'javascript'}");
+                        }
+                        $btn.prop('disabled', false);
+                    },
+                    error: function () {
+                        coreUpdaterStopPolling();
+                        coreUpdaterShowModePanel();
+                        toastr.error("{$btr->core_updater_ajax_error|escape:'javascript'}");
+                        $btn.prop('disabled', false);
+                    }
+                });
             }
         });
     });

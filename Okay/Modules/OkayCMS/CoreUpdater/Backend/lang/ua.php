@@ -11,7 +11,7 @@ $lang['core_updater_check_now'] = 'Перевірити зараз';
 $lang['core_updater_update_btn'] = 'Оновити';
 $lang['core_updater_view_changes'] = 'Переглянути зміни';
 $lang['core_updater_confirm_title'] = 'Підтвердження оновлення';
-$lang['core_updater_confirm_text'] = 'Оновлення ядра змінить файли сайту та тимчасово увімкне технічні роботи. Продовжити?';
+$lang['core_updater_confirm_text'] = 'Оновлення ядра змінить файли сайту, тимчасово увімкне технічні роботи і автоматично створить резервну копію перед стартом. Продовжити?';
 $lang['core_updater_confirm_yes'] = 'Так, оновити';
 $lang['core_updater_confirm_no'] = 'Скасувати';
 

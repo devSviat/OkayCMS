@@ -11,7 +11,7 @@ $lang['core_updater_check_now'] = 'Check now';
 $lang['core_updater_update_btn'] = 'Update';
 $lang['core_updater_view_changes'] = 'View changes';
 $lang['core_updater_confirm_title'] = 'Confirm update';
-$lang['core_updater_confirm_text'] = 'Updating the core will change site files and briefly put the storefront into maintenance mode. Continue?';
+$lang['core_updater_confirm_text'] = 'Updating the core will change site files, briefly put the storefront into maintenance mode, and automatically create a backup before it starts. Continue?';
 $lang['core_updater_confirm_yes'] = 'Yes, update';
 $lang['core_updater_confirm_no'] = 'Cancel';
 
