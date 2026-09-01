@@ -185,3 +185,27 @@ $lang['okay_cms__feeds__feed__settings__prom_ua__sales_max_length'] = "Allowed t
 $lang['okay_cms__feeds__feed__settings__prom_ua__country_of_origin'] = "Country of origin";
 $lang['okay_cms__feeds__feed__settings__prom_ua__feed_name'] = "Feed name";
 $lang['okay_cms__feeds__feed__categories_settings__prom_ua__external_id'] = "External ID";
+
+// Epitsentr settings
+$lang['okay_cms__feeds__feed__settings__epitsentr__upload_without_images'] = "Upload products without images";
+$lang['okay_cms__feeds__feed__settings__epitsentr__upload_only_in_stock_products'] = "Upload only products that are in stock";
+$lang['okay_cms__feeds__feed__settings__epitsentr__store'] = "Can be bought at a retail store";
+$lang['okay_cms__feeds__feed__settings__epitsentr__pickup'] = "You can pick it up yourself";
+$lang['okay_cms__feeds__feed__settings__epitsentr__use_full_description'] = "Transfer the full description to the upload (if turned off, the short description is transmitted)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__has_manufacturer_warranty'] = "Products have a manufacturer warranty";
+$lang['okay_cms__feeds__feed__settings__epitsentr__no_export_without_price'] = "Do not unload goods with a price of 0";
+$lang['okay_cms__feeds__feed__settings__epitsentr__delivery'] = "Possibility of courier delivery";
+$lang['okay_cms__feeds__feed__settings__epitsentr__adult'] = "Adult products";
+$lang['okay_cms__feeds__feed__settings__epitsentr__company'] = "Company";
+$lang['okay_cms__feeds__feed__settings__epitsentr__sales_max_length'] = "Allowed text length in an element is 50 characters";
+$lang['okay_cms__feeds__feed__settings__epitsentr__country_of_origin'] = "Country of origin";
+$lang['okay_cms__feeds__feed__settings__epitsentr__feed_name'] = "Feed name";
+$lang['okay_cms__feeds__feed__settings__epitsentr__enable_auto_discounts'] = "Enable automatic calculation and display of discounts (enable_auto_discounts)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__count'] = "Transfer the total quantity of a product available for sale on the Market (count)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__description_in_html'] = 'Pass full html description to feed';
+$lang['okay_cms__feeds__feed__settings__epitsentr__description_in_html_info'] = "If this checkbox is checked, the full description will not be stripped of html tags and the text will be wrapped in CDATA to correctly pass tags to html feeds";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brands_external_ids'] = "Brand external IDs";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brand_name'] = "Brand name";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brand_external_id'] = "External ID in Epitsentr";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brand_external_id_placeholder'] = "Enter external ID";
+$lang['okay_cms__feeds__feed__categories_settings__epitsentr__external_id'] = "External ID";

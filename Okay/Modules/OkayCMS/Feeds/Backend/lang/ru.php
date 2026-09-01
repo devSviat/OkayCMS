@@ -185,3 +185,27 @@ $lang['okay_cms__feeds__feed__settings__prom_ua__sales_max_length'] = "Допу�
 $lang['okay_cms__feeds__feed__settings__prom_ua__country_of_origin'] = "Страна производитель (country_of_origin)";
 $lang['okay_cms__feeds__feed__settings__prom_ua__feed_name'] = "Название фида";
 $lang['okay_cms__feeds__feed__categories_settings__prom_ua__external_id'] = "Внешний ID";
+
+// Настройки Epitsentr
+$lang['okay_cms__feeds__feed__settings__epitsentr__upload_without_images'] = "Выгружать товары без изображений";
+$lang['okay_cms__feeds__feed__settings__epitsentr__upload_only_in_stock_products'] = "Выгружать только товары, которые есть в наличии";
+$lang['okay_cms__feeds__feed__settings__epitsentr__store'] = "Возможность купить товар в розничном магазине";
+$lang['okay_cms__feeds__feed__settings__epitsentr__pickup'] = "Возможность самовывоза из пункта выдачи";
+$lang['okay_cms__feeds__feed__settings__epitsentr__use_full_description'] = "Передавать в фид полное описание (если выключена передается краткое описание)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__has_manufacturer_warranty'] = "У товаров есть гарантия производителя";
+$lang['okay_cms__feeds__feed__settings__epitsentr__no_export_without_price'] = "Не выгружать товары с ценой 0";
+$lang['okay_cms__feeds__feed__settings__epitsentr__delivery'] = "Возможность курьерской доставки";
+$lang['okay_cms__feeds__feed__settings__epitsentr__adult'] = "Товары для взрослых (adult)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__company'] = "Полное наименование компании, владеющей магазином";
+$lang['okay_cms__feeds__feed__settings__epitsentr__sales_max_length'] = "Допустимая длина текста в элементе — 50 символов";
+$lang['okay_cms__feeds__feed__settings__epitsentr__country_of_origin'] = "Страна производитель (country_of_origin)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__feed_name'] = "Название фида";
+$lang['okay_cms__feeds__feed__settings__epitsentr__enable_auto_discounts'] = "Включить автоматический расчет и показ скидок (enable_auto_discounts)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__count'] = "Передавать общее количество товара, доступное для продажи на Маркете (count)";
+$lang['okay_cms__feeds__feed__settings__epitsentr__description_in_html'] = "Передавать в фид полное описание в html";
+$lang['okay_cms__feeds__feed__settings__epitsentr__description_in_html_info'] = "При включении этой галочки полное описание не будет очищаться от html тегов и для корректное передачи тегов в фиды html текст будет обернут в CDATA";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brands_external_ids'] = "Внешние ID брендов";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brand_name'] = "Название бренда";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brand_external_id'] = "Внешний ID в Эпицентре";
+$lang['okay_cms__feeds__feed__settings__epitsentr__brand_external_id_placeholder'] = "Введите внешний ID";
+$lang['okay_cms__feeds__feed__categories_settings__epitsentr__external_id'] = "Внешний ID";

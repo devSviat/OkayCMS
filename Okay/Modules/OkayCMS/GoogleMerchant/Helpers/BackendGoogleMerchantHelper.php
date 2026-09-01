@@ -335,7 +335,12 @@ class BackendGoogleMerchantHelper
     private function getAllRelations()
     {
         if ($this->allRelations === null) {
-            $this->allRelations = $this->relationsEntity->noLimit()->find();
+            $relations = $this->relationsEntity->noLimit()->find();
+
+            // find() віддає результат через ExtenderFacade, тож повернути
+            // не масив може будь-який чужий ChainExtender — а нижче по
+            // ланцюгу це foreach без перевірки.
+            $this->allRelations = is_array($relations) ? $relations : [];
         }
 
         return $this->allRelations;

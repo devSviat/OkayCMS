@@ -22,6 +22,44 @@ class NPCacheHelperTest extends TestCase
 {
     private const CITIES_PAGES = 9;
 
+    /**
+     * НП не завжди фільтрує totalCount за TypeOfWarehouseRef: для типу
+     * «Поштове відділення з обмеженням» він віддає ті самі 13.5 тис., що й для
+     * звичайного «Поштове(ий)», але жодного рядка цього типу в data немає.
+     * Перевірено живим викликом на бойовому ключі.
+     *
+     * Без межі на порожній сторінці кожен добовий прогін витрачав на такий тип
+     * 14 запитів, з яких не імпортується нічого. Свій ліміт НП віддає кодом 200
+     * з errors: ["To many requests"], тож марні запити не безкоштовні.
+     *
+     * Правило арифметичне, тож і перевіряється арифметично.
+     */
+    #[DataProvider('pagesLeftProvider')]
+    public function testEmptyPageIsTheLastOne(int $totalCount, int $page, bool $empty, int $expected): void
+    {
+        // Правило не залежить від жодної залежності хелпера, тож і екземпляр
+        // тут без конструктора — без моків, яким нема чого очікувати.
+        $helper = (new \ReflectionClass(NPCacheHelper::class))->newInstanceWithoutConstructor();
+
+        $this->assertSame(
+            $expected,
+            (new \ReflectionMethod(NPCacheHelper::class, 'pagesLeft'))
+                ->invoke($helper, $totalCount, 1000, $page, $empty)
+        );
+    }
+
+    public static function pagesLeftProvider(): array
+    {
+        return [
+            'сторінка з даними — межа з totalCount' => [13514, 1, false, 14],
+            'порожня перша — далі не йдемо'         => [13514, 1, true, 1],
+            'порожня посеред пагінації'             => [13514, 5, true, 5],
+            'порожня після останньої сторінки'      => [13514, 14, true, 14],
+            'відповідь без totalCount'              => [0, 1, true, 0],
+            'рівний поділ'                          => [2000, 1, false, 2],
+        ];
+    }
+
     public function testCitiesCacheIsNotPrunedWhenApiCallFails(): void
     {
         $helper = $this->helperMock(['updateCitiesCache', 'removeRedundant']);
