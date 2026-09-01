@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Okay\Modules\OkayCMS\Liqpay\Init;
+namespace Okay\Modules\OkayCMS\LiqPay\Init;
 
 
 use Okay\Core\Modules\AbstractInit;
