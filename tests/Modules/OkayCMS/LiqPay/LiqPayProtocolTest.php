@@ -68,6 +68,77 @@ class LiqPayProtocolTest extends TestCase
         $this->assertFalse($this->protocol->matches(self::PRIVATE_KEY, $data, $foreign));
     }
 
+    /**
+     * Головна властивість підпису: підроблений колбек не проходить. Кожен
+     * випадок тут — окрема спроба заробити на магазині, а не варіація формату.
+     */
+    #[DataProvider('tamperedPayloadProvider')]
+    public function testTamperedPayloadProducesADifferentSignature(array $tampered): void
+    {
+        $original = base64_encode(json_encode([
+            'order_id' => '42-123456',
+            'status'   => 'success',
+            'amount'   => 100.00,
+            'currency' => 'UAH',
+        ]));
+
+        $this->assertNotSame(
+            $this->protocol->sign(self::PRIVATE_KEY, $original),
+            $this->protocol->sign(self::PRIVATE_KEY, base64_encode(json_encode($tampered)))
+        );
+    }
+
+    public static function tamperedPayloadProvider(): array
+    {
+        return [
+            'lowered amount'      => [
+                ['order_id' => '42-123456', 'status' => 'success', 'amount' => 1.00, 'currency' => 'UAH'],
+            ],
+            'someone elses order' => [
+                ['order_id' => '99-123456', 'status' => 'success', 'amount' => 100.00, 'currency' => 'UAH'],
+            ],
+            'flipped status'      => [
+                ['order_id' => '42-123456', 'status' => 'failure', 'amount' => 100.00, 'currency' => 'UAH'],
+            ],
+            'other currency'      => [
+                ['order_id' => '42-123456', 'status' => 'success', 'amount' => 100.00, 'currency' => 'USD'],
+            ],
+        ];
+    }
+
+    /**
+     * Ключ обгортає дані з обох боків. Підпис лише з переднім ключем — робоча
+     * реалізація hmac-подібної схеми, яку LiqPay відхилить мовчки: замовлення
+     * просто не оплатяться.
+     */
+    public function testKeyWrapsTheDataOnBothSides(): void
+    {
+        $data = 'ZGF0YQ==';
+
+        $this->assertNotSame(
+            base64_encode(sha1(self::PRIVATE_KEY . $data, true)),
+            $this->protocol->sign(self::PRIVATE_KEY, $data)
+        );
+    }
+
+    /** sha1 у сирих байтах — 20 байтів, тобто рівно 28 символів base64. */
+    public function testSignatureHasTheShapeOfRawSha1(): void
+    {
+        $signature = $this->protocol->sign(self::PRIVATE_KEY, 'ZGF0YQ==');
+
+        $this->assertSame(28, strlen($signature));
+        $this->assertMatchesRegularExpression('~^[A-Za-z0-9+/]+=*$~', $signature);
+    }
+
+    /** Порожній ключ не має збігатися з непорожнім — інакше пусті налаштування «працюють». */
+    public function testEmptyKeyDoesNotCollide(): void
+    {
+        $this->assertNotSame(
+            $this->protocol->sign('', 'ZGF0YQ=='),
+            $this->protocol->sign(self::PRIVATE_KEY, 'ZGF0YQ==')
+        );
+    }
+
     #[DataProvider('orderIdProvider')]
     public function testExtractOrderId(string $liqPayOrderId, int $expected): void
     {
