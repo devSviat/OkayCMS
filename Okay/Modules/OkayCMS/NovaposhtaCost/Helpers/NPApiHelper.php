@@ -14,6 +14,14 @@ use Psr\Log\LoggerInterface;
 
 class NPApiHelper
 {
+    /**
+     * Скільки разів пробувати запит там, де на відповідь ніхто не чекає.
+     * Клієнтські шляхи (автокомпліт адреси, розрахунок доставки) лишаються на
+     * одній спробі: там ретрай тримає php-fpm воркер до півтори хвилини, а
+     * «повторює» користувач — наступною літерою.
+     */
+    private const UNATTENDED_ATTEMPTS = 3;
+
     private string $lastCallError = '';
     private Settings $settings;
     private LoggerInterface $logger;
@@ -37,7 +45,7 @@ class NPApiHelper
             "calledMethod" => "getWarehouseTypes",
         ];
 
-        $response = $this->request($request, false);
+        $response = $this->request($request, false, self::UNATTENDED_ATTEMPTS);
         if (!empty($response->success)) {
             $result = [];
             foreach ($response->data as $warehouseTypeData) {
@@ -79,7 +87,7 @@ class NPApiHelper
             ]
         ];
 
-        $response = $this->request($request);
+        $response = $this->request($request, true, self::UNATTENDED_ATTEMPTS);
         if (!empty($response->success)) {
             $warehousesDTO = new NPWarehousesCollectionDTO();
             foreach ($response->data as $warehouseData) {
@@ -125,7 +133,7 @@ class NPApiHelper
             ],
         ];
 
-        $response = $this->request($request);
+        $response = $this->request($request, true, self::UNATTENDED_ATTEMPTS);
         if (!empty($response->success)) {
             $citiesDTO = new NPCitiesCollectionDTO();
             foreach ($response->data as $cityData) {
@@ -152,7 +160,7 @@ class NPApiHelper
         return $this->lastCallError;
     }
 
-    public function request(array $requestParams, bool $isUseApiKey = true)
+    public function request(array $requestParams, bool $isUseApiKey = true, int $maxAttempts = 1)
     {
         if (empty($requestParams)) {
             return false;
@@ -161,40 +169,110 @@ class NPApiHelper
             $requestParams["apiKey"] = $this->settings->get('newpost_key');
         }
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://api.novaposhta.ua/v2.0/json/');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestParams));
-        curl_setopt($ch, CURLOPT_POST, 1);
-        $response = curl_exec($ch);
+        $maxAttempts = max(1, $maxAttempts);
+        $retryDelay = 1;
+        $retryErrno = [6, 7, 35, 28, 52, 56]; // curl network errors
+
+        $attempt = 0;
+
+        do {
+            $attempt++;
+
+            $ch = curl_init();
+
+            curl_setopt($ch, CURLOPT_URL, 'https://api.novaposhta.ua/v2.0/json/');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                "Content-Type: application/json",
+                "Connection: close"
+            ]);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST , 'POST');
+
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestParams));
+
+            // Без FOLLOWLOCATION навмисно: ендпоінт один і незмінний, а на
+            // 301/302 curl перетворює POST на GET — тіло з apiKey або
+            // губиться, або їде за чужим Location.
+            curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
+
+            $response = curl_exec($ch);
+            $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $errno    = curl_errno($ch);
+            $error    = curl_error($ch);
+
+
+            $tooManyRequests = false;
+            if ($response !== false) {
+                $responseJson = json_decode($response);
+
+                if (!empty($responseJson->errors)
+                    && in_array('To many requests', $responseJson->errors, true)
+                ) {
+                    // Лише warning: помилкою це стане внизу, якщо спроби
+                    // скінчаться. Інакше кожна літера в автокомпліті писала б
+                    // два записи error на той самий ліміт.
+                    $this->lastCallError = "To many requests";
+                    $this->logger->warning('Novaposhta cost warning: "' . $this->lastCallError . '"');
+                    $tooManyRequests = true;
+                } else {
+                    break;
+                }
+            }
+
+            if (!$tooManyRequests && !in_array($errno, $retryErrno, true)) {
+                $this->lastCallError = "CURL response code:$status error #{$errno}: {$error}";
+                $this->logger->error('Novaposhta cost error: "' . $this->lastCallError . '"');
+                return false;
+            }
+
+            if ($attempt < $maxAttempts) {
+                $this->logger->warning(sprintf(
+                    'Novaposhta cost warning retry %d/%d: CURL #%d %s status http:%d',
+                    $attempt,
+                    $maxAttempts,
+                    $errno,
+                    $error,
+                    $status
+                ));
+
+                sleep($retryDelay);
+            }
+        } while ($attempt < $maxAttempts);
 
         if ($response === false) {
-            $this->lastCallError = 'Error in API call';
-            $this->logger->warning('Novaposhta cost error: "' . $this->lastCallError . '"');
+            $this->lastCallError = "CURL failed after {$attempt} attempt(s). Last error #{$errno}: {$error}";
+            $this->logger->error('Novaposhta cost error: "' . $this->lastCallError . '"');
             return false;
         }
 
-        $response = json_decode($response);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->lastCallError = 'Invalid JSON response';
+            $this->logger->error('Novaposhta cost error: "' . $this->lastCallError . '"');
+            return false;
+        }
 
-        if (!empty($response->errors)) {
-            $this->lastCallError = implode('<br>', (array)$response->errors);
-            // Запам'ятовуємо помилку по API key
+        if (!empty($responseJson->errors)) {
+            $this->lastCallError = implode('<br>', (array) $responseJson->errors);
+
             if (strpos($this->lastCallError, 'API key') !== false) {
                 $this->settings->set('np_api_key_error', $this->lastCallError);
             }
-            $this->logger->warning('Novaposhta cost error: "' . $this->lastCallError . '"');
+
+            $this->logger->error('Novaposhta cost error: "' . $this->lastCallError . '"');
             return false;
         }
-        if (!empty($response->success)) {
-            if (empty($response->data)) {
+        if (!empty($responseJson->success)) {
+            if (!isset($responseJson->data)) {
                 $this->lastCallError = 'Response data is empty';
-                $this->logger->warning('Novaposhta cost error: "' . $this->lastCallError . '"');
+                $this->logger->error('Novaposhta cost error: "' . $this->lastCallError . '"');
                 return false;
             }
-            return $response;
+            return $responseJson;
         }
 
         return false;
