@@ -91,16 +91,16 @@ class LiqPayProtocolTest extends TestCase
     public static function tamperedPayloadProvider(): array
     {
         return [
-            'занижена сума' => [
+            'lowered amount'      => [
                 ['order_id' => '42-123456', 'status' => 'success', 'amount' => 1.00, 'currency' => 'UAH'],
             ],
-            'чуже замовлення' => [
+            'someone elses order' => [
                 ['order_id' => '99-123456', 'status' => 'success', 'amount' => 100.00, 'currency' => 'UAH'],
             ],
-            'підмінений статус' => [
+            'flipped status'      => [
                 ['order_id' => '42-123456', 'status' => 'failure', 'amount' => 100.00, 'currency' => 'UAH'],
             ],
-            'інша валюта' => [
+            'other currency'      => [
                 ['order_id' => '42-123456', 'status' => 'success', 'amount' => 100.00, 'currency' => 'USD'],
             ],
         ];
