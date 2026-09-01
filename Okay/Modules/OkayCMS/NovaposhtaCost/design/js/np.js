@@ -68,6 +68,48 @@ function init() {
     update_np_payments();
 }
 
+// Поле міста мусить нести ref зі списку НП, а не будь-який текст. validation.js
+// вимагає лише непорожнє значення, тож замовлення з міста «Львв» проходило
+// перевірку й доїжджало до менеджера з порожнім novaposhta_delivery_city_id.
+$(document).on(
+    "focusout keydown",
+    ".fn_delivery_novaposhta input.city_novaposhta, .fn_delivery_novaposhta input.city_novaposhta_for_door",
+    function (e) {
+        if (e.type === "focusout" || e.key === "Enter") {
+            const $this = $(this);
+            const deliveryBlock = $('input[name="delivery_id"]:checked').closest(
+                ".fn_delivery_item"
+            );
+            const validator = $(".fn_validate_cart").validate();
+            const cityId = deliveryBlock
+                .find('input[name="novaposhta_delivery_city_id"]')
+                .val();
+
+            if (!cityId) {
+                $this.val("");
+                validator.element($this);
+            } else {
+                // errorsFor() чекає DOM-елемент: із jQuery-обʼєкта idOrName()
+                // читає .id || .name, отримує undefined і падає в
+                // escapeCssMeta(). Мітка при цьому лишалась на екрані.
+                $this.removeClass("error").attr("aria-invalid", "false");
+                validator.errorsFor($this[0]).remove();
+            }
+        }
+    }
+);
+
+// Повертає полю міста нормальний вигляд після вибору зі списку. Потрібно саме
+// тому, що focusout настає РАНІШЕ за вибір підказки: обробник вище встигає
+// очистити поле, okay.js знімає .filled, а валідатор позначає поле помилковим.
+// Без цього щойно вибране місто лишається червоним і з плейсхолдером поверх
+// тексту — однаково і для відділення, і для адресної доставки.
+function npCityChosen(input) {
+    input.removeClass("error").attr("aria-invalid", "false");
+    input.closest(".form__group").addClass("filled");
+    $(".fn_validate_cart").validate().errorsFor(input[0]).remove();
+}
+
 $( ".fn_delivery_novaposhta input.city_novaposhta" ).devbridgeAutocomplete({
     serviceUrl: okay.router['OkayCMS_NovaposhtaCost_find_city'],
     minChars: 1,
@@ -80,6 +122,8 @@ $( ".fn_delivery_novaposhta input.city_novaposhta" ).devbridgeAutocomplete({
         delivery_block.find('input[name="novaposhta_delivery_warehouse_id"]').val('');
         delivery_block.find('select.fn_select_warehouses_novaposhta option:selected').prop('selected', false);
         delivery_block.find('input[name="novaposhta_delivery_city_id"]').val(suggestion.data.ref).trigger('change');
+
+        npCityChosen(delivery_block.find("input.city_novaposhta"));
     },
     formatResult: function(suggestion, currentValue) {
         var reEscape = new RegExp( '(\\' + ['/', '.', '*', '+', '?', '|', '(', ')', '[', ']', '{', '}', '\\'].join( '|\\' ) + ')', 'g' );
@@ -101,6 +145,8 @@ $( ".fn_delivery_novaposhta input.city_novaposhta_for_door" ).devbridgeAutocompl
         delivery_block.find('input[name=novaposhta_city_name]').val(suggestion.city);
         delivery_block.find('input[name=novaposhta_area_name]').val(suggestion.area);
         delivery_block.find('input[name=novaposhta_region_name]').val(suggestion.region);
+
+        npCityChosen(delivery_block.find("input.city_novaposhta_for_door"));
        // if (suggestion.streets_availability) { Новая Почта перестала присылать корректный параметр у некоторых городов
         if (true) {
             $(".fn_delivery_novaposhta input.fn_street").devbridgeAutocomplete({
