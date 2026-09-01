@@ -14,6 +14,14 @@ use Psr\Log\LoggerInterface;
 
 class NPApiHelper
 {
+    /**
+     * Скільки разів пробувати запит там, де на відповідь ніхто не чекає.
+     * Клієнтські шляхи (автокомпліт адреси, розрахунок доставки) лишаються на
+     * одній спробі: там ретрай тримає php-fpm воркер до півтори хвилини, а
+     * «повторює» користувач — наступною літерою.
+     */
+    private const UNATTENDED_ATTEMPTS = 3;
+
     private string $lastCallError = '';
     private Settings $settings;
     private LoggerInterface $logger;
@@ -37,7 +45,7 @@ class NPApiHelper
             "calledMethod" => "getWarehouseTypes",
         ];
 
-        $response = $this->request($request, false);
+        $response = $this->request($request, false, self::UNATTENDED_ATTEMPTS);
         if (!empty($response->success)) {
             $result = [];
             foreach ($response->data as $warehouseTypeData) {
@@ -79,7 +87,7 @@ class NPApiHelper
             ]
         ];
 
-        $response = $this->request($request);
+        $response = $this->request($request, true, self::UNATTENDED_ATTEMPTS);
         if (!empty($response->success)) {
             $warehousesDTO = new NPWarehousesCollectionDTO();
             foreach ($response->data as $warehouseData) {
@@ -125,7 +133,7 @@ class NPApiHelper
             ],
         ];
 
-        $response = $this->request($request);
+        $response = $this->request($request, true, self::UNATTENDED_ATTEMPTS);
         if (!empty($response->success)) {
             $citiesDTO = new NPCitiesCollectionDTO();
             foreach ($response->data as $cityData) {
@@ -152,7 +160,7 @@ class NPApiHelper
         return $this->lastCallError;
     }
 
-    public function request(array $requestParams, bool $isUseApiKey = true)
+    public function request(array $requestParams, bool $isUseApiKey = true, int $maxAttempts = 1)
     {
         if (empty($requestParams)) {
             return false;
@@ -161,7 +169,7 @@ class NPApiHelper
             $requestParams["apiKey"] = $this->settings->get('newpost_key');
         }
 
-        $maxRetries = 3;
+        $maxAttempts = max(1, $maxAttempts);
         $retryDelay = 1;
         $retryErrno = [6, 7, 35, 28, 52, 56]; // curl network errors
 
@@ -187,10 +195,10 @@ class NPApiHelper
 
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestParams));
 
+            // Без FOLLOWLOCATION навмисно: ендпоінт один і незмінний, а на
+            // 301/302 curl перетворює POST на GET — тіло з apiKey або
+            // губиться, або їде за чужим Location.
             curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
-            curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
-            curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
             $response = curl_exec($ch);
             $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -205,8 +213,11 @@ class NPApiHelper
                 if (!empty($responseJson->errors)
                     && in_array('To many requests', $responseJson->errors, true)
                 ) {
+                    // Лише warning: помилкою це стане внизу, якщо спроби
+                    // скінчаться. Інакше кожна літера в автокомпліті писала б
+                    // два записи error на той самий ліміт.
                     $this->lastCallError = "To many requests";
-                    $this->logger->error('Novaposhta cost error: "' . $this->lastCallError . '"');
+                    $this->logger->warning('Novaposhta cost warning: "' . $this->lastCallError . '"');
                     $tooManyRequests = true;
                 } else {
                     break;
@@ -219,21 +230,22 @@ class NPApiHelper
                 return false;
             }
 
-            $this->logger->warning(sprintf(
-                'Novaposhta cost warning retry %d/%d: CURL #%d %s status http:%d',
-                $attempt,
-                $maxRetries,
-                $errno,
-                $error,
-                $status
-            ));
+            if ($attempt < $maxAttempts) {
+                $this->logger->warning(sprintf(
+                    'Novaposhta cost warning retry %d/%d: CURL #%d %s status http:%d',
+                    $attempt,
+                    $maxAttempts,
+                    $errno,
+                    $error,
+                    $status
+                ));
 
-            sleep($retryDelay);
-
-        } while ($attempt < $maxRetries);
+                sleep($retryDelay);
+            }
+        } while ($attempt < $maxAttempts);
 
         if ($response === false) {
-            $this->lastCallError = "CURL failed after {$maxRetries} retries. Last error #{$errno}: {$error}";
+            $this->lastCallError = "CURL failed after {$attempt} attempt(s). Last error #{$errno}: {$error}";
             $this->logger->error('Novaposhta cost error: "' . $this->lastCallError . '"');
             return false;
         }
