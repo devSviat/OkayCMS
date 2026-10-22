@@ -1,1 +1,4 @@
 .env
+
+# Локальний mkcert-сертифікат і ключ для сервісу tls
+/docker/tls/certs/
