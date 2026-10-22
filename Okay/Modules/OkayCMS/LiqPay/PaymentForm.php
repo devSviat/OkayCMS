@@ -59,7 +59,7 @@ class PaymentForm extends AbstractModule implements PaymentFormInterface
 
         $privateKey = $settings['liq_pay_private_key'];
         $publicKey = $settings['liq_pay_public_key'];
-        $paymentType = $settings['pay_types'];
+        $paymentType = $settings['pay_types'] ?? null;
 
         // Приватного ключа тут немає навмисно: у протоколі v3 він потрібен лише
         // для обчислення підпису на сервері. Раніше він лежав у цьому масиві й

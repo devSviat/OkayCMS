@@ -105,7 +105,7 @@ class LicenseModulesTemplates
             if ($retryCnt < self::MAX_RETRY) {
                 $retryCnt++;
             }
-            $_SESSION['request_timeout'] = time() + (self::REQUEST_TIMEOUT * $_SESSION['request_timeout_try_cnt']);
+            $_SESSION['request_timeout'] = time() + (self::REQUEST_TIMEOUT * $retryCnt);
             $_SESSION['request_timeout_try_cnt'] = $retryCnt;
             // Та сама пауза, але спільна для всіх відвідувачів. Сесійна вище
             // лишається недоторканою: вона нічого не ламає, просто не діє для

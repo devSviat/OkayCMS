@@ -448,11 +448,17 @@ class TranslationsEntity extends Entity
         $content = "<?php\n\n";
         $content .= "\$lang = [];\n";
         foreach($translations as $label => $translation) {
-            $content .= "\$lang['".$label."'] = '".addcslashes($translation, "\n\r\\\"'")."';\n";
+            $content .= "\$lang['".$label."'] = '".addcslashes((string) $translation, "\n\r\\\"'")."';\n";
         }
         $file = fopen($langFile, 'w');
         fwrite($file, $content);
         fclose($file);
+
+        // На проді opcache.validate_timestamps=0: без цього правка з адмінки
+        // не видна до рестарту php-fpm.
+        if (function_exists('opcache_invalidate')) {
+            @opcache_invalidate($langFile, true);
+        }
 
         return ExtenderFacade::execute([static::class, __FUNCTION__], null, func_get_args());
     }

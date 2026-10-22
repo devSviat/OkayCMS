@@ -98,7 +98,7 @@ class Validator
         if (empty($url)) {
             return !$is_required;
         }
-        if (!preg_match("/^(?:https?://)?[a-zA-Zа-яА-Я\d]+?(?:-+[a-zA-Zа-яА-Я\d]+?)*\.(?:[a-zA-Zа-яА-Я\d.]+?(?:-+[a-zA-Zа-яА-Я\d]+?)*)+/?$/ui", $url)) {
+        if (!preg_match("~^(?:https?://)?[a-zA-Zа-яА-Я\d]+?(?:-+[a-zA-Zа-яА-Я\d]+?)*\.(?:[a-zA-Zа-яА-Я\d.]+?(?:-+[a-zA-Zа-яА-Я\d]+?)*)+/?$~ui", (string) $url)) {
             return false;
         }
         return true;

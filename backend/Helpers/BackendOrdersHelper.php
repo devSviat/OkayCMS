@@ -626,8 +626,9 @@ class BackendOrdersHelper
 
     public function determineCurrentPage($page)
     {
-        if (empty($page)) {
-            $page = 1;
+        // 'all' — усі сторінки; будь-що інше з запиту має стати номером сторінки.
+        if ($page !== 'all') {
+            $page = max(1, (int) $page);
         }
         return ExtenderFacade::execute(__METHOD__, $page, func_get_args());
     }
