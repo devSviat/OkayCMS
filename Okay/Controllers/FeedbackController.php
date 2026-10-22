@@ -38,6 +38,9 @@ class FeedbackController extends AbstractController {
             } else {
 
                 $saved = true;
+                // message_sent бачить і відсіяний повтор. Лічильникам звернень
+                // (аналітика, CRM) потрібен саме новий запис.
+                $created = false;
 
                 if ($this->acceptFeedback($feedback)) {
                     $feedback->ip = $_SERVER['REMOTE_ADDR'];
@@ -52,6 +55,7 @@ class FeedbackController extends AbstractController {
                         $this->design->assign('error', 'not_saved');
                         $saved = false;
                     } else {
+                        $created = true;
                         // Отправляем email
                         $notify->emailFeedbackAdmin($feedbackId);
                     }
@@ -62,6 +66,7 @@ class FeedbackController extends AbstractController {
                 if ($saved) {
                     $frontPostRedirectGet->flash([
                         'message_sent' => true,
+                        'message_created' => $created,
                         'request_data' => $this->design->getVar('request_data'),
                     ]);
                     $frontPostRedirectGet->redirectToCurrent();
