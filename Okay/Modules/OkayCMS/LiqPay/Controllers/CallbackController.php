@@ -30,7 +30,16 @@ class CallbackController extends AbstractController
         $signature      = $this->request->post('signature');
         $data           = $this->request->post('data');
 
-        $payment_data = json_decode(base64_decode($data));
+        $payment_data = json_decode(base64_decode((string) $data));
+
+        // Анонімний POST без data інакше доходив до читання властивостей null
+        // і лишав у лозі deprecation та чотири warning на кожен запит.
+        if (!is_object($payment_data)) {
+            $logger->warning("LiqPay notice: 'bad data'");
+            $this->response->setContent("bad data")->setStatusCode(400);
+            $this->response->sendContent();
+            exit;
+        }
 
         $orderId = $protocol->extractOrderId((string)$payment_data->order_id);
         $currency = $payment_data->currency;
