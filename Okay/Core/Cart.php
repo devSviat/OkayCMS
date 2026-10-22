@@ -174,6 +174,7 @@ class Cart
     {
         if (empty($_SESSION['user_id'])) {
             if (!empty($_COOKIE['shopping_cart']) && is_array($items = json_decode($_COOKIE['shopping_cart'], true))) {
+                $items = self::sanitizeItems($items);
                 foreach ($items as $key => $item){
                     if (!empty($_SESSION['shopping_cart'][$key]))
                     {
@@ -262,6 +263,48 @@ class Cart
         $this->updateTotals();
     }
 
+    /**
+     * Лишає з клієнтського кошика лише пари «додатний id варіанта => додатна
+     * ціла кількість». Решту відкидає, а не виправляє: дробове чи від'ємне
+     * значення в cookie — підробка, а не помилка введення.
+     *
+     * @param array $items variant_id => amount, як у cookie shopping_cart
+     * @return array<int, int>
+     */
+    public static function sanitizeItems(array $items): array
+    {
+        $clean = [];
+        foreach ($items as $variantId => $amount) {
+            $variantId = filter_var($variantId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+            if ($variantId === false) {
+                continue;
+            }
+
+            if (is_string($amount) && ctype_digit($amount)) {
+                $amount = (int) $amount;
+            }
+            if (!is_int($amount) || $amount < 1) {
+                continue;
+            }
+
+            $clean[$variantId] = $amount;
+        }
+
+        return $clean;
+    }
+
+    /**
+     * Кількість у межах [1, склад]. Для варіанта без залишку (передзамовлення)
+     * межею є max_order_amount; нескінченний склад VariantsEntity вже віддає
+     * як stock = max_order_amount.
+     */
+    public static function clampAmount(int $amount, $stock, int $maxOrderAmount): int
+    {
+        $limit = $stock > 0 ? (int) $stock : $maxOrderAmount;
+
+        return max(1, min($amount, $limit));
+    }
+
     public function get(): self
     {
         return ExtenderFacade::execute(__METHOD__, $this, func_get_args());
@@ -278,9 +321,8 @@ class Cart
         if (!isset($_SESSION['shopping_cart'][$variantId])) {
             $variant = $this->variantsEntity->get(intval($variantId));
             if (!empty($variant) && ($variant->stock > 0 || $this->settings->get('is_preorder'))) {
-                $amount = max(1, $amount);
-                $amount = min($amount, ($variant->stock > 0 ? $variant->stock : min($this->settings->get('max_order_amount'), $amount)));
-                $_SESSION['shopping_cart'][$variantId] = intval($amount);
+                $amount = self::clampAmount((int) $amount, $variant->stock, (int) $this->settings->get('max_order_amount'));
+                $_SESSION['shopping_cart'][$variantId] = $amount;
                 if (!empty($_SESSION['shopping_cart'])) {
                     $this->saveShoppingCart($_SESSION['shopping_cart'] ?? []);
                 }
@@ -309,9 +351,8 @@ class Cart
         if (isset($_SESSION['shopping_cart'][$variantId])) {
             $variant = $this->variantsEntity->get(intval($variantId));
             if (!empty($variant) && ($variant->stock > 0 || $this->settings->get('is_preorder'))) {
-                $amount = max(1, $amount);
-                $amount = min($amount, ($variant->stock > 0 ? $variant->stock : min($this->settings->get('max_order_amount'), $amount)));
-                $_SESSION['shopping_cart'][$variantId] = intval($amount);
+                $amount = self::clampAmount((int) $amount, $variant->stock, (int) $this->settings->get('max_order_amount'));
+                $_SESSION['shopping_cart'][$variantId] = $amount;
                 if (!empty($_SESSION['shopping_cart'])) {
                     $this->saveShoppingCart($_SESSION['shopping_cart'] ?? []);
                 }
@@ -649,7 +690,9 @@ class Cart
             if (isset($variants[$variantId])) {
                 $item = new \stdClass;
                 $item->variant = $variants[$variantId];
-                $item->amount = $amount;
+                // Сесійний кошик міг прийти з cookie чи зі старої сесії до
+                // валідації — кількість у замовленні визначає лише склад.
+                $item->amount = self::clampAmount((int) $amount, $variants[$variantId]->stock, (int) $this->settings->get('max_order_amount'));
 
                 $items[$variantId] = $item;
             }
