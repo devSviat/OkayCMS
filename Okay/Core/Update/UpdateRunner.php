@@ -315,10 +315,14 @@ class UpdateRunner
         $this->assertEnoughDiskSpace($ctx['rootDir'], $ctx['extractDir']);
 
         $payloadDir = $ctx['extractDir'] . '/payload';
-        if ($this->composerLockDiffers($ctx['rootDir'], $payloadDir) && !$this->isComposerAvailable($ctx['rootDir'])) {
+        if (ComposerInstallDecision::isRequired($ctx['rootDir'], $payloadDir) && !$this->isComposerAvailable($ctx['rootDir'])) {
+            // Не «виконайте composer install»: прогін стоїть ДО підміни файлів,
+            // на диску ще старий composer.lock, і така команда нічого не змінить.
             throw new \RuntimeException(
-                'composer.lock оновлення відрізняється від поточного, а composer/composer.phar не знайдено — '
-                . 'оновлення зупинено до будь-яких змін.'
+                'Оновлення зупинено до будь-яких змін. '
+                . 'Оновлення змінює залежності, яким потрібен composer install, а composer/composer.phar не знайдено. '
+                . 'Зробіть composer доступним — встановіть його на сервер або покладіть composer.phar у корінь сайту — '
+                . 'і запустіть оновлення знову: далі воно викличе composer саме, уже з новим composer.lock.'
             );
         }
 
@@ -867,25 +871,6 @@ class UpdateRunner
         }
 
         return $size;
-    }
-
-    /**
-     * Логіка навмисно дублює UpdateApplier::runComposerIfNeeded() (той
-     * метод private і фактично ЗАПУСКАЄ composer install — тут потрібна
-     * лише перевірка ДО будь-яких змін, без побічних ефектів).
-     */
-    private function composerLockDiffers(string $rootDir, string $payloadDir): bool
-    {
-        $packageLockPath = $payloadDir . '/composer.lock';
-        if (!is_file($packageLockPath)) {
-            return false;
-        }
-
-        $currentLockPath = $rootDir . '/composer.lock';
-        $packageLock = file_get_contents($packageLockPath);
-        $currentLock = is_file($currentLockPath) ? file_get_contents($currentLockPath) : null;
-
-        return $packageLock !== $currentLock;
     }
 
     private function isComposerAvailable(string $rootDir): bool

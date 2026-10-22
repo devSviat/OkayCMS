@@ -183,9 +183,9 @@ class UpdateApplier
     }
 
     /**
-     * composer install, лише якщо composer.lock у пакеті відрізняється від
-     * поточного (порівняння ВМІСТУ, не mtime). Пакет без composer.lock
-     * (не кожен реліз чіпає залежності) → null, кроку немає.
+     * composer install, лише якщо пакет змінює прод-залежності — рішення за
+     * ComposerInstallDecision (порівняння вмісту без dev-частин, не mtime).
+     * Пакет без composer.lock (не кожен реліз чіпає залежності) → null, кроку немає.
      *
      * ЯКЩО lock відрізняється, а composer недоступний — RuntimeException.
      * Це страховка: основний гейт — pre-flight у UpdateRunner (Task 7), що
@@ -199,26 +199,17 @@ class UpdateApplier
     public function runComposerIfNeeded(string $rootDir, string $extractedPayloadDir): ?string
     {
         $rootDir = rtrim($rootDir, '/');
-        $extractedPayloadDir = rtrim($extractedPayloadDir, '/');
 
-        $packageLockPath = $extractedPayloadDir . '/composer.lock';
-        if (!is_file($packageLockPath)) {
-            return null;
-        }
-
-        $currentLockPath = $rootDir . '/composer.lock';
-        $packageLock = file_get_contents($packageLockPath);
-        $currentLock = is_file($currentLockPath) ? file_get_contents($currentLockPath) : null;
-
-        if ($packageLock === $currentLock) {
+        if (!ComposerInstallDecision::isRequired($rootDir, $extractedPayloadDir)) {
             return null;
         }
 
         $composerCommand = $this->findComposerCommand($rootDir);
         if ($composerCommand === null) {
             throw new \RuntimeException(
-                'composer.lock оновлення відрізняється від поточного, а composer/composer.phar не знайдено — '
-                . 'встановлення залежностей неможливе.'
+                'Оновлення змінює залежності, яким потрібен composer install, а composer/composer.phar не знайдено. '
+                . 'Зробіть composer доступним — встановіть його на сервер або покладіть composer.phar у корінь сайту — '
+                . 'і запустіть оновлення знову: далі воно викличе composer саме, уже з новим composer.lock.'
             );
         }
 
