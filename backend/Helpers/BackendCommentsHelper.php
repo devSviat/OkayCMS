@@ -199,6 +199,19 @@ class BackendCommentsHelper
     /**
      * @param array<string, array{type: string, id: int}> $targets
      */
+    /**
+     * Перераховує бал товарів і записів, до яких належать ці відгуки. Для змін
+     * поза approve()/delete(), як-от перемикача «схвалено» в списку відгуків.
+     *
+     * @param int[] $commentIds
+     */
+    public function recalculateRatingsForComments(array $commentIds)
+    {
+        $this->recalculateRatings($this->reviewTargets($commentIds));
+
+        ExtenderFacade::execute(__METHOD__, null, func_get_args());
+    }
+
     private function recalculateRatings(array $targets)
     {
         foreach ($targets as $target) {
