@@ -218,6 +218,11 @@ server {
         rewrite /admin /backend/ redirect;
     }
 
+    # Без цього /backend падає в загальний location і віддає 404.
+    location = /backend {
+        return 301 /backend/;
+    }
+
     location ^~ /backend/ {
         # Скомпільовані Smarty-шаблони — не точки входу; кожен виконувався
         # як PHP і давав 500 з записом у лог.
