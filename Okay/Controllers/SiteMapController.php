@@ -19,8 +19,7 @@ class SiteMapController extends AbstractController
          * доступные пары:
          * root_url=http://domain.com
          *
-         * чтобы сгенерировать файлы с браузера нужно в браузере перейти по ссылке
-         * http://domain.com/sitemap.xml?output=file
+         * Файли пишуться лише з CLI: браузеру sitemap завжди віддається відповіддю.
          */
 
         $siteMapHelper->writeHead();
