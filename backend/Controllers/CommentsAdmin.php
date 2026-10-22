@@ -32,6 +32,9 @@ class CommentsAdmin extends IndexAdmin
                     break;
                 }
             }
+
+            // F5 після відповіді повторював POST: друга відповідь і другий лист.
+            $this->postRedirectGet->redirect();
         }
 
         $filter        = $backendCommentsHelper->buildFilter();

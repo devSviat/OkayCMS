@@ -207,10 +207,13 @@ class Init extends AbstractInit
             }
         );
 
+        // 05:00 — найтихіша година для API Нової пошти. Відділення на десять
+        // хвилин пізніше: їх вивантаження важче за міста і довше тримає
+        // з'єднання, тож дві задачі не стартують одночасно.
         $this->registerSchedule(
             (new Schedule([NPCacheHelper::class, 'cronUpdateCitiesCache']))
                 ->name('Parses NP cities to the db cache')
-                ->time('0 0 * * *')
+                ->time('0 5 * * *')
                 ->overlap(false)
                 ->timeout(3600)
         );
@@ -218,7 +221,7 @@ class Init extends AbstractInit
         $this->registerSchedule(
             (new Schedule([NPCacheHelper::class, 'cronUpdateWarehousesCache']))
                 ->name('Parses NP warehouses to the db cache')
-                ->time('10 0 * * *')
+                ->time('10 5 * * *')
                 ->overlap(false)
                 ->timeout(3600)
         );

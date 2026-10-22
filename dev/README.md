@@ -168,6 +168,67 @@ mariadb --skip-ssl -h 127.0.0.1 -P "$MYSQL_PORT" -uroot -p"$MYSQL_ROOT_PASSWORD"
 `frontend`, інакше опублікований порт був би no-op: Docker не публікує порт
 контейнера, чия єдина мережа internal.
 
+## Свій домен і HTTPS (Linux)
+
+Кожен проєкт на машині отримує власну loopback-адресу `127.0.0.x`, тож кілька
+стеків одночасно займають порти `80`, `443` і `3306`, не заважаючи одне одному.
+HTTPS знімає контейнер `tls` (nginx із `docker/tls/nginx.conf`) і передає
+запит в основний nginx із `X-Forwarded-Proto: https`. Команди — з теки `dev/`.
+
+1. Вибрати вільну адресу (зайняті видно в `/etc/hosts`) і прив'язати до неї
+   домен:
+
+   ```sh
+   echo "127.0.0.60       okaycmsfork.test" | sudo tee -a /etc/hosts
+   ```
+
+   Зона `.test` зарезервована під локальне використання (RFC 2606); `.local`
+   не брати — її перехоплює mDNS.
+
+2. Встановити [mkcert](https://github.com/FiloSottile/mkcert) і один раз на
+   машину довірити його центр сертифікації (системному сховищу, Firefox і
+   Chromium):
+
+   ```sh
+   sudo pacman -S mkcert nss              # Arch
+   sudo apt install mkcert libnss3-tools  # Debian/Ubuntu
+   mkcert -install
+   ```
+
+   Браузер, запущений до `mkcert -install`, треба перезапустити.
+
+3. Згенерувати сертифікат одразу в проєкт. Імена файлів фіксовані — їх читає
+   `docker/tls/nginx.conf`; каталог у `.gitignore`, ключ не комітити:
+
+   ```sh
+   mkdir -p docker/tls/certs
+   mkcert -cert-file docker/tls/certs/cert.pem -key-file docker/tls/certs/key.pem okaycmsfork.test
+   ```
+
+4. У `.env`:
+
+   ```ini
+   VIRTUAL_HOST=okaycmsfork.test
+   BIND_IP=127.0.0.60
+   COMPOSE_PROFILES=tls
+   ```
+
+   `BIND_IP` має збігатися з адресою з кроку 1. Без `COMPOSE_PROFILES=tls`
+   контейнера `tls` не існує і сайт працює лише по HTTP.
+
+5. Застосувати й перевірити:
+
+   ```sh
+   docker compose up -d
+   curl -sS -o /dev/null -w '%{http_code} %{ssl_verify_result}\n' https://okaycmsfork.test/
+   ```
+
+   Очікувано `200 0`; ненульовий `ssl_verify_result` — `mkcert -install` не
+   виконано.
+
+Сертифікат mkcert діє трохи більше двох років. Після перевипуску —
+`docker compose restart tls`.
+
 ## Scheduler
 
 Контейнер `scheduler` — `supercronic` під `tini`, щохвилини виконує

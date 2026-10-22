@@ -5,7 +5,7 @@
 
 # ─────────────────────────────── base ───────────────────────────────
 # Версії образів запінені до патча, оновлює їх Dependabot (.github/dependabot.yml).
-FROM php:8.5.9-fpm AS base
+FROM php:8.5.12-fpm AS base
 
 # Образи php:*-fpm перезбираються рідше, ніж Debian патчить пакети. Першим
 # шаром — щоб усе нижче лягало на пропатчену базу.
@@ -50,14 +50,14 @@ COPY dev/config/php/custom.d/okay.ini /usr/local/etc/php/custom.d/okay.ini
 
 # Обслуговують сервіс `scheduler`. У base, а не в prod, щоб dev і prod мали ті
 # самі бінарники.
-ARG SUPERCRONIC_VERSION=v0.2.49
+ARG SUPERCRONIC_VERSION=v0.2.51
 ARG TARGETARCH
 RUN apt-get update \
  && apt-get install -y --no-install-recommends tini \
  && rm -rf /var/lib/apt/lists/* \
  && case "${TARGETARCH}" in \
-        amd64) SUPERCRONIC_SHA256=a53ae236602c7338aba3fbaff40bda6300eae3b9fedb8261eb06cfe3724430c1 ;; \
-        arm64) SUPERCRONIC_SHA256=02aa0cb229ba09050cba6638059dadb9eedc2276632ea43d6a57a2f8c1629dd5 ;; \
+        amd64) SUPERCRONIC_SHA256=cc232108374e8e2b537045f2d5eaa1229f619db314c3ba6a14d38b35dc0aa123 ;; \
+        arm64) SUPERCRONIC_SHA256=4ae22576a78223d8ccdf5f3b3660a5cbb5288416bf0ca96afc4a36d195932b94 ;; \
         *) echo "unsupported architecture for supercronic: ${TARGETARCH}" >&2; exit 1 ;; \
     esac \
  && curl -fsSL -o /usr/local/bin/supercronic \

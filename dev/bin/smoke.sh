@@ -393,8 +393,8 @@ expect_contains "files/originals/ is answered by the storefront, not by a bare s
 
 # Ajax-точки входу адмінки виконуються, а не переписуються на backend/index.php.
 # Статус тут і є розрізнювачем: переписаний шлях віддав би 302 на форму входу,
-# а виконаний скрипт упирається у власний гейт configure.php (E_USER_ERROR).
-expect_status 500 "/backend/ajax/stat.php"
+# а виконаний скрипт упирається у власний гейт configure.php (403 без входу).
+expect_status 403 "/backend/ajax/stat.php"
 
 # files/resized/ - маршрут, тож location має try_files на фронт-контролер. Ті
 # кеш-заголовки й CSP, що стоять там для справжніх файлів, на цей фолбек лягати
@@ -544,6 +544,8 @@ for entry in $(cd .. && ls -A); do
         robots.txt) continue ;;
         # index.php віддає 301 на /, це його штатна поведінка.
         index.php)  expect_status 301 "/index.php"; continue ;;
+        # Вхід в адмінку: /backend канонізується на /backend/.
+        backend)    expect_status 301 "/backend"; continue ;;
         # ACME-валідація Let's Encrypt — єдиний крапковий шлях, що віддається.
         .well-known) continue ;;
     esac

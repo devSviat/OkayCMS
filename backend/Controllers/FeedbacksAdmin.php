@@ -39,6 +39,11 @@ class FeedbacksAdmin extends IndexAdmin
                 $backendNotifyHelper->feedbackAnswerNotify($answerFeedbackId);
             }
         }
+
+        // F5 після відповіді повторював POST: друга відповідь і другий лист.
+        if ($this->request->method('post')) {
+            $this->postRedirectGet->redirect();
+        }
         
         // Отображение
         $filter = $backendFeedbacksHelper->buildFilter();

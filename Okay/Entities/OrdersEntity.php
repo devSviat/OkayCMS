@@ -402,7 +402,6 @@ class OrdersEntity extends Entity
      */
     public function findOtherOfClient($order, $page = 1, $perPage = 10)
     {
-        $offset       = $this->calculateOffset($page, $perPage);
         if (!$orderMatches = $this->determineOrderMatchParams($order, $page, $perPage)) {
             return [];
         }
@@ -411,7 +410,7 @@ class OrdersEntity extends Entity
         $filter['id'] = array_keys($orderMatches);
         if ($page !== 'all') {
             $filter['limit']  = $perPage;
-            $filter['offset'] = $offset;
+            $filter['offset'] = $this->calculateOffset($page, $perPage);
         }
 
         $orders = $this->find($filter);
@@ -422,15 +421,24 @@ class OrdersEntity extends Entity
 
     private function calculateOffset($page, $perPage)
     {
-        return $perPage * $page - $perPage;
+        return $perPage * max(1, (int) $page) - $perPage;
     }
 
     private function determineOrderMatchParams($order, $page, $perPage)
     {
+        $bindValues = [
+            'order_id'  => $order->id,
+            'email'     => $order->email,
+            'phone'     => Phone::clear($order->phone),
+        ];
+
+        // Плейсхолдери лише разом із LIMIT: зайвий bind без них — помилка PDO.
         if ($page === 'all') {
             $limitOffset = '';
         } else {
             $limitOffset = 'LIMIT :per_page OFFSET :offset';
+            $bindValues['per_page'] = $perPage;
+            $bindValues['offset']   = $this->calculateOffset($page, $perPage);
         }
 
         $sql = $this->queryFactory->newSqlQuery();
@@ -445,13 +453,7 @@ class OrdersEntity extends Entity
                 ORDER BY id DESC
                 {$limitOffset}
             ")
-            ->bindValues([
-                'order_id'  => $order->id,
-                'email'     => $order->email,
-                'phone'     => Phone::clear($order->phone),
-                'per_page'  => $perPage,
-                'offset'    => $this->calculateOffset($page, $perPage)
-            ])
+            ->bindValues($bindValues)
             ->results(null, 'id');
     }
 

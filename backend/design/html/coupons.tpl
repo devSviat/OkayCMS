@@ -72,6 +72,20 @@
     </div>
 {/if}
 
+{if $coupon_sign_missing}
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="alert alert--icon alert--warning">
+                <div class="alert__content">
+                    <div class="alert__title">{$btr->alert_warning|escape}</div>
+                    {assign var='discountsSettingsAdmin' value="{url controller=DiscountsSettingsAdmin}"}
+                    <p>{sprintf($btr->coupons_sign_missing, $discountsSettingsAdmin)}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
+
 {$block = {get_design_block block="coupons_custom_block"}}
 {if !empty($block)}
     <div class="fn_toggle_wrap custom_block">

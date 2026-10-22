@@ -13,7 +13,12 @@
             </div>
         {/if}
 
-        {if $cart->coupon->min_order_price > 0}
+        {if $cart->couponStatus == 'min_order_price'}
+            {* Купон дійсний, але сума замовлення нижча за мінімальну — знижки немає *}
+            <div class="message_error">
+                {$lang->cart_coupon} {$cart->coupon->code|escape} {$lang->cart_coupon_min} {$cart->coupon->min_order_price|convert} {$currency->sign|escape}
+            </div>
+        {elseif $cart->couponStatus == 'applied' && $cart->coupon->min_order_price > 0}
             <div class="message_success">
                 {$lang->cart_coupon} {$cart->coupon->code|escape} {$lang->cart_coupon_min} {$cart->coupon->min_order_price|convert} {$currency->sign|escape}
             </div>

@@ -718,6 +718,7 @@ $lang['coupons_updated'] = 'Купон змінений';
 $lang['coupons_valid_until'] = 'Діє до';
 $lang['coupons_yes'] = 'Так';
 $lang['coupons_coupons'] = 'Купони';
+$lang['coupons_sign_missing'] = 'Знак $ok_coup не вказано в жодному наборі на сторінці <a href="%s" target="_blank">Налаштування знижок</a>, тому купони не дають знижки.';
 $lang['currency_add'] = 'Додати валюту';
 $lang['currency_base'] = 'Основна валюта';
 $lang['currency_cents_display'] = 'Відображення копійок';
