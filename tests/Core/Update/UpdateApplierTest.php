@@ -328,13 +328,30 @@ class UpdateApplierTest extends TestCase
     {
         $payloadDir = $this->tmpDir . '/payload';
         $rootDir = $this->tmpDir . '/root';
-        $this->writeFile($payloadDir . '/composer.lock', '{"content-hash": "new"}');
-        $this->writeFile($rootDir . '/composer.lock', '{"content-hash": "old"}');
+        $this->writeFile($payloadDir . '/composer.lock', '{"packages": [{"name": "a/b", "version": "2.0.0"}], "content-hash": "new"}');
+        $this->writeFile($rootDir . '/composer.lock', '{"packages": [{"name": "a/b", "version": "1.0.0"}], "content-hash": "old"}');
 
         $this->withEmptyPath(function () use ($rootDir, $payloadDir): void {
             $this->expectException(\RuntimeException::class);
-            $this->expectExceptionMessageMatches('/composer.*не знайдено/u');
+            $this->expectExceptionMessageMatches('/composer.*не знайдено.*composer\.phar у корінь сайту/us');
             $this->applier->runComposerIfNeeded($rootDir, $payloadDir);
+        });
+    }
+
+    /**
+     * Бамп phpunit чи phpstan — це packages-dev, на прод не їде: install з
+     * --no-dev дав би те саме vendor/. Composer тут не потрібен, навіть якщо
+     * його на сервері немає.
+     */
+    public function testRunComposerIfNeededSkipsDevOnlyLockChangeEvenWithoutComposer(): void
+    {
+        $payloadDir = $this->tmpDir . '/payload';
+        $rootDir = $this->tmpDir . '/root';
+        $this->writeFile($payloadDir . '/composer.lock', '{"packages": [{"name": "a/b", "version": "1.0.0"}], "packages-dev": [{"name": "phpunit/phpunit", "version": "13.1.0"}], "content-hash": "new"}');
+        $this->writeFile($rootDir . '/composer.lock', '{"packages": [{"name": "a/b", "version": "1.0.0"}], "packages-dev": [{"name": "phpunit/phpunit", "version": "13.0.0"}], "content-hash": "old"}');
+
+        $this->withEmptyPath(function () use ($rootDir, $payloadDir): void {
+            $this->assertNull($this->applier->runComposerIfNeeded($rootDir, $payloadDir));
         });
     }
 
