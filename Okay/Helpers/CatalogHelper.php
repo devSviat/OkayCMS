@@ -92,14 +92,7 @@ class CatalogHelper
              */
             $baseFeaturesValues = $this->getBaseFeaturesValues(null, $this->settings->get('missing_products'));
 
-            // Окремою вибіркою по id, а не з $baseFeaturesValues: той при
-            // missing_products=hide уже звужений по in_stock. Без вибраного значення
-            // MetaRobotsHelper кидає «Wrong feature value» — 500 на власному посиланні.
-            foreach ($this->getSelectedFeaturesValues($productsFilter) as $value) {
-                if (isset($catalogFeatures[$value->feature_id])) {
-                    $catalogFeatures[$value->feature_id]->features_values[$value->id] = $value;
-                }
-            }
+            $catalogFeatures = $this->addSelectedFeaturesValues($productsFilter, $catalogFeatures);
 
             // Достаём значения свойств текущей категории
             $featuresValuesFilter = $this->filterHelper->prepareFilterGetFeaturesValues($productsFilter, null, $this->settings->get('missing_products'));
@@ -133,18 +126,7 @@ class CatalogHelper
                     }
                 }
             }
-            foreach ($catalogFeatures as $k => $feature) {
-                // Той самий гард, що й у петлі вище: свойство з вибраним значенням
-                // прибирати не можна, інакше MetaRobotsHelper дістане набір, який
-                // суперечить URL, і кине «Wrong feature id».
-                if (!empty($productsFilter['features'][$feature->id])) {
-                    continue;
-                }
-
-                if (!property_exists($feature, 'features_values') || empty($feature->features_values)) {
-                    unset($catalogFeatures[$k]);
-                }
-            }
+            $catalogFeatures = $this->removeFeaturesWithoutValues($productsFilter, $catalogFeatures);
         }
 
         $rangeFilter = $productsFilter;
@@ -304,6 +286,80 @@ class CatalogHelper
         }
 
         return ExtenderFacade::execute(__METHOD__, $selected, func_get_args());
+    }
+
+    /**
+     * Можливі значення свойств для MetaRobotsHelper, коли сам блок фільтра
+     * завантажується окремим ajax-запитом (deferred_load_features). Метатеги
+     * сторінки фільтра рахуються вже зараз, і без цього набору
+     * getCatalogRobots() кидає виняток на власному посиланні фільтра.
+     *
+     * Спільне для категорії, бренду, усіх товарів і сторінки брендів.
+     *
+     * @param array<string, mixed> $productsFilter
+     * @param array<int, object> $catalogFeatures свойства каталогу за id
+     * @return array<int, object> ті самі свойства без тих, що лишились без значень
+     */
+    public function setDeferredAvailableFeatures(array $productsFilter, array $catalogFeatures): array
+    {
+        $baseFeaturesValues = $this->getBaseFeaturesValues(null, $this->settings->get('missing_products'));
+        foreach ($baseFeaturesValues as $values) {
+            foreach ($values as $value) {
+                if (isset($catalogFeatures[$value->feature_id])) {
+                    $catalogFeatures[$value->feature_id]->features_values[$value->id] = $value;
+                }
+            }
+        }
+
+        $catalogFeatures = $this->addSelectedFeaturesValues($productsFilter, $catalogFeatures);
+        $catalogFeatures = $this->removeFeaturesWithoutValues($productsFilter, $catalogFeatures);
+
+        $this->metaRobotsHelper->setAvailableFeatures($catalogFeatures);
+
+        return ExtenderFacade::execute(__METHOD__, $catalogFeatures, func_get_args());
+    }
+
+    /**
+     * Вибрані значення окремою вибіркою по id, а не з базових: ті при
+     * missing_products=hide уже звужені по in_stock. Без вибраного значення
+     * MetaRobotsHelper кидає «Wrong feature value» — 500 на власному посиланні.
+     *
+     * @param array<string, mixed> $productsFilter
+     * @param array<int, object> $catalogFeatures
+     * @return array<int, object>
+     */
+    private function addSelectedFeaturesValues(array $productsFilter, array $catalogFeatures): array
+    {
+        foreach ($this->getSelectedFeaturesValues($productsFilter) as $value) {
+            if (isset($catalogFeatures[$value->feature_id])) {
+                $catalogFeatures[$value->feature_id]->features_values[$value->id] = $value;
+            }
+        }
+
+        return $catalogFeatures;
+    }
+
+    /**
+     * Свойство з вибраним значенням прибирати не можна: MetaRobotsHelper дістав
+     * би набір, який суперечить URL, і кинув би «Wrong feature id».
+     *
+     * @param array<string, mixed> $productsFilter
+     * @param array<int, object> $catalogFeatures
+     * @return array<int, object>
+     */
+    private function removeFeaturesWithoutValues(array $productsFilter, array $catalogFeatures): array
+    {
+        foreach ($catalogFeatures as $k => $feature) {
+            if (!empty($productsFilter['features'][$feature->id])) {
+                continue;
+            }
+
+            if (!property_exists($feature, 'features_values') || empty($feature->features_values)) {
+                unset($catalogFeatures[$k]);
+            }
+        }
+
+        return $catalogFeatures;
     }
 
     /**
