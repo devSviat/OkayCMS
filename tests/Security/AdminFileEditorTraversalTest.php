@@ -47,6 +47,10 @@ class AdminFileEditorTraversalTest extends TestCase
                 'backend/Controllers/ScriptsAdmin.php',
                 ["SafeFileName::basename(\$this->request->get('file'))"],
             ],
+            'style editor' => [
+                'backend/Controllers/StylesAdmin.php',
+                ["SafeFileName::basename(\$this->request->get('file'))"],
+            ],
         ];
     }
 
