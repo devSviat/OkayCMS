@@ -156,6 +156,13 @@ if (empty($entity)) {
 
 if (!empty($entity)) {
     $result = $entity->update($id, $values);
+
+    // Перемикач «схвалено» в списку відгуків змінює, які оцінки входять у бал
+    // товару. Масова дія рахує це в BackendCommentsHelper::approve(), а тут
+    // запис іде повз неї.
+    if ($object === 'comment' && $result && array_key_exists('approved', (array)$values)) {
+        $DI->get(\Okay\Admin\Helpers\BackendCommentsHelper::class)->recalculateRatingsForComments([$id]);
+    }
 }
 
 $response->setContent(json_encode($result), RESPONSE_JSON);
