@@ -66,37 +66,7 @@ class BrandsController extends AbstractController
             );
         } else {
             // если включена отложенная загрузка фильтров, установим отдельно возможные значения свойств
-            $baseFeaturesValues = $catalogHelper->getBaseFeaturesValues(null, $this->settings->get('missing_products'));
-
-            if (!empty($baseFeaturesValues)) {
-                foreach ($baseFeaturesValues as $values) {
-                    foreach ($values as $value) {
-                        if (isset($catalogFeatures[$value->feature_id])) {
-                            $catalogFeatures[$value->feature_id]->features_values[$value->id] = $value;
-                        }
-                    }
-                }
-            }
-
-            // $baseFeaturesValues звужений по in_stock, тож вибране значення могло
-            // туди не потрапити. Без нього MetaRobotsHelper кидає «Wrong feature value».
-            foreach ($catalogHelper->getSelectedFeaturesValues($productsFilter) as $value) {
-                if (isset($catalogFeatures[$value->feature_id])) {
-                    $catalogFeatures[$value->feature_id]->features_values[$value->id] = $value;
-                }
-            }
-
-            foreach ($catalogFeatures as $k => $feature) {
-                // Свойство з вибраним значенням прибирати не можна: набір, який
-                // суперечить URL, кладе getCatalogRobots() у виняток.
-                if (!empty($productsFilter['features'][$feature->id])) {
-                    continue;
-                }
-
-                if (!property_exists($feature, 'features_values') || empty($feature->features_values)) {
-                    unset($catalogFeatures[$k]);
-                }
-            }
+            $catalogFeatures = $catalogHelper->setDeferredAvailableFeatures($productsFilter, $catalogFeatures);
         }
 
         $brandsFilter = $brandsHelper->getBrandsFilter($productsFilter);
