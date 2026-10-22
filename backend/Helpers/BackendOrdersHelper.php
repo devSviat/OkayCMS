@@ -13,6 +13,7 @@ use Okay\Entities\CurrenciesEntity;
 use Okay\Entities\DeliveriesEntity;
 use Okay\Entities\DiscountsEntity;
 use Okay\Entities\ImagesEntity;
+use Okay\Entities\ManagersEntity;
 use Okay\Entities\OrderHistoryEntity;
 use Okay\Entities\OrderLabelsEntity;
 use Okay\Entities\OrdersEntity;
@@ -493,26 +494,51 @@ class BackendOrdersHelper
     {
         if(!empty($change_status_id = $this->request->post("change_status_id"))) {
             $newStatus = $this->orderStatusEntity->findOne(["id" => $change_status_id]);
+            $newStatusId = $this->request->post("change_status_id","integer");
             $errorOrders = [];
+            // Статус до зміни: рядок історії потрібен лише там, де він справді змінився.
+            $statusBefore = $this->ordersEntity->cols(['id', 'status_id'])->mappedBy('id')->find(['id' => $ids, 'limit' => count($ids)]);
             foreach($ids as $id) {
+                $changed = false;
                 if($newStatus->is_close == 1){
                     if (!$this->ordersEntity->close(intval($id))) {
                         $errorOrders[] = $id;
                         //$this->design->assign('error_orders', $errorOrders);
                         //$this->design->assign('message_error', 'error_closing');
                     } else {
-                        $this->ordersEntity->update($id, ['status_id'=>$this->request->post("change_status_id","integer")]);
+                        $this->ordersEntity->update($id, ['status_id'=>$newStatusId]);
+                        $changed = true;
                     }
                 } else {
                     if ($this->ordersEntity->open(intval($id))) {
-                        $this->ordersEntity->update($id, ['status_id'=>$this->request->post("change_status_id","integer")]);
+                        $this->ordersEntity->update($id, ['status_id'=>$newStatusId]);
+                        $changed = true;
                     }
                 }
 
+                // Той самий запис, що робить картка замовлення (BackendOrderHistoryHelper::updateHistory):
+                // без нього історія не знає про масові зміни статусу.
+                if ($changed && isset($statusBefore[$id]) && (int) $statusBefore[$id]->status_id !== $newStatusId) {
+                    $this->orderHistoryEntity->add([
+                        'order_id' => (int) $id,
+                        'manager_id' => $this->currentManagerId(),
+                        'new_status_id' => $newStatusId,
+                    ]);
+                }
             }
         }
 
         ExtenderFacade::execute(__METHOD__, null, func_get_args());
+    }
+
+    private function currentManagerId(): ?int
+    {
+        if (empty($_SESSION['admin'])) {
+            return null;
+        }
+        $manager = $this->entityFactory->get(ManagersEntity::class)->get($_SESSION['admin']);
+
+        return $manager ? (int) $manager->id : null;
     }
 
     public function setLabel($ids)
