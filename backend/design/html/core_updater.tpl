@@ -278,6 +278,25 @@
 {*Довідка й налаштування — ховаються на час прогону, щоб не відволікати від прогресу*}
 <div class="row fn_side_panels"{if $vm.mode == 'running'} style="display:none;"{/if}>
 
+    {*Модульні update_x_y_z() оновлення ядра свідомо не запускає — тут лише
+      видно, що вони чекають, щоб не шукати кнопку на сторінці «Модулі»*}
+    {if $pending_module_updates}
+        <div class="col-md-12 mb-2">
+            <div class="alert alert--icon alert--warning">
+                <div class="alert__content">
+                    <div class="alert__title">{$btr->core_updater_pending_modules_title|escape}</div>
+                    <p>{$btr->core_updater_pending_modules_hint|escape}</p>
+                    <ul class="mb-1">
+                        {foreach $pending_module_updates as $pending}
+                            <li>{$pending.vendor|escape}/{$pending.module_name|escape}: {$pending.installed|escape} &rarr; <strong>{$pending.available|escape}</strong></li>
+                        {/foreach}
+                    </ul>
+                    <a href="{url controller=ModulesAdmin}">{$btr->core_updater_pending_modules_link|escape}</a>
+                </div>
+            </div>
+        </div>
+    {/if}
+
     {*Паспорт системи: обидві версії разом, щоб не шукати їх по адмінці*}
     <div class="col-lg-6 col-md-12 mb-2">
         <div class="boxed">

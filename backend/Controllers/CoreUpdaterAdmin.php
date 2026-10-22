@@ -3,19 +3,28 @@
 namespace Okay\Admin\Controllers;
 
 use Okay\Core\Config;
+use Okay\Core\Modules\Module;
 use Okay\Core\Settings;
 use Okay\Core\Update\CoreUpdaterViewModel;
+use Okay\Core\Update\PendingModuleUpdates;
 use Okay\Core\Update\UpdateCheckHelper;
 use Okay\Core\Update\UpdateRunner;
 use Okay\Core\Update\UpdateStatus;
+use Okay\Entities\ModulesEntity;
 
 class CoreUpdaterAdmin extends IndexAdmin
 {
     /** Скільки останніх резервних копій показувати списком. */
     private const BACKUPS_SHOWN = 10;
 
-    public function fetch(UpdateCheckHelper $checkHelper, UpdateStatus $status, Config $config, Settings $settings)
-    {
+    public function fetch(
+        UpdateCheckHelper $checkHelper,
+        UpdateStatus $status,
+        Config $config,
+        Settings $settings,
+        ModulesEntity $modulesEntity,
+        Module $moduleCore
+    ) {
         $runState = $status->load();
         $vm = CoreUpdaterViewModel::build($checkHelper->getSnapshot(), $runState, time(), $config->version, $config->forkVersion);
 
@@ -34,6 +43,10 @@ class CoreUpdaterAdmin extends IndexAdmin
             'detectedRootUrl' => $this->request->getRootUrl(),
         ]);
         $this->design->assign('backups', self::collectBackups((string) $config->get('root_dir')));
+        $this->design->assign(
+            'pending_module_updates',
+            PendingModuleUpdates::collect($modulesEntity->noLimit()->find(), $moduleCore)
+        );
 
         $this->response->setContent($this->design->fetch('core_updater.tpl'));
     }
