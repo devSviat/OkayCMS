@@ -544,6 +544,8 @@ for entry in $(cd .. && ls -A); do
         robots.txt) continue ;;
         # index.php віддає 301 на /, це його штатна поведінка.
         index.php)  expect_status 301 "/index.php"; continue ;;
+        # Вхід в адмінку: /backend канонізується на /backend/.
+        backend)    expect_status 301 "/backend"; continue ;;
         # ACME-валідація Let's Encrypt — єдиний крапковий шлях, що віддається.
         .well-known) continue ;;
     esac
