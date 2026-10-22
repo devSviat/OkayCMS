@@ -115,6 +115,9 @@ class CommonHelper
 
         if ($callbackId = $callbacksEntity->add($callback)) {
             $this->design->assign('call_sent', true, true);
+            // call_sent бачить і відсіяний повтор. Лічильникам звернень
+            // (аналітика, CRM) потрібен саме новий запис.
+            $this->design->assign('call_created', true, true);
             // Отправляем email
             $this->notify->emailCallbackAdmin($callbackId);
             return true;
@@ -167,7 +170,7 @@ class CommonHelper
     }
 
     /** Прапорці результату, які шаблони показують після редиректу. */
-    const FLASH_FLAGS = ['call_sent', 'call_error', 'subscribe_success', 'subscribe_error'];
+    const FLASH_FLAGS = ['call_sent', 'call_created', 'call_error', 'subscribe_success', 'subscribe_error'];
 
     /**
      * Що має пережити редирект: прапорці результату й дані форми - шаблони
