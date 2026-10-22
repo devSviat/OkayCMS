@@ -100,6 +100,14 @@ class Cart
     public $coupon = null;
 
     /**
+     * @var string|null
+     * Що сталося з купоном із сесії: 'applied' — знижка в кошику;
+     * 'min_order_price' — сума замовлення нижча за мінімальну;
+     * 'not_applied' — жоден набір знижок не прийняв $ok_coup, купон знято.
+     */
+    public $couponStatus = null;
+
+    /**
      * @var array
      * All available discounts of the cart
      */
@@ -495,6 +503,7 @@ class Cart
     private function attachCouponDiscount()
     {
         $this->coupon = null;
+        $this->couponStatus = null;
         if (!empty($_SESSION['coupon_code'])) {
             $coupon = $this->couponsEntity->get($_SESSION['coupon_code']);
             if ($coupon && $coupon->valid) {
@@ -514,6 +523,8 @@ class Cart
                     }
                     $discount = ExtenderFacade::execute(__METHOD__, $discount, func_get_args());
                     $this->availableDiscounts['ok_coup'] = $discount;
+                } else {
+                    $this->couponStatus = 'min_order_price';
                 }
             } else {
                 unset($_SESSION['coupon_code']);
@@ -571,8 +582,32 @@ class Cart
                     }
                 }
             }
+
+            // Купон, якого не прийняв жоден набір, знижки не дає. Лишений у
+            // сесії, він показувався б застосованим і списував використання
+            // при оформленні — одноразовий згорав би без знижки.
+            if ($this->coupon !== null && $this->couponStatus === null) {
+                if ($this->hasAppliedDiscount('ok_coup')) {
+                    $this->couponStatus = 'applied';
+                } else {
+                    $this->couponStatus = 'not_applied';
+                    $this->coupon = null;
+                    unset($_SESSION['coupon_code']);
+                }
+            }
         }
         ExtenderFacade::execute(__METHOD__, $this, func_get_args());
+    }
+
+    private function hasAppliedDiscount(string $sign): bool
+    {
+        foreach ($this->discounts as $discount) {
+            if (($discount->sign ?? null) === $sign) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function applyPurchasesDiscounts() {
