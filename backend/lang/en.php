@@ -719,6 +719,7 @@ $lang['coupons_updated'] = 'Coupon updated';
 $lang['coupons_valid_until'] = 'Valid until';
 $lang['coupons_yes'] = 'Yes';
 $lang['coupons_coupons'] = 'Coupons';
+$lang['coupons_sign_missing'] = 'The $ok_coup sign is not used in any set on the <a href="%s" target="_blank">Discount settings</a> page, so coupons give no discount.';
 $lang['currency_add'] = 'Add currency';
 $lang['currency_base'] = 'Base Currency';
 $lang['currency_cents_display'] = 'Display cents';

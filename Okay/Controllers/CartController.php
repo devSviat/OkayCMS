@@ -194,7 +194,9 @@ class CartController extends AbstractController
                 $preparedOrder  = $ordersHelper->prepareAdd($order);
                 $orderId        = $ordersHelper->add($preparedOrder);
 
-                if (isset($_SESSION['coupon_code'])){
+                // Лише купон зі знижкою в цьому замовленні: нижче min_order_price
+                // він лишається в сесії, але використання списувати нема за що.
+                if (isset($_SESSION['coupon_code']) && $cart->couponStatus === 'applied') {
                     $couponHelper->registerUseIfExists($_SESSION['coupon_code']);
                 }
 
@@ -253,7 +255,11 @@ class CartController extends AbstractController
                         $this->design->assign('coupon_error', 'invalid');
                     } else {
                         $cart->applyCoupon($couponCode);
-                        $this->response->redirectTo(Router::generateUrl('cart', [], true));
+                        if ($cart->couponStatus === 'not_applied') {
+                            $this->design->assign('coupon_error', 'invalid');
+                        } else {
+                            $this->response->redirectTo(Router::generateUrl('cart', [], true));
+                        }
                     }
                 }
             }
@@ -341,6 +347,9 @@ class CartController extends AbstractController
                         $this->design->assign('coupon_error', 'invalid');
                     } else {
                         $cart->applyCoupon($couponCode);
+                        if ($cart->couponStatus === 'not_applied') {
+                            $this->design->assign('coupon_error', 'invalid');
+                        }
                     }
                 }
             }
