@@ -70,15 +70,11 @@ class SiteMapHelper
         $this->canonicalHelper = $canonicalHelper;
         $this->language = $mainHelper->getCurrentLanguage();
 
-        if ($argv = Request::getArgv()) {
-            $this->params['output'] = 'file';
+        $argv = Request::getArgv();
+        $this->params['output'] = self::outputMode(PHP_SAPI, $argv);
+        if ($this->params['output'] == 'file') {
             $this->params['root_url'] = preg_replace("~^(https?://[^/]+)/.*$~", "$1", $argv['root_url']);
         } else {
-            if (isset($_GET['output']) && $_GET['output'] == 'file') {
-                $this->params['output'] = 'file';
-            } else {
-                $this->params['output'] = 'browser';
-            }
             $this->params['root_url'] = Request::getRootUrl();
         }
         $this->params['lang_label'] = '_'.$this->language->label;
@@ -87,6 +83,18 @@ class SiteMapHelper
         }
     }
     
+    /**
+     * Запис файлів стирає й перезаписує sitemap у корені сайту, тож доступний
+     * лише з CLI. З вебу $argv не береться до уваги: при register_argc_argv = On
+     * веб-SAPI заповнює його з query string.
+     *
+     * @return string 'file' або 'browser'
+     */
+    public static function outputMode(string $sapi, array $argv): string
+    {
+        return $sapi === 'cli' && $argv ? 'file' : 'browser';
+    }
+
     public function writeHead()
     {
         $this->writeString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
