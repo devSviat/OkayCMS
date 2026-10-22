@@ -344,31 +344,31 @@ class BackendSettingsHelper
     public function updateRouterSettings()
     {
         $this->settings->set('category_routes_template', $this->request->post('category_routes_template'));
-        $this->settings->set('category_routes_template__default', trim($this->request->post('category_routes_template__default')));
-        $this->settings->set('category_routes_template__prefix_and_path', trim($this->request->post('category_routes_template__prefix_and_path')));
+        $this->settings->set('category_routes_template__default', trim((string) $this->request->post('category_routes_template__default')));
+        $this->settings->set('category_routes_template__prefix_and_path', trim((string) $this->request->post('category_routes_template__prefix_and_path')));
         $this->settings->set('category_routes_template_slash_end', $this->request->post('category_routes_template_slash_end'));
 
         $this->settings->set('product_routes_template', $this->request->post('product_routes_template'));
-        $this->settings->set('product_routes_template__prefix_and_path', trim($this->request->post('product_routes_template__prefix_and_path')));
-        $this->settings->set('product_routes_template__default', trim($this->request->post('product_routes_template__default')));
+        $this->settings->set('product_routes_template__prefix_and_path', trim((string) $this->request->post('product_routes_template__prefix_and_path')));
+        $this->settings->set('product_routes_template__default', trim((string) $this->request->post('product_routes_template__default')));
         $this->settings->set('product_routes_template_slash_end', $this->request->post('product_routes_template_slash_end'));
 
         $this->settings->set('brand_routes_template', $this->request->post('brand_routes_template'));
-        $this->settings->set('brand_routes_template__default', trim($this->request->post('brand_routes_template__default')));
+        $this->settings->set('brand_routes_template__default', trim((string) $this->request->post('brand_routes_template__default')));
         $this->settings->set('brand_routes_template_slash_end', $this->request->post('brand_routes_template_slash_end'));
 
         $this->settings->set('blog_category_routes_template', $this->request->post('blog_category_routes_template'));
-        $this->settings->set('blog_category_routes_template__default', trim($this->request->post('blog_category_routes_template__default')));
-        $this->settings->set('blog_category_routes_template__prefix_and_path', trim($this->request->post('blog_category_routes_template__prefix_and_path')));
+        $this->settings->set('blog_category_routes_template__default', trim((string) $this->request->post('blog_category_routes_template__default')));
+        $this->settings->set('blog_category_routes_template__prefix_and_path', trim((string) $this->request->post('blog_category_routes_template__prefix_and_path')));
         $this->settings->set('blog_category_routes_template_slash_end', $this->request->post('blog_category_routes_template_slash_end'));
 
         $this->settings->set('post_routes_template', $this->request->post('post_routes_template'));
-        $this->settings->set('post_routes_template__prefix_and_path', trim($this->request->post('post_routes_template__prefix_and_path')));
-        $this->settings->set('post_routes_template__default', trim($this->request->post('post_routes_template__default')));
+        $this->settings->set('post_routes_template__prefix_and_path', trim((string) $this->request->post('post_routes_template__prefix_and_path')));
+        $this->settings->set('post_routes_template__default', trim((string) $this->request->post('post_routes_template__default')));
         $this->settings->set('post_routes_template_slash_end', $this->request->post('post_routes_template_slash_end'));
 
-        $this->settings->set('all_brands_routes_template__default', trim($this->request->post('all_brands_routes_template__default')));
-        $this->settings->set('all_blog_routes_template__default', trim($this->request->post('all_blog_routes_template__default')));
+        $this->settings->set('all_brands_routes_template__default', trim((string) $this->request->post('all_brands_routes_template__default')));
+        $this->settings->set('all_blog_routes_template__default', trim((string) $this->request->post('all_blog_routes_template__default')));
 
         $this->settings->set('all_brands_routes_template_slash_end', $this->request->post('all_brands_routes_template_slash_end'));
         $this->settings->set('all_blog_routes_template_slash_end', $this->request->post('all_blog_routes_template_slash_end'));
@@ -466,7 +466,7 @@ class BackendSettingsHelper
         @unlink($designImagesDir . $this->settings->get('site_favicon'));
         if (move_uploaded_file($tmpName, $designImagesDir . $siteFaviconName)) {
             $this->settings->set('site_favicon', $siteFaviconName);
-            $siteFaviconVersion = ltrim($this->settings->get('site_favicon_version'), '0');
+            $siteFaviconVersion = ltrim((string) $this->settings->get('site_favicon_version'), '0');
 
             if (!$siteFaviconVersion) {
                 $siteFaviconVersion = 0;
@@ -595,7 +595,7 @@ class BackendSettingsHelper
 
                 // Загружаем новое лого
                 if (move_uploaded_file($tmpName, $designImagesDir . $siteLogoName)) {
-                    $siteLogoVersion = ltrim($this->settings->get('site_logo_version'), '0');
+                    $siteLogoVersion = ltrim((string) $this->settings->get('site_logo_version'), '0');
                     if (!$siteLogoVersion) {
                         $siteLogoVersion = 0;
                     }
