@@ -4,6 +4,7 @@
 namespace Okay\Admin\Controllers;
 
 
+use Okay\Core\Security\SafeFileName;
 use Okay\Core\TemplateConfig\FrontTemplateConfig;
 
 class StylesAdmin extends IndexAdmin
@@ -28,7 +29,8 @@ class StylesAdmin extends IndexAdmin
         asort($styles);
         
         // Текущий шаблон
-        $style_file = $this->request->get('file');
+        // Як у ScriptsAdmin: інакше "../../x.css" читав .css з будь-якого місця на диску.
+        $style_file = SafeFileName::basename($this->request->get('file'));
         
         if (!empty($style_file) && pathinfo($style_file, PATHINFO_EXTENSION) != 'css') {
             exit();
