@@ -135,7 +135,7 @@ class AuthAdmin extends IndexAdmin
                     }
 
                     $managersEntity->updateLastActivityDate($manager->id);
-                    $loginRedirectResource = (!empty($_SESSION['before_auth_url']) ? $_SESSION['before_auth_url'] : $this->request->getBasePathWithDomain() . '/backend/index.php');
+                    $loginRedirectResource = (!empty($_SESSION['before_auth_url']) ? $_SESSION['before_auth_url'] : $this->request->getRootUrl() . '/backend/index.php');
                     unset($_SESSION['before_auth_url']);
 
                     $allManagers = $managersEntity->order('id ASC')->find();

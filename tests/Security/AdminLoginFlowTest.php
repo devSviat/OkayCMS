@@ -35,6 +35,19 @@ class AdminLoginFlowTest extends TestCase
         $this->assertStringNotContainsString('limit_cnt', $this->source('backend/design/html/auth.tpl'));
     }
 
+    /**
+     * Без збереженої адреси після входу ведемо в корінь адмінки. Поточна адреса
+     * тут — сторінка входу, і дописаний до неї шлях давав
+     * «?controller=AuthAdmin/backend/index.php».
+     */
+    public function testFallbackAfterLoginIsTheAdminRoot(): void
+    {
+        $this->assertStringContainsString(
+            "\$this->request->getRootUrl() . '/backend/index.php');",
+            $this->source('backend/Controllers/AuthAdmin.php')
+        );
+    }
+
     public function testRecoveryEmailIsLimited(): void
     {
         $auth = $this->source('backend/Controllers/AuthAdmin.php');
