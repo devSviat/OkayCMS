@@ -30,6 +30,24 @@ class ReviewRatingAggregateTest extends TestCase
     }
 
     /**
+     * Оцінку поза шкалою може записати лише хтось повз форму, наприклад
+     * менеджер через ajax-перемикач. У середнє вона йти не повинна: 99 давало б
+     * `aggregateRating` вище за `bestRating`.
+     */
+    public function testRatingsOutsideTheScaleDoNotCount(): void
+    {
+        $entity = $this->objectEntity();
+
+        $this->helper([
+            (object)['rating' => 4],
+            (object)['rating' => 99],
+            (object)['rating' => -3],
+        ])->recalculateFromReviews($entity, 7);
+
+        $this->assertSame(['rating' => 4.0, 'votes' => 1], $entity->updated);
+    }
+
+    /**
      * Коли оцінок не лишилось, бал обнуляється: шаблон друкує розмітку лише
      * при `rating > 0`, тож товар просто лишається без заявленої оцінки.
      */

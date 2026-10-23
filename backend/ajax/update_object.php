@@ -159,8 +159,9 @@ if (!empty($entity)) {
 
     // Перемикач «схвалено» в списку відгуків змінює, які оцінки входять у бал
     // товару. Масова дія рахує це в BackendCommentsHelper::approve(), а тут
-    // запис іде повз неї.
-    if ($object === 'comment' && $result && array_key_exists('approved', (array)$values)) {
+    // запис іде повз неї. Рахується на будь-яке поле: ендпоінт пише те, що
+    // прислали, зокрема й `rating`.
+    if ($object === 'comment' && $result) {
         $DI->get(\Okay\Admin\Helpers\BackendCommentsHelper::class)->recalculateRatingsForComments([$id]);
     }
 }
