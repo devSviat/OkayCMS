@@ -18,6 +18,9 @@ require_once('vendor/autoload.php');
 
 $DI = include 'Okay/Core/config/container.php';
 
+// До першого читання $_SESSION['admin']: відкликана сесія тут стає гостьовою.
+$DI->get(\Okay\Core\Security\ManagerSessions::class)->enforce();
+
 /** @var Config $config */
 $config = $DI->get(Config::class);
 

@@ -4,12 +4,13 @@
 namespace Okay\Admin\Controllers;
 
 
+use Okay\Core\Security\ManagerSessions;
 use Okay\Entities\ManagersEntity;
 
 class ManagersAdmin extends IndexAdmin
 {
     
-    public function fetch(ManagersEntity $managersEntity)
+    public function fetch(ManagersEntity $managersEntity, ManagerSessions $managerSessions)
     {
         if ($this->request->method('post')) {
             // Действия с выбранными
@@ -19,6 +20,9 @@ class ManagersAdmin extends IndexAdmin
                     case 'delete': {
                         /*Удалить менеджера*/
                         $managersEntity->delete($ids);
+                        foreach ($ids as $id) {
+                            $managerSessions->revokeAll((int)$id, (int)$this->manager->id);
+                        }
                         break;
                     }
                 }

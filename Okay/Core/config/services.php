@@ -52,6 +52,9 @@ use Okay\Core\Security\AdminRecoveryToken;
 use Okay\Core\Security\AttemptLimiter;
 use Okay\Core\Security\AdminLoginGuard;
 use Okay\Core\Security\ManagerLoginKey;
+use Okay\Core\Security\ManagerSessions;
+use Okay\Core\Security\ManagerReauth;
+use Okay\Core\Security\ManagerProfilePolicy;
 use Okay\Core\Security\RecoveryToken;
 use Okay\Core\Security\StorefrontGuard;
 use Okay\Core\Release\CoreMigrator;
@@ -333,6 +336,26 @@ $services = [
         'class' => ManagerLoginKey::class,
         'arguments' => [
             new SR(QueryFactory::class),
+        ],
+    ],
+    ManagerSessions::class => [
+        'class' => ManagerSessions::class,
+        'arguments' => [
+            new SR(EntityFactory::class),
+            new SR(LoggerInterface::class),
+        ],
+    ],
+    ManagerReauth::class => [
+        'class' => ManagerReauth::class,
+        'arguments' => [
+            new SR(AdminLoginGuard::class),
+            new SR(EntityFactory::class),
+        ],
+    ],
+    ManagerProfilePolicy::class => [
+        'class' => ManagerProfilePolicy::class,
+        'arguments' => [
+            new SR(Managers::class),
         ],
     ],
     Translit::class => [

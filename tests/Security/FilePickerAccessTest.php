@@ -24,6 +24,10 @@ class FilePickerAccessTest extends TestCase
         );
     }
 
+    /**
+     * ManagerAdmin — лише свій профіль без права managers (ManagerProfilePolicy,
+     * ManagerProfileAccessTest).
+     */
     public function testOnlyTheLoginPageAndThePickerSkipThePermissionCheck(): void
     {
         $source = $this->source('backend/Controllers/IndexAdmin.php');
@@ -34,7 +38,7 @@ class FilePickerAccessTest extends TestCase
 
         preg_match_all('~backendController\s*[!=]==?\s*[\'"]([A-Za-z]+)[\'"]~', $condition[1], $matches);
 
-        $this->assertSame(['AuthAdmin', 'FilePickerAdmin'], $matches[1]);
+        $this->assertSame(['AuthAdmin', 'FilePickerAdmin', 'ManagerAdmin'], $matches[1]);
     }
 
     public function testCsrfGateStillCoversThePicker(): void

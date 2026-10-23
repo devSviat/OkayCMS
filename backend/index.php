@@ -39,9 +39,11 @@ $config = $DI->get(Config::class);
 
 // Засекаем время
 $time_start = microtime(true);
-ini_set('session.gc_maxlifetime', 86400); // 86400 = 24 часа
+ini_set('session.gc_maxlifetime', \Okay\Core\Security\ManagerSessions::IDLE_SECONDS);
 // cookie_lifetime задається в SessionNames::cookieParams()
 \Okay\Core\Security\SessionNames::startBackend();
+// До першого читання $_SESSION['admin']: відкликана сесія тут стає гостьовою.
+$DI->get(\Okay\Core\Security\ManagerSessions::class)->enforce();
 
 // Шаблони друкують це значення як {$smarty.session.id} у полі session_id.
 // Тепер це окремий CSRF-токен, а не ідентифікатор сесії.
@@ -59,6 +61,7 @@ $request = $DI->get(Request::class);
 // має відбуватись тут, бо бекендова сесія активна лише в цьому вході -
 // вітринний ?logout її не бачить із моменту розділення просторів сесій.
 if ($request->isPost() && $request->post('logout') !== null && $request->checkSession()) {
+    $DI->get(\Okay\Core\Security\ManagerSessions::class)->signOut();
     \Okay\Core\Security\SessionNames::destroyBackend();
     \Okay\Core\Security\SessionNames::deleteCookie('admin_login');
 

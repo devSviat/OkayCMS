@@ -68,6 +68,7 @@ class Managers
         'settings_indexing',
         'open_ai',
         'core_updater',
+        'manager_sessions',
     ];
 
     // Соответствие модулей и названий соответствующих прав
@@ -126,6 +127,7 @@ class Managers
         'PaymentMethodsAdmin'   => 'payment',
         'ManagersAdmin'         => 'managers',
         'ManagerAdmin'          => 'managers',
+        'AllManagerSessionsAdmin' => 'manager_sessions',
         'LicenseAdmin'          => 'license',
         'SubscribeMailingAdmin' => 'subscribes',
         'CallbacksAdmin'        => 'callbacks',
