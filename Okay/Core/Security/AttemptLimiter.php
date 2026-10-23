@@ -12,7 +12,11 @@ use Psr\Log\LoggerInterface;
  */
 class AttemptLimiter
 {
-    /** Файл лічильника, якого не чіпали довше, вже не містить жодної мітки в межах вікна. */
+    /**
+     * Файл лічильника, якого не чіпали довше, вже не містить жодної мітки в
+     * межах вікна. Мусить бути більшим за найдовше вікно серед лімітерів —
+     * стереже AttemptLimiterTest::testPruneAgeCoversTheLongestWindow.
+     */
     public const PRUNE_AFTER_SECONDS = 7200;
 
     private $dir;

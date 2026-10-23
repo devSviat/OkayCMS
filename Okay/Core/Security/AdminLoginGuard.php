@@ -23,6 +23,7 @@ class AdminLoginGuard
     public const RECOVERY_EMAILS = 5;
     /** Листів відновлення на одну скриньку за годину — з будь-яких адрес. */
     public const RECOVERY_EMAILS_PER_RECIPIENT = 3;
+    public const RECOVERY_WINDOW_SECONDS = 3600;
 
     /**
      * Хеші випадкових паролів з типовими параметрами PasswordHasher::hash().
@@ -38,12 +39,15 @@ class AdminLoginGuard
     private AttemptLimiter $recoveryTo;
     private PasswordHasher $hasher;
 
-    public function __construct(AttemptLimiter $attemptLimiter, private Managers $managers)
-    {
+    public function __construct(
+        AttemptLimiter $attemptLimiter,
+        private Managers $managers,
+        private ManagerLoginKey $loginKey
+    ) {
         $this->byIp = $attemptLimiter->withLimits(self::IP_ATTEMPTS, self::WINDOW_SECONDS);
         $this->byLogin = $attemptLimiter->withLimits(self::LOGIN_ATTEMPTS, self::WINDOW_SECONDS);
-        $this->recovery = $attemptLimiter->withLimits(self::RECOVERY_EMAILS, 3600);
-        $this->recoveryTo = $attemptLimiter->withLimits(self::RECOVERY_EMAILS_PER_RECIPIENT, 3600);
+        $this->recovery = $attemptLimiter->withLimits(self::RECOVERY_EMAILS, self::RECOVERY_WINDOW_SECONDS);
+        $this->recoveryTo = $attemptLimiter->withLimits(self::RECOVERY_EMAILS_PER_RECIPIENT, self::RECOVERY_WINDOW_SECONDS);
         $this->hasher = new PasswordHasher();
     }
 
@@ -51,15 +55,15 @@ class AdminLoginGuard
      * Займає спробу пароля. Рахується кожна спроба, а перевірка й запис
      * атомарні, тож паралельні запити ліміт не минають.
      *
-     * @param object|null $manager знайдений за логіном. Ліміт облікового запису
-     *        рахується за його id: колація `ok_managers.login` не розрізняє
-     *        діакритики, і «zzsécargon» знаходить того самого менеджера
+     * Ключ облікового запису однаковий для існуючого й вигаданого логіна
+     * (ManagerLoginKey): інакше шоста спроба видавала б, чи логін існує.
+     *
      * @return bool false — ліміт вичерпано, пароль не перевіряти
      */
-    public function allowPasswordAttempt(?object $manager, string $login, string $ip): bool
+    public function allowPasswordAttempt(string $login, string $ip): bool
     {
         return $this->byIp->attempt(self::ipKey($ip))
-            && $this->byLogin->attempt(self::loginKey($manager, $login, $ip));
+            && $this->byLogin->attempt($this->loginKey($login, $ip));
     }
 
     /**
@@ -68,9 +72,9 @@ class AdminLoginGuard
      * не обнуляємо — свій обліковий запис не має давати нескінченного перебору
      * чужих.
      */
-    public function passwordSucceeded(object $manager, string $login, string $ip): void
+    public function passwordSucceeded(string $login, string $ip): void
     {
-        $this->byLogin->reset(self::loginKey($manager, $login, $ip));
+        $this->byLogin->reset($this->loginKey($login, $ip));
         $this->byIp->refund(self::ipKey($ip));
     }
 
@@ -117,13 +121,8 @@ class AdminLoginGuard
         return 'admin_login_ip:' . ClientIp::bucket($ip);
     }
 
-    /** Без менеджера — логін без регістру й крайніх пробілів, як їх не розрізняє колація. */
-    private static function loginKey(?object $manager, string $login, string $ip): string
+    private function loginKey(string $login, string $ip): string
     {
-        $account = $manager !== null && !empty($manager->id)
-            ? 'id:' . (int)$manager->id
-            : 'login:' . mb_strtolower(trim($login));
-
-        return 'admin_login:' . $account . '|' . ClientIp::bucket($ip);
+        return 'admin_login:' . $this->loginKey->of($login) . '|' . ClientIp::bucket($ip);
     }
 }

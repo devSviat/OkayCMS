@@ -53,23 +53,46 @@ class AdminLoginFlowTest extends TestCase
         $auth = $this->source('backend/Controllers/AuthAdmin.php');
         $send = strpos($auth, '->emailPasswordRecoveryAdmin(');
 
-        foreach (['->allowRecoveryEmail(', '->allowRecoveryEmailTo('] as $limit) {
+        foreach (['->allowRecoveryEmail($clientIp)', '->allowRecoveryEmailTo('] as $limit) {
             $this->assertNotFalse(strpos($auth, $limit), $limit);
             $this->assertLessThan($send, strpos($auth, $limit), $limit);
         }
     }
 
-    /** Лист іде після відповіді: інакше SMTP у часі відповіді видавав, що менеджер є. */
-    public function testRecoveryEmailIsSentAfterTheResponse(): void
+    /**
+     * Лист іде після відповіді й після звільнення сесії: інакше SMTP у часі
+     * відповіді — або в очікуванні паралельного запиту з тією самою кукою на
+     * блокування сесії — видавав, що менеджер є. Ліміт на скриньку — теж після.
+     */
+    public function testRecoveryEmailIsSentAfterTheResponseAndTheSessionRelease(): void
     {
         $auth = $this->source('backend/Controllers/AuthAdmin.php');
         $respond = strpos($auth, '$this->response->sendContent();');
+        $release = strpos($auth, 'session_write_close();');
         $finish = strpos($auth, 'fastcgi_finish_request();');
+        $recipientLimit = strpos($auth, '->allowRecoveryEmailTo((string)$managerToRecovery->email)');
         $send = strpos($auth, '->emailPasswordRecoveryAdmin(');
 
-        $this->assertNotFalse($finish);
-        $this->assertLessThan($finish, $respond);
-        $this->assertLessThan($send, $finish);
+        foreach ([$release, $finish, $recipientLimit] as $position) {
+            $this->assertNotFalse($position);
+        }
+        $this->assertLessThan($release, $respond);
+        $this->assertLessThan($finish, $release);
+        $this->assertLessThan($recipientLimit, $finish);
+        $this->assertLessThan($send, $recipientLimit);
+    }
+
+    /** Успіх обнуляє лічильник облікового запису й повертає спробу адресі. */
+    public function testSuccessIsReportedToTheGuard(): void
+    {
+        $auth = $this->source('backend/Controllers/AuthAdmin.php');
+        $verify = strpos($auth, '->verifyPassword(');
+        $succeeded = strpos($auth, '$loginGuard->passwordSucceeded($login, $clientIp);');
+        $session = strpos($auth, "\$_SESSION['admin'] = \$manager->login;", (int)$verify);
+
+        $this->assertNotFalse($succeeded);
+        $this->assertLessThan($succeeded, $verify);
+        $this->assertLessThan($session, $succeeded);
     }
 
     /** Масив у POST (`login[]=`) давав Warning у лог. */

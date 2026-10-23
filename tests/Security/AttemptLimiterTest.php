@@ -190,6 +190,19 @@ class AttemptLimiterTest extends TestCase
         $this->assertFileExists($this->dir . '/' . hash('sha256', 'fresh') . '.json');
     }
 
+    /** Прибирання не має видаляти лічильник, який ще в межах свого вікна. */
+    public function testPruneAgeCoversTheLongestWindow()
+    {
+        $params = include dirname(__DIR__, 2) . '/Okay/Core/config/parameters.php';
+        $windows = [
+            $params['attempt_limiter']['window_seconds'],
+            \Okay\Core\Security\AdminLoginGuard::WINDOW_SECONDS,
+            \Okay\Core\Security\AdminLoginGuard::RECOVERY_WINDOW_SECONDS,
+        ];
+
+        $this->assertGreaterThan(max($windows), AttemptLimiter::PRUNE_AFTER_SECONDS);
+    }
+
     /**
      * Недоступне сховище не закриває вхід (тека з root-власником замкнула б
      * адмінку всім), але й не мовчить: ліміт у цей час не діє.

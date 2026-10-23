@@ -53,14 +53,18 @@ class AuthAdmin extends IndexAdmin
             $this->response->setContent(json_encode($result), RESPONSE_JSON);
             $this->response->sendContent();
 
-            if ($managerToRecovery !== null && $loginGuard->allowRecoveryEmailTo((string)$managerToRecovery->email)) {
-                // Лист — уже після відповіді: SMTP займає десятки мілісекунд, і
-                // за часом відповіді інакше було видно, що такий менеджер є.
-                // Поза php-fpm цієї функції немає, і лист іде до кінця запиту.
-                if (function_exists('fastcgi_finish_request')) {
-                    fastcgi_finish_request();
-                }
+            // Далі робота залежить від того, чи є такий менеджер, тож вона йде
+            // після відповіді: SMTP займає десятки мілісекунд. Сесію звільняємо
+            // теж: інакше паралельний запит з тією самою кукою чекав би на
+            // блокування до кінця листа й видавав те саме.
+            session_write_close();
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            } elseif (function_exists('litespeed_finish_request')) {
+                litespeed_finish_request();
+            }
 
+            if ($managerToRecovery !== null && $loginGuard->allowRecoveryEmailTo((string)$managerToRecovery->email)) {
                 // Токен підписаний поточним хешем пароля менеджера, тому
                 // стає недійсним одразу після зміни пароля.
                 $code = $recoveryToken->create(
@@ -121,19 +125,19 @@ class AuthAdmin extends IndexAdmin
             $pass = $this->request->post('password');
             $pass = is_string($pass) ? $pass : '';
 
-            $manager = $login === '' ? null : ($managersEntity->get($login) ?: null);
-
-            if (!$loginGuard->allowPasswordAttempt($manager, $login, $clientIp)) {
+            if (!$loginGuard->allowPasswordAttempt($login, $clientIp)) {
                 $this->design->assign('login', $login);
                 $this->design->assign('error_message', 'limit_try');
             } else {
+                $manager = $login === '' ? null : ($managersEntity->get($login) ?: null);
+
                 // Відповідь на хибну пару однакова для існуючого й вигаданого
                 // логіна, і за текстом, і за часом (AdminLoginGuard::verifyPassword).
                 if (!$loginGuard->verifyPassword($manager, $pass)) {
                     $this->design->assign('login', $login);
                     $this->design->assign('error_message', 'auth_wrong');
                 } else {
-                    $loginGuard->passwordSucceeded($manager, $login, $clientIp);
+                    $loginGuard->passwordSucceeded($login, $clientIp);
 
                     /*Входим в админку*/
                     SessionNames::regenerate();

@@ -51,6 +51,7 @@ use Okay\Core\TplMod\Parser as TplParser;
 use Okay\Core\Security\AdminRecoveryToken;
 use Okay\Core\Security\AttemptLimiter;
 use Okay\Core\Security\AdminLoginGuard;
+use Okay\Core\Security\ManagerLoginKey;
 use Okay\Core\Security\RecoveryToken;
 use Okay\Core\Security\StorefrontGuard;
 use Okay\Core\Release\CoreMigrator;
@@ -325,6 +326,13 @@ $services = [
         'arguments' => [
             new SR(AttemptLimiter::class),
             new SR(Managers::class),
+            new SR(ManagerLoginKey::class),
+        ],
+    ],
+    ManagerLoginKey::class => [
+        'class' => ManagerLoginKey::class,
+        'arguments' => [
+            new SR(QueryFactory::class),
         ],
     ],
     Translit::class => [

@@ -5,6 +5,7 @@ namespace Security;
 use Okay\Core\Managers;
 use Okay\Core\Security\AdminLoginGuard;
 use Okay\Core\Security\AttemptLimiter;
+use Okay\Core\Security\ManagerLoginKey;
 use Okay\Core\Security\PasswordHasher;
 use PHPUnit\Framework\TestCase;
 
@@ -33,11 +34,11 @@ class AdminLoginGuardTest extends TestCase
     {
         $guard = $this->guard();
         for ($i = 0; $i < AdminLoginGuard::LOGIN_ATTEMPTS; $i++) {
-            $this->assertTrue($guard->allowPasswordAttempt(null, 'admin', '203.0.113.7'));
+            $this->assertTrue($guard->allowPasswordAttempt('admin', '203.0.113.7'));
         }
 
-        $this->assertFalse($guard->allowPasswordAttempt(null, 'admin', '203.0.113.7'));
-        $this->assertFalse($guard->allowPasswordAttempt(null, 'ADMIN ', '203.0.113.7'), 'регістр і пробіли — той самий логін');
+        $this->assertFalse($guard->allowPasswordAttempt('admin', '203.0.113.7'));
+        $this->assertFalse($guard->allowPasswordAttempt('ADMIN ', '203.0.113.7'), 'регістр і пробіли — той самий логін');
     }
 
     /**
@@ -48,10 +49,10 @@ class AdminLoginGuardTest extends TestCase
     {
         $guard = $this->guard();
         for ($i = 0; $i < AdminLoginGuard::LOGIN_ATTEMPTS + 3; $i++) {
-            $guard->allowPasswordAttempt(null, 'admin', '198.51.100.9');
+            $guard->allowPasswordAttempt('admin', '198.51.100.9');
         }
 
-        $this->assertTrue($guard->allowPasswordAttempt(null, 'admin', '203.0.113.7'));
+        $this->assertTrue($guard->allowPasswordAttempt('admin', '203.0.113.7'));
     }
 
     /** Перебір багатьох логінів з однієї адреси впирається в ліміт адреси. */
@@ -59,21 +60,21 @@ class AdminLoginGuardTest extends TestCase
     {
         $guard = $this->guard();
         for ($i = 0; $i < AdminLoginGuard::IP_ATTEMPTS; $i++) {
-            $this->assertTrue($guard->allowPasswordAttempt(null, 'user' . $i, '198.51.100.9'));
+            $this->assertTrue($guard->allowPasswordAttempt('user' . $i, '198.51.100.9'));
         }
 
-        $this->assertFalse($guard->allowPasswordAttempt(null, 'another', '198.51.100.9'));
-        $this->assertTrue($guard->allowPasswordAttempt(null, 'another', '203.0.113.7'));
+        $this->assertFalse($guard->allowPasswordAttempt('another', '198.51.100.9'));
+        $this->assertTrue($guard->allowPasswordAttempt('another', '203.0.113.7'));
     }
 
     public function testIpv6NetworkIsOneSource(): void
     {
         $guard = $this->guard();
         for ($i = 0; $i < AdminLoginGuard::LOGIN_ATTEMPTS; $i++) {
-            $guard->allowPasswordAttempt(null, 'admin', '2001:db8:1:2::' . dechex($i + 1));
+            $guard->allowPasswordAttempt('admin', '2001:db8:1:2::' . dechex($i + 1));
         }
 
-        $this->assertFalse($guard->allowPasswordAttempt(null, 'admin', '2001:db8:1:2::ffff'));
+        $this->assertFalse($guard->allowPasswordAttempt('admin', '2001:db8:1:2::ffff'));
     }
 
     /**
@@ -84,12 +85,11 @@ class AdminLoginGuardTest extends TestCase
     public function testSuccessResetsTheAccountAndRefundsOneAddressAttempt(): void
     {
         $guard = $this->guard();
-        $manager = (object)['id' => 7];
         for ($i = 0; $i < AdminLoginGuard::LOGIN_ATTEMPTS; $i++) {
-            $guard->allowPasswordAttempt($manager, 'admin', '203.0.113.7');
+            $guard->allowPasswordAttempt('admin', '203.0.113.7');
         }
-        $guard->passwordSucceeded($manager, 'admin', '203.0.113.7');
-        $this->assertTrue($guard->allowPasswordAttempt($manager, 'admin', '203.0.113.7'));
+        $guard->passwordSucceeded('admin', '203.0.113.7');
+        $this->assertTrue($guard->allowPasswordAttempt('admin', '203.0.113.7'));
 
         $ipFile = $this->dir . '/' . hash('sha256', 'admin_login_ip:203.0.113.7') . '.json';
         $this->assertCount(AdminLoginGuard::LOGIN_ATTEMPTS, json_decode((string)file_get_contents($ipFile), true));
@@ -100,25 +100,25 @@ class AdminLoginGuardTest extends TestCase
     {
         $guard = $this->guard();
         for ($i = 0; $i < AdminLoginGuard::IP_ATTEMPTS * 2; $i++) {
-            $manager = (object)['id' => $i + 1];
-            $this->assertTrue($guard->allowPasswordAttempt($manager, 'm' . $i, '203.0.113.7'));
-            $guard->passwordSucceeded($manager, 'm' . $i, '203.0.113.7');
+            $this->assertTrue($guard->allowPasswordAttempt('m' . $i, '203.0.113.7'));
+            $guard->passwordSucceeded('m' . $i, '203.0.113.7');
         }
     }
 
     /**
-     * Колація `ok_managers.login` не розрізняє діакритики: «zzsécargon» знаходить
-     * того самого менеджера, тож ліміт рахується за id, а не за рядком.
+     * Ключ облікового запису рахує база (ManagerLoginKey), тож написання, яке
+     * вона вважає тим самим логіном, ділить лічильник — і для існуючого, і для
+     * вигаданого логіна однаково.
      */
-    public function testAccountLimitFollowsTheManagerNotTheSpelling(): void
+    public function testAccountLimitFollowsWhatTheDatabaseConsidersOneLogin(): void
     {
         $guard = $this->guard();
-        $manager = (object)['id' => 7];
         for ($i = 0; $i < AdminLoginGuard::LOGIN_ATTEMPTS; $i++) {
-            $guard->allowPasswordAttempt($manager, 'zzsecargon', '203.0.113.7');
+            $guard->allowPasswordAttempt('zzsecargon', '203.0.113.7');
         }
 
-        $this->assertFalse($guard->allowPasswordAttempt($manager, 'zzsécargon', '203.0.113.7'));
+        $this->assertFalse($guard->allowPasswordAttempt('ZZSÉCARGON  ', '203.0.113.7'));
+        $this->assertTrue($guard->allowPasswordAttempt(' zzsecargon', '203.0.113.7'), 'пробіл на початку база розрізняє');
     }
 
     public function testRecoveryEmailsAreLimitedPerAddress(): void
@@ -205,6 +205,19 @@ class AdminLoginGuardTest extends TestCase
 
     private function guard(): AdminLoginGuard
     {
-        return new AdminLoginGuard(new AttemptLimiter($this->dir, 10, 300), new Managers());
+        // Наближення до utf8mb4_unicode_ci для тестів: без регістру, діакритики
+        // й пробілів у кінці. Справжній ключ рахує база.
+        $key = new class extends ManagerLoginKey {
+            public function __construct()
+            {
+            }
+
+            public function of(string $login): string
+            {
+                return 'w:' . strtolower(rtrim(strtr($login, ['é' => 'e', 'É' => 'E', 'í' => 'i', 'ó' => 'o', 'Ó' => 'O']), ' '));
+            }
+        };
+
+        return new AdminLoginGuard(new AttemptLimiter($this->dir, 10, 300), new Managers(), $key);
     }
 }
