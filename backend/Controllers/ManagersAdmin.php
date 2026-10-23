@@ -40,9 +40,12 @@ class ManagersAdmin extends IndexAdmin
                 }
 
                 $skipped = false;
-                foreach (array_unique(array_map('intval', $ids)) as $id) {
+                $ids = array_values(array_unique(array_map('intval', $ids)));
+                $allManagers = $managersEntity->noLimit()->find() ?: [];
+                foreach ($ids as $id) {
                     $target = $id > 0 ? $managersEntity->get($id) : null;
-                    if (!is_object($target) || $id === $viewerId || !$policy->canManage($this->manager, $target)) {
+                    if (!is_object($target) || $id === $viewerId || !$policy->canManage($this->manager, $target)
+                        || $policy->isLastFullAdmin($target, $allManagers, array_diff($ids, [$viewerId]))) {
                         $skipped = true;
                         continue;
                     }

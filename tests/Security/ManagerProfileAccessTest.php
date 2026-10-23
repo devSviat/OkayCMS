@@ -118,6 +118,40 @@ class ManagerProfileAccessTest extends TestCase
         $this->assertTrue((new ManagerProfilePolicy($managers))->canManage($this->viewer(1, ['managers']), $empty));
     }
 
+    /**
+     * Право видаленого чи неліцензованого модуля лишається в рядку менеджера,
+     * але нічого не дає. Воно не має робити менеджера недосяжним навіть для
+     * повного адміна: інакше звільненого не завершити й не видалити.
+     */
+    public function testStalePermissionDoesNotPutAManagerOutOfReach(): void
+    {
+        $managers = new Managers();
+        $full = (object)['id' => 1, 'permissions' => null];
+        $managers->setManagerPermissions($full);
+        $policy = new ManagerProfilePolicy($managers);
+
+        $this->assertTrue($policy->canManage($full, $this->viewer(9, ['products', 'vendor__removed_module'])));
+        $this->assertFalse(
+            $policy->canManage($this->viewer(2, ['managers']), $this->viewer(9, ['products'])),
+            'справжнє право, якого немає в того, хто діє, — як і раніше ні'
+        );
+    }
+
+    public function testTheLastFullAdminCannotDisappear(): void
+    {
+        $managers = new Managers();
+        $all = $managers->getAllPermissions();
+        $policy = new ManagerProfilePolicy($managers);
+        $adminA = $this->viewer(1, $all);
+        $adminB = $this->viewer(2, $all);
+        $plain = $this->viewer(3, ['products']);
+
+        $this->assertFalse($policy->isLastFullAdmin($adminA, [$adminA, $adminB, $plain]));
+        $this->assertTrue($policy->isLastFullAdmin($adminA, [$adminA, $plain]));
+        $this->assertTrue($policy->isLastFullAdmin($adminA, [$adminA, $adminB, $plain], [2]), 'B зникає тією самою дією');
+        $this->assertFalse($policy->isLastFullAdmin($plain, [$adminA, $plain]), 'не повний — не останній');
+    }
+
     public function testSessionsOfAHigherManagerCannotBeRevoked(): void
     {
         $policy = new ManagerProfilePolicy(new Managers());

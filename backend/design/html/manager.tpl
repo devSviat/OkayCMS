@@ -50,6 +50,7 @@
                 {elseif $message_error == 'password_wrong'}{$btr->manager_reauth_wrong|escape}
                 {elseif $message_error == 'reauth_required'}{$btr->manager_reauth_required|escape}
                 {elseif $message_error == 'no_access'}{$btr->manager_no_access|escape}
+                {elseif $message_error == 'last_full_admin'}{$btr->manager_last_full_admin|escape}
                 {elseif $message_error == 'limit_try'}{$btr->auth_limit_try|escape}
                 {else}{$btr->manager_save_failed|escape}{/if}
             </div>
@@ -200,11 +201,13 @@
                         {if $can_manage_target}
                             <div class="row">
                                 <div class="col-lg-12 col-md-12">
-                                    <button type="submit" class="btn btn_blue btn_small float-md-right">
+                                    {* Свої налаштування — без підтвердження, чужі — лише у вікні *}
+                                    {$profile_locked = !$is_self && !$reauth_fresh}
+                                    <button type="submit" class="btn btn_blue btn_small float-md-right" {if $profile_locked}disabled title="{$btr->manager_reauth_required|escape}"{/if}>
                                         {include file='svg_icon.tpl' svgId='checked'}
                                         <span>{$btr->general_apply|escape}</span>
                                     </button>
-                                    <button type="submit" form="fn_reset_menu" class="btn btn-info btn_small float-md-right mr-h">
+                                    <button type="submit" form="fn_reset_menu" class="btn btn-info btn_small float-md-right mr-h" {if $profile_locked}disabled title="{$btr->manager_reauth_required|escape}"{/if}>
                                         {include file='svg_icon.tpl' svgId='refresh_icon'}
                                         <span>{$btr->manager_reset_menu|escape}</span>
                                     </button>

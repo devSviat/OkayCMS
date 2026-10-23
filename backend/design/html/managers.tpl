@@ -25,7 +25,7 @@
                 {if $message_error == 'reauth_required'}{$btr->manager_reauth_required|escape}
                 {elseif $message_error == 'password_wrong'}{$btr->manager_reauth_wrong|escape}
                 {elseif $message_error == 'limit_try'}{$btr->auth_limit_try|escape}
-                {else}{$btr->manager_no_access|escape}{/if}
+                {else}{$btr->manager_delete_skipped|escape}{/if}
             </div>
         </div>
     </div>

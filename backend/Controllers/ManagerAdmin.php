@@ -148,6 +148,11 @@ class ManagerAdmin extends IndexAdmin
             $this->response->redirectTo($this->profileUrl($targetId, $tab));
             return;
         }
+        // Над іншим менеджером — будь-яка дія лише у вікні підтвердження.
+        if (!$isSelf && !$this->confirmed($reauth)) {
+            $this->response->redirectTo($this->profileUrl($targetId, $tab));
+            return;
+        }
 
         switch ($action) {
             case 'profile':
@@ -172,13 +177,17 @@ class ManagerAdmin extends IndexAdmin
                 if (!$this->confirmed($reauth)) {
                     break;
                 }
-                $managersEntity->update($targetId, [
-                    'permissions' => $this->managers->determineNewPermissions(
-                        $viewer,
-                        $target,
-                        (array)$this->request->post('permissions', null, [])
-                    ),
-                ]);
+                $newPermissions = $this->managers->determineNewPermissions(
+                    $viewer,
+                    $target,
+                    (array)$this->request->post('permissions', null, [])
+                );
+                if (!$policy->hasFullAccess((object)['permissions' => array_values($newPermissions)])
+                    && $policy->isLastFullAdmin($target, $managersEntity->noLimit()->find() ?: [])) {
+                    $this->postRedirectGet->storeMessageError('last_full_admin');
+                    break;
+                }
+                $managersEntity->update($targetId, ['permissions' => $newPermissions]);
                 $this->postRedirectGet->storeMessageSuccess('permissions_saved');
                 break;
 
