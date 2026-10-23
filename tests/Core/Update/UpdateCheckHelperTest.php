@@ -64,4 +64,15 @@ class UpdateCheckHelperTest extends TestCase
         ], $result);
         $this->assertIsInt($lastErrorAt);
     }
+
+    /** Після 301 у заголовках дві відповіді; ETag має бути з кінцевої. */
+    public function testExtractEtagTakesTheFinalResponseAfterRedirect(): void
+    {
+        $headers = "HTTP/2 301\r\nlocation: https://api.github.com/repositories/1/releases\r\netag: \"old\"\r\n\r\n"
+            . "HTTP/2 200\r\ncontent-type: application/json\r\nETag: W/\"final\"\r\n\r\n";
+
+        $this->assertSame('W/"final"', UpdateCheckHelper::extractEtag($headers));
+        $this->assertSame('W/"one"', UpdateCheckHelper::extractEtag("HTTP/2 200\r\nETag: W/\"one\"\r\n\r\n"));
+        $this->assertNull(UpdateCheckHelper::extractEtag("HTTP/2 200\r\ncontent-type: x\r\n\r\n"));
+    }
 }

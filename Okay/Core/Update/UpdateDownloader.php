@@ -46,7 +46,7 @@ class UpdateDownloader
             // Паранойя-перевірка (defense-in-depth): навіть якщо снапшот
             // у Settings колись підмінили, споживання (тут) перевіряє
             // префікс наново, а не довіряє тому, що збережено раніше.
-            if (!str_starts_with($url, ReleaseFeed::TRUSTED_ASSET_URL_PREFIX)) {
+            if (!ReleaseFeed::isTrustedAssetUrl($url)) {
                 throw new \RuntimeException("Посилання на \"{$key}\" не з довіреного джерела: {$url}");
             }
 

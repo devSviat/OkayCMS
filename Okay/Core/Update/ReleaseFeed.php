@@ -14,8 +14,30 @@ class ReleaseFeed
      * Довіряємо asset-посиланням лише з нашого репозиторію релізів —
      * інакше зловмисний конкурентний release ('assets' підробити не можна,
      * а от чужий 'browser_download_url' у власному релізі — можна).
+     *
+     * Дві адреси на час перейменування devSviat/OkayCMS → devSviat/OkayCMS-Fork:
+     * після нього GitHub віддає asset-и вже з новою назвою, і сайт, що довіряє
+     * лише старій, не побачив би жодного релізу — тобто й того, що це виправляє.
+     * Стару адресу можна прибрати, коли всі сайти оновляться після перейменування.
      */
-    public const TRUSTED_ASSET_URL_PREFIX = 'https://github.com/devSviat/OkayCMS/releases/download/';
+    public const TRUSTED_ASSET_URL_PREFIXES = [
+        'https://github.com/devSviat/OkayCMS/releases/download/',
+        'https://github.com/devSviat/OkayCMS-Fork/releases/download/',
+    ];
+
+    public static function isTrustedAssetUrl($url): bool
+    {
+        if (!is_string($url)) {
+            return false;
+        }
+        foreach (self::TRUSTED_ASSET_URL_PREFIXES as $prefix) {
+            if (str_starts_with($url, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * @return array{forkVersion: string, tag: string, publishedAt: ?string, notesUrl: ?string, notesBody: ?string, assets: array{zip: string, versionJson: string, checksums: string}}|null
@@ -177,7 +199,7 @@ class ReleaseFeed
             }
 
             $url = $asset['browser_download_url'];
-            if (!is_string($url) || !str_starts_with($url, self::TRUSTED_ASSET_URL_PREFIX)) {
+            if (!self::isTrustedAssetUrl($url)) {
                 continue;
             }
 
