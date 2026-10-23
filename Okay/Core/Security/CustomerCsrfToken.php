@@ -7,7 +7,9 @@ namespace Okay\Core\Security;
  *
  * Значення дублюється в SameSite=Lax куку: при зміні імені сесії
  * (див. SessionNames) серверний стан губиться, а форма, відрендерена
- * до оновлення, має лишитись робочою.
+ * до оновлення, має лишитись робочою. Кука — лише запасний шлях на час,
+ * коли в сесії токена немає: інакше той, хто здатен підкинути куку
+ * (піддомен, http без HSTS), обрав би токен сам і підробив запит.
  */
 class CustomerCsrfToken
 {
@@ -20,6 +22,12 @@ class CustomerCsrfToken
     {
         $fromSession = self::sessionToken();
         if ($fromSession !== null) {
+            // Скрипти тем беруть токен для AJAX із куки: розійдеться з сесією —
+            // їхні запити відхилятимуться. Заодно затирається підкинута кука.
+            if (self::cookieToken() !== $fromSession) {
+                self::setCookie($fromSession);
+            }
+
             return $fromSession;
         }
 
@@ -38,6 +46,13 @@ class CustomerCsrfToken
         $token = bin2hex(random_bytes(32));
 
         $_SESSION[self::SESSION_KEY] = $token;
+        self::setCookie($token);
+
+        return $token;
+    }
+
+    private static function setCookie(string $token): void
+    {
         $_COOKIE[self::COOKIE_NAME] = $token;
 
         if (!headers_sent()) {
@@ -52,8 +67,6 @@ class CustomerCsrfToken
                 'samesite' => 'Lax',
             ]);
         }
-
-        return $token;
     }
 
     public static function check($token)
@@ -62,13 +75,10 @@ class CustomerCsrfToken
             return false;
         }
 
-        foreach ([self::sessionToken(), self::cookieToken()] as $known) {
-            if ($known !== null && hash_equals($known, (string)$token)) {
-                return true;
-            }
-        }
+        // Токен сесії, а кука — лише коли сесія свого не має.
+        $known = self::sessionToken() ?? self::cookieToken();
 
-        return false;
+        return $known !== null && hash_equals($known, (string)$token);
     }
 
     private static function sessionToken()
