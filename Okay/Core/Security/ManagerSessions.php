@@ -63,6 +63,8 @@ class ManagerSessions
         }
 
         $_SESSION['admin'] = $manager->login;
+        // Токен, виданий до входу, міг бути підкинутий разом із кукою сесії.
+        AdminCsrfToken::rotate();
 
         return true;
     }

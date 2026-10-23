@@ -39,6 +39,12 @@ class ManagerReauth
         return is_int($at) && $at <= time() && time() - $at < self::CONFIRM_WINDOW_SECONDS;
     }
 
+    /** Закрити вікно раніше: менеджер відходить від комп'ютера. */
+    public function close(): void
+    {
+        unset($_SESSION[self::SESSION_KEY]);
+    }
+
     /** До якого часу відкрите вікно, або null. */
     public function expiresAt(): ?int
     {

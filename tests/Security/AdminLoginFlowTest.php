@@ -103,4 +103,86 @@ class AdminLoginFlowTest extends TestCase
         $this->assertStringContainsString('$login = is_string($login) ? $login : \'\';', $auth);
         $this->assertStringContainsString('$pass = is_string($pass) ? $pass : \'\';', $auth);
     }
+
+    /**
+     * З увімкненою 2FA пароль не дає входу: спершу перевірка 2FA, і лише без
+     * неї — signIn(). Після листа відновлення код перевіряється ще до зміни
+     * пароля й відкликання сесій: сама пошта не має забирати власнику пароль.
+     */
+    public function testTwoFactorIsCheckedBeforeSignInOnBothPaths(): void
+    {
+        $auth = $this->source('backend/Controllers/AuthAdmin.php');
+
+        $recoveryStart = strpos($auth, '$manager = $managerToRecovery;');
+        $recoveryVerify = strpos($auth, '$twoFactor->verify((int)$manager->id, $this->request->post(\'totp_code\'))', (int)$recoveryStart);
+        $recoveryRefused = strpos($auth, 'return;', (int)$recoveryVerify);
+        $this->assertNotFalse($recoveryStart);
+        $this->assertNotFalse($recoveryVerify);
+        foreach ([
+            'зміна пароля' => "\$managersEntity->update((int)\$manager->id, ['password' => \$new_password]);",
+            'відкликання сесій' => '$managerSessions->revokeAll((int)$manager->id, (int)$manager->id);',
+            'вхід' => '$managerSessions->signIn($manager, $codeResult !== null)',
+        ] as $what => $call) {
+            $at = strpos($auth, $call, (int)$recoveryStart);
+            $this->assertNotFalse($at, $what);
+            $this->assertLessThan($at, $recoveryRefused, 'відновлення з листа: хибний код повертає до «' . $what . '»');
+        }
+
+        $passwordOk = strpos($auth, '$loginGuard->passwordSucceeded($login, $clientIp);');
+        $passwordCheck = strpos($auth, '$twoFactor->isEnabled((int)$manager->id)', (int)$passwordOk);
+        $passwordSignIn = strpos($auth, '$managerSessions->signIn($manager)', (int)$passwordOk);
+        $this->assertNotFalse($passwordCheck);
+        $this->assertLessThan($passwordSignIn, $passwordCheck, 'вхід паролем');
+
+        // Гілка 2FA закінчується редіректом на код, а не падає до signIn().
+        $this->assertSame(1, substr_count($auth, '$twoFactor->startChallenge('));
+        $this->assertMatchesRegularExpression('~startChallenge\([^;]*\);\s*(unset\(\$_SESSION\[\'before_auth_url\'\]\);\s*)?\$response->redirectTo\(~s', $auth);
+    }
+
+    /** 2FA вмикають, коли пароль міг витекти: сесії, відкриті лише паролем, закриваються. */
+    public function testEnablingTwoFactorEndsOtherSessions(): void
+    {
+        $admin = $this->source('backend/Controllers/ManagerAdmin.php');
+        $confirm = strpos($admin, "case 'totp_confirm':");
+        $next = strpos($admin, 'case ', (int)$confirm + 1);
+        $this->assertNotFalse($confirm);
+
+        $this->assertStringContainsString('$managerSessions->revokeOthers($viewerId, $viewerId);', substr($admin, $confirm, $next - $confirm));
+    }
+
+    /** Секрет і коди не переживають свого менеджера. */
+    public function testDeletingAManagerDropsItsTwoFactor(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '~\$managersEntity->delete\(\[\$id\]\);.*?\$twoFactor->disable\(\$id\);~s',
+            $this->source('backend/Controllers/ManagersAdmin.php')
+        );
+    }
+
+    /** Крок коду пускає лише через signIn() з mfa = true і лише того самого менеджера. */
+    public function testCodeStepSignsInTheSameManagerWithMfa(): void
+    {
+        $auth = $this->source('backend/Controllers/AuthAdmin.php');
+
+        $this->assertStringContainsString("(string)\$manager->login !== \$challenge['login']", $auth);
+        $this->assertStringContainsString('$managerSessions->signIn($manager, true)', $auth);
+        $this->assertStringNotContainsString("\$_SESSION['admin'] =", $auth);
+    }
+
+    /**
+     * Enter у полі коду відправляє форму першою її кнопкою. Скасування мусить
+     * жити в окремій формі, інакше Enter скасовує вхід замість відправити код.
+     */
+    public function testEnterInTheCodeFieldSubmitsTheCode(): void
+    {
+        $tpl = $this->source('backend/design/html/auth.tpl');
+        $start = strpos($tpl, '{elseif $two_factor_step}');
+        $end = strpos($tpl, '</form>', (int)$start);
+        $this->assertNotFalse($start);
+        $step = substr($tpl, (int)$start, (int)$end - (int)$start);
+
+        $this->assertStringNotContainsString('name="cancel_2fa"', $step, 'кнопка скасування — частина форми коду');
+        $this->assertStringContainsString('form="fn_cancel_2fa"', $step);
+        $this->assertStringContainsString('id="fn_cancel_2fa"', $tpl);
+    }
 }

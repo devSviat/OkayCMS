@@ -5,6 +5,7 @@ namespace Security;
 use Aura\Sql\ExtendedPdo;
 use Okay\Core\Config;
 use Okay\Core\EntityFactory;
+use Okay\Core\Security\AdminCsrfToken;
 use Okay\Core\Security\ManagerReauth;
 use Okay\Core\Security\ManagerSessions;
 use Okay\Core\ServiceLocator;
@@ -14,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * ManagerSessions::signIn() на живій базі: новий ідентифікатор сесії, рядок у
  * реєстрі саме для нього, і лише тоді мітка admin. Вікно підтвердження паролем
- * попереднього входу не переживає. Без бази тест пропускається.
+ * і CSRF-токен попереднього входу його не переживають. Без бази тест пропускається.
  */
 class ManagerSessionsSignInTest extends TestCase
 {
@@ -39,6 +40,7 @@ class ManagerSessionsSignInTest extends TestCase
             $before = session_id();
             $_SESSION[ManagerReauth::SESSION_KEY] = time();
             $_SESSION['admin'] = 'someone_else';
+            $tokenBefore = AdminCsrfToken::get();
 
             $sessions = new ManagerSessions(ServiceLocator::getInstance()->getService(EntityFactory::class));
             $this->assertTrue($sessions->signIn((object)['id' => $managerId, 'login' => 'si_manager']));
@@ -46,6 +48,7 @@ class ManagerSessionsSignInTest extends TestCase
             $this->assertNotSame($before, session_id(), 'фіксація сесії: ідентифікатор мусить змінитись');
             $this->assertSame('si_manager', $_SESSION['admin']);
             $this->assertArrayNotHasKey(ManagerReauth::SESSION_KEY, $_SESSION);
+            $this->assertNotSame($tokenBefore, AdminCsrfToken::get(), 'CSRF-токен з-до входу не переживає вхід');
             $this->assertTrue($sessions->isValid('si_manager', session_id()));
             $this->assertFalse($sessions->isValid('si_manager', $before), 'старий ідентифікатор не зареєстровано');
         } finally {

@@ -7,6 +7,7 @@ namespace Okay\Admin\Controllers;
 use Okay\Core\Security\ManagerProfilePolicy;
 use Okay\Core\Security\ManagerReauth;
 use Okay\Core\Security\ManagerSessions;
+use Okay\Core\Security\ManagerTwoFactor;
 use Okay\Entities\ManagersEntity;
 
 class ManagersAdmin extends IndexAdmin
@@ -16,13 +17,22 @@ class ManagersAdmin extends IndexAdmin
         ManagersEntity $managersEntity,
         ManagerSessions $managerSessions,
         ManagerProfilePolicy $policy,
-        ManagerReauth $reauth
+        ManagerReauth $reauth,
+        ManagerTwoFactor $twoFactor
     ) {
         if ($this->request->method('post')) {
             $viewerId = (int)$this->manager->id;
 
+            if ($this->request->post('action') === 'reauth_close') {
+                $reauth->close();
+                $this->postRedirectGet->redirect();
+            }
+
             if ($this->request->post('action') === 'reauth') {
                 $result = $reauth->checkPassword($viewerId, $this->request->post('reauth_password'), (string)($_SERVER['REMOTE_ADDR'] ?? ''));
+                if ($this->request->post('ajax')) {
+                    $this->reauthJson($result);
+                }
                 if ($result !== ManagerReauth::OK) {
                     $this->postRedirectGet->storeMessageError($result);
                 }
@@ -51,6 +61,9 @@ class ManagersAdmin extends IndexAdmin
                     }
                     $managersEntity->delete([$id]);
                     $managerSessions->revokeAll($id, $viewerId);
+                    // Рядки 2FA прив'язані лише до id: менеджер із тим самим id
+                    // (імпорт, ручний INSERT) отримав би чужий секрет і коди.
+                    $twoFactor->disable($id);
                 }
                 if ($skipped) {
                     $this->postRedirectGet->storeMessageError('no_access');
@@ -72,4 +85,11 @@ class ManagersAdmin extends IndexAdmin
         $this->response->setContent($this->design->fetch('managers.tpl'));
     }
 
+    /** Відповідь на перевірку пароля з модального вікна: без перезавантаження сторінки. */
+    private function reauthJson(string $result): void
+    {
+        $this->response->setContent(json_encode(['ok' => $result === ManagerReauth::OK, 'error' => $result === ManagerReauth::OK ? null : $result]), RESPONSE_JSON);
+        $this->response->sendContent();
+        exit;
+    }
 }

@@ -39,7 +39,7 @@
     {if $managers}
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12">
-                <form method="post" class="fn_form_list">
+                <form method="post" class="fn_form_list" data-reauth="1">
                     <input type="hidden" name="session_id" value="{$smarty.session.id}">
                     <div class="managers_wrap okay_list">
                         {*Шапка таблицы*}
@@ -73,7 +73,7 @@
                                             {/if}
                                         </div>
 
-                                        {if $manager_admin->can_delete && $reauth_fresh}
+                                        {if $manager_admin->can_delete}
                                             <div class="okay_list_boding okay_list_close">
                                                 {*delete*}
                                                 <button data-hint="{$btr->managers_delete|escape}" type="button" class="btn_close fn_remove hint-bottom-right-t-info-s-small-mobile  hint-anim" data-toggle="modal" data-target="#fn_action_modal" onclick="success_action($(this));">

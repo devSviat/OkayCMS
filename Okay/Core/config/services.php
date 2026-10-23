@@ -53,6 +53,8 @@ use Okay\Core\Security\AttemptLimiter;
 use Okay\Core\Security\AdminLoginGuard;
 use Okay\Core\Security\ManagerLoginKey;
 use Okay\Core\Security\ManagerSessions;
+use Okay\Core\Security\ManagerTwoFactor;
+use Okay\Core\Security\TotpKey;
 use Okay\Core\Security\ManagerReauth;
 use Okay\Core\Security\ManagerProfilePolicy;
 use Okay\Core\Security\RecoveryToken;
@@ -342,6 +344,20 @@ $services = [
         'class' => ManagerSessions::class,
         'arguments' => [
             new SR(EntityFactory::class),
+            new SR(LoggerInterface::class),
+        ],
+    ],
+    TotpKey::class => [
+        'class' => TotpKey::class,
+        'arguments' => [
+            new SR(Config::class),
+        ],
+    ],
+    ManagerTwoFactor::class => [
+        'class' => ManagerTwoFactor::class,
+        'arguments' => [
+            new SR(EntityFactory::class),
+            new SR(TotpKey::class),
             new SR(LoggerInterface::class),
         ],
     ],

@@ -4,8 +4,7 @@
     {$meta_title = $btr->manager_new scope=global}
 {/if}
 
-{* Поля логіна й email без вікна підтвердження — лише для читання, із замком (ManagerReauth) *}
-{$credentials_locked = !$reauth_fresh || !$can_manage_target}
+{$credentials_locked = !$can_manage_target}
 
 <div class="row">
     <div class="col-lg-12 col-md-12">
@@ -32,13 +31,17 @@
                 {elseif $message_success == 'permissions_saved'}{$btr->manager_permissions_saved|escape}
                 {elseif $message_success == 'session_revoked'}{$btr->manager_sessions_revoked|escape}
                 {elseif $message_success == 'sessions_revoked'}{$btr->manager_sessions_revoked_many|escape}
+                {elseif $message_success == 'totp_enabled'}{$btr->manager_totp_enabled_msg|escape}
+                {elseif $message_success == 'totp_disabled'}{$btr->manager_totp_disabled_msg|escape}
+                {elseif $message_success == 'totp_codes_new'}{$btr->manager_totp_codes_new_msg|escape}
                 {else}{$btr->manager_updated|escape}{/if}
             </div>
         </div>
     </div>
 {/if}
 
-{if $message_error}
+{* Пароль підтвердження й коди 2FA показують помилку біля свого поля *}
+{if $message_error && !in_array($message_error, ['password_wrong', 'limit_try', 'totp_wrong', 'totp_limit'])}
     <div class="alert alert--icon alert--error">
         <div class="alert__content">
             <div class="alert__title">
@@ -51,6 +54,8 @@
                 {elseif $message_error == 'reauth_required'}{$btr->manager_reauth_required|escape}
                 {elseif $message_error == 'no_access'}{$btr->manager_no_access|escape}
                 {elseif $message_error == 'last_full_admin'}{$btr->manager_last_full_admin|escape}
+                {elseif $message_error == 'totp_wrong'}{$btr->auth_2fa_wrong|escape}
+                {elseif $message_error == 'totp_key_missing'}{$btr->manager_totp_key_missing|escape}
                 {elseif $message_error == 'limit_try'}{$btr->auth_limit_try|escape}
                 {else}{$btr->manager_save_failed|escape}{/if}
             </div>
@@ -75,7 +80,7 @@
 
 {if $is_new}
     {* Новий менеджер: одна форма — обліковий запис, пароль і права разом *}
-    <form method="post" autocomplete="off">
+    <form method="post" autocomplete="off" data-reauth="1">
         <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
         <input type="hidden" name="action" value="create">
         <div class="boxed">
@@ -122,10 +127,8 @@
         </div>
         <div class="boxed">
             {include file='manager_permissions.tpl'}
-        </div>
-        <div class="row">
-            <div class="col-lg-12 col-md-12">
-                <button type="submit" class="btn btn_blue btn_small float-md-right" {if !$reauth_fresh}disabled title="{$btr->manager_reauth_required|escape}"{/if}>
+            <div class="sticky_actions">
+                <button type="submit" class="btn btn_blue btn_small">
                     {include file='svg_icon.tpl' svgId='checked'}
                     <span>{$btr->manager_create|escape}</span>
                 </button>
@@ -148,7 +151,7 @@
 
                 {* Профіль. Логін і email — вхід і відновлення пароля, тож лише у вікні підтвердження *}
                 <div id="profile" class="tab">
-                    <form method="post" autocomplete="off">
+                    <form method="post" autocomplete="off" data-reauth="{if $is_self}changed{else}1{/if}">
                         <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
                         <input type="hidden" name="id" value="{$m->id|escape}">
                         <input type="hidden" name="action" value="profile">
@@ -158,15 +161,15 @@
                                 <div class="form-group">
                                     <div class="heading_label heading_label--required"><span>{$btr->manager_login|escape}</span></div>
                                     <div class="input-group">
-                                        <input class="form-control" name="login" type="text" autocomplete="off" value="{$m->login|escape}" required {if $credentials_locked}readonly{/if}/>
-                                        <span class="input-group-addon" title="{if $credentials_locked}{$btr->manager_reauth_to_edit|escape}{/if}">{if $credentials_locked}{include file='svg_icon.tpl' svgId='lock_closed'}{else}{include file='svg_icon.tpl' svgId='user2_icon'}{/if}</span>
+                                        <input class="form-control" name="login" type="text" autocomplete="off" value="{$m->login|escape}" required data-reauth-field {if $credentials_locked}readonly{/if}/>
+                                        <span class="input-group-addon">{include file='svg_icon.tpl' svgId='user2_icon'}</span>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="heading_label">{$btr->manager_email|escape}</div>
                                     <div class="input-group">
-                                        <input class="form-control" name="email" type="email" autocomplete="off" value="{$m->email|escape}" {if $credentials_locked}readonly{/if}/>
-                                        <span class="input-group-addon" title="{if $credentials_locked}{$btr->manager_reauth_to_edit|escape}{/if}">{if $credentials_locked}{include file='svg_icon.tpl' svgId='lock_closed'}{else}{include file='svg_icon.tpl' svgId='email'}{/if}</span>
+                                        <input class="form-control" name="email" type="email" autocomplete="off" value="{$m->email|escape}" data-reauth-field {if $credentials_locked}readonly{/if}/>
+                                        <span class="input-group-addon">{include file='svg_icon.tpl' svgId='email'}</span>
                                     </div>
                                     <div class="text_grey font_12 mt-q">{$btr->manager_email_hint|escape}</div>
                                 </div>
@@ -201,13 +204,11 @@
                         {if $can_manage_target}
                             <div class="row">
                                 <div class="col-lg-12 col-md-12">
-                                    {* Свої налаштування — без підтвердження, чужі — лише у вікні *}
-                                    {$profile_locked = !$is_self && !$reauth_fresh}
-                                    <button type="submit" class="btn btn_blue btn_small float-md-right" {if $profile_locked}disabled title="{$btr->manager_reauth_required|escape}"{/if}>
+                                    <button type="submit" class="btn btn_blue btn_small float-md-right">
                                         {include file='svg_icon.tpl' svgId='checked'}
                                         <span>{$btr->general_apply|escape}</span>
                                     </button>
-                                    <button type="submit" form="fn_reset_menu" class="btn btn-info btn_small float-md-right mr-h" {if $profile_locked}disabled title="{$btr->manager_reauth_required|escape}"{/if}>
+                                    <button type="submit" form="fn_reset_menu" class="btn btn-info btn_small float-md-right mr-h">
                                         {include file='svg_icon.tpl' svgId='refresh_icon'}
                                         <span>{$btr->manager_reset_menu|escape}</span>
                                     </button>
@@ -216,7 +217,7 @@
                         {/if}
                     </form>
                     {if $can_manage_target}
-                        <form method="post" id="fn_reset_menu">
+                        <form method="post" id="fn_reset_menu" {if !$is_self}data-reauth="1"{/if}>
                             <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
                             <input type="hidden" name="id" value="{$m->id|escape}">
                             <input type="hidden" name="action" value="reset_menu">
@@ -225,50 +226,73 @@
                 </div>
 
                 {* Безпека: пароль і сесії. Усе тут, крім зміни власного пароля, — у вікні підтвердження *}
+                {* Безпека: секції налаштувань — ліворуч що це й навіщо, праворуч керування *}
                 <div id="security" class="tab">
-                    <div class="row">
-                        <div class="col-xl-4 col-lg-5 col-md-12 mb-2">
-                            <div class="heading_box mb-1">{$btr->manager_password_heading|escape}</div>
+
+                    <section class="settings_section{if $totp_setup} settings_section--wide{/if}">
+                        <div class="settings_section__about">
+                            <h2 class="settings_section__title">{$btr->manager_totp_heading|escape}</h2>
+                            {if $totp_enabled}
+                                <span class="tag tag-success">{$btr->manager_totp_state_on|escape}</span>
+                            {else}
+                                <span class="tag tag-default">{$btr->manager_totp_state_off|escape}</span>
+                            {/if}
+                            <p class="settings_section__hint">{$btr->manager_totp_about|escape}</p>
+                        </div>
+                        <div class="settings_section__body">
+                            {include file='manager_two_factor.tpl'}
+                        </div>
+                    </section>
+
+                    {if $totp_setup}
+                        <p class="settings_locked">{$btr->manager_totp_setup_focus|escape}</p>
+                    {else}
+                    <section class="settings_section">
+                        <div class="settings_section__about">
+                            <h2 class="settings_section__title">{$btr->manager_password_heading|escape}</h2>
+                            <p class="settings_section__hint">{if $is_self}{$btr->manager_password_ends_others|escape}{else}{$btr->manager_password_ends_all|escape}{/if}</p>
+                        </div>
+                        <div class="settings_section__body">
                             {if $can_manage_target}
-                                <form method="post" autocomplete="off">
+                                <form method="post" class="settings_form" autocomplete="off" {if !$is_self}data-reauth="1"{/if}>
                                     <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
                                     <input type="hidden" name="id" value="{$m->id|escape}">
                                     <input type="hidden" name="action" value="password">
                                     {if $is_self}
                                         {* Свій пароль — завжди з поточним, навіть у вікні підтвердження *}
                                         <div class="form-group">
-                                            <div class="heading_label heading_label--required"><span>{$btr->manager_current_password|escape}</span></div>
-                                            <input class="form-control" name="current_password" type="password" autocomplete="current-password" required/>
+                                            <label class="heading_label heading_label--required" for="fn_current_password"><span>{$btr->manager_current_password|escape}</span></label>
+                                            <input class="form-control" id="fn_current_password" name="current_password" type="password" autocomplete="current-password" required/>
                                         </div>
                                     {/if}
                                     <div class="form-group">
-                                        <div class="heading_label heading_label--required"><span>{$btr->manager_new_password|escape}</span></div>
-                                        <input class="form-control" name="new_password" type="password" autocomplete="new-password" minlength="{$password_min_length|escape}" required/>
-                                        <div class="text_grey font_12 mt-q">{$btr->manager_password_short|escape} {$password_min_length|escape}</div>
+                                        <label class="heading_label heading_label--required" for="fn_new_password"><span>{$btr->manager_new_password|escape}</span></label>
+                                        <input class="form-control" id="fn_new_password" name="new_password" type="password" autocomplete="new-password" minlength="{$password_min_length|escape}" required aria-describedby="fn_password_rule"/>
+                                        <div class="text_grey font_12 mt-q" id="fn_password_rule">{$btr->manager_password_short|escape} {$password_min_length|escape}</div>
                                     </div>
                                     <div class="form-group">
-                                        <div class="heading_label heading_label--required"><span>{$btr->manager_pass_repeat|escape}</span></div>
-                                        <input class="form-control" name="new_password_check" type="password" autocomplete="new-password" minlength="{$password_min_length|escape}" required/>
+                                        <label class="heading_label heading_label--required" for="fn_new_password_check"><span>{$btr->manager_pass_repeat|escape}</span></label>
+                                        <input class="form-control" id="fn_new_password_check" name="new_password_check" type="password" autocomplete="new-password" minlength="{$password_min_length|escape}" required/>
                                     </div>
-                                    <p class="text_grey font_12">{if $is_self}{$btr->manager_password_ends_others|escape}{else}{$btr->manager_password_ends_all|escape}{/if}</p>
-                                    <button type="submit" class="btn btn_blue btn_small" {if !$is_self && !$reauth_fresh}disabled title="{$btr->manager_reauth_required|escape}"{/if}>
-                                        {include file='svg_icon.tpl' svgId='pass_icon'}
-                                        <span>{$btr->manager_change_password|escape}</span>
-                                    </button>
+                                    <button type="submit" class="btn btn_blue btn_small">{$btr->manager_change_password|escape}</button>
                                 </form>
                             {else}
                                 <p class="text_grey">{$btr->manager_higher_text|escape}</p>
                             {/if}
                         </div>
+                    </section>
 
-                        <div class="col-xl-8 col-lg-7 col-md-12">
-                            <div class="heading_box mb-1">{$btr->manager_sessions_heading|escape}</div>
+                    <section class="settings_section">
+                        <div class="settings_section__about">
+                            <h2 class="settings_section__title">{$btr->manager_sessions_heading|escape}</h2>
+                            <p class="settings_section__hint">{$btr->manager_sessions_hint|escape}</p>
+                        </div>
+                        <div class="settings_section__body">
                             {if !$can_see_sessions}
                                 <p class="text_grey">{$btr->manager_sessions_no_access|escape}</p>
                             {elseif !$sessions}
                                 <p class="text_grey">{$btr->manager_sessions_none|escape}</p>
                             {else}
-                                {$locked = !$can_revoke_sessions || !$reauth_fresh}
                                 <ul class="session_list">
                                     {foreach $sessions as $s}
                                         <li class="session_list__item">
@@ -283,47 +307,43 @@
                                                 </div>
                                             </div>
                                             {if $s->id != $current_session_id && $can_revoke_sessions}
-                                                <form method="post" class="session_list__action">
+                                                <form method="post" class="session_list__action" data-reauth="1">
                                                     <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
                                                     <input type="hidden" name="id" value="{$m->id|escape}">
                                                     <input type="hidden" name="action" value="revoke_session">
                                                     <input type="hidden" name="session" value="{$s->id|escape}">
-                                                    <button type="submit" class="btn btn-outline-danger btn_mini" {if $locked}disabled title="{$btr->manager_reauth_required|escape}"{/if}>{$btr->manager_sessions_revoke|escape}</button>
+                                                    <button type="submit" class="btn btn-info btn_mini">{$btr->manager_sessions_revoke|escape}</button>
                                                 </form>
                                             {/if}
                                         </li>
                                     {/foreach}
                                 </ul>
-
-                                <div class="session_list__footer">
-                                    <span>{$btr->manager_sessions_hint|escape}</span>
-                                    {if $can_revoke_sessions && (!$is_self || count($sessions) > 1)}
-                                        <form method="post">
-                                            <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
-                                            <input type="hidden" name="id" value="{$m->id|escape}">
-                                            <input type="hidden" name="action" value="revoke_other_sessions">
-                                            <button type="submit" class="btn btn-outline-danger btn_small" {if $locked}disabled title="{$btr->manager_reauth_required|escape}"{/if}>
-                                                {include file='svg_icon.tpl' svgId='logout'}
-                                                <span>{if $is_self}{$btr->manager_sessions_revoke_others|escape}{else}{$btr->manager_sessions_revoke_all|escape}{/if}</span>
-                                            </button>
-                                        </form>
-                                    {/if}
-                                </div>
+                                {if $can_revoke_sessions && (!$is_self || count($sessions) > 1)}
+                                    <form method="post" class="settings_form__actions" data-reauth="1">
+                                        <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
+                                        <input type="hidden" name="id" value="{$m->id|escape}">
+                                        <input type="hidden" name="action" value="revoke_other_sessions">
+                                        <button type="submit" class="btn btn-outline-danger btn_small">
+                                            {if $is_self}{$btr->manager_sessions_revoke_others|escape}{else}{$btr->manager_sessions_revoke_all|escape}{/if}
+                                        </button>
+                                    </form>
+                                {/if}
                             {/if}
                         </div>
-                    </div>
+                    </section>
+                    {/if}
                 </div>
 
                 {* Права доступу — лише іншого менеджера, лише з правом managers і лише нижчого чи рівного *}
                 {if $can_edit_permissions}
                     <div id="permissions" class="tab">
-                        <form method="post" autocomplete="off">
+                        <form method="post" autocomplete="off" data-reauth="1">
                             <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
                             <input type="hidden" name="id" value="{$m->id|escape}">
                             <input type="hidden" name="action" value="permissions">
                             {include file='manager_permissions.tpl'}
                             <div class="sticky_actions">
-                                <button type="submit" class="btn btn_blue btn_small" {if !$reauth_fresh}disabled title="{$btr->manager_reauth_required|escape}"{/if}>
+                                <button type="submit" class="btn btn_blue btn_small">
                                     {include file='svg_icon.tpl' svgId='checked'}
                                     <span>{$btr->general_apply|escape}</span>
                                 </button>

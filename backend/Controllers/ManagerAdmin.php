@@ -9,6 +9,13 @@ use Okay\Core\ManagerMenu;
 use Okay\Core\Security\ManagerProfilePolicy;
 use Okay\Core\Security\ManagerReauth;
 use Okay\Core\Security\ManagerSessions;
+use Okay\Core\Security\ManagerTwoFactor;
+use Okay\Core\Security\TotpKey;
+use Okay\Core\Settings;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Okay\Core\Validator;
 use Okay\Entities\ManagersEntity;
 
@@ -27,6 +34,11 @@ class ManagerAdmin extends IndexAdmin
     private const TAB_PROFILE = 'profile';
     private const TAB_SECURITY = 'security';
     private const TAB_PERMISSIONS = 'permissions';
+    /** Нові коди відновлення показуються один раз — на сторінці після дії. */
+    private const NEW_CODES_KEY = 'totp_new_codes';
+
+    private ManagerTwoFactor $twoFactor;
+    private string $totpIssuer = '';
 
     public function fetch(
         ManagerMenu $managerMenu,
@@ -35,8 +47,12 @@ class ManagerAdmin extends IndexAdmin
         ManagerSessions $managerSessions,
         ManagerProfilePolicy $policy,
         ManagerReauth $reauth,
-        Validator $validator
+        Validator $validator,
+        ManagerTwoFactor $twoFactor,
+        Settings $settings
     ) {
+        $this->twoFactor = $twoFactor;
+        $this->totpIssuer = trim((string)$settings->get('site_name')) ?: (string)($_SERVER['HTTP_HOST'] ?? 'OkayCMS');
         $viewer = $this->manager;
         $viewerId = (int)$viewer->id;
         $btrLanguages = $this->btrLanguages($languagesCore);
@@ -78,6 +94,9 @@ class ManagerAdmin extends IndexAdmin
         $this->design->assign('can_edit_permissions', $policy->canEditPermissions($viewer, $target));
         $this->design->assign('can_see_sessions', $canSeeSessions);
         $this->design->assign('can_revoke_sessions', $target !== null && $policy->canRevokeSessionsOf($viewer, $target));
+        if ($target !== null) {
+            $this->assignTwoFactor($target, $isSelf);
+        }
         $sessions = $canSeeSessions ? $managerSessions->activeOf((int)$target->id) : [];
         foreach ($sessions as $session) {
             $session->device = ManagerSessions::device((string)$session->user_agent);
@@ -112,9 +131,21 @@ class ManagerAdmin extends IndexAdmin
         $viewerId = (int)$viewer->id;
         $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '');
 
+        if ($action === 'reauth_close') {
+            $reauth->close();
+            $this->response->redirectTo($target !== null
+                ? $this->profileUrl((int)$target->id, self::TAB_PROFILE)
+                : $this->request->getRootUrl() . '/backend/index.php?controller=ManagerAdmin');
+            return;
+        }
+
         // Відкриває вікно підтвердження паролем того, хто діє (не цілі).
         if ($action === 'reauth') {
-            if (($result = $reauth->checkPassword($viewerId, $this->request->post('reauth_password'), $ip)) !== ManagerReauth::OK) {
+            $result = $reauth->checkPassword($viewerId, $this->request->post('reauth_password'), $ip);
+            if ($this->request->post('ajax')) {
+                $this->reauthJson($result);
+            }
+            if ($result !== ManagerReauth::OK) {
                 $this->postRedirectGet->storeMessageError($result);
             }
             $tab = $this->request->post('tab');
@@ -137,7 +168,16 @@ class ManagerAdmin extends IndexAdmin
         $tab = self::TAB_PROFILE;
 
         $sessionActions = ['revoke_session', 'revoke_other_sessions'];
-        if (!in_array($action, array_merge(['profile', 'reset_menu', 'password', 'permissions'], $sessionActions), true)) {
+        $ownTwoFactorActions = ['totp_start', 'totp_confirm', 'totp_cancel', 'totp_codes'];
+        if (in_array($action, $ownTwoFactorActions, true)) {
+            // Підключити застосунок чи взяти нові коди можна лише собі.
+            if ($isSelf) {
+                $this->handleOwnTwoFactor($action, $viewer, $reauth, $managerSessions);
+            }
+            $this->response->redirectTo($this->profileUrl($targetId, self::TAB_SECURITY));
+            return;
+        }
+        if (!in_array($action, array_merge(['profile', 'reset_menu', 'password', 'permissions', 'totp_disable'], $sessionActions), true)) {
             return;
         }
         $allowed = in_array($action, $sessionActions, true)
@@ -214,6 +254,29 @@ class ManagerAdmin extends IndexAdmin
                     $managerSessions->revokeAll($targetId, $viewerId);
                 }
                 $this->postRedirectGet->storeMessageSuccess('sessions_revoked');
+                break;
+
+            case 'totp_disable':
+                $tab = self::TAB_SECURITY;
+                if (!$this->confirmed($reauth)) {
+                    break;
+                }
+                // Собі — ще й чинний код: вікно підтверджує пароль, а не телефон.
+                // Іншому (загублений телефон) — лише вищий чи рівний, у вікні.
+                if ($isSelf) {
+                    $result = $this->twoFactor->verify($targetId, $this->request->post('totp_code'));
+                    if ($result !== ManagerTwoFactor::OK && $result !== ManagerTwoFactor::OK_RECOVERY) {
+                        $this->postRedirectGet->storeMessageError($result === ManagerTwoFactor::LIMIT ? 'totp_limit' : 'totp_wrong');
+                        break;
+                    }
+                }
+                $this->twoFactor->disable($targetId);
+                if ($isSelf) {
+                    $managerSessions->revokeOthers($targetId, $viewerId);
+                } else {
+                    $managerSessions->revokeAll($targetId, $viewerId);
+                }
+                $this->postRedirectGet->storeMessageSuccess('totp_disabled');
                 break;
 
             default:
@@ -379,6 +442,14 @@ class ManagerAdmin extends IndexAdmin
         $this->response->redirectTo($this->profileUrl((int)$id, self::TAB_PROFILE));
     }
 
+    /** Відповідь на перевірку пароля з модального вікна: без перезавантаження сторінки. */
+    private function reauthJson(string $result): void
+    {
+        $this->response->setContent(json_encode(['ok' => $result === ManagerReauth::OK, 'error' => $result === ManagerReauth::OK ? null : $result]), RESPONSE_JSON);
+        $this->response->sendContent();
+        exit;
+    }
+
     /** Чутлива дія лише у вікні підтвердження; інакше — повідомлення, а пароль тут не питається. */
     private function confirmed(ManagerReauth $reauth): bool
     {
@@ -388,6 +459,88 @@ class ManagerAdmin extends IndexAdmin
         $this->postRedirectGet->storeMessageError(ManagerReauth::REQUIRED);
 
         return false;
+    }
+
+    private function handleOwnTwoFactor(string $action, object $viewer, ManagerReauth $reauth, ManagerSessions $managerSessions): void
+    {
+        $viewerId = (int)$viewer->id;
+
+        switch ($action) {
+            case 'totp_start':
+                if (!$this->confirmed($reauth)) {
+                    return;
+                }
+                if ($this->twoFactor->isEnabled($viewerId)) {
+                    return;
+                }
+                if ($this->twoFactor->startSetup($viewerId, $this->totpIssuer, (string)$viewer->login) === null) {
+                    $this->postRedirectGet->storeMessageError('totp_key_missing');
+                }
+                return;
+
+            case 'totp_confirm':
+                $codes = $this->twoFactor->confirmSetup($viewerId, $this->stringPost('totp_code'));
+                if ($codes === null) {
+                    $this->postRedirectGet->storeMessageError('totp_wrong');
+                    return;
+                }
+                $_SESSION[self::NEW_CODES_KEY] = $codes;
+                // 2FA вмикають, коли пароль міг витекти: сесії, відкриті лише
+                // паролем, не мають її пережити.
+                $managerSessions->revokeOthers($viewerId, $viewerId);
+                $this->postRedirectGet->storeMessageSuccess('totp_enabled');
+                return;
+
+            case 'totp_cancel':
+                $this->twoFactor->cancelSetup();
+                return;
+
+            case 'totp_codes':
+                if (!$this->confirmed($reauth) || !$this->twoFactor->isEnabled($viewerId)) {
+                    return;
+                }
+                $_SESSION[self::NEW_CODES_KEY] = $this->twoFactor->regenerateRecoveryCodes($viewerId);
+                // Старі коди могли потрапити до чужих рук — разом із ними й сесії.
+                $managerSessions->revokeOthers($viewerId, $viewerId);
+                $this->postRedirectGet->storeMessageSuccess('totp_codes_new');
+                return;
+        }
+    }
+
+    private function assignTwoFactor(object $target, bool $isSelf): void
+    {
+        $targetId = (int)$target->id;
+        $setup = $isSelf ? $this->twoFactor->pendingSetup($targetId, $this->totpIssuer, (string)$target->login) : null;
+        if ($setup !== null) {
+            // Групи по 4: ключ переписують руками, суцільні 32 символи легко збити.
+            $setup['secret_grouped'] = implode(' ', str_split($setup['secret'], 4));
+        }
+        $newCodes = $isSelf && is_array($_SESSION[self::NEW_CODES_KEY] ?? null) ? $_SESSION[self::NEW_CODES_KEY] : [];
+        unset($_SESSION[self::NEW_CODES_KEY]);
+
+        // Секрет і коди на сторінці — ні в кеш браузера, ні в проміжні кеші.
+        if ($setup !== null || $newCodes !== []) {
+            $this->response->addHeader('Cache-Control: no-store, private');
+        }
+
+        $this->design->assign('totp_enabled', $this->twoFactor->isEnabled($targetId));
+        $this->design->assign('totp_enabled_at', $this->twoFactor->enabledAt($targetId));
+        $this->design->assign('totp_codes_left', $this->twoFactor->remainingRecoveryCodes($targetId));
+        $this->design->assign('totp_key_status', $this->twoFactor->keyStatus());
+        $this->design->assign('totp_key_ok', $this->twoFactor->keyStatus() === TotpKey::OK);
+        $this->design->assign('totp_setup', $setup);
+        $this->design->assign('totp_qr', $setup !== null ? self::qrDataUri($setup['uri']) : null);
+        $this->design->assign('totp_new_codes', $newCodes);
+        $this->design->assign('recovery_code_used', $isSelf && !empty($_SESSION['recovery_code_used']));
+        unset($_SESSION['recovery_code_used']);
+    }
+
+    /** QR малюється тут, у SVG: стороння служба QR побачила б секрет. */
+    private static function qrDataUri(string $uri): string
+    {
+        $svg = (new Writer(new ImageRenderer(new RendererStyle(200, 1), new SvgImageBackEnd())))->writeString($uri);
+
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }
 
     private function stringPost(string $name): string

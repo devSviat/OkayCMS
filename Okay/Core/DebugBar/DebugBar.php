@@ -106,6 +106,11 @@ class DebugBar
 
     public static function setConfigValue($name, $value, $source)
     {
+        // Панель показує конфіг на сторінці: паролі й ключі туди не потрапляють.
+        if (preg_match('/password|secret|token|_key$/i', (string)$name) && (string)$value !== '') {
+            $value = '***';
+        }
+
         if (is_null(self::$debugBar)) {
             self::$bufferedConfigValues[] = ['name' => $name, 'value' => $value, 'source' => $source];
             return;
