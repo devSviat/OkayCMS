@@ -54,11 +54,11 @@
                         </div>
                     </div>
                     {if $s->id != $current_session_id && $s->can_revoke}
-                        <form method="post" class="session_list__action">
+                        <form method="post" class="session_list__action" data-reauth="1">
                             <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
                             <input type="hidden" name="action" value="revoke_session">
                             <input type="hidden" name="session" value="{$s->id|escape}">
-                            <button type="submit" class="btn btn-outline-danger btn_mini" {if !$reauth_fresh}disabled title="{$btr->manager_reauth_required|escape}"{/if}>{$btr->manager_sessions_revoke|escape}</button>
+                            <button type="submit" class="btn btn-info btn_mini">{$btr->manager_sessions_revoke|escape}</button>
                         </form>
                     {/if}
                 </li>

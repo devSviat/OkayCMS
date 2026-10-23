@@ -141,7 +141,11 @@ class ManagerAdmin extends IndexAdmin
 
         // Відкриває вікно підтвердження паролем того, хто діє (не цілі).
         if ($action === 'reauth') {
-            if (($result = $reauth->checkPassword($viewerId, $this->request->post('reauth_password'), $ip)) !== ManagerReauth::OK) {
+            $result = $reauth->checkPassword($viewerId, $this->request->post('reauth_password'), $ip);
+            if ($this->request->post('ajax')) {
+                $this->reauthJson($result);
+            }
+            if ($result !== ManagerReauth::OK) {
                 $this->postRedirectGet->storeMessageError($result);
             }
             $tab = $this->request->post('tab');
@@ -436,6 +440,14 @@ class ManagerAdmin extends IndexAdmin
 
         $this->postRedirectGet->storeMessageSuccess('added');
         $this->response->redirectTo($this->profileUrl((int)$id, self::TAB_PROFILE));
+    }
+
+    /** Відповідь на перевірку пароля з модального вікна: без перезавантаження сторінки. */
+    private function reauthJson(string $result): void
+    {
+        $this->response->setContent(json_encode(['ok' => $result === ManagerReauth::OK, 'error' => $result === ManagerReauth::OK ? null : $result]), RESPONSE_JSON);
+        $this->response->sendContent();
+        exit;
     }
 
     /** Чутлива дія лише у вікні підтвердження; інакше — повідомлення, а пароль тут не питається. */

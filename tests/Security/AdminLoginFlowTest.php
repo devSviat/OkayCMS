@@ -137,4 +137,21 @@ class AdminLoginFlowTest extends TestCase
         $this->assertStringContainsString('$managerSessions->signIn($manager, true)', $auth);
         $this->assertStringNotContainsString("\$_SESSION['admin'] =", $auth);
     }
+
+    /**
+     * Enter у полі коду відправляє форму першою її кнопкою. Скасування мусить
+     * жити в окремій формі, інакше Enter скасовує вхід замість відправити код.
+     */
+    public function testEnterInTheCodeFieldSubmitsTheCode(): void
+    {
+        $tpl = $this->source('backend/design/html/auth.tpl');
+        $start = strpos($tpl, '{elseif $two_factor_step}');
+        $end = strpos($tpl, '</form>', (int)$start);
+        $this->assertNotFalse($start);
+        $step = substr($tpl, (int)$start, (int)$end - (int)$start);
+
+        $this->assertStringNotContainsString('name="cancel_2fa"', $step, 'кнопка скасування — частина форми коду');
+        $this->assertStringContainsString('form="fn_cancel_2fa"', $step);
+        $this->assertStringContainsString('id="fn_cancel_2fa"', $tpl);
+    }
 }

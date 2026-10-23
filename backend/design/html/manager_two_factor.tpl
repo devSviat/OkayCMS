@@ -29,32 +29,32 @@
 
     {if $is_self}
         <div class="settings_form__actions">
-            <form method="post">
+            <form method="post" data-reauth="1">
                 <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
                 <input type="hidden" name="id" value="{$m->id|escape}">
-                <button type="submit" name="action" value="totp_codes" class="btn btn-info btn_small" {if !$reauth_fresh}disabled{/if}>
+                <button type="submit" name="action" value="totp_codes" class="btn btn-info btn_small">
                     {$btr->manager_totp_new_codes|escape}
                 </button>
             </form>
         </div>
-        <form method="post" class="settings_inline" autocomplete="off">
+        <form method="post" class="settings_inline" autocomplete="off" data-reauth="1">
             <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
             <input type="hidden" name="id" value="{$m->id|escape}">
             <input type="hidden" name="action" value="totp_disable">
             <label class="heading_label" for="fn_totp_disable">{$btr->manager_totp_disable_label|escape}</label>
             <div class="settings_inline__row">
-                <input class="form-control" id="fn_totp_disable" name="totp_code" type="text" autocomplete="one-time-code" placeholder="{$btr->manager_totp_code_or_recovery|escape}" required {if !$reauth_fresh}disabled{/if}/>
-                <button type="submit" class="btn btn-outline-danger btn_small" {if !$reauth_fresh}disabled{/if}>{$btr->manager_totp_disable|escape}</button>
+                <input class="form-control" id="fn_totp_disable" name="totp_code" type="text" autocomplete="one-time-code" placeholder="{$btr->manager_totp_code_or_recovery|escape}" required/>
+                <button type="submit" class="btn btn-outline-danger btn_small">{$btr->manager_totp_disable|escape}</button>
             </div>
             {if $message_error == 'totp_wrong'}<p class="settings_error" role="alert">{$btr->auth_2fa_wrong|escape}</p>{/if}
         </form>
     {elseif $can_manage_target}
         <p class="settings_note">{$btr->manager_totp_reset_hint|escape}</p>
-        <form method="post" class="settings_form__actions">
+        <form method="post" class="settings_form__actions" data-reauth="1">
             <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
             <input type="hidden" name="id" value="{$m->id|escape}">
             <input type="hidden" name="action" value="totp_disable">
-            <button type="submit" class="btn btn-outline-danger btn_small" {if !$reauth_fresh}disabled{/if}>{$btr->manager_totp_reset|escape}</button>
+            <button type="submit" class="btn btn-outline-danger btn_small">{$btr->manager_totp_reset|escape}</button>
         </form>
     {/if}
 
@@ -85,10 +85,10 @@
 
 {elseif $is_self}
     {if $totp_key_ok}
-        <form method="post" class="settings_form__actions">
+        <form method="post" class="settings_form__actions" data-reauth="1">
             <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
             <input type="hidden" name="id" value="{$m->id|escape}">
-            <button type="submit" name="action" value="totp_start" class="btn btn_blue btn_small" {if !$reauth_fresh}disabled{/if}>{$btr->manager_totp_enable|escape}</button>
+            <button type="submit" name="action" value="totp_start" class="btn btn_blue btn_small">{$btr->manager_totp_enable|escape}</button>
         </form>
     {else}
         {* Без ключа 2FA не вмикається: секрет не було б чим зашифрувати *}

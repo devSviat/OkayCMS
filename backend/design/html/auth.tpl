@@ -74,7 +74,8 @@
                                     {/if}
                                     <p class="text_grey font_12 mb-1">{$btr->auth_2fa_recovery_hint|escape}</p>
                                     <div class="auth_buttons">
-                                        <button type="submit" name="cancel_2fa" value="1" formnovalidate class="auth_buttons__recovery link px-0 mb-1">{$btr->auth_2fa_back|escape}</button>
+                                        {* Окрема форма: інакше Enter у полі коду брав би першу кнопку — цю — і скасовував вхід *}
+                                        <button type="submit" form="fn_cancel_2fa" class="auth_buttons__recovery link px-0 mb-1">{$btr->auth_2fa_back|escape}</button>
                                         <button type="submit" value="login" class="auth_buttons__login btn btn_blue btn_big btn-block" tabindex="2">{$btr->auth_2fa_submit|escape}</button>
                                     </div>
                                 {else}
@@ -110,6 +111,12 @@
                                     </div>
                                 {/if}
                             </form>
+                            {if $two_factor_step}
+                                <form method="post" id="fn_cancel_2fa" hidden>
+                                    <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
+                                    <input type="hidden" name="cancel_2fa" value="1">
+                                </form>
+                            {/if}
                             <div class="col-xs-12 mt-1 p-h fn_recovery_wrap hidden px-0">
                                 <div class="fn_error" style="display: none;margin-bottom:15px;color: #bf1e1e;font-weight: 600;font-size: 15px;"></div>
                                 <div class="fn_success" style="display: none;margin-bottom:15px;color: #13bb13;font-weight: 600;font-size: 15px;">{$btr->auth_recovery_success|escape}</div>

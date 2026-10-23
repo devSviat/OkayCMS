@@ -28,6 +28,9 @@ class ManagersAdmin extends IndexAdmin
 
             if ($this->request->post('action') === 'reauth') {
                 $result = $reauth->checkPassword($viewerId, $this->request->post('reauth_password'), (string)($_SERVER['REMOTE_ADDR'] ?? ''));
+                if ($this->request->post('ajax')) {
+                    $this->reauthJson($result);
+                }
                 if ($result !== ManagerReauth::OK) {
                     $this->postRedirectGet->storeMessageError($result);
                 }
@@ -77,4 +80,11 @@ class ManagersAdmin extends IndexAdmin
         $this->response->setContent($this->design->fetch('managers.tpl'));
     }
 
+    /** Відповідь на перевірку пароля з модального вікна: без перезавантаження сторінки. */
+    private function reauthJson(string $result): void
+    {
+        $this->response->setContent(json_encode(['ok' => $result === ManagerReauth::OK, 'error' => $result === ManagerReauth::OK ? null : $result]), RESPONSE_JSON);
+        $this->response->sendContent();
+        exit;
+    }
 }

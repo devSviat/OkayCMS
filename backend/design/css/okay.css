@@ -9387,78 +9387,38 @@ textarea:focus-visible,
 
 /* Профіль менеджера: смуга підтвердження паролем (ManagerReauth).
    Один рядок замість алерта-картки: це стан сторінки, а не повідомлення. */
-.reauth_bar {
-    display: flex;
+.reauth_status {
+    display: inline-flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px 24px;
-    margin-bottom: 20px;
-    padding: 12px 16px;
-    border: 1px solid var(--ok-line);
-    border-radius: var(--ok-radius-panel);
-    background: var(--ok-accent-soft);
+    gap: 6px;
+    margin: 0 0 16px;
+    padding: 6px 12px;
+    border-radius: var(--ok-radius-control);
+    background: var(--ok-warning-soft);
+    font-size: 13px;
     color: var(--ok-ink);
 }
-.reauth_bar__text {
-    display: flex;
-    flex: 1 1 320px;
-    align-items: flex-start;
-    gap: 10px;
-    min-width: 0;
-    font-size: 14px;
-    line-height: 1.45;
-}
-.reauth_bar__text > svg {
+.reauth_status > svg {
     flex-shrink: 0;
-    margin-top: 1px;
-    color: var(--ok-accent);
-}
-.reauth_bar__title {
-    display: block;
-    font-weight: 600;
-}
-.reauth_bar__hint {
-    display: block;
-    color: var(--ok-ink-soft);
-}
-.reauth_bar__form {
-    display: flex;
-    flex: 0 1 420px;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 0;
-}
-.reauth_bar__form .form-control {
-    flex: 1 1 200px;
-    width: auto;
-}
-.reauth_bar--open {
-    background: var(--ok-warning-soft);
-}
-.reauth_bar--open .reauth_bar__text {
-    align-items: center;
-}
-.reauth_bar--open .reauth_bar__text > svg {
-    margin-top: 0;
     color: var(--ok-warning);
 }
-.reauth_bar__form--end {
-    flex: 0 0 auto;
-    margin-left: auto;
-}
-.reauth_bar--error {
-    border-color: var(--ok-danger);
-}
-.reauth_bar__error {
-    display: block;
-    color: var(--ok-danger-hover);
-}
-.reauth_bar--error .form-control {
-    border-color: var(--ok-danger);
-}
-.reauth_bar__time {
-    font-variant-numeric: tabular-nums;
+.reauth_status__time {
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+.reauth_status__form {
+    display: inline;
+    margin: 0 0 0 4px;
+}
+.reauth_status__end {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--ok-accent);
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 /* Список сесій: рядок — пристрій і подробиці зліва, дія справа. Таблиця з
@@ -9814,5 +9774,45 @@ button.auth_buttons__recovery:hover {
 /* Підключення 2FA: на час задачі секція на всю ширину, пояснення над панеллю. */
 .settings_section--wide {
     grid-template-columns: minmax(0, 1fr);
+}
+
+/* Перемикач: сам input прозорий, тож кільце фокуса малюється на видимій доріжці. */
+.switch .switch-input:focus-visible ~ .switch-label {
+    outline: 2px solid var(--ok-accent);
+    outline-offset: 2px;
+}
+button.auth_buttons__recovery {
+    text-decoration: underline;
+}
+
+/* Модальне вікно підтвердження паролем (manager_reauth_panel.tpl). */
+.reauth_modal__hint {
+    margin: 0 0 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ok-ink-soft);
+}
+.reauth_modal__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+@media (max-width: 575px) {
+    /* QR з того самого телефона не відскануєш — спершу ключ для ручного вводу. */
+    .two_factor_setup__qr {
+        order: 2;
+    }
+    .two_factor_code.form-control {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    /* Верхня панель адмінки фіксована: без відступу заголовок вікна ховається під нею. */
+    #fn_reauth_modal .modal-dialog {
+        margin-top: 72px;
+    }
 }
 
