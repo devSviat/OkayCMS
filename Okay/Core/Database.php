@@ -89,6 +89,9 @@ class Database
     {
         $result = true;
         try {
+            // Інакше після невдалого запиту results()/result() віддавали б рядки
+            // попереднього, і виклик, що не перевіряє query(), бачив би чужі дані.
+            $this->result = null;
             $this->affectedRows = null;
             
             // Получаем все плейсхолдеры
