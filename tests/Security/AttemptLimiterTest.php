@@ -163,6 +163,61 @@ class AttemptLimiterTest extends TestCase
         $this->assertSame($limit, $allowed);
     }
 
+    public function testRefundGivesBackTheLastAttempt()
+    {
+        $limiter = new AttemptLimiter($this->dir, 2, 300);
+        $limiter->attempt('k');
+        $limiter->attempt('k');
+        $this->assertFalse($limiter->attempt('k'));
+
+        $limiter->refund('k');
+
+        $this->assertTrue($limiter->attempt('k'));
+        $this->assertFalse($limiter->attempt('k'));
+    }
+
+    /** Без прибирання кожна адреса й кожен вигаданий логін лишали б по файлу назавжди. */
+    public function testPruneRemovesOnlyStaleCounters()
+    {
+        $limiter = new AttemptLimiter($this->dir, 2, 300);
+        $limiter->attempt('old');
+        $limiter->attempt('fresh');
+        $old = $this->dir . '/' . hash('sha256', 'old') . '.json';
+        touch($old, time() - AttemptLimiter::PRUNE_AFTER_SECONDS - 60);
+
+        $this->assertSame(1, $limiter->prune());
+        $this->assertFileDoesNotExist($old);
+        $this->assertFileExists($this->dir . '/' . hash('sha256', 'fresh') . '.json');
+    }
+
+    /**
+     * Недоступне сховище не закриває вхід (тека з root-власником замкнула б
+     * адмінку всім), але й не мовчить: ліміт у цей час не діє.
+     */
+    public function testUnavailableStorageIsLoggedAndLetsTheAttemptThrough()
+    {
+        file_put_contents($this->dir . '-blocker', '');
+        $logger = new class extends \Psr\Log\AbstractLogger {
+            public array $errors = [];
+
+            public function log($level, string|\Stringable $message, array $context = []): void
+            {
+                if ($level === 'error') {
+                    $this->errors[] = (string)$message;
+                }
+            }
+        };
+        $limiter = new AttemptLimiter($this->dir . '-blocker/sub', 1, 300, $logger);
+
+        try {
+            $this->assertTrue($limiter->attempt('k'));
+            $this->assertTrue($limiter->withLimits(1, 300)->attempt('k'));
+            $this->assertCount(2, $logger->errors);
+        } finally {
+            @unlink($this->dir . '-blocker');
+        }
+    }
+
     /**
      * @param int[] $timestamps
      */

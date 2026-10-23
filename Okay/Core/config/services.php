@@ -317,6 +317,7 @@ $services = [
             new PR('attempt_limiter.dir'),
             new PR('attempt_limiter.max_attempts'),
             new PR('attempt_limiter.window_seconds'),
+            new SR(LoggerInterface::class),
         ],
     ],
     AdminLoginGuard::class => [

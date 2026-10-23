@@ -4,6 +4,7 @@ namespace Okay\Core\Scheduler;
 
 use Monolog\Logger;
 use Okay\Core\Log\SafeRotatingFileHandler;
+use Okay\Core\Security\AttemptLimiter;
 use Okay\Core\Update\UpdateCheckHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Lock\LockFactory;
@@ -45,6 +46,14 @@ class Scheduler
             (new Schedule([UpdateCheckHelper::class, 'checkScheduled']))
                 ->name('Check for core updates')
                 ->time('30 4 * * *')
+                ->overlap(false)
+                ->timeout(60)
+        );
+
+        $this->registerSchedule(
+            (new Schedule([AttemptLimiter::class, 'prune']))
+                ->name('Prune attempt limiter files')
+                ->time('17 * * * *')
                 ->overlap(false)
                 ->timeout(60)
         );

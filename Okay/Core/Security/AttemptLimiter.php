@@ -2,6 +2,8 @@
 
 namespace Okay\Core\Security;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * Лічильник невдалих спроб для ендпойнтів без сесії.
  *
@@ -10,15 +12,20 @@ namespace Okay\Core\Security;
  */
 class AttemptLimiter
 {
+    /** Файл лічильника, якого не чіпали довше, вже не містить жодної мітки в межах вікна. */
+    public const PRUNE_AFTER_SECONDS = 7200;
+
     private $dir;
     private $maxAttempts;
     private $windowSeconds;
+    private ?LoggerInterface $logger;
 
-    public function __construct($dir, $maxAttempts = 10, $windowSeconds = 300)
+    public function __construct($dir, $maxAttempts = 10, $windowSeconds = 300, ?LoggerInterface $logger = null)
     {
         $this->dir = rtrim((string)$dir, '/');
         $this->maxAttempts = max(1, (int)$maxAttempts);
         $this->windowSeconds = max(1, (int)$windowSeconds);
+        $this->logger = $logger;
     }
 
     /**
@@ -26,7 +33,7 @@ class AttemptLimiter
      */
     public function withLimits(int $maxAttempts, int $windowSeconds): self
     {
-        return new self($this->dir, $maxAttempts, $windowSeconds);
+        return new self($this->dir, $maxAttempts, $windowSeconds, $this->logger);
     }
 
     public function tooManyAttempts($key)
@@ -41,8 +48,9 @@ class AttemptLimiter
      * registerFailure() паралельні запити проходять разом: усі читають той
      * самий лічильник, і пачка з N одночасних спроб минає ліміт.
      *
-     * Сховище недоступне — спробу пропускаємо, як і registerFailure(): без
-     * запису в cache/ сайт однаково не працює, а вхід лишився б закритим.
+     * Сховище недоступне — спробу пропускаємо й пишемо помилку в лог. Закрити
+     * натомість означало б, що тека з root-власником після `docker compose
+     * exec` замикає вхід в адмінку всім, і виправити це можна лише з сервера.
      *
      * @return bool false — ліміт вичерпано, спробу не зараховано
      */
@@ -56,6 +64,37 @@ class AttemptLimiter
 
             return [true, $recent];
         }, true);
+    }
+
+    /**
+     * Повертає останню зайняту спробу: успіх не має витрачати ліміт.
+     */
+    public function refund($key): void
+    {
+        $this->locked($key, function (array $recent) {
+            array_pop($recent);
+
+            return [null, $recent];
+        }, null);
+    }
+
+    /**
+     * Видаляє файли лічильників, яких давно не чіпали. Інакше кожна адреса й
+     * кожен вигаданий логін лишають по файлу назавжди. Задача планувальника.
+     *
+     * @return int скільки видалено
+     */
+    public function prune(): int
+    {
+        $removed = 0;
+        $threshold = time() - self::PRUNE_AFTER_SECONDS;
+        foreach (glob($this->dir . '/*.json') ?: [] as $file) {
+            if (@filemtime($file) < $threshold && @unlink($file)) {
+                $removed++;
+            }
+        }
+
+        return $removed;
     }
 
     public function registerFailure($key)
@@ -84,17 +123,21 @@ class AttemptLimiter
     private function locked($key, callable $change, $unavailable)
     {
         $file = $this->fileFor($key);
-        if ($file === null || !$this->ensureDir()) {
+        if ($file === null) {
             return $unavailable;
         }
 
-        $handle = @fopen($file, 'c+');
+        $handle = $this->ensureDir() ? @fopen($file, 'c+') : false;
         if ($handle === false) {
+            $this->logger?->error('AttemptLimiter: сховище лічильників недоступне на запис, ліміт спроб не діє', ['dir' => $this->dir]);
+
             return $unavailable;
         }
 
         try {
             if (!flock($handle, LOCK_EX)) {
+                $this->logger?->error('AttemptLimiter: не вдалося заблокувати файл лічильника, ліміт спроб не діє', ['dir' => $this->dir]);
+
                 return $unavailable;
             }
 

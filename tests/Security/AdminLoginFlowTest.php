@@ -51,9 +51,33 @@ class AdminLoginFlowTest extends TestCase
     public function testRecoveryEmailIsLimited(): void
     {
         $auth = $this->source('backend/Controllers/AuthAdmin.php');
-        $limit = strpos($auth, '->allowRecoveryEmail(');
+        $send = strpos($auth, '->emailPasswordRecoveryAdmin(');
 
-        $this->assertNotFalse($limit);
-        $this->assertLessThan(strpos($auth, '->emailPasswordRecoveryAdmin('), $limit);
+        foreach (['->allowRecoveryEmail(', '->allowRecoveryEmailTo('] as $limit) {
+            $this->assertNotFalse(strpos($auth, $limit), $limit);
+            $this->assertLessThan($send, strpos($auth, $limit), $limit);
+        }
+    }
+
+    /** Лист іде після відповіді: інакше SMTP у часі відповіді видавав, що менеджер є. */
+    public function testRecoveryEmailIsSentAfterTheResponse(): void
+    {
+        $auth = $this->source('backend/Controllers/AuthAdmin.php');
+        $respond = strpos($auth, '$this->response->sendContent();');
+        $finish = strpos($auth, 'fastcgi_finish_request();');
+        $send = strpos($auth, '->emailPasswordRecoveryAdmin(');
+
+        $this->assertNotFalse($finish);
+        $this->assertLessThan($finish, $respond);
+        $this->assertLessThan($send, $finish);
+    }
+
+    /** Масив у POST (`login[]=`) давав Warning у лог. */
+    public function testOnlyStringCredentialsAreAccepted(): void
+    {
+        $auth = $this->source('backend/Controllers/AuthAdmin.php');
+
+        $this->assertStringContainsString('$login = is_string($login) ? $login : \'\';', $auth);
+        $this->assertStringContainsString('$pass = is_string($pass) ? $pass : \'\';', $auth);
     }
 }
