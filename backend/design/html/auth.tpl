@@ -57,6 +57,26 @@
                                     <div class="auth_buttons">
                                         <button type="submit" value="login" class="auth_buttons__login btn btn_blue btn_big btn-block" tabindex="3">{$btr->auth_form_save_pass|escape}</button>
                                     </div>
+                                {elseif $two_factor_step}
+                                    {* Друга сходинка: пароль прийнято, мітки admin ще немає (ManagerTwoFactor) *}
+                                    <h1 class="auth_heading heading-divider">{$btr->auth_2fa_title|escape}</h1>
+                                    <p class="auth_heading_promo">{$btr->auth_2fa_promo|escape}</p>
+                                    <p class="auth_2fa_account">{$btr->auth_2fa_account|escape} <b>{$two_factor_login|escape}</b></p>
+                                    <input type="text" name="totp_code" value="" autocomplete="one-time-code" autofocus="" tabindex="1" class="form-control two_factor_code auth_2fa_code mb-1" placeholder="000000" aria-label="{$btr->auth_2fa_placeholder|escape}" maxlength="24" {if $error_message}aria-invalid="true"{/if} required>
+                                    {if $error_message}
+                                        <div class="mb-1 error_box" role="alert">
+                                            {if $error_message == 'key_unavailable'}
+                                                {$btr->auth_2fa_key_unavailable|escape}
+                                            {else}
+                                                {$btr->auth_2fa_wrong|escape}
+                                            {/if}
+                                        </div>
+                                    {/if}
+                                    <p class="text_grey font_12 mb-1">{$btr->auth_2fa_recovery_hint|escape}</p>
+                                    <div class="auth_buttons">
+                                        <button type="submit" name="cancel_2fa" value="1" formnovalidate class="auth_buttons__recovery link px-0 mb-1">{$btr->auth_2fa_back|escape}</button>
+                                        <button type="submit" value="login" class="auth_buttons__login btn btn_blue btn_big btn-block" tabindex="2">{$btr->auth_2fa_submit|escape}</button>
+                                    </div>
                                 {else}
                                     <h1 class="auth_heading heading-divider">{$btr->auth_form_login_admin|escape}</h1>
                                     <p class="auth_heading_promo">{$smarty.server.HTTP_HOST|escape}</p>

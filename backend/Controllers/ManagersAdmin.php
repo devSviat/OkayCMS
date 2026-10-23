@@ -21,6 +21,11 @@ class ManagersAdmin extends IndexAdmin
         if ($this->request->method('post')) {
             $viewerId = (int)$this->manager->id;
 
+            if ($this->request->post('action') === 'reauth_close') {
+                $reauth->close();
+                $this->postRedirectGet->redirect();
+            }
+
             if ($this->request->post('action') === 'reauth') {
                 $result = $reauth->checkPassword($viewerId, $this->request->post('reauth_password'), (string)($_SERVER['REMOTE_ADDR'] ?? ''));
                 if ($result !== ManagerReauth::OK) {

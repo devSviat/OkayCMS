@@ -10,6 +10,7 @@ use Okay\Core\Notify;
 use Okay\Core\Security\AdminLoginGuard;
 use Okay\Core\Security\AdminRecoveryToken;
 use Okay\Core\Security\ManagerSessions;
+use Okay\Core\Security\ManagerTwoFactor;
 use Okay\Core\Validator;
 use Okay\Entities\LessonsEntity;
 use Okay\Entities\ManagersEntity;
@@ -26,9 +27,16 @@ class AuthAdmin extends IndexAdmin
         Validator $validator,
         AdminRecoveryToken $recoveryToken,
         AdminLoginGuard $loginGuard,
-        ManagerSessions $managerSessions
+        ManagerSessions $managerSessions,
+        ManagerTwoFactor $twoFactor
     ) {
         $clientIp = (string)($_SERVER['REMOTE_ADDR'] ?? '');
+
+        // Друга сходинка: пароль уже прийнято, чекаємо код. Мітки admin
+        // немає, тож жоден вхід адмінки ще не пускає.
+        if ($this->handleTwoFactorStep($twoFactor, $managersEntity, $managerSessions)) {
+            return;
+        }
 
         /*Восстановление пароля администратора*/
         $recoveryEmail = $this->request->get('recovery_email');
@@ -109,6 +117,12 @@ class AuthAdmin extends IndexAdmin
                     // найчастіше роблять саме тоді, коли пароль міг витекти.
                     $managerSessions->revokeAll((int)$manager->id, (int)$manager->id);
 
+                    // Доступ до пошти не має обходити 2FA: після нового пароля — код.
+                    if ($twoFactor->isEnabled((int)$manager->id)) {
+                        $twoFactor->startChallenge($manager, $this->request->getRootUrl() . '/backend/index.php');
+                        $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=AuthAdmin');
+                    }
+
                     if (!$managerSessions->signIn($manager)) {
                         $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=AuthAdmin');
                     }
@@ -145,19 +159,27 @@ class AuthAdmin extends IndexAdmin
                 } else {
                     $loginGuard->passwordSucceeded($login, $clientIp);
 
+                    // Старий формат хеша (APR1/MD5) замінюємо на актуальний ще
+                    // до коду: пароль уже перевірено.
+                    if ($managers->needsPasswordRehash($manager->password)) {
+                        $managersEntity->update((int)$manager->id, ['password' => $pass]);
+                    }
+
+                    if ($twoFactor->isEnabled((int)$manager->id)) {
+                        $twoFactor->startChallenge(
+                            $manager,
+                            !empty($_SESSION['before_auth_url']) ? (string)$_SESSION['before_auth_url'] : $this->request->getRootUrl() . '/backend/index.php'
+                        );
+                        unset($_SESSION['before_auth_url']);
+                        $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=AuthAdmin');
+                    }
+
                     /*Входим в админку*/
                     if (!$managerSessions->signIn($manager)) {
                         $this->design->assign('login', $login);
                         $this->design->assign('error_message', 'session_failed');
                         $this->response->setContent($this->design->fetch('auth.tpl'));
                         return;
-                    }
-
-                    // Старий формат хеша (APR1/MD5) замінюємо на актуальний.
-                    // ManagersEntity::update() хешує пароль сам, тому
-                    // передаємо його у відкритому вигляді.
-                    if ($managers->needsPasswordRehash($manager->password)) {
-                        $managersEntity->update((int)$manager->id, ['password' => $pass]);
                     }
 
                     $managersEntity->updateLastActivityDate($manager->id);
@@ -177,4 +199,69 @@ class AuthAdmin extends IndexAdmin
         $this->response->setContent($this->design->fetch('auth.tpl'));
     }
 
+
+    /**
+     * Сторінка коду після пароля. true — запит оброблено тут (форма коду,
+     * вхід або повернення до пароля).
+     */
+    private function handleTwoFactorStep(
+        ManagerTwoFactor $twoFactor,
+        ManagersEntity $managersEntity,
+        ManagerSessions $managerSessions
+    ): bool {
+        $authUrl = $this->request->getRootUrl() . '/backend/index.php?controller=AuthAdmin';
+
+        if ($this->request->method('post') && $this->request->post('cancel_2fa')) {
+            $twoFactor->clearChallenge();
+            $this->response->redirectTo($authUrl);
+        }
+
+        $challenge = $twoFactor->challenge();
+        if ($challenge === null) {
+            return false;
+        }
+
+        $error = null;
+        if ($this->request->method('post') && $this->request->post('totp_code') !== null) {
+            $result = $twoFactor->verify($challenge['manager_id'], $this->request->post('totp_code'));
+
+            if ($result === ManagerTwoFactor::OK || $result === ManagerTwoFactor::OK_RECOVERY) {
+                $manager = $managersEntity->get($challenge['manager_id']);
+                $twoFactor->clearChallenge();
+
+                // Менеджера могли перейменувати чи видалити, поки він вводив код.
+                if (!is_object($manager) || (string)$manager->login !== $challenge['login'] || !$managerSessions->signIn($manager, true)) {
+                    $this->response->redirectTo($authUrl);
+                }
+
+                $managersEntity->updateLastActivityDate($manager->id);
+                if ($result === ManagerTwoFactor::OK_RECOVERY) {
+                    $_SESSION['recovery_code_used'] = true;
+                }
+                // Адреса з сесії, але веде лише в межах сайту.
+                $redirect = (string)$challenge['redirect'];
+                $root = $this->request->getRootUrl() . '/';
+                $this->response->redirectTo(str_starts_with($redirect, $root) ? $redirect : $root . 'backend/index.php');
+            }
+
+            if ($result === ManagerTwoFactor::LIMIT) {
+                // Понад ліміт кодів — знову пароль: інакше шість цифр можна
+                // перебирати, маючи лише пароль.
+                $twoFactor->clearChallenge();
+                $this->design->assign('error_message', 'limit_try');
+                $this->response->setContent($this->design->fetch('auth.tpl'));
+
+                return true;
+            }
+
+            $error = $result === ManagerTwoFactor::KEY_UNAVAILABLE ? 'key_unavailable' : 'code_wrong';
+        }
+
+        $this->design->assign('two_factor_step', true);
+        $this->design->assign('two_factor_login', $challenge['login']);
+        $this->design->assign('error_message', $error);
+        $this->response->setContent($this->design->fetch('auth.tpl'));
+
+        return true;
+    }
 }

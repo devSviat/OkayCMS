@@ -103,4 +103,38 @@ class AdminLoginFlowTest extends TestCase
         $this->assertStringContainsString('$login = is_string($login) ? $login : \'\';', $auth);
         $this->assertStringContainsString('$pass = is_string($pass) ? $pass : \'\';', $auth);
     }
+
+    /**
+     * З увімкненою 2FA пароль не дає входу: спершу перевірка 2FA, і лише без
+     * неї — signIn(). Те саме після нового пароля з листа відновлення.
+     */
+    public function testTwoFactorIsCheckedBeforeSignInOnBothPaths(): void
+    {
+        $auth = $this->source('backend/Controllers/AuthAdmin.php');
+
+        $recoveryCheck = strpos($auth, '$twoFactor->isEnabled((int)$manager->id)');
+        $recoverySignIn = strpos($auth, '$managerSessions->signIn($manager)');
+        $this->assertNotFalse($recoveryCheck);
+        $this->assertLessThan($recoverySignIn, $recoveryCheck, 'відновлення з листа');
+
+        $passwordOk = strpos($auth, '$loginGuard->passwordSucceeded($login, $clientIp);');
+        $passwordCheck = strpos($auth, '$twoFactor->isEnabled((int)$manager->id)', (int)$passwordOk);
+        $passwordSignIn = strpos($auth, '$managerSessions->signIn($manager)', (int)$passwordOk);
+        $this->assertNotFalse($passwordCheck);
+        $this->assertLessThan($passwordSignIn, $passwordCheck, 'вхід паролем');
+
+        // Обидві гілки 2FA закінчуються редіректом на код, а не падають до signIn().
+        $this->assertSame(2, substr_count($auth, '$twoFactor->startChallenge('));
+        $this->assertMatchesRegularExpression('~startChallenge\([^;]*\);\s*(unset\(\$_SESSION\[\'before_auth_url\'\]\);\s*)?\$response->redirectTo\(~s', $auth);
+    }
+
+    /** Крок коду пускає лише через signIn() з mfa = true і лише того самого менеджера. */
+    public function testCodeStepSignsInTheSameManagerWithMfa(): void
+    {
+        $auth = $this->source('backend/Controllers/AuthAdmin.php');
+
+        $this->assertStringContainsString("(string)\$manager->login !== \$challenge['login']", $auth);
+        $this->assertStringContainsString('$managerSessions->signIn($manager, true)', $auth);
+        $this->assertStringNotContainsString("\$_SESSION['admin'] =", $auth);
+    }
 }

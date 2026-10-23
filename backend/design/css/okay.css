@@ -9433,11 +9433,28 @@ textarea:focus-visible,
     width: auto;
 }
 .reauth_bar--open {
-    padding: 10px 16px;
-    background: var(--ok-success-soft);
+    background: var(--ok-warning-soft);
+}
+.reauth_bar--open .reauth_bar__text {
+    align-items: center;
 }
 .reauth_bar--open .reauth_bar__text > svg {
-    color: var(--ok-success);
+    margin-top: 0;
+    color: var(--ok-warning);
+}
+.reauth_bar__form--end {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+.reauth_bar--error {
+    border-color: var(--ok-danger);
+}
+.reauth_bar__error {
+    display: block;
+    color: var(--ok-danger-hover);
+}
+.reauth_bar--error .form-control {
+    border-color: var(--ok-danger);
 }
 .reauth_bar__time {
     font-variant-numeric: tabular-nums;
@@ -9516,3 +9533,286 @@ textarea:focus-visible,
     border-top: 1px solid var(--ok-line);
     background: var(--ok-surface);
 }
+
+/* Двофакторна автентифікація на вкладці «Безпека». */
+.two_factor_setup {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 20px 32px;
+    padding: 20px;
+    border: 1px solid var(--ok-line);
+    border-radius: var(--ok-radius-panel);
+    background: var(--ok-sunken);
+}
+.two_factor_setup__qr {
+    flex-shrink: 0;
+    padding: 8px;
+    border: 1px solid var(--ok-line);
+    border-radius: var(--ok-radius-control);
+    background: var(--ok-surface);
+}
+.two_factor_setup__steps {
+    flex: 1 1 320px;
+    min-width: 0;
+    margin: 0;
+    padding-left: 20px;
+    color: var(--ok-ink);
+    line-height: 1.5;
+}
+.two_factor_setup__steps > li + li {
+    margin-top: 16px;
+}
+.two_factor_setup__manual {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--ok-ink-muted);
+}
+.two_factor_setup__secret {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 6px 10px;
+    border: 1px solid var(--ok-line);
+    border-radius: var(--ok-radius-control);
+    background: var(--ok-surface);
+    color: var(--ok-ink);
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    word-spacing: 0.2em;
+    overflow-wrap: anywhere;
+    user-select: all;
+}
+.two_factor_setup__form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0 0;
+}
+.two_factor_code.form-control {
+    flex: 0 0 auto;
+    width: 9.5em;
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.25em;
+    text-align: center;
+}
+.two_factor_codes {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border: 1px solid var(--ok-line);
+    border-radius: var(--ok-radius-panel);
+    background: var(--ok-warning-soft);
+}
+.two_factor_codes__title {
+    font-weight: 600;
+    color: var(--ok-ink);
+}
+.two_factor_codes__hint {
+    margin: 2px 0 8px;
+    font-size: 13px;
+    color: var(--ok-ink-soft);
+}
+.two_factor_codes__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 4px 16px;
+    margin: 0;
+    padding-left: 24px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ok-ink);
+    user-select: all;
+}
+
+/* «Інший обліковий запис» на кроці коду — кнопка (POST), а виглядає як
+   посилання «Забули пароль?» поруч. */
+button.auth_buttons__recovery {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+button.auth_buttons__recovery:hover {
+    text-decoration: underline;
+}
+
+/* Секції налаштувань (профіль менеджера, «Безпека»): ліворуч що це й навіщо,
+   праворуч керування. На вузькому екрані — одна колонка. */
+.settings_section {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) minmax(0, 2.2fr);
+    gap: 16px 40px;
+    padding: 24px 0;
+}
+.settings_section + .settings_section {
+    border-top: 1px solid var(--ok-line);
+}
+.settings_section:first-child {
+    padding-top: 8px;
+}
+@media (max-width: 991px) {
+    .settings_section {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+.settings_section__about {
+    min-width: 0;
+}
+.settings_section__title {
+    display: inline-block;
+    margin: 0 8px 6px 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--ok-ink);
+}
+.settings_section__hint {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ok-ink-muted);
+}
+.settings_section__body {
+    min-width: 0;
+}
+.settings_form {
+    max-width: 420px;
+}
+.settings_form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 0;
+}
+.settings_inline {
+    max-width: 520px;
+    margin: 20px 0 0;
+}
+.settings_inline__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.settings_inline__row .form-control {
+    flex: 1 1 220px;
+    width: auto;
+}
+.settings_facts {
+    display: grid;
+    grid-template-columns: max-content auto;
+    gap: 4px 16px;
+    margin: 0;
+    font-size: 14px;
+}
+.settings_facts dt {
+    font-weight: 400;
+    color: var(--ok-ink-muted);
+}
+.settings_facts dd {
+    margin: 0;
+    color: var(--ok-ink);
+    font-variant-numeric: tabular-nums;
+}
+.settings_note {
+    margin: 12px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ok-ink-soft);
+}
+.settings_note--warning {
+    color: var(--ok-warning);
+}
+
+/* Секція, дії якої чекають на підтвердження паролем: причина текстом біля дій,
+   а не в title, якого на дотику не видно. */
+.settings_locked {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--ok-ink-soft);
+}
+.settings_locked > svg {
+    flex-shrink: 0;
+    color: var(--ok-ink-muted);
+}
+.settings_error {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: var(--ok-danger-hover);
+}
+
+
+/* Форма прав менеджера. «Не дано» — нейтральний трек: червоний у системі означає
+   помилку чи деструктивну дію, а тут це звичайний стан. */
+.perms_form .switch.switch-default .switch-input:not(:checked) ~ .switch-label {
+    background-color: var(--ok-control-line);
+}
+.perms_form .switch.switch-default .switch-input:not(:checked) ~ .switch-label::after {
+    opacity: 0;
+}
+.perms_form .switch.switch-default .switch-input:indeterminate ~ .switch-label {
+    background-color: var(--ok-success-hover);
+}
+.perms_form .switch.switch-default .switch-input:indeterminate ~ .switch-handle {
+    left: 50%;
+    transform: translateX(-50%);
+}
+.perms_form .permission_box {
+    cursor: pointer;
+}
+.perms_form .permission_block .permission_box > span:first-child {
+    white-space: normal;
+}
+.perms_form__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-bottom: 16px;
+}
+.perms_form__all {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-weight: 600;
+    color: var(--ok-ink);
+    cursor: pointer;
+}
+.perms_form__total,
+.perms_form__count {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ok-ink-muted);
+    font-variant-numeric: tabular-nums;
+}
+.perms_form__count {
+    margin-left: 8px;
+}
+
+/* Крок коду на сторінці входу: чий обліковий запис і широке поле на шість цифр. */
+.auth_2fa_account {
+    margin: -4px 0 12px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ok-ink-soft);
+}
+.auth_2fa_code.form-control {
+    width: 100%;
+}
+.settings_locked--tab {
+    margin: 4px 0 0;
+}
+/* Підключення 2FA: на час задачі секція на всю ширину, пояснення над панеллю. */
+.settings_section--wide {
+    grid-template-columns: minmax(0, 1fr);
+}
+
