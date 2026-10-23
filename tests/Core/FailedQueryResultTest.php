@@ -17,6 +17,9 @@ use ReflectionClass;
  * попереднього запиту: results() віддавав чужі рядки. CRUD::add() брав
  * insertId(), а після невдалої вставки це id попередньої вставки з'єднання,
  * update() повертав true за будь-якого результату.
+ *
+ * Запити будуються голою Aura: обгортка Okay\Core\QueryFactory у конструкторі
+ * тягне Database через ServiceLocator, а в CI бази немає.
  */
 class FailedQueryResultTest extends TestCase
 {
@@ -39,10 +42,10 @@ class FailedQueryResultTest extends TestCase
         $previous = $this->createStub(\PDOStatement::class);
         $previous->method('fetchAll')->willReturn([(object) ['id' => 1, 'email' => 'other@example.com']]);
         $db = $this->database($previous);
-        $qf = new QueryFactory(new AuraQueryFactory('mysql'));
+        $aura = new AuraQueryFactory('mysql');
 
-        $this->assertTrue($db->query($qf->newSqlQuery()->setStatement('SELECT 1')));
-        $this->assertFalse($db->query($qf->newSqlQuery()->setStatement('SELECT 2')));
+        $this->assertTrue($db->query($aura->newSelect()->cols(['1'])));
+        $this->assertFalse($db->query($aura->newSelect()->cols(['2'])));
 
         $this->assertSame([], $db->results());
         $this->assertNull($db->result());
@@ -63,8 +66,16 @@ class FailedQueryResultTest extends TestCase
         $lang = $this->createStub(Languages::class);
         $lang->method('getDescription')->willReturn((object) []);
 
+        // Лише те, що CRUD бере з фабрики, — голими запитами Aura.
+        $queryFactory = new class {
+            private AuraQueryFactory $aura;
+            public function __construct() { $this->aura = new AuraQueryFactory('mysql'); }
+            public function newInsert() { return $this->aura->newInsert(); }
+            public function newUpdate() { return $this->aura->newUpdate(); }
+        };
+
         $entity = (new ReflectionClass(FeedbacksEntity::class))->newInstanceWithoutConstructor();
-        foreach (['db' => $db, 'queryFactory' => new QueryFactory(new AuraQueryFactory('mysql')), 'lang' => $lang] as $prop => $value) {
+        foreach (['db' => $db, 'queryFactory' => $queryFactory, 'lang' => $lang] as $prop => $value) {
             (new ReflectionClass($entity))->getProperty($prop)->setValue($entity, $value);
         }
 

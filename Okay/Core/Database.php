@@ -13,7 +13,7 @@ class Database
 {
 
     /**
-     * @var \PDOStatement
+     * @var \PDOStatement|null null — запиту ще не було або останній не вдався
      */
     private $result;
 
