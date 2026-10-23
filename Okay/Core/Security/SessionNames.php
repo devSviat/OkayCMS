@@ -213,11 +213,14 @@ class SessionNames
         // Нова кука у відповідь на міжсайтовий POST затерла б сесію відвідувача.
         // Сама сесія запиту потрібна - її читає перевірка токена; зайва лише кука.
         if (self::isCrossSitePostWithoutSession($name)) {
-            @session_start(['use_cookies' => false]);
+            @session_start(['use_cookies' => false, 'use_strict_mode' => true]);
             return;
         }
 
-        session_start();
+        // Строгий режим: ідентифікатор, якого сервер не видавав, замінюється
+        // новим. Інакше підкинутий заздалегідь id (фіксація сесії) ставав би
+        // сесією жертви. У коді, а не в php.ini, — щоб діяло на будь-якому хостингу.
+        session_start(['use_strict_mode' => true]);
     }
 
     /**

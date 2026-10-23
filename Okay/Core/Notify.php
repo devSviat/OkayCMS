@@ -85,6 +85,14 @@ class Notify
             $to = $this->testInternalEmail;
         }
 
+        // PHPMailer один на процес (планувальник, масові дії шлють кілька листів
+        // поспіль), а сам він між листами чистить лише те, що чистить Notify:
+        // Reply-To, вкладення й заголовки попереднього листа поїхали б у наступний.
+        $this->PHPMailer->clearAllRecipients();
+        $this->PHPMailer->clearReplyTos();
+        $this->PHPMailer->clearAttachments();
+        $this->PHPMailer->clearCustomHeaders();
+
         ob_start();
         $this->PHPMailer->IsSMTP(); // telling the class to use SMTP
         $this->PHPMailer->Host       = $this->settings->get('smtp_server');
@@ -112,8 +120,10 @@ class Notify
             // Добавляем протокол, если не указали
             $this->PHPMailer->Host = (strpos($this->PHPMailer->Host, "tls://") === false) ? "tls://".$this->PHPMailer->Host : $this->PHPMailer->Host;
         }
-        $this->PHPMailer->Username   = $this->settings->get('smtp_user');
-        $this->PHPMailer->Password   = $this->settings->get('smtp_pass');
+        // Без пароля в налаштуваннях тут null, а PHPMailer на PHP 8.5 віддає його
+        // в base64_encode() і пише Deprecated на кожен лист.
+        $this->PHPMailer->Username   = (string) $this->settings->get('smtp_user');
+        $this->PHPMailer->Password   = (string) $this->settings->get('smtp_pass');
         $this->PHPMailer->SetFrom($this->settings->get('smtp_user'), $this->settings->get('notify_from_name'));
         
         if (!empty($replyTo)) {
@@ -125,7 +135,6 @@ class Notify
         $this->PHPMailer->Subject = $subject;
 
         $this->PHPMailer->MsgHTML($message);
-        $this->PHPMailer->addCustomHeader("MIME-Version: 1.0\n");
 
         $recipients = explode(',',$to);
         if (!empty($recipients)) {
@@ -152,12 +161,15 @@ class Notify
             ob_end_clean();
             return $trace;
         }
+        ob_end_clean();
 
         if ($this->PHPMailer->SMTPDebug != 0) {
             $this->logger->notice("Can`t send mail to '{$to}', ErrorInfo: {$this->PHPMailer->ErrorInfo}", ['subject' => $subject]);
         } else {
             $this->logger->notice("Can`t send mail to '{$to}', ErrorInfo: For view details should enable debug mode", ['subject' => $subject]);
         }
+
+        return false;
     }
 
     /*Отправка емейла*/

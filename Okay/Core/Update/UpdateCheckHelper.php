@@ -17,7 +17,7 @@ class UpdateCheckHelper
     public const SETTING_AUTO_CHECK = 'core_updater__auto_check';
 
     public const TTL = 21600;
-    public const REPO = 'devSviat/OkayCMS';
+    public const REPO = 'devSviat/OkayCMS-Fork';
 
     private const RELEASES_URL = 'https://api.github.com/repos/' . self::REPO . '/releases?per_page=15';
 

@@ -155,9 +155,8 @@ trait CRUD
         $insert->into($this->getTable())
             ->cols((array)$object); // todo здесь нужно сделать через bindValues
 
-        $this->db->query($insert);
-
-        if (!$id = $this->db->insertId()) {
+        // insertId() після невдалої вставки віддає id попередньої вставки з'єднання.
+        if (!$this->db->query($insert) || !$id = $this->db->insertId()) {
             return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
         }
 
@@ -219,7 +218,9 @@ trait CRUD
                 ->where($this->getTableAlias() . '.id IN (:update_entity_id)');
             $update->bindValue('update_entity_id', $ids);
 
-            $this->db->query($update);
+            if (!$this->db->query($update)) {
+                return ExtenderFacade::execute([static::class, __FUNCTION__], false, func_get_args());
+            }
         }
 
         // Если есть описание для перевода. Указываем язык для обновления
