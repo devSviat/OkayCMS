@@ -158,4 +158,27 @@ class CoreMigratorTest extends TestCase
 
         $this->assertGreaterThan(0, $checked, 'жодного .up.sql не перевірено');
     }
+
+    /**
+     * Локальний і CI-стенд накочує міграції shell-скриптом, повз PHP. Його
+     * порядок мусить збігатися з CoreMigrator: інакше 1.3.11 іде раніше за
+     * 1.3.2 і падає на колонці, якої ще немає.
+     */
+    public function testDbInitAppliesMigrationsInTheMigratorOrder(): void
+    {
+        $root = dirname(__DIR__, 3);
+        $script = (string) file_get_contents($root . '/dev/config/mysql/db-init.sh');
+        $this->assertSame(1, preg_match('/^for migration in (.+); do$/m', $script, $loop), 'цикл міграцій у db-init.sh не знайдено');
+
+        $list = str_replace('/fork-migrations', escapeshellarg($root . '/1DB_changes/fork'), $loop[1]);
+        exec('sh -c ' . escapeshellarg("printf '%s\\n' " . $list), $output, $code);
+        $this->assertSame(0, $code);
+        $scriptOrder = array_map('basename', $output);
+
+        $migrator = (new \ReflectionClass(CoreMigrator::class))->newInstanceWithoutConstructor();
+        $migratorOrder = array_column($migrator->pending($root . '/1DB_changes/fork', []), 'name');
+
+        $this->assertGreaterThan(1, count($migratorOrder));
+        $this->assertSame($migratorOrder, $scriptOrder);
+    }
 }

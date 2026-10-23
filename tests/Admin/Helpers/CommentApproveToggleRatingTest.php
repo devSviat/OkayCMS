@@ -49,13 +49,17 @@ class CommentApproveToggleRatingTest extends TestCase
         $this->assertSame([['products', 7, 'product'], ['blog', 3, 'post']], $calls);
     }
 
-    /** Метод нічого не дає, якщо ajax-перемикач знову писатиме повз нього. */
-    public function testApproveToggleEndpointRecalculates(): void
+    /**
+     * Метод нічого не дає, якщо ajax-перемикач знову писатиме повз нього.
+     * Перерахунок — на будь-яке поле відгуку: ендпоінт пише те, що прислали,
+     * зокрема `rating`, а не лише `approved`.
+     */
+    public function testCommentEndpointRecalculatesOnAnyField(): void
     {
         $source = (string) file_get_contents(dirname(__DIR__, 3) . '/backend/ajax/update_object.php');
 
         $this->assertMatchesRegularExpression(
-            "/\\\$object === 'comment'.*approved.*recalculateRatingsForComments\\(\\[\\\$id\\]\\)/s",
+            '/if \(\$object === \'comment\' && \$result\) \{\s*\$DI->get\(.*BackendCommentsHelper::class\)->recalculateRatingsForComments\(\[\$id\]\)/s',
             $source
         );
     }
