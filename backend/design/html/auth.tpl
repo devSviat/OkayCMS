@@ -77,7 +77,6 @@
                                     <div class="mb-1 error_box">
                                         {if $error_message == 'auth_wrong'}
                                         {$btr->auth_wrong|escape}
-                                        {if $limit_cnt}<br>{$btr->auth_wrong1|escape} {$limit_cnt} {$limit_cnt|plural:$btr->auth_limit_cnt1:$btr->auth_limit_cnt2:$btr->auth_limit_cnt3}{/if}
                                         {elseif $error_message == 'limit_try'}
                                         {$btr->auth_limit_try|escape}
                                         {/if}
