@@ -24,7 +24,7 @@ class ManagerReauth
     /** Дію спробували без відкритого вікна. */
     public const REQUIRED = 'reauth_required';
 
-    private const SESSION_KEY = 'admin_reauth_at';
+    public const SESSION_KEY = 'admin_reauth_at';
 
     public function __construct(
         private AdminLoginGuard $loginGuard,

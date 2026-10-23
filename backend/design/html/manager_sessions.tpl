@@ -1,4 +1,4 @@
-{* Огляд сесій усіх менеджерів (AllManagerSessionsAdmin). Завершення — у профілі менеджера. *}
+{* Хто зараз увійшов (AllManagerSessionsAdmin) *}
 {$meta_title=$btr->manager_sessions_all_title scope=global}
 
 <div class="row">
@@ -9,48 +9,65 @@
     </div>
 </div>
 
-<div class="boxed">
-    <div class="text_grey mb-1">{$btr->manager_sessions_all_hint|escape}</div>
+{if $message_success}
+    <div class="alert alert--icon alert--success">
+        <div class="alert__content">
+            <div class="alert__title">{$btr->manager_sessions_revoked|escape}</div>
+        </div>
+    </div>
+{/if}
 
-    {if $sessions}
-        <div class="okay_list">
-            <div class="okay_list_head">
-                <div class="okay_list_heading" style="width: 15%">{$btr->manager_sessions_manager|escape}</div>
-                <div class="okay_list_heading" style="width: 15%">{$btr->manager_sessions_started|escape}</div>
-                <div class="okay_list_heading" style="width: 15%">{$btr->manager_sessions_last_seen|escape}</div>
-                <div class="okay_list_heading" style="width: 12%">{$btr->manager_sessions_ip|escape}</div>
-                <div class="okay_list_heading" style="width: 43%">{$btr->manager_sessions_device|escape}</div>
+{if $message_error}
+    <div class="alert alert--icon alert--error">
+        <div class="alert__content">
+            <div class="alert__title">
+                {if $message_error == 'reauth_required'}{$btr->manager_reauth_required|escape}
+                {elseif $message_error == 'password_wrong'}{$btr->manager_reauth_wrong|escape}
+                {elseif $message_error == 'limit_try'}{$btr->auth_limit_try|escape}
+                {else}{$btr->manager_no_access|escape}{/if}
             </div>
-            <div class="okay_list_body">
-                {foreach $sessions as $s}
-                    <div class="okay_list_body_item">
-                        <div class="okay_list_row">
-                            <div class="okay_list_boding" style="width: 15%">
-                                {if isset($session_logins[$s->manager_id])}
-                                    {if $can_open_profiles}
-                                        <a class="link" href="{url controller=ManagerAdmin id=$s->manager_id active_tab=security}">{$session_logins[$s->manager_id]|escape}</a>
-                                    {else}
-                                        {$session_logins[$s->manager_id]|escape}
-                                    {/if}
-                                {else}
-                                    #{$s->manager_id|escape}
-                                {/if}
-                                {if $s->id == $current_session_id}
-                                    <span class="tag tag-success">{$btr->manager_sessions_current|escape}</span>
-                                {/if}
-                            </div>
-                            <div class="okay_list_boding" style="width: 15%">{$s->created_at|escape}</div>
-                            <div class="okay_list_boding" style="width: 15%">{$s->last_seen_at|escape}</div>
-                            <div class="okay_list_boding" style="width: 12%">{$s->ip|escape}</div>
-                            <div class="okay_list_boding" style="width: 43%; word-break: break-word">{$s->user_agent|escape}</div>
+        </div>
+    </div>
+{/if}
+
+{include file='manager_reauth_panel.tpl'}
+
+<div class="boxed">
+    {if $sessions}
+        <ul class="session_list">
+            {foreach $sessions as $s}
+                <li class="session_list__item">
+                    <div class="session_list__main">
+                        <div class="session_list__device" title="{$s->user_agent|escape}">
+                            {if $can_open_profiles}
+                                <a class="link" href="{url controller=ManagerAdmin id=$s->manager_id active_tab=security}">{$s->login|escape}</a>
+                            {else}
+                                <span>{$s->login|escape}</span>
+                            {/if}
+                            <span class="text_grey">·</span>
+                            {if $s->is_mobile}{include file='svg_icon.tpl' svgId='phone'}{/if}
+                            <span>{$s->device|escape}</span>
+                            {if $s->id == $current_session_id}<span class="tag tag-success">{$btr->manager_sessions_current|escape}</span>{/if}
+                        </div>
+                        <div class="session_list__meta">
+                            {$s->ip|escape} · {$btr->manager_sessions_started|escape} {$s->created_at|date} {$s->created_at|time} · {$btr->manager_sessions_last_seen|escape} {$s->last_seen_at|date} {$s->last_seen_at|time}
                         </div>
                     </div>
-                {/foreach}
-            </div>
+                    {if $s->id != $current_session_id && $s->can_revoke}
+                        <form method="post" class="session_list__action">
+                            <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
+                            <input type="hidden" name="action" value="revoke_session">
+                            <input type="hidden" name="session" value="{$s->id|escape}">
+                            <button type="submit" class="btn btn-outline-danger btn_mini" {if !$reauth_fresh}disabled title="{$btr->manager_reauth_required|escape}"{/if}>{$btr->manager_sessions_revoke|escape}</button>
+                        </form>
+                    {/if}
+                </li>
+            {/foreach}
+        </ul>
+        <div class="session_list__footer">
+            <span>{$btr->manager_sessions_hint|escape}</span>
         </div>
     {else}
-        <div class="heading_box mt-1">
-            <div class="text_grey">{$btr->manager_sessions_none|escape}</div>
-        </div>
+        <p class="text_grey">{$btr->manager_sessions_none|escape}</p>
     {/if}
 </div>

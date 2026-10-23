@@ -74,11 +74,14 @@ class ManagerAdmin extends IndexAdmin
         $this->design->assign('m', $target ?? new \stdClass());
         $this->design->assign('is_new', $target === null);
         $this->design->assign('is_self', $isSelf);
-        $this->design->assign('can_edit_permissions', $policy->canEditPermissions($viewer, $target !== null ? (int)$target->id : null));
+        $this->design->assign('can_manage_target', $target === null || $policy->canManage($viewer, $target));
+        $this->design->assign('can_edit_permissions', $policy->canEditPermissions($viewer, $target));
         $this->design->assign('can_see_sessions', $canSeeSessions);
+        $this->design->assign('can_revoke_sessions', $target !== null && $policy->canRevokeSessionsOf($viewer, $target));
         $sessions = $canSeeSessions ? $managerSessions->activeOf((int)$target->id) : [];
         foreach ($sessions as $session) {
             $session->device = ManagerSessions::device((string)$session->user_agent);
+            $session->is_mobile = ManagerSessions::isMobile((string)$session->user_agent);
         }
         $this->design->assign('sessions', $sessions);
         $this->design->assign('current_session_id', $current !== null ? (int)$current->id : 0);
@@ -133,6 +136,19 @@ class ManagerAdmin extends IndexAdmin
         $isSelf = $targetId === $viewerId;
         $tab = self::TAB_PROFILE;
 
+        $sessionActions = ['revoke_session', 'revoke_other_sessions'];
+        if (!in_array($action, array_merge(['profile', 'reset_menu', 'password', 'permissions'], $sessionActions), true)) {
+            return;
+        }
+        $allowed = in_array($action, $sessionActions, true)
+            ? $policy->canRevokeSessionsOf($viewer, $target)
+            : $policy->canManage($viewer, $target);
+        if (!$allowed) {
+            $this->postRedirectGet->storeMessageError('no_access');
+            $this->response->redirectTo($this->profileUrl($targetId, $tab));
+            return;
+        }
+
         switch ($action) {
             case 'profile':
                 $this->saveProfile($target, $isSelf, $managersEntity, $managerSessions, $reauth, $validator, $btrLanguages, $ip, $viewerId);
@@ -150,7 +166,7 @@ class ManagerAdmin extends IndexAdmin
 
             case 'permissions':
                 $tab = self::TAB_PERMISSIONS;
-                if (!$policy->canEditPermissions($viewer, $targetId)) {
+                if (!$policy->canEditPermissions($viewer, $target)) {
                     break;
                 }
                 if (!$this->confirmed($reauth)) {
@@ -168,11 +184,8 @@ class ManagerAdmin extends IndexAdmin
 
             case 'revoke_session':
                 $tab = self::TAB_SECURITY;
-                if (!$policy->canSeeSessionsOf($viewer, $targetId)) {
-                    break;
-                }
-                // Свою сесію завершують без пароля, чужу — лише з підтвердженням.
-                if (!$isSelf && !$this->confirmed($reauth)) {
+                // І свою теж: інакше вкрадена кука викидала б власника з інших пристроїв.
+                if (!$this->confirmed($reauth)) {
                     break;
                 }
                 if ($managerSessions->revokeOne($targetId, (int)$this->request->post('session', 'integer'), $viewerId)) {
@@ -182,10 +195,7 @@ class ManagerAdmin extends IndexAdmin
 
             case 'revoke_other_sessions':
                 $tab = self::TAB_SECURITY;
-                if (!$policy->canSeeSessionsOf($viewer, $targetId)) {
-                    break;
-                }
-                if (!$isSelf && !$this->confirmed($reauth)) {
+                if (!$this->confirmed($reauth)) {
                     break;
                 }
                 // Для себе — усі, крім цієї; для іншого менеджера — усі.

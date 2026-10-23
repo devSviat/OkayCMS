@@ -220,10 +220,12 @@ class Managers
             return false;
         }
 
-        $manager->permissions = explode(',', $manager->permissions);
-        foreach ($manager->permissions as &$permission) {
-            $permission = trim($permission);
-        }
+        // Менеджер без жодного права зберігається порожнім рядком; explode() дав
+        // би [''] — «право» з порожньою назвою, яке не покриває жоден інший менеджер.
+        $manager->permissions = array_values(array_filter(
+            array_map('trim', explode(',', (string)$manager->permissions)),
+            static fn(string $permission): bool => $permission !== ''
+        ));
 
         return true;
     }

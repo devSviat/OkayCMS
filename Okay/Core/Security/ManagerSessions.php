@@ -40,7 +40,8 @@ class ManagerSessions
      */
     public function signIn(object $manager, bool $mfa = false): bool
     {
-        unset($_SESSION['admin']);
+        // Вікно підтвердження паролем належить попередньому входу, не цьому.
+        unset($_SESSION['admin'], $_SESSION[ManagerReauth::SESSION_KEY]);
         if (session_status() !== PHP_SESSION_ACTIVE || empty($manager->id) || !is_string($manager->login ?? null)) {
             return false;
         }
@@ -230,6 +231,12 @@ class ManagerSessions
         $label = implode(' · ', array_filter([$browser, $system]));
 
         return $label !== '' ? $label : mb_substr($userAgent, 0, 40);
+    }
+
+    /** Для іконки в списку сесій; так само лише підпис, не ідентифікація. */
+    public static function isMobile(string $userAgent): bool
+    {
+        return (bool)preg_match('~Android|iPhone|iPad|Mobile~', $userAgent);
     }
 
     public static function hash(string $sessionId): string

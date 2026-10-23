@@ -60,15 +60,73 @@ class ManagerProfileAccessTest extends TestCase
         $this->assertTrue($policy->mayOpen($this->viewer(1, ['managers']), 9));
     }
 
-    /** Свої права не редагуються ніким, чужі — лише з правом managers. */
+    /** Свої права не редагуються ніким, чужі — лише з правом managers і лише нижчого. */
     public function testPermissionsAreNeverEditableOnYourOwnProfile(): void
     {
         $policy = new ManagerProfilePolicy(new Managers());
+        $admin = $this->viewer(1, ['managers', 'products', 'orders']);
 
-        $this->assertFalse($policy->canEditPermissions($this->viewer(1, ['managers']), 1));
-        $this->assertTrue($policy->canEditPermissions($this->viewer(1, ['managers']), 2));
-        $this->assertTrue($policy->canEditPermissions($this->viewer(1, ['managers']), null), 'новий менеджер');
-        $this->assertFalse($policy->canEditPermissions($this->viewer(7, self::PLAIN), 2));
+        $this->assertFalse($policy->canEditPermissions($admin, $admin));
+        $this->assertTrue($policy->canEditPermissions($admin, $this->viewer(2, ['products'])));
+        $this->assertTrue($policy->canEditPermissions($admin, null), 'новий менеджер');
+        $this->assertFalse($policy->canEditPermissions($this->viewer(7, self::PLAIN), $this->viewer(2, ['products'])));
+    }
+
+    /**
+     * Власник права managers не чіпає менеджера, у якого є права, яких немає
+     * в нього: інакше міняв би пароль повному адміну й заходив замість нього.
+     */
+    public function testHigherManagerIsOutOfReach(): void
+    {
+        $policy = new ManagerProfilePolicy(new Managers());
+        $manager = $this->viewer(2, ['managers', 'products']);
+        $superAdmin = $this->viewer(1, ['managers', 'products', 'orders', 'settings']);
+
+        $this->assertFalse($policy->canManage($manager, $superAdmin));
+        $this->assertFalse($policy->canEditPermissions($manager, $superAdmin));
+        $this->assertTrue($policy->canManage($superAdmin, $manager));
+        $this->assertTrue($policy->canManage($manager, $this->viewer(3, ['managers', 'products'])), 'рівні права');
+        $this->assertTrue($policy->canManage($manager, $manager), 'себе');
+        $this->assertFalse($policy->canManage($this->viewer(7, self::PLAIN), $this->viewer(8, [])), 'без права managers — лише себе');
+    }
+
+    /** Повний доступ (NULL) розгортається в повний список: його покриває лише такий самий. */
+    public function testFullAccessIsCoveredOnlyByFullAccess(): void
+    {
+        $managers = new Managers();
+        $full = (object)['id' => 1, 'permissions' => null];
+        $managers->setManagerPermissions($full);
+        $other = (object)['id' => 2, 'permissions' => null];
+        $managers->setManagerPermissions($other);
+        $almost = (object)['id' => 3, 'permissions' => implode(',', array_diff($managers->getAllPermissions(), ['settings']))];
+        $managers->setManagerPermissions($almost);
+
+        $policy = new ManagerProfilePolicy($managers);
+        $this->assertTrue($policy->canManage($other, $full));
+        $this->assertFalse($policy->canManage($almost, $full));
+        $this->assertFalse($policy->covers((object)['permissions' => 'x'], $full), 'не розгорнуті права — не покриття');
+    }
+
+    /** Менеджер без жодного права (permissions = '') — нижчий за будь-кого з правом managers. */
+    public function testManagerWithoutPermissionsIsManageable(): void
+    {
+        $managers = new Managers();
+        $empty = (object)['id' => 9, 'permissions' => ''];
+        $managers->setManagerPermissions($empty);
+
+        $this->assertSame([], $empty->permissions);
+        $this->assertTrue((new ManagerProfilePolicy($managers))->canManage($this->viewer(1, ['managers']), $empty));
+    }
+
+    public function testSessionsOfAHigherManagerCannotBeRevoked(): void
+    {
+        $policy = new ManagerProfilePolicy(new Managers());
+        $sessionsOnly = $this->viewer(5, ['manager_sessions']);
+
+        $this->assertTrue($policy->canRevokeSessionsOf($sessionsOnly, $this->viewer(6, [])));
+        $this->assertFalse($policy->canRevokeSessionsOf($sessionsOnly, $this->viewer(1, ['managers'])));
+        $this->assertTrue($policy->canRevokeSessionsOf($this->viewer(7, self::PLAIN), $this->viewer(7, self::PLAIN)), 'свої');
+        $this->assertFalse($policy->canRevokeSessionsOf($this->viewer(7, self::PLAIN), $this->viewer(8, [])));
     }
 
     public function testOthersSessionsNeedTheSessionsRight(): void

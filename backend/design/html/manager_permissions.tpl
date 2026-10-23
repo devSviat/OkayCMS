@@ -1,7 +1,7 @@
 {* Перемикачі прав. Права, яких немає в того, хто редагує, не показуються й не змінюються
    (Managers::determineNewPermissions). system_modules не має свого пункту меню, тож окремо. *}
-<div class="boxed fn_toggle_wrap">
-    <div class="heading_box">
+<div class="fn_perms_all">
+    <div class="heading_box mb-1">
         {$btr->manager_rights|escape}
         <span class="font_14 text_600 ml-1">{$btr->manager_all_access|escape}</span>
         <label class="switch switch-default">
