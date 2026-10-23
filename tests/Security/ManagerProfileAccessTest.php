@@ -90,6 +90,23 @@ class ManagerProfileAccessTest extends TestCase
         $this->assertTrue((new ManagerProfilePolicy($managers))->canSeeSessionsOf($superAdmin, 2));
     }
 
+    /**
+     * Модуль, що вішає контролер на право ядра, не дублює його: інакше права
+     * менеджера зберігались як `orders,orders`, а у формі з'являвся другий
+     * перемикач того самого права під назвою модуля.
+     */
+    public function testModuleReusingACorePermissionDoesNotDuplicateIt(): void
+    {
+        $managers = new Managers();
+        $managers->addModulePermission('orders', 'Vendor/Module');
+        $managers->addModulePermission('vendor__module', 'Vendor/Module');
+
+        $all = $managers->getAllPermissions();
+        $this->assertSame(1, count(array_keys($all, 'orders', true)));
+        $this->assertContains('vendor__module', $all);
+        $this->assertSame(['vendor__module' => 'Vendor/Module'], $managers->getModulesPermissions());
+    }
+
     public function testReauthWindow(): void
     {
         $reauth = new ManagerReauth($this->createStub(AdminLoginGuard::class), $this->createStub(EntityFactory::class));

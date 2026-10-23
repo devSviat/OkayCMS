@@ -162,6 +162,13 @@ class Managers
      */
     public function addModulePermission($permission, $vendorModuleName)
     {
+        // Модуль, що вішає свій контролер на право ядра (`orders`), нового права
+        // не створює: інакше воно двічі потрапляло в getAllPermissions(), у
+        // збережені права менеджера й окремим перемикачем у форму прав.
+        if (in_array($permission, $this->permissionsList, true)) {
+            return;
+        }
+
         if (!isset($this->modulesPermissionsList[$permission])) {
             $this->modulesPermissionsList[$permission] = $vendorModuleName;
         }

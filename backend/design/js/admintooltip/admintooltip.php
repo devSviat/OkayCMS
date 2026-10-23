@@ -48,7 +48,7 @@ $response->addHeader('Cache-Control: no-cache, must-revalidate');
 $response->addHeader('Expires: -1');
 $response->addHeader('Pragma: no-cache');
 
-$manager = $DI->get(EntityFactory::class)->get(ManagersEntity::class)->get($_SESSION['admin']);
+$manager = $DI->get(EntityFactory::class)->get(ManagersEntity::class)->get($_SESSION['admin'] ?? '');
 
 /** @var Design $design */
 $design = $DI->get(Design::class);
