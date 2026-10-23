@@ -1,13 +1,13 @@
 # Політика безпеки
 
 **English:** please report privately via
-[GitHub Security Advisories](https://github.com/devSviat/OkayCMS/security/advisories/new)
+[GitHub Security Advisories](https://github.com/devSviat/OkayCMS-Fork/security/advisories/new)
 rather than opening a public issue. Reports in English are welcome.
 
 ## Куди повідомляти
 
 Приватним звітом через GitHub: **Security → Advisories → Report a vulnerability**
-([пряме посилання](https://github.com/devSviat/OkayCMS/security/advisories/new)).
+([пряме посилання](https://github.com/devSviat/OkayCMS-Fork/security/advisories/new)).
 
 Публічний issue для цього не підходить — він розкриває вразливість усім, хто
 читає репозиторій, ще до того, як зʼявиться виправлення.
@@ -17,7 +17,7 @@ rather than opening a public issue. Reports in English are welcome.
 Цей репозиторій — форк. Приймаються звіти про код **цього форку**: переписані
 межі безпеки, конфіги nginx і `.htaccess`, оточення Docker, власні модулі й теми.
 Що саме тут змінено проти апстріму, описано в
-[`docs/UPGRADE-security.md`](https://github.com/devSviat/OkayCMS/blob/main/docs/UPGRADE-security.md).
+[`docs/UPGRADE-security.md`](https://github.com/devSviat/OkayCMS-Fork/blob/main/docs/UPGRADE-security.md).
 
 Вразливість, яка є і в апстрімному [OkayCMS](https://github.com/OkayCMS/OkayCMS),
 варто надіслати й туди: тут вона буде закрита лише для цього форку.

@@ -187,7 +187,7 @@
                                     <p>{$btr->core_updater_no_migrations_applied_text|escape}</p>
                                 {/if}
                                 <p>
-                                    <a href="https://github.com/devSviat/OkayCMS/blob/main/docs/updates.md" target="_blank" rel="noopener">
+                                    <a href="https://github.com/devSviat/OkayCMS-Fork/blob/main/docs/updates.md" target="_blank" rel="noopener">
                                         {$btr->core_updater_docs_link_label|escape}
                                     </a>
                                 </p>
@@ -387,7 +387,7 @@
     </div>
 
     <div class="col-md-12 mb-2">
-        <a class="font_12" href="https://github.com/devSviat/OkayCMS/blob/main/docs/updates.md" target="_blank" rel="noopener">
+        <a class="font_12" href="https://github.com/devSviat/OkayCMS-Fork/blob/main/docs/updates.md" target="_blank" rel="noopener">
             {$btr->core_updater_docs_link_label|escape}
         </a>
     </div>
