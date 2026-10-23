@@ -21,21 +21,50 @@ class AttemptLimiter
         $this->windowSeconds = max(1, (int)$windowSeconds);
     }
 
+    /**
+     * Той самий лічильник з іншими межами, наприклад для входу в адмінку.
+     */
+    public function withLimits(int $maxAttempts, int $windowSeconds): self
+    {
+        return new self($this->dir, $maxAttempts, $windowSeconds);
+    }
+
     public function tooManyAttempts($key)
     {
         return count($this->recentFailures($key)) >= $this->maxAttempts;
     }
 
+    /**
+     * Займає спробу, якщо ліміт ще не вичерпано.
+     *
+     * Перевірка й запис ідуть під одним flock. Окремі tooManyAttempts() і
+     * registerFailure() паралельні запити проходять разом: усі читають той
+     * самий лічильник, і пачка з N одночасних спроб минає ліміт.
+     *
+     * Сховище недоступне — спробу пропускаємо, як і registerFailure(): без
+     * запису в cache/ сайт однаково не працює, а вхід лишився б закритим.
+     *
+     * @return bool false — ліміт вичерпано, спробу не зараховано
+     */
+    public function attempt($key): bool
+    {
+        return $this->locked($key, function (array $recent) {
+            if (count($recent) >= $this->maxAttempts) {
+                return [false, null];
+            }
+            $recent[] = time();
+
+            return [true, $recent];
+        }, true);
+    }
+
     public function registerFailure($key)
     {
-        $failures = $this->recentFailures($key);
-        $failures[] = time();
+        $this->locked($key, function (array $recent) {
+            $recent[] = time();
 
-        if (count($failures) > $this->maxAttempts) {
-            $failures = array_slice($failures, -$this->maxAttempts);
-        }
-
-        $this->write($key, $failures);
+            return [null, $recent];
+        }, null);
     }
 
     public function reset($key)
@@ -43,6 +72,46 @@ class AttemptLimiter
         $file = $this->fileFor($key);
         if ($file !== null && is_file($file)) {
             @unlink($file);
+        }
+    }
+
+    /**
+     * @param callable(int[]): array{0: mixed, 1: ?int[]} $change повертає
+     *        [результат, нові мітки або null — не писати]
+     * @param mixed $unavailable результат, коли сховище недоступне
+     * @return mixed
+     */
+    private function locked($key, callable $change, $unavailable)
+    {
+        $file = $this->fileFor($key);
+        if ($file === null || !$this->ensureDir()) {
+            return $unavailable;
+        }
+
+        $handle = @fopen($file, 'c+');
+        if ($handle === false) {
+            return $unavailable;
+        }
+
+        try {
+            if (!flock($handle, LOCK_EX)) {
+                return $unavailable;
+            }
+
+            [$result, $timestamps] = $change($this->recentFrom((string)stream_get_contents($handle)));
+
+            if ($timestamps !== null) {
+                $timestamps = array_slice(array_values($timestamps), -$this->maxAttempts);
+                ftruncate($handle, 0);
+                rewind($handle);
+                fwrite($handle, (string)json_encode($timestamps));
+                fflush($handle);
+            }
+
+            return $result;
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
         }
     }
 
@@ -54,7 +123,14 @@ class AttemptLimiter
         }
 
         $raw = @file_get_contents($file);
-        if (!is_string($raw) || $raw === '') {
+
+        return is_string($raw) ? $this->recentFrom($raw) : [];
+    }
+
+    /** @return int[] мітки в межах вікна */
+    private function recentFrom(string $raw): array
+    {
+        if ($raw === '') {
             return [];
         }
 
@@ -74,18 +150,9 @@ class AttemptLimiter
         return $recent;
     }
 
-    private function write($key, array $failures)
+    private function ensureDir(): bool
     {
-        $file = $this->fileFor($key);
-        if ($file === null) {
-            return;
-        }
-
-        if (!is_dir($this->dir) && !@mkdir($this->dir, 0775, true) && !is_dir($this->dir)) {
-            return;
-        }
-
-        @file_put_contents($file, json_encode(array_values($failures)), LOCK_EX);
+        return is_dir($this->dir) || @mkdir($this->dir, 0775, true) || is_dir($this->dir);
     }
 
     /**

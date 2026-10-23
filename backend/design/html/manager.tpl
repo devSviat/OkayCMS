@@ -246,12 +246,6 @@
                             {include file='svg_icon.tpl' svgId='checked'}
                             <span>{$btr->general_apply|escape}</span>
                         </button>
-                        {if $m->cnt_try >= 10}
-                            <button type="submit" name="unlock_manager" class="btn btn_small btn_blue">
-                                {include file='svg_icon.tpl' svgId='magic'}
-                            &nbsp;   {$btr->manager_unlock|escape}
-                            </button>
-                        {/if}
                     </div>
                 </div>
             </div>

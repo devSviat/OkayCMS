@@ -50,6 +50,7 @@ use Okay\Core\TplMod\ModificationChecker;
 use Okay\Core\TplMod\Parser as TplParser;
 use Okay\Core\Security\AdminRecoveryToken;
 use Okay\Core\Security\AttemptLimiter;
+use Okay\Core\Security\AdminLoginGuard;
 use Okay\Core\Security\RecoveryToken;
 use Okay\Core\Security\StorefrontGuard;
 use Okay\Core\Release\CoreMigrator;
@@ -316,6 +317,13 @@ $services = [
             new PR('attempt_limiter.dir'),
             new PR('attempt_limiter.max_attempts'),
             new PR('attempt_limiter.window_seconds'),
+        ],
+    ],
+    AdminLoginGuard::class => [
+        'class' => AdminLoginGuard::class,
+        'arguments' => [
+            new SR(AttemptLimiter::class),
+            new SR(Managers::class),
         ],
     ],
     Translit::class => [

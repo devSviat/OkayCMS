@@ -105,6 +105,64 @@ class AttemptLimiterTest extends TestCase
         $this->assertFalse($limiter->tooManyAttempts('1.2.3.4'));
     }
 
+    public function testAttemptStopsAtTheLimitAndDoesNotCountRefusals()
+    {
+        $limiter = new AttemptLimiter($this->dir, 2, 300);
+
+        $this->assertTrue($limiter->attempt('k'));
+        $this->assertTrue($limiter->attempt('k'));
+        $this->assertFalse($limiter->attempt('k'));
+        $this->assertFalse($limiter->attempt('k'));
+
+        // Відмова не продовжує блокування: у сховищі рівно дві мітки.
+        $files = glob($this->dir . '/*') ?: [];
+        $this->assertCount(2, json_decode((string)file_get_contents($files[0]), true));
+    }
+
+    public function testWithLimitsSharesStorageButNotLimits()
+    {
+        $strict = (new AttemptLimiter($this->dir, 10, 300))->withLimits(1, 300);
+
+        $this->assertTrue($strict->attempt('k'));
+        $this->assertFalse($strict->attempt('k'));
+        $this->assertTrue((new AttemptLimiter($this->dir, 1, 300))->tooManyAttempts('k'));
+    }
+
+    /**
+     * Справжні паралельні процеси: перевірка й запис мусять бути атомарними,
+     * інакше всі читають той самий лічильник і проходять разом.
+     */
+    public function testConcurrentAttemptsNeverExceedTheLimit()
+    {
+        $workers = 12;
+        $limit = 3;
+        $start = microtime(true) + 1.0;
+        $script = sprintf(
+            'require %s; while (microtime(true) < %F) {} echo (new %s(%s, %d, 300))->attempt("race") ? 1 : 0;',
+            var_export(dirname(__DIR__, 2) . '/vendor/autoload.php', true),
+            $start,
+            '\\' . AttemptLimiter::class,
+            var_export($this->dir, true),
+            $limit
+        );
+
+        $processes = [];
+        for ($i = 0; $i < $workers; $i++) {
+            $processes[] = proc_open([PHP_BINARY, '-r', $script], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+            $outputs[$i] = $pipes;
+        }
+
+        $allowed = 0;
+        foreach ($processes as $i => $process) {
+            $allowed += (int)stream_get_contents($outputs[$i][1]);
+            $errors = stream_get_contents($outputs[$i][2]);
+            proc_close($process);
+            $this->assertSame('', $errors);
+        }
+
+        $this->assertSame($limit, $allowed);
+    }
+
     /**
      * @param int[] $timestamps
      */
