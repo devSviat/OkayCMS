@@ -8,7 +8,8 @@ use Okay\Core\QueryFactory;
  * Ключ облікового запису для ліміту спроб входу: два логіни мають однаковий
  * ключ тоді й лише тоді, коли база вважає їх тим самим логіном.
  *
- * Тому ключ рахує сама база, вагою в колації стовпця `__managers.login`.
+ * Тому ключ рахує сама база, вагою в колації стовпця `__managers.login`
+ * (ManagerLoginKeyDatabaseTest звіряє це з ManagersEntity::get() на живій базі).
  * Будь-яка нормалізація в PHP розходиться з колацією: `utf8mb4_unicode_ci`
  * не розрізняє діакритики, а пробіл на початку розрізняє. Розбіжність працює
  * як оракул: вигаданий логін вичерпував інший лічильник, ніж справжній, і
@@ -27,19 +28,47 @@ class ManagerLoginKey
     {
         [$charset, $collation, $padSpace] = $this->collation();
 
-        // PAD SPACE: база не розрізняє пробілів у кінці, а WEIGHT_STRING їх
-        // рахує. Пробіли на початку значущі й лишаються.
-        $value = $padSpace ? 'RTRIM(CONVERT(:login USING ' . $charset . '))' : 'CONVERT(:login USING ' . $charset . ')';
-        $weight = $this->queryFactory->newSqlQuery()
-            ->setStatement('SELECT HEX(WEIGHT_STRING(' . $value . ' COLLATE ' . $collation . ')) AS w')
+        $rows = $this->queryFactory->newSqlQuery()
+            ->setStatement(
+                'SELECT HEX(WEIGHT_STRING(CONVERT(:login USING ' . $charset . ') COLLATE ' . $collation . ')) AS w,'
+                . ' HEX(WEIGHT_STRING(CONVERT(\' \' USING ' . $charset . ') COLLATE ' . $collation . ')) AS sp'
+            )
             ->bindValue('login', $login)
-            ->result('w');
+            ->results();
+        $row = is_array($rows) ? reset($rows) : null;
+        $weight = is_object($row) ? (string)($row->w ?? '') : '';
+        $space = is_object($row) ? (string)($row->sp ?? '') : '';
 
-        if (!is_string($weight) || $weight === '') {
+        if ($padSpace) {
+            $weight = self::trimTrailingSpaceWeight($weight, $space);
+        }
+
+        if ($weight === '') {
             return 'fallback:' . mb_strtolower(trim($login));
         }
 
         return 'w:' . $weight;
+    }
+
+    /**
+     * PAD SPACE: база не розрізняє в кінці нічого, що важить як пробіл, — і
+     * U+0020, і NBSP, U+2000–U+200A, U+3000 тощо, а WEIGHT_STRING їх рахує.
+     * Тому з кінця ваги знімаємо одиниці ваги пробілу, а не символи пробілу:
+     * RTRIM знімав лише U+0020, і кожна кількість NBSP у кінці давала новий
+     * лічильник для того самого облікового запису.
+     */
+    public static function trimTrailingSpaceWeight(string $weight, string $space): string
+    {
+        $unit = strlen($space);
+        if ($unit === 0) {
+            return $weight;
+        }
+
+        while ($weight !== '' && strlen($weight) % $unit === 0 && str_ends_with($weight, $space)) {
+            $weight = substr($weight, 0, -$unit);
+        }
+
+        return $weight;
     }
 
     /** @return array{0: string, 1: string, 2: bool} */
