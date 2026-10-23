@@ -150,7 +150,7 @@ grep -n "[0-9] given" phpstan-baseline.neon
 локальний:
 
 ```bash
-gh run list --repo devSviat/OkayCMS --branch main --limit 5 --json name,conclusion,headSha
+gh run list --repo devSviat/OkayCMS-Fork --branch main --limit 5 --json name,conclusion,headSha
 ```
 
 Друга міна тієї ж родини — база. У CI-джобі PHPUnit її немає, а
