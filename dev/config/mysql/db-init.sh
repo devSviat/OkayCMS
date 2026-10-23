@@ -56,7 +56,10 @@ CREATE TABLE IF NOT EXISTS ok_core_migrations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 SQL
 
-for migration in /fork-migrations/*.up.sql; do
+# Порядок глоба посимвольний: 1.3.11 іде раніше за 1.3.2, тобто раніше за
+# колонку, яку створює 1.3.2. sort -V дає той самий порядок, що strnatcmp у
+# CoreMigrator::pending(). Імена за правилом {fork-version}_{опис}.up.sql, без пробілів.
+for migration in $(ls /fork-migrations/*.up.sql 2>/dev/null | sort -V); do
     [ -f "$migration" ] || continue
     name="$(basename "$migration")"
 
