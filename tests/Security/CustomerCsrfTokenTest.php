@@ -70,4 +70,28 @@ class CustomerCsrfTokenTest extends TestCase
     {
         $this->assertFalse(CustomerCsrfToken::check(str_repeat('b', 64)));
     }
+
+    /**
+     * Підкинута кука (піддомен, http без HSTS) не має перемагати токен сесії:
+     * інакше нападник обирав би токен сам.
+     */
+    public function testCookieDoesNotOverrideTheSessionToken()
+    {
+        $own = CustomerCsrfToken::get();
+        $planted = str_repeat('c', 64);
+        $_COOKIE[CustomerCsrfToken::COOKIE_NAME] = $planted;
+
+        $this->assertFalse(CustomerCsrfToken::check($planted));
+        $this->assertTrue(CustomerCsrfToken::check($own));
+    }
+
+    /** Кука, що розійшлась із сесією, вирівнюється: AJAX тем бере токен саме з неї. */
+    public function testDivergedCookieIsResetToTheSessionToken()
+    {
+        $own = CustomerCsrfToken::get();
+        $_COOKIE[CustomerCsrfToken::COOKIE_NAME] = str_repeat('d', 64);
+
+        $this->assertSame($own, CustomerCsrfToken::get());
+        $this->assertSame($own, $_COOKIE[CustomerCsrfToken::COOKIE_NAME]);
+    }
 }
