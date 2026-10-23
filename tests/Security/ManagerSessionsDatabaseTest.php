@@ -24,6 +24,7 @@ class ManagerSessionsDatabaseTest extends TestCase
     private string $prefix;
     private int $alice;
     private int $bob;
+    private bool $inTransaction = false;
 
     protected function setUp(): void
     {
@@ -36,6 +37,7 @@ class ManagerSessionsDatabaseTest extends TestCase
 
         $this->sessions = new ManagerSessions(ServiceLocator::getInstance()->getService(EntityFactory::class));
         $this->pdo->beginTransaction();
+        $this->inTransaction = true;
 
         $this->alice = $this->manager('rs_alice');
         $this->bob = $this->manager('rs_bob');
@@ -43,7 +45,8 @@ class ManagerSessionsDatabaseTest extends TestCase
 
     protected function tearDown(): void
     {
-        if (isset($this->pdo) && $this->pdo->inTransaction()) {
+        // Не питати саму PDO: без бази inTransaction() пробує з'єднатись і падає вже пропущений тест.
+        if ($this->inTransaction) {
             $this->pdo->rollBack();
         }
     }
