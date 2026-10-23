@@ -240,12 +240,12 @@ ETag-кондиційний (`If-None-Match`); `304` лише освіжає `ch
 
 | Крок | Що робить |
 | ---- | --------- |
-| `download` | качає `{version}.zip` і `checksums.txt` у `files/tmp/updates/{version}/` (лише з `TRUSTED_ASSET_URL_PREFIX` — `https://github.com/devSviat/OkayCMS/releases/download/`) |
+| `download` | качає `{version}.zip` і `checksums.txt` у `files/tmp/updates/{version}/` (лише з `ReleaseFeed::TRUSTED_ASSET_URL_PREFIXES` — `https://github.com/devSviat/OkayCMS/releases/download/` або, після перейменування репозиторію, `https://github.com/devSviat/OkayCMS-Fork/releases/download/`) |
 | `verify` | звіряє sha256 архіву з `checksums.txt`, розпаковує, тоді звіряє **кожен** файл з `manifest.json` проти дерева й перевіряє шляхи на вихід за межі кореня (`assertSafePaths`) |
-| `preflight` | версія у `version.json` пакета мусить збігатися з версією релізу (інакше до тегу причепили чужий архів); `assertInstallable` (мінімальний PHP, downgrade guard — пакет мусить бути новіший за встановлену версію); корінь, `Okay/Core/` і `config/` доступні для запису (пробний файл, який одразу прибирається); вільного місця > 3× розміру розпакованого пакета; якщо `composer.lock` пакета відрізняється — composer має бути доступний; якщо `version.json` каже `requiresMigrations` — має бути доступний `mysqldump`; проба self-request (GET на корінь сайту, таймаут 10 с) — health-check і rollback запитують сайт самі себе, тож PHP-FPM мусить мати **щонайменше 2 вільні воркери** (`pm.max_children=1` зупиняє оновлення тут, до будь-яких змін, а не хибним rollback'ом із закритою вітриною) |
+| `preflight` | версія у `version.json` пакета мусить збігатися з версією релізу (інакше до тегу причепили чужий архів); `assertInstallable` (мінімальний PHP, downgrade guard — пакет мусить бути новіший за встановлену версію); корінь, `Okay/Core/` і `config/` доступні для запису (пробний файл, який одразу прибирається); вільного місця > 3× розміру розпакованого пакета; якщо пакет змінює прод-залежності — composer має бути доступний (рішення `ComposerInstallDecision`: `composer.lock` без `packages-dev`/`content-hash` і `composer.json` без `require-dev`/`autoload-dev`; бамп лише dev-інструментів composer не вимагає); якщо `version.json` каже `requiresMigrations` — має бути доступний `mysqldump`; проба self-request (GET на корінь сайту, таймаут 10 с) — health-check і rollback запитують сайт самі себе, тож PHP-FPM мусить мати **щонайменше 2 вільні воркери** (`pm.max_children=1` зупиняє оновлення тут, до будь-яких змін, а не хибним rollback'ом із закритою вітриною) |
 | `backup` | архівує у `files/backups/` файли з `manifest.json`, що фізично існують зараз (лише їх і перезапише apply); якщо є `.up.sql`-міграції — дампить `mysqldump`-ом лише зачеплені ними таблиці (розпізнані по `__marker` у SQL, той самий регекс, що й `CoreMigrator::prefixTables()`) |
 | `maintenance_on` | вмикає прапорець `config/.maintenance` із одноразовим токеном |
-| `apply_files` | spool-and-swap: кожен файл із `manifest.json` копіюється поруч (`{файл}.core-update.tmp`) і атомарно `rename()`-иться поверх цілі; нічого не видаляється. Тоді, якщо `composer.lock` пакета відрізняється від поточного — `composer install --no-dev --optimize-autoloader` |
+| `apply_files` | spool-and-swap: кожен файл із `manifest.json` копіюється поруч (`{файл}.core-update.tmp`) і атомарно `rename()`-иться поверх цілі; нічого не видаляється. Тоді, якщо пакет змінює прод-залежності (те саме рішення, що й у `preflight`) — `composer install --no-dev --optimize-autoloader` |
 | `migrations` | `CoreMigrator::apply()` накочує `.up.sql` із пакета (трекер `ok_core_migrations`) |
 | `cache_clear` | `Design::clearCompiled()` + `opcache_reset()`, якщо розширення завантажене |
 | `health_check` | HTTP GET на `/?core_updater_health=1` з токеном у заголовку `X-Core-Updater-Token`; очікує JSON із `forkVersion`, **точно** новою версією. До 4 спроб із паузою 2 с — перша може застати ще не перечитаний пул FPM |
@@ -505,7 +505,8 @@ apply:  1.2.0_b, 1.11.0_c   (1.1.0_a пропущено, порядок нату
   `core_updater__root_url` має пріоритет над `Host` і закриває це.
 - **Модель довіри до пакета — GitHub-Releases + HTTPS + SHA-256, без
   окремого підпису.** Пакет вважається справжнім, якщо asset лежить під
-  `github.com/devSviat/OkayCMS/releases/download/` і його sha256 збігається
+  `github.com/devSviat/OkayCMS/releases/download/` (або `…/OkayCMS-Fork/…` після
+  перейменування репозиторію) і його sha256 збігається
   з `checksums.txt`. Компрометація GitHub-акаунта чи CI-токена дозволила б
   опублікувати самоузгоджений шкідливий реліз, який пройде всі перевірки.
   Незалежний криптопідпис (GPG/minisign поза GitHub) — можливе посилення v2.

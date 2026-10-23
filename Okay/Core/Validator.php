@@ -42,7 +42,9 @@ class Validator
             return !$is_required;
         }
         // for email
-        if (!preg_match("/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$/ui", $email)) {
+        // D: без нього «$» пропускає перенос рядка в кінці, і «victim@x.com\n» реєструвався
+        // б поруч із victim@x.com, а модулі, що обрізають пробіли, бачили б ту саму адресу.
+        if (!preg_match("/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$/uiD", $email)) {
             return false;
         }
         return true;

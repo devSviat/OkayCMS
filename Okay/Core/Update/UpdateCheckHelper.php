@@ -78,6 +78,12 @@ class UpdateCheckHelper
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 20);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+        // Перейменований репозиторій GitHub API віддає як 301 на нову адресу;
+        // без переходу перевірка оновлень падала б з «HTTP 301».
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+        curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+        curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
 
         $response = curl_exec($ch);
         $errno = curl_errno($ch);
@@ -251,9 +257,14 @@ class UpdateCheckHelper
         ];
     }
 
-    private static function extractEtag(string $headers): ?string
+    /**
+     * ETag останньої відповіді: після переходів у $headers лежать заголовки
+     * кожної, а значення має сенс лише для кінцевої адреси.
+     */
+    public static function extractEtag(string $headers): ?string
     {
-        if (preg_match('/^ETag:\s*(.+)$/mi', $headers, $matches)) {
+        $blocks = preg_split("/\r?\n\r?\n/", trim($headers)) ?: [];
+        if (preg_match('/^ETag:\s*(.+)$/mi', (string) end($blocks), $matches)) {
             return trim($matches[1]);
         }
 

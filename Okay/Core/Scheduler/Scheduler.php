@@ -23,8 +23,8 @@ class Scheduler
     /** @var Task[] */
     private $tasks = [];
 
-    public function __construct($loggerDir) {
-        $this->lockFactory = new LockFactory(new FlockStore());
+    public function __construct($loggerDir, $rootDir = null) {
+        $this->lockFactory = new LockFactory(new FlockStore(self::lockDir($rootDir)));
 
         $logger = new Logger('Scheduler');
         $logger->pushHandler(new SafeRotatingFileHandler($loggerDir.'/scheduler/scheduler.log', 10));
@@ -48,6 +48,25 @@ class Scheduler
                 ->overlap(false)
                 ->timeout(60)
         );
+    }
+
+    /**
+     * Блокування задач — у теці проєкту, а не в sys_get_temp_dir(): /tmp у
+     * кожного контейнера свій, і scheduler:run з контейнера планувальника та
+     * ручний запуск з php-контейнера не бачили б блокувань одне одного.
+     * Без придатної теки — як було (системна тимчасова).
+     */
+    private static function lockDir($rootDir): ?string
+    {
+        if (!is_string($rootDir) || $rootDir === '') {
+            return null;
+        }
+        $dir = rtrim($rootDir, '/') . '/cache/locks';
+        if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+            return null;
+        }
+
+        return is_writable($dir) ? $dir : null;
     }
 
     public function registerSchedule(Schedule $schedule): void
@@ -108,7 +127,7 @@ class Scheduler
             if ($task->isDue() || $force) {
                 try {
                     $task->run();
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $this->info("Task #{$task->getId()} ({$task->getName()}): Error: {$e->getMessage()}");
                 }
             }
