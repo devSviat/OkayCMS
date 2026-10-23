@@ -637,6 +637,7 @@ $services = [
         'class' => Scheduler::class,
         'arguments' => [
             new PR('logger.dir'),
+            new PR('root_dir'),
         ]
     ],
     LicenseModulesTemplates::class => [

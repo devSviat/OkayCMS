@@ -55,7 +55,11 @@ class Task
 
     public function run(): void
     {
-        $this->lock->acquire();
+        // isDue() і цей acquire() — не одна операція, а -f isDue() взагалі
+        // оминає: без перевірки дві копії задачі з overlap(false) йшли б разом.
+        if (!$this->lock->acquire() && !$this->overlap) {
+            return;
+        }
 
         $serviceLocator = ServiceLocator::getInstance();
 
