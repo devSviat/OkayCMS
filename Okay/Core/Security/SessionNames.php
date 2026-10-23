@@ -21,10 +21,14 @@ class SessionNames
      * Ніколи не пишеться в сесію вітрини, інакше вихід менеджера з бекенду не
      * забирав би привілеї на вітрині одразу ж.
      */
+    /** Відповідь уже визначено й запам'ятовано до кінця запиту. */
+    private static bool $adminChecked = false;
+    /** Звірений із реєстром логін або null. */
+    private static ?string $adminLogin = null;
+
     private static bool $backendRead = false;
     /** @var array{0: string, 1: string}|null логін і ідентифікатор бекендової сесії, ще не звірені з реєстром */
     private static ?array $backendSession = null;
-    private static ?bool $adminValid = null;
     /** @var (callable(string, string): bool)|null */
     private static $adminSessionValidator = null;
 
@@ -57,22 +61,27 @@ class SessionNames
      */
     public static function adminLogin(): ?string
     {
+        if (self::$adminChecked) {
+            return self::$adminLogin;
+        }
+
         self::preloadBackendSession();
         if (self::$backendSession === null) {
-            return null;
+            self::$adminChecked = true;
+
+            return self::$adminLogin = null;
         }
 
         // Без валідатора відповідь «не адмін», і вона не запам'ятовується:
         // після реєстрації валідатора той самий запит перевірить сесію.
-        if (self::$adminValid === null) {
-            if (self::$adminSessionValidator === null) {
-                return null;
-            }
-            [$login, $sessionId] = self::$backendSession;
-            self::$adminValid = (self::$adminSessionValidator)($login, $sessionId) === true;
+        if (self::$adminSessionValidator === null) {
+            return null;
         }
 
-        return self::$adminValid ? self::$backendSession[0] : null;
+        [$login, $sessionId] = self::$backendSession;
+        self::$adminChecked = true;
+
+        return self::$adminLogin = (self::$adminSessionValidator)($login, $sessionId) === true ? $login : null;
     }
 
     /**
@@ -98,7 +107,8 @@ class SessionNames
     public static function setAdminSessionValidator(callable $validator): void
     {
         self::$adminSessionValidator = $validator;
-        self::$adminValid = null;
+        self::$adminChecked = false;
+        self::$adminLogin = null;
     }
 
     /**
