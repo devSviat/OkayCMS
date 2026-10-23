@@ -21,12 +21,12 @@ class ReleaseFeedTest extends TestCase
             'forkVersion' => '1.1.0',
             'tag' => 'okaycms-fork/v1.1.0',
             'publishedAt' => '2026-02-15T00:00:00Z',
-            'notesUrl' => 'https://github.com/devSviat/OkayCMS/releases/tag/okaycms-fork%2Fv1.1.0',
+            'notesUrl' => 'https://github.com/devSviat/OkayCMS-Fork/releases/tag/okaycms-fork%2Fv1.1.0',
             'notesBody' => 'Release notes for 1.1.0',
             'assets' => [
-                'zip' => 'https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.1.0/okaycms-fork-v1.1.0.zip',
-                'versionJson' => 'https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.1.0/version.json',
-                'checksums' => 'https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.1.0/checksums.txt',
+                'zip' => 'https://github.com/devSviat/OkayCMS-Fork/releases/download/okaycms-fork/v1.1.0/okaycms-fork-v1.1.0.zip',
+                'versionJson' => 'https://github.com/devSviat/OkayCMS-Fork/releases/download/okaycms-fork/v1.1.0/version.json',
+                'checksums' => 'https://github.com/devSviat/OkayCMS-Fork/releases/download/okaycms-fork/v1.1.0/checksums.txt',
             ],
         ], $result);
     }
@@ -113,7 +113,7 @@ class ReleaseFeedTest extends TestCase
             'схожа назва' => ['https://github.com/devSviat/OkayCMS-Forked/releases/download/okaycms-fork/v1.0.0/version.json', false],
             'інший власник' => ['https://github.com/evil/OkayCMS-Fork/releases/download/okaycms-fork/v1.0.0/version.json', false],
             'http' => ['http://github.com/devSviat/OkayCMS-Fork/releases/download/okaycms-fork/v1.0.0/version.json', false],
-            'не рядок' => [['https://github.com/devSviat/OkayCMS/releases/download/x'], false],
+            'не рядок' => [['https://github.com/devSviat/OkayCMS-Fork/releases/download/x'], false],
         ];
     }
 
@@ -124,16 +124,16 @@ class ReleaseFeedTest extends TestCase
         $this->assertSame($expected, ReleaseFeed::isTrustedAssetUrl($url));
     }
 
-    /** Після перейменування репозиторію GitHub віддає asset-и з новою назвою: реліз має знайтись. */
-    public function testParseLatestAcceptsAssetsAfterRepositoryRename(): void
+    /** Знімок, збережений до перейменування 23.10.2026, містить asset-и зі старою назвою: реліз має знайтись. */
+    public function testParseLatestAcceptsAssetsWithTheNameBeforeRename(): void
     {
-        $json = str_replace('github.com/devSviat/OkayCMS/', 'github.com/devSviat/OkayCMS-Fork/', self::fixture('releases.json'));
+        $json = str_replace('github.com/devSviat/OkayCMS-Fork/', 'github.com/devSviat/OkayCMS/', self::fixture('releases.json'));
 
         $result = ReleaseFeed::parseLatest($json);
 
         $this->assertNotNull($result);
         $this->assertSame('1.1.0', $result['forkVersion']);
-        $this->assertStringStartsWith('https://github.com/devSviat/OkayCMS-Fork/releases/download/', $result['assets']['zip']);
+        $this->assertStringStartsWith('https://github.com/devSviat/OkayCMS/releases/download/', $result['assets']['zip']);
     }
 
     public function testParseLatestSkipsAssetsFromUntrustedOrigin(): void
@@ -221,10 +221,10 @@ class ReleaseFeedTest extends TestCase
     public function testPlainNotesStripsMarkdownAndGithubNoise(): void
     {
         $raw = "## What's Changed\n"
-            . "* Перший фікс by @devSviat in https://github.com/devSviat/OkayCMS/pull/238\n"
+            . "* Перший фікс by @devSviat in https://github.com/devSviat/OkayCMS-Fork/pull/238\n"
             . "* Другий фікс by @someone\n"
             . "\n\n\n"
-            . "**Full Changelog**: https://github.com/devSviat/OkayCMS/compare/a...b";
+            . "**Full Changelog**: https://github.com/devSviat/OkayCMS-Fork/compare/a...b";
 
         $notes = ReleaseFeed::plainNotes($raw);
 
