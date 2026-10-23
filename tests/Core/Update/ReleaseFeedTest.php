@@ -104,6 +104,38 @@ class ReleaseFeedTest extends TestCase
         $this->assertSame('1.0.0', $result['forkVersion']);
     }
 
+    /** @return array<string, array{0: mixed, 1: bool}> */
+    public static function assetUrlProvider(): array
+    {
+        return [
+            'стара назва репозиторію' => ['https://github.com/devSviat/OkayCMS/releases/download/okaycms-fork/v1.0.0/version.json', true],
+            'нова назва репозиторію' => ['https://github.com/devSviat/OkayCMS-Fork/releases/download/okaycms-fork/v1.0.0/version.json', true],
+            'схожа назва' => ['https://github.com/devSviat/OkayCMS-Forked/releases/download/okaycms-fork/v1.0.0/version.json', false],
+            'інший власник' => ['https://github.com/evil/OkayCMS-Fork/releases/download/okaycms-fork/v1.0.0/version.json', false],
+            'http' => ['http://github.com/devSviat/OkayCMS-Fork/releases/download/okaycms-fork/v1.0.0/version.json', false],
+            'не рядок' => [['https://github.com/devSviat/OkayCMS/releases/download/x'], false],
+        ];
+    }
+
+    /** @dataProvider assetUrlProvider */
+    #[\PHPUnit\Framework\Attributes\DataProvider('assetUrlProvider')]
+    public function testIsTrustedAssetUrl($url, bool $expected): void
+    {
+        $this->assertSame($expected, ReleaseFeed::isTrustedAssetUrl($url));
+    }
+
+    /** Після перейменування репозиторію GitHub віддає asset-и з новою назвою: реліз має знайтись. */
+    public function testParseLatestAcceptsAssetsAfterRepositoryRename(): void
+    {
+        $json = str_replace('github.com/devSviat/OkayCMS/', 'github.com/devSviat/OkayCMS-Fork/', self::fixture('releases.json'));
+
+        $result = ReleaseFeed::parseLatest($json);
+
+        $this->assertNotNull($result);
+        $this->assertSame('1.1.0', $result['forkVersion']);
+        $this->assertStringStartsWith('https://github.com/devSviat/OkayCMS-Fork/releases/download/', $result['assets']['zip']);
+    }
+
     public function testParseLatestSkipsAssetsFromUntrustedOrigin(): void
     {
         // v2.0.0 має zip по http:// і version.json з чужого хоста —
