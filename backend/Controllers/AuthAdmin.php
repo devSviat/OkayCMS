@@ -96,6 +96,7 @@ class AuthAdmin extends IndexAdmin
         if ($recoveryIsValid) {
             $this->design->assign('recovery_mod', true);
             $this->design->assign('recovery_code', $code);
+            $this->design->assign('recovery_two_factor', $twoFactor->isEnabled((int)$managerToRecovery->id));
 
             if ($this->request->method('post')){
                 $new_password = $this->request->post('new_password');
@@ -110,6 +111,18 @@ class AuthAdmin extends IndexAdmin
                     // будь-якого валідного коду міг змінити пароль кому завгодно.
                     $manager = $managerToRecovery;
 
+                    // Доступ до пошти не має обходити 2FA, і без коду пароль не
+                    // міняється: інакше сама пошта дозволяла б забрати власнику
+                    // пароль і викинути його з усіх сесій.
+                    $codeResult = $twoFactor->isEnabled((int)$manager->id)
+                        ? $twoFactor->verify((int)$manager->id, $this->request->post('totp_code'))
+                        : null;
+                    if ($codeResult !== null && $codeResult !== ManagerTwoFactor::OK && $codeResult !== ManagerTwoFactor::OK_RECOVERY) {
+                        $this->design->assign('error_message', $codeResult === ManagerTwoFactor::LIMIT ? 'code_limit' : ($codeResult === ManagerTwoFactor::KEY_UNAVAILABLE ? 'key_unavailable' : 'code_wrong'));
+                        $this->response->setContent($this->design->fetch('auth.tpl'));
+                        return;
+                    }
+
                     // ManagersEntity::update() хешує пароль сам.
                     $managersEntity->update((int)$manager->id, ['password' => $new_password]);
 
@@ -117,14 +130,11 @@ class AuthAdmin extends IndexAdmin
                     // найчастіше роблять саме тоді, коли пароль міг витекти.
                     $managerSessions->revokeAll((int)$manager->id, (int)$manager->id);
 
-                    // Доступ до пошти не має обходити 2FA: після нового пароля — код.
-                    if ($twoFactor->isEnabled((int)$manager->id)) {
-                        $twoFactor->startChallenge($manager, $this->request->getRootUrl() . '/backend/index.php');
+                    if (!$managerSessions->signIn($manager, $codeResult !== null)) {
                         $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=AuthAdmin');
                     }
-
-                    if (!$managerSessions->signIn($manager)) {
-                        $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=AuthAdmin');
+                    if ($codeResult === ManagerTwoFactor::OK_RECOVERY) {
+                        $_SESSION['recovery_code_used'] = true;
                     }
 
                     $allManagers = $managersEntity->order('id ASC')->find();
@@ -248,7 +258,7 @@ class AuthAdmin extends IndexAdmin
                 // Понад ліміт кодів — знову пароль: інакше шість цифр можна
                 // перебирати, маючи лише пароль.
                 $twoFactor->clearChallenge();
-                $this->design->assign('error_message', 'limit_try');
+                $this->design->assign('error_message', 'code_limit');
                 $this->response->setContent($this->design->fetch('auth.tpl'));
 
                 return true;

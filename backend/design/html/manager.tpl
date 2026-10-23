@@ -41,7 +41,7 @@
 {/if}
 
 {* Пароль підтвердження й коди 2FA показують помилку біля свого поля *}
-{if $message_error && !in_array($message_error, ['password_wrong', 'limit_try', 'totp_wrong'])}
+{if $message_error && !in_array($message_error, ['password_wrong', 'limit_try', 'totp_wrong', 'totp_limit'])}
     <div class="alert alert--icon alert--error">
         <div class="alert__content">
             <div class="alert__title">

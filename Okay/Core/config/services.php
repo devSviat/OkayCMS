@@ -358,7 +358,6 @@ $services = [
         'arguments' => [
             new SR(EntityFactory::class),
             new SR(TotpKey::class),
-            new SR(AttemptLimiter::class),
             new SR(LoggerInterface::class),
         ],
     ],

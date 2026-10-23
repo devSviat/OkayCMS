@@ -27,9 +27,16 @@ class ManagerTwoFactor
     public const RECOVERY_CODE_LENGTH = 16;
     public const SETUP_TTL_SECONDS = 600;
     public const CHALLENGE_TTL_SECONDS = 300;
-    /** Невдалих кодів на одного менеджера, після чого треба знову вводити пароль. */
+    /** Невдалих кодів на одного менеджера за вікно, після чого треба знову вводити пароль. */
     public const CODE_ATTEMPTS = 5;
     public const CODE_WINDOW_SECONDS = 900;
+    /**
+     * Кожне вичерпане вікно подвоює наступне, до доби: з паролем у руках
+     * перебір інакше мав би 480 спроб на добу без кінця.
+     */
+    public const CODE_WINDOW_MAX_SECONDS = 86400;
+    /** Скільки разів перечитати лічильник, якщо паралельна спроба змінила його першою. */
+    private const SWAP_RETRIES = 3;
 
     public const OK = 'ok';
     public const OK_RECOVERY = 'ok_recovery';
@@ -41,15 +48,11 @@ class ManagerTwoFactor
     private const CHALLENGE_KEY = 'admin_pending';
     private const RECOVERY_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-    private AttemptLimiter $codeAttempts;
-
     public function __construct(
         private EntityFactory $entityFactory,
         private TotpKey $totpKey,
-        AttemptLimiter $attemptLimiter,
         private ?LoggerInterface $logger = null
     ) {
-        $this->codeAttempts = $attemptLimiter->withLimits(self::CODE_ATTEMPTS, self::CODE_WINDOW_SECONDS);
     }
 
     public function isEnabled(int $managerId): bool
@@ -155,24 +158,25 @@ class ManagerTwoFactor
     public function verify(int $managerId, mixed $input, ?int $now = null): string
     {
         $input = is_string($input) ? $input : '';
-        $limitKey = 'admin_2fa:' . $managerId;
-        if (!$this->codeAttempts->attempt($limitKey)) {
+        $now ??= time();
+
+        // Без рядка 2FA вимкнено, а з ним зникли й коди відновлення.
+        $row = $this->row($managerId);
+        if ($row === null) {
+            return self::WRONG;
+        }
+        if (!$this->claimAttempt($row, $now)) {
             return self::LIMIT;
         }
 
         $recovery = self::normalizeRecovery($input);
         if ($recovery !== null) {
             if ($this->codes()->consume($managerId, hash('sha256', $recovery))) {
-                $this->codeAttempts->reset($limitKey);
+                $this->resetAttempts($managerId);
 
                 return self::OK_RECOVERY;
             }
 
-            return self::WRONG;
-        }
-
-        $row = $this->row($managerId);
-        if ($row === null) {
             return self::WRONG;
         }
 
@@ -184,14 +188,38 @@ class ManagerTwoFactor
             return self::KEY_UNAVAILABLE;
         }
 
-        $step = Totp::matchingStep($secret, self::normalizeTotp($input), $now ?? time());
+        $step = Totp::matchingStep($secret, self::normalizeTotp($input), $now);
         if ($step === null || !$this->totp()->acceptStep($managerId, $step)) {
             return self::WRONG;
         }
 
-        $this->codeAttempts->reset($limitKey);
+        $this->resetAttempts($managerId);
 
         return self::OK;
+    }
+
+    /**
+     * Наступний стан лічильника [failed_count, failed_since, lockouts] або
+     * null — ліміт вичерпано. Годинник, що пішов назад, лишає вікно відкритим.
+     *
+     * @param array{0: int, 1: int, 2: int} $state
+     * @return array{0: int, 1: int, 2: int}|null
+     */
+    public static function nextAttempts(array $state, int $now): ?array
+    {
+        [$count, $since, $lockouts] = $state;
+        if ($now - $since < self::windowSeconds($lockouts)) {
+            return $count >= self::CODE_ATTEMPTS ? null : [$count + 1, $since, $lockouts];
+        }
+
+        return [1, $now, $count >= self::CODE_ATTEMPTS ? $lockouts + 1 : $lockouts];
+    }
+
+    public static function windowSeconds(int $lockouts): int
+    {
+        $doublings = max(0, min($lockouts, 10));
+
+        return min(self::CODE_WINDOW_SECONDS * (2 ** $doublings), self::CODE_WINDOW_MAX_SECONDS);
     }
 
     /** @return string[] нові коди; старі перестають діяти */
@@ -200,12 +228,17 @@ class ManagerTwoFactor
         $codes = $this->codes();
         $codes->deleteOf($managerId);
 
+        // Повтор лише на випадок збігу UNIQUE(code_hash); стабільна помилка
+        // бази не має крутити цикл до max_execution_time.
         $plain = [];
-        while (count($plain) < self::RECOVERY_CODES) {
+        for ($try = 0; $try < self::RECOVERY_CODES * 2 && count($plain) < self::RECOVERY_CODES; $try++) {
             $code = self::newRecoveryCode();
             if ($codes->add(['manager_id' => $managerId, 'code_hash' => hash('sha256', $code)])) {
                 $plain[] = implode('-', str_split($code, 4));
             }
+        }
+        if (count($plain) < self::RECOVERY_CODES) {
+            $this->logger?->error('ManagerTwoFactor: не вдалося записати коди відновлення менеджера ' . $managerId);
         }
 
         return $plain;
@@ -322,6 +355,37 @@ class ManagerTwoFactor
         $secret = base64_decode((string)($setup['secret'] ?? ''), true);
 
         return is_string($secret) && strlen($secret) === Totp::SECRET_BYTES ? $secret : null;
+    }
+
+    /** Займає спробу в лічильнику бази; будь-яка невдача запису — «ліміт». */
+    private function claimAttempt(object $row, int $now): bool
+    {
+        $managerId = (int)$row->manager_id;
+        for ($try = 0; $try < self::SWAP_RETRIES && $row !== null; $try++) {
+            $state = [(int)$row->failed_count, (int)$row->failed_since, (int)$row->lockouts];
+            $next = self::nextAttempts($state, $now);
+            if ($next === null) {
+                // Код понад ліміт можна надіслати лише з паролем: власник
+                // бачить у лозі, що пароль відомий комусь іще.
+                $this->logger?->warning('ManagerTwoFactor: код менеджера ' . $managerId . ' понад ліміт, вікно ' . self::windowSeconds($state[2]) . ' с');
+
+                return false;
+            }
+            if ($this->totp()->swapAttempts($managerId, $state, $next)) {
+                return true;
+            }
+            $row = $this->row($managerId);
+        }
+
+        return false;
+    }
+
+    private function resetAttempts(int $managerId): void
+    {
+        $row = $this->row($managerId);
+        if ($row !== null) {
+            $this->totp()->swapAttempts($managerId, [(int)$row->failed_count, (int)$row->failed_since, (int)$row->lockouts], [0, 0, 0]);
+        }
     }
 
     private function row(int $managerId): ?object

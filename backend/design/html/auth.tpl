@@ -45,12 +45,23 @@
                                         </span>
                                         <input type="password" name="new_password_check" value="" autocomplete="new-password" tabindex="2" class="form-control" placeholder="{$btr->auth_form_pass2|escape}">
                                     </div>
+                                    {if $recovery_two_factor}
+                                        {* З 2FA пароль з листа міняється лише разом із кодом (AuthAdmin) *}
+                                        <input type="text" name="totp_code" value="" autocomplete="one-time-code" class="form-control two_factor_code auth_2fa_code mb-1" placeholder="000000" aria-label="{$btr->auth_2fa_placeholder|escape}" maxlength="24" required>
+                                        <p class="text_grey font_12 mb-1">{$btr->auth_2fa_recovery_hint|escape}</p>
+                                    {/if}
                                     {if $error_message}
                                         <div class="mb-1 error_box" role="alert">
                                             {if $error_message == 'password_empty'}
                                                 {$btr->auth_form_new_pass|escape}
                                             {elseif $error_message == 'password_wrong'}
                                                 {$btr->auth_form_pass_mismatch|escape}
+                                            {elseif $error_message == 'code_limit'}
+                                                {$btr->auth_2fa_limit|escape}
+                                            {elseif $error_message == 'key_unavailable'}
+                                                {$btr->auth_2fa_key_unavailable|escape}
+                                            {elseif $error_message == 'code_wrong'}
+                                                {$btr->auth_2fa_wrong|escape}
                                             {/if}
                                         </div>
                                     {/if}
@@ -100,6 +111,8 @@
                                         {$btr->auth_wrong|escape}
                                         {elseif $error_message == 'limit_try'}
                                         {$btr->auth_limit_try|escape}
+                                        {elseif $error_message == 'code_limit'}
+                                        {$btr->auth_2fa_limit|escape}
                                         {elseif $error_message == 'session_failed'}
                                         {$btr->auth_session_failed|escape}
                                         {/if}

@@ -5,7 +5,6 @@ namespace Security;
 use Aura\Sql\ExtendedPdo;
 use Okay\Core\Config;
 use Okay\Core\EntityFactory;
-use Okay\Core\Security\AttemptLimiter;
 use Okay\Core\Security\ManagerTwoFactor;
 use Okay\Core\Security\Totp;
 use Okay\Core\Security\TotpKey;
@@ -24,7 +23,6 @@ class ManagerTwoFactorDatabaseTest extends TestCase
     private ExtendedPdo $pdo;
     private string $prefix;
     private bool $inTransaction = false;
-    private string $limiterDir;
     private int $managerId;
 
     protected function setUp(): void
@@ -38,7 +36,6 @@ class ManagerTwoFactorDatabaseTest extends TestCase
         }
         $this->assertMatchesRegularExpression('/^[a-z0-9_]*$/i', $this->prefix);
 
-        $this->limiterDir = sys_get_temp_dir() . '/okay-2fa-test-' . bin2hex(random_bytes(4));
         $_SESSION = [];
         $this->pdo->beginTransaction();
         $this->inTransaction = true;
@@ -52,10 +49,6 @@ class ManagerTwoFactorDatabaseTest extends TestCase
         if ($this->inTransaction) {
             $this->pdo->rollBack();
         }
-        foreach (glob(($this->limiterDir ?? '/nonexistent') . '/*') ?: [] as $file) {
-            @unlink($file);
-        }
-        @rmdir($this->limiterDir ?? '');
     }
 
     public function testEnableStoresOnlyCiphertextAndHashes(): void
@@ -103,8 +96,11 @@ class ManagerTwoFactorDatabaseTest extends TestCase
         [$service, , $codes] = $this->enable(random_bytes(32));
         $this->pdo->perform("INSERT INTO {$this->prefix}managers (lang, login, email, password) VALUES ('en', 'tf_other', '', 'x')");
         $other = (int)$this->pdo->lastInsertId();
+        // Своя 2FA в іншого є: без рядка verify() відмовив би раніше, ніж дійшов до кодів.
+        $this->pdo->perform("INSERT INTO {$this->prefix}manager_totp (manager_id, secret, last_step) VALUES (:id, 'x', 0)", ['id' => $other]);
 
         $this->assertSame(ManagerTwoFactor::WRONG, $service->verify($other, $codes[0], self::NOW));
+        $this->assertSame(ManagerTwoFactor::RECOVERY_CODES, $service->remainingRecoveryCodes($this->managerId));
     }
 
     public function testWithoutTheKeyTotpFailsButRecoveryCodesWork(): void
@@ -155,6 +151,53 @@ class ManagerTwoFactorDatabaseTest extends TestCase
         $this->assertSame(ManagerTwoFactor::LIMIT, $service->verify($this->managerId, Totp::code($secret, Totp::step(self::NOW) + 1), self::NOW + 30));
     }
 
+    /** Ліміт живе в базі й зачіпає й коди відновлення. */
+    public function testLimitAlsoBlocksRecoveryCodes(): void
+    {
+        [$service, , $codes] = $this->enable(random_bytes(32));
+        $this->failAll($service, self::NOW);
+
+        $this->assertSame(ManagerTwoFactor::LIMIT, $service->verify($this->managerId, $codes[0], self::NOW + 1));
+        $this->assertSame(ManagerTwoFactor::RECOVERY_CODES, $service->remainingRecoveryCodes($this->managerId), 'код понад ліміт не згорів');
+    }
+
+    /** Кожне вичерпане вікно подвоює наступне; успіх скидає лічильник. */
+    public function testEachExhaustedWindowDoublesTheNext(): void
+    {
+        [$service, $secret] = $this->enable(random_bytes(32));
+        $window = ManagerTwoFactor::CODE_WINDOW_SECONDS;
+
+        $this->failAll($service, self::NOW);
+        $second = self::NOW + $window;
+        $this->failAll($service, $second);
+        $this->assertSame(ManagerTwoFactor::LIMIT, $service->verify($this->managerId, '000000', $second + $window), 'друге вікно — подвійне');
+
+        $third = $second + 2 * $window;
+        $this->assertSame(ManagerTwoFactor::OK, $service->verify($this->managerId, Totp::code($secret, Totp::step($third)), $third));
+        $this->assertSame([0, 0, 0], array_map('intval', array_values($this->pdo->fetchOne(
+            "SELECT failed_count, failed_since, lockouts FROM {$this->prefix}manager_totp WHERE manager_id = :id",
+            ['id' => $this->managerId]
+        ))));
+    }
+
+    public function testWindowGrowthStopsAtADay(): void
+    {
+        $this->assertSame(ManagerTwoFactor::CODE_WINDOW_SECONDS, ManagerTwoFactor::windowSeconds(0));
+        $this->assertSame(2 * ManagerTwoFactor::CODE_WINDOW_SECONDS, ManagerTwoFactor::windowSeconds(1));
+        $this->assertSame(ManagerTwoFactor::CODE_WINDOW_MAX_SECONDS, ManagerTwoFactor::windowSeconds(1000));
+        $this->assertNull(ManagerTwoFactor::nextAttempts([ManagerTwoFactor::CODE_ATTEMPTS, self::NOW, 0], self::NOW - 3600), 'годинник назад не відкриває вікно');
+    }
+
+    /** Стан, прочитаний до чужої спроби, не записується: місце бере лише одна. */
+    public function testStaleCounterDoesNotOverwrite(): void
+    {
+        $this->enable(random_bytes(32));
+        $totp = ServiceLocator::getInstance()->getService(EntityFactory::class)->get(\Okay\Entities\ManagerTotpEntity::class);
+
+        $this->assertTrue($totp->swapAttempts($this->managerId, [0, 0, 0], [1, self::NOW, 0]));
+        $this->assertFalse($totp->swapAttempts($this->managerId, [0, 0, 0], [1, self::NOW + 1, 0]));
+    }
+
     public function testDisableRemovesSecretAndCodes(): void
     {
         [$service, , $codes] = $this->enable(random_bytes(32));
@@ -174,6 +217,14 @@ class ManagerTwoFactorDatabaseTest extends TestCase
         $this->assertNull($service->pendingSetup($this->managerId + 1, 'Shop', 'x'));
         $this->assertNull($service->confirmSetup($this->managerId + 1, '000000', self::NOW));
         $this->assertNotNull($service->pendingSetup($this->managerId, 'Shop', 'tf_manager'));
+    }
+
+    private function failAll(ManagerTwoFactor $service, int $at): void
+    {
+        for ($i = 0; $i < ManagerTwoFactor::CODE_ATTEMPTS; $i++) {
+            $this->assertSame(ManagerTwoFactor::WRONG, $service->verify($this->managerId, '000000', $at));
+        }
+        $this->assertSame(ManagerTwoFactor::LIMIT, $service->verify($this->managerId, '000000', $at));
     }
 
     /** @return array{0: ManagerTwoFactor, 1: string, 2: string[]} */
@@ -196,8 +247,7 @@ class ManagerTwoFactorDatabaseTest extends TestCase
 
         return new ManagerTwoFactor(
             ServiceLocator::getInstance()->getService(EntityFactory::class),
-            $totpKey,
-            new AttemptLimiter($this->limiterDir, 5, 900)
+            $totpKey
         );
     }
 }

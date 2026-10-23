@@ -1048,6 +1048,7 @@ $lang['auth_2fa_promo'] = 'Enter the six digits from your authenticator app.';
 $lang['auth_2fa_account'] = 'Signing in as';
 $lang['auth_2fa_placeholder'] = 'Code from the app';
 $lang['auth_2fa_wrong'] = 'Wrong code. Check that the time on your phone is correct.';
+$lang['auth_2fa_limit'] = 'Too many wrong codes. Try again later: the pause grows with each series of mistakes.';
 $lang['auth_2fa_key_unavailable'] = 'The two-factor key is unavailable on the server. Sign in with a recovery code.';
 $lang['auth_2fa_recovery_hint'] = 'No phone? Enter one of your recovery codes.';
 $lang['auth_2fa_back'] = 'Different account';

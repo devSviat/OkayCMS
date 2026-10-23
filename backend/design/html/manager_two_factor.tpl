@@ -46,7 +46,8 @@
                 <input class="form-control" id="fn_totp_disable" name="totp_code" type="text" autocomplete="one-time-code" placeholder="{$btr->manager_totp_code_or_recovery|escape}" required/>
                 <button type="submit" class="btn btn-outline-danger btn_small">{$btr->manager_totp_disable|escape}</button>
             </div>
-            {if $message_error == 'totp_wrong'}<p class="settings_error" role="alert">{$btr->auth_2fa_wrong|escape}</p>{/if}
+            {if $message_error == 'totp_wrong'}<p class="settings_error" role="alert">{$btr->auth_2fa_wrong|escape}</p>
+            {elseif $message_error == 'totp_limit'}<p class="settings_error" role="alert">{$btr->auth_2fa_limit|escape}</p>{/if}
         </form>
     {elseif $can_manage_target}
         <p class="settings_note">{$btr->manager_totp_reset_hint|escape}</p>

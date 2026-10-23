@@ -266,7 +266,7 @@ class ManagerAdmin extends IndexAdmin
                 if ($isSelf) {
                     $result = $this->twoFactor->verify($targetId, $this->request->post('totp_code'));
                     if ($result !== ManagerTwoFactor::OK && $result !== ManagerTwoFactor::OK_RECOVERY) {
-                        $this->postRedirectGet->storeMessageError($result === ManagerTwoFactor::LIMIT ? 'limit_try' : 'totp_wrong');
+                        $this->postRedirectGet->storeMessageError($result === ManagerTwoFactor::LIMIT ? 'totp_limit' : 'totp_wrong');
                         break;
                     }
                 }
@@ -485,6 +485,9 @@ class ManagerAdmin extends IndexAdmin
                     return;
                 }
                 $_SESSION[self::NEW_CODES_KEY] = $codes;
+                // 2FA вмикають, коли пароль міг витекти: сесії, відкриті лише
+                // паролем, не мають її пережити.
+                $managerSessions->revokeOthers($viewerId, $viewerId);
                 $this->postRedirectGet->storeMessageSuccess('totp_enabled');
                 return;
 
