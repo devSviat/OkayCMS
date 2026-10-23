@@ -86,7 +86,7 @@ class SessionNamesTest extends TestCase
     public static function privilegeTransitionProvider()
     {
         return [
-            'admin login'    => ['backend/Controllers/AuthAdmin.php', "\$_SESSION['admin'] = \$manager->login;"],
+            'admin login'    => ['Okay/Core/Security/ManagerSessions.php', "\$_SESSION['admin'] = \$manager->login;"],
             'customer reset' => ['Okay/Controllers/UserController.php', "\$_SESSION['user_id'] = "],
         ];
     }
@@ -132,6 +132,7 @@ class SessionNamesTest extends TestCase
     {
         $sessionId = $this->createBackendSession('some_manager_login');
         $_COOKIE[SessionNames::BACKEND] = $sessionId;
+        $this->acceptOnly('some_manager_login', $sessionId);
 
         try {
             $this->assertTrue(SessionNames::isAdmin());
@@ -146,6 +147,7 @@ class SessionNamesTest extends TestCase
     {
         $sessionId = $this->createBackendSession('some_manager_login');
         $_COOKIE[SessionNames::BACKEND] = $sessionId;
+        $this->acceptOnly('some_manager_login', $sessionId);
 
         try {
             // Той самий порядок, що і в index.php: спочатку читаємо бекенд,
@@ -227,6 +229,96 @@ class SessionNamesTest extends TestCase
         SessionNames::destroyBackend();
 
         $this->assertSame(PHP_SESSION_NONE, session_status());
+    }
+
+    /**
+     * Справжня сесія з міткою admin без підтвердження реєстру — не адмін.
+     * Саме так вітрина перестає бачити відкликану сесію.
+     */
+    #[RunInSeparateProcess]
+    public function testSessionWithoutValidatorIsNotAdmin()
+    {
+        $sessionId = $this->createBackendSession('some_manager_login');
+        $_COOKIE[SessionNames::BACKEND] = $sessionId;
+
+        try {
+            $this->assertFalse(SessionNames::isAdmin());
+            $this->assertNull(SessionNames::adminLogin());
+        } finally {
+            $this->destroySessionFile($sessionId);
+        }
+    }
+
+    #[RunInSeparateProcess]
+    public function testSessionRejectedByTheRegistryIsNotAdmin()
+    {
+        $sessionId = $this->createBackendSession('some_manager_login');
+        $_COOKIE[SessionNames::BACKEND] = $sessionId;
+        SessionNames::setAdminSessionValidator(static fn(string $login, string $sid): bool => false);
+
+        try {
+            $this->assertFalse(SessionNames::isAdmin());
+            $this->assertNull(SessionNames::adminLogin());
+        } finally {
+            $this->destroySessionFile($sessionId);
+        }
+    }
+
+    /**
+     * Порядок index.php: бекендова сесія читається до сесії вітрини, коли
+     * валідатора ще немає, а звіряється після контейнера. Ранній «ні» не
+     * має запам'ятатись, а пізній — мусить дістати ту саму пару.
+     */
+    #[RunInSeparateProcess]
+    public function testPreloadedSessionIsValidatedOnceTheValidatorAppears()
+    {
+        $sessionId = $this->createBackendSession('some_manager_login');
+        $_COOKIE[SessionNames::BACKEND] = $sessionId;
+
+        try {
+            SessionNames::preloadBackendSession();
+            SessionNames::startFrontend();
+            $this->assertFalse(SessionNames::isAdmin());
+
+            $calls = [];
+            SessionNames::setAdminSessionValidator(static function (string $login, string $sid) use (&$calls): bool {
+                $calls[] = [$login, $sid];
+
+                return true;
+            });
+
+            $this->assertSame('some_manager_login', SessionNames::adminLogin());
+            $this->assertTrue(SessionNames::isAdmin());
+            $this->assertSame([['some_manager_login', $sessionId]], $calls, 'один виклик на запит, з тією самою парою');
+
+            $frontendSessionId = session_id();
+            session_write_close();
+            $this->destroySessionFile($frontendSessionId);
+        } finally {
+            $this->destroySessionFile($sessionId);
+        }
+    }
+
+    /** Відповідь валідатора, що не є строго true, — не підтвердження. */
+    #[RunInSeparateProcess]
+    public function testOnlyStrictTrueFromTheValidatorCounts()
+    {
+        $sessionId = $this->createBackendSession('some_manager_login');
+        $_COOKIE[SessionNames::BACKEND] = $sessionId;
+        SessionNames::setAdminSessionValidator(static fn(string $login, string $sid) => 1);
+
+        try {
+            $this->assertFalse(SessionNames::isAdmin());
+        } finally {
+            $this->destroySessionFile($sessionId);
+        }
+    }
+
+    private function acceptOnly(string $login, string $sessionId): void
+    {
+        SessionNames::setAdminSessionValidator(
+            static fn(string $l, string $sid): bool => $l === $login && $sid === $sessionId
+        );
     }
 
     private function createBackendSession(string $login): string

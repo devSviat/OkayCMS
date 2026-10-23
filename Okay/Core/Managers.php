@@ -68,6 +68,7 @@ class Managers
         'settings_indexing',
         'open_ai',
         'core_updater',
+        'manager_sessions',
     ];
 
     // Соответствие модулей и названий соответствующих прав
@@ -126,6 +127,7 @@ class Managers
         'PaymentMethodsAdmin'   => 'payment',
         'ManagersAdmin'         => 'managers',
         'ManagerAdmin'          => 'managers',
+        'AllManagerSessionsAdmin' => 'manager_sessions',
         'LicenseAdmin'          => 'license',
         'SubscribeMailingAdmin' => 'subscribes',
         'CallbacksAdmin'        => 'callbacks',
@@ -160,6 +162,13 @@ class Managers
      */
     public function addModulePermission($permission, $vendorModuleName)
     {
+        // Модуль, що вішає свій контролер на право ядра (`orders`), нового права
+        // не створює: інакше воно двічі потрапляло в getAllPermissions(), у
+        // збережені права менеджера й окремим перемикачем у форму прав.
+        if (in_array($permission, $this->permissionsList, true)) {
+            return;
+        }
+
         if (!isset($this->modulesPermissionsList[$permission])) {
             $this->modulesPermissionsList[$permission] = $vendorModuleName;
         }
@@ -211,10 +220,12 @@ class Managers
             return false;
         }
 
-        $manager->permissions = explode(',', $manager->permissions);
-        foreach ($manager->permissions as &$permission) {
-            $permission = trim($permission);
-        }
+        // Менеджер без жодного права зберігається порожнім рядком; explode() дав
+        // би [''] — «право» з порожньою назвою, яке не покриває жоден інший менеджер.
+        $manager->permissions = array_values(array_filter(
+            array_map('trim', explode(',', (string)$manager->permissions)),
+            static fn(string $permission): bool => $permission !== ''
+        ));
 
         return true;
     }

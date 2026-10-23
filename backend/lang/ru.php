@@ -1040,6 +1040,7 @@ $lang['auth_limit_cnt1'] = 'попытка';
 $lang['auth_limit_cnt2'] = 'попыток';
 $lang['auth_limit_cnt3'] = 'попытки';
 $lang['auth_limit_try'] = 'Вы исчерпали количество попыток на сегодня.';
+$lang['auth_session_failed'] = 'Could not start a session. Please try again.';
 $lang['auth_recovery_label'] = 'Введите email администратора для восстановления пароля';
 $lang['auth_recovery_success'] = 'Сообщение отправлено на емейл администратору';
 $lang['auth_remind'] = 'Напомнить';

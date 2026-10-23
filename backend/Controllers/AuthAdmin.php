@@ -9,7 +9,7 @@ use Okay\Core\Managers;
 use Okay\Core\Notify;
 use Okay\Core\Security\AdminLoginGuard;
 use Okay\Core\Security\AdminRecoveryToken;
-use Okay\Core\Security\SessionNames;
+use Okay\Core\Security\ManagerSessions;
 use Okay\Core\Validator;
 use Okay\Entities\LessonsEntity;
 use Okay\Entities\ManagersEntity;
@@ -25,7 +25,8 @@ class AuthAdmin extends IndexAdmin
         Response $response,
         Validator $validator,
         AdminRecoveryToken $recoveryToken,
-        AdminLoginGuard $loginGuard
+        AdminLoginGuard $loginGuard,
+        ManagerSessions $managerSessions
     ) {
         $clientIp = (string)($_SERVER['REMOTE_ADDR'] ?? '');
 
@@ -104,8 +105,13 @@ class AuthAdmin extends IndexAdmin
                     // ManagersEntity::update() хешує пароль сам.
                     $managersEntity->update((int)$manager->id, ['password' => $new_password]);
 
-                    SessionNames::regenerate();
-                    $_SESSION['admin'] = $manager->login;
+                    // Новий пароль закриває всі наявні входи: відновлення
+                    // найчастіше роблять саме тоді, коли пароль міг витекти.
+                    $managerSessions->revokeAll((int)$manager->id, (int)$manager->id);
+
+                    if (!$managerSessions->signIn($manager)) {
+                        $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=AuthAdmin');
+                    }
 
                     $allManagers = $managersEntity->order('id ASC')->find();
                     $firstManager = reset($allManagers);
@@ -140,8 +146,12 @@ class AuthAdmin extends IndexAdmin
                     $loginGuard->passwordSucceeded($login, $clientIp);
 
                     /*Входим в админку*/
-                    SessionNames::regenerate();
-                    $_SESSION['admin'] = $manager->login;
+                    if (!$managerSessions->signIn($manager)) {
+                        $this->design->assign('login', $login);
+                        $this->design->assign('error_message', 'session_failed');
+                        $this->response->setContent($this->design->fetch('auth.tpl'));
+                        return;
+                    }
 
                     // Старий формат хеша (APR1/MD5) замінюємо на актуальний.
                     // ManagersEntity::update() хешує пароль сам, тому

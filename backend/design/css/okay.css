@@ -9384,3 +9384,135 @@ textarea:focus-visible,
   color: #6c757d;
   font-size: 12px;
 }
+
+/* Профіль менеджера: смуга підтвердження паролем (ManagerReauth).
+   Один рядок замість алерта-картки: це стан сторінки, а не повідомлення. */
+.reauth_bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 24px;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    border: 1px solid var(--ok-line);
+    border-radius: var(--ok-radius-panel);
+    background: var(--ok-accent-soft);
+    color: var(--ok-ink);
+}
+.reauth_bar__text {
+    display: flex;
+    flex: 1 1 320px;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+    font-size: 14px;
+    line-height: 1.45;
+}
+.reauth_bar__text > svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--ok-accent);
+}
+.reauth_bar__title {
+    display: block;
+    font-weight: 600;
+}
+.reauth_bar__hint {
+    display: block;
+    color: var(--ok-ink-soft);
+}
+.reauth_bar__form {
+    display: flex;
+    flex: 0 1 420px;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+}
+.reauth_bar__form .form-control {
+    flex: 1 1 200px;
+    width: auto;
+}
+.reauth_bar--open {
+    padding: 10px 16px;
+    background: var(--ok-success-soft);
+}
+.reauth_bar--open .reauth_bar__text > svg {
+    color: var(--ok-success);
+}
+.reauth_bar__time {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+/* Список сесій: рядок — пристрій і подробиці зліва, дія справа. Таблиця з
+   чотирма колонками на вузькому екрані переносила IP і дату по символу. */
+.session_list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--ok-line);
+    border-radius: var(--ok-radius-panel);
+    background: var(--ok-surface);
+}
+.session_list__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    padding: 12px 16px;
+}
+.session_list__item + .session_list__item {
+    border-top: 1px solid var(--ok-line);
+}
+.session_list__main {
+    flex: 1 1 260px;
+    min-width: 0;
+}
+.session_list__device {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    font-weight: 600;
+    color: var(--ok-ink);
+    overflow-wrap: anywhere;
+}
+.session_list__device > svg {
+    flex-shrink: 0;
+    color: var(--ok-ink-muted);
+}
+.session_list__meta {
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--ok-ink-muted);
+    font-variant-numeric: tabular-nums;
+}
+.session_list__action {
+    flex: 0 0 auto;
+    margin: 0 0 0 auto;
+}
+.session_list__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--ok-ink-muted);
+}
+
+/* Дії форми, що лишаються під рукою в довгому списку прав. */
+.sticky_actions {
+    position: sticky;
+    bottom: 0;
+    z-index: var(--ok-z-sticky);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px 0;
+    border-top: 1px solid var(--ok-line);
+    background: var(--ok-surface);
+}

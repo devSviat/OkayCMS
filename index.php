@@ -73,8 +73,9 @@ if (file_exists($maintenanceFlag)) {
 }
 
 // Має відбутися до старту сесії вітрини: одночасно активною може бути
-// лише одна сесія, а тут ми на мить читаємо бекендову.
-\Okay\Core\Security\SessionNames::isAdmin();
+// лише одна сесія, а тут ми на мить читаємо бекендову. З реєстром сесій
+// її звіряє перший isAdmin(), уже після контейнера.
+\Okay\Core\Security\SessionNames::preloadBackendSession();
 \Okay\Core\Security\SessionNames::startFrontend();
 
 /** @var OkayContainer $DI */

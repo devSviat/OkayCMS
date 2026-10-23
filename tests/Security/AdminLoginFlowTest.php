@@ -88,7 +88,7 @@ class AdminLoginFlowTest extends TestCase
         $auth = $this->source('backend/Controllers/AuthAdmin.php');
         $verify = strpos($auth, '->verifyPassword(');
         $succeeded = strpos($auth, '$loginGuard->passwordSucceeded($login, $clientIp);');
-        $session = strpos($auth, "\$_SESSION['admin'] = \$manager->login;", (int)$verify);
+        $session = strpos($auth, '$managerSessions->signIn($manager)', (int)$verify);
 
         $this->assertNotFalse($succeeded);
         $this->assertLessThan($succeeded, $verify);

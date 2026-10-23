@@ -79,6 +79,8 @@
                                         {$btr->auth_wrong|escape}
                                         {elseif $error_message == 'limit_try'}
                                         {$btr->auth_limit_try|escape}
+                                        {elseif $error_message == 'session_failed'}
+                                        {$btr->auth_session_failed|escape}
                                         {/if}
                                     </div>
                                     {/if}

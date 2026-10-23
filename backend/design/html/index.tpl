@@ -443,6 +443,7 @@
                     <div class="col-md-12 font_12 text_white">
                         <a href="https://okay-cms.com">OkayCMS</a> &copy; {$smarty.now|date_format:"%Y"} v.{$config->version|escape} ({$btr->index_build_label|escape} {$config->forkVersion|escape}) | {$btr->index_logged|escape}
                         <a href="index.php?controller=ManagerAdmin&id={$manager->id}">{$manager->login|escape}</a>
+                        (<a href="index.php?controller=ManagerAdmin&id={$manager->id}&active_tab=security">{$btr->index_my_profile|escape}</a>)
                         (<form method="post" action="" class="admin_exit__form admin_exit__form--inline">
                             <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
                             <button type="submit" name="logout" value="1" class="admin_exit__link">{$btr->index_exit|escape}</button>
