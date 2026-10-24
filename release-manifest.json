@@ -1,4 +1,6 @@
 {
+    "packageFormat": 2,
+    "requiresFrom": "1.3.12",
     "include": [
         "Okay/Core/",
         "Okay/Controllers/",
@@ -8,7 +10,6 @@
         "Okay/lang_general/",
         "Okay/xml/opensearch.xml.tpl",
         "backend/",
-        "backend/design/html/core_updater.tpl",
         "Okay/Modules/OkayCMS/",
         "composer.json",
         "composer.lock",
@@ -18,7 +19,7 @@
     ],
     "exclude": [
         "Okay/Core/.core-updater-write-probe",
-        "backend/design/",
+        "backend/design/compiled/",
         "backend/files/",
         "Okay/Modules/OkayCMS/AutoDeploy/log/",
         "Okay/Modules/OkayCMS/AutoDeploy/tmp/",
