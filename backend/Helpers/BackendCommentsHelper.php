@@ -183,7 +183,7 @@ class BackendCommentsHelper
      * @param array|int $ids
      * @return array<string, array{type: string, id: int}>
      */
-    private function reviewTargets($ids): array
+    private function reviewTargets($ids)
     {
         $targets = [];
         foreach ($this->commentsEntity->noLimit()->find(['id' => (array)$ids]) as $comment) {

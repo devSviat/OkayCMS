@@ -177,7 +177,7 @@ PHPCompatibility тут немає: стабільна 9.3.5 не знає PHP 8
 
 ## Rector
 
-`rector.php` — 20 правил, лише синтаксис: `array()` → `[]`, `strpos() !== false` → `str_contains()`,
+`rector.php` — 19 правил, лише синтаксис: `array()` → `[]`, `strpos() !== false` → `str_contains()`,
 `isset() ? :` → `??`, стрілкові функції, `'intval'` → `intval(...)` тощо. CI запускає
 `vendor/bin/rector process --dry-run`: код, який правила змінили б, валить збірку. Виправити —
 `php vendor/bin/rector process`.

@@ -542,7 +542,7 @@ class Router {
      * значение - экземпляк класса, который указали как Type hint или строка, которая соответствует части урла
      * @throws \ReflectionException
      */
-    private function getMethodParams($controller, $methodName, $routeParams = [], $routeVars = [], $defaults = [], $stringOnly = false): array
+    private function getMethodParams($controller, $methodName, $routeParams = [], $routeVars = [], $defaults = [], $stringOnly = false)
     {
         $methodParams = [];
         $allParams = [];

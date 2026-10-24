@@ -186,10 +186,7 @@ class ThemeAdmin extends IndexAdmin
         return;
     }
 
-    /**
-     * @return \stdClass[]
-     */
-    private function getThemes(): array {
+    private function getThemes() {
         $themes = [];
         if($handle = opendir($this->themes_dir)) {
             while(false !== ($file = readdir($handle))) {

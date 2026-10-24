@@ -63,7 +63,7 @@ trait order
      * @return array
      * "Магическая" сортировка, если $order = 'field' или 'field_asc' или 'field_desc' то применяется сортировка по указанному полю в указанном направлении
      */
-    private function autoOrder($order = null): array
+    private function autoOrder($order = null)
     {
         $orderFields = [];
         $langFields = $this->getLangFields();

@@ -186,7 +186,7 @@ class OkayContainer implements ContainerInterface
      * @param array  $argumentDefinitions The service arguments definition.
      * @return array The service constructor arguments.
      */
-    private function resolveArguments(array $argumentDefinitions): array
+    private function resolveArguments(array $argumentDefinitions)
     {
         $arguments = [];
 

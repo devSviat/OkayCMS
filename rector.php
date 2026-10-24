@@ -42,5 +42,4 @@ return RectorConfig::configure()
         Rector\Php55\Rector\String_\StringClassNameToClassConstantRector::class,
         Rector\Php73\Rector\FuncCall\ArrayKeyFirstLastRector::class,
         Rector\Php83\Rector\ClassConst\AddTypeToConstRector::class,
-        Rector\TypeDeclaration\Rector\ClassMethod\PrivateMethodReturnTypeFromStrictNewArrayRector::class,
     ]);

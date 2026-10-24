@@ -436,10 +436,7 @@ class ManagerMenu
         }
     }
 
-    /**
-     * @return mixed[]
-     */
-    private function prepareItemsForManagerMenu($section): array
+    private function prepareItemsForManagerMenu($section)
     {
         $preparedItems = [];
         foreach($section as $title => $controllers) {

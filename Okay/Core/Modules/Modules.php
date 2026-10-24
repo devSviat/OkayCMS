@@ -428,10 +428,7 @@ class Modules // TODO: подумать, мож сюда переедет CRUD E
         }
     }
 
-    /**
-     * @return \stdClass[]
-     */
-    private function initModuleSettings($vendor, $moduleName, $langLabel): array
+    private function initModuleSettings($vendor, $moduleName, $langLabel)
     {
         $settings = [];
         $moduleDir = $this->module->getModuleDirectory($vendor, $moduleName);

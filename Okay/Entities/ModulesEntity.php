@@ -140,10 +140,7 @@ class ModulesEntity extends Entity
         $this->select->where('system IS NULL OR system = 0');
     }
 
-    /**
-     * @return mixed[]
-     */
-    private function installedFullModuleNames(): array
+    private function installedFullModuleNames()
     {
         $installedModules = $this->cols(['vendor', 'module_name'])->find();
 
