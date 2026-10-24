@@ -175,6 +175,32 @@ PHPStan підключає `phpstan/phpstan-deprecation-rules`: виклик ф�
 PHPCompatibility тут немає: стабільна 9.3.5 не знає PHP 8.x і на коді з навмисними застарілими
 конструкціями 8.4/8.5 не знаходила жодної.
 
+## Rector
+
+`rector.php` — 20 правил, лише синтаксис: `array()` → `[]`, `strpos() !== false` → `str_contains()`,
+`isset() ? :` → `??`, стрілкові функції, `'intval'` → `intval(...)` тощо. CI запускає
+`vendor/bin/rector process --dry-run`: код, який правила змінили б, валить збірку. Виправити —
+`php vendor/bin/rector process`.
+
+Правила перелічено явно, а не наборами `withPhpSets()`: новий реліз Rector доповнює набори, і в CI
+мовчки з'явилось би неперевірене правило. Сигнатур, видимості й типів властивостей жодне з них не
+міняє — модулі наслідують класи ядра (`IndexAdmin`, `Entity`, хелпери) і перевизначають їхні методи.
+
+Свідомо не ввімкнено, бо ламає тут конкретне:
+
+| Правило | Що ламає |
+| --- | --- |
+| `typeDeclarations` на `public`/`protected` | модуль, що перевизначає метод без типу (Redis перевизначає 9 хелперів) |
+| `ClassPropertyAssignToConstructorPromotion` | додає типи властивостям → `TypeError`, де пишуть в обхід конструктора |
+| `RemoveUnusedPrivateProperty` | `Entity` читає властивості через reflection (`TranslationsEntity::$templateOnly`) |
+| `RemoveUnusedConstructorParam` | DI передає аргументи конструктора явним списком |
+| `ChangeSwitchToMatch` | `match` порівнює строго і кидає `UnhandledMatchError` |
+| `ArrayToFirstClassCallable` | Smarty бере ім'я фільтра з callable-масиву; замикання лишається без імені |
+| `SafeDeclareStrictTypes` | міняє приведення скалярів у кожному виклику з файлу |
+
+`Okay/Modules` і `backend/design` (сторонній файловий менеджер) у `skip`. Дослідження з прогонами —
+`docs/superpowers/specs/2026-10-24-rector-modernization-design.md` у broken.
+
 ## `dev/bin/smoke.sh`
 
 Перевірка того, що локальне оточення справді піднялось: чекає, поки сервіси з healthcheck
@@ -197,6 +223,7 @@ PHPCompatibility тут немає: стабільна 9.3.5 не знає PHP 8
 | `composer audit --locked` | вразливості в залежностях; `--abandoned=report`, тобто покинутий пакет не валить збірку |
 | `vendor/bin/phpunit` | тести на 8.5 |
 | `vendor/bin/phpstan analyse` | статичний аналіз, окремою джобою на 8.5 |
+| `vendor/bin/rector process --dry-run` | синтаксис, який `rector.php` уже прибрав, у тій самій джобі |
 | `php -l` по всіх файлах | застаріле під час компіляції, на 8.5 |
 | `gitleaks detect` | секрети по **всій** історії |
 

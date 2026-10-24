@@ -97,7 +97,7 @@ class Router {
     public static function getRouteByName($name)
     {
         self::initializeRoutes();
-        return isset(self::$routes[$name]) ? self::$routes[$name] : false;
+        return self::$routes[$name] ?? false;
     }
 
     private function getFullControllerClassName($controllerName)
@@ -217,7 +217,7 @@ class Router {
                     $method = 'pageNotFound';
                 }
 
-                $defaults = isset($route['defaults']) ? $route['defaults'] : [];
+                $defaults = $route['defaults'] ?? [];
 
                 preg_match_all('~{\$(.+?)}~', $route['slug'], $matches);
                 $routeVars = array_merge($routeVars, $matches[1]);
@@ -292,7 +292,7 @@ class Router {
 
     private function classNameHasNoNamespace($className)
     {
-        return strpos($className, '\\') === false;
+        return !str_contains($className, '\\');
     }
 
     private function createControllerInstance($controllerName, $methodName, $params = [], $routeVars = [], $defaults = [])
@@ -542,7 +542,7 @@ class Router {
      * значение - экземпляк класса, который указали как Type hint или строка, которая соответствует части урла
      * @throws \ReflectionException
      */
-    private function getMethodParams($controller, $methodName, $routeParams = [], $routeVars = [], $defaults = [], $stringOnly = false)
+    private function getMethodParams($controller, $methodName, $routeParams = [], $routeVars = [], $defaults = [], $stringOnly = false): array
     {
         $methodParams = [];
         $allParams = [];

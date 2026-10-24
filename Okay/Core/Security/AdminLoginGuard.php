@@ -30,8 +30,8 @@ class AdminLoginGuard
      * Перевірка проти них триває стільки ж, скільки справжня, а заздалегідь
      * обчислені вони не додають до відповіді ще й часу хешування.
      */
-    private const DUMMY_ARGON2ID = '$argon2id$v=19$m=65536,t=4,p=1$L1ZjRUZSVjZEcTJWVTVIMA$qL4hfZ0aQpGYYjH9CJ0NBVTok575F8cUPYj+edllS/k';
-    private const DUMMY_BCRYPT = '$2y$12$6uu9vk0ctp2j244CcVy5geq6P1iTeYnBwKVbLs26.oFu37PT/VfzS';
+    private const string DUMMY_ARGON2ID = '$argon2id$v=19$m=65536,t=4,p=1$L1ZjRUZSVjZEcTJWVTVIMA$qL4hfZ0aQpGYYjH9CJ0NBVTok575F8cUPYj+edllS/k';
+    private const string DUMMY_BCRYPT = '$2y$12$6uu9vk0ctp2j244CcVy5geq6P1iTeYnBwKVbLs26.oFu37PT/VfzS';
 
     private AttemptLimiter $byIp;
     private AttemptLimiter $byLogin;

@@ -170,9 +170,7 @@ class Modules // TODO: подумать, мож сюда переедет CRUD E
                         $tag = strtolower($reflector->getShortName());
                     }
 
-                    $mock = function() {
-                        return '';
-                    };
+                    $mock = (fn() => '');
 
                     if ($type = Plugin::resolveType($plugin['class'])) {
                         $design->registerPlugin($type, $tag, $mock);
@@ -426,13 +424,14 @@ class Modules // TODO: подумать, мож сюда переедет CRUD E
                 continue;
             }
 
-            $this->smarty->registerPlugin($type, $pluginName, function () {
-                return null;
-            });
+            $this->smarty->registerPlugin($type, $pluginName, fn() => null);
         }
     }
 
-    private function initModuleSettings($vendor, $moduleName, $langLabel)
+    /**
+     * @return \stdClass[]
+     */
+    private function initModuleSettings($vendor, $moduleName, $langLabel): array
     {
         $settings = [];
         $moduleDir = $this->module->getModuleDirectory($vendor, $moduleName);
@@ -444,7 +443,7 @@ class Modules // TODO: подумать, мож сюда переедет CRUD E
                 $attributes = $setting->attributes();
                 $settingName = (string)$setting->name;
                 $translationName = preg_replace('~{\$lang->(.+)?}~', '$1', $settingName);
-                $settingName = isset($moduleTranslations[$translationName]) ? $moduleTranslations[$translationName] : $settingName;
+                $settingName = $moduleTranslations[$translationName] ?? $settingName;
                 $settings[(string)$setting->variable] = new \stdClass;
                 $settings[(string)$setting->variable]->name = $settingName;
                 $settings[(string)$setting->variable]->variable = (string)$setting->variable;
@@ -464,7 +463,7 @@ class Modules // TODO: подумать, мож сюда переедет CRUD E
                     foreach ($setting->options as $option) {
                         $optionName = (string)$option->name;
                         $translationName = preg_replace('~{\$lang->(.+)?}~', '$1', $optionName);
-                        $optionName = isset($moduleTranslations[$translationName]) ? $moduleTranslations[$translationName] : $optionName;
+                        $optionName = $moduleTranslations[$translationName] ?? $optionName;
                         $settings[(string)$setting->variable]->options[(string)$option->value] = new \stdClass;
                         $settings[(string)$setting->variable]->options[(string)$option->value]->name = $optionName;
                         $settings[(string)$setting->variable]->options[(string)$option->value]->value = (string)$option->value;

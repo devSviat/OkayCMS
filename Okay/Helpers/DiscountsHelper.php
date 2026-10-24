@@ -115,9 +115,9 @@ class DiscountsHelper
                 if (isset($availableDiscounts[$sign->sign])) {
                     /** @var Discount $discount */
                     $discount = clone $availableDiscounts[$sign->sign];
-                    $discount->fromLastDiscount = isset($discount->fromLastDiscount) ? $discount->fromLastDiscount : $sign->fromLastDiscount;
-                    $discount->name = isset($discount->name) ? $discount->name : $sign->name;
-                    $discount->description = isset($discount->description) ? $discount->description : $sign->description;
+                    $discount->fromLastDiscount ??= $sign->fromLastDiscount;
+                    $discount->name ??= $sign->name;
+                    $discount->description ??= $sign->description;
                     $discount->lang['name'] = $discount->name;
                     $discount->lang['description'] = $discount->description;
                     $substitutes = $this->buildReplacements($discount->langParts);

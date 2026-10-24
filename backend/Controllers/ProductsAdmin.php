@@ -50,7 +50,7 @@ class ProductsAdmin extends IndexAdmin
             // Сортировка
             if (empty($backendProductsHelper->getProductsSortName())) {
                 $positions = $productRequest->postPositions();
-                list($ids, $positions) = $backendProductsHelper->sortPositions($positions);
+                [$ids, $positions] = $backendProductsHelper->sortPositions($positions);
                 $backendProductsHelper->updatePositions($ids, $positions);
             }
 

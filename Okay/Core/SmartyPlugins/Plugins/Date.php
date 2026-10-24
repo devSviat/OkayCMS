@@ -18,7 +18,7 @@ class Date extends Modifier
      * an unset setting emptied the admin's date input - and an empty input is
      * what the blog form then tried to save back as a date.
      */
-    private const FALLBACK_FORMAT = 'd.m.Y';
+    private const string FALLBACK_FORMAT = 'd.m.Y';
 
     private $translations;
     private $languages;

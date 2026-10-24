@@ -132,7 +132,7 @@ class BackendCommentsHelper
         $comment->type      = $parentComment->type;
         $comment->object_id = $parentComment->object_id;
         $comment->text      = $this->request->post('text');
-        $comment->name      = ($this->settings->get('notify_from_name') ? $this->settings->get('notify_from_name') : 'Administrator');
+        $comment->name      = ($this->settings->get('notify_from_name') ?: 'Administrator');
         $comment->approved  = 1;
 
         return ExtenderFacade::execute(__METHOD__, $comment, func_get_args());
@@ -168,7 +168,7 @@ class BackendCommentsHelper
 
     public function approve($ids)
     {
-        $this->commentsEntity->update($ids, array('approved'=>1));
+        $this->commentsEntity->update($ids, ['approved'=>1]);
 
         // Саме тут бал і зʼявляється: новий відгук створюється несхваленим, тож
         // до модерації в середнє не потрапляє.
@@ -183,7 +183,7 @@ class BackendCommentsHelper
      * @param array|int $ids
      * @return array<string, array{type: string, id: int}>
      */
-    private function reviewTargets($ids)
+    private function reviewTargets($ids): array
     {
         $targets = [];
         foreach ($this->commentsEntity->noLimit()->find(['id' => (array)$ids]) as $comment) {

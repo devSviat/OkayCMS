@@ -27,7 +27,7 @@ switch ($module) {
         $keywords = explode(' ', $keyword);
         $categories = $categoriesEntity->getMarket($keyword);
 
-        $suggestions = array();
+        $suggestions = [];
         foreach ($categories as $cats) {
             $suggestion = new \stdClass();
             $suggestion->data = $cats;

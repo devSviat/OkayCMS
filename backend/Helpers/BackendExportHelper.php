@@ -157,7 +157,7 @@ class BackendExportHelper
 
     public function fetchProducts($filter)
     {
-        $products = array();
+        $products = [];
         foreach($this->productsEntity->find($filter) as $p) {
             $products[$p->id] = (array) $p;
         }

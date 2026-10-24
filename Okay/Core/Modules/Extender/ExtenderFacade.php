@@ -28,15 +28,15 @@ class ExtenderFacade
 
     public function newChainExtension($expandable, $extension)
     {
-        list($extendableClass, $extendableMethod) = $this->matchExtensionBindings($expandable);
-        list($extensionClass,  $extensionMethod)  = $this->matchExtensionBindings($extension);
+        [$extendableClass, $extendableMethod] = $this->matchExtensionBindings($expandable);
+        [$extensionClass, $extensionMethod]  = $this->matchExtensionBindings($extension);
         $this->chainExtender->newExtension($extendableClass, $extendableMethod, $extensionClass, $extensionMethod);
     }
 
     public function newQueueExtension($expandable, $extension)
     {
-        list($extendableClass, $extendableMethod) = $this->matchExtensionBindings($expandable);
-        list($extensionClass,  $extensionMethod)  = $this->matchExtensionBindings($extension);
+        [$extendableClass, $extendableMethod] = $this->matchExtensionBindings($expandable);
+        [$extensionClass, $extensionMethod]  = $this->matchExtensionBindings($extension);
         $this->queueExtender->newExtension($extendableClass, $extendableMethod, $extensionClass, $extensionMethod);
     }
 
@@ -52,7 +52,7 @@ class ExtenderFacade
 
     private static function stringifyTrigger($trigger)
     {
-        list($className, $methodName) = $trigger;
+        [$className, $methodName] = $trigger;
         return $className.'::'.$methodName;
     }
 

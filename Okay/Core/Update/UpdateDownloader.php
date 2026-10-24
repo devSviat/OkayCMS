@@ -11,7 +11,7 @@ use Okay\Core\Config;
  */
 class UpdateDownloader
 {
-    private const ASSET_KEYS = ['zip', 'checksums'];
+    private const array ASSET_KEYS = ['zip', 'checksums'];
 
     private Config $config;
 

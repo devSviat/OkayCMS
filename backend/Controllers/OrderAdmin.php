@@ -131,7 +131,7 @@ class OrderAdmin extends IndexAdmin
 
                     // Обновим позиции скидок
                     $positions = $ordersRequest->postDiscountPositions();
-                    list($ids, $positions) = $backendOrdersHelper->sortDiscountPositions($positions);
+                    [$ids, $positions] = $backendOrdersHelper->sortDiscountPositions($positions);
                     $backendOrdersHelper->updateDiscountPositions($ids, $positions);
 
                     // Обновим статус заказа

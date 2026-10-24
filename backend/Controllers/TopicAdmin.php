@@ -17,7 +17,7 @@ class TopicAdmin extends IndexAdmin {
             $this->response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=SupportAdmin');
         }
 
-        if (in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '0:0:0:0:0:0:0:1'))) {
+        if (in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '0:0:0:0:0:0:0:1'])) {
             $this->design->assign('message_error', 'localhost');
             $this->response->setContent($this->design->fetch('topic.tpl'));
             return;
@@ -67,7 +67,7 @@ class TopicAdmin extends IndexAdmin {
                     if (!$result) {
                         $this->design->assign('message_error', 'unknown_error');
                     } elseif (!$result->success) {
-                        $this->design->assign('message_error', $result->error ? $result->error : 'unknown_error');
+                        $this->design->assign('message_error', $result->error ?: 'unknown_error');
                     } else {
                         if (isset($result->topic_id)) {
                             $topic->id = $result->topic_id;
@@ -82,7 +82,7 @@ class TopicAdmin extends IndexAdmin {
                 if (!$result) {
                     $this->design->assign('message_error', 'unknown_error');
                 } elseif (!$result->success) {
-                    $this->design->assign('message_error', $result->error ? $result->error : 'unknown_error');
+                    $this->design->assign('message_error', $result->error ?: 'unknown_error');
                 } else {
                     $this->postRedirectGet->storeMessageSuccess('closed');
                     $this->postRedirectGet->storeNewEntityId($topic->id);
@@ -94,7 +94,7 @@ class TopicAdmin extends IndexAdmin {
         }
 
         if ($topic->id) {
-            $filter = array();
+            $filter = [];
             $filter['topic_id'] = $topic->id;
             $filter['page'] = max(1, $this->request->get('page', 'integer'));
             $filter['limit'] = 100;
@@ -110,7 +110,7 @@ class TopicAdmin extends IndexAdmin {
             if (empty($result)) {
                 $this->design->assign('message_error', 'unknown_error');
             } elseif (empty($result->success)) {
-                $this->design->assign('message_error', $result->error ? $result->error : 'unknown_error');
+                $this->design->assign('message_error', $result->error ?: 'unknown_error');
             } else {
                 $result->comments = (array)$result->comments;
                 if (!empty($result->comments)) {

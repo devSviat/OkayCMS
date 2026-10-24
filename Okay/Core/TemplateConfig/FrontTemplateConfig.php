@@ -383,7 +383,7 @@ class FrontTemplateConfig
         foreach ($cache_directories as $dir) {
             if (is_dir($dir)) {
                 foreach (scandir($dir) as $file) {
-                    if (!in_array($file, array(".", ".."))) {
+                    if (!in_array($file, [".", ".."])) {
                         @unlink($dir . $file);
                     }
                 }
@@ -547,9 +547,7 @@ class FrontTemplateConfig
     private function compileElementAttributes($attributes): string
     {
         if ($attributes) {
-            return ' '.implode(' ', array_map(function($attribute, $value) {
-                    return "$attribute=\"$value\"";
-                }, array_keys($attributes), $attributes));
+            return ' '.implode(' ', array_map(fn($attribute, $value) => "$attribute=\"$value\"", array_keys($attributes), $attributes));
         } else {
             return '';
         }
@@ -657,7 +655,7 @@ class FrontTemplateConfig
 
             foreach ($assets['css'] as $cssFilePath) {
                 $this->cssConfig->register(
-                    (new Css('debug_bar_'.pathinfo($cssFilePath, PATHINFO_BASENAME)))
+                    new Css('debug_bar_'.pathinfo($cssFilePath, PATHINFO_BASENAME))
                         ->setPosition('footer')
                         ->setIndividual(true),
                     $cssFilePath
@@ -666,7 +664,7 @@ class FrontTemplateConfig
 
             foreach ($assets['js'] as $jsFilePath) {
                 $this->jsConfig->register(
-                    (new Js('debug_bar_'.pathinfo($jsFilePath, PATHINFO_BASENAME)))
+                    new Js('debug_bar_'.pathinfo($jsFilePath, PATHINFO_BASENAME))
                         ->setPosition('footer')
                         ->setIndividual(true),
                     $jsFilePath

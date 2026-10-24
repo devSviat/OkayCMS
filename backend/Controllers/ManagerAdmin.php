@@ -32,11 +32,11 @@ class ManagerAdmin extends IndexAdmin
 {
     public const PASSWORD_MIN_LENGTH = 8;
 
-    private const TAB_PROFILE = 'profile';
-    private const TAB_SECURITY = 'security';
-    private const TAB_PERMISSIONS = 'permissions';
+    private const string TAB_PROFILE = 'profile';
+    private const string TAB_SECURITY = 'security';
+    private const string TAB_PERMISSIONS = 'permissions';
     /** Нові коди відновлення показуються один раз — на сторінці після дії. */
-    private const NEW_CODES_KEY = 'totp_new_codes';
+    private const string NEW_CODES_KEY = 'totp_new_codes';
 
     private ManagerTwoFactor $twoFactor;
     private ManagerAuthLog $authLog;
@@ -564,7 +564,7 @@ class ManagerAdmin extends IndexAdmin
         if (!class_exists(Writer::class)) {
             return null;
         }
-        $svg = (new Writer(new ImageRenderer(new RendererStyle(200, 1), new SvgImageBackEnd())))->writeString($uri);
+        $svg = new Writer(new ImageRenderer(new RendererStyle(200, 1), new SvgImageBackEnd()))->writeString($uri);
 
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }

@@ -66,6 +66,11 @@ jobs:
       - name: PHPStan
         run: vendor/bin/phpstan analyse --no-progress
 
+      # rector.php — лише синтаксичні правила; новий код не повертає конструкцій,
+      # які вже прибрано (array(), strpos() !== false тощо).
+      - name: Rector
+        run: vendor/bin/rector process --dry-run --no-progress-bar
+
   # Компілятор 8.5 по кожному файлу, зокрема в tests/ і ok, яких PHPStan не
   # аналізує: застаріле під час компіляції валить збірку.
   lint:

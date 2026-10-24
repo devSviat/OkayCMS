@@ -162,18 +162,22 @@ class ModuleDesign
         }
     }
 
-    private function getDirNames($filePath)
+    /**
+     * @return string[]
+     */
+    private function getDirNames($filePath): array
     {
         $parts = explode('/', $filePath);
-
-        end($parts);
-        $fileIndex = key($parts);
+        $fileIndex = array_key_last($parts);
         unset($parts[$fileIndex]);
 
         return $parts;
     }
 
-    private function getFiles($baseDir)
+    /**
+     * @return \stdClass[]
+     */
+    private function getFiles($baseDir): array
     {
         if (!is_dir($baseDir)) {
             return [];

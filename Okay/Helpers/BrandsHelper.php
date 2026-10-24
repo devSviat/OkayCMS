@@ -114,9 +114,7 @@ class BrandsHelper implements GetListInterface
     public function getList($filter = [], $sortName = null, $excludedFields = null)
     {
 
-        if ($excludedFields === null) {
-            $excludedFields = $this->getExcludeFields();
-        }
+        $excludedFields ??= $this->getExcludeFields();
         
         /** @var BrandsEntity $brandsEntity */
         $brandsEntity = $this->entityFactory->get(BrandsEntity::class);

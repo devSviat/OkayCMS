@@ -278,7 +278,7 @@ class Settings
         $select->from('__settings_lang')
             ->cols(['*']);
         
-        $langId  = !is_null($langId) ? $langId : $this->languages->getLangId();
+        $langId ??= $this->languages->getLangId();
         if($langId) {
             $select->where('lang_id=:action_object_lang_id');
             $select->bindValues(['action_object_lang_id'=>$langId]);

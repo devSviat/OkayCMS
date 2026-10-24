@@ -176,7 +176,7 @@ class CommonHelper
      * Що має пережити редирект: прапорці результату й дані форми - шаблони
      * друкують із них ім'я відправника у повідомленні про успіх.
      */
-    private function flashPayload()
+    private function flashPayload(): array
     {
         $vars = ['request_data' => $this->design->getVar('request_data')];
 

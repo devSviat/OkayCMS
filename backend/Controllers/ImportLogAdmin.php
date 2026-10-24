@@ -50,7 +50,7 @@ class ImportLogAdmin extends IndexAdmin
         $this->imagesEntity   = $entityFactory->get(ImagesEntity::class);
         $this->productsEntity = $entityFactory->get(ProductsEntity::class);
 
-        $filter = array();
+        $filter = [];
         $filter['page'] = max(1, $this->request->get('page', 'integer'));
 
         if ($filter['limit'] = $this->request->get('limit', 'integer')) {
@@ -94,13 +94,13 @@ class ImportLogAdmin extends IndexAdmin
         $this->design->assign('current_page', $filter['page']);
         $logs = $this->getLogs($filter, false);
         if(!empty($logs)) {
-            $products_ids = array();
+            $products_ids = [];
             foreach($logs as $l) {
                 $products_ids[] = $l->product_id;
             }
 
-            $products = array();
-            $images_ids = array();
+            $products = [];
+            $images_ids = [];
             foreach($this->productsEntity->find(['id'=>array_unique($products_ids)]) as $p) {
                 $products[$p->id] = $p;
                 $images_ids[] = $p->main_image_id;
@@ -127,7 +127,7 @@ class ImportLogAdmin extends IndexAdmin
     }
 
     /*Выборка лога последнего успешного импорта*/
-    private function getLogs($filter = array(), $is_count = true) {
+    private function getLogs($filter = [], $is_count = true) {
         $keyword_filter = '';
         $status_filter = '';
         $sql_limit = '';

@@ -25,7 +25,7 @@ use Symfony\Component\Process\Process;
  */
 class UpdateRunner
 {
-    private const LOCK_RESOURCE = 'core_updater_run';
+    private const string LOCK_RESOURCE = 'core_updater_run';
 
     /**
      * Джерело root URL для health-check, коли Request не може його зібрати
@@ -34,10 +34,10 @@ class UpdateRunner
      */
     public const SETTING_ROOT_URL = 'core_updater__root_url';
 
-    private const MIN_FREE_SPACE_MULTIPLIER = 3;
+    private const int MIN_FREE_SPACE_MULTIPLIER = 3;
 
     /** Ім'я пробного файлу pre-flight; воно ж у `release-manifest.json` серед exclude. */
-    private const WRITE_PROBE_NAME = '.core-updater-write-probe';
+    private const string WRITE_PROBE_NAME = '.core-updater-write-probe';
 
     /**
      * Health-check після apply б'ється в PHP-FPM, який щойно перечитує
@@ -45,11 +45,11 @@ class UpdateRunner
      * дорозігнаний пул. Ретраї лише розтягують те саме питання в часі,
      * рішення по кожній відповіді лишається строгим.
      */
-    private const HEALTH_CHECK_ATTEMPTS = 4;
+    private const int HEALTH_CHECK_ATTEMPTS = 4;
 
-    private const HEALTH_CHECK_RETRY_DELAY = 2;
+    private const int HEALTH_CHECK_RETRY_DELAY = 2;
 
-    private const SELF_REQUEST_PROBE_TIMEOUT = 10;
+    private const int SELF_REQUEST_PROBE_TIMEOUT = 10;
 
     /**
      * Крок → назва методу-обробника, у порядку UpdateStatus::STEPS. ЄДИНЕ
@@ -60,7 +60,7 @@ class UpdateRunner
      *
      * @var array<string, string>
      */
-    private const STEP_HANDLERS = [
+    private const array STEP_HANDLERS = [
         UpdateStatus::STEP_DOWNLOAD => 'stepDownload',
         UpdateStatus::STEP_VERIFY => 'stepVerify',
         UpdateStatus::STEP_PREFLIGHT => 'stepPreflight',
@@ -160,7 +160,7 @@ class UpdateRunner
         set_time_limit(0);
 
         $rootDir = rtrim((string) $this->config->get('root_dir'), '/');
-        $lock = (new LockFactory(new FlockStore($rootDir . '/files/tmp')))->createLock(self::LOCK_RESOURCE);
+        $lock = new LockFactory(new FlockStore($rootDir . '/files/tmp'))->createLock(self::LOCK_RESOURCE);
         if (!$lock->acquire()) {
             throw new \RuntimeException('Оновлення вже виконується.');
         }
@@ -784,7 +784,7 @@ class UpdateRunner
                 // health-ендпоінта взагалі (перше в житті інсталяції
                 // оновлення відкочується на код без нього).
                 $healthy = $this->checkHealth($ctx['maintenanceToken'], $ctx['fromVersion'], true);
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 $healthy = false;
             }
         }
@@ -969,7 +969,7 @@ class UpdateRunner
             $process->run();
 
             return $process->isSuccessful();
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }

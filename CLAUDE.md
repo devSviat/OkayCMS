@@ -41,7 +41,7 @@ security boundaries, themes and the Docker environment, so a blind merge would u
 - Custom ORM (`Okay\Core\Entity\Entity`)
 - Symfony Console `^8.0` (the `./ok` CLI) — commands declare their name via `#[AsCommand]`
 - Aura.Sql `^6.0` / Aura.SqlQuery `^3.0` (DB layer)
-- PHPUnit `^13.2`, PHPStan `^2.2` with `phpstan-deprecation-rules` (dev)
+- PHPUnit `^13.2`, PHPStan `^2.2` with `phpstan-deprecation-rules`, Rector `^2.7` — syntax-only rules in `rector.php` (dev)
 
 ## Commands
 

@@ -73,7 +73,7 @@ if ($request->isPost() && $request->post('logout') !== null && $request->checkSe
 $languages = $DI->get(Languages::class);
 
 $postLangId = $request->post('lang_id', 'integer');
-$adminLangId = ($postLangId ? $postLangId : $request->get('lang_id', 'integer'));
+$adminLangId = ($postLangId ?: $request->get('lang_id', 'integer'));
 
 if ($adminLangId) {
     $_SESSION['admin_lang_id'] = $adminLangId;

@@ -125,9 +125,7 @@ class CommentsHelper implements GetListInterface
      */
     public function getList($filter = [], $sortName = null, $excludedFields = null)
     {
-        if ($excludedFields === null) {
-            $excludedFields = $this->getExcludeFields();
-        }
+        $excludedFields ??= $this->getExcludeFields();
 
         /** @var CommentsEntity $commentsEntity */
         $commentsEntity = $this->entityFactory->get(CommentsEntity::class);

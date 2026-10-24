@@ -369,9 +369,7 @@ class CatalogHelper
      */
     public function getBaseFeaturesValues(?array $filter = null, ?string $missingProducts = null): array
     {
-        if ($filter === null) {
-            $filter = $this->filterHelper->getFeaturesValuesFilter();
-        }
+        $filter ??= $this->filterHelper->getFeaturesValuesFilter();
 
         // Если скрываем из каталога товары не в наличии, значит и в фильтре их значения тоже не нужны будут
         if ($missingProducts === MISSING_PRODUCTS_HIDE) {
@@ -387,9 +385,7 @@ class CatalogHelper
         $features = $this->filterHelper->getFeatures();
         if (empty($filter['feature_id']) && !empty($features)) {
             // id берём из объекта, а не из ключа: getFeatures() расширяемый.
-            $filter['feature_id'] = array_map(static function (object $feature) {
-                return $feature->id;
-            }, $features);
+            $filter['feature_id'] = array_map(static fn(object $feature) => $feature->id, $features);
         }
 
         /**
@@ -460,9 +456,7 @@ class CatalogHelper
 
     public function getCatalogFeatures(?array $filter = null): array
     {
-        if ($filter === null) {
-            $filter = $this->getCatalogFeaturesFilter();
-        }
+        $filter ??= $this->getCatalogFeaturesFilter();
 
         $features = $this->featuresEntity->mappedBy('id')->find($filter);
 

@@ -371,16 +371,14 @@ class ManagerMenu
         $controllersPermissions = $this->managers->getControllersPermissions();
 
         foreach ($this->leftMenu as $section => $items) {
-            if (!isset($manager->menu[$section])) {
-                $manager->menu[$section] = $this->prepareItemsForManagerMenu($items);
-            }
+            $manager->menu[$section] ??= $this->prepareItemsForManagerMenu($items);
 
             foreach ($items as $title => $controllers) {
                 $mainController = reset($controllers);
                 $controllerMethod = null;
 
-                if (strpos($mainController, '@') !== false) {
-                    list($mainController, $controllerMethod) = explode('@', $mainController, 2);
+                if (str_contains($mainController, '@')) {
+                    [$mainController, $controllerMethod] = explode('@', $mainController, 2);
                 }
 
                 /*if (!isset($manager->menu[$section][$title])) {
@@ -438,7 +436,10 @@ class ManagerMenu
         }
     }
 
-    private function prepareItemsForManagerMenu($section)
+    /**
+     * @return mixed[]
+     */
+    private function prepareItemsForManagerMenu($section): array
     {
         $preparedItems = [];
         foreach($section as $title => $controllers) {
@@ -508,8 +509,8 @@ class ManagerMenu
             foreach ($this->leftMenu as $section => $items) {
                 foreach ($items as $title => $controllers) {
                     foreach ($controllers as $c) {
-                        if (strpos($c, '@') !== false) {
-                            list($c, $controllerMethod) = explode('@', $c, 2);
+                        if (str_contains($c, '@')) {
+                            [$c, $controllerMethod] = explode('@', $c, 2);
                         }
                         if ($controller == $c) {
                             $activeControllerName = $title;
@@ -582,8 +583,8 @@ class ManagerMenu
         $permissionBlockMenu = [];
 
         foreach($blockMenu as $itemName => $controllers) {
-            if (strpos($controllers[0], '@') !== false) {
-                list($controllers[0], $controllerMethod) = explode('@', $controllers[0], 2);
+            if (str_contains($controllers[0], '@')) {
+                [$controllers[0], $controllerMethod] = explode('@', $controllers[0], 2);
             }
             $permission = $this->managers->getPermissionByController($controllers[0]);
             // Берем первый попавшийся пункт как основной для одинаковых пермишинов, иначе array_flip будет брать последний

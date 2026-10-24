@@ -342,7 +342,7 @@ class CategoryMetadataHelper extends CommonMetadataHelper
             '{$category}' => ($this->category->name ?: ''),
             '{$category_h1}' => ($this->category->name_h1 ?: ''),
             '{$category_url}' => Router::generateUrl('category', ['url' => $this->category->url], true),
-            '{$sitename}' => ($this->settings->get('site_name') ? $this->settings->get('site_name') : ''),
+            '{$sitename}' => ($this->settings->get('site_name') ?: ''),
         ];
 
         /** @var EntityFactory $entityFactory */
@@ -387,7 +387,7 @@ class CategoryMetadataHelper extends CommonMetadataHelper
                 }
 
                 $featuresAliasesForSelected = [];
-                foreach ($featuresAliasesValuesEntity->find(array('feature_id'=>$featuresIds)) as $fv) {
+                foreach ($featuresAliasesValuesEntity->find(['feature_id'=>$featuresIds]) as $fv) {
                     $featuresAliasesForSelected[$fv->feature_id][$fv->variable] = $fv->value;
                 }
 
@@ -414,7 +414,7 @@ class CategoryMetadataHelper extends CommonMetadataHelper
                 }
             } else {
                 //Если только одно значение одного свойства
-                foreach ($featuresAliasesValuesEntity->find(array('feature_id'=>$featuresIds)) as $fv) {
+                foreach ($featuresAliasesValuesEntity->find(['feature_id'=>$featuresIds]) as $fv) {
                     $this->parts['{$f_alias_'.$fv->variable.'}'] = $fv->value;
                 }
 
@@ -442,9 +442,7 @@ class CategoryMetadataHelper extends CommonMetadataHelper
 
             /** @var FeaturesEntity $featuresEntity */
             $featuresEntity = $entityFactory->get(FeaturesEntity::class);
-            
-            reset($this->metaArray['features_values']);
-            $featureId = key($this->metaArray['features_values']);
+            $featureId = array_key_first($this->metaArray['features_values']);
             $feature = $featuresEntity->get((int)$featureId);
 
             $this->parts['{$feature_name}'] = $feature->name;
@@ -506,9 +504,7 @@ class CategoryMetadataHelper extends CommonMetadataHelper
                     $key = $isDefaultKey.'brand_feature' . (!empty($p->feature_id) ? '_' . $p->feature_id : '');
                     $seoFilterPatterns[$key] = $p;
                 }
-
-                reset($this->metaArray['features_values']);
-                $featureId = key($this->metaArray['features_values']);
+                $featureId = array_key_first($this->metaArray['features_values']);
                 $feature = $featuresEntity->get((int)$featureId);
 
                 // Определяем какой шаблон брать по умолчанию, для категории + определенное свойство, или категории и любое свойство
@@ -544,9 +540,7 @@ class CategoryMetadataHelper extends CommonMetadataHelper
                     $key = $isDefaultKey.'feature' . (!empty($p->feature_id) ? '_' . $p->feature_id : '');
                     $seoFilterPatterns[$key] = $p;
                 }
-
-                reset($this->metaArray['features_values']);
-                $featureId = key($this->metaArray['features_values']);
+                $featureId = array_key_first($this->metaArray['features_values']);
                 $feature = $featuresEntity->get((int)$featureId);
 
                 // Определяем какой шаблон брать по умолчанию, для категории + определенное свойство, или категории и любое свойство

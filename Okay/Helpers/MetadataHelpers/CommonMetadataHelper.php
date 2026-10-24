@@ -161,8 +161,8 @@ class CommonMetadataHelper implements MetadataInterface
         if ($page = $this->design->getVar('page')) {
 
             $this->parts = [
-                '{$page}' => ($page->name ? $page->name : ''),
-                '{$page_h1}' => ($page->name_h1 ? $page->name_h1 : ''),
+                '{$page}' => ($page->name ?: ''),
+                '{$page_h1}' => ($page->name_h1 ?: ''),
             ];
         }
         

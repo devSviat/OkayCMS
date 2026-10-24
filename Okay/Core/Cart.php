@@ -618,7 +618,7 @@ class Cart
                         }
 
                         $discounts = $this->discountsHelper->prepareDiscounts($signs['cart'], $this->availableDiscounts);
-                        list($this->discounts, $this->total_price) = $this->discountsHelper->calculateDiscounts($discounts, $this->undiscounted_total_price);
+                        [$this->discounts, $this->total_price] = $this->discountsHelper->calculateDiscounts($discounts, $this->undiscounted_total_price);
                         break;
                     }
                 }

@@ -123,7 +123,7 @@ class PrefixAndPathStrategy extends AbstractRouteStrategy
             return $this->getMockRouteParams($prefix);
         }
 
-        list($productUrl, $variantId) = $this->matchProductUrlFromUri($noPrefixUrl, $category->path_url);
+        [$productUrl, $variantId] = $this->matchProductUrlFromUri($noPrefixUrl, $category->path_url);
         $productId    = $this->productsEntity->col('id')->findOne([
             'url'              => $productUrl,
             'main_category_id' => $mainCategoryId
@@ -219,7 +219,7 @@ class PrefixAndPathStrategy extends AbstractRouteStrategy
 
     private function prefixIsFailed($prefix, $url) : bool
     {
-        return $prefix !== substr($url, 0, strlen($prefix));
+        return !str_starts_with($url, $prefix);
     }
 
     private function getPrefix() : string

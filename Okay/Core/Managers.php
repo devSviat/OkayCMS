@@ -169,9 +169,7 @@ class Managers
             return;
         }
 
-        if (!isset($this->modulesPermissionsList[$permission])) {
-            $this->modulesPermissionsList[$permission] = $vendorModuleName;
-        }
+        $this->modulesPermissionsList[$permission] ??= $vendorModuleName;
     }
 
     public function removeControllersPermissionByModuleName($moduleName)
@@ -223,7 +221,7 @@ class Managers
         // Менеджер без жодного права зберігається порожнім рядком; explode() дав
         // би [''] — «право» з порожньою назвою, яке не покриває жоден інший менеджер.
         $manager->permissions = array_values(array_filter(
-            array_map('trim', explode(',', (string)$manager->permissions)),
+            array_map(trim(...), explode(',', (string)$manager->permissions)),
             static fn(string $permission): bool => $permission !== ''
         ));
 
@@ -310,9 +308,7 @@ class Managers
 
     private function passwordHasher()
     {
-        if ($this->passwordHasher === null) {
-            $this->passwordHasher = new PasswordHasher();
-        }
+        $this->passwordHasher ??= new PasswordHasher();
 
         return $this->passwordHasher;
     }

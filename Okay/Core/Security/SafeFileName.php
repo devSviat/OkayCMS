@@ -25,7 +25,7 @@ class SafeFileName
             return '';
         }
 
-        if (strpos($name, "\0") !== false) {
+        if (str_contains($name, "\0")) {
             return '';
         }
 

@@ -134,7 +134,7 @@ class PrefixAndPathStrategy extends AbstractRouteStrategy
     private function compareUrlStartsNoSuccess($categoryPathUrl, $url)
     {
 
-        if (strpos($url, 'category_features') !== false) {
+        if (str_contains($url, 'category_features')) {
             $url = substr($url, strlen('category_features') + 1);
         }
         
@@ -145,7 +145,7 @@ class PrefixAndPathStrategy extends AbstractRouteStrategy
 
     private function matchFiltersUrl($categoryPathUrl, $url)
     {
-        if (strpos($url, 'category_features') !== false) {
+        if (str_contains($url, 'category_features')) {
             $url = substr($url, strlen('category_features') + 1);
         }
         

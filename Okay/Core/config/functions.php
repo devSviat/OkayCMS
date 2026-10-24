@@ -22,7 +22,7 @@ if (!function_exists('http_build_url')) {
     // @param    int                A bitmask of binary or'ed HTTP_URL constants (Optional)HTTP_URL_REPLACE is the default
     // @param    array            If set, it will be filled with the parts of the composed url like parse_url() would return
     function http_build_url($url, $parts=[], $flags=HTTP_URL_REPLACE, &$new_url=false) {
-        $keys = array('user','pass','port','path','query','fragment');
+        $keys = ['user','pass','port','path','query','fragment'];
 
         // HTTP_URL_STRIP_ALL becomes all the HTTP_URL_STRIP_Xs
         if ($flags & HTTP_URL_STRIP_ALL) {
@@ -90,9 +90,9 @@ if (!function_exists('http_build_url')) {
         return
             ((isset($parse_url['scheme'])) ? $parse_url['scheme'] . '://' : '')
             .((isset($parse_url['user'])) ? $parse_url['user'] . ((isset($parse_url['pass'])) ? ':' . $parse_url['pass'] : '') .'@' : '')
-            .((isset($parse_url['host'])) ? $parse_url['host'] : '')
+            .($parse_url['host'] ?? '')
             .((isset($parse_url['port'])) ? ':' . $parse_url['port'] : '')
-            .((isset($parse_url['path'])) ? $parse_url['path'] : '')
+            .($parse_url['path'] ?? '')
             .((isset($parse_url['query'])) ? '?' . $parse_url['query'] : '')
             .((isset($parse_url['fragment'])) ? '#' . $parse_url['fragment'] : '')
             ;

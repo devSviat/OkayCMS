@@ -8,8 +8,8 @@ use Okay\Entities\SupportInfoEntity;
 
 class Support
 {
-    private const REQUEST_TIMEOUT = 10;
-    private const MAX_RETRY = 4;
+    private const int REQUEST_TIMEOUT = 10;
+    private const int MAX_RETRY = 4;
 
     /**
      * @var Config
@@ -51,11 +51,11 @@ class Support
         if (empty($info->public_key) || empty($topic_id)) {
             return false;
         }
-        $params = array(
+        $params = [
             'topic_id' => $topic_id,
             'key'      => $info->public_key,
             'action'   => 'close_topic'
-        );
+        ];
         return $this->supportRequest($params);
     }
 
@@ -123,7 +123,7 @@ class Support
             'version'      => $this->config->version,
             'version_type' => (!empty($this->config->version_type) ? $this->config->version_type : null),
             'owner_email'  => $email,
-            'owner_phone'  => $this->settings->get('admin_phone') ? $this->settings->get('admin_phone') : ''
+            'owner_phone'  => $this->settings->get('admin_phone') ?: ''
         ];
         
         return $this->supportRequest($params);
@@ -151,7 +151,7 @@ class Support
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, 'http://okay-cms.support/support/1.0/');
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=UTF-8'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=UTF-8']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 20);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
@@ -165,7 +165,7 @@ class Support
                 $retryCnt++;
             }
 
-            $_SESSION['support_request_timeout'] = time() + pow(self::REQUEST_TIMEOUT, $retryCnt);
+            $_SESSION['support_request_timeout'] = time() + self::REQUEST_TIMEOUT ** $retryCnt;
 
         } else {
             $retryCnt = 0;

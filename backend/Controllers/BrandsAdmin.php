@@ -55,9 +55,9 @@ class BrandsAdmin extends IndexAdmin
         }
 
         $brandsCount               = $backendBrandsHelper->countBrands($filter);
-        list($filter, $pagesCount) = $backendBrandsHelper->makePagination($brandsCount, $filter);
+        [$filter, $pagesCount] = $backendBrandsHelper->makePagination($brandsCount, $filter);
         $brands                    = $backendBrandsHelper->findBrands($filter);
-        $keyword                   = isset($filter['keyword']) ? $filter['keyword'] : '';
+        $keyword                   = $filter['keyword'] ?? '';
 
         $this->design->assign('brands_count', $brandsCount);
         $this->design->assign('pages_count',  $pagesCount);

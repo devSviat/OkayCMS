@@ -44,7 +44,7 @@ class BlogAdmin extends IndexAdmin
         $posts      = $backendBlogHelper->findPosts($filter);
         $postsCount = $backendBlogHelper->getPostsCount($filter);
 
-        $keyword  = isset($filter['keyword'])   ? $filter['keyword']   : '';
+        $keyword  = $filter['keyword'] ?? '';
 
         $this->design->assign('category_id',    $categoryId);
         $this->design->assign('categories',     $categories);

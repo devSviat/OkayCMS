@@ -29,11 +29,9 @@ class GetPosts extends Func
 
     public function run($params, $smarty)
     {
-        if (!isset($params['visible'])) {
-            $params['visible'] = 1;
-        }
+        $params['visible'] ??= 1;
 
-        $sort = isset($params['sort']) ? $params['sort'] : null;
+        $sort = $params['sort'] ?? null;
         
         if (!empty($params['var'])) {
             $smarty->assign($params['var'], $this->blogHelper->getList($params, $sort));

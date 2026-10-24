@@ -52,11 +52,7 @@ class Config
             throw new \Exception('Config::subfolder is remove. Use Request::getSubDir()');
         }
 
-        if (isset($this->vars[$name])) {
-            return $this->vars[$name];
-        }
-
-        return null;
+        return $this->vars[$name] ?? null;
     }
 
     /**
@@ -136,7 +132,7 @@ class Config
         }
 
         // Определяем корневую директорию сайта
-        $this->vars['root_dir'] =  dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR;
+        $this->vars['root_dir'] =  dirname(__DIR__, 2).DIRECTORY_SEPARATOR;
 
         // Максимальный размер загружаемых файлов
         $max_upload = (int)(ini_get('upload_max_filesize'));

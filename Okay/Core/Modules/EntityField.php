@@ -68,9 +68,7 @@ class EntityField
         $type = $this->type;
         
         if ($this->type === self::TYPE_ENUM && !empty($this->values)) {
-            $values = array_map(function ($value) {
-                return "'" . $value . "'";
-            }, $this->values);
+            $values = array_map(fn($value) => "'" . $value . "'", $this->values);
             $type .= '(' . implode(',', $values) . ')';
         } elseif (!empty($this->length)) {
             $type .= "({$this->length})";

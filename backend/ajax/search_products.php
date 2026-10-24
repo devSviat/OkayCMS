@@ -34,9 +34,7 @@ $products = [];
 if (empty($filter)) {
     $filter = [];
 }
-if (!isset($filter['limit'])) {
-    $filter['limit'] = 10;
-}
+$filter['limit'] ??= 10;
 foreach ($productsEntity->cols($productFields)->find(['keyword' => $keyword] + $filter) as $product) {
     $products[$product->id] = $product;
     $imagesIds[] = $product->main_image_id;

@@ -12,9 +12,7 @@ class PDOCollector extends \DebugBar\DataCollector\PDO\PDOCollector
 {
     public function getQueryFormatter(): LibQueryFormatter
     {
-        if ($this->queryFormatter === null) {
-            $this->queryFormatter = new QueryFormatter();
-        }
+        $this->queryFormatter ??= new QueryFormatter();
 
         return $this->queryFormatter;
     }

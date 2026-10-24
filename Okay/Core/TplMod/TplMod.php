@@ -70,7 +70,7 @@ class TplMod
     {
         // find і like - це АБО, а не пріоритет: коли задані обидва, like перевіряється
         // й тоді, коли find не збігся.
-        if (!empty($change->getFind()) && strpos($node->getOriginalElement(), $change->getFind()) !== false) {
+        if (!empty($change->getFind()) && str_contains($node->getOriginalElement(), $change->getFind())) {
             return true;
         }
 
@@ -187,7 +187,7 @@ class TplMod
         if (!empty($change->getClosestFind())) {
             $find = $change->getClosestFind();
             $node = $this->closestNode($node, static fn(BaseNode $candidate): bool
-                => strpos($candidate->getOriginalElement(), $find) !== false);
+                => str_contains($candidate->getOriginalElement(), $find));
         } elseif (!empty($change->getClosestLike())) {
             $like = $change->getClosestLike();
             $node = $this->closestNode($node, static fn(BaseNode $candidate): bool
@@ -225,7 +225,7 @@ class TplMod
         $result = false;
         if ($children = $node->children()) {
             foreach ($children as $child) {
-                if (strpos($child->getOriginalElement(), $search) !== false) {
+                if (str_contains($child->getOriginalElement(), $search)) {
                     return $child;
                 }
                 if ($result = $this->findChildNode($child, $search)) {
@@ -257,7 +257,7 @@ class TplMod
         $resultString = '';
         /** @var BaseNode $child */
         foreach ($node->children() as $child) {
-            if (strpos($node->getOriginalElement(), '<textarea') === false) {
+            if (!str_contains($node->getOriginalElement(), '<textarea')) {
                 $resultString .= PHP_EOL;
                 
                 // Добавляем отступы для форматирования
@@ -274,7 +274,7 @@ class TplMod
 
             if (!empty($child->getCloseTag())) {
                 // Добавляем отступы для форматирования
-                if (!empty($child->children()) && strpos($child->getOriginalElement(), '<textarea') === false) {
+                if (!empty($child->children()) && !str_contains($child->getOriginalElement(), '<textarea')) {
                     $resultString .= PHP_EOL;
                     for ($i = 1; $i <= $level; $i++) {
                         $resultString .= '    ';

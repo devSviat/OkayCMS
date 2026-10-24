@@ -63,10 +63,10 @@ class ImportAdmin extends IndexAdmin
                     $this->design->assign('message_error', 'convert_error');
                 } else {
                     $importCore->initColumns();
-                    $lcColumns = array_map("mb_strtolower", $importCore->getColumns());
+                    $lcColumns = array_map(mb_strtolower(...), $importCore->getColumns());
                     $duplicatedColumns = array_diff_assoc($lcColumns, array_unique($lcColumns));
                     $duplicatedColumns = array_unique($duplicatedColumns);
-                    $duplicatedColumns_pairs = array();
+                    $duplicatedColumns_pairs = [];
                     foreach ($this->importCore->getColumnsNames() as $columns) {
                         $cnt = 0;
                         foreach ($columns as $column) {
@@ -120,7 +120,7 @@ class ImportAdmin extends IndexAdmin
 
         // Далі імпорт читає файл із роздільником ";" і без огляду на BOM,
         // тож приводимо джерело до цього вигляду тут, на вході.
-        return (new CsvNormalizer())->normalizeFile($dest) !== false;
+        return new CsvNormalizer()->normalizeFile($dest) !== false;
     }
 
     private function toUtf8($source, $dest) {
@@ -185,7 +185,7 @@ class ImportAdmin extends IndexAdmin
         }
     }
 
-    private function assignColumnsInfo($fields = array()) {
+    private function assignColumnsInfo($fields = []) {
         $source_columns = $this->importCore->getColumns();
         $this->design->assign('columns_names', array_keys($this->importCore->getColumnsNames()));
 
@@ -197,7 +197,7 @@ class ImportAdmin extends IndexAdmin
         $internal_columns = array_keys($this->importCore->getInternalColumnsNames());
 
         if (empty($fields)) {
-            $selected = array();
+            $selected = [];
             foreach ($features as $f) {
                 $selected[$f] = $f;
             }
@@ -209,7 +209,7 @@ class ImportAdmin extends IndexAdmin
         foreach ($source_columns as &$column) {
             $c = new \stdClass();
             $c->name = $column;
-            $c->value = isset($selected[$c->name]) ? $selected[$c->name] : '';
+            $c->value = $selected[$c->name] ?? '';
             $c->is_feature = in_array($c->name, $features);
             $c->is_exist = in_array($c->name, $internal_columns) || $c->is_feature;
             $c->is_nf_selected = !$c->is_exist && $c->value==$c->name;

@@ -56,7 +56,7 @@ class Languages
     {
         if (!isset($this->availableLanguages)) {
             include_once("backend/lang/languages_list.php");
-            $this->availableLanguages = isset($langs) ? $langs : [];
+            $this->availableLanguages = $langs ?? [];
         }
         return $this->availableLanguages;
     }
@@ -105,9 +105,7 @@ class Languages
 
     public function getLangLabel($langId = null)
     {
-        if ($langId === null) {
-            $langId = $this->getLangId();
-        }
+        $langId ??= $this->getLangId();
 
         if (!isset($this->languagesList[$langId])) {
             return false;
@@ -119,9 +117,7 @@ class Languages
 
     public function getHrefLang($langId = null)
     {
-        if ($langId === null) {
-            $langId = $this->getLangId();
-        }
+        $langId ??= $this->getLangId();
 
         if (!isset($this->languagesList[$langId])) {
             return false;
@@ -134,9 +130,7 @@ class Languages
     public function getLangLink($langId = null)
     {
         $langLink = '';
-        if ($langId === null) {
-            $langId = $this->getLangId();
-        }
+        $langId ??= $this->getLangId();
         
         if (!isset($this->languagesList[$langId])) {
             return false;
@@ -270,7 +264,7 @@ class Languages
             $file = preg_replace('~^(.*)\.php$~', '$1', $file);
             
             $class = str_replace('/', '\\', $file);
-            if (class_exists($class) && is_subclass_of($class, 'Okay\Core\Entity\Entity')) {
+            if (class_exists($class) && is_subclass_of($class, \Okay\Core\Entity\Entity::class)) {
                 if ($class::getLangTable()) {
                     $result = new \stdClass();
                     $result->langTable = $class::getLangTable();

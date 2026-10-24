@@ -134,7 +134,7 @@ class OkayContainer implements ContainerInterface
     {
         try {
             $this->getParameter($name);
-        } catch (ParameterNotFoundException $exception) {
+        } catch (ParameterNotFoundException) {
             return false;
         }
 
@@ -186,7 +186,7 @@ class OkayContainer implements ContainerInterface
      * @param array  $argumentDefinitions The service arguments definition.
      * @return array The service constructor arguments.
      */
-    private function resolveArguments(array $argumentDefinitions)
+    private function resolveArguments(array $argumentDefinitions): array
     {
         $arguments = [];
 

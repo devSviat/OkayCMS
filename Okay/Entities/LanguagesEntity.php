@@ -240,7 +240,10 @@ class LanguagesEntity extends Entity
         return true;
     }
     
-    private function getLangTables()
+    /**
+     * @return mixed[]
+     */
+    private function getLangTables(): array
     {
         $sql = $this->queryFactory->newSqlQuery();
         $sql->setStatement("SHOW TABLES LIKE '%__lang\_%'");

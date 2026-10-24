@@ -124,9 +124,7 @@ class CategoriesHelper
     public function getTableOfContent($text, $objectUrl = null)
     {
 
-        if ($objectUrl === null) {
-            $objectUrl = Request::getRequestUri();
-        }
+        $objectUrl ??= Request::getRequestUri();
 
         $tableOfContent = [];
         $items = [];

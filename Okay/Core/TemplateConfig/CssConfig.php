@@ -348,7 +348,7 @@ class CssConfig
         }
 
         // Перебиваем в файле все относительные пути
-        if (strpos($cssLine, 'url') !== false && strpos($cssLine, '..') !== false) {
+        if (str_contains($cssLine, 'url') && str_contains($cssLine, '..')) {
             $cssLine = strtr($cssLine, ['../' => '../../' . $subDir . '/']);
         }
 //        if (strpos($cssLine, 'url') !== false) {
@@ -372,7 +372,7 @@ class CssConfig
                     // a Value throws; that's what broke on colors like --okay-basic-company.
                     $value = $r->getValue();
                     $css_value = $value instanceof Value ? $value->render(OutputFormat::createPretty()) : (string)$value;
-                    if (strpos($r->getPropertyName(), '--') === 0) {
+                    if (str_starts_with($r->getPropertyName(), '--')) {
                         $this->cssVariables[$r->getPropertyName()] = $css_value;
                     }
                 }

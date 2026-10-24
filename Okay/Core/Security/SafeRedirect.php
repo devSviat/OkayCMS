@@ -22,11 +22,11 @@ class SafeRedirect
             return false;
         }
 
-        if (strpos($decoded, '\\') !== false) {
+        if (str_contains($decoded, '\\')) {
             return false;
         }
 
-        if (strpos($decoded, '//') === 0) {
+        if (str_starts_with($decoded, '//')) {
             return false;
         }
 

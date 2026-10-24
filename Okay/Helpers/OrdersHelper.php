@@ -163,7 +163,7 @@ class OrdersHelper
                 $purchase->variant = $variants[$purchase->variant_id];
             }
             if (isset($sortedDiscounts[$purchase->id])) {
-                list($purchase->discounts) = $this->discountsHelper->calculateDiscounts($this->discountsHelper->buildFromDB($sortedDiscounts[$purchase->id]), $purchase->undiscounted_price);
+                [$purchase->discounts] = $this->discountsHelper->calculateDiscounts($this->discountsHelper->buildFromDB($sortedDiscounts[$purchase->id]), $purchase->undiscounted_price);
             }
         }
 
@@ -219,7 +219,7 @@ class OrdersHelper
             'entity_id' => $orderId
         ]);
         $order = $ordersEntity->findOne(['id' => $orderId]);
-        list($discounts) = $this->discountsHelper->calculateDiscounts($this->discountsHelper->buildFromDB($discountsDB), $order->undiscounted_total_price);
+        [$discounts] = $this->discountsHelper->calculateDiscounts($this->discountsHelper->buildFromDB($discountsDB), $order->undiscounted_total_price);
 
         return ExtenderFacade::execute(__METHOD__, $discounts, func_get_args());
     }

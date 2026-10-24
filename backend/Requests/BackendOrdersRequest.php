@@ -60,8 +60,7 @@ class BackendOrdersRequest
         if ($postDiscounts = $this->request->post('order_discounts')) {
             foreach ($postDiscounts as $field => $values) {
                 foreach ($values as $i => $value) {
-                    if (!isset($discounts[$i]))
-                        $discounts[$i] = new \stdClass();
+                    $discounts[$i] ??= new \stdClass();
                     $discounts[$i]->{$field} = $value;
                 }
             }
@@ -79,8 +78,7 @@ class BackendOrdersRequest
                 if (!empty($postPurchaseDiscounts)) {
                     foreach ($postPurchaseDiscounts as $field => $values) {
                         foreach ($values as $i => $value) {
-                            if (!isset($discounts[$position][$i]))
-                                $discounts[$position][$i] = new \stdClass();
+                            $discounts[$position][$i] ??= new \stdClass();
                             $discounts[$position][$i]->{$field} = $value;
                         }
                     }

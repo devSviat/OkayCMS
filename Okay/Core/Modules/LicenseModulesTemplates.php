@@ -32,10 +32,10 @@ class LicenseModulesTemplates
     private string $licenseEmail = '';
 
     // Кількість символів в кінці файлу, де ми маємо шукати ліцензію
-    private const END_FILE_LENGTH = 100;
+    private const int END_FILE_LENGTH = 100;
 
-    private const REQUEST_TIMEOUT = 1200;
-    private const MAX_RETRY = 5;
+    private const int REQUEST_TIMEOUT = 1200;
+    private const int MAX_RETRY = 5;
 
     public function __construct(
         QueryFactory $queryFactory,
