@@ -87,7 +87,7 @@ class BackendExtender implements ExtensionInterface
 
     public function extendFilter($params)
     {
-        list($filter, $page) = $params;
+        [$filter, $page] = $params;
 
         $filter[Init::FILTER_FEEDS] = true;
 

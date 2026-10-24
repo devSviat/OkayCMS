@@ -226,7 +226,7 @@ class EpitsentrAdapter extends AbstractPresetAdapter
         if (!empty($item->translit_string) && !empty($item->features)) {
             $translits = [];
             foreach (explode('@|@', $item->translit_string) as $translitItem) {
-                list($featureId, $translit) = explode('!-', $translitItem, 2);
+                [$featureId, $translit] = explode('!-', $translitItem, 2);
                 if (!empty($translit) && isset($item->features[$featureId])) {
                     $translits[$featureId] = $translit;
                 }
@@ -439,9 +439,7 @@ class EpitsentrAdapter extends AbstractPresetAdapter
             $categoryId = $product->main_category_id;
             
             // Кешуємо налаштування категорії
-            if (!isset($this->categorySettingsCache[$categoryId])) {
-                $this->categorySettingsCache[$categoryId] = $this->getCategorySettings($categoryId);
-            }
+            $this->categorySettingsCache[$categoryId] ??= $this->getCategorySettings($categoryId);
             $categorySettings = $this->categorySettingsCache[$categoryId];
             
             $categoryCode = $categoryId;
@@ -640,9 +638,7 @@ class EpitsentrAdapter extends AbstractPresetAdapter
             $countryCode = '';
             
             // Кешуємо налаштування feature
-            if (!isset($this->featureSettingsCache[$countryOfOriginParamId])) {
-                $this->featureSettingsCache[$countryOfOriginParamId] = $this->getFeatureSettings($countryOfOriginParamId);
-            }
+            $this->featureSettingsCache[$countryOfOriginParamId] ??= $this->getFeatureSettings($countryOfOriginParamId);
             $featureSettings = $this->featureSettingsCache[$countryOfOriginParamId];
             
             if (!empty($featureSettings['code'])) {
@@ -667,9 +663,7 @@ class EpitsentrAdapter extends AbstractPresetAdapter
                 $featureId = $feature['id'];
                 
                 // Кешуємо налаштування feature
-                if (!isset($this->featureSettingsCache[$featureId])) {
-                    $this->featureSettingsCache[$featureId] = $this->getFeatureSettings($featureId);
-                }
+                $this->featureSettingsCache[$featureId] ??= $this->getFeatureSettings($featureId);
                 $featureSettings = $this->featureSettingsCache[$featureId];
 
                 if (!$featureSettings || $featureSettings['to_feed']) {

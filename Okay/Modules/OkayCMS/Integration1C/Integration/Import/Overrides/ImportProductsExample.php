@@ -8,7 +8,7 @@ use Okay\Modules\OkayCMS\Integration1C\Integration\Import\ImportProducts as Base
 
 class ImportProducts extends BaseImport
 {
-    
+
     //... Abstract здесь можно перегружать методы базового импорта
     //Необходимо убрать в названии файла окончание Example
     

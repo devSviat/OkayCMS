@@ -39,32 +39,32 @@ class Init extends AbstractInit
         
         $this->setBackendMainController('BannersAdmin');
         $this->migrateEntityTable(BannersEntity::class, [
-            (new EntityField('id'))->setTypeInt(11)->setAutoIncrement(),
-            (new EntityField('name'))->setTypeVarchar(255),
-            (new EntityField('group_name'))->setTypeVarchar(255, true),
-            (new EntityField('position'))->setTypeInt(11)->setDefault(0)->setIndex(),
-            (new EntityField('visible'))->setTypeTinyInt(1, true)->setDefault(1)->setIndex(),
-            (new EntityField('show_all_pages'))->setTypeTinyInt(1, true)->setDefault(1)->setIndex(),
-            (new EntityField('show_all_products'))->setTypeTinyInt(1, true)->setDefault(0)->setIndex(),
-            (new EntityField('categories'))->setTypeVarchar(255)->setDefault(''),
-            (new EntityField('pages'))->setTypeVarchar(255)->setDefault(''),
-            (new EntityField('brands'))->setTypeVarchar(255)->setDefault(''),
-            (new EntityField('as_individual_shortcode'))->setTypeTinyInt(1, true)->setDefault(0),
-            (new EntityField('settings'))->setTypeText(),
+            new EntityField('id')->setTypeInt(11)->setAutoIncrement(),
+            new EntityField('name')->setTypeVarchar(255),
+            new EntityField('group_name')->setTypeVarchar(255, true),
+            new EntityField('position')->setTypeInt(11)->setDefault(0)->setIndex(),
+            new EntityField('visible')->setTypeTinyInt(1, true)->setDefault(1)->setIndex(),
+            new EntityField('show_all_pages')->setTypeTinyInt(1, true)->setDefault(1)->setIndex(),
+            new EntityField('show_all_products')->setTypeTinyInt(1, true)->setDefault(0)->setIndex(),
+            new EntityField('categories')->setTypeVarchar(255)->setDefault(''),
+            new EntityField('pages')->setTypeVarchar(255)->setDefault(''),
+            new EntityField('brands')->setTypeVarchar(255)->setDefault(''),
+            new EntityField('as_individual_shortcode')->setTypeTinyInt(1, true)->setDefault(0),
+            new EntityField('settings')->setTypeText(),
         ]);
         
         $this->migrateEntityTable(BannersImagesEntity::class, [
-            (new EntityField('id'))->setTypeInt(11)->setAutoIncrement(),
-            (new EntityField('banner_id'))->setTypeInt(11)->setIndex(),
-            (new EntityField('name'))->setTypeVarchar(255)->setDefault('')->setIsLang(),
-            (new EntityField('alt'))->setTypeVarchar(255)->setDefault('')->setIsLang(),
-            (new EntityField('title'))->setTypeVarchar(255)->setDefault('')->setIsLang(),
-            (new EntityField('url'))->setTypeVarchar(255)->setDefault('')->setIsLang(),
-            (new EntityField('description'))->setTypeText()->setIsLang(),
-            (new EntityField('image'))->setTypeVarchar(255)->setDefault(''),
-            (new EntityField('position'))->setTypeInt(11)->setDefault(0)->setIndex(),
-            (new EntityField('visible'))->setTypeTinyInt(1, true)->setDefault(1)->setIndex(),
-            (new EntityField('settings'))->setTypeText(),
+            new EntityField('id')->setTypeInt(11)->setAutoIncrement(),
+            new EntityField('banner_id')->setTypeInt(11)->setIndex(),
+            new EntityField('name')->setTypeVarchar(255)->setDefault('')->setIsLang(),
+            new EntityField('alt')->setTypeVarchar(255)->setDefault('')->setIsLang(),
+            new EntityField('title')->setTypeVarchar(255)->setDefault('')->setIsLang(),
+            new EntityField('url')->setTypeVarchar(255)->setDefault('')->setIsLang(),
+            new EntityField('description')->setTypeText()->setIsLang(),
+            new EntityField('image')->setTypeVarchar(255)->setDefault(''),
+            new EntityField('position')->setTypeInt(11)->setDefault(0)->setIndex(),
+            new EntityField('visible')->setTypeTinyInt(1, true)->setDefault(1)->setIndex(),
+            new EntityField('settings')->setTypeText(),
         ]);
     }
     
@@ -161,7 +161,7 @@ class Init extends AbstractInit
         $sql = $queryFactory->newSqlQuery();
         $sql->setStatement("UPDATE " . BannersImagesEntity::getLangTable() . " AS l LEFT JOIN " . BannersImagesEntity::getTable() . " AS b ON l." . BannersImagesEntity::getLangObject() . "_id = b.id SET l.image=b.image")->execute();
         
-        $this->migrateEntityField(BannersImagesEntity::class, (new EntityField('is_lang_banner'))->setTypeTinyInt(1, true)->setDefault(1));
+        $this->migrateEntityField(BannersImagesEntity::class, new EntityField('is_lang_banner')->setTypeTinyInt(1, true)->setDefault(1));
         
     }
 
@@ -169,7 +169,7 @@ class Init extends AbstractInit
     {
         $this->migrateEntityField(
             BannersImagesEntity::class,
-            (new EntityField('image_mobile'))
+            new EntityField('image_mobile')
                 ->setTypeVarchar(255)
                 ->setIsLang()
                 ->setDefault('')

@@ -50,7 +50,7 @@ class Integration1C
     /**
      * @var array Какие расширения файлов можно загружать из 1С
      */
-    public $allowed_extensions = array(
+    public $allowed_extensions = [
         'xml',
         'jpg',
         'jpeg',
@@ -63,7 +63,7 @@ class Integration1C
         'doc',
         'xlsx',
         'docx',
-    );
+    ];
 
     /** @var Managers*/
     public $managers;
@@ -178,7 +178,7 @@ class Integration1C
             
             $remoteUser = base64_decode(substr($remoteUser,6)) ;
             if ((strlen($remoteUser) > 0) || ( strcasecmp($remoteUser, ":" ) > 0)) {
-                list($name, $password) = explode(':', $remoteUser);
+                [$name, $password] = explode(':', $remoteUser);
                 $_SERVER['PHP_AUTH_USER'] = $name;
                 $_SERVER['PHP_AUTH_PW']   = $password;
             }

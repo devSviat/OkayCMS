@@ -238,7 +238,7 @@ class ImportProducts extends AbstractImport
         $xmlProduct->Наименование = trim($xmlProduct->Наименование);
 
         //  Id товара и варианта (если есть) по 1С
-        @list($product1cId, $variant1cId) = explode('#', $xmlProduct->Ид);
+        @[$product1cId, $variant1cId] = explode('#', $xmlProduct->Ид);
         if (empty($variant1cId)) {
             $variant1cId = '';
         }
@@ -355,7 +355,7 @@ class ImportProducts extends AbstractImport
                     $url .= '_1';
                 }
             }
-            
+
             $productId = $productsEntity->add([
                 'external_id' => $product1cId,
                 'url' => $url,

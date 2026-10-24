@@ -424,9 +424,7 @@ class RozetkaAdapter extends AbstractPresetAdapter
                     }
 
                     if (count($feature['values']) > 1) {
-                        $valuesString = implode(" <br/>\n", array_map(function($value) {
-                            return $this->xmlFeedHelper->escape($value);
-                        }, $feature['values']));
+                        $valuesString = implode(" <br/>\n", array_map(fn($value) => $this->xmlFeedHelper->escape($value), $feature['values']));
 
                         $data = sprintf(
                             '<value lang="%s"><![CDATA[%s]]></value>',
@@ -434,9 +432,7 @@ class RozetkaAdapter extends AbstractPresetAdapter
                             $valuesString
                         );
                         if (!empty($this->uaLang) && !empty($this->uaLang->id) && !empty($product->features_ua[$feature['id']])) {
-                            $valuesStringUa = implode(" <br/>\n", array_map(function($value) {
-                                return $this->xmlFeedHelper->escape($value);
-                            }, $product->features_ua[$feature['id']]['values']));
+                            $valuesStringUa = implode(" <br/>\n", array_map(fn($value) => $this->xmlFeedHelper->escape($value), $product->features_ua[$feature['id']]['values']));
                             $data .= sprintf(
                                 '<value lang="%s"><![CDATA[%s]]></value>',
                                 $this->languages->getHrefLang($this->uaLang->id),

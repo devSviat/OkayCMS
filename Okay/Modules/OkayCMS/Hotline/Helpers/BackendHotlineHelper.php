@@ -334,9 +334,7 @@ class BackendHotlineHelper
     /** @return object[] */
     private function getAllRelations()
     {
-        if ($this->allRelations === null) {
-            $this->allRelations = $this->relationsEntity->noLimit()->find();
-        }
+        $this->allRelations ??= $this->relationsEntity->noLimit()->find();
 
         return $this->allRelations;
     }

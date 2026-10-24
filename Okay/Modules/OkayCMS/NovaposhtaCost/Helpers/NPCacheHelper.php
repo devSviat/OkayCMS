@@ -13,7 +13,7 @@ use Okay\Modules\OkayCMS\NovaposhtaCost\Init\Init;
 
 class NPCacheHelper
 {
-    private const START_UPDATE_TIME_TTL = 1800;
+    private const int START_UPDATE_TIME_TTL = 1800;
 
     private NPApiHelper $apiHelper;
     private EntityFactory $entityFactory;
