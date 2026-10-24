@@ -449,7 +449,9 @@ class UpdateRunner
                 array_push($statements, ...$this->migrator->splitSqlFile($path));
             }
 
-            $tables = UpdateBackup::extractTouchedTables($statements, (string) $this->config->get('db_prefix'));
+            $tables = $this->migrator->existingTables(
+                UpdateBackup::extractTouchedTables($statements, (string) $this->config->get('db_prefix'))
+            );
             if ($tables !== []) {
                 $dumpPath = $backupsDir . '/pre-update-' . $ctx['fromVersion'] . '-to-' . $ctx['toVersion'] . '-' . time() . '.sql';
                 $this->backup->dumpTables($tables, $dumpPath);
