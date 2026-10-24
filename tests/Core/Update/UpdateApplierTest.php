@@ -58,6 +58,10 @@ class UpdateApplierTest extends TestCase
             }
 
             $path = $dir . '/' . $entry;
+            // chmod на посиланні діє на ціль: php-only/php веде до справжнього бінарника.
+            if (is_link($path)) {
+                continue;
+            }
             is_dir($path) ? $this->chmodRecursive($path, $mode) : chmod($path, $mode);
         }
     }
@@ -349,10 +353,85 @@ class UpdateApplierTest extends TestCase
         $rootDir = $this->tmpDir . '/root';
         $this->writeFile($payloadDir . '/composer.lock', '{"packages": [{"name": "a/b", "version": "1.0.0"}], "packages-dev": [{"name": "phpunit/phpunit", "version": "13.1.0"}], "content-hash": "new"}');
         $this->writeFile($rootDir . '/composer.lock', '{"packages": [{"name": "a/b", "version": "1.0.0"}], "packages-dev": [{"name": "phpunit/phpunit", "version": "13.0.0"}], "content-hash": "old"}');
+        $this->writeFile($rootDir . '/vendor/composer/installed.json', '{"packages": [{"name": "a/b", "version": "1.0.0"}]}');
 
         $this->withEmptyPath(function () use ($rootDir, $payloadDir): void {
             $this->assertNull($this->applier->runComposerIfNeeded($rootDir, $payloadDir));
         });
+    }
+
+    /**
+     * Сам пакетний composer.lock уже лежить на сайті (оновлення до 1.4.1 клали
+     * його без composer install), а vendor/ старий. Порівняння файлів тут
+     * мовчить — рішення мусить бачити, що встановлено насправді.
+     */
+    public function testRunComposerIfNeededSeesAStaleVendorEvenWhenTheLockIsAlreadyNew(): void
+    {
+        $payloadDir = $this->tmpDir . '/payload';
+        $rootDir = $this->tmpDir . '/root';
+        $lock = '{"packages": [{"name": "a/b", "version": "2.0.0"}, {"name": "bacon/bacon-qr-code", "version": "3.0.1"}], "content-hash": "new"}';
+        $this->writeFile($payloadDir . '/composer.lock', $lock);
+        $this->writeFile($rootDir . '/composer.lock', $lock);
+        $this->writeFile($rootDir . '/vendor/composer/installed.json', '{"packages": [{"name": "a/b", "version": "1.0.0"}]}');
+
+        $this->withEmptyPath(function () use ($rootDir, $payloadDir): void {
+            $this->expectException(\RuntimeException::class);
+            $this->expectExceptionMessageMatches('/composer.*не знайдено/us');
+            $this->applier->runComposerIfNeeded($rootDir, $payloadDir);
+        });
+    }
+
+    /** Оточення справді доходить до процесу composer, а не лише рахується. */
+    public function testComposerProcessReceivesTheEnvironment(): void
+    {
+        $rootDir = $this->tmpDir . '/root';
+        $this->writeFile($rootDir . '/composer.phar', '<?php echo "COMPOSER_HOME=" . getenv("COMPOSER_HOME");');
+        $savedHome = getenv('HOME');
+        $savedComposerHome = getenv('COMPOSER_HOME');
+        putenv('HOME');
+        putenv('COMPOSER_HOME');
+        try {
+            $this->withEmptyPath(function () use ($rootDir): void {
+                // Лише php, без справжнього composer із /usr/local/bin.
+                $phpOnly = $this->tmpDir . '/php-only';
+                mkdir($phpOnly);
+                symlink(PHP_BINARY, $phpOnly . '/php');
+                $_ENV['PATH'] = $_SERVER['PATH'] = getenv('PATH') . ':' . $phpOnly;
+                putenv('PATH=' . $_ENV['PATH']);
+                $this->assertStringContainsString('COMPOSER_HOME=' . rtrim(sys_get_temp_dir(), '/') . '/okaycms-composer-', $this->applier->runComposer($rootDir));
+            });
+        } finally {
+            putenv($savedHome === false ? 'HOME' : 'HOME=' . $savedHome);
+            putenv($savedComposerHome === false ? 'COMPOSER_HOME' : 'COMPOSER_HOME=' . $savedComposerHome);
+        }
+    }
+
+    /**
+     * Воркер php-fpm часто без HOME (clear_env = yes) або з чужим HOME від
+     * root-майстра; composer без доступного на запис COMPOSER_HOME падає.
+     */
+    public function testComposerGetsAWritableHomeOutsideTheSite(): void
+    {
+        $saved = [getenv('HOME'), getenv('COMPOSER_HOME')];
+        try {
+            putenv('COMPOSER_HOME');
+            putenv('HOME');
+            $env = UpdateApplier::composerEnv();
+            $this->assertStringStartsWith(rtrim(sys_get_temp_dir(), '/') . '/okaycms-composer-', $env['COMPOSER_HOME']);
+
+            putenv('HOME=/nonexistent-home-' . uniqid());
+            $this->assertArrayHasKey('COMPOSER_HOME', UpdateApplier::composerEnv());
+
+            putenv('HOME=' . $this->tmpDir);
+            $this->assertArrayNotHasKey('COMPOSER_HOME', UpdateApplier::composerEnv(), 'свій доступний HOME — без підміни');
+
+            putenv('COMPOSER_HOME=/custom/composer');
+            putenv('HOME');
+            $this->assertArrayNotHasKey('COMPOSER_HOME', UpdateApplier::composerEnv(), 'налаштований COMPOSER_HOME не чіпаємо');
+        } finally {
+            putenv($saved[0] === false ? 'HOME' : 'HOME=' . $saved[0]);
+            putenv($saved[1] === false ? 'COMPOSER_HOME' : 'COMPOSER_HOME=' . $saved[1]);
+        }
     }
 
     public function testRunComposerIfNeededTreatsMissingCurrentLockAsDifferent(): void
