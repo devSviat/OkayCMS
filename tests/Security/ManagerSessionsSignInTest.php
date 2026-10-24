@@ -6,6 +6,7 @@ use Aura\Sql\ExtendedPdo;
 use Okay\Core\Config;
 use Okay\Core\EntityFactory;
 use Okay\Core\Security\AdminCsrfToken;
+use Okay\Core\Security\ManagerAuthLog;
 use Okay\Core\Security\ManagerReauth;
 use Okay\Core\Security\ManagerSessions;
 use Okay\Core\ServiceLocator;
@@ -42,8 +43,9 @@ class ManagerSessionsSignInTest extends TestCase
             $_SESSION['admin'] = 'someone_else';
             $tokenBefore = AdminCsrfToken::get();
 
-            $sessions = new ManagerSessions(ServiceLocator::getInstance()->getService(EntityFactory::class));
-            $this->assertTrue($sessions->signIn((object)['id' => $managerId, 'login' => 'si_manager']));
+            $log = new ManagerAuthLog(ServiceLocator::getInstance()->getService(EntityFactory::class));
+            $sessions = new ManagerSessions(ServiceLocator::getInstance()->getService(EntityFactory::class), null, $log);
+            $this->assertTrue($sessions->signIn((object)['id' => $managerId, 'login' => 'si_manager'], true));
 
             $this->assertNotSame($before, session_id(), 'фіксація сесії: ідентифікатор мусить змінитись');
             $this->assertSame('si_manager', $_SESSION['admin']);
@@ -51,6 +53,11 @@ class ManagerSessionsSignInTest extends TestCase
             $this->assertNotSame($tokenBefore, AdminCsrfToken::get(), 'CSRF-токен з-до входу не переживає вхід');
             $this->assertTrue($sessions->isValid('si_manager', session_id()));
             $this->assertFalse($sessions->isValid('si_manager', $before), 'старий ідентифікатор не зареєстровано');
+
+            // Вхід і вихід — події журналу, вхід із позначкою, що з кодом 2FA.
+            $sessions->signOut();
+            $events = $pdo->fetchAll("SELECT event, details FROM {$prefix}manager_auth_log WHERE manager_id = :id ORDER BY id", ['id' => $managerId]);
+            $this->assertSame([['event' => 'login', 'details' => '{"mfa":true}'], ['event' => 'logout', 'details' => '']], $events);
         } finally {
             $pdo->rollBack();
             session_destroy();

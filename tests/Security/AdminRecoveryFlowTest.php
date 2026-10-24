@@ -56,7 +56,7 @@ class AdminRecoveryFlowTest extends TestCase
     {
         $source = $this->source();
 
-        $update = strpos($source, "\$managersEntity->update((int)\$manager->id, ['password' => \$new_password]);");
+        $update = strpos($source, "\$saved = \$managersEntity->update((int)\$manager->id, ['password' => \$new_password]);");
         $revoke = strpos($source, '$managerSessions->revokeAll((int)$manager->id, (int)$manager->id);');
         $login = strpos($source, '$managerSessions->signIn($manager)');
 

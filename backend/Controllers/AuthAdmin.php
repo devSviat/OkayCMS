@@ -9,6 +9,7 @@ use Okay\Core\Managers;
 use Okay\Core\Notify;
 use Okay\Core\Security\AdminLoginGuard;
 use Okay\Core\Security\AdminRecoveryToken;
+use Okay\Core\Security\ManagerAuthLog;
 use Okay\Core\Security\ManagerSessions;
 use Okay\Core\Security\ManagerTwoFactor;
 use Okay\Core\Validator;
@@ -28,7 +29,8 @@ class AuthAdmin extends IndexAdmin
         AdminRecoveryToken $recoveryToken,
         AdminLoginGuard $loginGuard,
         ManagerSessions $managerSessions,
-        ManagerTwoFactor $twoFactor
+        ManagerTwoFactor $twoFactor,
+        ManagerAuthLog $authLog
     ) {
         $clientIp = (string)($_SERVER['REMOTE_ADDR'] ?? '');
 
@@ -123,8 +125,15 @@ class AuthAdmin extends IndexAdmin
                         return;
                     }
 
-                    // ManagersEntity::update() хешує пароль сам.
-                    $managersEntity->update((int)$manager->id, ['password' => $new_password]);
+                    // ManagersEntity::update() хешує пароль сам. Не записався — не
+                    // гасимо сесій і не впускаємо: пароль лишився старим.
+                    $saved = $managersEntity->update((int)$manager->id, ['password' => $new_password]);
+                    if (!$saved) {
+                        $this->design->assign('error_message', 'session_failed');
+                        $this->response->setContent($this->design->fetch('auth.tpl'));
+                        return;
+                    }
+                    $authLog->record(ManagerAuthLog::PASSWORD_CHANGED, (int)$manager->id, null, ['via' => 'email']);
 
                     // Новий пароль закриває всі наявні входи: відновлення
                     // найчастіше роблять саме тоді, коли пароль міг витекти.
@@ -156,6 +165,9 @@ class AuthAdmin extends IndexAdmin
             $pass = is_string($pass) ? $pass : '';
 
             if (!$loginGuard->allowPasswordAttempt($login, $clientIp)) {
+                // Без пошуку менеджера: ця гілка дешева й без меж, і різниця в
+                // часі між існуючим і вигаданим логіном видавала б, чи він є.
+                $loginGuard->recordLimit(null);
                 $this->design->assign('login', $login);
                 $this->design->assign('error_message', 'limit_try');
             } else {

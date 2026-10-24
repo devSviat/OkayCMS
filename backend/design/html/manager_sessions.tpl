@@ -71,3 +71,9 @@
         <p class="text_grey">{$btr->manager_sessions_none|escape}</p>
     {/if}
 </div>
+
+<div class="boxed">
+    <div class="heading_box">{$btr->manager_log_heading|escape}</div>
+    <p class="text_grey font_12">{$btr->manager_log_all_hint|escape}</p>
+    {include file='manager_auth_log.tpl' auth_log_all=true}
+</div>

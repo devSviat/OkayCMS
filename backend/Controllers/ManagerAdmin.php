@@ -6,6 +6,7 @@ namespace Okay\Admin\Controllers;
 
 use Okay\Core\Languages;
 use Okay\Core\ManagerMenu;
+use Okay\Core\Security\ManagerAuthLog;
 use Okay\Core\Security\ManagerProfilePolicy;
 use Okay\Core\Security\ManagerReauth;
 use Okay\Core\Security\ManagerSessions;
@@ -38,6 +39,7 @@ class ManagerAdmin extends IndexAdmin
     private const NEW_CODES_KEY = 'totp_new_codes';
 
     private ManagerTwoFactor $twoFactor;
+    private ManagerAuthLog $authLog;
     private string $totpIssuer = '';
 
     public function fetch(
@@ -49,9 +51,11 @@ class ManagerAdmin extends IndexAdmin
         ManagerReauth $reauth,
         Validator $validator,
         ManagerTwoFactor $twoFactor,
-        Settings $settings
+        Settings $settings,
+        ManagerAuthLog $authLog
     ) {
         $this->twoFactor = $twoFactor;
+        $this->authLog = $authLog;
         $this->totpIssuer = trim((string)$settings->get('site_name')) ?: (string)($_SERVER['HTTP_HOST'] ?? 'OkayCMS');
         $viewer = $this->manager;
         $viewerId = (int)$viewer->id;
@@ -103,6 +107,8 @@ class ManagerAdmin extends IndexAdmin
             $session->is_mobile = ManagerSessions::isMobile((string)$session->user_agent);
         }
         $this->design->assign('sessions', $sessions);
+        // Журнал видно тим самим, хто бачить сесії: це та сама картина «хто й звідки заходив».
+        $this->design->assign('auth_log', $canSeeSessions ? $this->authLog->of((int)$target->id) : []);
         $this->design->assign('current_session_id', $current !== null ? (int)$current->id : 0);
         $this->design->assign('reauth_fresh', $reauth->isFresh());
         $this->design->assign('reauth_expires_at', $reauth->expiresAt());
@@ -227,7 +233,9 @@ class ManagerAdmin extends IndexAdmin
                     $this->postRedirectGet->storeMessageError('last_full_admin');
                     break;
                 }
-                $managersEntity->update($targetId, ['permissions' => $newPermissions]);
+                if ($managersEntity->update($targetId, ['permissions' => $newPermissions])) {
+                    $this->authLog->record(ManagerAuthLog::PERMISSIONS_CHANGED, $targetId, $isSelf ? null : $viewerId);
+                }
                 $this->postRedirectGet->storeMessageSuccess('permissions_saved');
                 break;
 
@@ -270,7 +278,7 @@ class ManagerAdmin extends IndexAdmin
                         break;
                     }
                 }
-                $this->twoFactor->disable($targetId);
+                $this->twoFactor->disable($targetId, $viewerId, 'profile');
                 if ($isSelf) {
                     $managerSessions->revokeOthers($targetId, $viewerId);
                 } else {
@@ -322,13 +330,19 @@ class ManagerAdmin extends IndexAdmin
             return;
         }
 
-        $managersEntity->update($targetId, [
+        $saved = $managersEntity->update($targetId, [
             'login'       => $login,
             'email'       => $email,
             'lang'        => in_array($lang, $btrLanguages, true) ? $lang : (string)$target->lang,
             'comment'     => mb_substr($this->stringPost('comment'), 0, 512),
             'menu_status' => $this->request->post('menu_status', 'integer') ? 1 : 0,
         ]);
+        if ($saved && $login !== (string)$target->login) {
+            $this->authLog->record(ManagerAuthLog::LOGIN_CHANGED, $targetId, $isSelf ? null : $viewerId);
+        }
+        if ($saved && $email !== (string)$target->email) {
+            $this->authLog->record(ManagerAuthLog::EMAIL_CHANGED, $targetId, $isSelf ? null : $viewerId);
+        }
 
         if ($isSelf && $login !== (string)$target->login) {
             $managerSessions->loginChanged($targetId, $login);
@@ -372,7 +386,11 @@ class ManagerAdmin extends IndexAdmin
         }
 
         // ManagersEntity::update() хешує пароль сам.
-        $managersEntity->update((int)$target->id, ['password' => $password]);
+        if (!$managersEntity->update((int)$target->id, ['password' => $password])) {
+            $this->postRedirectGet->storeMessageError('save_failed');
+            return;
+        }
+        $this->authLog->record(ManagerAuthLog::PASSWORD_CHANGED, (int)$target->id, $isSelf ? null : $viewerId, ['via' => 'profile']);
 
         if ($isSelf) {
             $managerSessions->revokeOthers((int)$target->id, $viewerId);
@@ -438,6 +456,7 @@ class ManagerAdmin extends IndexAdmin
             return;
         }
 
+        $this->authLog->record(ManagerAuthLog::MANAGER_CREATED, (int)$id, (int)$viewer->id);
         $this->postRedirectGet->storeMessageSuccess('added');
         $this->response->redirectTo($this->profileUrl((int)$id, self::TAB_PROFILE));
     }
