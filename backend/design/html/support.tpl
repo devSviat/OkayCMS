@@ -80,7 +80,7 @@
                                             {elseif $topic->status == 'closed'}
                                                 <span class="text_grey">{$btr->support_closed|escape}</span>
                                             {else}
-                                               <span class="text_grey">unknown</span>
+                                               <span class="text_grey">{$btr->support_status_unknown|escape}</span>
                                             {/if}
                                         </div>
                                         <div class="okay_list_boding okay_list_support_time {if $topic->spent_time < 0}text_success{/if}">

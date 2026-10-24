@@ -23,11 +23,11 @@
                        <div class="col-lg-4 col-md-4 col-sm-12">
                            <div class="banner_card">
                                <div class="system_header">
-                                   <span class="font-weight-bold">PHP Version</span>
+                                   <span class="font-weight-bold">{$btr->settings_system_php_version|escape}</span>
                                </div>
                                <div class="banner_card_block">
                                    <div class="system_information">
-                                       Version: {$php_version|escape}
+                                       {$btr->general_version|escape}: {$php_version|escape}
                                    </div>
                                </div>
                            </div>
