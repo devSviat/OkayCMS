@@ -14,7 +14,6 @@ php vendor/bin/phpunit tests/Core/            # каталог
 php vendor/bin/phpunit --filter TplModTest    # один клас
 
 php vendor/bin/phpstan analyse                # статичний аналіз
-php vendor/bin/phpcs                          # сумісність із версією PHP
 
 dev/bin/smoke.sh                              # перевірка оточення; запускати з кореня
 ```
@@ -163,15 +162,19 @@ gh run list --repo devSviat/OkayCMS-Fork --branch main --limit 5 --json name,con
 тест проходить за мілісекунди, а той, що тягне PDO, висить до таймауту, бо на паузі з'єднання не
 відпадає з помилкою.
 
-## PHP_CodeSniffer
+## Застаріле в PHP і бібліотеках
 
-`phpcs.xml.dist` — це **не стильовий** набір правил, а перевірка сумісності з версією PHP:
-`PHPCompatibility` із `testVersion = 8.4-`. Перевіряються `Okay`, `backend`, `ok` і `tests`.
+PHPStan підключає `phpstan/phpstan-deprecation-rules`: виклик функції, методу, константи чи класу з
+позначкою `@deprecated` (у PHP чи в залежності, як `Monolog\Logger::DEBUG`) валить аналіз. Застарілі
+конструкції самої мови — неявний nullable, оператор backtick — PHPStan ловить і
+без розширення, але рахує нижньою межею 8.4 з `composer.json` і не бачить того, що застаріло лише
+в 8.5 (касти `(integer)`, `(boolean)`). Це ловить наступний крок CI: `php -l` на 8.5 по кожному
+файлу репозиторію, зокрема `tests/` і `ok`, — будь-який рядок, крім «No syntax errors», валить збірку.
+`phpVersion: 80500` у `phpstan.neon` натомість не годиться: PHPStan перестав би помічати синтаксис 8.5
+в коді, який мусить працювати й на 8.4.
 
-Попередження не валять перевірку (`ignore_warnings_on_exit`), гейтом є лише помилки. Одне
-правило вимкнене свідомо — `ArgumentFunctionsReportCurrentValue`: воно спрацьовує на кожному
-`ExtenderFacade::execute(__METHOD__, $result, func_get_args())`, тобто буквально всюди, і
-стосується поведінки, яка діє з PHP 7.0.
+PHPCompatibility тут немає: стабільна 9.3.5 не знає PHP 8.x і на коді з навмисними застарілими
+конструкціями 8.4/8.5 не знаходила жодної.
 
 ## `dev/bin/smoke.sh`
 
@@ -193,9 +196,9 @@ gh run list --repo devSviat/OkayCMS-Fork --branch main --limit 5 --json name,con
 | ---- | ------------ |
 | `composer validate --strict` | коректність `composer.json` |
 | `composer audit --locked` | вразливості в залежностях; `--abandoned=report`, тобто покинутий пакет не валить збірку |
-| `vendor/bin/phpcs -q` | сумісність із версією PHP, на матриці 8.4 і 8.5 |
 | `vendor/bin/phpunit` | тести, на тій самій матриці |
 | `vendor/bin/phpstan analyse` | статичний аналіз, окремою джобою на 8.5 |
+| `php -l` по всіх файлах | застаріле в PHP 8.5, у тій самій джобі |
 | `gitleaks detect` | секрети по **всій** історії |
 
 Розібрані вручну спрацювання Gitleaks перелічені у `.gitleaksignore` поіменно — не звуженням
@@ -208,7 +211,6 @@ gh run list --repo devSviat/OkayCMS-Fork --branch main --limit 5 --json name,con
 
 ```bash
 cd dev && docker compose exec php85 php vendor/bin/phpunit
-cd dev && docker compose exec php85 php vendor/bin/phpcs
 cd dev && docker compose exec php85 php vendor/bin/phpstan analyse
 dev/bin/smoke.sh
 ```
