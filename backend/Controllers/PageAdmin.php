@@ -29,6 +29,7 @@ class PageAdmin extends IndexAdmin
                 if (empty($page->id)) {
                     $page     = $backendPagesHelper->prepareAdd($page);
                     $page->id = $backendPagesHelper->add($page);
+                    $this->postRedirectGet->requireAdded($page->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($page->id);

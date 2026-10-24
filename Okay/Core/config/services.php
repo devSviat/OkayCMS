@@ -630,6 +630,7 @@ $services = [
         'arguments' => [
             new SR(Request::class),
             new SR(Response::class),
+            new SR(BackendTranslations::class),
         ],
     ],
     FrontPostRedirectGet::class => [

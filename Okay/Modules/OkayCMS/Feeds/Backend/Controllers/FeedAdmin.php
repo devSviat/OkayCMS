@@ -25,6 +25,7 @@ class FeedAdmin extends IndexAdmin
                 if (empty($feed->id)) {
                     $feed     = $backendFeedsHelper->prepareAdd($feed);
                     $feed->id = $backendFeedsHelper->add($feed);
+                    $this->postRedirectGet->requireAdded($feed->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($feed->id);

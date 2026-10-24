@@ -28,6 +28,7 @@ class AuthorAdmin extends IndexAdmin
                 if (empty($author->id)) {
                     $preparedAuthor = $backendAuthorsHelper->prepareAdd($author);
                     $author->id     = $backendAuthorsHelper->add($preparedAuthor);
+                    $this->postRedirectGet->requireAdded($author->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($author->id);

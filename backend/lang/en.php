@@ -1858,6 +1858,7 @@ $lang['manager_reauth_title'] = 'Confirm your password';
 $lang['manager_reauth_hint'] = 'Login, email, password, permissions, sessions and deleting managers change only after confirmation. It lasts 10 minutes.';
 $lang['manager_reauth_wrong'] = 'Wrong password.';
 $lang['manager_save_failed'] = 'Could not save. Please try again.';
+$lang['general_add_failed'] = 'The record was not added: the database rejected it. Details are in the site error log.';
 $lang['index_my_profile'] = 'profile and sessions';
 $lang['core_updater_meta_title'] = 'Core update';
 $lang['core_updater_installed_label'] = 'Installed version';

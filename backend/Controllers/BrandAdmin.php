@@ -26,6 +26,7 @@ class BrandAdmin extends IndexAdmin
                 if (empty($brand->id)) {
                     $preparedBrand = $backendBrandsHelper->prepareAdd($brand);
                     $brand->id     = $backendBrandsHelper->add($preparedBrand);
+                    $this->postRedirectGet->requireAdded($brand->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($brand->id);

@@ -31,6 +31,7 @@ class DeliveryAdmin extends IndexAdmin
                 if (empty($delivery->id)) {
                     $preparedDelivery = $backendDeliveriesHelper->prepareAdd($delivery);
                     $delivery->id     = $backendDeliveriesHelper->add($preparedDelivery);
+                    $this->postRedirectGet->requireAdded($delivery->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($delivery->id);

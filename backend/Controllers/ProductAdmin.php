@@ -44,6 +44,7 @@ class ProductAdmin extends IndexAdmin
                 if (empty($product->id)) {
                     $preparedProduct = $backendProductsHelper->prepareAdd($product);
                     $addedProductId  = $backendProductsHelper->add($preparedProduct);
+                    $this->postRedirectGet->requireAdded($addedProductId);
                     $product = $backendProductsHelper->getProduct($addedProductId);
 
                     $this->postRedirectGet->storeMessageSuccess('added');

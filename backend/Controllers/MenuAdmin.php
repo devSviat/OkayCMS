@@ -37,6 +37,7 @@ class MenuAdmin extends IndexAdmin
                 if (empty($menu->id)) {
                     $preparedMenu = $backendMenuHelper->prepareAdd($menu);
                     $menu->id  = $backendMenuHelper->add($preparedMenu);
+                    $this->postRedirectGet->requireAdded($menu->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($menu->id);

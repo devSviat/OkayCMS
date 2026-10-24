@@ -31,6 +31,7 @@ class UserAdmin extends IndexAdmin
                 if (empty($user->id)) {
                     $preparedUser = $backendUsersHelper->prepareAdd($user);
                     $preparedUser->id = $backendUsersHelper->add($preparedUser);
+                    $this->postRedirectGet->requireAdded($preparedUser->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($preparedUser->id);

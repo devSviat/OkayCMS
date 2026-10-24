@@ -25,6 +25,7 @@ class BannersImageAdmin extends IndexAdmin
             if (empty($bannersImage->id)) {
                 $preparedBannersImage = $bannersImagesHelper->prepareAdd($bannersImage);
                 $bannersImage->id     = $bannersImagesHelper->add($preparedBannersImage);
+                $this->postRedirectGet->requireAdded($bannersImage->id);
                 $this->postRedirectGet->storeMessageSuccess('added');
                 $this->postRedirectGet->storeNewEntityId($bannersImage->id);
                 $isNewBannersImage = true;

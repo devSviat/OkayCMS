@@ -37,6 +37,7 @@ class BannerAdmin extends IndexAdmin
                     /*Добавляем/обновляем группу баннеров*/
                     $preparedBanner = $bannersHelper->prepareAdd($banner);
                     $banner->id = $bannersHelper->add($preparedBanner);
+                    $this->postRedirectGet->requireAdded($banner->id);
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($banner->id);
                 } else {

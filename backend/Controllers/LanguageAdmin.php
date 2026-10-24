@@ -35,6 +35,7 @@ class LanguageAdmin extends IndexAdmin
                 } else {
                     /*Добавление/Обновление языка*/
                     $updateLanguage->id = $languagesEntity->add($updateLanguage);
+                    $this->postRedirectGet->requireAdded($updateLanguage->id);
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($updateLanguage->id);
                 }
