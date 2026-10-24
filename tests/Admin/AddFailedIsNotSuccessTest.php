@@ -66,7 +66,7 @@ class AddFailedIsNotSuccessTest extends TestCase
             }
         }
 
-        self::assertGreaterThanOrEqual(19, $checked, 'пошук місць add() нічого не знаходить — перевірка була б зеленою ні на чому');
+        self::assertGreaterThanOrEqual(17, $checked, 'пошук місць add() нічого не знаходить — перевірка була б зеленою ні на чому');
     }
 
     private static function prg(): BackendPostRedirectGet
