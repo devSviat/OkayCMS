@@ -483,6 +483,31 @@
     .okay_list_drag {
         display: none;
     }
+
+    /* Список товарів на телефоні: увімкнути чи вимкнути товар — щоденна дія, а
+       без перемикача в рядку лишалась тільки кнопка видалення. Видалення
+       лишається: масових дій на телефоні немає, тож іншого шляху до нього нема.
+       Клас products_list мають і інші списки, тож товари впізнаються за
+       клітинками ціни й кількості, які є лише в них. */
+    .products_list:has(.okay_list_price):has(.okay_list_count) .okay_list_status {
+        display: block;
+        width: 64px;
+    }
+    .products_list:has(.okay_list_price):has(.okay_list_count) .okay_list_body .okay_list_name {
+        width: calc(100% - 144px);
+    }
+    .products_list:has(.okay_list_price):has(.okay_list_count) .okay_list_close .btn_close {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    /* Контейнер шапки не стискається (flex: 0 0 auto) і брав ширину панелі
+       замовлення в один рядок — 450px на 390px екрані. Стиснення дає панелі
+       перенести статус і кнопки на другий рядок. */
+    .main_header__item:has(> .order_toolbar) {
+        flex-shrink: 1;
+        min-width: 0;
+        max-width: 100%;
+    }
     
     .currencies_wrap .okay_list_footer {
         display: flex;
