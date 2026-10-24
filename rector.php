@@ -15,8 +15,6 @@ return RectorConfig::configure()
         __DIR__ . '/backend',
     ])
     ->withSkip([
-        // Модулі Sviat живуть у своїх репозиторіях лабу і правляться там.
-        __DIR__ . '/Okay/Modules/Sviat',
         // Сторонній файловий менеджер, не наш код.
         __DIR__ . '/backend/design',
         '*/compiled/*',
