@@ -283,9 +283,11 @@
                         <p class="text_primary">.text_primary</p>
                         <p class="text_success">.text_success</p>
                         <p class="text_green">.text_green</p>
+                        <p class="text_attention">.text_attention</p>
                         <p class="text_warning">.text_warning</p>
                         <p class="text_grey">.text_grey</p>
                         <p class="text_white text_white__bg">.text_white</p>
+                        <div class="mt-1">{$btr->description_text_roles}</div>
                     </div>
                 </div>
             </div>
@@ -383,6 +385,9 @@
             <div class="heading_box font_24 mb-2">{$btr->description_title_buttons}</div>
             <div class="mb-2">
                 {$btr->description_promo_buttons}
+            </div>
+            <div class="mb-2">
+                {$btr->description_buttons_roles}
             </div>
 
             <div class="row mt-2">
@@ -520,7 +525,7 @@
 
         <div class="boxed">
             <div id="ancor_4"></div>
-            <div class="heading_box font_24 mb-2">{$btr->description_title_switcher}</div>
+            <div class="heading_box font_24 mb-2">{$btr->description_title_forms}</div>
             <div class="mb-2">
                 {$btr->description_info_switcher}
             </div>
@@ -742,6 +747,16 @@
                             </label>
                         </div>
                         </div>
+                        <div class="activity_of_switch_item">
+                            <div class="okay_switch clearfix">
+                            <label class="switch_label">{$btr->description_switcher_off_label}</label>
+                            <label class="switch switch-default">
+                                <input class="switch-input" name="disabled_example" value="1" type="checkbox" id="example_checkbox_off">
+                                <span class="switch-label"></span>
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                        </div>
                     </div>
                     <div class="mt-2">
                         <textarea class="fn_code_mirror13">
@@ -872,7 +887,7 @@
                             <input type="file" name="" data-name="dropped_images[]" multiple class="dropinput fn_template">
                         </li>
                         <li class="product_image_item hidden fn_sort_item">
-                            <button type="button" class="fn_remove_image remove_image"></button>
+                            <button type="button" class="fn_remove_image remove_image" aria-label="{$btr->general_delete|escape}"></button>
                             <i class="move_zone">
                                 {if $image}
                                 <img class="product_icon" src="{$image->filename|resize:300:120}" alt=""/>
@@ -883,7 +898,7 @@
                             </i>
                         </li>
                         <li class="fn_new_image_item product_image_item fn_sort_item">
-                            <button type="button" class="fn_remove_image remove_image"></button>
+                            <button type="button" class="fn_remove_image remove_image" aria-label="{$btr->general_delete|escape}"></button>
                             <img src="" alt=""/>
                         </li>
                     </ul>
@@ -900,7 +915,7 @@
      &#123;foreach $product_images as $image&#125; ----- замінити масив на потрібний
 
     <li class="product_image_item hidden fn_sort_item">
-        <button type="button" class="fn_remove_image remove_image"></button>
+        <button type="button" class="fn_remove_image remove_image" aria-label="&#123;$btr->general_delete|escape&#125;"></button>
         <i class="move_zone">
 
             &#123;if $image&#125; ---- замінити змінну
@@ -915,7 +930,7 @@
     &#123;/foreach}
 
     <li class="fn_new_image_item product_image_item fn_sort_item">
-        <button type="button" class="fn_remove_image remove_image"></button>
+        <button type="button" class="fn_remove_image remove_image" aria-label="&#123;$btr->general_delete|escape&#125;"></button>
         <img src="" alt=""/>
     </li>
 </ul>

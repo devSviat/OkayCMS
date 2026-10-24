@@ -455,7 +455,7 @@
                                 <a class="text_success" href="index.php?controller=SupportAdmin">{$btr->index_support_active|escape} ({$support_info->new_messages|escape})</a>
                             {else}
                                 <a href="index.php?controller=SupportAdmin">
-                                    <span class="text_warning">{$btr->index_support_not_active|escape}</span>
+                                    <span class="text_attention">{$btr->index_support_not_active|escape}</span>
                                 </a>
                             {/if}
                         </div>

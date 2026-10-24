@@ -112,7 +112,7 @@
                     </div>
                 {elseif $module->params->isAccessExpired()}
                     <div class="mt-q">
-                        <span class="text_warning font_12 text_600">
+                        <span class="text_attention font_12 text_600">
                             {$btr->module_access_expired|escape}
                         </span>
                     </div>

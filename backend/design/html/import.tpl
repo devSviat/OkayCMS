@@ -166,9 +166,9 @@
 
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12">
-                                <div class="text_warning">
-                                    <div class="heading_normal text_warning">
-                                        <span class="text_warning">{$btr->import_backup|escape}</span>
+                                <div class="text_attention">
+                                    <div class="heading_normal text_attention">
+                                        <span class="text_attention">{$btr->import_backup|escape}</span>
                                     </div>
                                 </div>
                             </div>

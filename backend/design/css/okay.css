@@ -138,6 +138,7 @@
     --ok-warning: #a35a00;
     --ok-warning-hover: #874a00;
     --ok-warning-soft: #fdf2e3;
+    --ok-warning-on-chrome: #e9a84e;
 
     /* Другорядна дія поруч із синьою первинною: схвалити, обробити, оновити
        модуль, подивитись демо. 7.18:1 під білим текстом. */
@@ -391,13 +392,10 @@ body:not(.top-nav) header.navbar {
 .text-success,
 .text_success{color: var(--ok-success)}
 .text-green,
-.text_green{color: green;}
+.text_green{color: var(--ok-success);}
 .text-danger,
 .text_warning{color:  var(--ok-danger)!important;}
 .text_attention{color:  var(--ok-warning)!important;}
-/* Ціна в списку товарів, нижча за стару: стан, на який варто зважати при правці
-   ціни, а не помилка. Клас text_warning фарбує в небезпеку. */
-.okay_list_price .form-control.text_warning{color: var(--ok-warning)!important;}
 .text-primary,
 .text-info,
 .text_primary{color: var(--ok-accent);}
@@ -1195,40 +1193,42 @@ a.link_white:hover{
 
 .btn-secondary {
     color: var(--ok-ink-inverse);
-    background-color: #5b6770;
-    border-color: #5b6770;
+    background-color: var(--ok-ink-soft);
+    border-color: var(--ok-ink-soft);
 }
-.btn-secondary:hover{
-    color: var(--ok-ink-inverse);
-    background-color: #5c6973;;
-    border-color: #5c6973;;
-}
+.btn-secondary:hover,
 .btn-secondary:focus{
     color: var(--ok-ink-inverse);
-    background-color: #5c6973;
-    border-color: #5c6973;
+    background-color: var(--ok-ink);
+    border-color: var(--ok-ink);
 }
-
-.btn-secondary:active{
-    color: var(--ok-ink-inverse);
-    background-color: #4a555d;
-    border-color: #4a555d;
-    background-image: none;
-}
-
+.btn-secondary:active,
 .btn-secondary:active:hover,
 .btn-secondary:active:focus{
     color: var(--ok-ink-inverse);
-    background-color: #4a555d;
-    border-color: #4a555d;
+    background-color: var(--ok-ink);
+    border-color: var(--ok-ink);
+    background-image: none;
 }
-.btn-secondary:disabled:focus{
-    background-color: #3d424d;
-    border-color: #3d424d;
-}
+.btn-secondary:disabled:focus,
 .btn-secondary:disabled:hover{
-    background-color: #3d424d;
-    border-color: #3d424d;
+    background-color: var(--ok-line-strong);
+    border-color: var(--ok-line-strong);
+}
+
+/* Bootstrap-клас без власного стилю тут: модулі (зокрема сторонні) ставлять його
+   на позитивну дію, і без правила кнопка лишалась сірою вендорною. */
+.btn-success {
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-success);
+    border-color: var(--ok-success);
+}
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active{
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-success-hover);
+    border-color: var(--ok-success-hover);
 }
 
 
@@ -5787,7 +5787,30 @@ body.menu-pin .menu_switch .menu_hamburger::after {
 
 
 
+/* «Платна / безкоштовна» — вибір, а не дія: поточний варіант позначає акцент,
+   як будь-який поточний вибір. Розмітка несе btn-outline-warning (другорядна дія). */
+.delivery_type.btn-outline-warning {
+    color: var(--ok-accent);
+    background-color: var(--ok-surface);
+    border-color: var(--ok-control-line);
+}
+.delivery_type.btn-outline-warning:hover,
+.delivery_type.btn-outline-warning:focus {
+    color: var(--ok-accent-hover);
+    background-color: var(--ok-accent-soft);
+    border-color: var(--ok-accent);
+}
+.delivery_type.btn-outline-warning.active {
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-accent);
+    border-color: var(--ok-accent);
+}
+
 /************************************************************************* Footer  */
+/* Стан-попередження на хромі: --ok-warning тут дає замало контрасту. */
+#footer .text_attention {
+    color: var(--ok-warning-on-chrome)!important;
+}
 #footer {
     line-height: 35px;
     color: rgb(38, 50, 56);
