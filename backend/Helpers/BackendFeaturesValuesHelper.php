@@ -8,6 +8,7 @@ use Okay\Core\Languages;
 use Okay\Core\Request;
 use Okay\Core\Settings;
 use Okay\Core\Translit;
+use Okay\Core\Import\CsvQuoteDamage;
 use Okay\Core\Database;
 use Okay\Core\QueryFactory;
 use Okay\Core\EntityFactory;
@@ -258,6 +259,89 @@ class BackendFeaturesValuesHelper
         }
 
         ExtenderFacade::execute(__METHOD__, null, func_get_args());
+    }
+
+    /**
+     * Відновлює значення властивостей, зіпсовані CSV з escape '\\' (CsvQuoteDamage).
+     * Відновлене значення часто збігається з наявним чистим або з іншим
+     * зіпсованим тієї ж властивості — такі записи зливаються unionValues().
+     * Наявний чистий запис лишається: його translit і позицію вже знає вітрина.
+     *
+     * @param bool $apply false — лише план
+     * @return array<int, object> групи: feature_id, value, survivor_id, survivor_clean, merged_ids
+     */
+    public function repairCsvQuoteDamage(bool $apply = false): array
+    {
+        $groups = [];
+        foreach ($this->featuresValuesEntity->noLimit()->find(['csv_quote_damaged' => 1]) as $value) {
+            $repaired = CsvQuoteDamage::repair((string)$value->value);
+            $key = $value->feature_id . "\0" . $repaired;
+            if (isset($groups[$key])) {
+                $groups[$key]->damaged_ids[] = (int)$value->id;
+            } else {
+                $groups[$key] = (object)[
+                    'feature_id' => (int)$value->feature_id,
+                    'value' => $repaired,
+                    'damaged_ids' => [(int)$value->id],
+                ];
+            }
+        }
+
+        $report = [];
+        foreach ($groups as $group) {
+            $cleanId = $this->findCleanValueId($group->feature_id, $group->value, $group->damaged_ids);
+            $survivorId = $cleanId ?? min($group->damaged_ids);
+            $mergedIds = array_values(array_diff($group->damaged_ids, [$survivorId]));
+
+            if ($apply) {
+                foreach ($mergedIds as $mergedId) {
+                    $this->unionValues($mergedId, $survivorId);
+                }
+                if ($cleanId === null) {
+                    $this->repairValueInEveryLanguage($survivorId, $group->feature_id);
+                }
+            }
+
+            $report[] = (object)[
+                'feature_id' => $group->feature_id,
+                'value' => $group->value,
+                'survivor_id' => $survivorId,
+                'survivor_clean' => $cleanId !== null,
+                'merged_ids' => $mergedIds,
+            ];
+        }
+
+        return ExtenderFacade::execute(__METHOD__, $report, func_get_args());
+    }
+
+    /** Порівняння в PHP: колація регістронезалежна, а «S11» і «s11» — різні значення. */
+    private function findCleanValueId(int $featureId, string $value, array $excludeIds): ?int
+    {
+        foreach ($this->featuresValuesEntity->noLimit()->find(['feature_id' => $featureId, 'value' => $value]) as $candidate) {
+            if ($candidate->value === $value && !in_array((int)$candidate->id, $excludeIds, true)) {
+                return (int)$candidate->id;
+            }
+        }
+
+        return null;
+    }
+
+    private function repairValueInEveryLanguage(int $valueId, int $featureId): void
+    {
+        $currentLangId = $this->languages->getLangId();
+        foreach ($this->languages->getAllLanguages() as $language) {
+            $this->languages->setLangId((int)$language->id);
+            $value = $this->featuresValuesEntity->get($valueId);
+            if (empty($value)) {
+                continue;
+            }
+            $repaired = CsvQuoteDamage::repair((string)$value->value);
+            $this->featuresValuesEntity->update($valueId, [
+                'value' => $repaired,
+                'translit' => $this->generateUniqueTranslitForValue($featureId, Translit::translitAlpha($repaired), $valueId),
+            ]);
+        }
+        $this->languages->setLangId($currentLangId);
     }
 
     public function sortFeatureValuePositions($feature, $featuresValues, $featuresValuesFilter)

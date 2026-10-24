@@ -190,6 +190,24 @@ class FeaturesValuesEntity extends Entity
         return ExtenderFacade::execute([static::class, __FUNCTION__], $count, func_get_args());
     }
 
+    /**
+     * Значення, зіпсоване CSV з escape '\\' хоч в одній мові (див. CsvQuoteDamage).
+     * Мовну таблицю перевіряємо підзапитом: join дає лише поточну мову.
+     */
+    protected function filter__csv_quote_damaged()
+    {
+        $this->select->where(
+            '(' . self::csvQuoteDamagedSql('fv.value')
+            . ' OR fv.id IN (SELECT dl.feature_value_id FROM __lang_features_values AS dl WHERE ' . self::csvQuoteDamagedSql('dl.value') . '))'
+        );
+    }
+
+    /** Той самий підпис, що CsvQuoteDamage::isDamaged(): `""` або `\"`. */
+    private static function csvQuoteDamagedSql(string $column): string
+    {
+        return "({$column} LIKE '%\"\"%' OR {$column} LIKE CONCAT('%', CHAR(92), CHAR(92), '\"%'))";
+    }
+
     protected function filter__product_id($productsIds)
     {
         $this->select->where('pf.product_id IN (:products_ids)')
