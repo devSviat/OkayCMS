@@ -83,6 +83,28 @@ class AdminTemplateInvariantsTest extends TestCase
         ];
     }
 
+    /**
+     * Переклад у JS-рядку чи атрибуті в одинарних лапках без екранування:
+     * перший апостроф у перекладі («Обов'язкове») обриває рядок. У
+     * learning_hints.tpl так падав увесь скрипт підказок на п'яти сторінках.
+     */
+    public function testNoUnescapedTranslationInsideSingleQuotes(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $files = array_merge(
+            glob($root . '/backend/design/html/{,*/}*.tpl', GLOB_BRACE),
+            glob($root . '/Okay/Modules/*/*/Backend/design/html/{,*/}*.tpl', GLOB_BRACE)
+        );
+        $offenders = [];
+        foreach ($files as $file) {
+            if (preg_match_all('/\'\{\$btr->[a-z0-9_]+\}\'/', file_get_contents($file), $m)) {
+                $offenders[] = substr($file, strlen($root) + 1) . ': ' . implode(', ', array_unique($m[0]));
+            }
+        }
+
+        $this->assertSame([], $offenders);
+    }
+
     private function read(string $relativePath): string
     {
         return file_get_contents(dirname(__DIR__, 2) . '/' . $relativePath);
