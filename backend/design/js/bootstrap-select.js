@@ -1824,7 +1824,10 @@
           $this.data('selectpicker', (data = new Selectpicker(this, config, _event)));
         } else if (options) {
           for (var i in options) {
-            if (options.hasOwnProperty(i)) {
+            // options тут буває $this.data(), а jQuery 4 тримає його в Object.create(null):
+            // власного hasOwnProperty у такого об'єкта немає. На телефоні index.tpl ініціалізує
+            // селекти до window.load, і повторний виклик з load падав саме тут.
+            if (Object.prototype.hasOwnProperty.call(options, i)) {
               data.options[i] = options[i];
             }
           }

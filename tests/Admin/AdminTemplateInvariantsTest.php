@@ -105,6 +105,19 @@ class AdminTemplateInvariantsTest extends TestCase
         $this->assertSame([], $offenders);
     }
 
+    /**
+     * Повторний виклик selectpicker з $this.data() (jQuery 4: об'єкт без
+     * прототипу) падав на options.hasOwnProperty — на телефоні на кожній
+     * сторінці з селектами.
+     */
+    public function testSelectpickerOptionsAreIteratedWithoutOwnHasOwnProperty(): void
+    {
+        $source = $this->read('backend/design/js/bootstrap-select.js');
+
+        $this->assertStringNotContainsString('options.hasOwnProperty(', $source);
+        $this->assertStringContainsString('Object.prototype.hasOwnProperty.call(options, i)', $source);
+    }
+
     private function read(string $relativePath): string
     {
         return file_get_contents(dirname(__DIR__, 2) . '/' . $relativePath);
