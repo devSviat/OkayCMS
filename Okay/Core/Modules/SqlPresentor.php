@@ -42,7 +42,9 @@ class SqlPresentor
     {
         $primaryKeyExists = false;
 
-        $sql  = "CREATE TABLE {$tableName} (";
+        // Видалення модуля лишає його таблиці, тож перевстановка створює наявні:
+        // без IF NOT EXISTS — помилка 1050 у лозі на кожну.
+        $sql  = "CREATE TABLE IF NOT EXISTS {$tableName} (";
 
         /** @var EntityField $entityField */
         foreach ($entityFields as $entityField) {
