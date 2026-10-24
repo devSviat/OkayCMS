@@ -165,9 +165,7 @@ class ModuleDesign
     private function getDirNames($filePath)
     {
         $parts = explode('/', $filePath);
-
-        end($parts);
-        $fileIndex = key($parts);
+        $fileIndex = array_key_last($parts);
         unset($parts[$fileIndex]);
 
         return $parts;

@@ -411,7 +411,7 @@ class ProductsEntity extends Entity implements RelatedProductsInterface
 
         $result = ['next'=>'', 'prev'=>''];
         if (!empty($pIds)) {
-            foreach ($this->find(array('id'=>array_keys($pIds))) as $p) {
+            foreach ($this->find(['id'=>array_keys($pIds)]) as $p) {
                 $result[$pIds[$p->id]] = $p;
             }
         }

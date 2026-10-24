@@ -71,7 +71,7 @@ class FeaturesAdmin extends IndexAdmin
 
         $featuresCount  = $backendFeaturesHelper->count($filter);
         $pagesCount     = $backendFeaturesHelper->countPages($filter);
-        $keyword        = isset($filter['keyword']) ? $filter['keyword'] : '';
+        $keyword        = $filter['keyword'] ?? '';
 
         if ($this->request->get('page') == 'all') {
             $filter['limit'] = $featuresCount;

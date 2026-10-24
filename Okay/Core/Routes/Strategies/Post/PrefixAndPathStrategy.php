@@ -222,7 +222,7 @@ class PrefixAndPathStrategy extends AbstractRouteStrategy
 
     private function prefixIsFailed($prefix, $url)
     {
-        return $prefix !== substr($url, 0, strlen($prefix));
+        return !str_starts_with($url, $prefix);
     }
 
     private function getPrefix()

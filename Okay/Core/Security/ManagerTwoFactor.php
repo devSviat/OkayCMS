@@ -36,7 +36,7 @@ class ManagerTwoFactor
      */
     public const CODE_WINDOW_MAX_SECONDS = 86400;
     /** Скільки разів перечитати лічильник, якщо паралельна спроба змінила його першою. */
-    private const SWAP_RETRIES = 3;
+    private const int SWAP_RETRIES = 3;
 
     public const OK = 'ok';
     public const OK_RECOVERY = 'ok_recovery';
@@ -44,9 +44,9 @@ class ManagerTwoFactor
     public const LIMIT = 'limit';
     public const KEY_UNAVAILABLE = 'key_unavailable';
 
-    private const SETUP_KEY = 'totp_setup';
-    private const CHALLENGE_KEY = 'admin_pending';
-    private const RECOVERY_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    private const string SETUP_KEY = 'totp_setup';
+    private const string CHALLENGE_KEY = 'admin_pending';
+    private const string RECOVERY_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
     public function __construct(
         private EntityFactory $entityFactory,

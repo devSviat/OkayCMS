@@ -12,7 +12,7 @@ class SiteMapController extends AbstractController
     public function renderXml(SiteMapHelper $siteMapHelper)
     {
 
-        chdir(dirname(dirname(__DIR__)));
+        chdir(dirname(__DIR__, 2));
 
         /*
          * параметры с крона в виде key=val

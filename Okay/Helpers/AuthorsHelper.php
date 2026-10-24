@@ -25,9 +25,7 @@ class AuthorsHelper implements GetListInterface
      */
     public function getList($filter = [], $sortName = null, $excludedFields = null)
     {
-        if ($excludedFields === null) {
-            $excludedFields = $this->getExcludeFields();
-        }
+        $excludedFields ??= $this->getExcludeFields();
         
         /** @var AuthorsEntity $authorsEntity */
         $authorsEntity = $this->entityFactory->get(AuthorsEntity::class);

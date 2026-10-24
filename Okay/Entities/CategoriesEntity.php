@@ -353,7 +353,7 @@ class CategoriesEntity extends Entity
             fgetcsv($f, 0, '^', '"', '\\');
             while (!feof($f)) {
                 $line = fgetcsv($f, 0, '^', '"', '\\');
-                if (empty($query) || strpos(mb_strtolower($line[0]), $query) !== false) {
+                if (empty($query) || str_contains(mb_strtolower($line[0]), $query)) {
                     $marketCats[] = $line[0];
                 }
             }
@@ -428,12 +428,12 @@ class CategoriesEntity extends Entity
         $categories = $this->getAllCategoriesFromDb();
 
         $tree = new \stdClass();
-        $tree->subcategories = array();
+        $tree->subcategories = [];
 
         // Указатели на узлы дерева
-        $pointers = array();
+        $pointers = [];
         $pointers[0] = &$tree;
-        $pointers[0]->path = array();
+        $pointers[0]->path = [];
         $pointers[0]->level = 0;
 
         $finish = false;
@@ -448,7 +448,7 @@ class CategoriesEntity extends Entity
 
                     // Путь к текущей категории
                     $curr = $pointers[$category->id];
-                    $pointers[$category->id]->path = array_merge((array)$pointers[$category->parent_id]->path, array($curr));
+                    $pointers[$category->id]->path = array_merge((array)$pointers[$category->parent_id]->path, [$curr]);
 
                     // Путь к текущей категории в виде строки
                     $pathUrl = [];

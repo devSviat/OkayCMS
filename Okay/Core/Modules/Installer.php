@@ -26,7 +26,7 @@ class Installer
 
         $moduleId = false;
         
-        list($vendor, $moduleName) = explode('/', $fullModuleName);
+        [$vendor, $moduleName] = explode('/', $fullModuleName);
         
         // Директорию получаем чтобы провалидировать, что такой модуль существует в ФС
         if ($this->module->getModuleDirectory($vendor, $moduleName)) {

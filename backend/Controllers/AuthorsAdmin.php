@@ -46,7 +46,7 @@ class AuthorsAdmin extends IndexAdmin
         }
 
         $authorsCount               = $backendAuthorsHelper->countAuthors($filter);
-        list($filter, $pagesCount)  = $backendAuthorsHelper->makePagination($authorsCount, $filter);
+        [$filter, $pagesCount]  = $backendAuthorsHelper->makePagination($authorsCount, $filter);
         $authors                    = $backendAuthorsHelper->findAuthors($filter);
 
         $this->design->assign('authors_count', $authorsCount);

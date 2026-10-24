@@ -59,8 +59,8 @@ class SupportController extends AbstractController
                 $supportInfoEntity->updateInfo([
                     'private_key'  => $data->private_key,
                     'public_key'   => $data->public_key,
-                    'new_messages' => intval(isset($data->new_messages) ? $data->new_messages : 0),
-                    'balance'      => intval(isset($data->balance) ? $data->balance : 0),
+                    'new_messages' => intval($data->new_messages ?? 0),
+                    'balance'      => intval($data->balance ?? 0),
                     'temp_key'     => null,
                     'temp_time'    => null
                 ]);
@@ -73,7 +73,7 @@ class SupportController extends AbstractController
                     break;
                 }
                 $supportInfoEntity->updateInfo([
-                    'balance'      => intval(isset($data->balance) ? $data->balance : 0),
+                    'balance'      => intval($data->balance ?? 0),
                     'new_messages' => $info->new_messages + intval($data->new_messages)
                 ]);
                 $result = ['success' => 1];

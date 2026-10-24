@@ -42,7 +42,7 @@ class BlogCategoriesAdmin extends IndexAdmin
             
             // Сортировка
             $positions = $categoriesRequest->postPositions();
-            list($ids, $positions) = $backendBlogCategoriesHelper->sortPositions($positions);
+            [$ids, $positions] = $backendBlogCategoriesHelper->sortPositions($positions);
             $backendBlogCategoriesHelper->updatePositions($ids, $positions);
         }
 

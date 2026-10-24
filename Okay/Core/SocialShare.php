@@ -19,7 +19,7 @@ class SocialShare
      * лежить у sj_shares працюючих магазинів, і перейменування зробило б
      * їхню галочку невидимою.
      */
-    private const NETWORKS = [
+    private const array NETWORKS = [
         'facebook'      => ['label' => 'Facebook',  'url' => 'https://www.facebook.com/sharer/sharer.php?u={url}'],
         'twitter'       => ['label' => 'X',         'url' => 'https://x.com/intent/post?url={url}&text={title}'],
         'telegram'      => ['label' => 'Telegram',  'url' => 'https://t.me/share/url?url={url}&text={title}'],

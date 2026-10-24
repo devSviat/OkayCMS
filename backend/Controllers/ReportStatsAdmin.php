@@ -77,7 +77,7 @@ class ReportStatsAdmin extends IndexAdmin
         
         foreach ($report_stat_purchases as $id=>$r) {
             if (!empty($r->product_id)) {
-                $tmp_cat = $categoriesEntity->findOne(array('product_id' => $r->product_id));
+                $tmp_cat = $categoriesEntity->findOne(['product_id' => $r->product_id]);
                 $report_stat_purchases[$id]->category = $tmp_cat;
             }
         }

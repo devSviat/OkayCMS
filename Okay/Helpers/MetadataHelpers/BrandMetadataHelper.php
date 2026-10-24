@@ -225,8 +225,8 @@ class BrandMetadataHelper extends CommonMetadataHelper
         }
         
         $this->parts = [
-            '{$brand}' => ($this->brand->name ? $this->brand->name : ''),
-            '{$sitename}' => ($this->settings->get('site_name') ? $this->settings->get('site_name') : ''),
+            '{$brand}' => ($this->brand->name ?: ''),
+            '{$sitename}' => ($this->settings->get('site_name') ?: ''),
         ];
         
         return $this->parts = ExtenderFacade::execute(__METHOD__, $this->parts, func_get_args());

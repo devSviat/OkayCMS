@@ -27,7 +27,7 @@ class NoPrefixStrategy extends AbstractRouteStrategy
     
     public function generateRouteParams($url) : array
     {
-        list($productUrl, $variantId) = $this->matchProductUrlFromUri($url);
+        [$productUrl, $variantId] = $this->matchProductUrlFromUri($url);
         $productId = $this->productsEntity->col('id')->get((string) $productUrl);
 
         if (empty($productId)) {

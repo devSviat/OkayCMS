@@ -114,8 +114,8 @@ class AuthorMetadataHelper extends CommonMetadataHelper
         }
         
         $this->parts = [
-            '{$author}' => ($this->author->name ? $this->author->name : ''),
-            '{$sitename}' => ($this->settings->get('site_name') ? $this->settings->get('site_name') : ''),
+            '{$author}' => ($this->author->name ?: ''),
+            '{$sitename}' => ($this->settings->get('site_name') ?: ''),
         ];
         
         return $this->parts = ExtenderFacade::execute(__METHOD__, $this->parts, func_get_args());

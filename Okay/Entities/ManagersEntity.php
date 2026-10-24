@@ -42,7 +42,7 @@ class ManagersEntity extends Entity
             if (!empty($m->menu)) {
                 $m->menu = unserialize($m->menu, ['allowed_classes' => false]);
             } else {
-                $m->menu = array();
+                $m->menu = [];
             }
         }
 

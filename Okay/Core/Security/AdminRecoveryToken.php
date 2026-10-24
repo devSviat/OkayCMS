@@ -27,9 +27,7 @@ class AdminRecoveryToken
 
     public function create($managerId, $currentPasswordHash, $now = null)
     {
-        if ($now === null) {
-            $now = time();
-        }
+        $now ??= time();
 
         $managerId = (int)$managerId;
         $expires = (int)$now + self::TTL;
@@ -47,9 +45,7 @@ class AdminRecoveryToken
 
     public function managerId($token, $currentPasswordHash, $now = null)
     {
-        if ($now === null) {
-            $now = time();
-        }
+        $now ??= time();
 
         $parts = $this->parse($token);
         if ($parts === null) {
@@ -70,18 +66,18 @@ class AdminRecoveryToken
 
     private function parse($token)
     {
-        if (!is_string($token) || strpos($token, '.') === false) {
+        if (!is_string($token) || !str_contains($token, '.')) {
             return null;
         }
 
-        list($payload, $signature) = explode('.', $token, 2);
+        [$payload, $signature] = explode('.', $token, 2);
 
         $decoded = $this->decode($payload);
-        if ($decoded === null || strpos($decoded, ':') === false) {
+        if ($decoded === null || !str_contains($decoded, ':')) {
             return null;
         }
 
-        list($managerId, $expires) = explode(':', $decoded, 2);
+        [$managerId, $expires] = explode(':', $decoded, 2);
 
         if (!ctype_digit($managerId) || !ctype_digit($expires)) {
             return null;

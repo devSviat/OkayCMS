@@ -29,7 +29,7 @@ class ResizeController extends AbstractController
         
         $resizeDirs = $resizeHelper->getResizeDirs($object);
         if (!empty($resizeDirs)) {
-            list($originalImgDir, $resizedImgDir) = $resizeDirs;
+            [$originalImgDir, $resizedImgDir] = $resizeDirs;
         }
         
         if ($object == 'products') {

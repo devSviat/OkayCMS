@@ -91,11 +91,11 @@ class Recaptcha
     {
         $curl = curl_init($this->url);
 
-        $params = http_build_query(array(
+        $params = http_build_query([
             'secret'   => $this->secret_key,
             'response' => $this->getResponseKey(),
             'remoteip' => $_SERVER['REMOTE_ADDR']
-        ));
+        ]);
 
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $params);

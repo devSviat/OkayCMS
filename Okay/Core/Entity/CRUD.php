@@ -70,7 +70,7 @@ trait CRUD
         $this->buildFilter($filter);
         $this->select->cols($this->getAllFields());
         $this->select->distinct(true);
-        
+
         $select = clone $this->select;
         $this->flush();
         return $select; // No ExtenderFacade

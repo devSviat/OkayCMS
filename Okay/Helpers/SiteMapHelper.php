@@ -51,7 +51,7 @@ class SiteMapHelper
      * Налаштування бренд-фільтра дивляться лише на кількість обраних брендів,
      * тож для перевірки вистачає масиву з одного будь-якого елемента.
      */
-    private const ONE_BRAND_SELECTED = [0];
+    private const array ONE_BRAND_SELECTED = [0];
 
     public function __construct(
         EntityFactory $entityFactory,

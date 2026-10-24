@@ -147,11 +147,11 @@ class DatabaseDeployCommand extends Command
 
     private function isComment(string $line): string
     {
-        return substr($line, 0, 2) == '--';
+        return str_starts_with($line, '--');
     }
 
     private function isQueryEnd(string $line): string
     {
-        return substr(trim($line), -1, 1) == ';';
+        return str_ends_with(trim($line), ';');
     }
 }

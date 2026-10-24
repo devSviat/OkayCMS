@@ -68,7 +68,7 @@ $filter['sort'] = $request->get('sort');
 
 $users = [];
 foreach($usersEntity->find($filter) as $u) {
-    $str = array();
+    $str = [];
     foreach($columnsNames as $n=>$c) {
         $str[] = $u->$n;
     }

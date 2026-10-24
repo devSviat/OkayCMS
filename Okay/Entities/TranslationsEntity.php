@@ -348,12 +348,12 @@ class TranslationsEntity extends Entity
         if ($force === true) {
             unset($this->themeVars[$langLabel]);
         }
-        
+
         if (!isset($this->themeVars[$langLabel])) {
             $translations = [];
             $langFile = $this->getReadLangFile($langLabel, $this->frontTemplateConfig->getTheme());
             if (file_exists($langFile)) {
-                $lang = array();
+                $lang = [];
                 if ($force === false) {
                     require_once $langFile;
                 } else {

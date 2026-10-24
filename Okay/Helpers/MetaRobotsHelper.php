@@ -176,7 +176,7 @@ class MetaRobotsHelper
                 }
             }
         }
-        
+
         // Подсчитываем общую глубину фильтра
         $filterDepth = 0;
         if (!empty($otherFilter)) {
@@ -188,7 +188,7 @@ class MetaRobotsHelper
         if (!empty($brandsFilter)) {
             $filterDepth++;
         }
-        
+
         if ($filterDepth > $this->maxFilterDepth) {
             return ROBOTS_NOINDEX_NOFOLLOW; // no ExtenderFacade
         }
@@ -204,10 +204,10 @@ class MetaRobotsHelper
         } else {
             $paginationCatalogRobots = 0;
         }
-        
+
         $baseCatalogRobots = $this->getBaseCatalogRobots($otherFilter);
         $catalogRobots = $this->getCatalogRobotsExecutor($featuresFilter, $brandsFilter);
-        
+
         return max($baseCatalogRobots, $catalogRobots, $paginationCatalogRobots); // no ExtenderFacade
     }
 

@@ -37,8 +37,8 @@ class LicenseStorage
         }
         $licenseContent = file_get_contents($licenseFilename);
         if (empty($licenseContent)
-            || strpos($licenseContent, "\n") !== false
-            || strpos($licenseContent, "\r") !== false
+            || str_contains($licenseContent, "\n")
+            || str_contains($licenseContent, "\r")
         ) {
             return null;
         }

@@ -16,7 +16,7 @@ namespace Okay\Core\Security;
 class RequestOrigin
 {
     /** Порти, які в origin не пишуться */
-    private const DEFAULT_PORTS = ['http' => 80, 'https' => 443];
+    private const array DEFAULT_PORTS = ['http' => 80, 'https' => 443];
 
     /**
      * @param string|null $origin  заголовок Origin

@@ -173,7 +173,7 @@ class SvgSanitizer
         $value = strtolower((string)$value);
 
         foreach (['javascript:', 'expression(', 'url(', '@import', 'behavior:'] as $needle) {
-            if (strpos($value, $needle) !== false) {
+            if (str_contains($value, $needle)) {
                 return true;
             }
         }

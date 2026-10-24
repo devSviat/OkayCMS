@@ -127,7 +127,7 @@ abstract class AbstractRoute
     public function generateRouteParams()
     {
         $url = $this->prepareUrl(Request::getRequestUri());
-        list($slug, $patterns, $defaults) = $this->strategy->generateRouteParams($url);
+        [$slug, $patterns, $defaults] = $this->strategy->generateRouteParams($url);
         return new RouteParams($slug, $patterns, $defaults);
     }
 

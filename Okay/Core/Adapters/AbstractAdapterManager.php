@@ -23,9 +23,7 @@ abstract class AbstractAdapterManager
 
     protected function setAdapter($adapterName = null) // todo type hint
     {
-        if (null === $adapterName) {
-            $adapterName = $this->defaultAdapterName;
-        }
+        $adapterName ??= $this->defaultAdapterName;
 
         if ($this->adapter instanceof $adapterName) {
             return;

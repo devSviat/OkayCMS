@@ -32,7 +32,7 @@ class Design
      * модуль не має; registerClass() кидає виняток на відсутньому класі, тому
      * кожен проходить перевірку перед реєстрацією.
      */
-    private const STATIC_CLASSES = [
+    private const array STATIC_CLASSES = [
         \Okay\Core\UserReferer\UserReferer::class,
         \Okay\Core\Phone::class,
         '\\' . \Okay\Core\Phone::class,
@@ -181,11 +181,11 @@ class Design
             // php_modifiers і php_functions у Smarty 5 більше не існують: єдиний
             // спосіб дозволити нативну функцію - зареєструвати її як модифікатор,
             // що й робить registerSmartyPlugins().
-            $this->smarty->security_policy->secure_dir = array(
+            $this->smarty->security_policy->secure_dir = [
                 $rootDir . 'design/' . $theme,
                 $rootDir . 'backend/design',
                 $rootDir . 'Okay/Modules',
-            );
+            ];
         }
 
         $this->defaultTemplateDir = $rootDir.'design/'.$theme.'/html';
@@ -227,7 +227,7 @@ class Design
         $currentFile = $source !== null ? (string)$source->getFilepath() : '';
 
         // Определяем модификации чего сейчас нам нужны, фронта или бека
-        if (strpos($currentFile, $this->rootDir.'backend'.DIRECTORY_SEPARATOR.'design'.DIRECTORY_SEPARATOR.'html') !== false) {
+        if (str_contains($currentFile, $this->rootDir.'backend'.DIRECTORY_SEPARATOR.'design'.DIRECTORY_SEPARATOR.'html')) {
             $modifications = $this->modules->getBackendModulesTplModifications();
         } else {
             $modifications = $this->modules->getFrontModulesTplModifications();
@@ -402,7 +402,7 @@ class Design
             return $output;
         }
 
-        return (new TrimWhitespace())->filter($output, $template);
+        return new TrimWhitespace()->filter($output, $template);
     }
 
     public function useDefaultDir()

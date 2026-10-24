@@ -20,7 +20,7 @@ use Symfony\Component\Console\Input\InputOption;
 )]
 class ModuleCheckModificationsCommand extends Command
 {
-    private const ANCHOR_EXCERPT_LENGTH = 60;
+    private const int ANCHOR_EXCERPT_LENGTH = 60;
 
     protected function configure(): void
     {

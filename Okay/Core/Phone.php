@@ -50,7 +50,7 @@ class Phone
     {
         try {
             return self::format($phoneNumber, PhoneNumberFormat::E164);
-        } catch (\Exception $exception) {
+        } catch (\Exception) {
             return null;
         }
     }
@@ -85,7 +85,7 @@ class Phone
         ];
         
         foreach ($wrongPrefixes as $prefix) {
-            if (strpos($phoneNumber, $prefix) === 0) {
+            if (str_starts_with($phoneNumber, $prefix)) {
                 $phoneNumber = ltrim($phoneNumber, '+');
             }
         }
@@ -111,7 +111,7 @@ class Phone
             $phoneUtil = PhoneNumberUtil::getInstance();
             $phoneObject = $phoneUtil->parse($phoneNumber, $defaultRegion);
             return $phoneUtil->isValidNumber($phoneObject);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }
@@ -129,7 +129,7 @@ class Phone
         // Той самий null, що й у clear(): substr(null) - deprecated з PHP 8.1.
         $phoneNumber = (string)$phoneNumber;
 
-        if (substr($phoneNumber, 0, 2) == '+0') {
+        if (str_starts_with($phoneNumber, '+0')) {
             $phoneNumber = substr($phoneNumber, 1);
         }
 
@@ -145,9 +145,7 @@ class Phone
 
         $defaultRegion = $settings->get('phone_default_region');
         
-        if ($numberFormat === null) {
-            $numberFormat = $settings->get('phone_default_format');
-        }
+        $numberFormat ??= $settings->get('phone_default_format');
 
         $phoneObject = $phoneUtil->parse($phoneNumber, $defaultRegion);
         return $phoneUtil->format($phoneObject, self::resolveFormat($numberFormat));

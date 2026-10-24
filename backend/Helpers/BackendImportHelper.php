@@ -546,12 +546,8 @@ class BackendImportHelper
         }
 
         // Чтобы не ругалось что поле не может быть NULL
-        if (!isset($variant['price'])) {
-            $variant['price'] = 0;
-        }
-        if (!isset($variant['compare_price'])) {
-            $variant['compare_price'] = 0;
-        }
+        $variant['price'] ??= 0;
+        $variant['compare_price'] ??= 0;
         
         return ExtenderFacade::execute(__METHOD__, $variant, func_get_args());
     }
@@ -728,7 +724,7 @@ class BackendImportHelper
                     } else {
                         $determinedBy = 'productName';
                     }
-                    
+
                     //unset($variant['sku']);
                 }
             } else {

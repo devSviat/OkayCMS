@@ -1,6 +1,6 @@
 <?php
 
-$lang_general = array();
+$lang_general = [];
 $lang_general['date_D_1'] = "Пн";
 $lang_general['date_D_2'] = "Вт";
 $lang_general['date_D_3'] = "Ср";

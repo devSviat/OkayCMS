@@ -32,7 +32,7 @@ class PublicSurfaceTest extends TestCase
         '1DB_changes', 'backend', 'CLAUDE.md', 'compiled', 'composer.json',
         'composer.lock', 'config', 'design', 'dev', 'docs', 'files',
         'LICENSE.md', 'ok', 'Okay', 'phpstan-baseline.neon',
-        'phpstan.neon', 'phpunit.xml', 'PRODUCT.md', 'README.md', 'release-manifest.json', 'tests', 'vendor',
+        'phpstan.neon', 'phpunit.xml', 'PRODUCT.md', 'README.md', 'rector.php', 'release-manifest.json', 'tests', 'vendor',
     ];
 
     /**

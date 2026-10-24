@@ -23,7 +23,7 @@ abstract class AbstractExtender
         $trigger = self::compileTrigger($classExpandable, $methodExpandable);
 
         if ($newMethod = $this->checkAndCorrectDeprecatedMethod($trigger)) {
-            list($classExpandable, $methodExpandable) = $newMethod;
+            [$classExpandable, $methodExpandable] = $newMethod;
             $trigger = self::compileTrigger($classExpandable, $methodExpandable);
         }
 
@@ -78,15 +78,11 @@ abstract class AbstractExtender
     public static function extensionLog($trigger)
     {
         if (is_array($trigger)) {
-            list($className, $methodName) = $trigger;
+            [$className, $methodName] = $trigger;
             $trigger = self::compileTrigger($className, $methodName);
         }
 
-        if (isset(static::$triggers[$trigger])) {
-            return static::$triggers[$trigger];
-        }
-
-        return [];
+        return static::$triggers[$trigger] ?? [];
     }
 
     public static function execute($trigger, $output = null, array $input = []) {}

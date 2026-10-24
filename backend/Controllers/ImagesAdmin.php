@@ -18,7 +18,7 @@ class ImagesAdmin extends IndexAdmin
         $currentTheme = $frontTemplateConfig->getTheme();
 
         $images_dir = 'design/'.$currentTheme.'/images/';
-        $allowed_extentions = array('png', 'gif', 'jpg', 'jpeg', 'ico');
+        $allowed_extentions = ['png', 'gif', 'jpg', 'jpeg', 'ico'];
         $images = [];
         
         /*Сохранение изображений*/
@@ -87,7 +87,7 @@ class ImagesAdmin extends IndexAdmin
                     $image = new \stdClass;
                     $image->name = $file;
                     $image->size = filesize($images_dir.$file);
-                    list($image->width, $image->height) = @getimagesize($images_dir.$file);
+                    [$image->width, $image->height] = @getimagesize($images_dir.$file);
                     $images[$file] = $image;
                 }
             }

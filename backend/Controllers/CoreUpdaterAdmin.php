@@ -16,7 +16,7 @@ use Okay\Entities\ModulesEntity;
 class CoreUpdaterAdmin extends IndexAdmin
 {
     /** Скільки останніх резервних копій показувати списком. */
-    private const BACKUPS_SHOWN = 10;
+    private const int BACKUPS_SHOWN = 10;
 
     public function fetch(
         UpdateCheckHelper $checkHelper,

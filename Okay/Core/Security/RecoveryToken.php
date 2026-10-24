@@ -37,9 +37,7 @@ class RecoveryToken
 
     public function expiresAt($now = null)
     {
-        if ($now === null) {
-            $now = time();
-        }
+        $now ??= time();
 
         return date('Y-m-d H:i:s', (int)$now + self::TTL);
     }

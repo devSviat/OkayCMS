@@ -41,9 +41,7 @@ class BlogHelper implements GetListInterface
     public function getTableOfContent($text, $postUrl = null)
     {
         
-        if ($postUrl === null) {
-            $postUrl = Request::getRequestUri();
-        }
+        $postUrl ??= Request::getRequestUri();
         
         $tableOfContent = [];
         $items = [];
@@ -89,9 +87,7 @@ class BlogHelper implements GetListInterface
      */
     public function getList($filter = [], $sortName = null, $excludedFields = null)
     {
-        if ($excludedFields === null) {
-            $excludedFields = $this->getExcludeFields();
-        }
+        $excludedFields ??= $this->getExcludeFields();
         
         /** @var BlogEntity $blogEntity */
         $blogEntity = $this->entityFactory->get(BlogEntity::class);

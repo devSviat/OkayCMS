@@ -64,7 +64,8 @@
         "php-debugbar/monolog-bridge": "^1.0",
         "symfony/var-dumper": "^5.4.6|^6.4|^7.3|^8.0",
         "phpstan/phpstan": "^2.2",
-        "phpstan/phpstan-deprecation-rules": "^2.0"
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "rector/rector": "^2.7"
     },
     "autoload": {
         "psr-4": {

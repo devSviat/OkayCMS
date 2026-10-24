@@ -14,7 +14,7 @@ use Okay\Core\Security\SessionNames;
 //ini_set('display_errors', 'on');
 //error_reporting(E_ALL);
 
-chdir(dirname(dirname(__DIR__)));
+chdir(dirname(__DIR__, 2));
 
 // Автозавантажувач потрібен раніше за старт сесії: ім'я задає SessionNames.
 require_once('vendor/autoload.php');

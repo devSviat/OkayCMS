@@ -107,9 +107,7 @@ class FilterHelper
         }
 
         if (!isset($featuresValuesFilter['feature_id']) && !empty($this->features)) {
-            $featuresValuesFilter['feature_id'] = array_map(function (object $feature) {
-                return $feature->id;
-            }, $this->features);
+            $featuresValuesFilter['feature_id'] = array_map(fn(object $feature) => $feature->id, $this->features);
         }
 
         $this->featuresValuesFilter = ExtenderFacade::execute(__METHOD__, $featuresValuesFilter, func_get_args());
@@ -215,9 +213,7 @@ class FilterHelper
      */
     public function prepareFilterGetFeaturesValues(array $productsFilter = [], ?array $featuresValuesFilter = null, ?string $missingProducts = null): array
     {
-        if ($featuresValuesFilter === null) {
-            $featuresValuesFilter = $this->featuresValuesFilter;
-        }
+        $featuresValuesFilter ??= $this->featuresValuesFilter;
 
         $featuresValuesFilter['visible'] = 1;
 
@@ -278,11 +274,11 @@ class FilterHelper
             if (empty($v)) {
                 continue;
             }
-            @list($paramName, $paramValues) = explode('-', $v);
+            @[$paramName, $paramValues] = explode('-', $v);
 
             if ($paramName == 'page') {
                 $currentPage = (string)$paramValues;
-                if ($paramValues != 'all' && (!preg_match('~^[0-9]+$~', $paramValues) || strpos($paramValues, '0') === 0)) {
+                if ($paramValues != 'all' && (!preg_match('~^[0-9]+$~', $paramValues) || str_starts_with($paramValues, '0'))) {
                     return false;
                 }
 
@@ -304,7 +300,7 @@ class FilterHelper
             if (empty($v)) {
                 continue;
             }
-            @list($paramName, $paramValues) = explode('-', $v);
+            @[$paramName, $paramValues] = explode('-', $v);
 
             if ($paramName == 'sort') {
                 $currentSort = (string)$paramValues;
@@ -329,7 +325,7 @@ class FilterHelper
             if (empty($v)) {
                 continue;
             }
-            @list($paramName, $paramValues) = explode('-', $v);
+            @[$paramName, $paramValues] = explode('-', $v);
 
             if ($paramName == 'filter') {
                 foreach (explode('_', $paramValues) as $f) {
@@ -427,7 +423,7 @@ class FilterHelper
             if (empty($v)) {
                 continue;
             }
-            @list($paramName, $paramValues) = explode('-', $v);
+            @[$paramName, $paramValues] = explode('-', $v);
 
             if (!in_array($paramName, $this->getNotFeaturesParts())) {
                 if (isset($this->featuresByUrl[$paramName])
@@ -496,7 +492,7 @@ class FilterHelper
             if (empty($v)) {
                 continue;
             }
-            @list($paramName, $paramValues) = explode('-', $v);
+            @[$paramName, $paramValues] = explode('-', $v);
 
             if ($res = $this->userGetMetaArray($paramName, $paramValues)) {
                 $metaArray = array_merge($metaArray, $res);
@@ -685,7 +681,7 @@ class FilterHelper
         if (!empty($this->filtersUrl)) {
             foreach ($uriArray as $k => $v) {
                 
-                list($paramName, $paramValues) = explode('-', $v);
+                [$paramName, $paramValues] = explode('-', $v);
 
                 if ($parsedUrl = $this->filterChpuUrlParseUrl($paramName, $paramValues)) {
                     $resultArray = array_merge($resultArray, $parsedUrl);

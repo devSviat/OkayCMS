@@ -48,7 +48,7 @@ class CsvNormalizer
             }
         }
 
-        $delimiter = $declared !== null ? $declared : $this->detectDelimiter($firstLine);
+        $delimiter = $declared ?? $this->detectDelimiter($firstLine);
 
         if ($delimiter === self::TARGET_DELIMITER && $declared === null && !$this->hasBom($path)) {
             fclose($handle);

@@ -126,12 +126,12 @@ class UserHelper
         if (empty($_SESSION['user_id'])) {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
         }
-        
+
         /** @var UserCartItemsEntity $userCartItemsEntity */
         $userCartItemsEntity = $this->entityFactory->get(UserCartItemsEntity::class);
-        
+
         $itemsInDb = $userCartItemsEntity->mappedBy('variant_id')->find(['user_id' => $_SESSION['user_id']]);
-        
+
         if ($onlyToLocal === false) {
             // сохраняем текущие товары с сессии в базу
             if (!empty($_SESSION['shopping_cart'])) {
@@ -174,14 +174,14 @@ class UserHelper
      */
     public function mergeWishlist($onlyToLocal = false)
     {
-        
+
         if (empty($_SESSION['user_id'])) {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
         }
-        
+
         /** @var UserWishlistItemsEntity $userWishlistItemsEntity */
         $userWishlistItemsEntity = $this->entityFactory->get(UserWishlistItemsEntity::class);
-        
+
         $itemsInDb = $userWishlistItemsEntity->mappedBy('product_id')->find(['user_id' => $_SESSION['user_id']]);
 
         if ($onlyToLocal === false) {
@@ -202,13 +202,13 @@ class UserHelper
 
         // экстендер ставим здесь, чтобы до мержа модули могли корректировать содержимое избранного
         $itemsInDb = ExtenderFacade::execute(__METHOD__, $itemsInDb, func_get_args());
-        
+
         // Объединяем товары с базы в куки
         foreach ($itemsInDb as $item) {
             $this->wishList->addItem($item->product_id, true, true);
         }
         $this->wishList->save();
-        
+
         return $itemsInDb; // no ExtenderFacade
     }
 
@@ -221,14 +221,14 @@ class UserHelper
      */
     public function mergeComparison($onlyToLocal = false)
     {
-        
+
         if (empty($_SESSION['user_id'])) {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
         }
-        
+
         /** @var UserComparisonItemsEntity $userComparisonItemsEntity */
         $userComparisonItemsEntity = $this->entityFactory->get(UserComparisonItemsEntity::class);
-        
+
         $itemsInDb = $userComparisonItemsEntity->mappedBy('product_id')->find(['user_id' => $_SESSION['user_id']]);
 
         if ($onlyToLocal === false) {
@@ -246,16 +246,16 @@ class UserHelper
         if ($onlyToLocal === true) {
             $this->comparison->emptyComparison(true);
         }
-        
+
         // экстендер ставим здесь, чтобы до мержа модули могли корректировать содержимое сравнения
         $itemsInDb = ExtenderFacade::execute(__METHOD__, $itemsInDb, func_get_args());
-        
+
         // Объединяем товары с базы в куки
         foreach ($itemsInDb as $item) {
             $this->comparison->addItem($item->product_id, true, true);
         }
         $this->comparison->save();
-        
+
         return $itemsInDb; // no ExtenderFacade
     }
 
@@ -268,14 +268,14 @@ class UserHelper
      */
     public function mergeBrowsedProducts($onlyToLocal = false)
     {
-        
+
         if (empty($_SESSION['user_id'])) {
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
         }
-        
+
         /** @var UserBrowsedProductsEntity $userBrowsedProductsEntity */
         $userBrowsedProductsEntity = $this->entityFactory->get(UserBrowsedProductsEntity::class);
-        
+
         $itemsInDb = $userBrowsedProductsEntity->mappedBy('product_id')->order('id_desc')->find(['user_id' => $_SESSION['user_id']]);
 
         if ($onlyToLocal === false) {
@@ -300,16 +300,16 @@ class UserHelper
             ]);
             $_COOKIE['browsed_products'] = '';
         }
-        
+
         // экстендер ставим здесь, чтобы до мержа модули могли корректировать содержимое сравнения
         $itemsInDb = ExtenderFacade::execute(__METHOD__, $itemsInDb, func_get_args());
-        
+
         // Объединяем товары с базы в куки
         foreach ($itemsInDb as $item) {
             $this->browsedProducts->addItem($item->product_id, true, true);
         }
         $this->browsedProducts->save();
-        
+
         return $itemsInDb; // no ExtenderFacade
     }
 

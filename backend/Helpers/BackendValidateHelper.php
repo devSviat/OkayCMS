@@ -76,7 +76,7 @@ class BackendValidateHelper
             $error = 'url_exists';
         } elseif ($this->settings->get('global_unique_url') && !$this->urlUniqueValidator->validateGlobal($product->url, ProductsEntity::class, $product->id)) {
             $error = 'global_url_exists';
-        } elseif (substr($product->url, -1) == '-' || substr($product->url, 0, 1) == '-') {
+        } elseif (str_ends_with($product->url, '-') || str_starts_with($product->url, '-')) {
             $error = 'url_wrong';
         } elseif (empty($productCategories)) {
             $error = 'empty_categories';
@@ -98,7 +98,7 @@ class BackendValidateHelper
             $error = 'empty_name';
         } elseif (empty($category->url)) {
             $error = 'empty_url';
-        } elseif (substr($category->url, -1) == '-' || substr($category->url, 0, 1) == '-') {
+        } elseif (str_ends_with($category->url, '-') || str_starts_with($category->url, '-')) {
             $error = 'url_wrong';
         }
 
@@ -136,7 +136,7 @@ class BackendValidateHelper
             $error = 'empty_name';
         } elseif (empty($category->url)) {
             $error = 'empty_url';
-        } elseif (substr($category->url, -1) == '-' || substr($category->url, 0, 1) == '-') {
+        } elseif (str_ends_with($category->url, '-') || str_starts_with($category->url, '-')) {
             $error = 'url_wrong';
         }
 
@@ -200,7 +200,7 @@ class BackendValidateHelper
             $error = 'empty_name';
         } elseif(empty($post->url)) {
             $error = 'empty_url';
-        } elseif (substr($post->url, -1) == '-' || substr($post->url, 0, 1) == '-') {
+        } elseif (str_ends_with($post->url, '-') || str_starts_with($post->url, '-')) {
             $error = 'url_wrong';
         }
 
@@ -310,7 +310,7 @@ class BackendValidateHelper
             $error = 'url_exists';
         } elseif (empty($page->name)) {
             $error = 'empty_name';
-        } elseif (substr($page->url, -1) == '-' || substr($page->url, 0, 1) == '-') {
+        } elseif (str_ends_with($page->url, '-') || str_starts_with($page->url, '-')) {
             $error = 'url_wrong';
         }
 

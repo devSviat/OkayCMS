@@ -97,7 +97,7 @@ class NoPrefixAndCategoryStrategy extends AbstractRouteStrategy
             return $this->mockRouteParams;
         }
 
-        list($categoryUrl, $postUrl) = $parts;
+        [$categoryUrl, $postUrl] = $parts;
 
         $category = $this->categoriesEntity->findOne(['url' => $categoryUrl]);
         if (empty($category)) {

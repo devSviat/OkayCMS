@@ -138,14 +138,14 @@ class ModulesAdmin extends IndexAdmin
                 $downloadVersionsData = $backendModulesHelper->checkDownloadVersions($accessUrl);
 
                 if (!empty($downloadVersionsData->error)) {
-                    
+
                     switch ($downloadVersionsData->error) {
                         case 'Resource not found':
                             $response['error'] = $backendTranslations->getTranslation('m_modules_resource_not_found');
                             break;
                     }
-                    
-                
+
+
                 // Проверяем может у нас установлен этот модуль
                 } elseif (!empty($downloadVersionsData->meta->vendor_name) 
                     && !empty($downloadVersionsData->meta->module_name)

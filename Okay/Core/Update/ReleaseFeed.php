@@ -8,7 +8,7 @@ namespace Okay\Core\Update;
  */
 class ReleaseFeed
 {
-    private const TAG_PATTERN = '#^okaycms-fork/v(\d+\.\d+\.\d+)$#';
+    private const string TAG_PATTERN = '#^okaycms-fork/v(\d+\.\d+\.\d+)$#';
 
     /**
      * Довіряємо asset-посиланням лише з нашого репозиторію релізів —

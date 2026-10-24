@@ -45,7 +45,7 @@ $ext    = isset($_GET['ext']) && is_string($_GET['ext']) ? $_GET['ext'] : '';
 
 // Раніше фільтрувалось лише ім'я файлу, а folder і ext приходили з GET
 // як є — folder виводив за межі backend/files/.
-$requiredPermission = (new BackendFileDownloadPolicy())->permissionFor($folder, $file, $ext);
+$requiredPermission = new BackendFileDownloadPolicy()->permissionFor($folder, $file, $ext);
 
 if ($requiredPermission === null) {
     exit();
@@ -57,7 +57,7 @@ if (empty($manager->permissions) || !in_array($requiredPermission, (array)$manag
 }
 
 $ext = strtolower($ext);
-$file = (new PathResolver(__DIR__))->resolve($folder . '/' . $file . '.' . $ext);
+$file = new PathResolver(__DIR__)->resolve($folder . '/' . $file . '.' . $ext);
 
 if ($file === null || !is_file($file)) {
     exit();

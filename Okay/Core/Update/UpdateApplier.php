@@ -16,7 +16,7 @@ use Symfony\Component\Process\Process;
  */
 class UpdateApplier
 {
-    private const TMP_SUFFIX = '.core-update.tmp';
+    private const string TMP_SUFFIX = '.core-update.tmp';
 
     /**
      * Для кожного шляху з $manifestFiles: mkdir цільової директорії,
@@ -294,7 +294,7 @@ class UpdateApplier
             $process->run();
 
             return $process->isSuccessful();
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }

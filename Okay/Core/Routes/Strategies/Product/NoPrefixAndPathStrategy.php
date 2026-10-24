@@ -118,7 +118,7 @@ class NoPrefixAndPathStrategy extends AbstractRouteStrategy
             return $this->mockRouteParams;
         }
 
-        list($productUrl, $variantId) = $this->matchProductUrlFromUri($url, $category->path_url);
+        [$productUrl, $variantId] = $this->matchProductUrlFromUri($url, $category->path_url);
         $productId    = $this->productsEntity->col('id')->findOne([
             'url'              => $productUrl,
             'main_category_id' => $mainCategoryId

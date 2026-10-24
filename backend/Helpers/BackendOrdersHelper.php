@@ -162,7 +162,7 @@ class BackendOrdersHelper
 
             foreach ($variants as $variant) {
                 if (isset($products[$variant->product_id])) {
-                    $variant->units = $variant->units ? $variant->units : $this->settings->get('units');
+                    $variant->units = $variant->units ?: $this->settings->get('units');
                     $products[$variant->product_id]->variants[] = $variant;
                     if ($variant->currency_id && ($currency = $currenciesEntity->findOne(['id' => $variant->currency_id]))) {
                         if ($currency->rate_from != $currency->rate_to) {
@@ -409,7 +409,7 @@ class BackendOrdersHelper
                     $purchase->variant = $variants[$purchase->variant_id];
                 }
                 if (isset($sortedDiscounts[$purchase->id])) {
-                    list($purchase->discounts) = $this->discountsHelper->calculateDiscounts($this->discountsHelper->buildFromDB($sortedDiscounts[$purchase->id]), $purchase->undiscounted_price);
+                    [$purchase->discounts] = $this->discountsHelper->calculateDiscounts($this->discountsHelper->buildFromDB($sortedDiscounts[$purchase->id]), $purchase->undiscounted_price);
                 }
             }
         }
@@ -686,7 +686,7 @@ class BackendOrdersHelper
             'entity_id' => $orderId
         ]);
         $order = $ordersEntity->findOne(['id' => $orderId]);
-        list($discounts) = $this->discountsHelper->calculateDiscounts($this->discountsHelper->buildFromDB($discountsDB), $order->undiscounted_total_price);
+        [$discounts] = $this->discountsHelper->calculateDiscounts($this->discountsHelper->buildFromDB($discountsDB), $order->undiscounted_total_price);
 
         return ExtenderFacade::execute(__METHOD__, $discounts, func_get_args());
     }
@@ -758,7 +758,7 @@ class BackendOrdersHelper
     public function updateDiscountPositions($ids, $positions)
     {
         foreach($positions as $i=>$position) {
-            $this->discountsEntity->update($ids[$i], array('position' => (int) $position));
+            $this->discountsEntity->update($ids[$i], ['position' => (int) $position]);
         }
 
         ExtenderFacade::execute(__METHOD__, null, func_get_args());

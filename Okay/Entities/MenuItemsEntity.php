@@ -88,21 +88,19 @@ class MenuItemsEntity extends Entity
         $items = $this->find();
         
         foreach ($items as $item) {
-            if (!isset($menuItems[$item->menu_id]))  {
-                $menuItems[$item->menu_id] = [];
-            }
+            $menuItems[$item->menu_id] ??= [];
             $menuItems[$item->menu_id][] = $item;
         }
 
         foreach ($menuItems as $menu_id => $items) {
             // Дерево элементов меню
             $tree = new \stdClass();
-            $tree->submenus = array();
+            $tree->submenus = [];
 
             // Указатели на узлы дерева
-            $pointers = array();
+            $pointers = [];
             $pointers[0] = &$tree;
-            $pointers[0]->path = array();
+            $pointers[0]->path = [];
             $pointers[0]->level = 0;
 
             $finish = false;
@@ -117,7 +115,7 @@ class MenuItemsEntity extends Entity
 
                         // Путь к текущему элементу
                         $curr = $pointers[$item->id];
-                        $pointers[$item->id]->path = array_merge((array)$pointers[$item->parent_id]->path, array($curr));
+                        $pointers[$item->id]->path = array_merge((array)$pointers[$item->parent_id]->path, [$curr]);
 
                         // Уровень вложенности элементов
                         $pointers[$item->id]->level = 1 + $pointers[$item->parent_id]->level;

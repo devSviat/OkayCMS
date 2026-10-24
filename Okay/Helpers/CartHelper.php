@@ -208,13 +208,13 @@ class CartHelper
         $cart->langDiscountsToDB = [];
         /** @var Discount $discount */
         foreach ($cart->discounts as $discount) {
-            list($discountToDB, $langDiscountToDB) = $this->discountsHelper->prepareForDB($discount, 'order', $orderId);
+            [$discountToDB, $langDiscountToDB] = $this->discountsHelper->prepareForDB($discount, 'order', $orderId);
             $cart->discountsToDB[] = $discountToDB;
             $cart->langDiscountsToDB[] = $langDiscountToDB;
         }
         foreach ($cart->purchases as $i => $purchase) {
             foreach ($purchase->discounts as $discount) {
-                list($discountToDB, $langDiscountToDB) = $this->discountsHelper->prepareForDB($discount, 'purchase', $cart->purchasesToDB[$i]->id);
+                [$discountToDB, $langDiscountToDB] = $this->discountsHelper->prepareForDB($discount, 'purchase', $cart->purchasesToDB[$i]->id);
                 $cart->discountsToDB[] = $discountToDB;
                 $cart->langDiscountsToDB[] = $langDiscountToDB;
             }

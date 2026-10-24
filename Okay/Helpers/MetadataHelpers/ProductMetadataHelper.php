@@ -160,12 +160,12 @@ class ProductMetadataHelper extends CommonMetadataHelper
             '{$price}'         => ($this->product->variant->price != null ? $this->money->convert($this->product->variant->price, $currency->id, false) . ' ' . $currency->sign : ''),
             '{$compare_price}' => ($this->product->variant->compare_price != null ? $this->money->convert($this->product->variant->compare_price, $currency->id, false) . ' ' . $currency->sign : ''),
             '{$sku}'           => ($this->product->variant->sku != null ? $this->product->variant->sku : ''),
-            '{$sitename}'      => ($this->settings->get('site_name') ? $this->settings->get('site_name') : '')
+            '{$sitename}'      => ($this->settings->get('site_name') ?: '')
         ];
 
         if ($this->category) {
-            $this->parts['{$category}'] = ($this->category->name ? $this->category->name : '');
-            $this->parts['{$category_h1}'] = ($this->category->name_h1 ? $this->category->name_h1 : '');
+            $this->parts['{$category}'] = ($this->category->name ?: '');
+            $this->parts['{$category_h1}'] = ($this->category->name_h1 ?: '');
 
             if (!empty($this->product->features)) {
                 foreach ($this->product->features as $feature) {

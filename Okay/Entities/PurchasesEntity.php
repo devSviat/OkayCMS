@@ -168,9 +168,7 @@ class PurchasesEntity extends Entity
             $purchase->price = $variant->price;
         }
         
-        if (!isset($purchase->amount)) {
-            $purchase->amount = 1;
-        }
+        $purchase->amount ??= 1;
 
         if (!isset($purchase->units) && !empty($variant)) {
             $purchase->units = $variant->units;

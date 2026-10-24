@@ -112,7 +112,7 @@ class Money
         // Точность отображения, знаков после запятой
         if (is_null($precision)) {
             if (!empty($currency)) {
-                $precision = isset($currency->cents) ? $currency->cents : 2;
+                $precision = $currency->cents ?? 2;
             } else {
                 $precision = 0;
             }

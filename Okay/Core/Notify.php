@@ -114,11 +114,11 @@ class Notify
         if ($this->PHPMailer->Port == 465) {
             $this->PHPMailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             // Добавляем протокол, если не указали
-            $this->PHPMailer->Host = (strpos($this->PHPMailer->Host, "ssl://") === false) ? "ssl://".$this->PHPMailer->Host : $this->PHPMailer->Host;
+            $this->PHPMailer->Host = (!str_contains($this->PHPMailer->Host, "ssl://")) ? "ssl://".$this->PHPMailer->Host : $this->PHPMailer->Host;
         } elseif ($this->PHPMailer->Port == 587) {
             $this->PHPMailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             // Добавляем протокол, если не указали
-            $this->PHPMailer->Host = (strpos($this->PHPMailer->Host, "tls://") === false) ? "tls://".$this->PHPMailer->Host : $this->PHPMailer->Host;
+            $this->PHPMailer->Host = (!str_contains($this->PHPMailer->Host, "tls://")) ? "tls://".$this->PHPMailer->Host : $this->PHPMailer->Host;
         }
         // Без пароля в налаштуваннях тут null, а PHPMailer на PHP 8.5 віддає його
         // в base64_encode() і пише Deprecated на кожен лист.

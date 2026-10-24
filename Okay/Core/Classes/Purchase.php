@@ -179,7 +179,7 @@ class Purchase
                         continue;
                     }
                     $discounts = $this->discountsHelper->prepareDiscounts($signs['purchase'], $this->availableDiscounts);
-                    list($this->discounts, $this->price) = $this->discountsHelper->calculateDiscounts($discounts, $this->undiscounted_price);
+                    [$this->discounts, $this->price] = $this->discountsHelper->calculateDiscounts($discounts, $this->undiscounted_price);
                     $this->meta->total_price = $this->price * $this->amount;
                     break;
                 }
