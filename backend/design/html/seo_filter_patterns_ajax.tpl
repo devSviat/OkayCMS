@@ -204,7 +204,7 @@
                     <div class="col-md-12">
                         <div class="pull-right">
                             <button type="button" class="fn_delete_template btn btn_mini btn-danger float-md-right" >
-                                {include file='svg_icon.tpl' svgId='delete'}
+                                {include file='svg_icon.tpl' svgId='trash'}
                                 <span>{$btr->seo_filter_patterns_delete_template|escape}</span>
                             </button>
                         </div>

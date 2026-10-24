@@ -64,7 +64,7 @@
                                                 <span class="fn_rename_theme rename_theme p-h" data-old_name="{$image->name|escape}">{include file='svg_icon.tpl' svgId='pencil'}</span>
 
                                                 <button type="button" data-name="{$image->name|escape}" class="fn_delete_image btn_close float-xs-right">
-                                                    {include file='svg_icon.tpl' svgId='delete'}
+                                                    {include file='svg_icon.tpl' svgId='trash'}
                                                 </button>
                                             </div>
                                             <div class="banner_card_block">

@@ -369,7 +369,7 @@
                                         {if !$variant@first}
                                         <div class="okay_list_boding okay_list_close remove_variant">
                                             <button data-hint="{$btr->general_delete_product|escape}" type="button" class="btn_close fn_remove_variant hint-bottom-right-t-info-s-small-mobile  hint-anim">
-                                                {include file='svg_icon.tpl' svgId='delete'}
+                                                {include file='svg_icon.tpl' svgId='trash'}
                                             </button>
                                         </div>
                                         {/if}
@@ -436,7 +436,7 @@
                                     </div>
                                     <div class="okay_list_boding okay_list_close remove_variant">
                                         <button data-hint="{$btr->general_delete_product|escape}" type="button" class="btn_close fn_remove_variant hint-bottom-right-t-info-s-small-mobile  hint-anim">
-                                            {include file='svg_icon.tpl' svgId='delete'}
+                                            {include file='svg_icon.tpl' svgId='trash'}
                                         </button>
                                     </div>
                                 </div>
@@ -627,7 +627,7 @@
                                     <input type="text" class="new_feature new_feature_value"  name="new_features_values[]" placeholder="{$btr->product_features_value_enter|escape}"/>
                                 </div>
                                 <span class="fn_delete_feature btn_close delete_feature">
-                                    {include file='svg_icon.tpl' svgId='delete'}
+                                    {include file='svg_icon.tpl' svgId='trash'}
                                 </span>
                             </div>
                         </div>

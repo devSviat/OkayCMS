@@ -204,7 +204,7 @@
                                                     </div>
                                                     <div class="okay_list_boding okay_list_close remove_variant">
                                                         <button data-hint="{$btr->np_delete_delivery_type|escape}" type="button" class="btn_close fn_remove_delivery_type hint-bottom-right-t-info-s-small-mobile  hint-anim">
-                                                            {include file='svg_icon.tpl' svgId='delete'}
+                                                            {include file='svg_icon.tpl' svgId='trash'}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -244,7 +244,7 @@
                                                 </div>
                                                 <div class="okay_list_boding okay_list_close remove_variant">
                                                     <button data-hint="{$btr->np_delete_delivery_type|escape}" type="button" class="btn_close fn_remove_delivery_type hint-bottom-right-t-info-s-small-mobile  hint-anim">
-                                                        {include file='svg_icon.tpl' svgId='delete'}
+                                                        {include file='svg_icon.tpl' svgId='trash'}
                                                     </button>
                                                 </div>
                                             </div>
