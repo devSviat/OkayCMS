@@ -49,16 +49,22 @@ class UpdateCheckHelper
 
     public function check(bool $force = false): array
     {
+        $stored = $this->settings->get(self::SETTING_SNAPSHOT);
         $snapshot = $this->getSnapshot();
+
+        // Наступний реліз залежить від встановленої версії (ReleaseFeed::parseLatest):
+        // знімок, вибраний для іншої версії, застарів, хоч би й був свіжий. І ETag
+        // тоді не шлемо — 304 лишив би старий вибір без тіла, з якого вибрати новий.
+        $installedChanged = !ReleaseFeed::isChosenFor(is_array($stored) ? $stored : [], $this->config->forkVersion);
 
         // config.local.php може перевизначити частоту перевірки ключем core_updater_check_ttl
         $ttl = ((int) $this->config->get('core_updater_check_ttl')) ?: self::TTL;
 
-        if (!$force && $snapshot !== null && ReleaseFeed::isSnapshotFresh($snapshot, time(), $ttl)) {
+        if (!$force && !$installedChanged && $snapshot !== null && ReleaseFeed::isSnapshotFresh($snapshot, time(), $ttl)) {
             return $snapshot;
         }
 
-        $etag = is_string($snapshot['etag'] ?? null) ? $snapshot['etag'] : null;
+        $etag = !$installedChanged && is_string($snapshot['etag'] ?? null) ? $snapshot['etag'] : null;
 
         $headers = [
             'User-Agent: OkayCMS-Fork-Updater',
@@ -124,7 +130,7 @@ class UpdateCheckHelper
         $responseHeaders = substr($response, 0, $headerSize);
         $body = substr($response, $headerSize);
 
-        $latest = ReleaseFeed::parseLatest($body);
+        $latest = ReleaseFeed::parseLatest($body, $this->config->forkVersion);
         $metaError = null;
 
         if ($latest !== null) {
@@ -138,6 +144,7 @@ class UpdateCheckHelper
             'etag' => self::extractEtag($responseHeaders) ?? $etag,
             'installed' => $this->config->forkVersion,
             'latest' => $latest,
+            'latestFor' => $this->config->forkVersion,
             'updateAvailable' => $latest !== null
                 && ReleaseFeed::isNewerThanInstalled($latest['forkVersion'], $this->config->forkVersion),
         ];

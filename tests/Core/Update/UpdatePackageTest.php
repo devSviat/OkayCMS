@@ -136,12 +136,9 @@ class UpdatePackageTest extends TestCase
     {
         $manifest = json_decode(file_get_contents(self::FIXTURES . '/manifest-wrong-hash.json'), true)['files'];
 
-        try {
-            UpdatePackage::verifyExtractedFiles(self::FIXTURES . '/payload', $manifest);
-            $this->fail('Очікувався RuntimeException.');
-        } catch (\RuntimeException $e) {
-            $this->assertTrue(true);
-        }
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::verifyExtractedFiles(self::FIXTURES . '/payload', $manifest);
     }
 
     // --- assertSafePaths ---
@@ -203,6 +200,8 @@ class UpdatePackageTest extends TestCase
             'minPhp' => '8.4.0',
             'requiresMigrations' => false,
             'releasedAt' => '2026-02-01T00:00:00Z',
+            'packageFormat' => null,
+            'requiresFrom' => null,
         ], $meta);
     }
 
@@ -276,6 +275,25 @@ class UpdatePackageTest extends TestCase
         $this->expectException(\RuntimeException::class);
 
         UpdatePackage::assertInstallable($meta, '1.2.0', '8.5.0');
+    }
+
+    /** Пакет-після-мосту не ставиться зі старішої версії, навіть якщо правило вибору обійшли. */
+    public function testAssertInstallableRefusesInstallsOlderThanRequiresFrom(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Спершу оновіться до 1.3.12');
+
+        UpdatePackage::assertInstallable(['forkVersion' => '1.4.0', 'requiresFrom' => '1.3.12'], '1.3.9', '8.5.0');
+    }
+
+    public function testAssertInstallableAllowsRequiresFromAndNewer(): void
+    {
+        $meta = ['forkVersion' => '1.4.0', 'requiresFrom' => '1.3.12'];
+
+        UpdatePackage::assertInstallable($meta, '1.3.12', '8.5.0');
+        UpdatePackage::assertInstallable($meta, '1.3.13', '8.5.0');
+        UpdatePackage::assertInstallable(['forkVersion' => '1.4.0', 'requiresFrom' => null], '1.3.9', '8.5.0');
+        $this->addToAssertionCount(3);
     }
 
     /**

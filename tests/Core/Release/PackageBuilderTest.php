@@ -190,6 +190,48 @@ class PackageBuilderTest extends TestCase
         }
     }
 
+    /**
+     * Друге покоління: архів під назвою, якої старі інсталяції не шукають, і
+     * те саме покоління й requiresFrom у version.json — їх звіряє verify.
+     */
+    public function testSecondGenerationBuildCarriesItsGenerationInNameAndVersionJson(): void
+    {
+        $outputDir = sys_get_temp_dir() . '/package-builder-output-' . uniqid();
+        mkdir($outputDir, 0777, true);
+        $manifestPath = $outputDir . '/manifest-f2.json';
+        file_put_contents($manifestPath, json_encode([
+            'packageFormat' => 2,
+            'requiresFrom' => '1.3.12',
+            'include' => ['Okay/Core/', 'backend/'],
+            'exclude' => ['backend/design/compiled/'],
+        ]));
+
+        try {
+            $result = (new PackageBuilder())->build(
+                $this->fixturesDir . '/sample-repo',
+                $manifestPath,
+                '1.4.0',
+                '4.6.0',
+                $outputDir
+            );
+
+            $this->assertSame($outputDir . '/okaycms-fork-v1.4.0-f2.zip', $result['zipPath']);
+            $this->assertFileDoesNotExist($outputDir . '/okaycms-fork-v1.4.0.zip');
+            $this->assertStringContainsString('  okaycms-fork-v1.4.0-f2.zip', (string) file_get_contents($result['checksumsPath']));
+
+            $version = json_decode((string) file_get_contents($result['versionJsonPath']), true);
+            $this->assertSame(2, $version['packageFormat']);
+            $this->assertSame('1.3.12', $version['requiresFrom']);
+
+            $zip = new \ZipArchive();
+            $zip->open($result['zipPath']);
+            $this->assertNotFalse($zip->locateName('payload/backend/design/theme.tpl'), 'друге покоління везе тему адмінки');
+            $zip->close();
+        } finally {
+            $this->removeDirectory($outputDir);
+        }
+    }
+
     public function testBuildBundlesMigrationsIntoTheZip(): void
     {
         $outputDir = sys_get_temp_dir() . '/package-builder-output-' . uniqid();

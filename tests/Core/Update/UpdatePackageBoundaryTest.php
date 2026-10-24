@@ -3,6 +3,7 @@
 namespace Core\Update;
 
 use Okay\Core\Release\ReleaseManifest;
+use Okay\Core\Update\PackageFormat;
 use Okay\Core\Update\UpdatePackage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -28,11 +29,14 @@ class UpdatePackageBoundaryTest extends TestCase
     public function testRealReleaseManifestPassesTheBoundary(): void
     {
         $root = dirname(__DIR__, 3);
-        $files = (new ReleaseManifest($root . '/release-manifest.json'))->resolveFiles($root);
+        $manifest = new ReleaseManifest($root . '/release-manifest.json');
+        $files = $manifest->resolveFiles($root);
 
         $this->assertNotEmpty($files, 'маніфест не дав жодного файлу — перевірка втратила предмет');
 
-        UpdatePackage::assertPathsWithinCoreBoundary(array_fill_keys($files, str_repeat('0', 64)));
+        // Покоління з маніфесту: пакет першого покоління з темою адмінки
+        // впав би тут, а не на verify у кожної інсталяції до 1.3.12.
+        UpdatePackage::assertPathsWithinCoreBoundary(array_fill_keys($files, str_repeat('0', 64)), $manifest->packageFormat());
 
         $this->addToAssertionCount(1);
     }
@@ -43,7 +47,7 @@ class UpdatePackageBoundaryTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage($path);
 
-        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)]);
+        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)], PackageFormat::SUPPORTED);
     }
 
     /** @return array<string, array{string}> */
@@ -53,7 +57,7 @@ class UpdatePackageBoundaryTest extends TestCase
             'доступи до бази'      => ['config/config.local.php'],
             'завантаження'         => ['files/originals/products/photo.jpg'],
             'тема вітрини'         => ['design/vibe_shop/css/theme.css'],
-            'тема адмінки'         => ['backend/design/css/okay.css'],
+            'скомпільована адмінка' => ['backend/design/compiled/auth.tpl.php'],
             'дані імпорту'         => ['backend/files/import/import.csv'],
             'кеш'                  => ['cache/css/bundle.css'],
             'скомпільовані шаблони'=> ['compiled/okay_shop/index.tpl.php'],
@@ -73,7 +77,7 @@ class UpdatePackageBoundaryTest extends TestCase
     #[DataProvider('coreOwnedPathsProvider')]
     public function testCoreOwnedPathIsAllowed(string $path): void
     {
-        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)]);
+        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)], PackageFormat::SUPPORTED);
 
         $this->addToAssertionCount(1);
     }
@@ -103,7 +107,7 @@ class UpdatePackageBoundaryTest extends TestCase
     #[DataProvider('updaterOwnAssetsProvider')]
     public function testUpdaterOwnAssetIsTheDocumentedException(string $path): void
     {
-        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)]);
+        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)], PackageFormat::LEGACY);
 
         $this->addToAssertionCount(1);
     }
@@ -131,7 +135,65 @@ class UpdatePackageBoundaryTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
 
-        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)]);
+        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)], PackageFormat::LEGACY);
+    }
+
+    /**
+     * Друге покоління везе адмінку: шаблони, стилі, скрипти. Без цього нові
+     * контролери працювали б зі старими шаблонами (1.4.0 так ламала
+     * редагування менеджерів).
+     */
+    #[DataProvider('adminThemeCoreFilesProvider')]
+    public function testSecondFormatCarriesTheAdminTheme(string $path): void
+    {
+        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)], 2);
+
+        $this->addToAssertionCount(1);
+    }
+
+    /** @return array<string, array{string}> */
+    public static function adminThemeCoreFilesProvider(): array
+    {
+        return [
+            'головний шаблон' => ['backend/design/html/index.tpl'],
+            'стилі адмінки'   => ['backend/design/css/okay.css'],
+            'логотип'         => ['backend/design/images/logo_dark.svg'],
+            'точка входу під design' => ['backend/design/js/admintooltip/admintooltip.php'],
+        ];
+    }
+
+    /** Скомпільовані шаблони — стан інсталяції в будь-якому поколінні. */
+    #[DataProvider('everyFormatProvider')]
+    public function testCompiledAdminTemplatesAreNeverShipped(int $format): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('backend/design/compiled/');
+
+        UpdatePackage::assertPathsWithinCoreBoundary(['backend/design/compiled/index.tpl.php' => str_repeat('a', 64)], $format);
+    }
+
+    /** @return array<string, array{int}> */
+    public static function everyFormatProvider(): array
+    {
+        return array_combine(
+            array_map(static fn (int $f): string => 'покоління ' . $f, range(PackageFormat::LEGACY, PackageFormat::SUPPORTED)),
+            array_map(static fn (int $f): array => [$f], range(PackageFormat::LEGACY, PackageFormat::SUPPORTED))
+        );
+    }
+
+    /** Покоління, якого інсталяція не знає, не встановлюється навіть із чистим переліком. */
+    #[DataProvider('unknownFormatProvider')]
+    public function testUnknownFormatIsRejected(int $format): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        UpdatePackage::assertPathsWithinCoreBoundary(['Okay/Core/Config.php' => str_repeat('a', 64)], $format);
+    }
+
+    /** @return array<string, array{int}> */
+    public static function unknownFormatProvider(): array
+    {
+        return ['нуль' => [0], 'новіше за підтримане' => [PackageFormat::SUPPORTED + 1]];
     }
 
     /** @return array<string, array{string}> */
@@ -155,7 +217,7 @@ class UpdatePackageBoundaryTest extends TestCase
 
         UpdatePackage::assertPathsWithinCoreBoundary([
             'CONFIG/config.local.php' => str_repeat('a', 64),
-        ]);
+        ], PackageFormat::SUPPORTED);
     }
 
     /**
@@ -172,7 +234,7 @@ class UpdatePackageBoundaryTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
 
-        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)]);
+        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)], PackageFormat::SUPPORTED);
     }
 
     /** @return array<string, array{string}> */
@@ -205,7 +267,7 @@ class UpdatePackageBoundaryTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
 
-        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)]);
+        UpdatePackage::assertPathsWithinCoreBoundary([$path => str_repeat('a', 64)], PackageFormat::SUPPORTED);
     }
 
     /** @return array<string, array{string}> */
@@ -235,7 +297,7 @@ class UpdatePackageBoundaryTest extends TestCase
                 'config/config.local.php'   => str_repeat('a', 64),
                 'Okay/Core/Config.php'      => str_repeat('b', 64),
                 'design/vibe_shop/head.tpl' => str_repeat('c', 64),
-            ]);
+            ], PackageFormat::SUPPORTED);
             $this->fail('очікувався RuntimeException');
         } catch (\RuntimeException $e) {
             $this->assertStringContainsString('config/config.local.php', $e->getMessage());
@@ -246,7 +308,7 @@ class UpdatePackageBoundaryTest extends TestCase
 
     public function testEmptyManifestPasses(): void
     {
-        UpdatePackage::assertPathsWithinCoreBoundary([]);
+        UpdatePackage::assertPathsWithinCoreBoundary([], PackageFormat::SUPPORTED);
 
         $this->addToAssertionCount(1);
     }

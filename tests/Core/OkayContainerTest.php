@@ -5,6 +5,7 @@ namespace Core;
 use Okay\Core\OkayContainer\Exception\ContainerException;
 use Okay\Core\OkayContainer\OkayContainer;
 use Okay\Core\OkayContainer\Reference\ServiceReference;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -86,6 +87,9 @@ class OkayContainerTest extends TestCase
             try {
                 $container->get('boom');
                 $this->fail("спроба $attempt: виняток не кинуто");
+            } catch (AssertionFailedError $e) {
+                // fail() кидає виняток PHPUnit; без цього рядка catch нижче проковтнув би й його.
+                throw $e;
             } catch (\Throwable $e) {
                 $this->assertInstanceOf(\RuntimeException::class, $e, "спроба $attempt");
                 $this->assertStringContainsString('справжня причина', $e->getMessage(), "спроба $attempt");
@@ -108,6 +112,9 @@ class OkayContainerTest extends TestCase
             try {
                 $container->get('outer');
                 $this->fail("спроба $attempt: виняток не кинуто");
+            } catch (AssertionFailedError $e) {
+                // fail() кидає виняток PHPUnit; без цього рядка catch нижче проковтнув би й його.
+                throw $e;
             } catch (\Throwable $e) {
                 $this->assertStringNotContainsString('circular reference', $e->getMessage(), "спроба $attempt");
             }
