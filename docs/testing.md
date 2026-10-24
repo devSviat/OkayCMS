@@ -196,7 +196,7 @@ PHPCompatibility тут немає: стабільна 9.3.5 не знає PHP 8
 | ---- | ------------ |
 | `composer validate --strict` | коректність `composer.json` |
 | `composer audit --locked` | вразливості в залежностях; `--abandoned=report`, тобто покинутий пакет не валить збірку |
-| `vendor/bin/phpunit` | тести, на тій самій матриці |
+| `vendor/bin/phpunit` | тести, на матриці 8.4 і 8.5 |
 | `vendor/bin/phpstan analyse` | статичний аналіз, окремою джобою на 8.5 |
 | `php -l` по всіх файлах | застаріле в PHP 8.5, у тій самій джобі |
 | `gitleaks detect` | секрети по **всій** історії |
