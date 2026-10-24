@@ -62,6 +62,8 @@
                                                 {$btr->auth_2fa_key_unavailable|escape}
                                             {elseif $error_message == 'code_wrong'}
                                                 {$btr->auth_2fa_wrong|escape}
+                                            {elseif $error_message == 'session_failed'}
+                                                {$btr->auth_session_failed|escape}
                                             {/if}
                                         </div>
                                     {/if}

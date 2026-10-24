@@ -197,16 +197,26 @@ class ManagerSessions
         return $this->revoked($managerId, $byManagerId, $this->sessions()->revoke($managerId, null, $except, $byManagerId));
     }
 
-    /** Усі сесії менеджера, разом із поточною. $byManagerId null — консоль. */
-    public function revokeAll(int $managerId, ?int $byManagerId): int
+    /**
+     * Усі сесії менеджера, разом із поточною.
+     *
+     * @param ?int $byManagerId null — консоль
+     * @param string $via звідки, для журналу: без $byManagerId інакше не відрізнити консоль від самого менеджера
+     */
+    public function revokeAll(int $managerId, ?int $byManagerId, string $via = ''): int
     {
-        return $this->revoked($managerId, $byManagerId, $this->sessions()->revoke($managerId, null, null, $byManagerId));
+        return $this->revoked($managerId, $byManagerId, $this->sessions()->revoke($managerId, null, null, $byManagerId), $via);
     }
 
-    private function revoked(int $managerId, ?int $byManagerId, int $count): int
+    private function revoked(int $managerId, ?int $byManagerId, int $count, string $via = ''): int
     {
         if ($count > 0) {
-            $this->authLog?->record(ManagerAuthLog::SESSIONS_REVOKED, $managerId, $byManagerId !== $managerId ? $byManagerId : null, ['count' => $count]);
+            $this->authLog?->record(
+                ManagerAuthLog::SESSIONS_REVOKED,
+                $managerId,
+                $byManagerId !== $managerId ? $byManagerId : null,
+                ['count' => $count] + ($via !== '' ? ['via' => $via] : [])
+            );
         }
 
         return $count;

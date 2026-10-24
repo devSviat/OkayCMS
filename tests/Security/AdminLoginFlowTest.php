@@ -119,7 +119,7 @@ class AdminLoginFlowTest extends TestCase
         $this->assertNotFalse($recoveryStart);
         $this->assertNotFalse($recoveryVerify);
         foreach ([
-            'зміна пароля' => "\$managersEntity->update((int)\$manager->id, ['password' => \$new_password]);",
+            'зміна пароля' => "\$saved = \$managersEntity->update((int)\$manager->id, ['password' => \$new_password]);",
             'відкликання сесій' => '$managerSessions->revokeAll((int)$manager->id, (int)$manager->id);',
             'вхід' => '$managerSessions->signIn($manager, $codeResult !== null)',
         ] as $what => $call) {
@@ -195,15 +195,34 @@ class AdminLoginFlowTest extends TestCase
             $auth
         );
         $this->assertStringContainsString('$this->loginGuard->recordLimit(', $this->source('Okay/Core/Security/ManagerReauth.php'));
+
+        // Гілка ліміту дешева й без меж: пошук менеджера в ній дав би різницю в
+        // часі між існуючим і вигаданим логіном.
+        $limited = substr($auth, (int)strpos($auth, '$loginGuard->allowPasswordAttempt($login, $clientIp)'));
+        $limited = substr($limited, 0, (int)strpos($limited, '} else {'));
+        $this->assertStringContainsString('$loginGuard->recordLimit(null);', $limited);
+        $this->assertStringNotContainsString('->get(', $limited);
     }
 
-    /** Новий пароль із листа — подія в журналі власника, одразу після запису пароля. */
-    public function testPasswordFromTheEmailIsLogged(): void
+    /**
+     * Новий пароль із листа: не записався — ні сесій не гасимо, ні не впускаємо;
+     * записався — подія в журналі, ще до завершення сесій і входу.
+     */
+    public function testPasswordFromTheEmailIsLoggedOnlyWhenSaved(): void
     {
-        $this->assertMatchesRegularExpression(
-            "~\\\$managersEntity->update\(\(int\)\\\$manager->id, \['password' => \\\$new_password\]\);\s*\\\$authLog->record\(ManagerAuthLog::PASSWORD_CHANGED~",
-            $this->source('backend/Controllers/AuthAdmin.php')
-        );
+        $auth = $this->source('backend/Controllers/AuthAdmin.php');
+        $save = strpos($auth, '$saved = $managersEntity->update((int)$manager->id, [\'password\' => $new_password]);');
+        $refuse = strpos($auth, 'if (!$saved) {', (int)$save);
+        $return = strpos($auth, 'return;', (int)$refuse);
+        $logged = strpos($auth, '$authLog->record(ManagerAuthLog::PASSWORD_CHANGED, (int)$manager->id, null, [\'via\' => \'email\']);');
+        $revoke = strpos($auth, '$managerSessions->revokeAll((int)$manager->id, (int)$manager->id);');
+
+        foreach ([$save, $refuse, $return, $logged, $revoke] as $at) {
+            $this->assertNotFalse($at);
+        }
+        $this->assertLessThan($refuse, $save);
+        $this->assertLessThan($logged, $return);
+        $this->assertLessThan($revoke, $logged);
     }
 
     /**
@@ -220,5 +239,21 @@ class AdminLoginFlowTest extends TestCase
             "~\{if \\\$can_see_sessions\}\s*<section class=\"settings_section\">\s*<div class=\"settings_section__about\">\s*<h2 class=\"settings_section__title\">\{\\\$btr->manager_log_heading~",
             $this->source('backend/design/html/manager.tpl')
         );
+    }
+
+    /**
+     * Зміни облікового запису в профілі — події журналу, і лише коли запис
+     * справді відбувся; видалення менеджера забирає його журнал.
+     */
+    public function testAccountChangesAreLoggedAfterASuccessfulSave(): void
+    {
+        $admin = $this->source('backend/Controllers/ManagerAdmin.php');
+
+        $this->assertMatchesRegularExpression('~if \(\$managersEntity->update\(\$targetId, \[\'permissions\' => \$newPermissions\]\)\) \{\s*\$this->authLog->record\(ManagerAuthLog::PERMISSIONS_CHANGED~', $admin);
+        $this->assertStringContainsString('if ($saved && $login !== (string)$target->login) {', $admin);
+        $this->assertStringContainsString('if ($saved && $email !== (string)$target->email) {', $admin);
+        $this->assertStringContainsString('$this->authLog->record(ManagerAuthLog::MANAGER_CREATED, (int)$id, (int)$viewer->id);', $admin);
+        $this->assertMatchesRegularExpression('~if \(!\$managersEntity->update\(\(int\)\$target->id, \[\'password\' => \$password\]\)\) \{[^}]*return;\s*\}\s*\$this->authLog->record\(ManagerAuthLog::PASSWORD_CHANGED~s', $admin);
+        $this->assertStringContainsString('$authLog->forget($id, (string)$target->login, $viewerId);', $this->source('backend/Controllers/ManagersAdmin.php'));
     }
 }

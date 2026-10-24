@@ -125,8 +125,14 @@ class AuthAdmin extends IndexAdmin
                         return;
                     }
 
-                    // ManagersEntity::update() хешує пароль сам.
-                    $managersEntity->update((int)$manager->id, ['password' => $new_password]);
+                    // ManagersEntity::update() хешує пароль сам. Не записався — не
+                    // гасимо сесій і не впускаємо: пароль лишився старим.
+                    $saved = $managersEntity->update((int)$manager->id, ['password' => $new_password]);
+                    if (!$saved) {
+                        $this->design->assign('error_message', 'session_failed');
+                        $this->response->setContent($this->design->fetch('auth.tpl'));
+                        return;
+                    }
                     $authLog->record(ManagerAuthLog::PASSWORD_CHANGED, (int)$manager->id, null, ['via' => 'email']);
 
                     // Новий пароль закриває всі наявні входи: відновлення
@@ -159,8 +165,9 @@ class AuthAdmin extends IndexAdmin
             $pass = is_string($pass) ? $pass : '';
 
             if (!$loginGuard->allowPasswordAttempt($login, $clientIp)) {
-                $limited = $login === '' ? null : ($managersEntity->get($login) ?: null);
-                $loginGuard->recordLimit(is_object($limited) ? (int)$limited->id : null);
+                // Без пошуку менеджера: ця гілка дешева й без меж, і різниця в
+                // часі між існуючим і вигаданим логіном видавала б, чи він є.
+                $loginGuard->recordLimit(null);
                 $this->design->assign('login', $login);
                 $this->design->assign('error_message', 'limit_try');
             } else {

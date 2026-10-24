@@ -4,6 +4,7 @@
 namespace Okay\Admin\Controllers;
 
 
+use Okay\Core\Security\ManagerAuthLog;
 use Okay\Core\Security\ManagerProfilePolicy;
 use Okay\Core\Security\ManagerReauth;
 use Okay\Core\Security\ManagerSessions;
@@ -18,7 +19,8 @@ class ManagersAdmin extends IndexAdmin
         ManagerSessions $managerSessions,
         ManagerProfilePolicy $policy,
         ManagerReauth $reauth,
-        ManagerTwoFactor $twoFactor
+        ManagerTwoFactor $twoFactor,
+        ManagerAuthLog $authLog
     ) {
         if ($this->request->method('post')) {
             $viewerId = (int)$this->manager->id;
@@ -64,6 +66,7 @@ class ManagersAdmin extends IndexAdmin
                     // Рядки 2FA прив'язані лише до id: менеджер із тим самим id
                     // (імпорт, ручний INSERT) отримав би чужий секрет і коди.
                     $twoFactor->disable($id, $viewerId, 'manager_deleted');
+                    $authLog->forget($id, (string)$target->login, $viewerId);
                 }
                 if ($skipped) {
                     $this->postRedirectGet->storeMessageError('no_access');

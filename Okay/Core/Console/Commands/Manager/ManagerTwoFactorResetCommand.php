@@ -42,7 +42,7 @@ class ManagerTwoFactorResetCommand extends Command
             return Command::FAILURE;
         }
 
-        $revoked = $managerSessions->revokeAll($managerId, null);
+        $revoked = $managerSessions->revokeAll($managerId, null, 'cli');
         $this->output->writeln("Two-factor authentication of \"{$manager->login}\" is disabled, sessions ended: {$revoked}.");
         $this->output->writeln('The manager signs in with the password and can enable 2FA again in the profile.');
 

@@ -141,14 +141,92 @@ class ManagerAuthLogDatabaseTest extends TestCase
         $this->log->record(ManagerAuthLog::PASSWORD_FAILED, null);
 
         $mine = $this->log->of($this->managerId);
-        $this->assertSame(['login'], array_map(static fn($e) => $e->event, $mine));
-        $this->assertSame('log_manager', $mine[0]->manager_login);
-        $this->assertSame('info', $mine[0]->tone);
-        $this->assertSame('Chrome · Linux', $mine[0]->device);
+        $this->assertSame(['login'], array_map(static fn($e) => $e->event, $mine['events']));
+        $this->assertSame([], $mine['failures']);
+        $this->assertSame('log_manager', $mine['events'][0]->manager_login);
+        $this->assertSame('info', $mine['events'][0]->tone);
+        $this->assertSame('Chrome · Linux', $mine['events'][0]->device);
 
-        $recent = array_map(static fn($e) => [(int)$e->manager_id, $e->event], array_slice($this->log->recent(), 0, 3));
+        $recent = array_map(static fn($e) => [(int)$e->manager_id, $e->event], array_slice($this->log->recent()['failures'], 0, 2));
         $this->assertContains([0, 'password_failed'], $recent, 'загальний журнал бачить невідомі логіни');
         $this->assertContains([$other, 'password_failed'], $recent);
+    }
+
+    /**
+     * Невдалі спроби може насипати будь-хто, хто знає логін. Вони в окремому
+     * списку й не витісняють входів і змін захисту з екрана.
+     */
+    public function testFailuresDoNotPushSecurityEventsOutOfView(): void
+    {
+        $this->log->record(ManagerAuthLog::TWO_FACTOR_DISABLED, $this->managerId, null, ['via' => 'profile']);
+        for ($i = 0; $i < 40; $i++) {
+            $this->log->record(ManagerAuthLog::PASSWORD_FAILED, $this->managerId);
+        }
+
+        $view = $this->log->of($this->managerId);
+        $this->assertSame(['2fa_disabled'], array_map(static fn($e) => $e->event, $view['events']));
+        $this->assertCount(20, $view['failures']);
+        $this->assertSame('alert', $view['failures'][0]->tone);
+    }
+
+    /** Мільярди адрес однієї IPv6 /64 — одна мережа, як і в лімітах входу. */
+    public function testLimitDedupeCoversTheWholeIpv6Network(): void
+    {
+        foreach (['2001:db8:1:2::1', '2001:db8:1:2::ffff', '2001:db8:1:2:abcd::9'] as $ip) {
+            $_SERVER['REMOTE_ADDR'] = $ip;
+            $this->log->recordOnce(ManagerAuthLog::LIMIT, null, 900, ['stage' => 'password']);
+        }
+        $this->assertSame(1, (int)$this->pdo->fetchValue(
+            "SELECT COUNT(*) FROM {$this->prefix}manager_auth_log WHERE event = 'limit' AND ip LIKE '2001:db8:1:2:%'"
+        ));
+
+        $_SERVER['REMOTE_ADDR'] = '2001:db8:1:3::1';
+        $this->log->recordOnce(ManagerAuthLog::LIMIT, null, 900, ['stage' => 'password']);
+        $this->assertSame(1, (int)$this->pdo->fetchValue(
+            "SELECT COUNT(*) FROM {$this->prefix}manager_auth_log WHERE event = 'limit' AND ip = '2001:db8:1:3::1'"
+        ), 'інша /64 — окремий рядок');
+    }
+
+    /**
+     * Ліміти входу рахують кожну мережу окремо, тож з багатьох мереж події
+     * без входу йдуть потоком. На всіх разом діє стеля за вікно.
+     */
+    public function testEventsWithoutSignInHaveAGlobalCap(): void
+    {
+        $this->pdo->perform("DELETE FROM {$this->prefix}manager_auth_log WHERE event = 'limit'");
+        for ($i = 0; $i < 60; $i++) {
+            $_SERVER['REMOTE_ADDR'] = '198.18.0.' . $i;
+            $this->log->recordOnce(ManagerAuthLog::LIMIT, null, 900);
+        }
+        $this->assertSame(50, (int)$this->pdo->fetchValue("SELECT COUNT(*) FROM {$this->prefix}manager_auth_log WHERE event = 'limit'"));
+
+        $this->log->record(ManagerAuthLog::LOGIN, $this->managerId);
+        $this->assertSame(['login'], $this->events(), 'стеля не зачіпає подій після входу');
+    }
+
+    /** Видалений менеджер забирає свій журнал; хто кого видалив — лишається. */
+    public function testForgetDropsTheRowsAndKeepsWhoDeleted(): void
+    {
+        $this->log->record(ManagerAuthLog::LOGIN, $this->managerId);
+        $this->log->forget($this->managerId, 'log_manager', 12);
+
+        $this->assertSame([], $this->events());
+        $row = $this->pdo->fetchOne("SELECT * FROM {$this->prefix}manager_auth_log WHERE event = 'manager_deleted' ORDER BY id DESC LIMIT 1");
+        $this->assertNull($row['manager_id']);
+        $this->assertSame(12, (int)$row['actor_id']);
+        $this->assertSame(['login' => 'log_manager'], json_decode($row['details'], true));
+    }
+
+    /**
+     * Сервіси пишуть у журнал, лише якщо DI його передав: параметр
+     * необов'язковий, і загублений рядок у services.php тихо вимкнув би журнал.
+     */
+    public function testServicesGetTheLogFromTheContainer(): void
+    {
+        foreach ([AdminLoginGuard::class, ManagerSessions::class, ManagerTwoFactor::class] as $class) {
+            $service = ServiceLocator::getInstance()->getService($class);
+            $this->assertInstanceOf(ManagerAuthLog::class, (new \ReflectionProperty($class, 'authLog'))->getValue($service), $class);
+        }
     }
 
     public function testPruneDropsOnlyRowsOlderThanTheRetention(): void
@@ -256,7 +334,7 @@ class ManagerAuthLogDatabaseTest extends TestCase
         $rows = array_column($this->rows(), null, 'event');
         $this->assertSame(['via' => 'cli'], json_decode($rows['2fa_disabled']['details'], true));
         $this->assertNull($rows['2fa_disabled']['actor_id']);
-        $this->assertArrayHasKey('sessions_revoked', $rows);
+        $this->assertSame(['count' => 1, 'via' => 'cli'], json_decode($rows['sessions_revoked']['details'], true), 'консоль, а не сам менеджер');
     }
 
     private function twoFactor(?string $key): ManagerTwoFactor
