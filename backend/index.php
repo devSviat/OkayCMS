@@ -57,6 +57,18 @@ if ($config->get('debug_mode') == true) {
 /** @var Request $request */
 $request = $DI->get(Request::class);
 
+if (isset($_GET['return'])) {
+    $returnUrl = \Okay\Core\Security\BackendReturnUrl::sanitize($_GET['return'], $request->getRootUrl());
+    if ($returnUrl === null) {
+        unset($_GET['return'], $_REQUEST['return']);
+    } else {
+        $_GET['return'] = $returnUrl;
+        if (isset($_REQUEST['return'])) {
+            $_REQUEST['return'] = $returnUrl;
+        }
+    }
+}
+
 // Вихід менеджера. Тільки POST і тільки з валідним CSRF-токеном; сам вихід
 // має відбуватись тут, бо бекендова сесія активна лише в цьому вході -
 // вітринний ?logout її не бачить із моменту розділення просторів сесій.

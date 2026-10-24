@@ -8,65 +8,65 @@
                 showStepNumbers: false,
                 showBullets: false,
                 showProgress: true,
-                prevLabel: '« {$btr->learning_hint_prev}',
-                nextLabel: '{$btr->learning_hint_next} »',
+                prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+                nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
                 skipLabel: '×',
-                doneLabel: '{$btr->learning_hint_next_done}',
+                doneLabel: '{$btr->learning_hint_next_done|escape:'javascript'}',
                 steps: [
                     {
-                        intro: '{$btr->learning_hint_categories_intro}',
+                        intro: '{$btr->learning_hint_categories_intro|escape:'javascript'}',
                     },
                     {
-                        intro: '{$btr->learning_hint_categories_intro2}',
+                        intro: '{$btr->learning_hint_categories_intro2|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-1:first-child',
-                        intro: '{$btr->learning_hint_categories_item}',
+                        intro: '{$btr->learning_hint_categories_item|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_subicon',
-                        intro: '{$btr->learning_hint_categories_subicon}',
+                        intro: '{$btr->learning_hint_categories_subicon|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .move_zone',
-                        intro: '{$btr->learning_hint_categories_move_zone}',
+                        intro: '{$btr->learning_hint_categories_move_zone|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_check',
-                        intro: '{$btr->learning_hint_categories_check}',
+                        intro: '{$btr->learning_hint_categories_check|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_photo',
-                        intro: '{$btr->learning_hint_categories_photo}',
+                        intro: '{$btr->learning_hint_categories_photo|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_categories_name',
-                        intro: '{$btr->learning_hint_categories_name}',
+                        intro: '{$btr->learning_hint_categories_name|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_status',
-                        intro: '{$btr->learning_hint_categories_status}',
+                        intro: '{$btr->learning_hint_categories_status|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_setting a',
-                        intro: '{$btr->learning_hint_categories_setting}',
+                        intro: '{$btr->learning_hint_categories_setting|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_setting button',
-                        intro: '{$btr->learning_hint_categories_setting_duplicate}',
+                        intro: '{$btr->learning_hint_categories_setting_duplicate|escape:'javascript'}',
                         position: 'left',
                     },
                     {
-                        intro: '{$btr->learning_hint_categories_add}',
+                        intro: '{$btr->learning_hint_categories_add|escape:'javascript'}',
 
                     }
 
@@ -90,52 +90,52 @@
             showStepNumbers: false,
             showBullets: false,
             showProgress: true,
-            prevLabel: '« {$btr->learning_hint_prev}',
-            nextLabel: '{$btr->learning_hint_next} »',
+            prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+            nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
             skipLabel: '×',
-            doneLabel: '{$btr->learning_hint_done}',
+            doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
             steps: [
             {
-            intro: '{$btr->learning_hint_category_intro}',
+            intro: '{$btr->learning_hint_category_intro|escape:'javascript'}',
             },
             {
             element: '.fn_step-1',
-            intro: '{$btr->learning_hint_category_name}',
+            intro: '{$btr->learning_hint_category_name|escape:'javascript'}',
             position: 'bottom',
             },
             {
             element: '.fn_step-2',
-            intro: '{$btr->learning_hint_category_url}',
+            intro: '{$btr->learning_hint_category_url|escape:'javascript'}',
             position: 'bottom',
             },
             {
             element: '.fn_step-3',
-            intro: '{$btr->learning_hint_category_activity}',
+            intro: '{$btr->learning_hint_category_activity|escape:'javascript'}',
             position: 'left',
             },
             {
             element: '.fn_step-4',
-            intro: '{$btr->learning_hint_category_images}',
+            intro: '{$btr->learning_hint_category_images|escape:'javascript'}',
             },
             {
             element: '.fn_step-5',
-            intro: '{$btr->learning_hint_category_h1}',
+            intro: '{$btr->learning_hint_category_h1|escape:'javascript'}',
             },
             {
             element: '.fn_step-6',
-            intro: '{$btr->learning_hint_category_tree}',
+            intro: '{$btr->learning_hint_category_tree|escape:'javascript'}',
             position: 'left',
             },
             {
             element: '.fn_step-7',
-            intro: '{$btr->learning_hint_meta_data}',
+            intro: '{$btr->learning_hint_meta_data|escape:'javascript'}',
             },
             {
             element: '.fn_step-8',
-            intro: '{$btr->learning_hint_category_descriptions}',
+            intro: '{$btr->learning_hint_category_descriptions|escape:'javascript'}',
             },
             {
-            intro: '{$btr->learning_hint_category_finish}',
+            intro: '{$btr->learning_hint_category_finish|escape:'javascript'}',
             position: 'bottom',
             }
             ]
@@ -166,55 +166,55 @@
                 showStepNumbers: false,
                 showBullets: false,
                 showProgress: true,
-                prevLabel: '« {$btr->learning_hint_prev}',
-                nextLabel: '{$btr->learning_hint_next} »',
+                prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+                nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
                 skipLabel: '×',
-                doneLabel: '{$btr->learning_hint_next_done}',
+                doneLabel: '{$btr->learning_hint_next_done|escape:'javascript'}',
                 steps: [
                     {
-                        intro: '{$btr->learning_hint_brands_intro}',
+                        intro: '{$btr->learning_hint_brands_intro|escape:'javascript'}',
                     },
                     {
-                        intro: '{$btr->learning_hint_brands_intro2}',
+                        intro: '{$btr->learning_hint_brands_intro2|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-1:first-child',
-                        intro: '{$btr->learning_hint_brands_item}',
+                        intro: '{$btr->learning_hint_brands_item|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .move_zone',
-                        intro: '{$btr->learning_hint_brands_move_zone}',
+                        intro: '{$btr->learning_hint_brands_move_zone|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_check',
-                        intro: '{$btr->learning_hint_brands_check}',
+                        intro: '{$btr->learning_hint_brands_check|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_photo',
-                        intro: '{$btr->learning_hint_brands_photo}',
+                        intro: '{$btr->learning_hint_brands_photo|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_brands_name',
-                        intro: '{$btr->learning_hint_brands_name}',
+                        intro: '{$btr->learning_hint_brands_name|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_status',
-                        intro: '{$btr->learning_hint_brands_status}',
+                        intro: '{$btr->learning_hint_brands_status|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_setting',
-                        intro: '{$btr->learning_hint_brands_setting}',
+                        intro: '{$btr->learning_hint_brands_setting|escape:'javascript'}',
                         position: 'left',
                     },
                     {
-                        intro: '{$btr->learning_hint_brands_add}',
+                        intro: '{$btr->learning_hint_brands_add|escape:'javascript'}',
 
                     }
 
@@ -238,43 +238,43 @@
                 showStepNumbers: false,
                 showBullets: false,
                 showProgress: true,
-                prevLabel: '« {$btr->learning_hint_prev}',
-                nextLabel: '{$btr->learning_hint_next} »',
+                prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+                nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
                 skipLabel: '×',
-                doneLabel: '{$btr->learning_hint_done}',
+                doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
                 steps: [
                     {
-                        intro: '{$btr->learning_hint_brand_intro}',
+                        intro: '{$btr->learning_hint_brand_intro|escape:'javascript'}',
                     },
                     {
                         element: '.fn_step-1',
-                        intro: '{$btr->learning_hint_brand_name}',
+                        intro: '{$btr->learning_hint_brand_name|escape:'javascript'}',
                         position: 'bottom',
                     },
                     {
                         element: '.fn_step-2',
-                        intro: '{$btr->learning_hint_brand_url}',
+                        intro: '{$btr->learning_hint_brand_url|escape:'javascript'}',
                         position: 'bottom',
                     },
                     {
                         element: '.fn_step-3',
-                        intro: '{$btr->learning_hint_brand_activity}',
+                        intro: '{$btr->learning_hint_brand_activity|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-4',
-                        intro: '{$btr->learning_hint_brand_images}',
+                        intro: '{$btr->learning_hint_brand_images|escape:'javascript'}',
                     },
                     {
                         element: '.fn_step-5',
-                        intro: '{$btr->learning_hint_meta_data}',
+                        intro: '{$btr->learning_hint_meta_data|escape:'javascript'}',
                     },
                     {
                         element: '.fn_step-6',
-                        intro: '{$btr->learning_hint_brand_descriptions}',
+                        intro: '{$btr->learning_hint_brand_descriptions|escape:'javascript'}',
                     },
                     {
-                        intro: '{$btr->learning_hint_brand_finish}',
+                        intro: '{$btr->learning_hint_brand_finish|escape:'javascript'}',
                         position: 'bottom',
                     }
                 ]
@@ -306,65 +306,65 @@
                 showStepNumbers: false,
                 showBullets: false,
                 showProgress: true,
-                prevLabel: '« {$btr->learning_hint_prev}',
-                nextLabel: '{$btr->learning_hint_next} »',
+                prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+                nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
                 skipLabel: '×',
-                doneLabel: '{$btr->learning_hint_next_done}',
+                doneLabel: '{$btr->learning_hint_next_done|escape:'javascript'}',
                 steps: [
                     {
-                        intro: '{$btr->learning_hint_features_intro}',
+                        intro: '{$btr->learning_hint_features_intro|escape:'javascript'}',
                     },
                     {
-                        intro: '{$btr->learning_hint_features_intro2}',
+                        intro: '{$btr->learning_hint_features_intro2|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-1',
-                        intro: '{$btr->learning_hint_features_sorting}',
+                        intro: '{$btr->learning_hint_features_sorting|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-2:first-child',
-                        intro: '{$btr->learning_hint_features_item}',
+                        intro: '{$btr->learning_hint_features_item|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-2:first-child .move_zone',
-                        intro: '{$btr->learning_hint_features_move_zone}',
+                        intro: '{$btr->learning_hint_features_move_zone|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-2:first-child .okay_list_check',
-                        intro: '{$btr->learning_hint_features_check}',
+                        intro: '{$btr->learning_hint_features_check|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-2:first-child .okay_list_features_name',
-                        intro: '{$btr->learning_hint_features_name}',
+                        intro: '{$btr->learning_hint_features_name|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-2:first-child .okay_list_features_tag',
-                        intro: '{$btr->learning_hint_features_category}',
+                        intro: '{$btr->learning_hint_features_category|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-2:first-child .okay_list_status',
-                        intro: '{$btr->learning_hint_features_setting}',
+                        intro: '{$btr->learning_hint_features_setting|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-2:first-child .okay_list_url_status',
-                        intro: '{$btr->learning_hint_features_status}',
+                        intro: '{$btr->learning_hint_features_status|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-2:first-child .okay_list_boding:nth-last-child(2)',
-                        intro: '{$btr->learning_hint_features_status_2}',
+                        intro: '{$btr->learning_hint_features_status_2|escape:'javascript'}',
                         position: 'left',
                     },
                     {
-                        intro: '{$btr->learning_hint_features_add}',
+                        intro: '{$btr->learning_hint_features_add|escape:'javascript'}',
 
                     }
 
@@ -388,89 +388,89 @@
             showStepNumbers: false,
             showBullets: false,
             showProgress: true,
-            prevLabel: '« {$btr->learning_hint_prev}',
-            nextLabel: '{$btr->learning_hint_next} »',
+            prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+            nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
             skipLabel: '×',
-            doneLabel: '{$btr->learning_hint_done}',
+            doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
             steps: [
                 {
-                    intro: '{$btr->learning_hint_feature_intro}',
+                    intro: '{$btr->learning_hint_feature_intro|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-1',
-                    intro: '{$btr->learning_hint_feature_name}',
+                    intro: '{$btr->learning_hint_feature_name|escape:'javascript'}',
                     position: 'bottom',
                 },
                 {
                     element: '.fn_step-2',
-                    intro: '{$btr->learning_hint_feature_url}',
+                    intro: '{$btr->learning_hint_feature_url|escape:'javascript'}',
                     position: 'bottom',
                 },
                 {
                     element: '.fn_step-3',
-                    intro: '{$btr->learning_hint_feature_link}',
+                    intro: '{$btr->learning_hint_feature_link|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-4',
-                    intro: '{$btr->learning_hint_feature_activity}',
+                    intro: '{$btr->learning_hint_feature_activity|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-5',
-                    intro: '{$btr->learning_hint_feature_filter}',
+                    intro: '{$btr->learning_hint_feature_filter|escape:'javascript'}',
                     position: 'right',
                 },
                 {
                     element: '.fn_step-6',
-                    intro: '{$btr->learning_hint_features_meta_data}',
+                    intro: '{$btr->learning_hint_features_meta_data|escape:'javascript'}',
                     position: 'left',
                 },
                 {
-                    intro: '{$btr->learning_hint_feature_list}',
+                    intro: '{$btr->learning_hint_feature_list|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-7',
-                    intro: '{$btr->learning_hint_feature_list_add}',
+                    intro: '{$btr->learning_hint_feature_list_add|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-8',
-                    intro: '{$btr->learning_hint_feature_list_sorting}',
+                    intro: '{$btr->learning_hint_feature_list_sorting|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-9:first-child',
-                    intro: '{$btr->learning_hint_feature_item}',
+                    intro: '{$btr->learning_hint_feature_item|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-9:first-child .move_zone',
-                    intro: '{$btr->learning_hint_feature_move_zone}',
+                    intro: '{$btr->learning_hint_feature_move_zone|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-9:first-child .feature_value_name',
-                    intro: '{$btr->learning_hint_feature_list_name}',
+                    intro: '{$btr->learning_hint_feature_list_name|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-9:first-child .feature_value_translit',
-                    intro: '{$btr->learning_hint_feature_value_translit}',
+                    intro: '{$btr->learning_hint_feature_value_translit|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-9:first-child .feature_value_products_num',
-                    intro: '{$btr->learning_hint_feature_value_products_num}',
+                    intro: '{$btr->learning_hint_feature_value_products_num|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-9:first-child .feature_value_index',
-                    intro: '{$btr->learning_hint_feature_value_index}',
+                    intro: '{$btr->learning_hint_feature_value_index|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-10',
-                    intro: '{$btr->learning_hint_feature_union}',
+                    intro: '{$btr->learning_hint_feature_union|escape:'javascript'}',
                 },
                 {
-                    intro: '{$btr->learning_hint_feature_finish}',
+                    intro: '{$btr->learning_hint_feature_finish|escape:'javascript'}',
                     position: 'bottom',
                 }
             ]
@@ -502,75 +502,75 @@
                 showStepNumbers: false,
                 showBullets: false,
                 showProgress: true,
-                prevLabel: '« {$btr->learning_hint_prev}',
-                nextLabel: '{$btr->learning_hint_next} »',
+                prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+                nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
                 skipLabel: '×',
-                doneLabel: '{$btr->learning_hint_next_done}',
+                doneLabel: '{$btr->learning_hint_next_done|escape:'javascript'}',
                 steps: [
                     {
-                        intro: '{$btr->learning_hint_products_intro}',
+                        intro: '{$btr->learning_hint_products_intro|escape:'javascript'}',
                     },
                     {
-                        intro: '{$btr->learning_hint_products_intro2}',
+                        intro: '{$btr->learning_hint_products_intro2|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-0',
-                        intro: '{$btr->learning_hint_products_sorting}',
+                        intro: '{$btr->learning_hint_products_sorting|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step_sorting',
-                        intro: '{$btr->learning_hint_products_sorting2}',
+                        intro: '{$btr->learning_hint_products_sorting2|escape:'javascript'}',
                         position: 'bottom',
                     },
                     {
                         element: '.fn_step-1:first-child',
-                        intro: '{$btr->learning_hint_products_item}',
+                        intro: '{$btr->learning_hint_products_item|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .move_zone',
-                        intro: '{$btr->learning_hint_products_move_zone}',
+                        intro: '{$btr->learning_hint_products_move_zone|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_check',
-                        intro: '{$btr->learning_hint_products_check}',
+                        intro: '{$btr->learning_hint_products_check|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_photo',
-                        intro: '{$btr->learning_hint_products_photo}',
+                        intro: '{$btr->learning_hint_products_photo|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_name',
-                        intro: '{$btr->learning_hint_products_name}',
+                        intro: '{$btr->learning_hint_products_name|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_price',
-                        intro: '{$btr->learning_hint_products_list_price}',
+                        intro: '{$btr->learning_hint_products_list_price|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_count',
-                        intro: '{$btr->learning_hint_products_list_count}',
+                        intro: '{$btr->learning_hint_products_list_count|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_status',
-                        intro: '{$btr->learning_hint_products_status}',
+                        intro: '{$btr->learning_hint_products_status|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_products_setting',
-                        intro: '{$btr->learning_hint_products_setting}',
+                        intro: '{$btr->learning_hint_products_setting|escape:'javascript'}',
                         position: 'left',
                     },
                     {
-                        intro: '{$btr->learning_hint_products_add}',
+                        intro: '{$btr->learning_hint_products_add|escape:'javascript'}',
 
                     }
 
@@ -594,83 +594,83 @@
         showStepNumbers: false,
         showBullets: false,
         showProgress: true,
-        prevLabel: '« {$btr->learning_hint_prev}',
-        nextLabel: '{$btr->learning_hint_next} »',
+        prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+        nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
         skipLabel: '×',
-        doneLabel: '{$btr->learning_hint_done}',
+        doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
         steps: [
             {
-                intro: '{$btr->learning_hint_product_intro}',
+                intro: '{$btr->learning_hint_product_intro|escape:'javascript'}',
             },
             {
                 element: '.fn_step-1',
-                intro: '{$btr->learning_hint_product_name}',
+                intro: '{$btr->learning_hint_product_name|escape:'javascript'}',
                 position: 'bottom',
             },
             {
                 element: '.fn_step-2',
-                intro: '{$btr->learning_hint_product_url}',
+                intro: '{$btr->learning_hint_product_url|escape:'javascript'}',
                 position: 'bottom',
             },
             {
                 element: '.fn_step-3',
-                intro: '{$btr->learning_hint_product_activity}',
+                intro: '{$btr->learning_hint_product_activity|escape:'javascript'}',
                 position: 'left',
             },
             {
                 element: '.fn_step-4',
-                intro: '{$btr->learning_hint_product_hits}',
+                intro: '{$btr->learning_hint_product_hits|escape:'javascript'}',
                 position: 'left',
             },
             {
                 element: '.fn_step-5',
-                intro: '{$btr->learning_hint_product_images}',
+                intro: '{$btr->learning_hint_product_images|escape:'javascript'}',
             },
             {
                 element: '.fn_step-6',
-                intro: '{$btr->learning_hint_product_brand}',
+                intro: '{$btr->learning_hint_product_brand|escape:'javascript'}',
                 position: 'left',
             },
             {
                 element: '.fn_step-7',
-                intro: '{$btr->learning_hint_product_category}',
+                intro: '{$btr->learning_hint_product_category|escape:'javascript'}',
                 position: 'left',
             },
             {
                 element: '.fn_step-8',
-                intro: '{$btr->learning_hint_product_variant}',
+                intro: '{$btr->learning_hint_product_variant|escape:'javascript'}',
                 position: 'bottom',
             },
             {
                 element: '.fn_step-9',
-                intro: '{$btr->learning_hint_product_promo}',
+                intro: '{$btr->learning_hint_product_promo|escape:'javascript'}',
                 position: 'top',
             },
             {
                 element: '.fn_step-10',
-                intro: '{$btr->learning_hint_product_rating}',
+                intro: '{$btr->learning_hint_product_rating|escape:'javascript'}',
                 position: 'left',
             },
             {
                 element: '.fn_step-11',
-                intro: '{$btr->learning_hint_product_features}',
+                intro: '{$btr->learning_hint_product_features|escape:'javascript'}',
                 position: 'right',
             },
             {
                 element: '.fn_step-12',
-                intro: '{$btr->learning_hint_product_recommended}',
+                intro: '{$btr->learning_hint_product_recommended|escape:'javascript'}',
                 position: 'left',
             },
             {
                 element: '.fn_step-13',
-                intro: '{$btr->learning_hint_meta_data}',
+                intro: '{$btr->learning_hint_meta_data|escape:'javascript'}',
             },
             {
                 element: '.fn_step-14',
-                intro: '{$btr->learning_hint_product_descriptions}',
+                intro: '{$btr->learning_hint_product_descriptions|escape:'javascript'}',
             },
             {
-                intro: '{$btr->learning_hint_product_finish}',
+                intro: '{$btr->learning_hint_product_finish|escape:'javascript'}',
                 position: 'bottom',
             }
         ]
@@ -702,56 +702,56 @@
             showStepNumbers: false,
             showBullets: false,
             showProgress: true,
-            prevLabel: '« {$btr->learning_hint_prev}',
-            nextLabel: '{$btr->learning_hint_next} »',
+            prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+            nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
             skipLabel: '×',
-            doneLabel: '{$btr->learning_hint_done}',
+            doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
             steps: [
                 {
-                    intro: '{$btr->learning_hint_currency_intro}',
+                    intro: '{$btr->learning_hint_currency_intro|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-1',
-                    intro: '{$btr->learning_hint_currency_start}',
+                    intro: '{$btr->learning_hint_currency_start|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-2:first-child',
-                    intro: '{$btr->learning_hint_currency_intro2}',
+                    intro: '{$btr->learning_hint_currency_intro2|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-2:first-child .okay_list_currency_name',
-                    intro: '{$btr->learning_hint_currency_name}',
+                    intro: '{$btr->learning_hint_currency_name|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-2:first-child .okay_list_currency_iso',
-                    intro: '{$btr->learning_hint_currency_sign}',
+                    intro: '{$btr->learning_hint_currency_sign|escape:'javascript'}',
                     position: 'bottom',
                 },
                 {
                     element: '.fn_step-2:first-child .okay_list_currency_sign',
-                    intro: '{$btr->learning_hint_currency_iso}',
+                    intro: '{$btr->learning_hint_currency_iso|escape:'javascript'}',
                     position: 'bottom',
                 },
                 {
                     element: '.fn_step-2:first-child .okay_list_currency_exchange .okay_list_currency_exchange_item',
-                    intro: '{$btr->learning_hint_currency_course}',
+                    intro: '{$btr->learning_hint_currency_course|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-2:nth-child(2) .okay_list_currency_exchange .okay_list_currency_exchange_item',
-                    intro: '{$btr->learning_hint_currency_course2}',
+                    intro: '{$btr->learning_hint_currency_course2|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-2:nth-child(1) .okay_list_status',
-                    intro: '{$btr->learning_hint_currency_activity}',
+                    intro: '{$btr->learning_hint_currency_activity|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-2:nth-child(1) .cur_settings',
-                    intro: '{$btr->learning_hint_currency_cent}',
+                    intro: '{$btr->learning_hint_currency_cent|escape:'javascript'}',
                     position: 'left',
                 },
                 {
-                    intro: '{$btr->learning_hint_currency_finish}',
+                    intro: '{$btr->learning_hint_currency_finish|escape:'javascript'}',
                     position: 'center',
                 }
             ]
@@ -783,55 +783,55 @@
             showStepNumbers: false,
             showBullets: false,
             showProgress: true,
-            prevLabel: '« {$btr->learning_hint_prev}',
-            nextLabel: '{$btr->learning_hint_next} »',
+            prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+            nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
             skipLabel: '×',
-            doneLabel: '{$btr->learning_hint_next_done}',
+            doneLabel: '{$btr->learning_hint_next_done|escape:'javascript'}',
             steps: [
                 {
-                    intro: '{$btr->learning_hint_deliveries_intro}',
+                    intro: '{$btr->learning_hint_deliveries_intro|escape:'javascript'}',
                 },
                 {
-                    intro: '{$btr->learning_hint_deliveries_intro2}',
+                    intro: '{$btr->learning_hint_deliveries_intro2|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-1:first-child',
-                    intro: '{$btr->learning_hint_deliveries_item}',
+                    intro: '{$btr->learning_hint_deliveries_item|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-1:first-child .move_zone',
-                    intro: '{$btr->learning_hint_deliveries_move_zone}',
+                    intro: '{$btr->learning_hint_deliveries_move_zone|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-1:first-child .okay_list_check',
-                    intro: '{$btr->learning_hint_deliveries_check}',
+                    intro: '{$btr->learning_hint_deliveries_check|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-1:first-child .okay_list_delivery_photo',
-                    intro: '{$btr->learning_hint_deliveries_photo}',
+                    intro: '{$btr->learning_hint_deliveries_photo|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-1:first-child .okay_list_delivery_name',
-                    intro: '{$btr->learning_hint_deliveries_name}',
+                    intro: '{$btr->learning_hint_deliveries_name|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-1:first-child .okay_list_delivery_condit',
-                    intro: '{$btr->learning_hint_deliveries_terms}',
+                    intro: '{$btr->learning_hint_deliveries_terms|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-1:first-child .okay_list_status',
-                    intro: '{$btr->learning_hint_deliveries_status}',
+                    intro: '{$btr->learning_hint_deliveries_status|escape:'javascript'}',
                     position: 'left',
                 },
                 {
-                    intro: '{$btr->learning_hint_deliveries_add}',
+                    intro: '{$btr->learning_hint_deliveries_add|escape:'javascript'}',
 
                 }
 
@@ -856,46 +856,46 @@
             showStepNumbers: false,
             showBullets: false,
             showProgress: true,
-            prevLabel: '« {$btr->learning_hint_prev}',
-            nextLabel: '{$btr->learning_hint_next} »',
+            prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+            nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
             skipLabel: '×',
-            doneLabel: '{$btr->learning_hint_done}',
+            doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
             steps: [
                 {
-                    intro: '{$btr->learning_hint_delivery_intro}',
+                    intro: '{$btr->learning_hint_delivery_intro|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-1',
-                    intro: '{$btr->learning_hint_delivery_name}',
+                    intro: '{$btr->learning_hint_delivery_name|escape:'javascript'}',
                     position: 'bottom',
                 },
                 {
                     element: '.fn_step-2',
-                    intro: '{$btr->learning_hint_delivery_activity}',
+                    intro: '{$btr->learning_hint_delivery_activity|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-3',
-                    intro: '{$btr->learning_hint_delivery_images}',
+                    intro: '{$btr->learning_hint_delivery_images|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-4',
-                    intro: '{$btr->learning_hint_delivery_type}',
+                    intro: '{$btr->learning_hint_delivery_type|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-5',
-                    intro: '{$btr->learning_hint_delivery_module}',
+                    intro: '{$btr->learning_hint_delivery_module|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-6',
-                    intro: '{$btr->learning_hint_delivery_payments}',
+                    intro: '{$btr->learning_hint_delivery_payments|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-7',
-                    intro: '{$btr->learning_hint_delivery_descriptions}',
+                    intro: '{$btr->learning_hint_delivery_descriptions|escape:'javascript'}',
                 },
                 {
-                    intro: '{$btr->learning_hint_delivery_finish}',
+                    intro: '{$btr->learning_hint_delivery_finish|escape:'javascript'}',
                     position: 'bottom',
                 }
             ]
@@ -927,50 +927,50 @@
             showStepNumbers: false,
             showBullets: false,
             showProgress: true,
-            prevLabel: '« {$btr->learning_hint_prev}',
-            nextLabel: '{$btr->learning_hint_next} »',
+            prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+            nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
             skipLabel: '×',
-            doneLabel: '{$btr->learning_hint_next_done}',
+            doneLabel: '{$btr->learning_hint_next_done|escape:'javascript'}',
             steps: [
                 {
-                    intro: '{$btr->learning_hint_payments_intro}',
+                    intro: '{$btr->learning_hint_payments_intro|escape:'javascript'}',
                 },
                 {
-                    intro: '{$btr->learning_hint_payments_intro2}',
+                    intro: '{$btr->learning_hint_payments_intro2|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-1:first-child',
-                    intro: '{$btr->learning_hint_payments_item}',
+                    intro: '{$btr->learning_hint_payments_item|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-1:first-child .move_zone',
-                    intro: '{$btr->learning_hint_payments_move_zone}',
+                    intro: '{$btr->learning_hint_payments_move_zone|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-1:first-child .okay_list_check',
-                    intro: '{$btr->learning_hint_payments_check}',
+                    intro: '{$btr->learning_hint_payments_check|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-1:first-child .okay_list_delivery_photo',
-                    intro: '{$btr->learning_hint_payments_photo}',
+                    intro: '{$btr->learning_hint_payments_photo|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-1:first-child .okay_list_delivery_name',
-                    intro: '{$btr->learning_hint_payments_name}',
+                    intro: '{$btr->learning_hint_payments_name|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-1:first-child .okay_list_status',
-                    intro: '{$btr->learning_hint_payments_status}',
+                    intro: '{$btr->learning_hint_payments_status|escape:'javascript'}',
                     position: 'left',
                 },
                 {
-                    intro: '{$btr->learning_hint_payments_add}',
+                    intro: '{$btr->learning_hint_payments_add|escape:'javascript'}',
 
                 }
 
@@ -995,43 +995,43 @@
             showStepNumbers: false,
             showBullets: false,
             showProgress: true,
-            prevLabel: '« {$btr->learning_hint_prev}',
-            nextLabel: '{$btr->learning_hint_next} »',
+            prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+            nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
             skipLabel: '×',
-            doneLabel: '{$btr->learning_hint_done}',
+            doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
             steps: [
                 {
-                    intro: '{$btr->learning_hint_payment_intro}',
+                    intro: '{$btr->learning_hint_payment_intro|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-1',
-                    intro: '{$btr->learning_hint_payment_name}',
+                    intro: '{$btr->learning_hint_payment_name|escape:'javascript'}',
                     position: 'bottom',
                 },
                 {
                     element: '.fn_step-2',
-                    intro: '{$btr->learning_hint_payment_activity}',
+                    intro: '{$btr->learning_hint_payment_activity|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-3',
-                    intro: '{$btr->learning_hint_payment_images}',
+                    intro: '{$btr->learning_hint_payment_images|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-4',
-                    intro: '{$btr->learning_hint_payment_type}',
+                    intro: '{$btr->learning_hint_payment_type|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-6',
-                    intro: '{$btr->learning_hint_payment_delivery}',
+                    intro: '{$btr->learning_hint_payment_delivery|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-7',
-                    intro: '{$btr->learning_hint_payment_descriptions}',
+                    intro: '{$btr->learning_hint_payment_descriptions|escape:'javascript'}',
                 },
                 {
-                    intro: '{$btr->learning_hint_payment_finish}',
+                    intro: '{$btr->learning_hint_payment_finish|escape:'javascript'}',
                     position: 'bottom',
                 }
             ]
@@ -1064,65 +1064,65 @@
             showStepNumbers: false,
             showBullets: false,
             showProgress: true,
-            prevLabel: '« {$btr->learning_hint_prev}',
-            nextLabel: '{$btr->learning_hint_next} »',
+            prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+            nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
             skipLabel: '×',
-            doneLabel: '{$btr->learning_hint_done}',
+            doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
             steps: [
                 {
-                    intro: '{$btr->learning_hint_settings_catalog_intro}',
+                    intro: '{$btr->learning_hint_settings_catalog_intro|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-1',
-                    intro: '{$btr->learning_hint_settings_catalog__products_on_page}',
+                    intro: '{$btr->learning_hint_settings_catalog__products_on_page|escape:'javascript'}',
                     position: 'bottom',
                 },
                 {
                     element: '.fn_step-2',
-                    intro: '{$btr->learning_hint_settings_catalog_products_max}',
+                    intro: '{$btr->learning_hint_settings_catalog_products_max|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-3',
-                    intro: '{$btr->learning_hint_settings_catalog_posts_on_page}',
+                    intro: '{$btr->learning_hint_settings_catalog_posts_on_page|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-4',
-                    intro: '{$btr->learning_hint_settings_catalog_products_comparcion}',
+                    intro: '{$btr->learning_hint_settings_catalog_products_comparcion|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-5',
-                    intro: '{$btr->learning_hint_settings_catalog_units}',
+                    intro: '{$btr->learning_hint_settings_catalog_units|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-6',
-                    intro: '{$btr->learning_hint_settings_catalog_cents}',
+                    intro: '{$btr->learning_hint_settings_catalog_cents|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-7',
-                    intro: '{$btr->learning_hint_settings_catalog_thousands}',
+                    intro: '{$btr->learning_hint_settings_catalog_thousands|escape:'javascript'}',
                     position: 'right',
                 },
                 {
                     element: '.fn_step-8',
-                    intro: '{$btr->learning_hint_settings_catalog_not_in_stock}',
+                    intro: '{$btr->learning_hint_settings_catalog_not_in_stock|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-9',
-                    intro: '{$btr->learning_hint_settings_catalog_preorder_not_in_stock}',
+                    intro: '{$btr->learning_hint_settings_catalog_preorder_not_in_stock|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-10',
-                    intro: '{$btr->learning_hint_settings_catalog_truncate_table}',
+                    intro: '{$btr->learning_hint_settings_catalog_truncate_table|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-11',
-                    intro: '{$btr->learning_hint_settings_catalog_watermark}',
+                    intro: '{$btr->learning_hint_settings_catalog_watermark|escape:'javascript'}',
                 },
                 {
-                    intro: '{$btr->learning_hint_settings_catalog_finish}',
+                    intro: '{$btr->learning_hint_settings_catalog_finish|escape:'javascript'}',
                     position: 'bottom',
                 }
             ]
@@ -1155,56 +1155,56 @@
             showStepNumbers: false,
             showBullets: false,
             showProgress: true,
-            prevLabel: '« {$btr->learning_hint_prev}',
-            nextLabel: '{$btr->learning_hint_next} »',
+            prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+            nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
             skipLabel: '×',
-            doneLabel: '{$btr->learning_hint_done}',
+            doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
             steps: [
                 {
-                    intro: '{$btr->learning_hint_settings_notify_intro}',
+                    intro: '{$btr->learning_hint_settings_notify_intro|escape:'javascript'}',
                 },
                 {
                     element: '.fn_step-1',
-                    intro: '{$btr->learning_hint_settings_notify_emails}',
+                    intro: '{$btr->learning_hint_settings_notify_emails|escape:'javascript'}',
                     position: 'right',
                 },
                 {
                     element: '.fn_step-2',
-                    intro: '{$btr->learning_hint_settings_notify_reverce}',
+                    intro: '{$btr->learning_hint_settings_notify_reverce|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-3',
-                    intro: '{$btr->learning_hint_settings_notify_comments}',
+                    intro: '{$btr->learning_hint_settings_notify_comments|escape:'javascript'}',
                     position: 'right',
                 },
                 {
                     element: '.fn_step-4',
-                    intro: '{$btr->learning_hint_settings_notify_sender_name}',
+                    intro: '{$btr->learning_hint_settings_notify_sender_name|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-5',
-                    intro: '{$btr->learning_hint_settings_notify_email_lang}',
+                    intro: '{$btr->learning_hint_settings_notify_email_lang|escape:'javascript'}',
                     position: 'right',
                 },
                 {
                     element: '.fn_step-6',
-                    intro: '{$btr->learning_hint_settings_notify_auto_approved}',
+                    intro: '{$btr->learning_hint_settings_notify_auto_approved|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: '.fn_step-7',
-                    intro: '{$btr->learning_hint_settings_notify_smtp}',
+                    intro: '{$btr->learning_hint_settings_notify_smtp|escape:'javascript'}',
                     position: 'top',
                 },
                 {
                     element: '.fn_step-8',
-                    intro: '{$btr->learning_hint_settings_notify_smtp2}',
+                    intro: '{$btr->learning_hint_settings_notify_smtp2|escape:'javascript'}',
                     position: 'top',
                 },
                 {
-                    intro: '{$btr->learning_hint_settings_notify_finish}',
+                    intro: '{$btr->learning_hint_settings_notify_finish|escape:'javascript'}',
                     position: 'center',
                 }
             ]
@@ -1238,34 +1238,34 @@
             showStepNumbers: false,
             showBullets: false,
             showProgress: true,
-            prevLabel: '« {$btr->learning_hint_prev}',
-            nextLabel: '{$btr->learning_hint_next} »',
+            prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+            nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
             skipLabel: '×',
-            doneLabel: '{$btr->learning_hint_done}',
+            doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
             steps: [
                 {
-                    intro: '{$btr->learning_hint_seo_patterns_intro}',
+                    intro: '{$btr->learning_hint_seo_patterns_intro|escape:'javascript'}',
                 },
                 {
-                    intro: '{$btr->learning_hint_seo_patterns_intro2}',
+                    intro: '{$btr->learning_hint_seo_patterns_intro2|escape:'javascript'}',
                 },
                 {
                     element: document.querySelector('.fn_step-1'),
-                    intro: '{$btr->learning_hint_seo_patterns_list}',
+                    intro: '{$btr->learning_hint_seo_patterns_list|escape:'javascript'}',
                     position: 'right',
                 },
                 {
                     element: document.querySelector('.fn_step-2'),
-                    intro: '{$btr->learning_hint_seo_patterns_right}',
+                    intro: '{$btr->learning_hint_seo_patterns_right|escape:'javascript'}',
                     position: 'left',
                 },
                 {
                     element: document.querySelector('.fn_step-2'),
-                    intro: '{$btr->learning_hint_seo_patterns_right2}',
+                    intro: '{$btr->learning_hint_seo_patterns_right2|escape:'javascript'}',
                     position: 'left',
                 },
                 {
-                    intro: '{$btr->learning_hint_seo_patterns_finish}',
+                    intro: '{$btr->learning_hint_seo_patterns_finish|escape:'javascript'}',
                     position: 'center',
                 }
             ]
@@ -1299,65 +1299,65 @@
                 showStepNumbers: false,
                 showBullets: false,
                 showProgress: true,
-                prevLabel: '« {$btr->learning_hint_prev}',
-                nextLabel: '{$btr->learning_hint_next} »',
+                prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+                nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
                 skipLabel: '×',
-                doneLabel: '{$btr->learning_hint_next_done}',
+                doneLabel: '{$btr->learning_hint_next_done|escape:'javascript'}',
                 steps: [
                     {
-                        intro: '{$btr->learning_hint_orders_intro}',
+                        intro: '{$btr->learning_hint_orders_intro|escape:'javascript'}',
                     },
                     {
-                        intro: '{$btr->learning_hint_orders_intro2}',
+                        intro: '{$btr->learning_hint_orders_intro2|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-0',
-                        intro: '{$btr->learning_hint_orders_sorting}',
+                        intro: '{$btr->learning_hint_orders_sorting|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child',
-                        intro: '{$btr->learning_hint_orders_item}',
+                        intro: '{$btr->learning_hint_orders_item|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_check',
-                        intro: '{$btr->learning_hint_orders_check}',
+                        intro: '{$btr->learning_hint_orders_check|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_order_number',
-                        intro: '{$btr->learning_hint_orders_id}',
+                        intro: '{$btr->learning_hint_orders_id|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_orders_name',
-                        intro: '{$btr->learning_hint_orders_name}',
+                        intro: '{$btr->learning_hint_orders_name|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_order_status',
-                        intro: '{$btr->learning_hint_orders_status}',
+                        intro: '{$btr->learning_hint_orders_status|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_order_product_count',
-                        intro: '{$btr->learning_hint_orders_count}',
+                        intro: '{$btr->learning_hint_orders_count|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_orders_price',
-                        intro: '{$btr->learning_hint_orders_total}',
+                        intro: '{$btr->learning_hint_orders_total|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_order_marker',
-                        intro: '{$btr->learning_hint_orders_marker}',
+                        intro: '{$btr->learning_hint_orders_marker|escape:'javascript'}',
                         position: 'left',
                     },
                     {
-                        intro: '{$btr->learning_hint_orders_add}',
+                        intro: '{$btr->learning_hint_orders_add|escape:'javascript'}',
                     }
 
                 ]
@@ -1382,64 +1382,64 @@
                 showStepNumbers: false,
                 showBullets: false,
                 showProgress: true,
-                prevLabel: '« {$btr->learning_hint_prev}',
-                nextLabel: '{$btr->learning_hint_next} »',
+                prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+                nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
                 skipLabel: '×',
-                doneLabel: '{$btr->learning_hint_done}',
+                doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
                 steps: [
                     {
-                        intro: '{$btr->learning_hint_order_intro}',
+                        intro: '{$btr->learning_hint_order_intro|escape:'javascript'}',
                     },
                     {
-                        intro: '{$btr->learning_hint_order_intro2}',
+                        intro: '{$btr->learning_hint_order_intro2|escape:'javascript'}',
                     },
                     {
                         element: '.fn_step-1',
-                        intro: '{$btr->learning_hint_order_toolbar}',
+                        intro: '{$btr->learning_hint_order_toolbar|escape:'javascript'}',
                         position: 'bottom',
                     },
                     {
                         element: '.fn_step-1 .order_toolbar__status',
-                        intro: '{$btr->learning_hint_order_toolbar__status}',
+                        intro: '{$btr->learning_hint_order_toolbar__status|escape:'javascript'}',
                         position: 'right',
                     },
                     {
                         element: '.fn_step-1 .order_toolbar__eye',
-                        intro: '{$btr->learning_hint_order_toolbar__button}',
+                        intro: '{$btr->learning_hint_order_toolbar__button|escape:'javascript'}',
                         position: 'bottom',
                     },
                     {
                         element: '.fn_step-1 .order_toolbar__print',
-                        intro: '{$btr->learning_hint_order_toolbar__print}',
+                        intro: '{$btr->learning_hint_order_toolbar__print|escape:'javascript'}',
                         position: 'right',
                     },
                     {
                         element: '.fn_step-1 .order_toolbar__markers',
-                        intro: '{$btr->learning_hint_order_toolbar__markers}',
+                        intro: '{$btr->learning_hint_order_toolbar__markers|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-2',
-                        intro: '{$btr->learning_hint_order_left_content}',
+                        intro: '{$btr->learning_hint_order_left_content|escape:'javascript'}',
                         position: 'right',
                     },
                     {
                         element: '.fn_step-3',
-                        intro: '{$btr->learning_hint_order_parameters}',
+                        intro: '{$btr->learning_hint_order_parameters|escape:'javascript'}',
                         position: 'right',
                     },
                     {
                         element: '.fn_step-4',
-                        intro: '{$btr->learning_hint_order_right_content}',
+                        intro: '{$btr->learning_hint_order_right_content|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-5',
-                        intro: '{$btr->learning_hint_order_to_email}',
+                        intro: '{$btr->learning_hint_order_to_email|escape:'javascript'}',
                         position: 'left',
                     },
                     {
-                        intro: '{$btr->learning_hint_order_finish}',
+                        intro: '{$btr->learning_hint_order_finish|escape:'javascript'}',
                         position: 'center',
                     }
                 ]
@@ -1471,55 +1471,55 @@
                 showStepNumbers: false,
                 showBullets: false,
                 showProgress: true,
-                prevLabel: '« {$btr->learning_hint_prev}',
-                nextLabel: '{$btr->learning_hint_next} »',
+                prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+                nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
                 skipLabel: '×',
-                doneLabel: '{$btr->learning_hint_next_done}',
+                doneLabel: '{$btr->learning_hint_next_done|escape:'javascript'}',
                 steps: [
                     {
-                        intro: '{$btr->learning_hint_blog_intro}',
+                        intro: '{$btr->learning_hint_blog_intro|escape:'javascript'}',
                     },
                     {
-                        intro: '{$btr->learning_hint_blog_intro2}',
+                        intro: '{$btr->learning_hint_blog_intro2|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-0',
-                        intro: '{$btr->learning_hint_blog_sorting}',
+                        intro: '{$btr->learning_hint_blog_sorting|escape:'javascript'}',
                         position: 'right',
                     },
                     {
                         element: '.fn_step-1:first-child',
-                        intro: '{$btr->learning_hint_blog_item}',
+                        intro: '{$btr->learning_hint_blog_item|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_check',
-                        intro: '{$btr->learning_hint_blog_check}',
+                        intro: '{$btr->learning_hint_blog_check|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_photo',
-                        intro: '{$btr->learning_hint_blog_photo}',
+                        intro: '{$btr->learning_hint_blog_photo|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_blog_name',
-                        intro: '{$btr->learning_hint_blog_name}',
+                        intro: '{$btr->learning_hint_blog_name|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_status',
-                        intro: '{$btr->learning_hint_blog_status}',
+                        intro: '{$btr->learning_hint_blog_status|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-1:first-child .okay_list_blog_setting',
-                        intro: '{$btr->learning_hint_blog_setting}',
+                        intro: '{$btr->learning_hint_blog_setting|escape:'javascript'}',
                         position: 'left',
                     },
                     {
-                        intro: '{$btr->learning_hint_blog_add}',
+                        intro: '{$btr->learning_hint_blog_add|escape:'javascript'}',
                     }
 
                 ]
@@ -1542,56 +1542,56 @@
                 showStepNumbers: false,
                 showBullets: false,
                 showProgress: true,
-                prevLabel: '« {$btr->learning_hint_prev}',
-                nextLabel: '{$btr->learning_hint_next} »',
+                prevLabel: '« {$btr->learning_hint_prev|escape:'javascript'}',
+                nextLabel: '{$btr->learning_hint_next|escape:'javascript'} »',
                 skipLabel: '×',
-                doneLabel: '{$btr->learning_hint_done}',
+                doneLabel: '{$btr->learning_hint_done|escape:'javascript'}',
                 steps: [
                     {
-                        intro: '{$btr->learning_hint_post_intro}',
+                        intro: '{$btr->learning_hint_post_intro|escape:'javascript'}',
                     },
                     {
                         element: '.fn_step-1',
-                        intro: '{$btr->learning_hint_post_name}',
+                        intro: '{$btr->learning_hint_post_name|escape:'javascript'}',
                         position: 'bottom',
                     },
                     {
                         element: '.fn_step-2',
-                        intro: '{$btr->learning_hint_post_url}',
+                        intro: '{$btr->learning_hint_post_url|escape:'javascript'}',
                         position: 'bottom',
                     },
                     {
                         element: '.fn_step-3',
-                        intro: '{$btr->learning_hint_post_activity}',
+                        intro: '{$btr->learning_hint_post_activity|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-4',
-                        intro: '{$btr->learning_hint_post_images}',
+                        intro: '{$btr->learning_hint_post_images|escape:'javascript'}',
                         position: 'right',
                     },
                     {
                         element: '.fn_step-5',
-                        intro: '{$btr->learning_hint_post_parameters}',
+                        intro: '{$btr->learning_hint_post_parameters|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-6',
-                        intro: '{$btr->learning_hint_post_product}',
+                        intro: '{$btr->learning_hint_post_product|escape:'javascript'}',
                         position: 'left',
                     },
                     {
                         element: '.fn_step-7',
-                        intro: '{$btr->learning_hint_meta_data}',
+                        intro: '{$btr->learning_hint_meta_data|escape:'javascript'}',
                         position: 'top',
                     },
                     {
                         element: '.fn_step-8',
-                        intro: '{$btr->learning_hint_post_descriptions}',
+                        intro: '{$btr->learning_hint_post_descriptions|escape:'javascript'}',
                         position: 'top',
                     },
                     {
-                        intro: '{$btr->learning_hint_post_finish}',
+                        intro: '{$btr->learning_hint_post_finish|escape:'javascript'}',
                         position: 'center',
                     }
                 ]

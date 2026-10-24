@@ -138,6 +138,7 @@
     --ok-warning: #a35a00;
     --ok-warning-hover: #874a00;
     --ok-warning-soft: #fdf2e3;
+    --ok-warning-on-chrome: #e9a84e;
 
     /* Другорядна дія поруч із синьою первинною: схвалити, обробити, оновити
        модуль, подивитись демо. 7.18:1 під білим текстом. */
@@ -391,7 +392,7 @@ body:not(.top-nav) header.navbar {
 .text-success,
 .text_success{color: var(--ok-success)}
 .text-green,
-.text_green{color: green;}
+.text_green{color: var(--ok-success);}
 .text-danger,
 .text_warning{color:  var(--ok-danger)!important;}
 .text_attention{color:  var(--ok-warning)!important;}
@@ -1192,40 +1193,42 @@ a.link_white:hover{
 
 .btn-secondary {
     color: var(--ok-ink-inverse);
-    background-color: #5b6770;
-    border-color: #5b6770;
+    background-color: var(--ok-ink-soft);
+    border-color: var(--ok-ink-soft);
 }
-.btn-secondary:hover{
-    color: var(--ok-ink-inverse);
-    background-color: #5c6973;;
-    border-color: #5c6973;;
-}
+.btn-secondary:hover,
 .btn-secondary:focus{
     color: var(--ok-ink-inverse);
-    background-color: #5c6973;
-    border-color: #5c6973;
+    background-color: var(--ok-ink);
+    border-color: var(--ok-ink);
 }
-
-.btn-secondary:active{
-    color: var(--ok-ink-inverse);
-    background-color: #4a555d;
-    border-color: #4a555d;
-    background-image: none;
-}
-
+.btn-secondary:active,
 .btn-secondary:active:hover,
 .btn-secondary:active:focus{
     color: var(--ok-ink-inverse);
-    background-color: #4a555d;
-    border-color: #4a555d;
+    background-color: var(--ok-ink);
+    border-color: var(--ok-ink);
+    background-image: none;
 }
-.btn-secondary:disabled:focus{
-    background-color: #3d424d;
-    border-color: #3d424d;
-}
+.btn-secondary:disabled:focus,
 .btn-secondary:disabled:hover{
-    background-color: #3d424d;
-    border-color: #3d424d;
+    background-color: var(--ok-line-strong);
+    border-color: var(--ok-line-strong);
+}
+
+/* Bootstrap-клас без власного стилю тут: модулі (зокрема сторонні) ставлять його
+   на позитивну дію, і без правила кнопка лишалась сірою вендорною. */
+.btn-success {
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-success);
+    border-color: var(--ok-success);
+}
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active{
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-success-hover);
+    border-color: var(--ok-success-hover);
 }
 
 
@@ -1972,7 +1975,8 @@ opacity: 1;
 .form-control {
     background-color: var(--ok-surface);
     background-image: none;
-    border: 1px solid var(--ok-line);
+    /* Межа поля — це межа контрола: WCAG 1.4.11 вимагає 3:1, --ok-line давала 1.25:1. */
+    border: 1px solid var(--ok-control-line);
     -webkit-appearance: none;
     color: var(--ok-ink);
     outline: 0;
@@ -2027,7 +2031,7 @@ opacity: 1;
     padding-left: 25px;
 }
 .input_create:focus{
-    border-color:var(--ok-line);
+    border-color:var(--ok-accent);
 }
 .fn_add_purchase_discount {
     margin-top: 10px;
@@ -2190,7 +2194,7 @@ opacity: 1;
 
 .variant_input:focus,
 .form-control:focus {
-    border-color: #d0d0d0;
+    border-color: var(--ok-accent);
     background-color: var(--ok-sunken);
     -webkit-box-shadow: none;
     box-shadow: none;
@@ -2542,7 +2546,9 @@ label.switch_label i{
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
-    background-color: #af2f2f;
+    /* «Вимкнено» — звичайний стан, не помилка: червоний у системі означає
+       небезпеку, і на кожному вимкненому перемикачі він переставав щось значити. */
+    background-color: var(--ok-control-line);
     border: none;
     border-radius: var(--ok-radius-pill);
     -moz-transition: 0.15s ease-out;
@@ -2578,7 +2584,7 @@ label.switch_label i{
     width: 12px;
     height: 12px;
     color: #E04853;
-    opacity: 1;
+    opacity: 0;
 }
 .switch.switch-default .switch-input:checked ~ .switch-label::before {
     opacity: 1;
@@ -4506,7 +4512,7 @@ input[type="color"].fn_color::-moz-color-swatch{border: none; border-radius: inh
 .input-group.input-group--search .form-control{
     -moz-appearance: none;
     z-index: 0!important;
-    border-right: 1px solid var(--ok-line);
+    border-right: 1px solid var(--ok-control-line);
     border-radius: 8px;
     width: 100%;
     -webkit-box-flex: 0;
@@ -4523,7 +4529,7 @@ input[type="color"].fn_color::-moz-color-swatch{border: none; border-radius: inh
     border-left: none;
 }
 .input-group.input-group--reset .form-control{
-    border-right: 1px solid var(--ok-line)!important;
+    border-right: 1px solid var(--ok-control-line)!important;
     -webkit-box-flex: 0!important;
     -webkit-flex: 0 0 calc(100% - 40px)!important;
     -ms-flex: 0 0 calc(100% - 40px)!important;
@@ -4620,7 +4626,7 @@ input[type="color"].fn_color::-moz-color-swatch{border: none; border-radius: inh
     line-height: 1.25;
     color: var(--ok-ink-muted);
     text-align: center;
-    border: 1px solid var(--ok-line);
+    border: 1px solid var(--ok-control-line);
     background-color: var(--ok-sunken);
     margin: 0;
     display: -webkit-inline-box;
@@ -4771,10 +4777,14 @@ input[type="color"].fn_color::-moz-color-swatch{border: none; border-radius: inh
     height: 14px;
     margin-right: 5px;
 }
-.filter_date__item .filter_date__button.active,
 .filter_date__item .filter_date__button:hover{
     background: rgb(237, 239, 240);
     color: var(--ok-ink);
+}
+.filter_date__item .filter_date__button.active{
+    background: var(--ok-accent-soft);
+    border-color: var(--ok-accent);
+    color: var(--ok-accent);
 }
 .filter_date__item .fn_calendar_pixel{
     position: absolute;
@@ -4873,8 +4883,10 @@ input[type="color"].fn_color::-moz-color-swatch{border: none; border-radius: inh
 }
 .okay_list_setting .setting_icon_featured.fn_active_class,
 .okay_list_setting .setting_icon_featured:hover{
-    background: #F8D053;
-    border-color: #F8D053;
+    /* Увімкнений стан, як у сусідніх іконок рядка. Біла зірка на жовтому
+       давала 1.49:1. */
+    background: var(--ok-accent);
+    border-color: var(--ok-accent);
     color: var(--ok-ink-inverse)
 }
 .okay_list_setting .setting_icon_open svg{
@@ -5779,7 +5791,30 @@ body.menu-pin .menu_switch .menu_hamburger::after {
 
 
 
+/* «Платна / безкоштовна» — вибір, а не дія: поточний варіант позначає акцент,
+   як будь-який поточний вибір. Розмітка несе btn-outline-warning (другорядна дія). */
+.delivery_type.btn-outline-warning {
+    color: var(--ok-accent);
+    background-color: var(--ok-surface);
+    border-color: var(--ok-control-line);
+}
+.delivery_type.btn-outline-warning:hover,
+.delivery_type.btn-outline-warning:focus {
+    color: var(--ok-accent-hover);
+    background-color: var(--ok-accent-soft);
+    border-color: var(--ok-accent);
+}
+.delivery_type.btn-outline-warning.active {
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-accent);
+    border-color: var(--ok-accent);
+}
+
 /************************************************************************* Footer  */
+/* Стан-попередження на хромі: --ok-warning тут дає замало контрасту. */
+#footer .text_attention {
+    color: var(--ok-warning-on-chrome)!important;
+}
 #footer {
     line-height: 35px;
     color: rgb(38, 50, 56);
@@ -6938,12 +6973,14 @@ input[type=range]:focus::-ms-fill-upper {
     font-stretch: normal;
     line-height: normal;
     letter-spacing: normal;
-    color: var(--ok-ink-inverse);
-    /* Було rgba(112,124,134,.7): накладене на біле дає 2.6:1 під білим текстом. */
-    background-color: #5b6770;
+    color: var(--ok-ink);
+    /* Підпис рядка, а не кнопка: темна плашка на кожному з десятків рядків
+       переважувала самі значення. */
+    background-color: var(--ok-thead);
     width: 35%;
     padding: 5px 10px;
     height: 34px;
+    line-height: 24px;
     font-size: 14px;
     font-weight: 400;
     overflow: hidden;
@@ -6951,7 +6988,7 @@ input[type=range]:focus::-ms-fill-upper {
     white-space: nowrap;
 }
 .feature_name a{
-    color: var(--ok-ink-inverse);
+    color: var(--ok-ink);
 }
 .additional_values.feature_name {
     background: transparent;
@@ -7004,13 +7041,13 @@ input[type=range]:focus::-ms-fill-upper {
     width: calc(100% - 35px);
     padding: 5px 10px;
     font-size: 14px;
-    color: #607d8b;
+    color: var(--ok-ink);
     transition: border-color ease-in-out 0.15s,
     box-shadow ease-in-out 0.15s;
     background: var(--ok-canvas);
     height: 34px;
     font-weight: 400;
-    border: 1px solid transparent;
+    border: 1px solid var(--ok-control-line);
     float: left;
 }
 .feature_input:focus {
@@ -7633,17 +7670,49 @@ input[type=range]:focus::-ms-fill-upper {
 .modal .card-header {
     padding: 0.75rem 1.25rem;
     margin-bottom: 0;
-    background-color: var(--ok-chrome);
-    border-bottom: 1px solid rgb(33, 37, 45);
+    /* Не хром: темна плашка посеред контенту читалась як частина навігації. */
+    background-color: var(--ok-thead);
+    border-bottom: 1px solid var(--ok-thead-line);
     border-radius: 8px 8px 0 0;
 }
 .modal .heading_modal {
     font-family: var(--ok-font);
     font-weight: 500;
-    color: rgb(255, 255, 255);
+    color: var(--ok-ink);
     font-size: 22px;
     line-height: 28px;
     text-align: center;
+}
+/* Підтвердження видалення: «Так» видаляє, тож колір небезпеки носить саме він.
+   «Ні» нічого не робить і не мусить бути червоним. Те саме «Ні» в підтвердженні
+   оновлення ядра. */
+#fn_action_modal .fn_submit_delete {
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-danger);
+    border-color: var(--ok-danger);
+}
+#fn_action_modal .fn_submit_delete:hover,
+#fn_action_modal .fn_submit_delete:focus,
+#fn_action_modal .fn_submit_delete:active {
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-danger-hover);
+    border-color: var(--ok-danger-hover);
+}
+#fn_action_modal .fn_dismiss_delete,
+.fn_dismiss_confirm {
+    color: var(--ok-ink);
+    background-color: var(--ok-surface);
+    border-color: var(--ok-control-line);
+}
+#fn_action_modal .fn_dismiss_delete:hover,
+#fn_action_modal .fn_dismiss_delete:focus,
+#fn_action_modal .fn_dismiss_delete:active,
+.fn_dismiss_confirm:hover,
+.fn_dismiss_confirm:focus,
+.fn_dismiss_confirm:active {
+    color: var(--ok-ink);
+    background-color: var(--ok-thead);
+    border-color: var(--ok-control-line);
 }
 .modal .card-header::after {
     content: "";
@@ -7883,7 +7952,7 @@ base::-moz-progress-bar,
     position: fixed;
     width: 100%;
     text-align: center;
-    background-color: rgba(34, 31, 31, 0.9);
+    background-color: color-mix(in srgb, var(--ok-chrome) 90%, transparent);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     padding: 10px;
@@ -8054,7 +8123,8 @@ div.tox-fullscreen {
     display: block;
     width: 100%;
     height: 35px;
-    border: 1px solid var(--ok-line);
+    /* Свотч білого кольору на білій картці зливався з тлом. */
+    border: 1px solid var(--ok-control-line);
     border-radius: 8px;
     cursor: pointer;
 }
@@ -9207,17 +9277,19 @@ input.error {
     border-radius: 8px;
     cursor: pointer;
     user-select: none;
-    border: 1px solid var(--ok-danger);
+    /* Нагадування заповнити email для модулів, а не аварія: постійний червоний
+       у шапці привчав не помічати червоного взагалі. */
+    border: 1px solid var(--ok-chrome-ink-muted);
     padding: 6px 10px;
-    transition: all 0.2s ease-in-out;
+    transition: background-color 0.2s ease-in-out;
     color: var(--ok-ink-inverse);
-    background-color: var(--ok-danger);
+    background-color: transparent;
 }
 .btn_inner:focus,
 .btn_inner:hover{
     color: var(--ok-ink-inverse);
-    background-color: var(--ok-danger-hover);
-    border-color: var(--ok-danger-hover);
+    background-color: var(--ok-chrome-raised);
+    border-color: var(--ok-chrome-ink-muted);
 }
 .heading-divider {
     display: flex;
@@ -9240,6 +9312,30 @@ input.error {
     margin-left: .75em;
 }
 /************************************************************************* Фокус і рух */
+/* Перше, що отримує фокус: дозволяє оминути бічне меню (десятки посилань) і
+   перейти просто до вмісту. Видно лише під час переходу клавіатурою. */
+.skip_link {
+    position: absolute;
+    left: 8px;
+    top: -60px;
+    z-index: 1000;
+    padding: 8px 14px;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-accent);
+    border-radius: var(--ok-radius-control);
+}
+.skip_link:focus {
+    top: 8px;
+}
+/* Загальне a:focus фарбує текст посилання в акцент — на акцентному тлі він зникав. */
+a.skip_link,
+a.skip_link:hover,
+a.skip_link:focus {
+    color: var(--ok-ink-inverse);
+}
+#main_content:focus {
+    outline: none;
+}
 /* До цього в жодному стилі адмінки не було :focus-visible, зате 19 разів
    траплявся outline: none. Клавіатурний обхід був невидимий. Кільце нижче
    перекриває їх усі й показується тільки за клавіатурного фокуса, тож на
@@ -9766,14 +9862,7 @@ button.auth_buttons__recovery:hover {
 }
 
 
-/* Форма прав менеджера. «Не дано» — нейтральний трек: червоний у системі означає
-   помилку чи деструктивну дію, а тут це звичайний стан. */
-.perms_form .switch.switch-default .switch-input:not(:checked) ~ .switch-label {
-    background-color: var(--ok-control-line);
-}
-.perms_form .switch.switch-default .switch-input:not(:checked) ~ .switch-label::after {
-    opacity: 0;
-}
+/* Форма прав менеджера: «частково» — проміжний стан між нейтральним і зеленим. */
 .perms_form .switch.switch-default .switch-input:indeterminate ~ .switch-label {
     background-color: var(--ok-success-hover);
 }

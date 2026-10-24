@@ -26,6 +26,11 @@ class CommentsHelper implements GetListInterface
     /** Форма коментаря для FormToken. */
     const COMMENT_FORM = 'comment';
 
+    private const string OWN_COMMENTS_KEY = 'own_comment_ids';
+
+    /** Скільки власних несхвалених коментарів памʼятає сесія. */
+    private const int OWN_COMMENTS_LIMIT = 20;
+
     private $entityFactory;
     private $commentsRequest;
     private $validateHelper;
@@ -102,8 +107,7 @@ class CommentsHelper implements GetListInterface
             'type' => $objectType,
             'object_id' => $objectId,
             'approved' => 1,
-            'ip' => $_SERVER['REMOTE_ADDR']
-        ];
+        ] + $this->ownCommentsFilter();
 
         return ExtenderFacade::execute(__METHOD__, $filter, func_get_args());
     }
@@ -172,8 +176,7 @@ class CommentsHelper implements GetListInterface
             $filter = [
                 'has_parent' => true,
                 'approved' => 1,
-                'ip' => $_SERVER['REMOTE_ADDR'],
-            ];
+            ] + $this->ownCommentsFilter();
             foreach ($comments as $comment) {
                 $filter['composite_object_type_id'][$comment->type][] = $comment->object_id;
             }
@@ -247,6 +250,8 @@ class CommentsHelper implements GetListInterface
                 // в BackendCommentsHelper::approve(), куди такий відгук не потрапить.
                 if ($autoApproved) {
                     $this->recalculateRating($objectType, $objectId);
+                } else {
+                    $this->rememberOwnComment((int)$commentId);
                 }
 
                 // Отправляем email
@@ -257,6 +262,30 @@ class CommentsHelper implements GetListInterface
                 Response::redirectTo($this->backUrl('#comment_' . $commentId));
             }
         }
+    }
+
+    /**
+     * Показує автору його несхвалений коментар до модерації. Публічний для
+     * модулів, що додають коментарі повз addCommentProcedure().
+     */
+    public function rememberOwnComment(int $commentId): void
+    {
+        if ($commentId <= 0) {
+            return;
+        }
+
+        $ids = array_map(intval(...), (array)($_SESSION[self::OWN_COMMENTS_KEY] ?? []));
+        $ids[] = $commentId;
+        $_SESSION[self::OWN_COMMENTS_KEY] = array_slice(array_values(array_unique($ids)), -self::OWN_COMMENTS_LIMIT);
+    }
+
+    /** @return array{own_ids: int[], own_user_id: int} */
+    private function ownCommentsFilter(): array
+    {
+        return [
+            'own_ids' => array_map(intval(...), (array)($_SESSION[self::OWN_COMMENTS_KEY] ?? [])),
+            'own_user_id' => (int)($this->user->id ?? 0),
+        ];
     }
 
     /**

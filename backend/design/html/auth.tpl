@@ -1,5 +1,5 @@
 {$wrapper = '' scope=global}
-<html>
+<html lang="{if $btr->getLangLabel() == 'ua'}uk{else}{$btr->getLangLabel()|escape}{/if}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
@@ -22,7 +22,7 @@
                         <div class="auth_heading">
                             <img style="height: 50" src="{$rootUrl}/{$config->design_images}{$settings->site_logo}?v={$settings->site_logo_version}" alt="{$settings->site_name|escape}"/>
                             <div class="card-block text-xs-center">
-                                <div class="card-block--version">Version {$config->version|escape}</div>
+                                <div class="card-block--version">{$btr->general_version|escape} {$config->version|escape}</div>
                             </div>
                         </div>
                         <div class="">

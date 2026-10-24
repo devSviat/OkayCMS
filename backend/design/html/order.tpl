@@ -198,7 +198,7 @@
                                                 <div class="okay_list_boding okay_list_order_name">
                                                     <div class="boxes_inline">
                                                         {if $purchase->product}
-                                                            <a class="text_600 {if !$order->closed && $purchase->variant->stock == 0}hint-bottom-middle-t-info-s-small-mobile  hint-anim text_500 text_warning{/if}" {if !$order->closed && $purchase->variant->stock == 0}data-hint="{$btr->product_out_stock|escape}"{/if} href="{url controller=ProductAdmin id=$purchase->product->id}">{$purchase->product_name|escape}</a>
+                                                            <a class="text_600 {if !$order->closed && $purchase->variant->stock == 0}hint-bottom-middle-t-info-s-small-mobile  hint-anim text_500 text_attention{/if}" {if !$order->closed && $purchase->variant->stock == 0}data-hint="{$btr->product_out_stock|escape}"{/if} href="{url controller=ProductAdmin id=$purchase->product->id}">{$purchase->product_name|escape}</a>
                                                             {if $purchase->variant_name}
                                                                 <div class="mt-q font_12"><span class="text_grey">{$btr->order_option|escape}</span> {$purchase->variant_name|escape}</div>
                                                             {/if}
@@ -215,7 +215,7 @@
                                                             {/if}
                                                         {/if}
                                                         <div class="hidden-lg-up mt-q">
-                                                            <span class="text_primary text_600 {if $purchase->discounts}text_warning{/if}">{$purchase->price|escape}</span>
+                                                            <span class="text_primary text_600 {if $purchase->discounts}text_attention{/if}">{$purchase->price|escape}</span>
                                                             <span class="hidden-md-up text_500">
                                                             {$purchase->amount|escape} {if $purchase->units}{$purchase->units|escape}{else}{$settings->units|escape}{/if}</span>
                                                         </div>
@@ -261,7 +261,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="okay_list_boding okay_list_order_amount_price">
-                                                    <div class="text_dark {if $purchase->discounts}text_warning text_600{/if}">
+                                                    <div class="text_dark {if $purchase->discounts}text_attention text_600{/if}">
                                                         <span class="font_16">{($purchase->price) * ($purchase->amount)}</span>
                                                         <span class="font_12">{$currency->sign|escape}</span>
                                                     </div>

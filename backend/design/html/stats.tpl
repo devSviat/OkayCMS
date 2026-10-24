@@ -27,13 +27,14 @@
 </script>
 {literal}
     <script src="design/js/highcharts/highcharts.js" type="text/javascript"></script>
-    <script src="design/js/highcharts/themes/avocado.js" type="text/javascript"></script>
     <script src="design/js/highcharts/modules/exporting.js" type="text/javascript"></script>
 
 <script>
     var chart;
     $(function() {
+        var rootStyle = getComputedStyle(document.documentElement);
         var options = {
+            colors: [rootStyle.getPropertyValue('--ok-accent').trim()],
             exporting: {
                 chartOptions: { // specific options for the exported image
                     plotOptions: {
@@ -49,6 +50,9 @@
             chart: {
                 zoomType: 'x',
                 renderTo: 'container',
+                style: {
+                    fontFamily: rootStyle.getPropertyValue('--ok-font').trim()
+                },
                 defaultSeriesType: 'area',
                 type : "line"
             },
@@ -75,8 +79,9 @@
 
             plotOptions: {
                 line: {
+                    /* Точка на день за кілька років: підписи зливаються в суцільну смугу, значення є в підказці. */
                     dataLabels: {
-                        enabled: true
+                        enabled: false
                     },
                     enableMouseTracking: true,
                     connectNulls: false
@@ -120,8 +125,6 @@
             var chart = new Highcharts.Chart(options);
         });
     });
-    // Apply the theme
-    var highchartsOptions = Highcharts.setOptions(Highcharts.theme);
 
 </script>
 {/literal}

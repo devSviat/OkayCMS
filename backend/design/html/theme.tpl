@@ -104,7 +104,7 @@
 
                                                 {if !$t@first}
                                                     <button data-theme_name="{$t->name|escape}" type="button" class="btn_close float-xs-right fn_remove_theme" data-toggle="modal" data-target="#fn_delete_theme">
-                                                        {include file='svg_icon.tpl' svgId='delete'}
+                                                        {include file='svg_icon.tpl' svgId='trash'}
                                                     </button>
                                                 {/if}
                                             </div>

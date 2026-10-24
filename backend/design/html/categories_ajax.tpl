@@ -7,7 +7,7 @@
 
                 {if $category->subcategories}
                     <div class="okay_list_heading okay_list_subicon">
-                        <a href="javascript:;" class="fn_ajax_toggle" data-toggle="{if $isAllCategories || (!empty($smarty.get.category_id) && in_array($smarty.get.category_id, $category->children))}1{else}0{/if}" data-category_id="{$category->id}" >
+                        <a href="javascript:;" class="fn_ajax_toggle" aria-label="{$btr->general_toggle_children|escape}" data-toggle="{if $isAllCategories || (!empty($smarty.get.category_id) && in_array($smarty.get.category_id, $category->children))}1{else}0{/if}" data-category_id="{$category->id}" >
                             <span class="fn_toggle_icon{if $isAllCategories || (!empty($smarty.get.category_id) && in_array($smarty.get.category_id, $category->children))} is_open{/if}">{include file='svg_icon.tpl' svgId='square_plus'}{include file='svg_icon.tpl' svgId='square_minus'}</span>
                         </a>
                     </div>
@@ -68,7 +68,7 @@
                 <div class="okay_list_boding okay_list_close">
                     {*delete*}
                     <button data-hint="{$btr->categories_delete|escape}" type="button" class="btn_close fn_remove hint-bottom-middle-t-info-s-small-mobile  hint-anim" data-toggle="modal" data-target="#fn_action_modal" onclick="success_action($(this));">
-                        {include file='svg_icon.tpl' svgId='delete'}
+                        {include file='svg_icon.tpl' svgId='trash'}
                     </button>
                 </div>
             </div>

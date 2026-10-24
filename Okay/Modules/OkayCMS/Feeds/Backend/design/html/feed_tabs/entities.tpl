@@ -177,7 +177,7 @@
                     </select>
                 </div>
                 <button type="button" data-hint="{$btr->okay_cms__feeds__feed__entities__delete|escape}" class="btn btn_close feed_condition_delete fn_delete_condition hint-bottom-right-t-info-s-small-mobile hint-anim">
-                    {include file='svg_icon.tpl' svgId='delete'}
+                    {include file='svg_icon.tpl' svgId='trash'}
                 </button>
             </div>
         </div>

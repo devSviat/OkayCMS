@@ -10,23 +10,23 @@
                         <span>{$btr->order_from|escape}</span>
                         {if $order->referer_channel == Okay\Core\UserReferer\UserReferer::CHANNEL_EMAIL}
                             <span class="tag tag-chanel_email" title="{$order->referer_source|escape}">
-                                {include file='svg_icon.tpl' svgId='tag_email'} {$order->referer_channel|escape}
+                                {include file='svg_icon.tpl' svgId='tag_email'} {$btr->order_referer_channel_email|escape}
                             </span>
                         {elseif $order->referer_channel == Okay\Core\UserReferer\UserReferer::CHANNEL_SEARCH}
                             <span class="tag tag-chanel_search" title="{$order->referer_source|escape}">
-                                {include file='svg_icon.tpl' svgId='tag_search'} {$order->referer_channel|escape}
+                                {include file='svg_icon.tpl' svgId='tag_search'} {$btr->order_referer_channel_search|escape}
                             </span>
                         {elseif $order->referer_channel == Okay\Core\UserReferer\UserReferer::CHANNEL_SOCIAL}
                             <span class="tag tag-chanel_social" title="{$order->referer_source|escape}">
-                                {include file='svg_icon.tpl' svgId='tag_social'} {$order->referer_channel|escape}
+                                {include file='svg_icon.tpl' svgId='tag_social'} {$btr->order_referer_channel_social|escape}
                             </span>
                         {elseif $order->referer_channel == Okay\Core\UserReferer\UserReferer::CHANNEL_REFERRAL}
                             <span class="tag tag-chanel_referral" title="{$order->referer_source|escape}">
-                                {include file='svg_icon.tpl' svgId='tag_referral'} {$order->referer_channel|escape}
+                                {include file='svg_icon.tpl' svgId='tag_referral'} {$btr->order_referer_channel_referral|escape}
                             </span>
                         {else}
                             <span class="tag tag-chanel_unknown" title="{$order->referer_source|escape}">
-                                {include file='svg_icon.tpl' svgId='tag_unknown'} {$order->referer_channel|escape}
+                                {include file='svg_icon.tpl' svgId='tag_unknown'} {$btr->getTranslation('order_referer_channel_'|cat:$order->referer_channel)|default:$order->referer_channel|escape}
                             </span>
                         {/if}
                     {/if}

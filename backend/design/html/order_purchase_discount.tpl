@@ -52,7 +52,7 @@
                     </div>
 
                     <div class="okay_list_boding okay_list_order_amount_price">
-                        <div class="text_dark text_warning text_600">
+                        <div class="text_dark text_attention text_600">
                             <span class="font_16">{$discount->priceAfterDiscount|round:2}</span>
                             <span class="font_12">{$currency->sign|escape}</span>
                         </div>

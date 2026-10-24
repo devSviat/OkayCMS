@@ -77,7 +77,7 @@
                                 </div>
                                 <div class="okay_list_boding okay_list_close">
                                     <button data-hint="{$btr->feature_delete_alias|escape}" type="button" class="btn_close fn_remove_item hint-bottom-right-t-info-s-small-mobile  hint-anim">
-                                        {include file='svg_icon.tpl' svgId='delete'}
+                                        {include file='svg_icon.tpl' svgId='trash'}
                                     </button>
                                 </div>
                             </div>

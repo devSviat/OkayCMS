@@ -175,7 +175,7 @@
                         </div>
                         <div class="fn_step-9 col-lg-4 col-md-6">
                             <div class="heading_label">
-                                {$btr->settings_catalog_features_cache_ttl|escape} <span class="text_warning">Beta</span>
+                                {$btr->settings_catalog_features_cache_ttl|escape} <span class="text_attention">Beta</span>
                                 <i class="fn_tooltips fn_tip_wide hint-bottom-middle-t-white-s-small-mobile hint-anim" data-hint="{$btr->tooltip_settings_catalog_features_cache_ttl|escape}" tabindex="0" role="img" aria-label="{$btr->tooltip_settings_catalog_features_cache_ttl|escape}">
                                     {include file='svg_icon.tpl' svgId='icon_tooltips'}
                                 </i>

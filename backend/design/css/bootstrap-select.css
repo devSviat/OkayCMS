@@ -15,7 +15,7 @@ select.selectpicker {
 .bootstrap-select > .dropdown-toggle {
   width: 100%;
   background-color: RGB(255, 255, 255);
-  border: 1px solid RGB(228, 228, 228);
+  border: 1px solid var(--ok-control-line);
   -webkit-appearance: none;
   -webkit-transition: all 0.12s ease;
   transition: all 0.12s ease;

@@ -102,7 +102,7 @@
                                     <div class="row">
                                         <div class="col-lg-12 col-md-12 ">
                                             <button type="button" class="btn btn_mini btn-danger float-md-right fn_delete_counter">
-                                                {include file='svg_icon.tpl' svgId='delete'}
+                                                {include file='svg_icon.tpl' svgId='trash'}
                                                 <span>{$btr->general_delete|escape}</span>
                                             </button>
                                         </div>
@@ -148,7 +148,7 @@
                         <div class="row">
                             <div class="col-lg-12 col-md-12 ">
                                 <button type="button" class="btn btn_mini btn-danger float-md-right fn_delete_counter">
-                                    {include file='svg_icon.tpl' svgId='delete'}
+                                    {include file='svg_icon.tpl' svgId='trash'}
                                     <span>{$btr->general_delete|escape}</span>
                                 </button>
                             </div>
