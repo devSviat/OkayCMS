@@ -27,6 +27,7 @@ class ReleaseFeedTest extends TestCase
                 'zip' => 'https://github.com/devSviat/OkayCMS-Fork/releases/download/okaycms-fork/v1.1.0/okaycms-fork-v1.1.0.zip',
                 'versionJson' => 'https://github.com/devSviat/OkayCMS-Fork/releases/download/okaycms-fork/v1.1.0/version.json',
                 'checksums' => 'https://github.com/devSviat/OkayCMS-Fork/releases/download/okaycms-fork/v1.1.0/checksums.txt',
+                'packageFormat' => 1,
             ],
         ], $result);
     }
@@ -183,6 +184,8 @@ class ReleaseFeedTest extends TestCase
             'minPhp' => '8.4',
             'requiresMigrations' => true,
             'releasedAt' => '2026-02-15T00:00:00Z',
+            'packageFormat' => 2,
+            'requiresFrom' => '1.3.12',
         ]);
 
         $this->assertSame([
@@ -190,6 +193,8 @@ class ReleaseFeedTest extends TestCase
             'minPhp' => '8.4',
             'requiresMigrations' => true,
             'releasedAt' => '2026-02-15T00:00:00Z',
+            'packageFormat' => 2,
+            'requiresFrom' => '1.3.12',
         ], ReleaseFeed::parseVersionMeta($json));
     }
 
@@ -198,6 +203,8 @@ class ReleaseFeedTest extends TestCase
         $json = json_encode([
             'upstreamBase' => '4.5.2',
             'minPhp' => 12345,
+            'packageFormat' => '2',
+            'requiresFrom' => 'v1.3',
         ]);
 
         $this->assertSame([
@@ -205,6 +212,8 @@ class ReleaseFeedTest extends TestCase
             'minPhp' => null,
             'requiresMigrations' => null,
             'releasedAt' => null,
+            'packageFormat' => null,
+            'requiresFrom' => null,
         ], ReleaseFeed::parseVersionMeta($json));
     }
 
