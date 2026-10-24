@@ -103,4 +103,23 @@ class UpdateRunnerComposerTest extends TestCase
         }
         $this->assertFileDoesNotExist($flag);
     }
+
+    /**
+     * Рішення — у preflight, з урахуванням vendor/, разом із перевіркою
+     * vendor/ на запис; крок підміни його не перераховує. Preflight проганяє
+     * self-request і диск, тож тут — за кодом.
+     */
+    public function testPreflightDecidesComposerBeforeTheSwap(): void
+    {
+        $source = (string) file_get_contents((new \ReflectionClass(UpdateRunner::class))->getFileName());
+        $method = static function (string $name) use ($source): string {
+            $m = new \ReflectionMethod(UpdateRunner::class, $name);
+            return implode("\n", array_slice(explode("\n", $source), $m->getStartLine() - 1, $m->getEndLine() - $m->getStartLine() + 1));
+        };
+
+        $preflight = $method('stepPreflight');
+        $this->assertStringContainsString('$ctx[\'composerRequired\'] = ComposerInstallDecision::isRequiredFor(', $preflight);
+        $this->assertMatchesRegularExpression('~if \(\$ctx\[\'composerRequired\'\]\) \{\s*\$this->assertVendorWritable\(~', $preflight);
+        $this->assertStringNotContainsString('ComposerInstallDecision', $method('stepApplyFiles'));
+    }
 }

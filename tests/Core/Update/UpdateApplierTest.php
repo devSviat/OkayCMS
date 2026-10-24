@@ -377,6 +377,31 @@ class UpdateApplierTest extends TestCase
         });
     }
 
+    /** Оточення справді доходить до процесу composer, а не лише рахується. */
+    public function testComposerProcessReceivesTheEnvironment(): void
+    {
+        $rootDir = $this->tmpDir . '/root';
+        $this->writeFile($rootDir . '/composer.phar', '<?php echo "COMPOSER_HOME=" . getenv("COMPOSER_HOME");');
+        $savedHome = getenv('HOME');
+        $savedComposerHome = getenv('COMPOSER_HOME');
+        putenv('HOME');
+        putenv('COMPOSER_HOME');
+        try {
+            $this->withEmptyPath(function () use ($rootDir): void {
+                // Лише php, без справжнього composer із /usr/local/bin.
+                $phpOnly = $this->tmpDir . '/php-only';
+                mkdir($phpOnly);
+                symlink(PHP_BINARY, $phpOnly . '/php');
+                $_ENV['PATH'] = $_SERVER['PATH'] = getenv('PATH') . ':' . $phpOnly;
+                putenv('PATH=' . $_ENV['PATH']);
+                $this->assertStringContainsString('COMPOSER_HOME=' . rtrim(sys_get_temp_dir(), '/') . '/okaycms-composer-', $this->applier->runComposer($rootDir));
+            });
+        } finally {
+            putenv($savedHome === false ? 'HOME' : 'HOME=' . $savedHome);
+            putenv($savedComposerHome === false ? 'COMPOSER_HOME' : 'COMPOSER_HOME=' . $savedComposerHome);
+        }
+    }
+
     /**
      * Воркер php-fpm часто без HOME (clear_env = yes) або з чужим HOME від
      * root-майстра; composer без доступного на запис COMPOSER_HOME падає.
