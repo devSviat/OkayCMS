@@ -66,10 +66,28 @@ jobs:
       - name: PHPStan
         run: vendor/bin/phpstan analyse --no-progress
 
-      # PHPStan рахує нижньою межею 8.4 з composer.json і не бачить того, що
-      # застаріло лише в 8.5, як касти (integer). Компілятор 8.5 бачить, у
-      # кожному файлі, зокрема в tests/ і ok, яких PHPStan не аналізує.
-      - name: Застаріле в PHP 8.5
+  # Компілятор кожної версії, по кожному файлу, зокрема в tests/ і ok, яких
+  # PHPStan не аналізує. На 8.4 — синтаксис, новіший за мінімальну версію
+  # (оператор |>): PHPStan його пропускає, тести на 8.4 бачать лише файли, які
+  # завантажують. На 8.5 — застаріле лише в 8.5, як касти (integer): PHPStan
+  # рахує нижньою межею 8.4 з composer.json.
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+    name: Lint (PHP ${{ matrix.php }})
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: php -l
         run: |
           set -o pipefail
           git ls-files -z -- '*.php' ok ':!:Okay/Modules/*/vendor/*' \
