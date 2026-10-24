@@ -6973,12 +6973,14 @@ input[type=range]:focus::-ms-fill-upper {
     font-stretch: normal;
     line-height: normal;
     letter-spacing: normal;
-    color: var(--ok-ink-inverse);
-    /* Було rgba(112,124,134,.7): накладене на біле дає 2.6:1 під білим текстом. */
-    background-color: #5b6770;
+    color: var(--ok-ink);
+    /* Підпис рядка, а не кнопка: темна плашка на кожному з десятків рядків
+       переважувала самі значення. */
+    background-color: var(--ok-thead);
     width: 35%;
     padding: 5px 10px;
     height: 34px;
+    line-height: 24px;
     font-size: 14px;
     font-weight: 400;
     overflow: hidden;
@@ -6986,7 +6988,7 @@ input[type=range]:focus::-ms-fill-upper {
     white-space: nowrap;
 }
 .feature_name a{
-    color: var(--ok-ink-inverse);
+    color: var(--ok-ink);
 }
 .additional_values.feature_name {
     background: transparent;
@@ -7039,7 +7041,7 @@ input[type=range]:focus::-ms-fill-upper {
     width: calc(100% - 35px);
     padding: 5px 10px;
     font-size: 14px;
-    color: #607d8b;
+    color: var(--ok-ink);
     transition: border-color ease-in-out 0.15s,
     box-shadow ease-in-out 0.15s;
     background: var(--ok-canvas);
@@ -7950,7 +7952,7 @@ base::-moz-progress-bar,
     position: fixed;
     width: 100%;
     text-align: center;
-    background-color: rgba(34, 31, 31, 0.9);
+    background-color: color-mix(in srgb, var(--ok-chrome) 90%, transparent);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     padding: 10px;
