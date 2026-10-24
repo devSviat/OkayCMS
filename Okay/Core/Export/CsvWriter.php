@@ -35,7 +35,7 @@ class CsvWriter
      */
     public static function putRow($handle, array $values, $delimiter = ';')
     {
-        fputcsv($handle, self::escape($values), $delimiter, '"', '\\');
+        fputcsv($handle, self::escape($values), $delimiter, '"', '');
     }
 
     /**

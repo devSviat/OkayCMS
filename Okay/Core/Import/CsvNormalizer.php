@@ -56,7 +56,7 @@ class CsvNormalizer
         }
 
         $rows = [$this->parseLine($firstLine, $delimiter)];
-        while (($row = fgetcsv($handle, 0, $delimiter, '"', '\\')) !== false) {
+        while (($row = fgetcsv($handle, 0, $delimiter, '"', '')) !== false) {
             $rows[] = $row;
         }
         fclose($handle);
@@ -67,7 +67,7 @@ class CsvNormalizer
         }
 
         foreach ($rows as $row) {
-            fputcsv($out, $row, self::TARGET_DELIMITER, '"', '\\');
+            fputcsv($out, $row, self::TARGET_DELIMITER, '"', '');
         }
         fclose($out);
 
@@ -124,7 +124,7 @@ class CsvNormalizer
      */
     private function parseLine($line, $delimiter)
     {
-        return str_getcsv(rtrim((string)$line, "\r\n"), $delimiter, '"', '\\');
+        return str_getcsv(rtrim((string)$line, "\r\n"), $delimiter, '"', '');
     }
 
     private function hasBom($path)
