@@ -523,6 +523,22 @@
        Заголовок сторінки — div.heading_page у десятках шаблонів ядра й модулів, тож
        роль заголовка ставиться тут, а не в кожному шаблоні. */
     (function () {
+        var NAMEABLE_FIELD = 'input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), select, textarea';
+        // Без підказки (.fn_tooltips має власне ім'я) і без вкладених полів.
+        function visibleLabel(el) {
+            if (!el) {
+                return '';
+            }
+            var copy = el.cloneNode(true);
+            $(copy).find('.fn_tooltips, svg, input, select, textarea, button').remove();
+            return copy.textContent.replace(/\s+/g, ' ').trim();
+        }
+        function nameField(field, text) {
+            if (!field || !text || field.hasAttribute('aria-label') || field.hasAttribute('aria-labelledby') || field.title || (field.labels && field.labels.length)) {
+                return;
+            }
+            field.setAttribute('aria-label', text);
+        }
         function nameControls(root) {
             $(root).find('a[data-hint], button[data-hint], [role="button"][data-hint]').each(function () {
                 if (!this.hasAttribute('aria-label') && !this.textContent.trim()) {
@@ -545,6 +561,41 @@
                     this.setAttribute('aria-label', title);
                 }
             });
+            // Підпис поля — div.heading_label над ним, а не <label>: поле лишалось без імені.
+            // Порядок важливий: підпис точніший за заголовок колонки, а той — за префікс поля.
+            $(root).find('.heading_label').each(function () {
+                var text = visibleLabel(this);
+                var next = $(this).nextAll().filter(function () { return !$(this).is('input[type="hidden"]'); }).first();
+                var field = next.is(NAMEABLE_FIELD) ? next.get(0) : next.find(NAMEABLE_FIELD).get(0);
+                nameField(field, text);
+            });
+            $(root).find('.okay_list_boding').each(function () {
+                var head = $(this).closest('.okay_list').find('.okay_list_head').get(0);
+                if (!head) {
+                    return;
+                }
+                var heading = null;
+                this.classList.forEach(function (cls) {
+                    if (!heading && cls !== 'okay_list_boding' && cls.indexOf('okay_list_') === 0) {
+                        heading = head.querySelector('.okay_list_heading.' + cls);
+                    }
+                });
+                if (heading) {
+                    var text = visibleLabel(heading);
+                    $(this).find(NAMEABLE_FIELD).each(function () { nameField(this, text); });
+                }
+            });
+            $(root).find('.feature_row').each(function () {
+                // Додаткові значення — окремі рядки з порожньою назвою в тому ж блоці.
+                var text = visibleLabel($(this).children('.feature_name').get(0))
+                    || visibleLabel($(this).siblings('.feature_row').first().children('.feature_name').get(0));
+                $(this).find('.feature_value').find(NAMEABLE_FIELD).each(function () { nameField(this, text); });
+            });
+            $(root).find('.fn_dropzone input[type="file"]').each(function () { nameField(this, '{$btr->images_add|escape:'javascript'}'); });
+            $(root).find('.input-group').each(function () {
+                var text = visibleLabel($(this).children('.input-group-addon').filter(function () { return $(this).text().trim(); }).get(0));
+                $(this).find(NAMEABLE_FIELD).each(function () { nameField(this, text); });
+            });
             // Кнопка пошуку — лише іконка; ім'я з підказки поля, біля якого вона стоїть.
             $(root).find('.input-group button:not([aria-label])').each(function () {
                 var field = $(this).closest('.input-group').find('input[placeholder]').get(0);
@@ -565,7 +616,7 @@
         });
         // Рядки й зображення, додані пізніше скриптами, отримують ім'я при першому фокусі.
         document.addEventListener('focusin', function (e) {
-            if (e.target.closest && e.target.closest('[data-hint], .fn_remove_image, .fn_feature_multi_values')) {
+            if (e.target.closest && (e.target.closest('[data-hint], .fn_remove_image, .fn_feature_multi_values') || ($(e.target).is(NAMEABLE_FIELD) && !e.target.hasAttribute('aria-label')))) {
                 nameControls(e.target.parentNode || document);
             }
         });
