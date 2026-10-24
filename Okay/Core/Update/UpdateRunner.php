@@ -146,7 +146,12 @@ class UpdateRunner
 
     private function runLocked(string $rootDir, ?string $targetVersion): array
     {
-        $snapshot = $this->checkHelper->getSnapshot() ?? $this->checkHelper->check(true);
+        // check(), а не getSnapshot(): знімок, вибраний до попереднього
+        // оновлення, вказує на реліз, який уже стоїть, а не на наступний.
+        $snapshot = $this->checkHelper->check();
+        if (!ReleaseFeed::isChosenFor($snapshot, $this->config->forkVersion)) {
+            throw new \RuntimeException('Не вдалося перевірити, який реліз наступний для цієї версії: ' . ($snapshot['lastError'] ?? 'список релізів недоступний') . '.');
+        }
         $latest = $snapshot['latest'] ?? null;
         if (!is_array($latest) || !is_string($latest['forkVersion'] ?? null) || !is_array($latest['assets'] ?? null)) {
             throw new \RuntimeException('Немає доступного релізу для оновлення.');
@@ -279,13 +284,22 @@ class UpdateRunner
             throw new \RuntimeException("manifest.json пошкоджений або без ключа 'files': {$manifestPath}");
         }
 
+        $versionMeta = UpdatePackage::readVersionMeta($extractDir);
+        // Покоління з назви архіву вибрало реліз, а межу задає покоління з
+        // version.json. Розбіжність означає перейменований архів.
+        $packageFormat = $versionMeta['packageFormat'] ?? PackageFormat::LEGACY;
+        $assetFormat = (int) ($ctx['latest']['assets']['packageFormat'] ?? PackageFormat::LEGACY);
+        if ($packageFormat !== $assetFormat) {
+            throw new \RuntimeException("Архів релізу названо як покоління {$assetFormat}, а version.json пакета каже {$packageFormat}: пакет не відповідає релізу.");
+        }
+
         UpdatePackage::assertSafePaths($manifestFiles);
-        UpdatePackage::assertPathsWithinCoreBoundary($manifestFiles);
+        UpdatePackage::assertPathsWithinCoreBoundary($manifestFiles, $packageFormat);
         UpdatePackage::verifyExtractedFiles($extractDir . '/payload', $manifestFiles);
 
         $ctx['extractDir'] = $extractDir;
         $ctx['manifestFiles'] = $manifestFiles;
-        $ctx['versionMeta'] = UpdatePackage::readVersionMeta($extractDir);
+        $ctx['versionMeta'] = $versionMeta;
 
         return $ctx;
     }
@@ -435,7 +449,9 @@ class UpdateRunner
                 array_push($statements, ...$this->migrator->splitSqlFile($path));
             }
 
-            $tables = UpdateBackup::extractTouchedTables($statements, (string) $this->config->get('db_prefix'));
+            $tables = $this->migrator->existingTables(
+                UpdateBackup::extractTouchedTables($statements, (string) $this->config->get('db_prefix'))
+            );
             if ($tables !== []) {
                 $dumpPath = $backupsDir . '/pre-update-' . $ctx['fromVersion'] . '-to-' . $ctx['toVersion'] . '-' . time() . '.sql';
                 $this->backup->dumpTables($tables, $dumpPath);

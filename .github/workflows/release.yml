@@ -144,8 +144,17 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           TAG="okaycms-fork/v${VERSION}"
+          # Назва архіву несе покоління пакета (PackageFormat): інсталяції,
+          # що його не вміють, реліз пропускають. Архів мусить бути рівно
+          # один — другий зі старою назвою відкрив би реліз старим сайтам.
+          shopt -s nullglob
+          ZIPS=(build/release/*.zip)
+          if [[ ${#ZIPS[@]} -ne 1 ]]; then
+            echo "::error::Очікував рівно один архів у build/release, маю ${#ZIPS[@]}"
+            exit 1
+          fi
           ASSETS=(
-            "build/release/okaycms-fork-v${VERSION}.zip"
+            "${ZIPS[0]}"
             "build/release/version.json"
             "build/release/checksums.txt"
           )

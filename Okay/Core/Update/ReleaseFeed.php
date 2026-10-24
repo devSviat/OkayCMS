@@ -39,9 +39,17 @@ class ReleaseFeed
     }
 
     /**
-     * @return array{forkVersion: string, tag: string, publishedAt: ?string, notesUrl: ?string, notesBody: ?string, assets: array{zip: string, versionJson: string, checksums: string}}|null
+     * Реліз, на який ця інсталяція оновлюється наступним.
+     *
+     * Спершу — найновіший патч своєї гілки (major.minor). Лише з останнього
+     * патча — найновіший патч наступної гілки, що існує, і так крок за
+     * кроком. Так кожен сайт проходить останній патч кожної гілки, і туди
+     * можна класти перехідне: розширення межі, нове покоління пакета.
+     * Без $installed, або коли новішого немає, — просто найновіший.
+     *
+     * @return array{forkVersion: string, tag: string, publishedAt: ?string, notesUrl: ?string, notesBody: ?string, assets: array{zip: string, versionJson: string, checksums: string, packageFormat: int}}|null
      */
-    public static function parseLatest(string $releasesJson): ?array
+    public static function parseLatest(string $releasesJson, ?string $installed = null): ?array
     {
         $releases = json_decode($releasesJson, true);
         if (!is_array($releases)) {
@@ -63,12 +71,54 @@ class ReleaseFeed
         usort($candidates, static fn (array $a, array $b): int =>
             version_compare($b['forkVersion'], $a['forkVersion']));
 
-        return $candidates[0];
+        if ($installed === null) {
+            return $candidates[0];
+        }
+
+        $newer = array_values(array_filter(
+            $candidates,
+            static fn (array $c): bool => self::isNewerThanInstalled($c['forkVersion'], $installed)
+        ));
+        if ($newer === []) {
+            return $candidates[0];
+        }
+
+        // Гілка найстаршого з новіших релізів — своя, якщо в ній є новіший
+        // патч, інакше найближча новіша. З неї беремо найновіший реліз
+        // (список відсортовано за спаданням).
+        $nextLine = self::line($newer[count($newer) - 1]['forkVersion']);
+        foreach ($newer as $candidate) {
+            if (self::line($candidate['forkVersion']) === $nextLine) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    /** Гілка версії — major.minor: "1.3.12" → "1.3". */
+    private static function line(string $version): string
+    {
+        $parts = explode('.', $version);
+
+        return $parts[0] . '.' . ($parts[1] ?? '0');
     }
 
     public static function isNewerThanInstalled(string $candidate, string $installed): bool
     {
         return version_compare($candidate, $installed, '>');
+    }
+
+    /**
+     * Чи вибрано `latest` знімка для цієї встановленої версії. `latestFor`
+     * пишеться лише разом із вибором із повного списку релізів: `installed`
+     * для цього не годиться, його переписують і помилка, і 304.
+     *
+     * @param array<string, mixed> $snapshot
+     */
+    public static function isChosenFor(array $snapshot, string $installed): bool
+    {
+        return ($snapshot['latestFor'] ?? null) === $installed;
     }
 
     public static function isSnapshotFresh(array $snapshot, int $nowTs, int $ttlSeconds): bool
@@ -106,7 +156,7 @@ class ReleaseFeed
      * валідується окремо: часткові чи биті дані одних ключів не мають
      * ламати решту.
      *
-     * @return array{upstreamBase: ?string, minPhp: ?string, requiresMigrations: ?bool, releasedAt: ?string}|null
+     * @return array{upstreamBase: ?string, minPhp: ?string, requiresMigrations: ?bool, releasedAt: ?string, packageFormat: ?int, requiresFrom: ?string}|null
      */
     public static function parseVersionMeta(string $json): ?array
     {
@@ -120,6 +170,8 @@ class ReleaseFeed
             'minPhp' => is_string($data['minPhp'] ?? null) ? $data['minPhp'] : null,
             'requiresMigrations' => is_bool($data['requiresMigrations'] ?? null) ? $data['requiresMigrations'] : null,
             'releasedAt' => is_string($data['releasedAt'] ?? null) ? $data['releasedAt'] : null,
+            'packageFormat' => is_int($data['packageFormat'] ?? null) && $data['packageFormat'] >= PackageFormat::LEGACY ? $data['packageFormat'] : null,
+            'requiresFrom' => is_string($data['requiresFrom'] ?? null) && preg_match('/^\d+\.\d+\.\d+$/', $data['requiresFrom']) ? $data['requiresFrom'] : null,
         ];
     }
 
@@ -185,12 +237,16 @@ class ReleaseFeed
     }
 
     /**
-     * @return array{zip: string, versionJson: string, checksums: string}|null
+     * Архів береться найновішого покоління, яке ця інсталяція вміє встановити
+     * (PackageFormat). Реліз лише з архівом новішого покоління пропускається:
+     * так старий сайт іде на проміжну версію, а не на пакет, який відхилить.
+     *
+     * @return array{zip: string, versionJson: string, checksums: string, packageFormat: int}|null
      */
     private static function mapAssets(array $assets, string $version): ?array
     {
-        $zipName = "okaycms-fork-v{$version}.zip";
         $map = [];
+        $zipFormat = 0;
 
         foreach ($assets as $asset) {
             if (!is_array($asset) || !isset($asset['name'], $asset['browser_download_url'])) {
@@ -198,12 +254,20 @@ class ReleaseFeed
             }
 
             $url = $asset['browser_download_url'];
-            if (!self::isTrustedAssetUrl($url)) {
+            if (!self::isTrustedAssetUrl($url) || !is_string($asset['name'])) {
+                continue;
+            }
+
+            $format = PackageFormat::ofZipAssetName($asset['name'], $version);
+            if ($format !== null) {
+                if ($format <= PackageFormat::SUPPORTED && $format > $zipFormat) {
+                    $map['zip'] = $url;
+                    $zipFormat = $format;
+                }
                 continue;
             }
 
             $key = match ($asset['name']) {
-                $zipName => 'zip',
                 'version.json' => 'versionJson',
                 'checksums.txt' => 'checksums',
                 default => null,
@@ -217,6 +281,11 @@ class ReleaseFeed
             return null;
         }
 
-        return $map;
+        return [
+            'zip' => $map['zip'],
+            'versionJson' => $map['versionJson'],
+            'checksums' => $map['checksums'],
+            'packageFormat' => $zipFormat,
+        ];
     }
 }

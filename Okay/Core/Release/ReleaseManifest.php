@@ -2,6 +2,8 @@
 
 namespace Okay\Core\Release;
 
+use Okay\Core\Update\PackageFormat;
+
 class ReleaseManifest
 {
     /** @var string[] */
@@ -9,6 +11,10 @@ class ReleaseManifest
 
     /** @var string[] */
     private array $exclude;
+
+    private int $packageFormat;
+
+    private ?string $requiresFrom;
 
     public function __construct(string $manifestPath)
     {
@@ -21,9 +27,33 @@ class ReleaseManifest
         $this->include = $data['include'] ?? [];
         $this->exclude = $data['exclude'] ?? [];
 
+        $packageFormat = $data['packageFormat'] ?? PackageFormat::LEGACY;
+        if (!is_int($packageFormat) || $packageFormat < PackageFormat::LEGACY || $packageFormat > PackageFormat::SUPPORTED) {
+            throw new \RuntimeException("Release manifest has an unsupported 'packageFormat': {$manifestPath}");
+        }
+        $this->packageFormat = $packageFormat;
+
+        $requiresFrom = $data['requiresFrom'] ?? null;
+        if ($requiresFrom !== null && (!is_string($requiresFrom) || !preg_match('/^\d+\.\d+\.\d+$/', $requiresFrom))) {
+            throw new \RuntimeException("Release manifest has an invalid 'requiresFrom' (expected X.Y.Z): {$manifestPath}");
+        }
+        $this->requiresFrom = $requiresFrom;
+
         if (empty($this->include)) {
             throw new \RuntimeException("Release manifest has an empty 'include' list: {$manifestPath}");
         }
+    }
+
+    /** Покоління пакета (PackageFormat): що мусить уміти інсталяція, щоб його прийняти. */
+    public function packageFormat(): int
+    {
+        return $this->packageFormat;
+    }
+
+    /** Найстаріша встановлена версія, з якої пакет можна ставити, або null — з будь-якої. */
+    public function requiresFrom(): ?string
+    {
+        return $this->requiresFrom;
     }
 
     /** @return string[] repo-relative paths, sorted, deduplicated */

@@ -2,6 +2,7 @@
 
 namespace Core\Update;
 
+use Okay\Core\Update\ReleaseFeed;
 use Okay\Core\Update\UpdateCheckHelper;
 use PHPUnit\Framework\TestCase;
 
@@ -74,5 +75,18 @@ class UpdateCheckHelperTest extends TestCase
         $this->assertSame('W/"final"', UpdateCheckHelper::extractEtag($headers));
         $this->assertSame('W/"one"', UpdateCheckHelper::extractEtag("HTTP/2 200\r\nETag: W/\"one\"\r\n\r\n"));
         $this->assertNull(UpdateCheckHelper::extractEtag("HTTP/2 200\r\ncontent-type: x\r\n\r\n"));
+    }
+
+    /**
+     * Знімок, вибраний для іншої версії, — не відповідь для цієї: після
+     * оновлення на міст 1.3.12 він досі вказує на 1.3.12, а не на 1.4.0.
+     * `installed` тут не мірило: його переписують помилка й 304.
+     */
+    public function testSnapshotCountsOnlyForTheVersionItWasChosenFor(): void
+    {
+        $this->assertTrue(ReleaseFeed::isChosenFor(['latestFor' => '1.3.12', 'installed' => '1.3.12'], '1.3.12'));
+        $this->assertFalse(ReleaseFeed::isChosenFor(['latestFor' => '1.3.11', 'installed' => '1.3.12'], '1.3.12'));
+        $this->assertFalse(ReleaseFeed::isChosenFor(['installed' => '1.3.12'], '1.3.12'), 'знімок старого коду, без latestFor');
+        $this->assertFalse(ReleaseFeed::isChosenFor([], '1.3.12'));
     }
 }

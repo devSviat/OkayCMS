@@ -27,7 +27,7 @@ class UpdatePackage
         'vendor/',
         'Okay/log/',
         'backend/files/',
-        'backend/design/',
+        'backend/design/compiled/',
         // Живий стан штатних модулів. На боці збірки він виключений
         // (`release-manifest.json`), але саме цей однобічний запобіжник PR і
         // прибирає: маніфест, що загубив ці винятки, перезаписав би робочі
@@ -51,25 +51,14 @@ class UpdatePackage
     private const CORE_MODULE_VENDOR = 'okaycms';
 
     /**
-     * Виняток із `backend/design/`: сторінка оновлювача мусить оновлюватись
-     * разом із ним, інакше правку в ній не доставити ніколи. Живе ТУТ, у коді
-     * інсталяції, а не в пакеті — інакше межу визначав би той, від кого її й
-     * треба захищати.
-     *
-     * Простір імен, а не перелік файлів, і це принципово. Перевірку виконує
-     * код ІНСТАЛЯЦІЇ, тобто старий: поіменний перелік означав би, що реліз,
-     * якому знадобився другий файл сторінки (розділити шаблон, додати свій
-     * css), відхиляється цілком кожною вже встановленою інсталяцією — на
-     * кроці verify, з ручним лікуванням на кожній. Guard-тест такого не
-     * зловив би: він ганяє НОВИЙ перелік проти НОВОГО маніфесту й лишався б
-     * зеленим.
-     *
-     * Тому все, що зветься `core_updater*` під `backend/design/`, дозволене
-     * наперед. Вийти за цей простір усе одно означає дві версії: спершу
-     * реліз, що розширює виняток, і лише наступний — той, що везе файл.
+     * Пакет першого покоління (PackageFormat::LEGACY) не везе `backend/design/`:
+     * інсталяції до 1.3.12 його відхиляють. Виняток — сторінка оновлювача,
+     * простором імен `core_updater*`, бо старий код перевіряє саме так.
+     * Межа першого покоління тут та сама, що в них, щоб збірка не видала
+     * пакет, який вони відкинуть (стереже UpdatePackageBoundaryTest).
      */
-    private const CORE_OWNED_PREFIX = 'backend/design/';
-    private const CORE_OWNED_BASENAME_PREFIX = 'core_updater';
+    private const LEGACY_DENIED_PREFIX = 'backend/design/';
+    private const LEGACY_ALLOWED_BASENAME_PREFIX = 'core_updater';
 
     /**
      * Розбирає `checksums.txt` у форматі `{sha256}  {name}\n`, як пише
@@ -248,19 +237,22 @@ class UpdatePackage
      * задумано, і застосовувати з нього решту — здогадка.
      *
      * @param array<array-key, string> $manifestFiles відносний шлях => sha256
+     * @param int $packageFormat покоління пакета (PackageFormat)
      * @throws \RuntimeException з переліком УСІХ порушень, а не першого
      */
-    public static function assertPathsWithinCoreBoundary(array $manifestFiles): void
+    public static function assertPathsWithinCoreBoundary(array $manifestFiles, int $packageFormat): void
     {
+        if ($packageFormat < PackageFormat::LEGACY || $packageFormat > PackageFormat::SUPPORTED) {
+            throw new \RuntimeException("Пакет покоління {$packageFormat}, а ця інсталяція вміє встановлювати до " . PackageFormat::SUPPORTED . '.');
+        }
+
         $violations = [];
 
         foreach (array_keys($manifestFiles) as $path) {
             $path = (string) $path;
-            if (self::isUpdaterOwnAsset($path)) {
-                continue;
-            }
-
-            $reason = self::boundaryViolationReason($path);
+            $reason = $packageFormat === PackageFormat::LEGACY && self::isLegacyDeniedAdminPath($path)
+                ? 'пакет першого покоління не везе тему адмінки'
+                : self::boundaryViolationReason($path);
             if ($reason !== null) {
                 $violations[] = $path . ' — ' . $reason;
             }
@@ -300,20 +292,12 @@ class UpdatePackage
         return implode('/', $segments);
     }
 
-    /**
-     * Власні файли сторінки оновлювача — єдине, що ядро возить під
-     * `backend/design/`. Простір імен, а не перелік: чому саме так — у
-     * коментарі до CORE_OWNED_BASENAME_PREFIX.
-     */
-    private static function isUpdaterOwnAsset(string $path): bool
+    private static function isLegacyDeniedAdminPath(string $path): bool
     {
         $normalized = mb_strtolower(self::normalizePath($path));
 
-        if (!str_starts_with($normalized, self::CORE_OWNED_PREFIX)) {
-            return false;
-        }
-
-        return str_starts_with(basename($normalized), self::CORE_OWNED_BASENAME_PREFIX);
+        return str_starts_with($normalized, self::LEGACY_DENIED_PREFIX)
+            && !str_starts_with(basename($normalized), self::LEGACY_ALLOWED_BASENAME_PREFIX);
     }
 
     /** @return ?string причина відмови, або null якщо шлях у межах ядра */
@@ -359,7 +343,7 @@ class UpdatePackage
      * forkVersion додається окремо, бо в контексті C1 (список релізів)
      * він береться з тегу, а тут іншого джерела, крім самого файлу, немає.
      *
-     * @return array{forkVersion: string, upstreamBase: ?string, minPhp: ?string, requiresMigrations: ?bool, releasedAt: ?string}
+     * @return array{forkVersion: string, upstreamBase: ?string, minPhp: ?string, requiresMigrations: ?bool, releasedAt: ?string, packageFormat: ?int, requiresFrom: ?string}
      */
     public static function readVersionMeta(string $extractedDir): array
     {
@@ -412,6 +396,17 @@ class UpdatePackage
             throw new \RuntimeException(
                 "Цей реліз потребує PHP не нижче {$minPhp}, а на сервері встановлено {$phpVersion}. "
                 . 'Оновіть PHP перед встановленням оновлення.'
+            );
+        }
+
+        // Пакет, який можна ставити лише з проміжної версії (як міст Joomla
+        // 3.10): правило вибору релізу сюди не пускає, а це запасний рубіж,
+        // якщо пакет потрапив повз нього.
+        $requiresFrom = $versionMeta['requiresFrom'] ?? null;
+        if (is_string($requiresFrom) && $requiresFrom !== '' && version_compare($installedVersion, $requiresFrom, '<')) {
+            throw new \RuntimeException(
+                "Цей реліз ставиться лише з версії {$requiresFrom} і новіших, а встановлено {$installedVersion}. "
+                . "Спершу оновіться до {$requiresFrom}."
             );
         }
 

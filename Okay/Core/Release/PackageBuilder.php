@@ -2,9 +2,11 @@
 
 namespace Okay\Core\Release;
 
+use Okay\Core\Update\PackageFormat;
+
 class PackageBuilder
 {
-    /** @return array{fileCount: int, migrationsCount: int, requiresMigrations: bool} */
+    /** @return array{fileCount: int, migrationsCount: int, requiresMigrations: bool, packageFormat: int} */
     public function stage(
         string $repoPath,
         string $manifestPath,
@@ -43,6 +45,8 @@ class PackageBuilder
             'minPhp' => $minPhp,
             'releasedAt' => gmdate('c'),
             'requiresMigrations' => $requiresMigrations,
+            'packageFormat' => $manifest->packageFormat(),
+            'requiresFrom' => $manifest->requiresFrom(),
         ];
 
         file_put_contents($stagingDir . '/version.json', json_encode($version, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
@@ -55,6 +59,7 @@ class PackageBuilder
             'fileCount' => count($files),
             'migrationsCount' => $migrationsCount,
             'requiresMigrations' => $requiresMigrations,
+            'packageFormat' => $manifest->packageFormat(),
         ];
     }
 
@@ -136,7 +141,7 @@ class PackageBuilder
         try {
             $staged = $this->stage($repoPath, $manifestPath, $forkVersion, $upstreamBase, $stagingDir, $migrationsPath);
 
-            $zipPath = $outputDir . '/okaycms-fork-v' . $forkVersion . '.zip';
+            $zipPath = $outputDir . '/' . PackageFormat::zipAssetName($forkVersion, $staged['packageFormat']);
             $this->assembleZip($stagingDir, $zipPath);
 
             $versionJsonPath = $outputDir . '/version.json';
