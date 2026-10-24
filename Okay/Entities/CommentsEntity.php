@@ -40,19 +40,32 @@ class CommentsEntity extends Entity
     protected static $langTable;
     protected static $langObject;
 
+    /**
+     * Несхвалений коментар бачить лише автор: за id, запамʼятованими в його
+     * сесії (own_ids), і за власним user_id (own_user_id). Не за IP: за
+     * спільною адресою (офіс, мобільний оператор) чужі несхвалені бачили всі.
+     */
     protected function filter__approved($value, &$filter)
     {
-        $ip_filter = '';
-        if (isset($filter['ip'])) {
-            $ip_filter = " OR c.ip = :ip";
-            $this->select->bindValue('ip', $filter['ip']);
+        $conditions = ['c.approved = :approved'];
+        $this->select->bindValue('approved', (int)$value);
+
+        $ownIds = array_filter(array_map(intval(...), (array)($filter['own_ids'] ?? [])), fn($id) => $id > 0);
+        if ($ownIds !== []) {
+            $conditions[] = 'c.id IN (' . implode(',', $ownIds) . ')';
         }
 
-        $this->select->where("(c.approved = :approved {$ip_filter})");
-        $this->select->bindValue('approved', (int)$value);
+        $ownUserId = (int)($filter['own_user_id'] ?? 0);
+        if ($ownUserId > 0) {
+            $conditions[] = 'c.user_id = :own_user_id';
+            $this->select->bindValue('own_user_id', $ownUserId);
+        }
+
+        $this->select->where('(' . implode(' OR ', $conditions) . ')');
     }
 
-    // Фильтровать по IP в чистом виде нам не нужно
+    // Колонка ip лишається для модерації. Розширення, що досі передають 'ip'
+    // разом з approved, тепер нічого не відкривають.
     protected function filter__ip($value) {}
 
     /**
