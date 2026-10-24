@@ -140,7 +140,9 @@ class BackendSettingsHelper
             $this->settings->set('catalog_page_all_max_items', $pageAllMaxItems);
         }
 
-        $this->settings->set('max_order_amount', $this->request->post('max_order_amount', 'int', 50));
+        // Нечисловий текст давав 0, від'ємне зберігалось як є: при нулі товар без
+        // залишку оформлювався з amount = 0, а вигрузки віддавали кількість 0.
+        $this->settings->set('max_order_amount', max(1, $this->request->post('max_order_amount', 'int', 50)));
         $this->settings->set('comparison_count', $this->request->post('comparison_count', 'int', 5));
         $this->settings->set('posts_num', $this->request->post('posts_num', 'int', 8));
         $this->settings->set('missing_products', $this->request->post('missing_products', null, 'default'));
