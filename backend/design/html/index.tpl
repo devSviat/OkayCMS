@@ -586,7 +586,9 @@
                 }
             });
             $(root).find('.feature_row').each(function () {
-                var text = visibleLabel($(this).children('.feature_name').get(0));
+                // Додаткові значення — окремі рядки з порожньою назвою в тому ж блоці.
+                var text = visibleLabel($(this).children('.feature_name').get(0))
+                    || visibleLabel($(this).siblings('.feature_row').first().children('.feature_name').get(0));
                 $(this).find('.feature_value').find(NAMEABLE_FIELD).each(function () { nameField(this, text); });
             });
             $(root).find('.fn_dropzone input[type="file"]').each(function () { nameField(this, '{$btr->images_add|escape:'javascript'}'); });
