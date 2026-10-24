@@ -58,6 +58,10 @@ class UpdateApplierTest extends TestCase
             }
 
             $path = $dir . '/' . $entry;
+            // chmod на посиланні діє на ціль: php-only/php веде до справжнього бінарника.
+            if (is_link($path)) {
+                continue;
+            }
             is_dir($path) ? $this->chmodRecursive($path, $mode) : chmod($path, $mode);
         }
     }
