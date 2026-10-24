@@ -44,16 +44,19 @@
             {/if}
             <ul class="filter_date__list form-control">
                 <li class="filter_date__item">
-                    <button type="button" class="fn_last_week filter_date__button ">{$btr->orders_date_filter_last_week}</button>
+                    <button type="button" class="fn_date_preset filter_date__button" data-preset="today">{$btr->orders_date_filter_today}</button>
                 </li>
                 <li class="filter_date__item">
-                    <button type="button" class="fn_30_days filter_date__button">{$btr->orders_date_filter_last_30_days}</button>
+                    <button type="button" class="fn_date_preset filter_date__button" data-preset="yesterday">{$btr->orders_date_filter_last_yesterday}</button>
                 </li>
                 <li class="filter_date__item">
-                    <button type="button" class="fn_7_days filter_date__button">{$btr->orders_date_filter_last_7_days}</button>
+                    <button type="button" class="fn_date_preset filter_date__button" data-preset="week">{$btr->orders_date_filter_last_week}</button>
                 </li>
                 <li class="filter_date__item">
-                    <button type="button" class="fn_yesterday filter_date__button">{$btr->orders_date_filter_last_yesterday}</button>
+                    <button type="button" class="fn_date_preset filter_date__button" data-preset="7_days">{$btr->orders_date_filter_last_7_days}</button>
+                </li>
+                <li class="filter_date__item">
+                    <button type="button" class="fn_date_preset filter_date__button" data-preset="30_days">{$btr->orders_date_filter_last_30_days}</button>
                 </li>
                 <li class="filter_date__item filter_date__item--date hidden-xs-down">
                     <button class="fn_calendar filter_date__button" title="{$btr->orders_date_filter_calendar}" type="button">
@@ -491,54 +494,37 @@ $(function() {
         return `${day}-${month}-${year}`;
     }
 
-    $('.fn_last_week').on('click', function() {
-        const date   = new Date();
-        const day = date.getDay();
-        const dateTo = compileDateString(date);
-        $('.fn_to_date').val(dateTo);
+    function presetRange(preset) {
+        const from = new Date();
+        const to   = new Date();
+        switch (preset) {
+            case 'yesterday':
+                from.setDate(from.getDate() - 1);
+                to.setDate(to.getDate() - 1);
+                break;
+            case 'week':
+                /* getDay() дає 0 для неділі, а тиждень починається з понеділка. */
+                from.setDate(from.getDate() - (from.getDay() || 7) + 1);
+                break;
+            case '7_days':
+                from.setDate(from.getDate() - 6);
+                break;
+            case '30_days':
+                from.setDate(from.getDate() + 1);
+                from.setMonth(from.getMonth() - 1);
+                break;
+        }
+        return [compileDateString(from), compileDateString(to)];
+    }
 
-        date.setDate(date.getDate() - (day ? day : 7) + 1);
-        const dateFrom = compileDateString(date);
+    $('.fn_date_preset').each(function() {
+        const [dateFrom, dateTo] = presetRange($(this).data('preset'));
+        const isApplied = dateFrom === $('.fn_from_date').val() && dateTo === $('.fn_to_date').val();
+        $(this).toggleClass('active', isApplied).attr('aria-pressed', String(isApplied));
+    }).on('click', function() {
+        const [dateFrom, dateTo] = presetRange($(this).data('preset'));
         $('.fn_from_date').val(dateFrom);
-
-        $('.fn_date_filter').trigger('submit');
-    });
-
-    $('.fn_30_days').on('click', function() {
-        const date   = new Date();
-        const dateTo = compileDateString(date);
         $('.fn_to_date').val(dateTo);
-
-        date.setDate(date.getDate() + 1);
-        date.setMonth(date.getMonth() - 1);
-        const dateFrom = compileDateString(date);
-        $('.fn_from_date').val(dateFrom);
-
-        $('.fn_date_filter').trigger('submit');
-    });
-
-    $('.fn_7_days').on('click', function() {
-        const date   = new Date();
-        const dateTo = compileDateString(date);
-        $('.fn_to_date').val(dateTo);
-
-        date.setDate(date.getDate() - 6);
-        const dateFrom = compileDateString(date);
-        $('.fn_from_date').val(dateFrom);
-
-        $('.fn_date_filter').trigger('submit');
-    });
-
-    $('.fn_yesterday').on('click', function() {
-        const date   = new Date();
-        date.setDate(date.getDate() - 1);
-
-        const dateTo = compileDateString(date);
-        $('.fn_to_date').val(dateTo);
-
-        const dateFrom = compileDateString(date);
-        $('.fn_from_date').val(dateFrom);
-
         $('.fn_date_filter').trigger('submit');
     });
 

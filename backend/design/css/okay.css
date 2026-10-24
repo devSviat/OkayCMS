@@ -4777,10 +4777,14 @@ input[type="color"].fn_color::-moz-color-swatch{border: none; border-radius: inh
     height: 14px;
     margin-right: 5px;
 }
-.filter_date__item .filter_date__button.active,
 .filter_date__item .filter_date__button:hover{
     background: rgb(237, 239, 240);
     color: var(--ok-ink);
+}
+.filter_date__item .filter_date__button.active{
+    background: var(--ok-accent-soft);
+    border-color: var(--ok-accent);
+    color: var(--ok-accent);
 }
 .filter_date__item .fn_calendar_pixel{
     position: absolute;
