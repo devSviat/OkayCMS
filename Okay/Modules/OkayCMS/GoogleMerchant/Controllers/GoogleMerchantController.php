@@ -76,7 +76,7 @@ class GoogleMerchantController extends AbstractController
         $query->setStatement('SET SESSION group_concat_max_len = 1000000;')->execute();
 
         // Для экономии памяти работаем с небуферизированными запросами
-        // PDO::MYSQL_ATTR_USE_BUFFERED_QUERY застарів у PHP 8.5; Pdo\Mysql — з 8.4, мінімальної версії.
+        // PDO::MYSQL_ATTR_USE_BUFFERED_QUERY застарів у PHP 8.5.
         $pdo->setAttribute(\Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
         $query = $googleMerchantHelper->getQuery($feed->id, $uploadCategories);
 

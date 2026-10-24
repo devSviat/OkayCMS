@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "780e74c6e038e70c3054f6c4f856330d",
+    "content-hash": "31f1e12a5402b9485853a8ba25c7d155",
     "packages": [
         {
             "name": "aura/sql",
@@ -6135,7 +6135,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.4",
+        "php": "^8.5",
         "ext-simplexml": "*",
         "ext-dom": "*",
         "ext-xmlreader": "*",

@@ -35,7 +35,7 @@ security boundaries, themes and the Docker environment, so a blind merge would u
 
 ## Stack
 
-- PHP `^8.4` (verified on 8.4–8.5)
+- PHP `^8.5`
 - Smarty `^5.8` (templating) — `\Smarty_Internal_Template` is gone; plugins must not type-hint the template object
 - Custom DI container (`Okay\Core\OkayContainer`)
 - Custom ORM (`Okay\Core\Entity\Entity`)
@@ -58,7 +58,7 @@ php vendor/bin/phpunit --filter TplModTest   # run a single test class
 ./ok module:create                     # scaffold a new module
 ```
 
-Run CLI/PHPUnit inside the PHP container if PHP is not on the host: `cd dev && docker compose exec php85 php vendor/bin/phpunit` (the `php85` service runs PHP 8.5; the app requires PHP ≥ 8.4).
+Run CLI/PHPUnit inside the PHP container if PHP is not on the host: `cd dev && docker compose exec php85 php vendor/bin/phpunit` (the `php85` service runs PHP 8.5; the app requires PHP ≥ 8.5).
 
 Local env config lives in `dev/.env` (copy from `dev/.env-example`). On container creation the default DB dump `1DB_changes/okay_clean.sql` is loaded and the `admin` manager is (re)created. The database now lives on a named Docker volume — `docker compose down -v` destroys it (no more leftover files under a bind-mounted directory).
 
