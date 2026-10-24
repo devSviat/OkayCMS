@@ -297,6 +297,26 @@
         </div>
     {/if}
 
+    {*vendor/ відстав від composer.lock: оновлювач до 1.4.1 не запускав composer після
+      оновлення, і нові бібліотеки (QR для 2FA тощо) могли так і не встановитись*}
+    {if $dependencies_missing}
+        <div class="col-md-12 mb-2">
+            <div class="alert alert--icon alert--error">
+                <div class="alert__content">
+                    <div class="alert__title">{$btr->core_updater_deps_missing_title|escape}</div>
+                    <p>{$btr->core_updater_deps_missing_hint|escape}</p>
+                    <ul class="mb-1">
+                        {foreach $dependencies_missing as $package}
+                            {if $package@iteration <= 8}<li><code>{$package|escape}</code></li>{/if}
+                        {/foreach}
+                        {if $dependencies_missing|count > 8}<li>{$btr->core_updater_deps_missing_more|escape} {($dependencies_missing|count) - 8}</li>{/if}
+                    </ul>
+                    <button type="button" class="btn btn_small btn_blue fn_install_dependencies">{$btr->core_updater_deps_install|escape}</button>
+                </div>
+            </div>
+        </div>
+    {/if}
+
     {*Паспорт системи: обидві версії разом, щоб не шукати їх по адмінці*}
     <div class="col-lg-6 col-md-12 mb-2">
         <div class="boxed">
@@ -436,6 +456,29 @@
             toastr.error("{$btr->core_updater_ajax_error|escape:'javascript'}");
         }
     }
+
+    $(document).on('click', '.fn_install_dependencies', function () {
+        var btn = $(this);
+        btn.prop('disabled', true).text("{$btr->core_updater_deps_installing|escape:'javascript'}");
+        $.ajax({
+            type: 'post',
+            dataType: 'json',
+            url: "{url controller='CoreUpdaterAdmin@installDependencies'}",
+            data: { session_id: '{$smarty.session.id}' },
+            success: function (data) {
+                if (data && data.ok) {
+                    location.reload();
+                    return;
+                }
+                coreUpdaterHandleAjaxError(data);
+                btn.prop('disabled', false).text("{$btr->core_updater_deps_install|escape:'javascript'}");
+            },
+            error: function () {
+                coreUpdaterHandleAjaxError(null);
+                btn.prop('disabled', false).text("{$btr->core_updater_deps_install|escape:'javascript'}");
+            }
+        });
+    });
 
     function coreUpdaterShowRunningPanel() {
         $('.fn_mode_panel').hide();

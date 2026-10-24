@@ -554,9 +554,16 @@ class ManagerAdmin extends IndexAdmin
         unset($_SESSION['recovery_code_used']);
     }
 
-    /** QR малюється тут, у SVG: стороння служба QR побачила б секрет. */
-    private static function qrDataUri(string $uri): string
+    /**
+     * QR малюється тут, у SVG: стороння служба QR побачила б секрет.
+     * null — бібліотеки немає (оновлення кнопкою до 1.4.1 не встановлювало
+     * залежностей): лишається ручне введення секрету, а не фатальна помилка.
+     */
+    private static function qrDataUri(string $uri): ?string
     {
+        if (!class_exists(Writer::class)) {
+            return null;
+        }
         $svg = (new Writer(new ImageRenderer(new RendererStyle(200, 1), new SvgImageBackEnd())))->writeString($uri);
 
         return 'data:image/svg+xml;base64,' . base64_encode($svg);

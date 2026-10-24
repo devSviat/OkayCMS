@@ -198,11 +198,21 @@ class UpdateApplier
      */
     public function runComposerIfNeeded(string $rootDir, string $extractedPayloadDir): ?string
     {
-        $rootDir = rtrim($rootDir, '/');
-
-        if (!ComposerInstallDecision::isRequired($rootDir, $extractedPayloadDir)) {
+        if (!ComposerInstallDecision::isRequiredFor($rootDir, $extractedPayloadDir)) {
             return null;
         }
+
+        return $this->runComposer($rootDir);
+    }
+
+    /**
+     * composer install --no-dev за composer.lock сайту.
+     *
+     * @throws \RuntimeException composer недоступний або завершився з помилкою
+     */
+    public function runComposer(string $rootDir): string
+    {
+        $rootDir = rtrim($rootDir, '/');
 
         $composerCommand = $this->findComposerCommand($rootDir);
         if ($composerCommand === null) {
@@ -215,7 +225,8 @@ class UpdateApplier
 
         $process = new Process(
             [...$composerCommand, 'install', '--no-dev', '--optimize-autoloader', '--no-interaction'],
-            $rootDir
+            $rootDir,
+            self::composerEnv()
         );
         $process->setTimeout(600);
         $process->run();
@@ -225,6 +236,32 @@ class UpdateApplier
         }
 
         return $process->getOutput();
+    }
+
+    /**
+     * Оновлення запускається з воркера php-fpm, а там HOME буває відсутній
+     * (clear_env = yes) або чужий (успадкований від root майстра). Composer
+     * без доступного на запис COMPOSER_HOME зупиняється, тож тоді він іде в
+     * системну тимчасову теку — поза коренем сайту: кеш пакетів — це zip-и,
+     * а files/ віддає zip назовні. Налаштований COMPOSER_HOME не чіпаємо.
+     *
+     * @return array<string, string> додається до успадкованого оточення
+     */
+    public static function composerEnv(): array
+    {
+        $env = ['COMPOSER_NO_INTERACTION' => '1'];
+        $composerHome = getenv('COMPOSER_HOME');
+        if (is_string($composerHome) && $composerHome !== '') {
+            return $env;
+        }
+
+        $home = getenv('HOME');
+        if (!is_string($home) || $home === '' || !is_dir($home) || !is_writable($home)) {
+            $user = function_exists('posix_geteuid') ? (string)posix_geteuid() : 'php';
+            $env['COMPOSER_HOME'] = rtrim(sys_get_temp_dir(), '/') . '/okaycms-composer-' . $user;
+        }
+
+        return $env;
     }
 
     /**

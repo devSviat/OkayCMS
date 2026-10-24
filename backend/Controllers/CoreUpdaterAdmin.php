@@ -5,6 +5,7 @@ namespace Okay\Admin\Controllers;
 use Okay\Core\Config;
 use Okay\Core\Modules\Module;
 use Okay\Core\Settings;
+use Okay\Core\Update\ComposerInstallDecision;
 use Okay\Core\Update\CoreUpdaterViewModel;
 use Okay\Core\Update\PendingModuleUpdates;
 use Okay\Core\Update\UpdateCheckHelper;
@@ -43,6 +44,11 @@ class CoreUpdaterAdmin extends IndexAdmin
             'detectedRootUrl' => $this->request->getRootUrl(),
         ]);
         $this->design->assign('backups', self::collectBackups((string) $config->get('root_dir')));
+        $rootDir = rtrim((string) $config->get('root_dir'), '/');
+        $this->design->assign(
+            'dependencies_missing',
+            is_file($rootDir . '/composer.lock') ? ComposerInstallDecision::missingFromVendor($rootDir . '/composer.lock', $rootDir . '/vendor') : []
+        );
         $this->design->assign(
             'pending_module_updates',
             PendingModuleUpdates::collect($modulesEntity->noLimit()->find(), $moduleCore)
@@ -95,6 +101,23 @@ class CoreUpdaterAdmin extends IndexAdmin
         usort($backups, static fn(array $a, array $b): int => $b['date'] <=> $a['date']);
 
         return array_slice($backups, 0, self::BACKUPS_SHOWN);
+    }
+
+    public function installDependencies(UpdateRunner $runner)
+    {
+        if (!$this->assertValidPost()) {
+            return;
+        }
+
+        session_write_close();
+        try {
+            $runner->installDependencies();
+        } catch (\Throwable $e) {
+            $this->response->setContent(json_encode(['error' => 'dependencies_failed', 'message' => $e->getMessage()]), RESPONSE_JSON);
+            return;
+        }
+
+        $this->response->setContent(json_encode(['ok' => true]), RESPONSE_JSON);
     }
 
     public function checkNow(UpdateCheckHelper $checkHelper, Config $config)
