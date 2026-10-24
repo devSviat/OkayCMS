@@ -47,6 +47,71 @@ final class ComposerInstallDecision
             && self::differs(self::read($rootDir . '/composer.json'), $packageJson, self::JSON_DEV_KEYS);
     }
 
+    /**
+     * Чи потрібен composer install для пакета: змінились прод-залежності
+     * (порівняння файлів сайту з пакетом — лише ДО підміни файлів, після неї
+     * вони однакові) або vendor/ не містить того, що вимагає composer.lock
+     * пакета. Друге не залежить від порядку кроків і ловить vendor/,
+     * що відстав раніше: оновлювач до 1.4.1 composer не запускав зовсім.
+     */
+    public static function isRequiredFor(string $rootDir, string $payloadDir): bool
+    {
+        $payloadLock = rtrim($payloadDir, '/') . '/composer.lock';
+        if (!is_file($payloadLock)) {
+            return false;
+        }
+
+        return self::isRequired($rootDir, $payloadDir)
+            || self::missingFromVendor($payloadLock, rtrim($rootDir, '/') . '/vendor') !== [];
+    }
+
+    /**
+     * Прод-пакети з composer.lock, яких у vendor/ немає саме в цій версії.
+     * Звірка з vendor/composer/installed.json — тим, що composer справді
+     * встановив, а не з composer.lock сайту, який могли замінити без install.
+     *
+     * @return list<string> «назва версія» для кожного відсутнього чи іншого
+     */
+    public static function missingFromVendor(string $lockPath, string $vendorDir): array
+    {
+        $lock = json_decode((string)self::read($lockPath), true);
+        if (!is_array($lock) || !is_array($lock['packages'] ?? null)) {
+            return [];
+        }
+
+        $installedData = json_decode((string)self::read(rtrim($vendorDir, '/') . '/composer/installed.json'), true);
+        // Формат composer 2 — {"packages": [...]}, composer 1 — сам список.
+        $installedList = is_array($installedData) ? ($installedData['packages'] ?? $installedData) : [];
+        $installed = [];
+        foreach (is_array($installedList) ? $installedList : [] as $package) {
+            if (is_array($package) && is_string($package['name'] ?? null)) {
+                $installed[strtolower($package['name'])] = $package;
+            }
+        }
+
+        $missing = [];
+        foreach ($lock['packages'] as $package) {
+            if (!is_array($package) || !is_string($package['name'] ?? null)) {
+                continue;
+            }
+            $have = $installed[strtolower($package['name'])] ?? null;
+            $version = (string)($package['version'] ?? '');
+            if ($have === null || (string)($have['version'] ?? '') !== $version || self::reference($have) !== self::reference($package)) {
+                $missing[] = trim($package['name'] . ' ' . $version);
+            }
+        }
+
+        return $missing;
+    }
+
+    /** Коміт пакета, якщо composer його знає: та сама версія може бути іншим комітом (dev-гілки). */
+    private static function reference(array $package): ?string
+    {
+        $reference = $package['dist']['reference'] ?? $package['source']['reference'] ?? null;
+
+        return is_string($reference) && $reference !== '' ? $reference : null;
+    }
+
     /** @param list<string> $devKeys */
     private static function differs(?string $current, string $package, array $devKeys): bool
     {

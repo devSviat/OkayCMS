@@ -62,7 +62,11 @@
 {elseif $is_self && $totp_setup}
     {* Підключення: секрет поки лише в сесії, у базу — після першого коду *}
     <div class="two_factor_setup">
-        <img class="two_factor_setup__qr" src="{$totp_qr|escape}" width="184" height="184" alt="{$btr->manager_totp_qr_alt|escape}">
+        {if $totp_qr}
+            <img class="two_factor_setup__qr" src="{$totp_qr|escape}" width="184" height="184" alt="{$btr->manager_totp_qr_alt|escape}">
+        {else}
+            <p class="settings_note settings_note--warning two_factor_setup__qr">{$btr->manager_totp_qr_missing|escape}</p>
+        {/if}
         <ol class="two_factor_setup__steps">
             <li>{$btr->manager_totp_step_app|escape}</li>
             <li>

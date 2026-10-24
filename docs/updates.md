@@ -241,14 +241,30 @@ ETag-кондиційний (`If-None-Match`); `304` лише освіжає `ch
 | ---- | --------- |
 | `download` | качає `{version}.zip` і `checksums.txt` у `files/tmp/updates/{version}/` (лише з `ReleaseFeed::TRUSTED_ASSET_URL_PREFIXES` — `https://github.com/devSviat/OkayCMS-Fork/releases/download/` або стара адреса `https://github.com/devSviat/OkayCMS/releases/download/`, до перейменування 23.10.2026) |
 | `verify` | звіряє sha256 архіву з `checksums.txt`, розпаковує, тоді звіряє **кожен** файл з `manifest.json` проти дерева й перевіряє шляхи на вихід за межі кореня (`assertSafePaths`) |
-| `preflight` | версія у `version.json` пакета мусить збігатися з версією релізу (інакше до тегу причепили чужий архів); `assertInstallable` (мінімальний PHP, downgrade guard — пакет мусить бути новіший за встановлену версію); корінь, `Okay/Core/` і `config/` доступні для запису (пробний файл, який одразу прибирається); вільного місця > 3× розміру розпакованого пакета; якщо пакет змінює прод-залежності — composer має бути доступний (рішення `ComposerInstallDecision`: `composer.lock` без `packages-dev`/`content-hash` і `composer.json` без `require-dev`/`autoload-dev`; бамп лише dev-інструментів composer не вимагає); якщо `version.json` каже `requiresMigrations` — має бути доступний `mysqldump`; проба self-request (GET на корінь сайту, таймаут 10 с) — health-check і rollback запитують сайт самі себе, тож PHP-FPM мусить мати **щонайменше 2 вільні воркери** (`pm.max_children=1` зупиняє оновлення тут, до будь-яких змін, а не хибним rollback'ом із закритою вітриною) |
+| `preflight` | версія у `version.json` пакета мусить збігатися з версією релізу (інакше до тегу причепили чужий архів); `assertInstallable` (мінімальний PHP, downgrade guard — пакет мусить бути новіший за встановлену версію); корінь, `Okay/Core/` і `config/` доступні для запису (пробний файл, який одразу прибирається); вільного місця > 3× розміру розпакованого пакета; якщо пакет потребує `composer install` — composer має бути доступний, а `vendor/` — на запис (рішення `ComposerInstallDecision::isRequiredFor()`, ухвалюється **тут**, до підміни файлів, і зберігається для `apply_files`: змінились прод-залежності — `composer.lock` без `packages-dev`/`content-hash` і `composer.json` без `require-dev`/`autoload-dev` — або `vendor/composer/installed.json` не містить того, що вимагає `composer.lock` пакета; бамп лише dev-інструментів composer не вимагає); якщо `version.json` каже `requiresMigrations` — має бути доступний `mysqldump`; проба self-request (GET на корінь сайту, таймаут 10 с) — health-check і rollback запитують сайт самі себе, тож PHP-FPM мусить мати **щонайменше 2 вільні воркери** (`pm.max_children=1` зупиняє оновлення тут, до будь-яких змін, а не хибним rollback'ом із закритою вітриною) |
 | `backup` | архівує у `files/backups/` файли з `manifest.json`, що фізично існують зараз (лише їх і перезапише apply); якщо є `.up.sql`-міграції — дампить `mysqldump`-ом лише зачеплені ними таблиці (розпізнані по `__marker` у SQL, той самий регекс, що й `CoreMigrator::prefixTables()`) |
 | `maintenance_on` | вмикає прапорець `config/.maintenance` із одноразовим токеном |
-| `apply_files` | spool-and-swap: кожен файл із `manifest.json` копіюється поруч (`{файл}.core-update.tmp`) і атомарно `rename()`-иться поверх цілі; нічого не видаляється. Тоді, якщо пакет змінює прод-залежності (те саме рішення, що й у `preflight`) — `composer install --no-dev --optimize-autoloader` |
+| `apply_files` | spool-and-swap: кожен файл із `manifest.json` копіюється поруч (`{файл}.core-update.tmp`) і атомарно `rename()`-иться поверх цілі; нічого не видаляється. Тоді, якщо так вирішив `preflight`, — `composer install --no-dev --optimize-autoloader`. Без доступного на запис `HOME` (воркер php-fpm із `clear_env = yes` чи зі спадком від root) `COMPOSER_HOME` іде в системну тимчасову теку, поза коренем сайту |
 | `migrations` | `CoreMigrator::apply()` накочує `.up.sql` із пакета (трекер `ok_core_migrations`) |
 | `cache_clear` | `Design::clearCompiled()` + `opcache_reset()`, якщо розширення завантажене |
 | `health_check` | HTTP GET на `/?core_updater_health=1` з токеном у заголовку `X-Core-Updater-Token`; очікує JSON із `forkVersion`, **точно** новою версією. До 4 спроб із паузою 2 с — перша може застати ще не перечитаний пул FPM |
 | `finalize` | знімає `config/.maintenance`, прибирає `files/tmp/updates/{version}/` і старі бекапи (`pruneOldBackups`, лишає 3 найновіші файли — з провалу тут прогін уже не падає, лише пише `finalizeWarning`) |
+
+### Залежності, які оновлення не встановило
+
+До 1.4.1 оновлювач вирішував, чи потрібен composer, **після** підміни файлів:
+`composer.lock` сайту вже був пакетним, порівняння казало «не потрібен», і
+`composer install` не запускався ніколи. Сайт, оновлений кнопкою до 1.4.0,
+лишився без `bacon/bacon-qr-code`; перехід 1.4.0 → 1.4.1 виконує код 1.4.0, тож
+нові версії залежностей теж не встановлюються.
+
+Код 1.4.1 це лікує сам: сторінка «Оновлення ядра» звіряє `vendor/` з
+`composer.lock` (`ComposerInstallDecision::missingFromVendor()`) і, якщо вони
+розійшлись, показує перелік і кнопку «Встановити залежності» —
+`UpdateRunner::installDependencies()`: той самий лок, що й прогін, технічні
+роботи лише на час composer, потім очищення кешу. Без бібліотеки QR сторінка
+2FA не падає, а пропонує ввести ключ у застосунок вручну. Із консолі те саме —
+`composer install --no-dev --optimize-autoloader` у корені сайту.
 
 ### Health-check і root URL
 

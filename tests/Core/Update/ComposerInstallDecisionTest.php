@@ -25,11 +25,7 @@ class ComposerInstallDecisionTest extends TestCase
 
     protected function tearDown(): void
     {
-        foreach (['root', 'payload'] as $side) {
-            array_map('unlink', glob("{$this->dir}/{$side}/*") ?: []);
-            rmdir("{$this->dir}/{$side}");
-        }
-        rmdir($this->dir);
+        exec('rm -rf ' . escapeshellarg($this->dir));
     }
 
     private const LOCK = [
@@ -125,5 +121,60 @@ class ComposerInstallDecisionTest extends TestCase
     private function write(string $path, array $data): void
     {
         file_put_contents($this->dir . '/' . $path, json_encode($data, JSON_PRETTY_PRINT));
+    }
+
+    private function vendorWith(string $installedJson): string
+    {
+        $vendor = $this->dir . '/vendor-' . uniqid();
+        mkdir($vendor . '/composer', 0777, true);
+        file_put_contents($vendor . '/composer/installed.json', $installedJson);
+
+        return $vendor;
+    }
+
+    private function lock(string $json): string
+    {
+        $path = $this->dir . '/lock-' . uniqid() . '.json';
+        file_put_contents($path, $json);
+
+        return $path;
+    }
+
+    public function testVendorInSyncHasNothingMissing(): void
+    {
+        $lock = $this->lock('{"packages": [{"name": "a/b", "version": "1.0.0", "dist": {"reference": "abc"}}]}');
+        $vendor = $this->vendorWith('{"packages": [{"name": "A/B", "version": "1.0.0", "dist": {"reference": "abc"}}]}');
+
+        self::assertSame([], ComposerInstallDecision::missingFromVendor($lock, $vendor));
+    }
+
+    public function testMissingOtherVersionAndOtherCommitAreReported(): void
+    {
+        $lock = $this->lock('{"packages": ['
+            . '{"name": "a/new", "version": "1.0.0"},'
+            . '{"name": "a/bumped", "version": "2.0.0"},'
+            . '{"name": "a/branch", "version": "dev-main", "source": {"reference": "new"}},'
+            . '{"name": "a/same", "version": "1.0.0"}]}');
+        $vendor = $this->vendorWith('{"packages": ['
+            . '{"name": "a/bumped", "version": "1.9.0"},'
+            . '{"name": "a/branch", "version": "dev-main", "source": {"reference": "old"}},'
+            . '{"name": "a/same", "version": "1.0.0"}]}');
+
+        self::assertSame(['a/new 1.0.0', 'a/bumped 2.0.0', 'a/branch dev-main'], ComposerInstallDecision::missingFromVendor($lock, $vendor));
+    }
+
+    /** Формат composer 1 — сам список пакетів, без обгортки. */
+    public function testComposerOneInstalledFormatIsRead(): void
+    {
+        $lock = $this->lock('{"packages": [{"name": "a/b", "version": "1.0.0"}]}');
+
+        self::assertSame([], ComposerInstallDecision::missingFromVendor($lock, $this->vendorWith('[{"name": "a/b", "version": "1.0.0"}]')));
+    }
+
+    public function testWithoutVendorEverythingIsMissing(): void
+    {
+        $lock = $this->lock('{"packages": [{"name": "a/b", "version": "1.0.0"}]}');
+
+        self::assertSame(['a/b 1.0.0'], ComposerInstallDecision::missingFromVendor($lock, $this->dir . '/no-vendor'));
     }
 }

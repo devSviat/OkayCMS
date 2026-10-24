@@ -184,11 +184,8 @@ abstract class AbstractPresetAdapter implements PresetAdapterInterface
         $query->setStatement('SET SESSION group_concat_max_len = 1000000;')->execute();
 
         // Для экономии памяти работаем с небуферизированными запросами
-        // PHP 8.5 deprecated PDO::MYSQL_ATTR_USE_BUFFERED_QUERY in favour of Pdo\Mysql::ATTR_USE_BUFFERED_QUERY (8.4+)
-        $bufferedQueryAttr = \PHP_VERSION_ID >= 80400
-            ? \Pdo\Mysql::ATTR_USE_BUFFERED_QUERY
-            : \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY;
-        $this->pdo->setAttribute($bufferedQueryAttr, false);
+        // PDO::MYSQL_ATTR_USE_BUFFERED_QUERY застарів у PHP 8.5; Pdo\Mysql — з 8.4, мінімальної версії.
+        $this->pdo->setAttribute(\Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
 
         $prevProductId = null;
         while ($product = $productsQuery->result()) {

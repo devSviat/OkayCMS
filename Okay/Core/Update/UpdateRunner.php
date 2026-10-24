@@ -144,6 +144,41 @@ class UpdateRunner
         }
     }
 
+    /**
+     * composer install за composer.lock сайту — коли vendor/ від нього
+     * відстав (ComposerInstallDecision::missingFromVendor). Так лікуються
+     * сайти, оновлені кнопкою до 1.4.1: тодішній оновлювач composer не
+     * запускав. Під тим самим локом, що й прогін, і з технічними роботами:
+     * поки composer міняє vendor/, сторінки бачили б половину бібліотек.
+     *
+     * @return string вивід composer
+     * @throws \RuntimeException триває оновлення, composer недоступний чи впав
+     */
+    public function installDependencies(): string
+    {
+        ignore_user_abort(true);
+        set_time_limit(0);
+
+        $rootDir = rtrim((string) $this->config->get('root_dir'), '/');
+        $lock = (new LockFactory(new FlockStore($rootDir . '/files/tmp')))->createLock(self::LOCK_RESOURCE);
+        if (!$lock->acquire()) {
+            throw new \RuntimeException('Оновлення вже виконується.');
+        }
+
+        $flagPath = MaintenanceMode::flagPath($rootDir);
+        try {
+            $this->assertVendorWritable($rootDir);
+            MaintenanceMode::enable($flagPath);
+            $output = $this->applier->runComposer($rootDir);
+            $this->applier->clearCaches($this->design);
+
+            return $output;
+        } finally {
+            MaintenanceMode::disable($flagPath);
+            $lock->release();
+        }
+    }
+
     private function runLocked(string $rootDir, ?string $targetVersion): array
     {
         // check(), а не getSnapshot(): знімок, вибраний до попереднього
@@ -329,7 +364,10 @@ class UpdateRunner
         $this->assertEnoughDiskSpace($ctx['rootDir'], $ctx['extractDir']);
 
         $payloadDir = $ctx['extractDir'] . '/payload';
-        if (ComposerInstallDecision::isRequired($ctx['rootDir'], $payloadDir) && !$this->isComposerAvailable($ctx['rootDir'])) {
+        // Рішення — тут, до підміни файлів: після неї composer.lock сайту вже
+        // пакетний, і порівняння файлів завжди казало б «не потрібен».
+        $ctx['composerRequired'] = ComposerInstallDecision::isRequiredFor($ctx['rootDir'], $payloadDir);
+        if ($ctx['composerRequired'] && !$this->isComposerAvailable($ctx['rootDir'])) {
             // Не «виконайте composer install»: прогін стоїть ДО підміни файлів,
             // на диску ще старий composer.lock, і така команда нічого не змінить.
             throw new \RuntimeException(
@@ -338,6 +376,10 @@ class UpdateRunner
                 . 'Зробіть composer доступним — встановіть його на сервер або покладіть composer.phar у корінь сайту — '
                 . 'і запустіть оновлення знову: далі воно викличе composer саме, уже з новим composer.lock.'
             );
+        }
+
+        if ($ctx['composerRequired']) {
+            $this->assertVendorWritable($ctx['rootDir']);
         }
 
         if (($ctx['versionMeta']['requiresMigrations'] ?? null) === true && !$this->backup->isMysqldumpAvailable()) {
@@ -487,10 +529,9 @@ class UpdateRunner
             $this->logLine($ctx, '  ' . $path);
         }
 
-        $composerOutput = $this->applier->runComposerIfNeeded($ctx['rootDir'], $ctx['extractDir'] . '/payload');
-        if ($composerOutput !== null) {
-            $ctx['composerOutput'] = $composerOutput;
-            $this->logLine($ctx, 'composer: ' . $composerOutput);
+        if ($ctx['composerRequired'] ?? false) {
+            $ctx['composerOutput'] = $this->applier->runComposer($ctx['rootDir']);
+            $this->logLine($ctx, 'composer: ' . $ctx['composerOutput']);
         }
 
         return $ctx;
@@ -778,6 +819,24 @@ class UpdateRunner
     }
 
     // --- pre-flight гейти ---
+
+    /**
+     * composer install пише у vendor/: недоступний на запис — і він упав би
+     * вже після підміни файлів, а відкат vendor/ не повертає.
+     */
+    private function assertVendorWritable(string $rootDir): void
+    {
+        $vendor = $rootDir . '/vendor';
+        $writable = is_dir($vendor)
+            ? is_writable($vendor) && (!is_dir($vendor . '/composer') || is_writable($vendor . '/composer'))
+            : is_writable($rootDir);
+        if (!$writable) {
+            throw new \RuntimeException(
+                'Оновлення зупинено до будь-яких змін: воно встановлює залежності, а каталог vendor/ недоступний для запису '
+                . "користувачу, від якого працює сайт. Дайте йому права на {$vendor} і запустіть оновлення знову."
+            );
+        }
+    }
 
     private function assertWritable(string $rootDir): void
     {
