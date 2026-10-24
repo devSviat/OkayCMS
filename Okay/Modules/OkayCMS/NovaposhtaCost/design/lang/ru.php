@@ -1,6 +1,6 @@
 <?php
 
-$lang = array();
+$lang = [];
 $lang['np_cart_city'] = "Город";
 $lang['np_cart_street'] = "Улица";
 $lang['np_cart_house'] = "Дом";

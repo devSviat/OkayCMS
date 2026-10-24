@@ -34,9 +34,7 @@ class ImportOrders extends AbstractImport
         }
         
         // Если никакой статус не отметили для новых, возьмем первый в списке
-        if (!isset($ordersStatuses['new'])) {
-            $ordersStatuses['new'] = reset($ordersStatuses);
-        }
+        $ordersStatuses['new'] ??= reset($ordersStatuses);
         
         foreach ($xml->Документ as $xmlOrder) {
             $order = new \stdClass();
@@ -84,7 +82,7 @@ class ImportOrders extends AbstractImport
                 $purchase = null;
                 //  Id товара и варианта (если есть) по 1С
                 $product1cId = $variant1cId = '';
-                @list($product1cId, $variant1cId) = explode('#', (string)$xmlProduct->Ид);
+                @[$product1cId, $variant1cId] = explode('#', (string)$xmlProduct->Ид);
                 if (empty($product1cId)) {
                     $product1cId = '';
                 }
@@ -120,12 +118,12 @@ class ImportOrders extends AbstractImport
                         ->from('__variants')
                         ->where('sku=:sku')
                         ->bindValue('sku', $sku);
-                    
+
                     if (!empty($productId)) {
                         $select->where('product_id=:product_id')
                             ->bindValue('product_id', $productId);
                     }
-                    
+
                     $this->integration1C->db->query($select);
                     $variantId = $this->integration1C->db->result('id');
                 // последняя попытка, это если у товара всего один вариант, вероятнее всего он нужен

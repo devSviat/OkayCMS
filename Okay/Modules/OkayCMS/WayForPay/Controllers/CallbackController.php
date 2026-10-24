@@ -69,7 +69,7 @@ class CallbackController extends AbstractController
 
         $settings = unserialize($method->settings, ['allowed_classes' => false]);
 
-        $sign = array();
+        $sign = [];
         foreach ($keysForSignature as $dataKey) {
             if (array_key_exists($dataKey, $data)) {
                 $sign [] = $data->$dataKey;
@@ -91,7 +91,7 @@ class CallbackController extends AbstractController
             'time'           => time()
         ];
 
-        $sign = array();
+        $sign = [];
         foreach ($responseToGateway as $dataKey => $dataValue) {
             $sign [] = $dataValue;
         }

@@ -12,7 +12,7 @@ use Okay\Modules\OkayCMS\Feeds\Core\Presets\AbstractPresetAdapter;
 class FacebookAdapter extends AbstractPresetAdapter
 {
     /** Стеля Facebook для description — 9999 символів. */
-    private const DESCRIPTION_MAX_LENGTH = 9999;
+    private const int DESCRIPTION_MAX_LENGTH = 9999;
 
     /** @var string */
     static protected $headerTemplate = 'presets/facebook/header.tpl';

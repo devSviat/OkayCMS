@@ -15,8 +15,6 @@ return RectorConfig::configure()
         __DIR__ . '/backend',
     ])
     ->withSkip([
-        // Модулі — окремим кроком, кожен зі своєю перевіркою.
-        __DIR__ . '/Okay/Modules',
         // Сторонній файловий менеджер, не наш код.
         __DIR__ . '/backend/design',
         '*/compiled/*',

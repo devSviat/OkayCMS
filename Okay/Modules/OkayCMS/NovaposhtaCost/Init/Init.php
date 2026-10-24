@@ -44,35 +44,35 @@ class Init extends AbstractInit
         $this->setModuleType(MODULE_TYPE_DELIVERY);
         $this->setBackendMainController('NovaposhtaCostAdmin');
         $this->migrateEntityTable(NPCostDeliveryDataEntity::class, [
-            (new EntityField('id'))->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
-            (new EntityField('order_id'))->setTypeInt(11)->setIndex(),
-            (new EntityField('city_id'))->setTypeVarchar(255, true),
-            (new EntityField('warehouse_id'))->setTypeVarchar(255, true),
-            (new EntityField('delivery_term'))->setTypeVarchar(8, true),
-            (new EntityField('redelivery'))->setTypeTinyInt(1, true),
-            (new EntityField('city_name'))->setTypeVarchar(255, true),
-            (new EntityField('area_name'))->setTypeVarchar(255, true),
-            (new EntityField('region_name'))->setTypeVarchar(255, true),
-            (new EntityField('street'))->setTypeVarchar(255, true),
-            (new EntityField('house'))->setTypeVarchar(255, true),
-            (new EntityField('apartment'))->setTypeVarchar(255, true),
+            new EntityField('id')->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
+            new EntityField('order_id')->setTypeInt(11)->setIndex(),
+            new EntityField('city_id')->setTypeVarchar(255, true),
+            new EntityField('warehouse_id')->setTypeVarchar(255, true),
+            new EntityField('delivery_term')->setTypeVarchar(8, true),
+            new EntityField('redelivery')->setTypeTinyInt(1, true),
+            new EntityField('city_name')->setTypeVarchar(255, true),
+            new EntityField('area_name')->setTypeVarchar(255, true),
+            new EntityField('region_name')->setTypeVarchar(255, true),
+            new EntityField('street')->setTypeVarchar(255, true),
+            new EntityField('house')->setTypeVarchar(255, true),
+            new EntityField('apartment')->setTypeVarchar(255, true),
         ]);
         
         $this->migrateEntityTable(NPCitiesEntity::class, [
-            (new EntityField('id'))->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
-            (new EntityField('ref'))->setTypeVarchar(255)->setIndex(),
-            (new EntityField('name'))->setTypeVarchar(255, true)->setIsLang()->setIndex(100),
+            new EntityField('id')->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
+            new EntityField('ref')->setTypeVarchar(255)->setIndex(),
+            new EntityField('name')->setTypeVarchar(255, true)->setIsLang()->setIndex(100),
         ]);
         
         $this->migrateEntityTable(NPWarehousesEntity::class, [
-            (new EntityField('id'))->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
-            (new EntityField('ref'))->setTypeVarchar(255),
-            (new EntityField('city_ref'))->setTypeVarchar(255)->setIndex(),
-            (new EntityField('name'))->setTypeVarchar(255, true)->setIsLang()->setIndex(100),
+            new EntityField('id')->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
+            new EntityField('ref')->setTypeVarchar(255),
+            new EntityField('city_ref')->setTypeVarchar(255)->setIndex(),
+            new EntityField('name')->setTypeVarchar(255, true)->setIsLang()->setIndex(100),
         ]);
 
-        $this->migrateEntityField(VariantsEntity::class, (new EntityField(self::VOLUME_FIELD))->setTypeDecimal('10,5'));
-        $this->migrateEntityField(PaymentsEntity::class, (new EntityField(self::CASH_ON_DELIVERY))->setTypeTinyInt(1));
+        $this->migrateEntityField(VariantsEntity::class, new EntityField(self::VOLUME_FIELD)->setTypeDecimal('10,5'));
+        $this->migrateEntityField(PaymentsEntity::class, new EntityField(self::CASH_ON_DELIVERY)->setTypeTinyInt(1));
     }
 
     public function init()
@@ -211,7 +211,7 @@ class Init extends AbstractInit
         // хвилин пізніше: їх вивантаження важче за міста і довше тримає
         // з'єднання, тож дві задачі не стартують одночасно.
         $this->registerSchedule(
-            (new Schedule([NPCacheHelper::class, 'cronUpdateCitiesCache']))
+            new Schedule([NPCacheHelper::class, 'cronUpdateCitiesCache'])
                 ->name('Parses NP cities to the db cache')
                 ->time('0 5 * * *')
                 ->overlap(false)
@@ -219,7 +219,7 @@ class Init extends AbstractInit
         );
 
         $this->registerSchedule(
-            (new Schedule([NPCacheHelper::class, 'cronUpdateWarehousesCache']))
+            new Schedule([NPCacheHelper::class, 'cronUpdateWarehousesCache'])
                 ->name('Parses NP warehouses to the db cache')
                 ->time('10 5 * * *')
                 ->overlap(false)
@@ -229,7 +229,7 @@ class Init extends AbstractInit
 
     public function update_1_1_0()
     {
-        $this->migrateEntityField(NPWarehousesEntity::class, (new EntityField('type'))->setTypeVarchar(100, true)->setDefault(''));
+        $this->migrateEntityField(NPWarehousesEntity::class, new EntityField('type')->setTypeVarchar(100, true)->setDefault(''));
 
         $SL = ServiceLocator::getInstance();
         $entityFactory = $SL->getService(EntityFactory::class);
@@ -251,23 +251,23 @@ class Init extends AbstractInit
     {
         $this->migrateEntityField(
             NPWarehousesEntity::class,
-            (new EntityField('updated_at'))->setTypeTimestamp()
+            new EntityField('updated_at')->setTypeTimestamp()
         );
 
         $this->migrateEntityField(
             NPWarehousesEntity::class,
-            (new EntityField('number'))->setTypeInt(11)
+            new EntityField('number')->setTypeInt(11)
         );
         $this->migrateEntityField(
             NPCitiesEntity::class,
-            (new EntityField('updated_at'))->setTypeTimestamp()
+            new EntityField('updated_at')->setTypeTimestamp()
         );
 
         $this->migrateEntityTable(NPDeliveryTypesEntity::class, [
-            (new EntityField('id'))->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
-            (new EntityField('name'))->setTypeVarchar(255)->setIsLang(),
-            (new EntityField('warehouses_type_refs'))->setTypeVarchar(255),
-            (new EntityField('position'))->setTypeInt(11, false),
+            new EntityField('id')->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
+            new EntityField('name')->setTypeVarchar(255)->setIsLang(),
+            new EntityField('warehouses_type_refs')->setTypeVarchar(255),
+            new EntityField('position')->setTypeInt(11, false),
         ]);
 
         $SL = ServiceLocator::getInstance();

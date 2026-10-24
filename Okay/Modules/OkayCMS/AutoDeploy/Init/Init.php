@@ -22,8 +22,8 @@ class Init extends AbstractInit
     {
         $this->setBackendMainController('AutoDeployAdmin');
         $this->migrateEntityTable(MigrationsEntity::class, [
-            (new EntityField('id'))->setTypeInt(11)->setAutoIncrement(),
-            (new EntityField('name'))->setTypeVarchar(1024),
+            new EntityField('id')->setTypeInt(11)->setAutoIncrement(),
+            new EntityField('name')->setTypeVarchar(1024),
         ]);
     }
 

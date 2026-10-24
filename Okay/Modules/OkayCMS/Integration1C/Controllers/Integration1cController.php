@@ -66,7 +66,7 @@ class Integration1cController extends AbstractController
             $this->response->setContent("file_limit=1000000\n");
         }
 
-        if ($this->request->get('mode') == 'file' && in_array($this->request->get('type'), array('catalog', 'sale'))) {
+        if ($this->request->get('mode') == 'file' && in_array($this->request->get('type'), ['catalog', 'sale'])) {
 
             $filename = $this->request->get('filename');
             $xmlFileName = $integration1C->getFullPath($filename);

@@ -32,24 +32,24 @@ class Init extends AbstractInit
     {
         $this->setBackendMainController('DeliveryFieldsAdmin');
         $this->migrateEntityTable(DeliveryFieldsEntity::class, [
-            (new EntityField('id'))->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
-            (new EntityField('name'))->setTypeVarchar(255)->setIsLang(),
-            (new EntityField('visible'))->setTypeTinyInt(1),
-            (new EntityField('required'))->setTypeTinyInt(1),
-            (new EntityField('position'))->setTypeInt(11),
+            new EntityField('id')->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
+            new EntityField('name')->setTypeVarchar(255)->setIsLang(),
+            new EntityField('visible')->setTypeTinyInt(1),
+            new EntityField('required')->setTypeTinyInt(1),
+            new EntityField('position')->setTypeInt(11),
         ]);
 
-        $orderIdField = (new EntityField('order_id'))->setTypeInt(11);
+        $orderIdField = new EntityField('order_id')->setTypeInt(11);
         $this->migrateEntityTable(DeliveryFieldsValuesEntity::class, [
-            (new EntityField('id'))->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
-            (new EntityField('value'))->setTypeVarchar(255)->setIsLang(),
-            (new EntityField('field_id'))->setTypeInt(11)->setIndexUnique(null, $orderIdField),
+            new EntityField('id')->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
+            new EntityField('value')->setTypeVarchar(255)->setIsLang(),
+            new EntityField('field_id')->setTypeInt(11)->setIndexUnique(null, $orderIdField),
             $orderIdField,
         ]);
 
-        $deliveryIdField = (new EntityField('delivery_id'))->setTypeInt(11, false);
+        $deliveryIdField = new EntityField('delivery_id')->setTypeInt(11, false);
         $this->migrateCustomTable(self::FIELD_DELIVERY_RELATION_TABLE, [
-            (new EntityField('field_id'))->setTypeInt(11, false)->setIndexUnique(null, $deliveryIdField),
+            new EntityField('field_id')->setTypeInt(11, false)->setIndexUnique(null, $deliveryIdField),
             $deliveryIdField,
         ]);
 
