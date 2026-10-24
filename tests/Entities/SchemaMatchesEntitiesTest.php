@@ -63,8 +63,9 @@ class SchemaMatchesEntitiesTest extends TestCase
     }
 
     /**
-     * Колонки, які додають core-міграції форку. Маркер `__` — префікс
-     * таблиць, що підставляється під час застосування (CoreMigrator).
+     * Колонки, які додають core-міграції форку: нові таблиці (`CREATE TABLE`)
+     * і нові колонки (`ALTER TABLE … ADD`). Маркер `__` — префікс таблиць, що
+     * підставляється під час застосування (CoreMigrator).
      *
      * @return array<string, list<string>>
      */
@@ -73,6 +74,18 @@ class SchemaMatchesEntitiesTest extends TestCase
         $added = [];
 
         foreach (glob(self::repoRoot() . '/1DB_changes/fork/*.up.sql') ?: [] as $path) {
+            preg_match_all(
+                '/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`__(\w+)`\s*\((.*?)\n\)/is',
+                (string) file_get_contents($path),
+                $creates,
+                PREG_SET_ORDER
+            );
+
+            foreach ($creates as $create) {
+                preg_match_all('/^\s+`([^`]+)`\s+[a-z]/mi', $create[2], $columns);
+                $added['ok_' . $create[1]] = array_merge($added['ok_' . $create[1]] ?? [], $columns[1]);
+            }
+
             preg_match_all(
                 '/ALTER\s+TABLE\s+`__(\w+)`\s+ADD\s+(?:COLUMN\s+)?(?:IF\s+NOT\s+EXISTS\s+)?`(\w+)`/i',
                 (string) file_get_contents($path),

@@ -45,17 +45,51 @@
                                         </span>
                                         <input type="password" name="new_password_check" value="" autocomplete="new-password" tabindex="2" class="form-control" placeholder="{$btr->auth_form_pass2|escape}">
                                     </div>
+                                    {if $recovery_two_factor}
+                                        {* З 2FA пароль з листа міняється лише разом із кодом (AuthAdmin) *}
+                                        <input type="text" name="totp_code" value="" autocomplete="one-time-code" class="form-control two_factor_code auth_2fa_code mb-1" placeholder="000000" aria-label="{$btr->auth_2fa_placeholder|escape}" maxlength="24" required>
+                                        <p class="text_grey font_12 mb-1">{$btr->auth_2fa_recovery_hint|escape}</p>
+                                    {/if}
                                     {if $error_message}
                                         <div class="mb-1 error_box" role="alert">
                                             {if $error_message == 'password_empty'}
                                                 {$btr->auth_form_new_pass|escape}
                                             {elseif $error_message == 'password_wrong'}
                                                 {$btr->auth_form_pass_mismatch|escape}
+                                            {elseif $error_message == 'code_limit'}
+                                                {$btr->auth_2fa_limit|escape}
+                                            {elseif $error_message == 'key_unavailable'}
+                                                {$btr->auth_2fa_key_unavailable|escape}
+                                            {elseif $error_message == 'code_wrong'}
+                                                {$btr->auth_2fa_wrong|escape}
+                                            {elseif $error_message == 'session_failed'}
+                                                {$btr->auth_session_failed|escape}
                                             {/if}
                                         </div>
                                     {/if}
                                     <div class="auth_buttons">
                                         <button type="submit" value="login" class="auth_buttons__login btn btn_blue btn_big btn-block" tabindex="3">{$btr->auth_form_save_pass|escape}</button>
+                                    </div>
+                                {elseif $two_factor_step}
+                                    {* Друга сходинка: пароль прийнято, мітки admin ще немає (ManagerTwoFactor) *}
+                                    <h1 class="auth_heading heading-divider">{$btr->auth_2fa_title|escape}</h1>
+                                    <p class="auth_heading_promo">{$btr->auth_2fa_promo|escape}</p>
+                                    <p class="auth_2fa_account">{$btr->auth_2fa_account|escape} <b>{$two_factor_login|escape}</b></p>
+                                    <input type="text" name="totp_code" value="" autocomplete="one-time-code" autofocus="" tabindex="1" class="form-control two_factor_code auth_2fa_code mb-1" placeholder="000000" aria-label="{$btr->auth_2fa_placeholder|escape}" maxlength="24" {if $error_message}aria-invalid="true"{/if} required>
+                                    {if $error_message}
+                                        <div class="mb-1 error_box" role="alert">
+                                            {if $error_message == 'key_unavailable'}
+                                                {$btr->auth_2fa_key_unavailable|escape}
+                                            {else}
+                                                {$btr->auth_2fa_wrong|escape}
+                                            {/if}
+                                        </div>
+                                    {/if}
+                                    <p class="text_grey font_12 mb-1">{$btr->auth_2fa_recovery_hint|escape}</p>
+                                    <div class="auth_buttons">
+                                        {* Окрема форма: інакше Enter у полі коду брав би першу кнопку — цю — і скасовував вхід *}
+                                        <button type="submit" form="fn_cancel_2fa" class="auth_buttons__recovery link px-0 mb-1">{$btr->auth_2fa_back|escape}</button>
+                                        <button type="submit" value="login" class="auth_buttons__login btn btn_blue btn_big btn-block" tabindex="2">{$btr->auth_2fa_submit|escape}</button>
                                     </div>
                                 {else}
                                     <h1 class="auth_heading heading-divider">{$btr->auth_form_login_admin|escape}</h1>
@@ -77,9 +111,12 @@
                                     <div class="mb-1 error_box">
                                         {if $error_message == 'auth_wrong'}
                                         {$btr->auth_wrong|escape}
-                                        {if $limit_cnt}<br>{$btr->auth_wrong1|escape} {$limit_cnt} {$limit_cnt|plural:$btr->auth_limit_cnt1:$btr->auth_limit_cnt2:$btr->auth_limit_cnt3}{/if}
                                         {elseif $error_message == 'limit_try'}
                                         {$btr->auth_limit_try|escape}
+                                        {elseif $error_message == 'code_limit'}
+                                        {$btr->auth_2fa_limit|escape}
+                                        {elseif $error_message == 'session_failed'}
+                                        {$btr->auth_session_failed|escape}
                                         {/if}
                                     </div>
                                     {/if}
@@ -89,6 +126,12 @@
                                     </div>
                                 {/if}
                             </form>
+                            {if $two_factor_step}
+                                <form method="post" id="fn_cancel_2fa" hidden>
+                                    <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
+                                    <input type="hidden" name="cancel_2fa" value="1">
+                                </form>
+                            {/if}
                             <div class="col-xs-12 mt-1 p-h fn_recovery_wrap hidden px-0">
                                 <div class="fn_error" style="display: none;margin-bottom:15px;color: #bf1e1e;font-weight: 600;font-size: 15px;"></div>
                                 <div class="fn_success" style="display: none;margin-bottom:15px;color: #13bb13;font-weight: 600;font-size: 15px;">{$btr->auth_recovery_success|escape}</div>

@@ -32,7 +32,7 @@ class AdminRecoveryFlowTest extends TestCase
         $this->assertStringContainsString("\$this->design->assign('error_message', 'password_empty');", $source);
 
         $guard = strpos($source, "trim(\$new_password) === ''");
-        $login = strpos($source, "\$_SESSION['admin'] = \$manager->login;");
+        $login = strpos($source, '$managerSessions->signIn($manager)');
 
         $this->assertIsInt($guard);
         $this->assertIsInt($login);
@@ -47,16 +47,25 @@ class AdminRecoveryFlowTest extends TestCase
         $this->assertStringContainsString("\$this->design->assign('error_message', 'password_wrong');", $source);
     }
 
-    public function testSessionIsRegeneratedOnRecoveryLogin()
+    /**
+     * Вхід після відновлення — через ManagerSessions::signIn(), який міняє
+     * ідентифікатор сесії (SessionNamesTest). Перед ним гасяться всі наявні
+     * сесії менеджера: відновлюють пароль, коли старий міг витекти.
+     */
+    public function testRecoveryLoginRevokesOldSessionsAndSignsInThroughTheRegistry()
     {
         $source = $this->source();
 
-        $regenerate = strpos($source, 'SessionNames::regenerate();');
-        $login = strpos($source, "\$_SESSION['admin'] = \$manager->login;");
+        $update = strpos($source, "\$saved = \$managersEntity->update((int)\$manager->id, ['password' => \$new_password]);");
+        $revoke = strpos($source, '$managerSessions->revokeAll((int)$manager->id, (int)$manager->id);');
+        $login = strpos($source, '$managerSessions->signIn($manager)');
 
-        $this->assertIsInt($regenerate);
+        $this->assertIsInt($update);
+        $this->assertIsInt($revoke);
         $this->assertIsInt($login);
-        $this->assertLessThan($login, $regenerate);
+        $this->assertLessThan($revoke, $update);
+        $this->assertLessThan($login, $revoke);
+        $this->assertStringNotContainsString("\$_SESSION['admin'] =", $source, 'мітку адміна ставить лише signIn()');
     }
 
     public function testRecoveryFormNoLongerAsksForLogin()

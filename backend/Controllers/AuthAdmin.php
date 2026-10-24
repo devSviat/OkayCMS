@@ -7,8 +7,11 @@ namespace Okay\Admin\Controllers;
 use Okay\Core\Response;
 use Okay\Core\Managers;
 use Okay\Core\Notify;
+use Okay\Core\Security\AdminLoginGuard;
 use Okay\Core\Security\AdminRecoveryToken;
-use Okay\Core\Security\SessionNames;
+use Okay\Core\Security\ManagerAuthLog;
+use Okay\Core\Security\ManagerSessions;
+use Okay\Core\Security\ManagerTwoFactor;
 use Okay\Core\Validator;
 use Okay\Entities\LessonsEntity;
 use Okay\Entities\ManagersEntity;
@@ -23,25 +26,34 @@ class AuthAdmin extends IndexAdmin
         Notify $notify,
         Response $response,
         Validator $validator,
-        AdminRecoveryToken $recoveryToken
+        AdminRecoveryToken $recoveryToken,
+        AdminLoginGuard $loginGuard,
+        ManagerSessions $managerSessions,
+        ManagerTwoFactor $twoFactor,
+        ManagerAuthLog $authLog
     ) {
+        $clientIp = (string)($_SERVER['REMOTE_ADDR'] ?? '');
+
+        // Друга сходинка: пароль уже прийнято, чекаємо код. Мітки admin
+        // немає, тож жоден вхід адмінки ще не пускає.
+        if ($this->handleTwoFactorStep($twoFactor, $managersEntity, $managerSessions)) {
+            return;
+        }
+
         /*Восстановление пароля администратора*/
         $recoveryEmail = $this->request->get('recovery_email');
+        $recoveryEmail = is_string($recoveryEmail) ? $recoveryEmail : '';
         if ($this->request->get("ajax_recovery")) {
             $result = new \stdClass();
+            $managerToRecovery = null;
             if (!$validator->isEmail($recoveryEmail, true)) {
                 $result->error = 'wrong_email';
             } else {
-                $managerToRecovery = $managersEntity->findOne(['email' => $recoveryEmail]);
-
-                if (!empty($managerToRecovery)) {
-                    // Токен підписаний поточним хешем пароля менеджера, тому
-                    // стає недійсним одразу після зміни пароля.
-                    $code = $recoveryToken->create(
-                        (int)$managerToRecovery->id,
-                        (string)$managerToRecovery->password
-                    );
-                    $notify->emailPasswordRecoveryAdmin($managerToRecovery->email, $code);
+                // Понад ліміт адреси відповідь та сама, що й на успіх: окрема
+                // помилка підказала б, що ліміт рахує саме листи.
+                if ($loginGuard->allowRecoveryEmail($clientIp)) {
+                    $found = $managersEntity->findOne(['email' => $recoveryEmail]);
+                    $managerToRecovery = is_object($found) ? $found : null;
                 }
 
                 // Відповідь однакова незалежно від того, чи існує такий
@@ -51,6 +63,27 @@ class AuthAdmin extends IndexAdmin
             }
             $this->response->setContent(json_encode($result), RESPONSE_JSON);
             $this->response->sendContent();
+
+            // Далі робота залежить від того, чи є такий менеджер, тож вона йде
+            // після відповіді: SMTP займає десятки мілісекунд. Сесію звільняємо
+            // теж: інакше паралельний запит з тією самою кукою чекав би на
+            // блокування до кінця листа й видавав те саме.
+            session_write_close();
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            } elseif (function_exists('litespeed_finish_request')) {
+                litespeed_finish_request();
+            }
+
+            if ($managerToRecovery !== null && $loginGuard->allowRecoveryEmailTo((string)$managerToRecovery->email)) {
+                // Токен підписаний поточним хешем пароля менеджера, тому
+                // стає недійсним одразу після зміни пароля.
+                $code = $recoveryToken->create(
+                    (int)$managerToRecovery->id,
+                    (string)$managerToRecovery->password
+                );
+                $notify->emailPasswordRecoveryAdmin($managerToRecovery->email, $code);
+            }
             exit;
         }
 
@@ -65,6 +98,7 @@ class AuthAdmin extends IndexAdmin
         if ($recoveryIsValid) {
             $this->design->assign('recovery_mod', true);
             $this->design->assign('recovery_code', $code);
+            $this->design->assign('recovery_two_factor', $twoFactor->isEnabled((int)$managerToRecovery->id));
 
             if ($this->request->method('post')){
                 $new_password = $this->request->post('new_password');
@@ -79,15 +113,38 @@ class AuthAdmin extends IndexAdmin
                     // будь-якого валідного коду міг змінити пароль кому завгодно.
                     $manager = $managerToRecovery;
 
-                    // ManagersEntity::update() хешує пароль сам.
-                    $managersEntity->update((int)$manager->id, [
-                        'password' => $new_password,
-                        'cnt_try'  => 0,
-                        'last_try' => null,
-                    ]);
+                    // Доступ до пошти не має обходити 2FA, і без коду пароль не
+                    // міняється: інакше сама пошта дозволяла б забрати власнику
+                    // пароль і викинути його з усіх сесій.
+                    $codeResult = $twoFactor->isEnabled((int)$manager->id)
+                        ? $twoFactor->verify((int)$manager->id, $this->request->post('totp_code'))
+                        : null;
+                    if ($codeResult !== null && $codeResult !== ManagerTwoFactor::OK && $codeResult !== ManagerTwoFactor::OK_RECOVERY) {
+                        $this->design->assign('error_message', $codeResult === ManagerTwoFactor::LIMIT ? 'code_limit' : ($codeResult === ManagerTwoFactor::KEY_UNAVAILABLE ? 'key_unavailable' : 'code_wrong'));
+                        $this->response->setContent($this->design->fetch('auth.tpl'));
+                        return;
+                    }
 
-                    SessionNames::regenerate();
-                    $_SESSION['admin'] = $manager->login;
+                    // ManagersEntity::update() хешує пароль сам. Не записався — не
+                    // гасимо сесій і не впускаємо: пароль лишився старим.
+                    $saved = $managersEntity->update((int)$manager->id, ['password' => $new_password]);
+                    if (!$saved) {
+                        $this->design->assign('error_message', 'session_failed');
+                        $this->response->setContent($this->design->fetch('auth.tpl'));
+                        return;
+                    }
+                    $authLog->record(ManagerAuthLog::PASSWORD_CHANGED, (int)$manager->id, null, ['via' => 'email']);
+
+                    // Новий пароль закриває всі наявні входи: відновлення
+                    // найчастіше роблять саме тоді, коли пароль міг витекти.
+                    $managerSessions->revokeAll((int)$manager->id, (int)$manager->id);
+
+                    if (!$managerSessions->signIn($manager, $codeResult !== null)) {
+                        $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=AuthAdmin');
+                    }
+                    if ($codeResult === ManagerTwoFactor::OK_RECOVERY) {
+                        $_SESSION['recovery_code_used'] = true;
+                    }
 
                     $allManagers = $managersEntity->order('id ASC')->find();
                     $firstManager = reset($allManagers);
@@ -101,39 +158,54 @@ class AuthAdmin extends IndexAdmin
 
         } elseif ($this->request->method('post')) {
             /*Авторизация в админ.панель*/
+            // Масив у POST (`login[]=`) інакше давав Warning у лог і «Array» у формі.
             $login = $this->request->post('login');
+            $login = is_string($login) ? $login : '';
             $pass = $this->request->post('password');
-            $manager = $managersEntity->get((string)$login);
-            
-            if ($manager) {
-                /*Подсчитываем количество неправильны попыток входа*/
-                $limit = 10;
-                $now = date('Y-m-d');
-                $last = (isset($manager->last_try) ? $manager->last_try : $now);
-                if ($last != $now) {
-                    $last = $now;
-                    $manager->cnt_try = 1;
+            $pass = is_string($pass) ? $pass : '';
+
+            if (!$loginGuard->allowPasswordAttempt($login, $clientIp)) {
+                // Без пошуку менеджера: ця гілка дешева й без меж, і різниця в
+                // часі між існуючим і вигаданим логіном видавала б, чи він є.
+                $loginGuard->recordLimit(null);
+                $this->design->assign('login', $login);
+                $this->design->assign('error_message', 'limit_try');
+            } else {
+                $manager = $login === '' ? null : ($managersEntity->get($login) ?: null);
+
+                // Відповідь на хибну пару однакова для існуючого й вигаданого
+                // логіна, і за текстом, і за часом (AdminLoginGuard::verifyPassword).
+                if (!$loginGuard->verifyPassword($manager, $pass)) {
+                    $this->design->assign('login', $login);
+                    $this->design->assign('error_message', 'auth_wrong');
                 } else {
-                    $manager->cnt_try++;
-                }
+                    $loginGuard->passwordSucceeded($login, $clientIp);
 
-                if ($manager->cnt_try > $limit) {
-                    $this->design->assign('error_message', 'limit_try');
-                } elseif ($managers->checkPassword($pass, $manager->password)) {
-                    /*Входим в админку*/
-                    SessionNames::regenerate();
-                    $_SESSION['admin'] = $manager->login;
-
-                    // Старий формат хеша (APR1/MD5) замінюємо на актуальний.
-                    // ManagersEntity::update() хешує пароль сам, тому
-                    // передаємо його у відкритому вигляді.
+                    // Старий формат хеша (APR1/MD5) замінюємо на актуальний ще
+                    // до коду: пароль уже перевірено.
                     if ($managers->needsPasswordRehash($manager->password)) {
                         $managersEntity->update((int)$manager->id, ['password' => $pass]);
                     }
 
-                    $managersEntity->update((int)$manager->id, ['cnt_try'=>0, 'last_try'=>null]);
+                    if ($twoFactor->isEnabled((int)$manager->id)) {
+                        $twoFactor->startChallenge(
+                            $manager,
+                            !empty($_SESSION['before_auth_url']) ? (string)$_SESSION['before_auth_url'] : $this->request->getRootUrl() . '/backend/index.php'
+                        );
+                        unset($_SESSION['before_auth_url']);
+                        $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=AuthAdmin');
+                    }
+
+                    /*Входим в админку*/
+                    if (!$managerSessions->signIn($manager)) {
+                        $this->design->assign('login', $login);
+                        $this->design->assign('error_message', 'session_failed');
+                        $this->response->setContent($this->design->fetch('auth.tpl'));
+                        return;
+                    }
+
                     $managersEntity->updateLastActivityDate($manager->id);
-                    $loginRedirectResource = (!empty($_SESSION['before_auth_url']) ? $_SESSION['before_auth_url'] : $this->request->getBasePathWithDomain() . '/backend/index.php');
+                    $loginRedirectResource = (!empty($_SESSION['before_auth_url']) ? $_SESSION['before_auth_url'] : $this->request->getRootUrl() . '/backend/index.php');
                     unset($_SESSION['before_auth_url']);
 
                     $allManagers = $managersEntity->order('id ASC')->find();
@@ -143,20 +215,75 @@ class AuthAdmin extends IndexAdmin
                         $response->redirectTo($this->request->getRootUrl() . '/backend/index.php?controller=LearningAdmin');
                     }
                     $response->redirectTo($loginRedirectResource);
-                } else {
-                    /*неверный пароль менеджера*/
-                    $this->design->assign('login', $login);
-                    $this->design->assign('error_message', 'auth_wrong');
-                    $this->design->assign('limit_cnt', $limit-$manager->cnt_try);
-                    $managersEntity->update((int)$manager->id, ['cnt_try'=>$manager->cnt_try, 'last_try'=>$last]);
                 }
-            } else {
-                /*менеджер не найден*/
-                $this->design->assign('login', $login);
-                $this->design->assign('error_message', 'auth_wrong');
             }
         }
         $this->response->setContent($this->design->fetch('auth.tpl'));
     }
 
+
+    /**
+     * Сторінка коду після пароля. true — запит оброблено тут (форма коду,
+     * вхід або повернення до пароля).
+     */
+    private function handleTwoFactorStep(
+        ManagerTwoFactor $twoFactor,
+        ManagersEntity $managersEntity,
+        ManagerSessions $managerSessions
+    ): bool {
+        $authUrl = $this->request->getRootUrl() . '/backend/index.php?controller=AuthAdmin';
+
+        if ($this->request->method('post') && $this->request->post('cancel_2fa')) {
+            $twoFactor->clearChallenge();
+            $this->response->redirectTo($authUrl);
+        }
+
+        $challenge = $twoFactor->challenge();
+        if ($challenge === null) {
+            return false;
+        }
+
+        $error = null;
+        if ($this->request->method('post') && $this->request->post('totp_code') !== null) {
+            $result = $twoFactor->verify($challenge['manager_id'], $this->request->post('totp_code'));
+
+            if ($result === ManagerTwoFactor::OK || $result === ManagerTwoFactor::OK_RECOVERY) {
+                $manager = $managersEntity->get($challenge['manager_id']);
+                $twoFactor->clearChallenge();
+
+                // Менеджера могли перейменувати чи видалити, поки він вводив код.
+                if (!is_object($manager) || (string)$manager->login !== $challenge['login'] || !$managerSessions->signIn($manager, true)) {
+                    $this->response->redirectTo($authUrl);
+                }
+
+                $managersEntity->updateLastActivityDate($manager->id);
+                if ($result === ManagerTwoFactor::OK_RECOVERY) {
+                    $_SESSION['recovery_code_used'] = true;
+                }
+                // Адреса з сесії, але веде лише в межах сайту.
+                $redirect = (string)$challenge['redirect'];
+                $root = $this->request->getRootUrl() . '/';
+                $this->response->redirectTo(str_starts_with($redirect, $root) ? $redirect : $root . 'backend/index.php');
+            }
+
+            if ($result === ManagerTwoFactor::LIMIT) {
+                // Понад ліміт кодів — знову пароль: інакше шість цифр можна
+                // перебирати, маючи лише пароль.
+                $twoFactor->clearChallenge();
+                $this->design->assign('error_message', 'code_limit');
+                $this->response->setContent($this->design->fetch('auth.tpl'));
+
+                return true;
+            }
+
+            $error = $result === ManagerTwoFactor::KEY_UNAVAILABLE ? 'key_unavailable' : 'code_wrong';
+        }
+
+        $this->design->assign('two_factor_step', true);
+        $this->design->assign('two_factor_login', $challenge['login']);
+        $this->design->assign('error_message', $error);
+        $this->response->setContent($this->design->fetch('auth.tpl'));
+
+        return true;
+    }
 }

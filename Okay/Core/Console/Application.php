@@ -5,6 +5,7 @@ namespace Okay\Core\Console;
 
 
 use Okay\Core\Console\Commands\Database\DatabaseDeployCommand;
+use Okay\Core\Console\Commands\Manager\ManagerTwoFactorResetCommand;
 use Okay\Core\Console\Commands\Module\ModuleCheckModificationsCommand;
 use Okay\Core\Console\Commands\Module\ModuleCreateCommand;
 use Okay\Core\Console\Commands\Release\CoreMigrateCommand;
@@ -25,6 +26,7 @@ class Application extends SymfonyApplication
         SchedulerListCommand::class,
         ReleaseBuildPackageCommand::class,
         CoreMigrateCommand::class,
+        ManagerTwoFactorResetCommand::class,
     ];
 
     public function __construct()

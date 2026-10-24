@@ -21,8 +21,16 @@ class SessionNames
      * Ніколи не пишеться в сесію вітрини, інакше вихід менеджера з бекенду не
      * забирав би привілеї на вітрині одразу ж.
      */
+    /** Відповідь уже визначено й запам'ятовано до кінця запиту. */
     private static bool $adminChecked = false;
+    /** Звірений із реєстром логін або null. */
     private static ?string $adminLogin = null;
+
+    private static bool $backendRead = false;
+    /** @var array{0: string, 1: string}|null логін і ідентифікатор бекендової сесії, ще не звірені з реєстром */
+    private static ?array $backendSession = null;
+    /** @var (callable(string, string): bool)|null */
+    private static $adminSessionValidator = null;
 
     public static function startFrontend()
     {
@@ -36,9 +44,11 @@ class SessionNames
 
     /**
      * Визначається за окремою бекендовою сесією, а не за $_SESSION['admin']
-     * вітрини: вітрина бекендового $_SESSION не бачить ніколи.
+     * вітрини: вітрина бекендового $_SESSION не бачить ніколи. Адмін — лише
+     * коли сесію підтвердив реєстр (setAdminSessionValidator).
      *
-     * Викликати ДО startFrontend() — активною може бути лише одна сесія.
+     * Бекендову сесію треба прочитати ДО startFrontend() (preloadBackendSession):
+     * активною може бути лише одна сесія.
      */
     public static function isAdmin(): bool
     {
@@ -51,19 +61,63 @@ class SessionNames
      */
     public static function adminLogin(): ?string
     {
-        if (!self::$adminChecked) {
-            self::$adminChecked = true;
-            self::$adminLogin   = self::readBackendAdminLogin();
+        if (self::$adminChecked) {
+            return self::$adminLogin;
         }
 
-        return self::$adminLogin;
+        self::preloadBackendSession();
+        if (self::$backendSession === null) {
+            self::$adminChecked = true;
+
+            return self::$adminLogin = null;
+        }
+
+        // Без валідатора відповідь «не адмін», і вона не запам'ятовується:
+        // після реєстрації валідатора той самий запит перевірить сесію.
+        if (self::$adminSessionValidator === null) {
+            return null;
+        }
+
+        [$login, $sessionId] = self::$backendSession;
+        self::$adminChecked = true;
+
+        return self::$adminLogin = (self::$adminSessionValidator)($login, $sessionId) === true ? $login : null;
+    }
+
+    /**
+     * Читає бекендову сесію, поки інша не активна. Звіряє з реєстром уже
+     * adminLogin(), коли валідатор зареєстровано.
+     *
+     * Викликати ДО startFrontend() — активною може бути лише одна сесія.
+     */
+    public static function preloadBackendSession(): void
+    {
+        if (!self::$backendRead) {
+            self::$backendRead = true;
+            self::$backendSession = self::readBackendSession();
+        }
+    }
+
+    /**
+     * Перевірка пари (логін, ідентифікатор сесії) реєстром сесій
+     * (ManagerSessions::isValid). Реєструє container.php.
+     *
+     * @param callable(string, string): bool $validator
+     */
+    public static function setAdminSessionValidator(callable $validator): void
+    {
+        self::$adminSessionValidator = $validator;
+        self::$adminChecked = false;
+        self::$adminLogin = null;
     }
 
     /**
      * Читає $_SESSION['admin'] з бекендової сесії, не активуючи і не
      * підмінюючи сесію поточного (вітринного) запиту.
+     *
+     * @return array{0: string, 1: string}|null
      */
-    private static function readBackendAdminLogin(): ?string
+    private static function readBackendSession(): ?array
     {
         // Якщо якась сесія вже активна — ми викликані не там, де очікувалось
         // (до запуску сесії вітрини), і чіпати чужу активну сесію небезпечно.
@@ -87,7 +141,7 @@ class SessionNames
         $previousUseCookies  = ini_get('session.use_cookies');
         $previousStrictMode  = ini_get('session.use_strict_mode');
 
-        $login = null;
+        $session = null;
         try {
             session_name(self::BACKEND);
             session_id($cookieSessionId);
@@ -102,7 +156,7 @@ class SessionNames
             ]);
 
             if ($started && !empty($_SESSION['admin']) && is_string($_SESSION['admin'])) {
-                $login = $_SESSION['admin'];
+                $session = [$_SESSION['admin'], $cookieSessionId];
             }
         } finally {
             session_name($previousName);
@@ -116,7 +170,7 @@ class SessionNames
             }
         }
 
-        return $login;
+        return $session;
     }
 
     private static function isValidSessionId(string $id): bool

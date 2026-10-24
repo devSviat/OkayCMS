@@ -18,12 +18,28 @@
     </div>
 </div>
 
+{if $message_error}
+    <div class="alert alert--icon alert--error">
+        <div class="alert__content">
+            <div class="alert__title">
+                {if $message_error == 'reauth_required'}{$btr->manager_reauth_required|escape}
+                {elseif $message_error == 'password_wrong'}{$btr->manager_reauth_wrong|escape}
+                {elseif $message_error == 'limit_try'}{$btr->auth_limit_try|escape}
+                {else}{$btr->manager_delete_skipped|escape}{/if}
+            </div>
+        </div>
+    </div>
+{/if}
+
+{* Видалення менеджера — у вікні підтвердження паролем (ManagersAdmin) *}
+{include file='manager_reauth_panel.tpl'}
+
 {*Главная форма страницы*}
 <div class="boxed fn_toggle_wrap">
     {if $managers}
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12">
-                <form method="post" class="fn_form_list">
+                <form method="post" class="fn_form_list" data-reauth="1">
                     <input type="hidden" name="session_id" value="{$smarty.session.id}">
                     <div class="managers_wrap okay_list">
                         {*Шапка таблицы*}
@@ -42,8 +58,10 @@
                                 <div class="fn_row okay_list_body_item">
                                     <div class="okay_list_row">
                                         <div class="okay_list_boding okay_list_check">
-                                            <input class="hidden_check" type="checkbox" id="id_{$manager_admin->id}" name="check[]" value="{$manager_admin->id}"/>
-                                            <label class="okay_ckeckbox" for="id_{$manager_admin->id}"></label>
+                                            {if $manager_admin->can_delete}
+                                                <input class="hidden_check" type="checkbox" id="id_{$manager_admin->id}" name="check[]" value="{$manager_admin->id}"/>
+                                                <label class="okay_ckeckbox" for="id_{$manager_admin->id}"></label>
+                                            {/if}
                                         </div>
 
                                         <div class="okay_list_boding okay_list_manager_name">
@@ -55,7 +73,7 @@
                                             {/if}
                                         </div>
 
-                                        {if $manager_admin->id != $manager->id}
+                                        {if $manager_admin->can_delete}
                                             <div class="okay_list_boding okay_list_close">
                                                 {*delete*}
                                                 <button data-hint="{$btr->managers_delete|escape}" type="button" class="btn_close fn_remove hint-bottom-right-t-info-s-small-mobile  hint-anim" data-toggle="modal" data-target="#fn_action_modal" onclick="success_action($(this));">

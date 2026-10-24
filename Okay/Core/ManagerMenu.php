@@ -95,6 +95,7 @@ class ManagerMenu
             'left_translations_title'    => ['TranslationsAdmin', 'TranslationAdmin'],
             'learning_title'             => ['LearningAdmin'],
             'left_managers_title'        => ['ManagersAdmin', 'ManagerAdmin'],
+            'left_manager_sessions_title' => ['AllManagerSessionsAdmin'],
             'left_system_title'          => ['SystemAdmin'],
             'left_core_updater_title'    => ['CoreUpdaterAdmin'],
         ],

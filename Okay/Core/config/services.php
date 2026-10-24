@@ -50,6 +50,14 @@ use Okay\Core\TplMod\ModificationChecker;
 use Okay\Core\TplMod\Parser as TplParser;
 use Okay\Core\Security\AdminRecoveryToken;
 use Okay\Core\Security\AttemptLimiter;
+use Okay\Core\Security\AdminLoginGuard;
+use Okay\Core\Security\ManagerLoginKey;
+use Okay\Core\Security\ManagerAuthLog;
+use Okay\Core\Security\ManagerSessions;
+use Okay\Core\Security\ManagerTwoFactor;
+use Okay\Core\Security\TotpKey;
+use Okay\Core\Security\ManagerReauth;
+use Okay\Core\Security\ManagerProfilePolicy;
 use Okay\Core\Security\RecoveryToken;
 use Okay\Core\Security\StorefrontGuard;
 use Okay\Core\Release\CoreMigrator;
@@ -316,6 +324,65 @@ $services = [
             new PR('attempt_limiter.dir'),
             new PR('attempt_limiter.max_attempts'),
             new PR('attempt_limiter.window_seconds'),
+            new SR(LoggerInterface::class),
+        ],
+    ],
+    AdminLoginGuard::class => [
+        'class' => AdminLoginGuard::class,
+        'arguments' => [
+            new SR(AttemptLimiter::class),
+            new SR(Managers::class),
+            new SR(ManagerLoginKey::class),
+            new SR(ManagerAuthLog::class),
+        ],
+    ],
+    ManagerLoginKey::class => [
+        'class' => ManagerLoginKey::class,
+        'arguments' => [
+            new SR(QueryFactory::class),
+        ],
+    ],
+    ManagerAuthLog::class => [
+        'class' => ManagerAuthLog::class,
+        'arguments' => [
+            new SR(EntityFactory::class),
+            new SR(LoggerInterface::class),
+        ],
+    ],
+    ManagerSessions::class => [
+        'class' => ManagerSessions::class,
+        'arguments' => [
+            new SR(EntityFactory::class),
+            new SR(LoggerInterface::class),
+            new SR(ManagerAuthLog::class),
+        ],
+    ],
+    TotpKey::class => [
+        'class' => TotpKey::class,
+        'arguments' => [
+            new SR(Config::class),
+        ],
+    ],
+    ManagerTwoFactor::class => [
+        'class' => ManagerTwoFactor::class,
+        'arguments' => [
+            new SR(EntityFactory::class),
+            new SR(TotpKey::class),
+            new SR(LoggerInterface::class),
+            new SR(ManagerAuthLog::class),
+        ],
+    ],
+    ManagerReauth::class => [
+        'class' => ManagerReauth::class,
+        'arguments' => [
+            new SR(AdminLoginGuard::class),
+            new SR(EntityFactory::class),
+        ],
+    ],
+    ManagerProfilePolicy::class => [
+        'class' => ManagerProfilePolicy::class,
+        'arguments' => [
+            new SR(Managers::class),
         ],
     ],
     Translit::class => [

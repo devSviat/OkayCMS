@@ -119,3 +119,9 @@ resized_payments_dir = files/resized/payments/
 ; Папка изображений языков
 lang_images_dir = files/originals/lang/
 lang_resized_dir = files/resized/lang/
+
+[security]
+; Ключ шифрування секретів 2FA менеджерів (Okay\Core\Security\TotpKey), 32 байти
+; в Base64: openssl rand -base64 32. Змінна оточення OKAY_TOTP_KEY має перевагу.
+; Тут лишається порожнім: справжній ключ — в оточенні або config.local.php.
+totp_key = ""

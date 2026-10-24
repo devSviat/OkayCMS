@@ -16,6 +16,9 @@ SessionNames::startBackend();
 
 $DI = include 'Okay/Core/config/container.php';
 
+// До першого читання $_SESSION['admin']: відкликана сесія тут стає гостьовою.
+$DI->get(\Okay\Core\Security\ManagerSessions::class)->enforce();
+
 /** @var Modules $modules */
 $modules = $DI->get(Modules::class);
 $modules->startEnabledModules();

@@ -17,6 +17,8 @@ x-php-env: &php-env
   TZ: ${TZ:-Europe/Kyiv}
   TEST_INTERNAL_EMAIL: ${TEST_INTERNAL_EMAIL:-}
   PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-}
+  # Ключ шифрування секретів 2FA менеджерів (TotpKey). Порожньо — 2FA не вмикається.
+  OKAY_TOTP_KEY: ${OKAY_TOTP_KEY:-}
 
 # Шляхи, у які OkayCMS пише під час роботи. Один якір на обидва сервіси —
 # інакше ціль, не перевизначена для scheduler, губилась би при деплої.

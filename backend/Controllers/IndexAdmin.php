@@ -4,6 +4,7 @@
 namespace Okay\Admin\Controllers;
 
 use Okay\Core\Security\SessionNames;
+use Okay\Core\Security\ManagerProfilePolicy;
 
 
 use Okay\Admin\Helpers\BackendMainHelper;
@@ -282,8 +283,12 @@ class IndexAdmin
 
         // Вибирач файлів обслуговує редактор на всіх сторінках контенту, тож окремого
         // дозволу не має: досить бути менеджером, як і в попереднього менеджера файлів.
+        // Свій профіль (сесії, 2FA) відкриває кожен менеджер; чужі — лише з правом
+        // managers (ManagerProfilePolicy). ManagerAdmin сам тримає ціль на своєму id.
         if ($this->backendController === 'AuthAdmin'
             || $this->backendController === 'FilePickerAdmin'
+            || ($this->backendController === 'ManagerAdmin' && !empty($this->manager)
+                && (new ManagerProfilePolicy($managers))->mayOpen($this->manager, $request->get('id', 'integer') ?: null))
             || $this->managers->access($this->managers->getPermissionByController($this->backendController), $this->manager)) {
             return true;
         }

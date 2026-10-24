@@ -18,6 +18,9 @@ require_once('vendor/autoload.php');
 
 $DI = include 'Okay/Core/config/container.php';
 
+// До першого читання $_SESSION['admin']: відкликана сесія тут стає гостьовою.
+$DI->get(\Okay\Core\Security\ManagerSessions::class)->enforce();
+
 /** @var Config $config */
 $config = $DI->get(Config::class);
 
@@ -45,7 +48,7 @@ $response->addHeader('Cache-Control: no-cache, must-revalidate');
 $response->addHeader('Expires: -1');
 $response->addHeader('Pragma: no-cache');
 
-$manager = $DI->get(EntityFactory::class)->get(ManagersEntity::class)->get($_SESSION['admin']);
+$manager = $DI->get(EntityFactory::class)->get(ManagersEntity::class)->get($_SESSION['admin'] ?? '');
 
 /** @var Design $design */
 $design = $DI->get(Design::class);
