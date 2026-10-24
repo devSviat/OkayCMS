@@ -182,6 +182,4 @@ FrontExtender::class => [
       ->addNetwork('mastodon', 'Mastodon', 'https://example.social/share?text={title}%20{url}');
   ```
 
-  `{url}` і `{title}` підставляються вже закодованими. Розширювати
-  `BackendSettingsHelper::getJsSocials()` чи `getJsCustomSocials()` для цього не треба —
-  обидва лишились тільки заради сумісності й на вітрину більше не впливають.
+  `{url}` і `{title}` підставляються вже закодованими.

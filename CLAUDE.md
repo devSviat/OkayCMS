@@ -41,7 +41,7 @@ security boundaries, themes and the Docker environment, so a blind merge would u
 - Custom ORM (`Okay\Core\Entity\Entity`)
 - Symfony Console `^8.0` (the `./ok` CLI) — commands declare their name via `#[AsCommand]`
 - Aura.Sql `^6.0` / Aura.SqlQuery `^3.0` (DB layer)
-- PHPUnit `^13.2`, PHPStan `^2.2`, PHP_CodeSniffer `^3.7` (dev)
+- PHPUnit `^13.2`, PHPStan `^2.2` with `phpstan-deprecation-rules` (dev)
 
 ## Commands
 
@@ -105,7 +105,7 @@ Service wiring is centralized: core services in `Okay/Core/config/services.php` 
 | JS/CSS files | `docs/assets.md` |
 | Smarty plugins | `docs/smarty-plugins.md` |
 | CLI commands, scheduler | `docs/cli.md` |
-| Tests, phpstan, phpcs, smoke checks | `docs/testing.md` |
+| Tests, phpstan, smoke checks | `docs/testing.md` |
 | Discounts | `docs/discounts.md` |
 | Security boundaries and upgrade notes | `docs/UPGRADE-security.md` |
 | Porting a theme to this fork | `docs/theme-porting.md` |

@@ -40,11 +40,6 @@ jobs:
       - name: Composer audit
         run: composer audit --locked --abandoned=report
 
-      # PHPCompatibility statically targets testVersion 8.2- regardless of the
-      # runtime, so it is safe to run on every matrix entry.
-      - name: PHPCompatibility
-        run: vendor/bin/phpcs -q
-
       - name: PHPUnit
         run: vendor/bin/phpunit
 
@@ -70,6 +65,17 @@ jobs:
 
       - name: PHPStan
         run: vendor/bin/phpstan analyse --no-progress
+
+      # PHPStan рахує нижньою межею 8.4 з composer.json і не бачить того, що
+      # застаріло лише в 8.5, як касти (integer). Компілятор 8.5 бачить, у
+      # кожному файлі, зокрема в tests/ і ok, яких PHPStan не аналізує.
+      - name: Застаріле в PHP 8.5
+        run: |
+          set -o pipefail
+          git ls-files -z -- '*.php' ok ':!:Okay/Modules/*/vendor/*' \
+            | xargs -0 -n 100 -P 4 php -d error_reporting=-1 -d display_errors=1 -d log_errors=0 -l 2>&1 \
+            | { grep -v '^No syntax errors detected in ' || true; } | tee lint.txt
+          test ! -s lint.txt
 
   secrets:
     runs-on: ubuntu-latest

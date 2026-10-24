@@ -5,6 +5,7 @@ namespace Okay\Core;
 
 
 use Monolog\Handler\RotatingFileHandler;
+use Monolog\Level;
 use Okay\Core\Log\SafeRotatingFileHandler;
 use Okay\Core\Console\Application AS ConsoleApplication;
 use Okay\Core\Entity\UrlUniqueValidator;
@@ -283,7 +284,7 @@ $services = [
         'arguments' => [
             new PR('logger.file'),
             new PR('logger.max_files_rotation'),
-            Logger::DEBUG,
+            Level::Debug,
         ],
     ],
     LoggerInterface::class => [
@@ -415,12 +416,6 @@ $services = [
     ],
     SocialShare::class => [
         'class' => SocialShare::class,
-    ],
-    JsSocial::class => [
-        'class' => JsSocial::class,
-        'arguments' => [
-            new SR(SocialShare::class),
-        ],
     ],
     DataCleaner::class => [
         'class' => DataCleaner::class,

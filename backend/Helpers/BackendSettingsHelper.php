@@ -8,7 +8,6 @@ use Okay\Core\Config;
 use Okay\Core\DataCleaner;
 use Okay\Core\EntityFactory;
 use Okay\Core\Image;
-use Okay\Core\JsSocial;
 use Okay\Core\SocialShare;
 use Okay\Core\Languages;
 use Okay\Core\Managers;
@@ -75,11 +74,6 @@ class BackendSettingsHelper
     private $languages;
 
     /**
-     * @var JsSocial
-     */
-    private $jsSocial;
-
-    /**
      * @var SocialShare
      */
     private $socialShare;
@@ -106,7 +100,6 @@ class BackendSettingsHelper
         FrontTemplateConfig $frontTemplateConfig,
         QueryFactory $queryFactory,
         Languages $languages,
-        JsSocial $jsSocial,
         SocialShare $socialShare,
         Image $imageCore,
         LicenseModulesTemplates $licenseModulesTemplates
@@ -121,7 +114,6 @@ class BackendSettingsHelper
         $this->frontTemplateConfig = $frontTemplateConfig;
         $this->queryFactory = $queryFactory;
         $this->languages = $languages;
-        $this->jsSocial = $jsSocial;
         $this->socialShare = $socialShare;
         $this->dataCleaner = $dataCleaner;
         $this->imageCore = $imageCore;
@@ -533,23 +525,6 @@ class BackendSettingsHelper
     public function getSocialShareNetworks()
     {
         return ExtenderFacade::execute(__METHOD__, $this->socialShare->getNetworkLabels(), func_get_args());
-    }
-
-    /**
-     * @deprecated Лишився для модулів, які його розширювали. Список галочок
-     *             будується з getSocialShareNetworks().
-     */
-    public function getJsSocials()
-    {
-        return ExtenderFacade::execute(__METHOD__, $this->jsSocial->getSocials(), func_get_args());
-    }
-
-    /**
-     * @deprecated Лишився для модулів, які його розширювали.
-     */
-    public function getJsCustomSocials()
-    {
-        return ExtenderFacade::execute(__METHOD__, $this->jsSocial->getCustomSocials(), func_get_args());
     }
 
     public function getSiteSocialLinks()
