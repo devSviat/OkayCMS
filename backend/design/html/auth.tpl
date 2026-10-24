@@ -22,7 +22,7 @@
                         <div class="auth_heading">
                             <img style="height: 50" src="{$rootUrl}/{$config->design_images}{$settings->site_logo}?v={$settings->site_logo_version}" alt="{$settings->site_name|escape}"/>
                             <div class="card-block text-xs-center">
-                                <div class="card-block--version">Version {$config->version|escape}</div>
+                                <div class="card-block--version">{$btr->general_version|escape} {$config->version|escape}</div>
                             </div>
                         </div>
                         <div class="">
