@@ -1,5 +1,5 @@
 {$wrapper = '' scope=global}
-<html>
+<html lang="{if $btr->getLangLabel() == 'ua'}uk{else}{$btr->getLangLabel()|escape}{/if}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <META HTTP-EQUIV="Pragma" CONTENT="no-cache">

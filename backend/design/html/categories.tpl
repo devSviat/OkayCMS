@@ -33,7 +33,7 @@
                 {*Шапка таблицы*}
                 <div class="okay_list_head">
                     <div class="okay_list_heading okay_list_subicon">
-                        <a href="javascript:;" class="fn_open_all">
+                        <a href="javascript:;" class="fn_open_all" aria-label="{$btr->general_expand_all|escape}">
                             {include file='svg_icon.tpl' svgId='square_plus'}
                         </a>
                     </div>
