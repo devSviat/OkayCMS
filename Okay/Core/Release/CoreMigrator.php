@@ -40,6 +40,25 @@ class CoreMigrator
     }
 
     /**
+     * Ті з переданих таблиць, що вже існують. Бекап перед міграціями дампить
+     * лише їх: таблиця, яку міграція тільки створить, даних не має, а
+     * mysqldump на відсутній таблиці падає й зупиняє оновлення.
+     *
+     * @param string[] $tables префіксовані назви
+     * @return list<string> у порядку $tables
+     */
+    public function existingTables(array $tables): array
+    {
+        if ($this->pdo === null) {
+            throw new \LogicException('CoreMigrator: existingTables() потребує повної конструкції через DI');
+        }
+
+        $existing = array_flip($this->pdo->fetchCol('SHOW TABLES'));
+
+        return array_values(array_filter($tables, static fn (string $table): bool => isset($existing[$table])));
+    }
+
+    /**
      * Замінює маркер `__` префіксом таблиць — той самий синтаксис
      * міграцій, що і в решті бази (`__products` тощо). Дзеркалить
      * регекс Database::tablePrefix() (Okay/Core/Database.php), тримати
