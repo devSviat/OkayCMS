@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="{if $btr->getLangLabel() == 'ua'}uk{else}{$btr->getLangLabel()|escape}{/if}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <META HTTP-EQUIV="Pragma" CONTENT="no-cache"/>
@@ -109,6 +109,7 @@
     {/if}
 </head>
 <body class="navbar-fixed {if $manager->menu_status && $is_mobile === false && $is_tablet === false}menu-pin{/if}">
+<a class="skip_link" href="#main_content">{$btr->index_skip_to_content|escape}</a>
     <!-- Google Tag Manager (noscript) -->
     {if $settings->gather_enabled}
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6T2LJP" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -176,7 +177,7 @@
                        будь-який сторонній сайт. Обробник - backend/index.php. *}
                     <form method="post" action="" class="admin_exit__form">
                         <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
-                        <button type="submit" name="logout" value="1" class="admin_exit__button">
+                        <button type="submit" name="logout" value="1" class="admin_exit__button" aria-label="{$btr->index_exit|escape}">
                             {include file='svg_icon.tpl' svgId='exit'}
                         </button>
                     </form>
@@ -312,7 +313,7 @@
                 <div class="admin_exit hidden-md-up">
                     <form method="post" action="" class="admin_exit__form">
                         <input type="hidden" name="session_id" value="{$smarty.session.id|escape}">
-                        <button type="submit" name="logout" value="1" class="admin_exit__button">
+                        <button type="submit" name="logout" value="1" class="admin_exit__button" aria-label="{$btr->index_exit|escape}">
                             <span class="">{$btr->index_exit|escape}</span>
                             {include file='svg_icon.tpl' svgId='exit'}
                         </button>
@@ -420,9 +421,11 @@
     </nav>
     {*Верхняя шапка*}
     <div class="page-container">
-        <a href='{url_generator route="main" absolute=1}' class='admin_bookmark'></a>
+        {* Стилі цієї закладки є лише у вітрини (admintooltip): тут вона невидима, а з
+           клавіатури отримувала фокус за краєм екрана. На сайт веде кнопка в шапці. *}
+        <a href='{url_generator route="main" absolute=1}' class='admin_bookmark' tabindex="-1" aria-hidden="true"></a>
 
-        <div class="main">
+        <div class="main" id="main_content" role="main" tabindex="-1">
             <div class="container-fluid">
                 <div class="min_content_fix">
                     {if $content}
@@ -514,6 +517,60 @@
             </div>
         </div>
     </div>
+<script>
+    /* Іконки-кнопки підписані лише data-hint — це CSS-підказка, а не доступне ім'я,
+       і читач екрана оголошував просто «кнопка». Ім'я береться з тієї самої підказки.
+       Заголовок сторінки — div.heading_page у десятках шаблонів ядра й модулів, тож
+       роль заголовка ставиться тут, а не в кожному шаблоні. */
+    (function () {
+        function nameControls(root) {
+            $(root).find('a[data-hint], button[data-hint], [role="button"][data-hint]').each(function () {
+                if (!this.hasAttribute('aria-label') && !this.textContent.trim()) {
+                    this.setAttribute('aria-label', this.getAttribute('data-hint'));
+                }
+            });
+            $(root).find('.fn_remove_image:not([aria-label])').attr('aria-label', '{$btr->general_delete|escape:'javascript'}');
+            // «+» і «×» біля значень властивості — одна кнопка, яку скрипт товару перемикає
+            // класом fn_add / fn_remove, тож ім'я рахується щоразу заново.
+            $(root).find('.fn_feature_multi_values').each(function () {
+                this.setAttribute('aria-label', $(this).hasClass('fn_remove') ? '{$btr->general_delete|escape:'javascript'}' : '{$btr->feature_add_value|escape:'javascript'}');
+            });
+            // Фото в рядку списку веде туди ж, куди й назва; alt у нього порожній.
+            $(root).find('.fn_row a:not([aria-label])').each(function () {
+                if (this.textContent.trim() || !this.querySelector('img')) {
+                    return;
+                }
+                var title = $(this).closest('.fn_row').find('[class*="okay_list_"][class*="_name"] a').first().text().replace(/\s+/g, ' ').trim();
+                if (title) {
+                    this.setAttribute('aria-label', title);
+                }
+            });
+            // Кнопка пошуку — лише іконка; ім'я з підказки поля, біля якого вона стоїть.
+            $(root).find('.input-group button:not([aria-label])').each(function () {
+                var field = $(this).closest('.input-group').find('input[placeholder]').get(0);
+                if (!this.textContent.trim() && field) {
+                    this.setAttribute('aria-label', field.getAttribute('placeholder'));
+                }
+            });
+        }
+        $(function () {
+            nameControls(document);
+            if (!document.querySelector('h1')) {
+                var heading = document.querySelector('#main_content .heading_page');
+                if (heading) {
+                    heading.setAttribute('role', 'heading');
+                    heading.setAttribute('aria-level', '1');
+                }
+            }
+        });
+        // Рядки й зображення, додані пізніше скриптами, отримують ім'я при першому фокусі.
+        document.addEventListener('focusin', function (e) {
+            if (e.target.closest && e.target.closest('[data-hint], .fn_remove_image, .fn_feature_multi_values')) {
+                nameControls(e.target.parentNode || document);
+            }
+        });
+    })();
+</script>
 </body>
 
 {*main scripts*}
@@ -978,13 +1035,21 @@
         * функция вызывается прямо в файлах tpl
         * */
         function success_action ($this){
-            $(document).on('click','.fn_submit_delete',function(){
+            // Назва об'єкта в питанні: «Підтвердити?» не казало, що саме видаляється.
+            var name = $this.closest('.fn_row').find('[class*="okay_list_"][class*="_name"]').first().find('a').first().text().replace(/\s+/g, ' ').trim();
+            $('#fn_action_modal .heading_modal').text(name
+                ? '{$btr->index_confirm_delete|escape:'javascript'}'.replace('%s', name.length > 60 ? name.slice(0, 57) + '…' : name)
+                : '{$btr->index_confirm|escape:'javascript'}');
+            // Обробники в просторі імен і з off(): інакше кожне відкриття модалки
+            // додавало ще пару, і «Так» відправляв форму стільки разів, скільки її відкривали.
+            $(document).off('click.fnDelete');
+            $(document).on('click.fnDelete','.fn_submit_delete',function(){
                 $('.fn_form_list input[type="checkbox"][name*="check"]').prop('checked', false);
                 $this.closest(".fn_row").find('input[type="checkbox"][name*="check"]').prop('checked', true);
                 $this.closest(".fn_form_list").find('select[name="action"] option[value=delete]').prop('selected', true);
                 $this.closest(".fn_form_list").trigger('submit');
             });
-            $(document).on('click','.fn_dismiss_delete',function(){
+            $(document).on('click.fnDelete','.fn_dismiss_delete',function(){
                 $('.fn_form_list input[type="checkbox"][name*="check"]').prop('checked', false);
                 $this.closest(".fn_form_list").find('select[name="action"] option[value=delete]').removeAttr('selected');
                 return false;

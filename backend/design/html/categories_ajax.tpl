@@ -7,7 +7,7 @@
 
                 {if $category->subcategories}
                     <div class="okay_list_heading okay_list_subicon">
-                        <a href="javascript:;" class="fn_ajax_toggle" data-toggle="{if $isAllCategories || (!empty($smarty.get.category_id) && in_array($smarty.get.category_id, $category->children))}1{else}0{/if}" data-category_id="{$category->id}" >
+                        <a href="javascript:;" class="fn_ajax_toggle" aria-label="{$btr->general_toggle_children|escape}" data-toggle="{if $isAllCategories || (!empty($smarty.get.category_id) && in_array($smarty.get.category_id, $category->children))}1{else}0{/if}" data-category_id="{$category->id}" >
                             <span class="fn_toggle_icon{if $isAllCategories || (!empty($smarty.get.category_id) && in_array($smarty.get.category_id, $category->children))} is_open{/if}">{include file='svg_icon.tpl' svgId='square_plus'}{include file='svg_icon.tpl' svgId='square_minus'}</span>
                         </a>
                     </div>

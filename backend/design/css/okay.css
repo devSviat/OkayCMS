@@ -9306,6 +9306,30 @@ input.error {
     margin-left: .75em;
 }
 /************************************************************************* Фокус і рух */
+/* Перше, що отримує фокус: дозволяє оминути бічне меню (десятки посилань) і
+   перейти просто до вмісту. Видно лише під час переходу клавіатурою. */
+.skip_link {
+    position: absolute;
+    left: 8px;
+    top: -60px;
+    z-index: 1000;
+    padding: 8px 14px;
+    color: var(--ok-ink-inverse);
+    background-color: var(--ok-accent);
+    border-radius: var(--ok-radius-control);
+}
+.skip_link:focus {
+    top: 8px;
+}
+/* Загальне a:focus фарбує текст посилання в акцент — на акцентному тлі він зникав. */
+a.skip_link,
+a.skip_link:hover,
+a.skip_link:focus {
+    color: var(--ok-ink-inverse);
+}
+#main_content:focus {
+    outline: none;
+}
 /* До цього в жодному стилі адмінки не було :focus-visible, зате 19 разів
    траплявся outline: none. Клавіатурний обхід був невидимий. Кільце нижче
    перекриває їх усі й показується тільки за клавіатурного фокуса, тож на
