@@ -1842,3 +1842,4 @@ $lang['core_updater_checking'] = 'Проверяем…';
 $lang['general_version'] = 'Version';
 $lang['settings_system_php_version'] = 'PHP version';
 $lang['support_status_unknown'] = 'Unknown';
+$lang['general_add_failed'] = 'The record was not added: the database rejected it. Details are in the site error log.';

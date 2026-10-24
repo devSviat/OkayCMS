@@ -24,6 +24,7 @@ class FAQAdmin extends IndexAdmin
 
             if (empty($faq->id)) {
                 $faq->id = $FAQEntity->add($faq);
+                $this->postRedirectGet->requireAdded($faq->id);
                 $this->postRedirectGet->storeMessageSuccess('added');
                 $this->postRedirectGet->storeNewEntityId($faq->id);
             } else {

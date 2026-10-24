@@ -32,6 +32,7 @@ class CategoryAdmin extends IndexAdmin
                     // Добавление категории
                     $category     = $backendCategoriesHelper->prepareAdd($category);
                     $category->id = $backendCategoriesHelper->add($category);
+                    $this->postRedirectGet->requireAdded($category->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($category->id);

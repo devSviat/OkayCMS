@@ -36,6 +36,7 @@ class PaymentMethodAdmin extends IndexAdmin
                 if (empty($paymentMethod->id)) {
                     $preparedPayment = $backendPaymentsHelper->prepareAdd($paymentMethod);
                     $paymentMethod->id     = $backendPaymentsHelper->add($preparedPayment);
+                    $this->postRedirectGet->requireAdded($paymentMethod->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($paymentMethod->id);

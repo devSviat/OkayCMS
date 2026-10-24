@@ -29,6 +29,7 @@ class UserGroupAdmin extends IndexAdmin
                 if (empty($group->id)) {
                     $preparedGroup = $backendUserGroupsHelper->prepareAdd($group);
                     $group->id     = $backendUserGroupsHelper->add($preparedGroup);
+                    $this->postRedirectGet->requireAdded($group->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($group->id);

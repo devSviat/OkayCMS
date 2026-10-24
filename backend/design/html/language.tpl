@@ -51,6 +51,8 @@
                         {$btr->language_empty_label|escape}
                         {elseif $message_error == 'label_exists'}
                         {$btr->language_used|escape}
+                        {else}
+                        {$message_error|escape}
                         {/if}
                     </div>
                 </div>

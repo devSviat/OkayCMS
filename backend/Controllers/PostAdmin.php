@@ -39,6 +39,7 @@ class PostAdmin extends IndexAdmin
                 if (empty($post->id)) {
                     $preparedPost = $backendBlogHelper->prepareAdd($post);
                     $post->id     = $backendBlogHelper->add($preparedPost);
+                    $this->postRedirectGet->requireAdded($post->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($post->id);

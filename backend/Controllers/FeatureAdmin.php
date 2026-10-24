@@ -34,6 +34,7 @@ class FeatureAdmin extends IndexAdmin
                 if (empty($feature->id)) {
                     $feature   = $backendFeaturesHelper->prepareAdd($feature);
                     $feature->id = $backendFeaturesHelper->add($feature);
+                    $this->postRedirectGet->requireAdded($feature->id);
 
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($feature->id);

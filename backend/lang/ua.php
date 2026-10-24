@@ -1851,6 +1851,7 @@ $lang['manager_reauth_title'] = 'Підтвердіть пароль';
 $lang['manager_reauth_hint'] = 'Логін, email, пароль, права, сесії й видалення менеджерів змінюються лише після підтвердження. Воно діє 10 хвилин.';
 $lang['manager_reauth_wrong'] = 'Неправильний пароль.';
 $lang['manager_save_failed'] = 'Не вдалося зберегти. Спробуйте ще раз.';
+$lang['general_add_failed'] = 'Запис не додано: база даних відхилила вставку. Подробиці — в журналі помилок сайту.';
 $lang['index_my_profile'] = 'профіль і сесії';
 $lang['core_updater_meta_title'] = 'Оновлення ядра';
 $lang['core_updater_installed_label'] = 'Встановлена версія';

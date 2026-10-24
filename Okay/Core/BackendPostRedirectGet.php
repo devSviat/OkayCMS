@@ -16,10 +16,13 @@ class BackendPostRedirectGet
      */
     private $response;
 
-    public function __construct(Request $request, Response $response)
+    private BackendTranslations $backendTranslations;
+
+    public function __construct(Request $request, Response $response, BackendTranslations $backendTranslations)
     {
         $this->request  = $request;
         $this->response = $response;
+        $this->backendTranslations = $backendTranslations;
     }
 
     public function __destruct()
@@ -49,9 +52,40 @@ class BackendPostRedirectGet
         $this->response->redirectTo($this->request->url(['id' => $_SESSION['new_entity_id']]));
     }
 
+    /**
+     * Entity::add() на невдалій вставці віддає false: Database ковтає виняток
+     * і пише лише в лог. Порожній id тут — це «не додано», а не «додано».
+     * Запобіжник для модулів, що не викликають requireAdded().
+     */
     public function storeNewEntityId($id)
     {
+        if (empty($id)) {
+            $this->storeAddFailed();
+            return;
+        }
+
         $_SESSION['new_entity_id'] = $id;
+    }
+
+    /**
+     * Викликається одразу після add(): на невдалій вставці повертає на ту саму
+     * форму з помилкою, не даючи коду далі писати пов'язані дані до запису,
+     * якого немає.
+     */
+    public function requireAdded($id): void
+    {
+        if (!empty($id)) {
+            return;
+        }
+
+        $this->storeAddFailed();
+        $this->response->redirectTo($this->request->url());
+    }
+
+    private function storeAddFailed(): void
+    {
+        unset($_SESSION['message_success'], $_SESSION['new_entity_id']);
+        $_SESSION['message_error'] = $this->backendTranslations->getTranslation('general_add_failed');
     }
 
     public function storeMessageError($message)

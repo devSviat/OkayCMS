@@ -68,6 +68,7 @@ class OrderAdmin extends IndexAdmin
                 if (empty($order->id)) {
                     $preparedOrder = $backendOrdersHelper->prepareAdd($order);
                     $order->id  = $backendOrdersHelper->add($preparedOrder);
+                    $this->postRedirectGet->requireAdded($order->id);
                     $this->postRedirectGet->storeMessageSuccess('added');
                     $this->postRedirectGet->storeNewEntityId($order->id);
                 } else {
