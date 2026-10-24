@@ -25,6 +25,7 @@ cd dev && docker compose exec php85 php ok <команда>
 | `scheduler:list` | показує перелік зареєстрованих задач |
 | `release:build-package` | збирає пакет релізу форку (zip + `manifest.json` + `checksums.txt`) |
 | `manager:2fa-reset <login>` | вимикає менеджеру 2FA й завершує всі його сесії |
+| `features:repair-csv-quotes [--apply]` | відновлює значення властивостей, зіпсовані старим CSV-імпортом |
 
 ### `database:deploy`
 
@@ -113,6 +114,25 @@ php ok manager:2fa-reset <login>
 
 Код виходу 1 — менеджера з таким логіном немає або 2FA в нього не ввімкнена;
 тоді нічого не змінюється. Докладніше — [UPGRADE-security.md](UPGRADE-security.md#31-двофакторна-автентифікація-менеджерів).
+
+### `features:repair-csv-quotes`
+
+```bash
+php ok features:repair-csv-quotes          # план, нічого не пише
+php ok features:repair-csv-quotes --apply
+```
+
+До devSviat/OkayCMS-Fork#347 CSV читався й писався з escape `'\\'`: слеш перед
+лапкою екранував саме лапку, тож цикли експорт → імпорт лишали в значеннях
+властивостей `\"` і множили лапки — `\""PLUS\""`, `PLUS`, `PULSE"`.
+Команда шукає значення з таким підписом у будь-якій мові (фільтр
+`csv_quote_damaged` у `FeaturesValuesEntity`), відновлює їх
+(`Okay\Core\Import\CsvQuoteDamage`) і зливає ті, що після відновлення
+збіглися, тим самим `unionValues()`, що й кнопка «Об'єднати» в адмінці. Наявний
+чистий запис лишається, його translit не змінюється. Слеш без лапки поруч
+(`KRSC96\I`) — дані джерела, команда їх не чіпає. Логіка —
+`BackendFeaturesValuesHelper::repairCsvQuoteDamage()`, розширюється як звичайний
+метод хелпера.
 
 ## Своя команда
 
