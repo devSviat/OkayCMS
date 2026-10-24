@@ -77,20 +77,14 @@ class Parser
     
     private function parseLevel(BaseNode $parentNode, $parentOpenTagName = '')
     {
-        while (list($matchesSmartyComment,
-            $matchesHtmlComment,
-            $matchesHtml,
-            $matchesSmartyForeach,
-            $matchesSmartyFunction,
-            $matchesSmartyIf,
-            $matchesText) = $this->parseString($this->string)) {
+        while ([$matchesSmartyComment, $matchesHtmlComment, $matchesHtml, $matchesSmartyForeach, $matchesSmartyFunction, $matchesSmartyIf, $matchesText] = $this->parseString($this->string)) {
 
             if (!empty($matchesText) ) {
                 if (mb_strlen(trim($matchesText[1])) == 0) {
                     break;
                 }
                 
-                $this->string = isset($matchesText[2]) ? $matchesText[2] : '';
+                $this->string = $matchesText[2] ?? '';
                 $content = trim($matchesText[1]);
                 if (mb_strlen($content) > 0) {
                     $node = new TextNode($content);

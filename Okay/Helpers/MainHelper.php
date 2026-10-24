@@ -172,10 +172,8 @@ class MainHelper
         $design = $this->SL->getService(Design::class);
 
         // Если в контроллере не передали хелпер метаданных, утановим стандартный
-        if ($metadataHelper === null) {
-            /** @var MetadataInterface $metadataHelper */
-            $metadataHelper = $this->SL->getService(CommonMetadataHelper::class);
-        }
+        /** @var MetadataInterface $metadataHelper */
+        $metadataHelper ??= $this->SL->getService(CommonMetadataHelper::class);
         
         if ($design->getVar('h1') === null) {
             $design->assign('h1', $metadataHelper->getH1());

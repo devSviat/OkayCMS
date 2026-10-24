@@ -96,7 +96,7 @@ class NoPrefixAndCategoryStrategy extends AbstractRouteStrategy
             return $this->mockRouteParams;
         }
 
-        list($categoryUrl, $productUrl, $variantId) = array_pad($parts, 3, '');
+        [$categoryUrl, $productUrl, $variantId] = array_pad($parts, 3, '');
 
         $category = $this->categoriesEntity->get((string) $categoryUrl);
         if (empty($category)) {

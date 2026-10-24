@@ -81,7 +81,7 @@ class ManagerSessionsEntity extends Entity
     public function revoke(int $managerId, ?array $onlyIds, ?string $exceptSidHash, ?int $byManagerId): int
     {
         if ($onlyIds !== null) {
-            $onlyIds = array_values(array_filter(array_map('intval', $onlyIds)));
+            $onlyIds = array_values(array_filter(array_map(intval(...), $onlyIds)));
             if ($onlyIds === []) {
                 return ExtenderFacade::execute([static::class, __FUNCTION__], 0, func_get_args());
             }

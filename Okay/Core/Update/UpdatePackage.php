@@ -18,7 +18,7 @@ class UpdatePackage
      * Порівняння регістронезалежне: на FS, що не розрізняє регістр,
      * `CONFIG/config.local.php` перезаписав би `config/config.local.php`.
      */
-    private const OUTSIDE_CORE_PREFIXES = [
+    private const array OUTSIDE_CORE_PREFIXES = [
         'config/',
         'files/',
         'design/',
@@ -42,13 +42,13 @@ class UpdatePackage
      * важіль безпеки периметра на класичному хостингу й найчастіше локально
      * дописаний, `robots.txt` — рішення власника магазину.
      */
-    private const OUTSIDE_CORE_FILES = [
+    private const array OUTSIDE_CORE_FILES = [
         '.htaccess',
         'robots.txt',
     ];
 
     /** Єдиний вендор модулів, який постачається разом із ядром. */
-    private const CORE_MODULE_VENDOR = 'okaycms';
+    private const string CORE_MODULE_VENDOR = 'okaycms';
 
     /**
      * Пакет першого покоління (PackageFormat::LEGACY) не везе `backend/design/`:
@@ -57,8 +57,8 @@ class UpdatePackage
      * Межа першого покоління тут та сама, що в них, щоб збірка не видала
      * пакет, який вони відкинуть (стереже UpdatePackageBoundaryTest).
      */
-    private const LEGACY_DENIED_PREFIX = 'backend/design/';
-    private const LEGACY_ALLOWED_BASENAME_PREFIX = 'core_updater';
+    private const string LEGACY_DENIED_PREFIX = 'backend/design/';
+    private const string LEGACY_ALLOWED_BASENAME_PREFIX = 'core_updater';
 
     /**
      * Розбирає `checksums.txt` у форматі `{sha256}  {name}\n`, як пише

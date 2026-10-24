@@ -36,7 +36,7 @@ class BannersImagesAdmin extends IndexAdmin
             // Смена группы
             $imageBanners = $this->request->post('image_banners');
             foreach($imageBanners as $i=>$imageBanner) {
-                $bannersImagesEntity->update($i, array('banner_id'=>$imageBanner));
+                $bannersImagesEntity->update($i, ['banner_id'=>$imageBanner]);
             }
 
             // Действия с выбранными
@@ -69,7 +69,7 @@ class BannersImagesAdmin extends IndexAdmin
         }
         
         $bannersImagesCount        = $bannersImagesHelper->countBannersImages($filter);
-        list($filter, $pagesCount) = $bannersImagesHelper->makePagination($bannersImagesCount, $filter);
+        [$filter, $pagesCount] = $bannersImagesHelper->makePagination($bannersImagesCount, $filter);
         $bannersImages             = $bannersImagesHelper->findBannersImages($filter);
 
         $this->design->assign('banners_images_count', $bannersImagesCount);

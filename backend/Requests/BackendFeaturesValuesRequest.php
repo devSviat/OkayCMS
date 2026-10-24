@@ -48,7 +48,7 @@ class BackendFeaturesValuesRequest
 
     public function postToIndexAllValues()
     {
-        $toIndexAllValues = isset($_POST['to_index_all_values']) ? $_POST['to_index_all_values'] : null;
+        $toIndexAllValues = $_POST['to_index_all_values'] ?? null;
         return ExtenderFacade::execute(__METHOD__, $toIndexAllValues, func_get_args());
     }
 }

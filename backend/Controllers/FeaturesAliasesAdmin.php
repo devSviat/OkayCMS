@@ -109,7 +109,7 @@ class FeaturesAliasesAdmin extends IndexAdmin
                     asort($featuresAliasesIds);
                     $i = 0;
                     foreach($featuresAliasesIds as $featuresAlias_id) {
-                        $featuresAliasesEntity->update($featuresAliasesIds[$i], array('position'=>$featuresAlias_id));
+                        $featuresAliasesEntity->update($featuresAliasesIds[$i], ['position'=>$featuresAlias_id]);
                         $i++;
                     }
 

@@ -12,6 +12,7 @@ use DebugBar\DataCollector\PhpInfoCollector;
 use DebugBar\DataCollector\RequestDataCollector;
 use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DebugBar as LibDebugBar;
+use Monolog\Level;
 use Monolog\Logger;
 use Okay\Core\DebugBar\DataCollectors\ConfigCollector;
 use Okay\Core\DebugBar\DataCollectors\PDOCollector;
@@ -61,7 +62,7 @@ class DebugBar
 
             self::addCollector(new TimeDataCollector());
             self::addCollector(new ConfigCollector());
-            self::addCollector(new MonologCollector(null, Logger::DEBUG, true, 'system_log'));
+            self::addCollector(new MonologCollector(null, Level::Debug, true, 'system_log'));
 
             /** @var ExtendedPdo $extendedPdo */
             $extendedPdo = self::$serviceLocator->getService(ExtendedPdo::class);

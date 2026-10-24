@@ -101,7 +101,7 @@ $mainCurrency =  $currenciesEntity->getMainCurrency();
 $orders = $ordersEntity->find($filter);
 if (!empty($orders)) {
     foreach($orders as $o) {
-        $str = array();
+        $str = [];
         $o->currency = $mainCurrency->code;
         foreach($columnsNames as $n=>$c) {
             $str[] = $o->$n;

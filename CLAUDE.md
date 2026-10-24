@@ -35,13 +35,13 @@ security boundaries, themes and the Docker environment, so a blind merge would u
 
 ## Stack
 
-- PHP `^8.4` (verified on 8.4–8.5)
+- PHP `^8.5`
 - Smarty `^5.8` (templating) — `\Smarty_Internal_Template` is gone; plugins must not type-hint the template object
 - Custom DI container (`Okay\Core\OkayContainer`)
 - Custom ORM (`Okay\Core\Entity\Entity`)
 - Symfony Console `^8.0` (the `./ok` CLI) — commands declare their name via `#[AsCommand]`
 - Aura.Sql `^6.0` / Aura.SqlQuery `^3.0` (DB layer)
-- PHPUnit `^13.2`, PHPStan `^2.2`, PHP_CodeSniffer `^3.7` (dev)
+- PHPUnit `^13.2`, PHPStan `^2.2` with `phpstan-deprecation-rules`, Rector `^2.7` — syntax-only rules in `rector.php` (dev)
 
 ## Commands
 
@@ -58,7 +58,7 @@ php vendor/bin/phpunit --filter TplModTest   # run a single test class
 ./ok module:create                     # scaffold a new module
 ```
 
-Run CLI/PHPUnit inside the PHP container if PHP is not on the host: `cd dev && docker compose exec php85 php vendor/bin/phpunit` (the `php85` service runs PHP 8.5; the app requires PHP ≥ 8.4).
+Run CLI/PHPUnit inside the PHP container if PHP is not on the host: `cd dev && docker compose exec php85 php vendor/bin/phpunit` (the `php85` service runs PHP 8.5; the app requires PHP ≥ 8.5).
 
 Local env config lives in `dev/.env` (copy from `dev/.env-example`). On container creation the default DB dump `1DB_changes/okay_clean.sql` is loaded and the `admin` manager is (re)created. The database now lives on a named Docker volume — `docker compose down -v` destroys it (no more leftover files under a bind-mounted directory).
 
@@ -105,7 +105,7 @@ Service wiring is centralized: core services in `Okay/Core/config/services.php` 
 | JS/CSS files | `docs/assets.md` |
 | Smarty plugins | `docs/smarty-plugins.md` |
 | CLI commands, scheduler | `docs/cli.md` |
-| Tests, phpstan, phpcs, smoke checks | `docs/testing.md` |
+| Tests, phpstan, smoke checks | `docs/testing.md` |
 | Discounts | `docs/discounts.md` |
 | Security boundaries and upgrade notes | `docs/UPGRADE-security.md` |
 | Porting a theme to this fork | `docs/theme-porting.md` |

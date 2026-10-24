@@ -38,18 +38,18 @@ class Init extends AbstractInit
         $this->setBackendMainController('GoogleMerchantAdmin');
 
         $this->migrateEntityTable(GoogleMerchantFeedsEntity::class, [
-            (new EntityField('id'))->setTypeInt(11, false)->setAutoIncrement(),
-            (new EntityField('name'))->setTypeVarchar(100, false),
-            (new EntityField('url'))->setTypeVarchar(100, false)->setIndexUnique(),
-            (new EntityField('enabled'))->setTypeTinyInt(1, false)->setDefault(0),
+            new EntityField('id')->setTypeInt(11, false)->setAutoIncrement(),
+            new EntityField('name')->setTypeVarchar(100, false),
+            new EntityField('url')->setTypeVarchar(100, false)->setIndexUnique(),
+            new EntityField('enabled')->setTypeTinyInt(1, false)->setDefault(0),
         ]);
 
-        $entityTypeField = (new EntityField('entity_type'))->setTypeEnum(['product', 'category', 'brand'], false);
-        $includeField = (new EntityField('include'))->setTypeTinyInt(1, false);
-        $entityIdField = (new EntityField('entity_id'))->setTypeInt(11, false);
+        $entityTypeField = new EntityField('entity_type')->setTypeEnum(['product', 'category', 'brand'], false);
+        $includeField = new EntityField('include')->setTypeTinyInt(1, false);
+        $entityIdField = new EntityField('entity_id')->setTypeInt(11, false);
         $this->migrateEntityTable(GoogleMerchantRelationsEntity::class, [
-            (new EntityField('id'))->setTypeInt(11, false)->setAutoIncrement(),
-            (new EntityField('feed_id'))->setTypeInt(11, false)->setIndexUnique(null, $entityTypeField, $includeField, $entityIdField),
+            new EntityField('id')->setTypeInt(11, false)->setAutoIncrement(),
+            new EntityField('feed_id')->setTypeInt(11, false)->setIndexUnique(null, $entityTypeField, $includeField, $entityIdField),
             $entityIdField,
             $entityTypeField,
             $includeField,

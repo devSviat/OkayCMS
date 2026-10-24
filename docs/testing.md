@@ -14,7 +14,6 @@ php vendor/bin/phpunit tests/Core/            # каталог
 php vendor/bin/phpunit --filter TplModTest    # один клас
 
 php vendor/bin/phpstan analyse                # статичний аналіз
-php vendor/bin/phpcs                          # сумісність із версією PHP
 
 dev/bin/smoke.sh                              # перевірка оточення; запускати з кореня
 ```
@@ -163,15 +162,45 @@ gh run list --repo devSviat/OkayCMS-Fork --branch main --limit 5 --json name,con
 тест проходить за мілісекунди, а той, що тягне PDO, висить до таймауту, бо на паузі з'єднання не
 відпадає з помилкою.
 
-## PHP_CodeSniffer
+## Застаріле в PHP і бібліотеках
 
-`phpcs.xml.dist` — це **не стильовий** набір правил, а перевірка сумісності з версією PHP:
-`PHPCompatibility` із `testVersion = 8.4-`. Перевіряються `Okay`, `backend`, `ok` і `tests`.
+PHPStan підключає `phpstan/phpstan-deprecation-rules`: виклик функції, методу, константи чи класу з
+позначкою `@deprecated` (у PHP чи в залежності, як `Monolog\Logger::DEBUG`) валить аналіз. Застарілі
+конструкції самої мови — неявний nullable, оператор backtick — PHPStan ловить і
+без розширення: нижню межу він бере з `composer.json` (`^8.5`).
 
-Попередження не валять перевірку (`ignore_warnings_on_exit`), гейтом є лише помилки. Одне
-правило вимкнене свідомо — `ArgumentFunctionsReportCurrentValue`: воно спрацьовує на кожному
-`ExtenderFacade::execute(__METHOD__, $result, func_get_args())`, тобто буквально всюди, і
-стосується поведінки, яка діє з PHP 7.0.
+Джоба CI `lint` додатково проганяє `php -l` на 8.5 по кожному файлу репозиторію, зокрема `tests/` і
+`ok`, яких PHPStan не аналізує. Будь-який рядок, крім «No syntax errors», валить збірку.
+
+PHPCompatibility тут немає: стабільна 9.3.5 не знає PHP 8.x і на коді з навмисними застарілими
+конструкціями 8.4/8.5 не знаходила жодної.
+
+## Rector
+
+`rector.php` — 19 правил, лише синтаксис: `array()` → `[]`, `strpos() !== false` → `str_contains()`,
+`isset() ? :` → `??`, стрілкові функції, `'intval'` → `intval(...)` тощо. CI запускає
+`vendor/bin/rector process --dry-run`: код, який правила змінили б, валить збірку. Виправити —
+`php vendor/bin/rector process`.
+
+Правила перелічено явно, а не наборами `withPhpSets()`: новий реліз Rector доповнює набори, і в CI
+мовчки з'явилось би неперевірене правило. Сигнатур, видимості й типів властивостей жодне з них не
+міняє — модулі наслідують класи ядра (`IndexAdmin`, `Entity`, хелпери) і перевизначають їхні методи.
+
+Свідомо не ввімкнено, бо ламає тут конкретне:
+
+| Правило | Що ламає |
+| --- | --- |
+| `typeDeclarations` на `public`/`protected` | модуль, що перевизначає метод без типу (Redis перевизначає 9 хелперів) |
+| `ClassPropertyAssignToConstructorPromotion` | додає типи властивостям → `TypeError`, де пишуть в обхід конструктора |
+| `RemoveUnusedPrivateProperty` | `Entity` читає властивості через reflection (`TranslationsEntity::$templateOnly`) |
+| `RemoveUnusedConstructorParam` | DI передає аргументи конструктора явним списком |
+| `ChangeSwitchToMatch` | `match` порівнює строго і кидає `UnhandledMatchError` |
+| `ArrayToFirstClassCallable` | Smarty бере ім'я фільтра з callable-масиву; замикання лишається без імені |
+| `SafeDeclareStrictTypes` | міняє приведення скалярів у кожному виклику з файлу |
+
+`backend/design` (сторонній файловий менеджер) у `skip`. Модулі Sviat у broken теж під правилами: ті, що
+мають репозиторій у лабі, правляться там і приходять уже пройденими. Дослідження з прогонами —
+`docs/superpowers/specs/2026-10-24-rector-modernization-design.md` у broken.
 
 ## `dev/bin/smoke.sh`
 
@@ -193,9 +222,10 @@ gh run list --repo devSviat/OkayCMS-Fork --branch main --limit 5 --json name,con
 | ---- | ------------ |
 | `composer validate --strict` | коректність `composer.json` |
 | `composer audit --locked` | вразливості в залежностях; `--abandoned=report`, тобто покинутий пакет не валить збірку |
-| `vendor/bin/phpcs -q` | сумісність із версією PHP, на матриці 8.4 і 8.5 |
-| `vendor/bin/phpunit` | тести, на тій самій матриці |
+| `vendor/bin/phpunit` | тести на 8.5 |
 | `vendor/bin/phpstan analyse` | статичний аналіз, окремою джобою на 8.5 |
+| `vendor/bin/rector process --dry-run` | синтаксис, який `rector.php` уже прибрав, у тій самій джобі |
+| `php -l` по всіх файлах | застаріле під час компіляції, на 8.5 |
 | `gitleaks detect` | секрети по **всій** історії |
 
 Розібрані вручну спрацювання Gitleaks перелічені у `.gitleaksignore` поіменно — не звуженням
@@ -208,7 +238,6 @@ gh run list --repo devSviat/OkayCMS-Fork --branch main --limit 5 --json name,con
 
 ```bash
 cd dev && docker compose exec php85 php vendor/bin/phpunit
-cd dev && docker compose exec php85 php vendor/bin/phpcs
 cd dev && docker compose exec php85 php vendor/bin/phpstan analyse
 dev/bin/smoke.sh
 ```

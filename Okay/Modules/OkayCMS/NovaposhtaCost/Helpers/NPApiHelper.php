@@ -20,7 +20,7 @@ class NPApiHelper
      * одній спробі: там ретрай тримає php-fpm воркер до півтори хвилини, а
      * «повторює» користувач — наступною літерою.
      */
-    private const UNATTENDED_ATTEMPTS = 3;
+    private const int UNATTENDED_ATTEMPTS = 3;
 
     private string $lastCallError = '';
     private Settings $settings;
@@ -259,7 +259,7 @@ class NPApiHelper
         if (!empty($responseJson->errors)) {
             $this->lastCallError = implode('<br>', (array) $responseJson->errors);
 
-            if (strpos($this->lastCallError, 'API key') !== false) {
+            if (str_contains($this->lastCallError, 'API key')) {
                 $this->settings->set('np_api_key_error', $this->lastCallError);
             }
 

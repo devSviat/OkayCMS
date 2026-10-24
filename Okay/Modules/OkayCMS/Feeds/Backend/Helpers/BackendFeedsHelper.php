@@ -75,7 +75,7 @@ class BackendFeedsHelper
             $error = 'url_exists';
         } elseif (empty($feed->name)) {
             $error = 'empty_name';
-        } elseif (substr($feed->url, -1) == '-' || substr($feed->url, 0, 1) == '-') {
+        } elseif (str_ends_with($feed->url, '-') || str_starts_with($feed->url, '-')) {
             $error = 'url_wrong';
         }
 

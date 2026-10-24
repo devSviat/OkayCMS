@@ -60,7 +60,7 @@ class ModuleCreateCommand extends Command
                     $this->output->writeln('<error>The name is invalid. Please use only [a-Z, 0-9], first character must be letter.<error>');
                 }
 
-                $exist = array_search(strtolower($vendor), array_map('strtolower', $vendors));
+                $exist = array_search(strtolower($vendor), array_map(strtolower(...), $vendors));
                 if ($exist) {
                     $this->output->writeln('<error>Vendor already exist<error>');
                 }
@@ -90,7 +90,7 @@ class ModuleCreateCommand extends Command
                 $this->output->writeln('<error>The name is invalid. Please use only [a-Z, 0-9], first character must be letter.<error>');
             }
 
-            $exist = array_search(strtolower($module), array_map('strtolower', $modules));
+            $exist = array_search(strtolower($module), array_map(strtolower(...), $modules));
             if ($exist) {
                 $this->output->writeln('<error>Module already exist<error>');
             }

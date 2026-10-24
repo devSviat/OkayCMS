@@ -43,10 +43,10 @@ class ManagerAuthLog
      * FLOOD_WINDOW_SECONDS. Ліміти входу рахують кожну мережу окремо, і з
      * багатьох мереж таблицю інакше можна було б наповнювати без меж.
      */
-    private const FLOOD_CAPS = [self::PASSWORD_FAILED => 200, self::LIMIT => 50];
-    private const FLOOD_WINDOW_SECONDS = 900;
+    private const array FLOOD_CAPS = [self::PASSWORD_FAILED => 200, self::LIMIT => 50];
+    private const int FLOOD_WINDOW_SECONDS = 900;
 
-    private const DETAILS_MAX = 500;
+    private const int DETAILS_MAX = 500;
 
     public function __construct(
         private EntityFactory $entityFactory,

@@ -32,7 +32,7 @@ class Imagick extends AbstractResize // todo протестить адапрер
         }
 
         // Размеры превью при пропорциональном уменьшении
-        list($dstW, $dstH) = $this->calcContainSize($srcW, $srcH, $maxW, $maxH);
+        [$dstW, $dstH] = $this->calcContainSize($srcW, $srcH, $maxW, $maxH);
 
         // Уменьшаем
         $thumb->thumbnailImage($dstW, $dstH);

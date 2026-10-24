@@ -10,7 +10,7 @@ class GD extends AbstractResize
     public function resize($srcFile, $dstFile, $maxW, $maxH, $setWatermark = false, $crop_params = [])
     {
         // Параметры исходного изображения
-        @list($srcW, $srcH, $srcType) = array_values(getimagesize($srcFile));
+        @[$srcW, $srcH, $srcType] = array_values(getimagesize($srcFile));
         $srcType = image_type_to_mime_type($srcType);
 
         if(empty($srcW) || empty($srcH) || empty($srcType)) {
@@ -27,7 +27,7 @@ class GD extends AbstractResize
         }
 
         // Размеры превью при пропорциональном уменьшении
-        @list($dstW, $dstH) = $this->calcContainSize($srcW, $srcH, $maxW, $maxH);
+        @[$dstW, $dstH] = $this->calcContainSize($srcW, $srcH, $maxW, $maxH);
 
         // Читаем изображение
         switch ($srcType) {

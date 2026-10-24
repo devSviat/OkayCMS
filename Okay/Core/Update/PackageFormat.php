@@ -16,10 +16,10 @@ namespace Okay\Core\Update;
  */
 final class PackageFormat
 {
-    public const LEGACY = 1;
+    public const int LEGACY = 1;
 
     /** Найновіше покоління, яке ця інсталяція вміє встановити. */
-    public const SUPPORTED = 2;
+    public const int SUPPORTED = 2;
 
     /** Перше покоління отримало назву до появи поколінь, і назву міняти не можна: її шукають старі інсталяції. */
     public static function zipAssetName(string $version, int $format): string

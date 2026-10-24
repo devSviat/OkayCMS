@@ -41,10 +41,6 @@ class NoPrefixStrategy extends AbstractRouteStrategy
     {
         preg_match("/([^\/]+)/ui", $url, $matches);
 
-        if (isset($matches[1])) {
-            return $matches[1];
-        }
-
-        return '';
+        return $matches[1] ?? '';
     }
 }

@@ -134,7 +134,7 @@ class OkayContainer implements ContainerInterface
     {
         try {
             $this->getParameter($name);
-        } catch (ParameterNotFoundException $exception) {
+        } catch (ParameterNotFoundException) {
             return false;
         }
 

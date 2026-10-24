@@ -49,7 +49,7 @@ class PathResolver
             return false;
         }
 
-        if (strpos($value, "\0") !== false || strpos($value, '\\') !== false) {
+        if (str_contains($value, "\0") || str_contains($value, '\\')) {
             return false;
         }
 
@@ -77,11 +77,11 @@ class PathResolver
             return null;
         }
 
-        if (strpos($relativePath, "\0") !== false) {
+        if (str_contains($relativePath, "\0")) {
             return null;
         }
 
-        if (strpos($relativePath, '\\') !== false) {
+        if (str_contains($relativePath, '\\')) {
             return null;
         }
 
@@ -106,7 +106,7 @@ class PathResolver
 
         // realpath() розкриває симлінки, тому перевірка нижче відсікає і
         // симлінк усередині upload-кореня, що вказує назовні.
-        if ($resolved !== $this->root && strpos($resolved, $this->root . '/') !== 0) {
+        if ($resolved !== $this->root && !str_starts_with($resolved, $this->root . '/')) {
             return null;
         }
 

@@ -160,9 +160,9 @@ class DeployHelper
     {
         $SL = ServiceLocator::getInstance();
 
-        $entityFactory = $SL->getService('Okay\Core\EntityFactory');
-        $modulesEntity = $entityFactory->get('Okay\Entities\ModulesEntity');
-        $installer = $SL->getService('Okay\Core\Modules\Installer');
+        $entityFactory = $SL->getService(\Okay\Core\EntityFactory::class);
+        $modulesEntity = $entityFactory->get(\Okay\Entities\ModulesEntity::class);
+        $installer = $SL->getService(\Okay\Core\Modules\Installer::class);
 
         if (!$modules = $modulesEntity->find()) {
             return false;

@@ -12,7 +12,7 @@ namespace Okay\Modules\OkayCMS\LiqPay;
  */
 class LiqPayProtocol
 {
-    private const VERSION = 3;
+    private const int VERSION = 3;
 
     /**
      * Payload, який іде в браузер покупця.

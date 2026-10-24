@@ -16,7 +16,7 @@ use Okay\Modules\OkayCMS\Banners\VO\RestoreBackupErrorVO;
 
 class BannersBackupHelper
 {
-    private const BACKUP_CONFIG_FILE = 'config.json';
+    private const string BACKUP_CONFIG_FILE = 'config.json';
 
     private BannersEntity $bannersEntity;
     private BannersImagesEntity $bannersImagesEntity;

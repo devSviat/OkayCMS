@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.4', '8.5']
+        php: ['8.5']
     name: PHP ${{ matrix.php }}
     steps:
       - uses: actions/checkout@v7
@@ -39,11 +39,6 @@ jobs:
       # зупинки збірки в день, коли автор поставив прапорець.
       - name: Composer audit
         run: composer audit --locked --abandoned=report
-
-      # PHPCompatibility statically targets testVersion 8.2- regardless of the
-      # runtime, so it is safe to run on every matrix entry.
-      - name: PHPCompatibility
-        run: vendor/bin/phpcs -q
 
       - name: PHPUnit
         run: vendor/bin/phpunit
@@ -70,6 +65,37 @@ jobs:
 
       - name: PHPStan
         run: vendor/bin/phpstan analyse --no-progress
+
+      # rector.php — лише синтаксичні правила; новий код не повертає конструкцій,
+      # які вже прибрано (array(), strpos() !== false тощо).
+      - name: Rector
+        run: vendor/bin/rector process --dry-run --no-progress-bar
+
+  # Компілятор 8.5 по кожному файлу, зокрема в tests/ і ok, яких PHPStan не
+  # аналізує: застаріле під час компіляції валить збірку.
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.5']
+    name: Lint (PHP ${{ matrix.php }})
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: php -l
+        run: |
+          set -o pipefail
+          git ls-files -z -- '*.php' ok ':!:Okay/Modules/*/vendor/*' \
+            | xargs -0 -n 100 -P 4 php -d error_reporting=-1 -d display_errors=1 -d log_errors=0 -l 2>&1 \
+            | { grep -v '^No syntax errors detected in ' || true; } | tee lint.txt
+          test ! -s lint.txt
 
   secrets:
     runs-on: ubuntu-latest

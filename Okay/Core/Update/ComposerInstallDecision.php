@@ -18,9 +18,9 @@ namespace Okay\Core\Update;
  */
 final class ComposerInstallDecision
 {
-    private const LOCK_DEV_KEYS = ['packages-dev', 'content-hash', '_readme'];
+    private const array LOCK_DEV_KEYS = ['packages-dev', 'content-hash', '_readme'];
 
-    private const JSON_DEV_KEYS = ['require-dev', 'autoload-dev'];
+    private const array JSON_DEV_KEYS = ['require-dev', 'autoload-dev'];
 
     /**
      * @param string $rootDir корінь сайту з поточними composer.lock/composer.json

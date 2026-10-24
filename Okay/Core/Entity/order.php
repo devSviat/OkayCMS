@@ -33,7 +33,7 @@ trait order
                 $orderFieldName = preg_replace('~^([\w\.\-]+)?.*$~', '$1', $orderField);
 
                 // Если алиас не задали ранее, добавим его сейчас
-                if (strpos($orderFieldName, '.') === false) {
+                if (!str_contains($orderFieldName, '.')) {
                     $tableAlias = $this->getTableAlias();
 
                     // Если сортируют по полю, которое объявлено как мультиленговое, установим соответствующий алиас

@@ -11,24 +11,24 @@ use Okay\Core\Settings;
 class BackendModulesHelper
 {
     /** Основа експоненційного бекофу в request(), а не таймаут curl. */
-    private const REQUEST_TIMEOUT = 10;
-    private const MAX_RETRY = 4;
+    private const int REQUEST_TIMEOUT = 10;
+    private const int MAX_RETRY = 4;
 
     /**
      * Таймаути для викликів, які ініціює сам адмін (пошук по маркетплейсу,
      * список версій): чекати довго тут прийнятно, бо людина натиснула кнопку
      * і бачить очікування.
      */
-    private const CONNECT_TIMEOUT = 3;
-    private const TIMEOUT = 10;
+    private const int CONNECT_TIMEOUT = 3;
+    private const int TIMEOUT = 10;
 
     /**
      * Таймаути для фонового оновлення кешу: його ніхто не просив, і воно
      * трапляється всередині чужого запиту. Здоровий маркетплейс відповідає за
      * ~0.26 с, тож 3 с - десятикратний запас, а не економія.
      */
-    private const BACKGROUND_CONNECT_TIMEOUT = 2;
-    private const BACKGROUND_TIMEOUT = 3;
+    private const int BACKGROUND_CONNECT_TIMEOUT = 2;
+    private const int BACKGROUND_TIMEOUT = 3;
     private $apiBaseUrl;
     private $marketplaceUrl;
     private $config;
@@ -211,7 +211,7 @@ class BackendModulesHelper
             if ($retryCnt < self::MAX_RETRY) {
                 $retryCnt++;
             }
-            $_SESSION['modules_request_timeout'] = time() + pow(self::REQUEST_TIMEOUT, $retryCnt);
+            $_SESSION['modules_request_timeout'] = time() + self::REQUEST_TIMEOUT ** $retryCnt;
         } else {
             $retryCnt = 0;
         }
@@ -289,9 +289,7 @@ class BackendModulesHelper
     
     private function tempDir($subDir = null)
     {
-        if ($subDir === null) {
-            $subDir = sys_get_temp_dir();
-        }
+        $subDir ??= sys_get_temp_dir();
         $tempFile = tempnam($subDir,'');
         if (file_exists($tempFile)) {
             unlink($tempFile);

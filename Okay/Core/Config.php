@@ -16,7 +16,7 @@ class Config
     /*Версия системы*/
     public string $version = '4.5.3';
     /*Версія форку (лінійка релізів okaycms-fork/vX.Y.Z)*/
-    public string $forkVersion = '1.4.1';
+    public string $forkVersion = '1.5.0';
     /*Тип системы*/
     public string $version_type = 'pro';
 
@@ -52,11 +52,7 @@ class Config
             throw new \Exception('Config::subfolder is remove. Use Request::getSubDir()');
         }
 
-        if (isset($this->vars[$name])) {
-            return $this->vars[$name];
-        }
-
-        return null;
+        return $this->vars[$name] ?? null;
     }
 
     /**
@@ -136,7 +132,7 @@ class Config
         }
 
         // Определяем корневую директорию сайта
-        $this->vars['root_dir'] =  dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR;
+        $this->vars['root_dir'] =  dirname(__DIR__, 2).DIRECTORY_SEPARATOR;
 
         // Максимальный размер загружаемых файлов
         $max_upload = (int)(ini_get('upload_max_filesize'));

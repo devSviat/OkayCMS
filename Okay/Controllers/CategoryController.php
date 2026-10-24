@@ -170,9 +170,7 @@ class CategoryController extends AbstractController
 
         if (!empty($metaArray['features_values'])) {
             $canonicalFeaturesValues = array_combine(
-                array_map(function ($featureId) use ($catalogFeatures) {
-                    return $catalogFeatures[$featureId]->url;
-                }, array_keys($metaArray['features_values'])),
+                array_map(fn($featureId) => $catalogFeatures[$featureId]->url, array_keys($metaArray['features_values'])),
                 $metaArray['features_values']
             );
         } else {

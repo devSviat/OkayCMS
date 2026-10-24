@@ -20,7 +20,7 @@ class Response
     /** Ключі заголовків, доданих драйвером на попередньому sendHeaders(). */
     private $adapterHeaderKeys = [];
 
-    private const STATUS_CODES_MESSAGES = [
+    private const array STATUS_CODES_MESSAGES = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
@@ -244,7 +244,7 @@ class Response
         
         if (!empty($this->headers)) {
             foreach ($this->headers as $k => $header) {
-                list($headerContent, $replace, $responseCode) = $header;
+                [$headerContent, $replace, $responseCode] = $header;
                 
                 if (is_null($responseCode)) {
                     header($headerContent, $replace);

@@ -14,11 +14,11 @@ class Init extends AbstractInit
     {
         $this->setBackendMainController('FAQsAdmin');
         $this->migrateEntityTable(FAQEntity::class, [
-            (new EntityField('id'))->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
-            (new EntityField('question'))->setTypeText()->setIsLang(),
-            (new EntityField('answer'))->setTypeText()->setIsLang()->setNullable(),
-            (new EntityField('visible'))->setTypeTinyInt(1),
-            (new EntityField('position'))->setTypeInt(11),
+            new EntityField('id')->setIndexPrimaryKey()->setTypeInt(11, false)->setAutoIncrement(),
+            new EntityField('question')->setTypeText()->setIsLang(),
+            new EntityField('answer')->setTypeText()->setIsLang()->setNullable(),
+            new EntityField('visible')->setTypeTinyInt(1),
+            new EntityField('position')->setTypeInt(11),
         ]);
     }
     

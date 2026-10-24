@@ -21,14 +21,14 @@ use Okay\Core\Security\SvgSanitizer;
  */
 class BackendFilePickerHelper
 {
-    private const IMAGE_EXTENSIONS    = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico'];
-    private const MEDIA_EXTENSIONS    = ['mp3', 'mp4', 'ogg', 'webm'];
-    private const DOCUMENT_EXTENSIONS = ['pdf', 'zip', 'xls', 'xlsx', 'doc', 'docx', 'csv'];
+    private const array IMAGE_EXTENSIONS    = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico'];
+    private const array MEDIA_EXTENSIONS    = ['mp3', 'mp4', 'ogg', 'webm'];
+    private const array DOCUMENT_EXTENSIONS = ['pdf', 'zip', 'xls', 'xlsx', 'doc', 'docx', 'csv'];
 
-    private const UPLOAD_DIR = 'files/uploads/';
+    private const string UPLOAD_DIR = 'files/uploads/';
 
     /** Стільки ж дозволяв попередній менеджер файлів; php.ini на хостингу зазвичай ширший. */
-    private const MAX_UPLOAD_BYTES = 10485760;
+    private const int MAX_UPLOAD_BYTES = 10485760;
 
     private $config;
     private $image;
@@ -99,13 +99,9 @@ class BackendFilePickerHelper
             ];
         }
 
-        usort($files, function ($a, $b) {
-            return $b['modified'] <=> $a['modified'];
-        });
+        usort($files, fn($a, $b) => $b['modified'] <=> $a['modified']);
 
-        usort($result['folders'], function ($a, $b) {
-            return strnatcasecmp($a['name'], $b['name']);
-        });
+        usort($result['folders'], fn($a, $b) => strnatcasecmp($a['name'], $b['name']));
 
         $perPage = max(1, (int)$perPage);
         $total   = count($files);
@@ -162,7 +158,7 @@ class BackendFilePickerHelper
 
         // SVG браузер виконує як документ, тому переписуємо його за білим списком
         // до того, як файл стане доступним за URL.
-        if ($extension === 'svg' && !(new SvgSanitizer())->sanitizeFile($directory . '/' . $name)) {
+        if ($extension === 'svg' && !new SvgSanitizer()->sanitizeFile($directory . '/' . $name)) {
             @unlink($directory . '/' . $name);
             return ExtenderFacade::execute(__METHOD__, $result, func_get_args());
         }
@@ -252,7 +248,7 @@ class BackendFilePickerHelper
             return null;
         }
 
-        return (new PathResolver($root))->resolve(trim((string)$path, '/'));
+        return new PathResolver($root)->resolve(trim((string)$path, '/'));
     }
 
     private function uniqueName($directory, $name)

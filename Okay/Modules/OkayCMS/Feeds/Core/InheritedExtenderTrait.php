@@ -14,7 +14,7 @@ trait InheritedExtenderTrait
     {
         $output = ExtenderFacade::execute([self::class, $method], $output, func_get_args());
 
-        $declaringClass = (new \ReflectionMethod(static::class, $method))->getDeclaringClass()->name;
+        $declaringClass = new \ReflectionMethod(static::class, $method)->getDeclaringClass()->name;
         if ($declaringClass === self::class) {
             $output = ExtenderFacade::execute([static::class, $method], $output, func_get_args());
         }

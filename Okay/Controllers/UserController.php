@@ -234,7 +234,7 @@ class UserController extends AbstractController
             return;
         }
 
-        $state = isset($_SESSION[self::RECOVERY_SESSION_KEY]) ? $_SESSION[self::RECOVERY_SESSION_KEY] : null;
+        $state = $_SESSION[self::RECOVERY_SESSION_KEY] ?? null;
 
         // Встановлення нового пароля за підтвердженим токеном
         if (!empty($state) && $this->request->method('post') && $this->request->post('reset_password')) {

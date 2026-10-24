@@ -35,7 +35,7 @@ class UpdateBackup
      * зміні того методу. Група 2 включає один "межовий" символ одразу
      * після назви таблиці (не лапка) — його відкидає extractTouchedTables().
      */
-    private const MARKER_PATTERN = '/([^"\'0-9a-z_])__([a-z_]+[^"\'])/i';
+    private const string MARKER_PATTERN = '/([^"\'0-9a-z_])__([a-z_]+[^"\'])/i';
 
     /**
      * Стейтменти, що реально можуть зіпсувати дані таблиці. SELECT та інші
@@ -43,7 +43,7 @@ class UpdateBackup
      * лише проти ПОЧАТКУ стейтмента (один раз на елемент вхідного масиву),
      * а не рядок за рядком — див. контракт extractTouchedTables().
      */
-    private const STATEMENT_TYPE_PATTERN = '/^\s*(?:CREATE\s+(?:TABLE(?:\s+IF\s+NOT\s+EXISTS)?|(?:UNIQUE\s+)?INDEX)'
+    private const string STATEMENT_TYPE_PATTERN = '/^\s*(?:CREATE\s+(?:TABLE(?:\s+IF\s+NOT\s+EXISTS)?|(?:UNIQUE\s+)?INDEX)'
         . '|ALTER\s+TABLE|INSERT\s+(?:IGNORE\s+)?INTO|REPLACE\s+INTO|UPDATE'
         . '|DROP\s+(?:TABLE(?:\s+IF\s+EXISTS)?|INDEX)|TRUNCATE\s+TABLE|RENAME\s+TABLE)\b/i';
 
@@ -118,7 +118,7 @@ class UpdateBackup
      */
     public static function pruneOldBackups(string $backupsDir, int $keep = 3): array
     {
-        $files = array_filter(glob(rtrim($backupsDir, '/') . '/*') ?: [], 'is_file');
+        $files = array_filter(glob(rtrim($backupsDir, '/') . '/*') ?: [], is_file(...));
 
         usort($files, static function (string $a, string $b): int {
             $byMtime = filemtime($b) <=> filemtime($a);
@@ -186,7 +186,7 @@ class UpdateBackup
             $process->run();
 
             return $process->isSuccessful();
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }

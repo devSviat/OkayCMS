@@ -288,7 +288,7 @@ class IndexAdmin
         if ($this->backendController === 'AuthAdmin'
             || $this->backendController === 'FilePickerAdmin'
             || ($this->backendController === 'ManagerAdmin' && !empty($this->manager)
-                && (new ManagerProfilePolicy($managers))->mayOpen($this->manager, $request->get('id', 'integer') ?: null))
+                && new ManagerProfilePolicy($managers)->mayOpen($this->manager, $request->get('id', 'integer') ?: null))
             || $this->managers->access($this->managers->getPermissionByController($this->backendController), $this->manager)) {
             return true;
         }

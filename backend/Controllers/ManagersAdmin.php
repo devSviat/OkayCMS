@@ -52,7 +52,7 @@ class ManagersAdmin extends IndexAdmin
                 }
 
                 $skipped = false;
-                $ids = array_values(array_unique(array_map('intval', $ids)));
+                $ids = array_values(array_unique(array_map(intval(...), $ids)));
                 $allManagers = $managersEntity->noLimit()->find() ?: [];
                 foreach ($ids as $id) {
                     $target = $id > 0 ? $managersEntity->get($id) : null;

@@ -31,8 +31,8 @@ class PublicSurfaceTest extends TestCase
     private const PRIVATE_ROOT_ENTRIES = [
         '1DB_changes', 'backend', 'CLAUDE.md', 'compiled', 'composer.json',
         'composer.lock', 'config', 'design', 'dev', 'docs', 'files',
-        'LICENSE.md', 'ok', 'Okay', 'phpcs.xml.dist', 'phpstan-baseline.neon',
-        'phpstan.neon', 'phpunit.xml', 'PRODUCT.md', 'README.md', 'release-manifest.json', 'tests', 'vendor',
+        'LICENSE.md', 'ok', 'Okay', 'phpstan-baseline.neon',
+        'phpstan.neon', 'phpunit.xml', 'PRODUCT.md', 'README.md', 'rector.php', 'release-manifest.json', 'tests', 'vendor',
     ];
 
     /**

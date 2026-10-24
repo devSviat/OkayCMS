@@ -56,7 +56,7 @@ class OpenAiHelper
             foreach ($stream as $response) {
                 $content = $response->choices[0]->delta->content ?? '';
 
-                if ($format && !empty(trim($content)) && strpos($content, "\n") !== false) {
+                if ($format && !empty(trim($content)) && str_contains($content, "\n")) {
                     $content = trim($content) . '</p><p>';
                 }
 
@@ -102,7 +102,7 @@ class OpenAiHelper
     {
         try {
             $list = $this->openAi->models()->list();
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             return null;
         }
 
@@ -121,9 +121,7 @@ class OpenAiHelper
             return null;
         }
 
-        $textModels = array_filter($models, function ($model) {
-            return strpos($model['id'], 'gpt-') !== false;
-        });
+        $textModels = array_filter($models, fn($model) => str_contains($model['id'], 'gpt-'));
 
         return $textModels;
     }

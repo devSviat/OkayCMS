@@ -19,28 +19,28 @@ class Init extends AbstractInit
         $this->setBackendMainController('FeedsAdmin');
 
         $this->migrateEntityTable(FeedsEntity::class, [
-            (new EntityField('id'))->setTypeInt(11, false)->setAutoIncrement(),
-            (new EntityField('name'))->setTypeVarchar(100, false),
-            (new EntityField('url'))->setTypeVarchar(100, false)->setIndexUnique(),
-            (new EntityField('enabled'))->setTypeTinyInt(1, false)->setDefault(0),
-            (new EntityField('preset'))->setTypeVarchar(255, false),
-            (new EntityField('settings'))->setTypeMediumText(),
-            (new EntityField('features_settings'))->setTypeMediumText(),
-            (new EntityField('categories_settings'))->setTypeMediumText(),
-            (new EntityField('position'))->setTypeInt(11)->setDefault(0)->setIndex()
+            new EntityField('id')->setTypeInt(11, false)->setAutoIncrement(),
+            new EntityField('name')->setTypeVarchar(100, false),
+            new EntityField('url')->setTypeVarchar(100, false)->setIndexUnique(),
+            new EntityField('enabled')->setTypeTinyInt(1, false)->setDefault(0),
+            new EntityField('preset')->setTypeVarchar(255, false),
+            new EntityField('settings')->setTypeMediumText(),
+            new EntityField('features_settings')->setTypeMediumText(),
+            new EntityField('categories_settings')->setTypeMediumText(),
+            new EntityField('position')->setTypeInt(11)->setDefault(0)->setIndex()
         ]);
 
         $this->migrateEntityTable(ConditionsEntity::class, [
-            (new EntityField('id'))->setTypeInt(11, false)->setAutoIncrement(),
-            (new EntityField('feed_id'))->setTypeInt(11, false),
-            (new EntityField('entity'))->setTypeVarchar(255, false),
-            (new EntityField('type'))->setTypeEnum(['inclusion', 'exclusion']),
-            (new EntityField('all_entities'))->setTypeTinyInt(1, false)->setDefault(0),
+            new EntityField('id')->setTypeInt(11, false)->setAutoIncrement(),
+            new EntityField('feed_id')->setTypeInt(11, false),
+            new EntityField('entity')->setTypeVarchar(255, false),
+            new EntityField('type')->setTypeEnum(['inclusion', 'exclusion']),
+            new EntityField('all_entities')->setTypeTinyInt(1, false)->setDefault(0),
         ]);
 
-        $entityIdField = (new EntityField('entity_id'))->setTypeInt(11, false);
+        $entityIdField = new EntityField('entity_id')->setTypeInt(11, false);
         $this->migrateCustomTable(self::CONDITIONS_ENTITIES_RELATION_TABLE, [
-            (new EntityField('condition_id'))->setTypeInt(11, false)->setIndexUnique(null, $entityIdField),
+            new EntityField('condition_id')->setTypeInt(11, false)->setIndexUnique(null, $entityIdField),
             $entityIdField,
         ]);
     }

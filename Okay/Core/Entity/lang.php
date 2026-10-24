@@ -70,7 +70,7 @@ trait lang
 
         foreach ($allFields as &$f) {
             preg_match('~^([\w`\.]*\.)?`?(.+?)`?(:? as (.+))?$~i', $f, $matches);
-            $f = isset($matches[4]) ? $matches[4] : $matches[2];
+            $f = $matches[4] ?? $matches[2];
         }
         unset($f);
 

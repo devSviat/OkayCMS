@@ -136,7 +136,7 @@ class XmlFeedHelper
                     $itemTagAttributesString .= " {$attrName}=\"{$attrValue}\"";
                 }
             }
-            
+
             $xmlProduct .= PHP_EOL."<{$itemTag}{$itemTagAttributesString}>";
         }
 
@@ -172,7 +172,7 @@ class XmlFeedHelper
             ->leftJoin(FeaturesValuesEntity::getLangTable().' AS  lfv', 'fv.id = lfv.feature_value_id and lfv.lang_id=' . $this->languages->getLangId())
             ->leftJoin(FeaturesEntity::getTable().' AS  f', 'fv.feature_id = f.id AND f.visible')
             ->leftJoin(FeaturesEntity::getLangTable().' AS  lf', 'f.id = lf.feature_id and lf.lang_id=' . $this->languages->getLangId());
-        
+
         return $select;// No ExtenderFacade
     }
 
@@ -227,28 +227,28 @@ class XmlFeedHelper
             $features = explode('@|@', $product->{$featuresParamName});
             $values = [];
             foreach (explode('@|@', $product->{$valuesParamName}) as $value) {
-                list($featureId, $val) = explode('!-', $value, 2);
+                [$featureId, $val] = explode('!-', $value, 2);
                 $values[$featureId][] = $val;
             }
             $autoNameIds = [];
             foreach (explode('@|@', $product->auto_name_id_string) as $autoNameId) {
-                list($featureId, $val) = explode('!-', $autoNameId, 2);
+                [$featureId, $val] = explode('!-', $autoNameId, 2);
                 if (!empty($val)) {
                     $autoNameIds[$featureId] = $val;
                 }
             }
-            
+
             $autoValueIds = [];
             foreach (explode('@|@', $product->auto_value_id_string) as $autoValueId) {
-                list($featureId, $val) = explode('!-', $autoValueId, 2);
+                [$featureId, $val] = explode('!-', $autoValueId, 2);
                 if (!empty($val)) {
                     $autoValueIds[$featureId] = $val;
                 }
             }
-            
+
             foreach ($features as $feature) {
-                list($featureId, $featureName) = explode('!-', $feature, 2);
-                
+                [$featureId, $featureName] = explode('!-', $feature, 2);
+
                 if (isset($values[$featureId])) {
                     $product->{$saveToProperty}[$featureId] = [
                         'id' => $featureId,
@@ -284,7 +284,7 @@ class XmlFeedHelper
             $metaData = strtr($descriptionTemplate, $metaParts);
             $product->{$descriptionFieldName} = trim(preg_replace('/{\$[^$]*}/', '', $metaData));
         }
-        
+
         return $product; // No ExtenderFacade
     }
 
@@ -353,13 +353,13 @@ class XmlFeedHelper
 
         if (!empty($product->main_category_id) && isset($this->allCategories[$product->main_category_id])) {
             $category = $this->allCategories[$product->main_category_id];
-            $mataDataParts['{$category}'] = ($category->name ? $category->name : '');
-            $mataDataParts['{$category_h1}'] = ($category->name_h1 ? $category->name_h1 : '');
+            $mataDataParts['{$category}'] = ($category->name ?: '');
+            $mataDataParts['{$category_h1}'] = ($category->name_h1 ?: '');
         }
-        
+
         if (!empty($product->features)) {
             foreach ($product->features as $feature) {
-                
+
                 if (!empty($feature['auto_name_id'])) {
                     $mataDataParts['{$' . $feature['auto_name_id'] . '}'] = $feature['name'];
                 }
@@ -368,7 +368,7 @@ class XmlFeedHelper
                 }
             }
         }
-        
+
         return $mataDataParts; // No ExtenderFacade
     }
 
@@ -450,7 +450,7 @@ class XmlFeedHelper
 
         /** @var CategoriesEntity $categoriesEntity */
         $categoriesEntity = $ef->get(CategoriesEntity::class);
-        
+
         $uploadCategories = [];
         foreach ($categoriesIds as $cId) {
             $category = $categoriesEntity->get((int)$cId);

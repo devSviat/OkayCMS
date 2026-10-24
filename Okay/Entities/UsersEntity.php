@@ -162,9 +162,7 @@ class UsersEntity extends Entity
 
     private function passwordHasher()
     {
-        if ($this->passwordHasher === null) {
-            $this->passwordHasher = new PasswordHasher();
-        }
+        $this->passwordHasher ??= new PasswordHasher();
 
         return $this->passwordHasher;
     }

@@ -9,13 +9,13 @@ namespace Okay\Core\Security;
  */
 final class Totp
 {
-    public const PERIOD = 30;
-    public const DIGITS = 6;
+    public const int PERIOD = 30;
+    public const int DIGITS = 6;
     /** Допуск на розбіжність годинників: ±1 крок. */
-    public const WINDOW = 1;
-    public const SECRET_BYTES = 20;
+    public const int WINDOW = 1;
+    public const int SECRET_BYTES = 20;
 
-    private const BASE32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    private const string BASE32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
     public static function newSecret(): string
     {

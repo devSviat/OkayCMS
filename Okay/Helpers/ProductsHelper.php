@@ -114,9 +114,7 @@ class ProductsHelper implements GetListInterface
      */
     public function getList($filter = [], $sortName = null, $excludedFields = null)
     {
-        if ($excludedFields === null) {
-            $excludedFields = $this->getExcludeFields();
-        }
+        $excludedFields ??= $this->getExcludeFields();
 
         /** @var ProductsEntity $productsEntity */
         $productsEntity = $this->entityFactory->get(ProductsEntity::class);
@@ -265,9 +263,7 @@ class ProductsHelper implements GetListInterface
                 foreach ($featuresValues[$feature->id] as $featureValue) {
                     if (isset($productsValuesIds[$featureValue->id])) {
                         foreach ($productsValuesIds[$featureValue->id] as $productId) {
-                            if (!isset($products[$productId]->features[$featureValue->feature_id])) {
-                                $products[$productId]->features[$featureValue->feature_id] = clone $features[$featureValue->feature_id];
-                            }
+                            $products[$productId]->features[$featureValue->feature_id] ??= clone $features[$featureValue->feature_id];
                             $products[$productId]->features[$featureValue->feature_id]->values[] = $featureValue;
                         }
                     }

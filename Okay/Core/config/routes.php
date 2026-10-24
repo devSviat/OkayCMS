@@ -39,14 +39,14 @@ use Okay\Core\Routes\AllBrandsRoute;
 use Okay\Core\Routes\PageRoute;
 use Okay\Core\Routes\PostRoute;
 
-$productRouteParams   = (new ProductRoute())->generateRouteParams();
-$categoryRouteParams  = (new CategoryRoute())->generateRouteParams();
-$brandRouteParams     = (new BrandRoute())->generateRouteParams();
-$blogCategoryRouteParams = (new BlogCategoryRoute())->generateRouteParams();
-$postRouteParams      = (new PostRoute())->generateRouteParams();
-$allBlogRouteParams   = (new AllBlogRoute())->generateRouteParams();
-$allBrandsRouteParams = (new AllBrandsRoute())->generateRouteParams();
-$pageRouteParams      = (new PageRoute())->generateRouteParams();
+$productRouteParams   = new ProductRoute()->generateRouteParams();
+$categoryRouteParams  = new CategoryRoute()->generateRouteParams();
+$brandRouteParams     = new BrandRoute()->generateRouteParams();
+$blogCategoryRouteParams = new BlogCategoryRoute()->generateRouteParams();
+$postRouteParams      = new PostRoute()->generateRouteParams();
+$allBlogRouteParams   = new AllBlogRoute()->generateRouteParams();
+$allBrandsRouteParams = new AllBrandsRoute()->generateRouteParams();
+$pageRouteParams      = new PageRoute()->generateRouteParams();
 
 return [
     'main' => [

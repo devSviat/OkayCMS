@@ -45,7 +45,7 @@ class Scheduler
     private function registerCoreSchedules(): void
     {
         $this->registerSchedule(
-            (new Schedule([UpdateCheckHelper::class, 'checkScheduled']))
+            new Schedule([UpdateCheckHelper::class, 'checkScheduled'])
                 ->name('Check for core updates')
                 ->time('30 4 * * *')
                 ->overlap(false)
@@ -53,7 +53,7 @@ class Scheduler
         );
 
         $this->registerSchedule(
-            (new Schedule([AttemptLimiter::class, 'prune']))
+            new Schedule([AttemptLimiter::class, 'prune'])
                 ->name('Prune attempt limiter files')
                 ->time('17 * * * *')
                 ->overlap(false)
@@ -61,7 +61,7 @@ class Scheduler
         );
 
         $this->registerSchedule(
-            (new Schedule([ManagerSessions::class, 'prune']))
+            new Schedule([ManagerSessions::class, 'prune'])
                 ->name('Prune manager sessions')
                 ->time('43 3 * * *')
                 ->overlap(false)
@@ -69,7 +69,7 @@ class Scheduler
         );
 
         $this->registerSchedule(
-            (new Schedule([ManagerAuthLog::class, 'prune']))
+            new Schedule([ManagerAuthLog::class, 'prune'])
                 ->name('Prune manager auth log')
                 ->time('47 3 * * *')
                 ->overlap(false)
@@ -133,7 +133,7 @@ class Scheduler
                 if ($subProcess['process']->isRunning()) {
                     try {
                         $subProcess['process']->checkTimeout();
-                    } catch (ProcessTimedOutException $e) {
+                    } catch (ProcessTimedOutException) {
                         $task = $this->tasks[$key];
                         $this->info("Task #{$task->getId()} ({$task->getName()}) ({$subProcess['time']}): Timeout");
                         unset($subProcesses[$key]);

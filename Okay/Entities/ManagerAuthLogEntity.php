@@ -60,14 +60,14 @@ class ManagerAuthLogEntity extends Entity
     protected function filter__events($events)
     {
         $this->select->where('mal.event IN (:events)');
-        $this->select->bindValue('events', array_values(array_map('strval', (array)$events)) ?: ['']);
+        $this->select->bindValue('events', array_values(array_map(strval(...), (array)$events)) ?: ['']);
     }
 
     /** @param string[] $events */
     protected function filter__not_events($events)
     {
         $this->select->where('mal.event NOT IN (:not_events)');
-        $this->select->bindValue('not_events', array_values(array_map('strval', (array)$events)) ?: ['']);
+        $this->select->bindValue('not_events', array_values(array_map(strval(...), (array)$events)) ?: ['']);
     }
 
     /** Видаляє всі рядки менеджера — разом із ним самим. */

@@ -48,9 +48,7 @@ class TemplatesAdmin extends IndexAdmin
             exit();
         }
 
-        if (!isset($templateFile)){
-            $templateFile = reset($templates);
-        }
+        $templateFile ??= reset($templates);
 
         // Передаем имя шаблона в дизайн
         $this->design->assign('template_file', $templateFile);

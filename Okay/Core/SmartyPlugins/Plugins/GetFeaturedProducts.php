@@ -33,12 +33,10 @@ class GetFeaturedProducts extends Func
 
     public function run($params, $smarty)
     {
-        if (!isset($params['visible'])) {
-            $params['visible'] = 1;
-        }
+        $params['visible'] ??= 1;
         $params['featured'] = 1;
         if (!empty($params['var'])) {
-            $sort = isset($params['sort']) ? $params['sort'] : null;
+            $sort = $params['sort'] ?? null;
             $products = $this->productsHelper->getList($params, $sort);
             $smarty->assign($params['var'], $products);
         }

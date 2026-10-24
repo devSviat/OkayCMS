@@ -34,7 +34,7 @@ if (!$managers->access('export', $managersEntity->get($_SESSION['admin']))) {
     exit();
 }
 
-list($filter, $page) = $backendExportHelper->setUp($exportFilesDir, $filename,$columnsNames, $columnDelimiter, $productsCount);
+[$filter, $page] = $backendExportHelper->setUp($exportFilesDir, $filename,$columnsNames, $columnDelimiter, $productsCount);
 $products = $backendExportHelper->fetchProducts($filter);
 $products = $backendExportHelper->attachFeatures($products, $valuesDelimiter);
 $products = $backendExportHelper->attachCategories($products, $subcategoryDelimiter);

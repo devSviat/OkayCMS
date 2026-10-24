@@ -7,7 +7,7 @@ use Okay\Core\TemplateConfig\Js;
 $js = [];
 
 if (Router::getCurrentRouteName() == 'cart') {
-    $js[] = (new Js('np.js'))->setPosition('footer')->setDefer(true)->setIndividual(true);
+    $js[] = new Js('np.js')->setPosition('footer')->setDefer(true)->setIndividual(true);
 }
 
 return $js;

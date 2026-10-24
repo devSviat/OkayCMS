@@ -26,9 +26,7 @@ class ConfigCollector extends \DebugBar\DataCollector\ConfigCollector
 
     public function set(string $name, mixed $value, string $source = ''): void
     {
-        if (!isset($this->history[$name])) {
-            $this->history[$name] = [];
-        }
+        $this->history[$name] ??= [];
 
         array_unshift($this->history[$name], [
             'value'  => $value,

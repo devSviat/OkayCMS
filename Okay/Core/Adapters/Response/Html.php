@@ -57,9 +57,7 @@ class Html extends AbstractResponse
         
         // Создаем текущую обертку сайта (обычно index.tpl)
         $wrapper = $this->design->getVar('wrapper');
-        if (is_null($wrapper)) {
-            $wrapper = 'index.tpl';
-        }
+        $wrapper ??= 'index.tpl';
 
         if (!empty($wrapper)) {
             print $this->design->fetch($wrapper);

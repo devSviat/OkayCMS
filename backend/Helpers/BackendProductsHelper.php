@@ -366,7 +366,7 @@ class BackendProductsHelper
         if($brandId && $brand = $this->brandsEntity->get($brandId)) {
             $filter['brand_id'] = $brand->id;
         } elseif ($brandId == -1) {
-            $filter['brand_id'] = array(0);
+            $filter['brand_id'] = [0];
         }
 
         if ($features = $this->request->get('features')) {
@@ -514,15 +514,11 @@ class BackendProductsHelper
         // Подсчитываем кол-во категорий каждого товара, чтобы знать какой position ставить новым категориям
         $productsCategoriesNum = [];
         foreach ($this->categoriesEntity->getProductCategories($ids) as $pc) {
-            if (!isset($productsCategoriesNum[$pc->product_id])) {
-                $productsCategoriesNum[$pc->product_id] = 0;
-            }
+            $productsCategoriesNum[$pc->product_id] ??= 0;
             $productsCategoriesNum[$pc->product_id]++;
         }
         foreach ($ids as $id) {
-            if (!isset($productsCategoriesNum[$id])) {
-                $productsCategoriesNum[$id] = 0;
-            }
+            $productsCategoriesNum[$id] ??= 0;
             $this->categoriesEntity->addProductCategory($id, $categoryId, $productsCategoriesNum[$id]++);
         }
         
@@ -610,7 +606,7 @@ class BackendProductsHelper
     public function updatePositions($ids, $positions)
     {
         foreach($positions as $i=>$position) {
-            $this->productsEntity->update($ids[$i], array('position' => (int) $position));
+            $this->productsEntity->update($ids[$i], ['position' => (int) $position]);
         }
 
         ExtenderFacade::execute(__METHOD__, null, func_get_args());
@@ -632,8 +628,8 @@ class BackendProductsHelper
             // Товары
             $productsIds = array_keys($products);
             foreach($products as $product) {
-                $product->variants   = array();
-                $product->properties = array();
+                $product->variants   = [];
+                $product->properties = [];
             }
 
             $variants = $this->variantsEntity->find(['product_id' => $productsIds]);

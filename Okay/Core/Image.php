@@ -129,7 +129,7 @@ class Image
             return ExtenderFacade::execute(__METHOD__, false, func_get_args());
         }
 
-        list($sourceFile, $width , $height, $setWatermark, $cropParams, $pseudoWebp) = $resizeParams;
+        [$sourceFile, $width, $height, $setWatermark, $cropParams, $pseudoWebp] = $resizeParams;
 
         // До перевірки розміру: та робить exit(), тож ворожий шлях не був би
         // відхилений як ворожий.
@@ -277,9 +277,7 @@ class Image
 
         $resizedFilenameEncoded = rawurlencode($resizedFilenameEncoded);
 
-        if ($resizedDir === null) {
-            $resizedDir = $this->config->get('resized_images_dir');
-        }
+        $resizedDir ??= $this->config->get('resized_images_dir');
         
         $result = $this->request->getRootUrl() . '/' . $resizedDir . $resizedFilenameEncoded;
         return ExtenderFacade::execute(__METHOD__, $result, func_get_args());
@@ -486,7 +484,7 @@ class Image
             $crop_params['y_pos'] = $matches[7];
         }
 
-        return array($file.'.'.$ext, $width, $height, $set_watermark, $crop_params, $pseudoWebp);
+        return [$file.'.'.$ext, $width, $height, $set_watermark, $crop_params, $pseudoWebp];
     }
     
     /*Транслит названия изображения*/

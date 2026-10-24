@@ -123,9 +123,9 @@ class BlogCategoryMetadataHelper extends CommonMetadataHelper
         }
 
         $this->parts = [
-            '{$category}' => ($this->category->name ? $this->category->name : ''),
-            '{$category_h1}' => ($this->category->name_h1 ? $this->category->name_h1 : ''),
-            '{$sitename}' => ($this->settings->get('site_name') ? $this->settings->get('site_name') : ''),
+            '{$category}' => ($this->category->name ?: ''),
+            '{$category_h1}' => ($this->category->name_h1 ?: ''),
+            '{$sitename}' => ($this->settings->get('site_name') ?: ''),
         ];
 
         return $this->parts = ExtenderFacade::execute(__METHOD__, $this->parts, func_get_args());

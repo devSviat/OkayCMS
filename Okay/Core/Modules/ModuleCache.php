@@ -4,7 +4,7 @@ namespace Okay\Core\Modules;
 
 class ModuleCache
 {
-    private const __EXPIRE = 2;
+    private const int __EXPIRE = 2;
     protected static $timeExpire = 0;
 
     /**

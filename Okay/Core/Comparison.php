@@ -110,9 +110,7 @@ class Comparison
 
                     $productsValues = [];
                     if (!empty($visibleFeaturesIds = array_keys($features))) {
-                        $featuresValues = array_filter($featuresValues, function ($fv) use ($visibleFeaturesIds) {
-                            return in_array($fv->feature_id, $visibleFeaturesIds);
-                        });
+                        $featuresValues = array_filter($featuresValues, fn($fv) => in_array($fv->feature_id, $visibleFeaturesIds));
 
                         foreach ($this->featuresValuesEntity->getProductValuesIds($products_ids) as $pv) {
                             if (isset($featuresValues[$pv->value_id]) && in_array($featuresValues[$pv->value_id]->feature_id, $visibleFeaturesIds)) {

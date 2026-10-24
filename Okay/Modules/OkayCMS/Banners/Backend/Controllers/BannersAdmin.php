@@ -84,7 +84,7 @@ class BannersAdmin extends IndexAdmin
         }
 
         $bannersCount              = $bannersHelper->countBannersImages($filter);
-        list($filter, $pagesCount) = $bannersHelper->makePagination($bannersCount, $filter);
+        [$filter, $pagesCount] = $bannersHelper->makePagination($bannersCount, $filter);
         $banners = $bannersHelper->getBannersListForAdmin($filter);
 
         $this->design->assign('banners_count', $bannersCount);

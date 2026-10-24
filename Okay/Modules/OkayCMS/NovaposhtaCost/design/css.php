@@ -6,7 +6,7 @@ use Okay\Core\TemplateConfig\Css;
 $css = [];
 
 if (Router::getCurrentRouteName() == 'cart') {
-    $css[] = (new Css('np.css'))->setPosition('footer')->setIndividual(true);
+    $css[] = new Css('np.css')->setPosition('footer')->setIndividual(true);
 }
 
 return $css;

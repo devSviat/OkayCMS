@@ -359,7 +359,7 @@ class Request
             return self::$subDir;
         }
         
-        $scriptDir1 = realpath(dirname(dirname(__DIR__)));
+        $scriptDir1 = realpath(dirname(__DIR__, 2));
         $scriptDir2 = realpath($_SERVER['DOCUMENT_ROOT']);
         $subDir = trim(substr($scriptDir1, strlen($scriptDir2)), "/\\");
 
@@ -423,7 +423,7 @@ class Request
             return true;
         }
 
-        $token = isset($_POST['session_id']) ? $_POST['session_id'] : null;
+        $token = $_POST['session_id'] ?? null;
 
         if (!AdminCsrfToken::check($token)) {
             // Саме [], а не unset(): раніше суперглобал видалявся цілком і

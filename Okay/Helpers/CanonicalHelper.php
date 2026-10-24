@@ -101,7 +101,7 @@ class CanonicalHelper
     private function catalogCanonicalData($page, array $otherFilter, array $featuresFilter, array $brandsFilter)
     {
         $result = [];
-        
+
         // Подсчитываем общую глубину фильтра
         $filterDepth = 0;
         if (!empty($otherFilter)) {
@@ -118,7 +118,7 @@ class CanonicalHelper
             $result['brand'] = null;
             $filterDepth++;
         }
-        
+
         if ($filterDepth > $this->maxFilterDepth) {
             if (!empty($page)) {
                 $result['page'] = null;
@@ -126,7 +126,7 @@ class CanonicalHelper
             $result['sort'] = null;
             return $result; // no ExtenderFacade
         }
-        
+
         // Т.к. getCatalogCanonicalDataExecutor не может вернуть связку для доп. фильтров и свойств или бренда,
         // определяем эту связку здесь
         if (!empty($otherFilter)) {
@@ -139,15 +139,15 @@ class CanonicalHelper
                 return $result; // no ExtenderFacade
             }
         }
-        
+
         if (($baseCatalogData = $this->getBaseCatalogCanonicalData($page, $otherFilter)) === false) {
             return false; // no ExtenderFacade
         }
-        
+
         if (($catalogData = $this->getCatalogCanonicalDataExecutor($page, $featuresFilter, $brandsFilter)) === false) {
             return false; // no ExtenderFacade
         }
-        
+
         return $catalogData + $baseCatalogData; // no ExtenderFacade
     }
     
@@ -178,26 +178,26 @@ class CanonicalHelper
                 }
             }
         }
-        
+
         // Не превысили ли максимальное кол-во брендов
         if (!empty($brandsFilter)) {
             if (count($brandsFilter) > $this->maxBrandFilterDepth) {
                 $result['brand'] = null;
             }
         }
-        
+
         if (!empty($result)) {
             if (!empty($page)) {
                 $result['page'] = null;
             }
             return $result; // no ExtenderFacade
         }
-        
+
         if (!empty($page) && (!empty($featuresFilter) || !empty($brandsFilter))) {
             switch ($this->catalogFilterPagination) {
                 case CANONICAL_WITHOUT_FILTER_FIRST_PAGE:
                     $result['page'] = null;
-                    
+
                     if (!empty($featuresFilter)) {
                         // Заполняем массив, где ключи - транслиты свойств, значение null, чтобы удалить эти значения
                         $result = array_merge($result,
@@ -217,16 +217,16 @@ class CanonicalHelper
             }
             return $result; // no ExtenderFacade
         }
-        
+
         if (!empty($featuresFilter)) {
             switch ($this->catalogFeatures) {
                 case CANONICAL_WITHOUT_FILTER:
-                    
+
                     // Заполняем массив, где ключи - транслиты свойств, значение null, чтобы удалить эти значения
                     $result = array_merge($result,
                         array_fill_keys(array_keys($featuresFilter), null)
                     );
-                    
+
                     break;
                 case CANONICAL_WITH_FILTER:
                     break;
@@ -234,7 +234,7 @@ class CanonicalHelper
                     return false; // no ExtenderFacade
             }
         }
-        
+
         if (!empty($brandsFilter)) {
             switch ($this->catalogBrand) {
                 case CANONICAL_WITHOUT_FILTER:
@@ -246,7 +246,7 @@ class CanonicalHelper
                     return false; // no ExtenderFacade
             }
         }
-        
+
         return $result; // no ExtenderFacade
     }
 
@@ -274,7 +274,7 @@ class CanonicalHelper
                 return $result; // no ExtenderFacade
             }
         }
-        
+
         if (!empty($page) && !empty($otherFilter)) {
             switch ($this->catalogFilterPagination) {
                 case CANONICAL_WITHOUT_FILTER_FIRST_PAGE:
@@ -292,7 +292,7 @@ class CanonicalHelper
             }
             return $result; // no ExtenderFacade
         }
-        
+
         if (!empty($page)) {
             if ($page == 'all') {
                 switch ($this->catalogPageAll) {
@@ -323,7 +323,7 @@ class CanonicalHelper
                 }
             }
         }
-        
+
         if (!empty($otherFilter)) {
             switch ($this->catalogOtherFilter) {
                 case CANONICAL_WITHOUT_FILTER:
@@ -335,7 +335,7 @@ class CanonicalHelper
                     return false; // no ExtenderFacade
             }
         }
-        
+
         return $result; // no ExtenderFacade
     }
 }

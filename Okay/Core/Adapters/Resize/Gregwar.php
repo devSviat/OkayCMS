@@ -28,7 +28,7 @@ class Gregwar extends AbstractResize
         $srcW = $image->width();
         $srcH = $image->height();
 
-        list($dstW, $dstH) = $this->calcContainSize($srcW, $srcH, $maxW, $maxH);
+        [$dstW, $dstH] = $this->calcContainSize($srcW, $srcH, $maxW, $maxH);
         if (!empty($crop_params)) {
             $xPos = $crop_params['x_pos'];
             $yPos = $crop_params['y_pos'];

@@ -20,7 +20,7 @@ class SupportAdmin extends IndexAdmin
             } elseif ($result === false) {
                 $error = 'request_has_already_sent';
             } elseif (!$result->success) {
-                $error = $result->error ? $result->error : 'unknown_error';
+                $error = $result->error ?: 'unknown_error';
             } else {
                 $this->response->addHeader("Refresh:0");
                 $this->response->sendHeaders();
@@ -41,7 +41,7 @@ class SupportAdmin extends IndexAdmin
         $supportInfo = $supportInfoEntity->getInfo();
         if ($error) {
             $this->design->assign('message_error', $error);
-        } elseif (in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '0:0:0:0:0:0:0:1'))) {
+        } elseif (in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '0:0:0:0:0:0:0:1'])) {
             $this->design->assign('message_error', 'localhost');
         } elseif (empty($supportInfo->public_key)) {
             $this->design->assign('message_error', 'empty_key');
@@ -60,7 +60,7 @@ class SupportAdmin extends IndexAdmin
                 }
             }*/
 
-            $filter = array();
+            $filter = [];
             $filter['page'] = max(1, $this->request->get('page', 'integer'));
             $filter['limit'] = 100;
 
@@ -75,7 +75,7 @@ class SupportAdmin extends IndexAdmin
             if (!$result) {
                 $this->design->assign('message_error', 'unknown_error');
             } elseif (!$result->success) {
-                $this->design->assign('message_error', $result->error ? $result->error : 'unknown_error');
+                $this->design->assign('message_error', $result->error ?: 'unknown_error');
             } else {
                 $this->design->assign('topics_count', $result->topics_count);
                 $this->design->assign('pages_count', ceil($result->topics_count / $filter['limit']));

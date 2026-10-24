@@ -51,7 +51,7 @@ class BackendCategoriesHelper
     public function updatePositions($ids, $positions)
     {
         foreach($positions as $i=>$position) {
-            $this->categoriesEntity->update($ids[$i], array('position' => (int) $position));
+            $this->categoriesEntity->update($ids[$i], ['position' => (int) $position]);
         }
 
         ExtenderFacade::execute(__METHOD__, null, func_get_args());

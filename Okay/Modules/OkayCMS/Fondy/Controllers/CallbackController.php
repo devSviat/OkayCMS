@@ -26,7 +26,7 @@ class CallbackController extends AbstractController
 
         if (empty($_POST)){
             $callback = json_decode(file_get_contents("php://input"));
-            $_POST = array();
+            $_POST = [];
             foreach ($callback as $key=>$val){
                 $_POST[$key] =  $val ;
             }
@@ -40,10 +40,10 @@ class CallbackController extends AbstractController
         $payment_method = $paymentsEntity->get((int)$order->payment_method_id);
         $settings = $paymentsEntity->getPaymentSettings($payment_method->id);
 
-        $options = array(
+        $options = [
             'merchant' => $settings['fondy_merchantid'],
             'secretkey' => $settings['fondy_secret'],
-        );
+        ];
         $paymentInfo = FondyHelper::isPaymentValid($options, $_POST);
 
         if (!$order->paid) {
@@ -53,7 +53,7 @@ class CallbackController extends AbstractController
                     if ($_POST['order_status'] == FondyHelper::ORDER_APPROVED) {
 
                         // Установим статус оплачен
-                        $ordersEntity->update(intval($order->id), array('paid' => 1));
+                        $ordersEntity->update(intval($order->id), ['paid' => 1]);
 
                         // Отправим уведомление на email
                         $notify->emailOrderUser(intval($order->id));
@@ -64,7 +64,7 @@ class CallbackController extends AbstractController
                         Response::redirectTo(Router::generateUrl('order', ['url' => $order->url], true));
 
                     } else {
-                        $ordersEntity->update(intval($order->id), array('paid' => 0));
+                        $ordersEntity->update(intval($order->id), ['paid' => 0]);
 
                         Response::redirectTo(Router::generateUrl('order', ['url' => $order->url], true));
                     }

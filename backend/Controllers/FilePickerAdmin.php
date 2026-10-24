@@ -14,12 +14,12 @@ use Okay\Admin\Helpers\BackendFilePickerHelper;
  */
 class FilePickerAdmin extends IndexAdmin
 {
-    private const PER_PAGE = 60;
+    private const int PER_PAGE = 60;
 
-    private const SCRIPT = 'backend/design/js/okay-file-picker.js';
+    private const string SCRIPT = 'backend/design/js/okay-file-picker.js';
 
     /** В адмінці мова зветься "ua", а в BCP-47 українська це "uk". */
-    private const LANG_TAGS = ['ua' => 'uk'];
+    private const array LANG_TAGS = ['ua' => 'uk'];
 
     public function fetch(BackendFilePickerHelper $filePickerHelper)
     {
