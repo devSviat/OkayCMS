@@ -2,6 +2,7 @@
 
 namespace Okay\Admin\Controllers;
 
+use Okay\Core\Security\ManagerAuthLog;
 use Okay\Core\Security\ManagerProfilePolicy;
 use Okay\Core\Security\ManagerReauth;
 use Okay\Core\Security\ManagerSessions;
@@ -23,7 +24,8 @@ class AllManagerSessionsAdmin extends IndexAdmin
         ManagersEntity $managersEntity,
         ManagerSessionsEntity $sessionsEntity,
         ManagerProfilePolicy $policy,
-        ManagerReauth $reauth
+        ManagerReauth $reauth,
+        ManagerAuthLog $authLog
     ) {
         $viewer = $this->manager;
         $viewerId = (int)$viewer->id;
@@ -74,6 +76,7 @@ class AllManagerSessionsAdmin extends IndexAdmin
         $current = $managerSessions->currentRow();
 
         $this->design->assign('sessions', $sessions);
+        $this->design->assign('auth_log', $authLog->recent());
         $this->design->assign('current_session_id', $current !== null ? (int)$current->id : 0);
         $this->design->assign('can_open_profiles', $policy->canManageOthers($viewer));
         $this->design->assign('reauth_fresh', $reauth->isFresh());

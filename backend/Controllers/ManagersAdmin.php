@@ -63,7 +63,7 @@ class ManagersAdmin extends IndexAdmin
                     $managerSessions->revokeAll($id, $viewerId);
                     // Рядки 2FA прив'язані лише до id: менеджер із тим самим id
                     // (імпорт, ручний INSERT) отримав би чужий секрет і коди.
-                    $twoFactor->disable($id);
+                    $twoFactor->disable($id, $viewerId, 'manager_deleted');
                 }
                 if ($skipped) {
                     $this->postRedirectGet->storeMessageError('no_access');

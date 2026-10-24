@@ -9479,6 +9479,57 @@ textarea:focus-visible,
     color: var(--ok-ink-muted);
 }
 
+/* Журнал безпеки: подія й подробиці рядком, час, IP і пристрій під ними.
+   Тон — смуга зліва, а не заливка: тривожних рядків у журналі бувають
+   десятки, і суцільний червоний перестав би щось означати. */
+.auth_log {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--ok-line);
+    border-radius: var(--ok-radius-panel);
+    background: var(--ok-surface);
+    overflow: hidden;
+}
+.auth_log__item {
+    padding: 10px 16px 10px 13px;
+    border-left: 3px solid transparent;
+}
+.auth_log__item + .auth_log__item {
+    border-top: 1px solid var(--ok-line);
+}
+.auth_log__item--alert {
+    border-left-color: var(--ok-danger);
+}
+.auth_log__item--change {
+    border-left-color: var(--ok-warning);
+}
+.auth_log__what {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    color: var(--ok-ink);
+    overflow-wrap: anywhere;
+}
+.auth_log__event {
+    font-weight: 600;
+}
+.auth_log__item--alert .auth_log__event {
+    color: var(--ok-danger);
+}
+.auth_log__detail {
+    font-size: 13px;
+    color: var(--ok-ink-soft);
+}
+.auth_log__meta {
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--ok-ink-muted);
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
 /* Дії форми, що лишаються під рукою в довгому списку прав. */
 .sticky_actions {
     position: sticky;

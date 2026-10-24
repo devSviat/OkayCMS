@@ -51,7 +51,8 @@ class ManagerTwoFactor
     public function __construct(
         private EntityFactory $entityFactory,
         private TotpKey $totpKey,
-        private ?LoggerInterface $logger = null
+        private ?LoggerInterface $logger = null,
+        private ?ManagerAuthLog $authLog = null
     ) {
     }
 
@@ -145,8 +146,9 @@ class ManagerTwoFactor
         }
 
         $this->cancelSetup();
+        $this->authLog?->record(ManagerAuthLog::TWO_FACTOR_ENABLED, $managerId);
 
-        return $this->regenerateRecoveryCodes($managerId);
+        return $this->issueRecoveryCodes($managerId);
     }
 
     /**
@@ -173,9 +175,11 @@ class ManagerTwoFactor
         if ($recovery !== null) {
             if ($this->codes()->consume($managerId, hash('sha256', $recovery))) {
                 $this->resetAttempts($managerId);
+                $this->authLog?->record(ManagerAuthLog::RECOVERY_CODE_USED, $managerId);
 
                 return self::OK_RECOVERY;
             }
+            $this->authLog?->record(ManagerAuthLog::CODE_FAILED, $managerId);
 
             return self::WRONG;
         }
@@ -190,6 +194,8 @@ class ManagerTwoFactor
 
         $step = Totp::matchingStep($secret, self::normalizeTotp($input), $now);
         if ($step === null || !$this->totp()->acceptStep($managerId, $step)) {
+            $this->authLog?->record(ManagerAuthLog::CODE_FAILED, $managerId);
+
             return self::WRONG;
         }
 
@@ -225,6 +231,17 @@ class ManagerTwoFactor
     /** @return string[] нові коди; старі перестають діяти */
     public function regenerateRecoveryCodes(int $managerId): array
     {
+        $plain = $this->issueRecoveryCodes($managerId);
+        if ($plain !== []) {
+            $this->authLog?->record(ManagerAuthLog::RECOVERY_CODES_RENEWED, $managerId);
+        }
+
+        return $plain;
+    }
+
+    /** @return string[] */
+    private function issueRecoveryCodes(int $managerId): array
+    {
         $codes = $this->codes();
         $codes->deleteOf($managerId);
 
@@ -244,10 +261,21 @@ class ManagerTwoFactor
         return $plain;
     }
 
-    public function disable(int $managerId): void
+    /**
+     * @param ?int $byManagerId хто вимкнув, якщо не сам менеджер; null — сам або консоль
+     * @param string $via звідки: profile, manager_deleted, cli — для журналу
+     * @return bool чи 2FA була ввімкнена
+     */
+    public function disable(int $managerId, ?int $byManagerId = null, string $via = 'profile'): bool
     {
+        $wasEnabled = $this->isEnabled($managerId);
         $this->totp()->deleteOf($managerId);
         $this->codes()->deleteOf($managerId);
+        if ($wasEnabled) {
+            $this->authLog?->record(ManagerAuthLog::TWO_FACTOR_DISABLED, $managerId, $byManagerId !== $managerId ? $byManagerId : null, ['via' => $via]);
+        }
+
+        return $wasEnabled;
     }
 
     /**
@@ -368,6 +396,7 @@ class ManagerTwoFactor
                 // Код понад ліміт можна надіслати лише з паролем: власник
                 // бачить у лозі, що пароль відомий комусь іще.
                 $this->logger?->warning('ManagerTwoFactor: код менеджера ' . $managerId . ' понад ліміт, вікно ' . self::windowSeconds($state[2]) . ' с');
+                $this->authLog?->recordOnce(ManagerAuthLog::LIMIT, $managerId, self::windowSeconds($state[2]), ['stage' => 'code']);
 
                 return false;
             }

@@ -42,7 +42,8 @@ class AdminLoginGuard
     public function __construct(
         AttemptLimiter $attemptLimiter,
         private Managers $managers,
-        private ManagerLoginKey $loginKey
+        private ManagerLoginKey $loginKey,
+        private ?ManagerAuthLog $authLog = null
     ) {
         $this->byIp = $attemptLimiter->withLimits(self::IP_ATTEMPTS, self::WINDOW_SECONDS);
         $this->byLogin = $attemptLimiter->withLimits(self::LOGIN_ATTEMPTS, self::WINDOW_SECONDS);
@@ -89,6 +90,7 @@ class AdminLoginGuard
 
         if ($manager === null || $hash === '' || $password === '') {
             $this->dummyVerify($password);
+            $this->authLog?->record(ManagerAuthLog::PASSWORD_FAILED, isset($manager->id) ? (int)$manager->id : null);
 
             return false;
         }
@@ -97,7 +99,21 @@ class AdminLoginGuard
             $this->dummyVerify($password);
         }
 
-        return (bool)$this->managers->checkPassword($password, $hash);
+        $ok = (bool)$this->managers->checkPassword($password, $hash);
+        if (!$ok) {
+            $this->authLog?->record(ManagerAuthLog::PASSWORD_FAILED, (int)$manager->id);
+        }
+
+        return $ok;
+    }
+
+    /**
+     * У журнал — що ліміт пароля спрацював, раз на вікно для менеджера й
+     * адреси: натискання понад ліміт інакше писали б рядок кожне.
+     */
+    public function recordLimit(?int $managerId): void
+    {
+        $this->authLog?->recordOnce(ManagerAuthLog::LIMIT, $managerId, self::WINDOW_SECONDS, ['stage' => 'password']);
     }
 
     public function allowRecoveryEmail(string $ip): bool

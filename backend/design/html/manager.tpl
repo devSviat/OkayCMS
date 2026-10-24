@@ -331,6 +331,18 @@
                             {/if}
                         </div>
                     </section>
+
+                    {if $can_see_sessions}
+                        <section class="settings_section">
+                            <div class="settings_section__about">
+                                <h2 class="settings_section__title">{$btr->manager_log_heading|escape}</h2>
+                                <p class="settings_section__hint">{$btr->manager_log_hint|escape}</p>
+                            </div>
+                            <div class="settings_section__body">
+                                {include file='manager_auth_log.tpl' auth_log_all=false}
+                            </div>
+                        </section>
+                    {/if}
                     {/if}
                 </div>
 

@@ -154,7 +154,7 @@ class AdminLoginFlowTest extends TestCase
     public function testDeletingAManagerDropsItsTwoFactor(): void
     {
         $this->assertMatchesRegularExpression(
-            '~\$managersEntity->delete\(\[\$id\]\);.*?\$twoFactor->disable\(\$id\);~s',
+            '~\$managersEntity->delete\(\[\$id\]\);.*?\$twoFactor->disable\(\$id, \$viewerId, \'manager_deleted\'\);~s',
             $this->source('backend/Controllers/ManagersAdmin.php')
         );
     }
@@ -184,5 +184,41 @@ class AdminLoginFlowTest extends TestCase
         $this->assertStringNotContainsString('name="cancel_2fa"', $step, 'кнопка скасування — частина форми коду');
         $this->assertStringContainsString('form="fn_cancel_2fa"', $step);
         $this->assertStringContainsString('id="fn_cancel_2fa"', $tpl);
+    }
+
+    /** Спрацювання ліміту пароля потрапляє в журнал (раз на вікно — це робить сам guard). */
+    public function testPasswordLimitIsLogged(): void
+    {
+        $auth = $this->source('backend/Controllers/AuthAdmin.php');
+        $this->assertMatchesRegularExpression(
+            '~if \(!\$loginGuard->allowPasswordAttempt\(\$login, \$clientIp\)\) \{[^}]*\$loginGuard->recordLimit\(~s',
+            $auth
+        );
+        $this->assertStringContainsString('$this->loginGuard->recordLimit(', $this->source('Okay/Core/Security/ManagerReauth.php'));
+    }
+
+    /** Новий пароль із листа — подія в журналі власника, одразу після запису пароля. */
+    public function testPasswordFromTheEmailIsLogged(): void
+    {
+        $this->assertMatchesRegularExpression(
+            "~\\\$managersEntity->update\(\(int\)\\\$manager->id, \['password' => \\\$new_password\]\);\s*\\\$authLog->record\(ManagerAuthLog::PASSWORD_CHANGED~",
+            $this->source('backend/Controllers/AuthAdmin.php')
+        );
+    }
+
+    /**
+     * Журнал менеджера видно рівно тим, хто бачить його сесії: і контролер не
+     * віддає рядків, і шаблон не показує розділу без цього права.
+     */
+    public function testForeignLogIsShownOnlyWithTheSessionsRight(): void
+    {
+        $this->assertStringContainsString(
+            "\$this->design->assign('auth_log', \$canSeeSessions ? \$this->authLog->of((int)\$target->id) : []);",
+            $this->source('backend/Controllers/ManagerAdmin.php')
+        );
+        $this->assertMatchesRegularExpression(
+            "~\{if \\\$can_see_sessions\}\s*<section class=\"settings_section\">\s*<div class=\"settings_section__about\">\s*<h2 class=\"settings_section__title\">\{\\\$btr->manager_log_heading~",
+            $this->source('backend/design/html/manager.tpl')
+        );
     }
 }

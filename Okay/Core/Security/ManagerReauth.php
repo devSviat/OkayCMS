@@ -64,6 +64,8 @@ class ManagerReauth
         $password = is_string($password) ? $password : '';
 
         if (!$this->loginGuard->allowPasswordAttempt($login, $ip)) {
+            $this->loginGuard->recordLimit($login !== '' ? $managerId : null);
+
             return self::LIMIT;
         }
 

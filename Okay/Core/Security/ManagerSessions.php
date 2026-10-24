@@ -28,7 +28,8 @@ class ManagerSessions
 
     public function __construct(
         private EntityFactory $entityFactory,
-        private ?LoggerInterface $logger = null
+        private ?LoggerInterface $logger = null,
+        private ?ManagerAuthLog $authLog = null
     ) {
     }
 
@@ -65,6 +66,7 @@ class ManagerSessions
         $_SESSION['admin'] = $manager->login;
         // Токен, виданий до входу, міг бути підкинутий разом із кукою сесії.
         AdminCsrfToken::rotate();
+        $this->authLog?->record(ManagerAuthLog::LOGIN, (int)$manager->id, null, ['mfa' => $mfa]);
 
         return true;
     }
@@ -136,6 +138,7 @@ class ManagerSessions
         $row = $this->currentRow();
         if ($row !== null) {
             $this->sessions()->revoke((int)$row->manager_id, [(int)$row->id], null, (int)$row->manager_id);
+            $this->authLog?->record(ManagerAuthLog::LOGOUT, (int)$row->manager_id);
         }
     }
 
@@ -171,7 +174,7 @@ class ManagerSessions
     /** Одна сесія менеджера $ownerId. Рядок іншого менеджера не зачіпається. */
     public function revokeOne(int $ownerId, int $sessionRowId, int $byManagerId): bool
     {
-        return $this->sessions()->revoke($ownerId, [$sessionRowId], null, $byManagerId) > 0;
+        return $this->revoked($ownerId, $byManagerId, $this->sessions()->revoke($ownerId, [$sessionRowId], null, $byManagerId)) > 0;
     }
 
     /** Будь-яка сесія за id рядка — для власника права manager_sessions. */
@@ -191,13 +194,22 @@ class ManagerSessions
         $current = $this->currentRow();
         $except = $current !== null && (int)$current->manager_id === $managerId ? (string)$current->sid_hash : null;
 
-        return $this->sessions()->revoke($managerId, null, $except, $byManagerId);
+        return $this->revoked($managerId, $byManagerId, $this->sessions()->revoke($managerId, null, $except, $byManagerId));
     }
 
-    /** Усі сесії менеджера, разом із поточною. */
+    /** Усі сесії менеджера, разом із поточною. $byManagerId null — консоль. */
     public function revokeAll(int $managerId, ?int $byManagerId): int
     {
-        return $this->sessions()->revoke($managerId, null, null, $byManagerId);
+        return $this->revoked($managerId, $byManagerId, $this->sessions()->revoke($managerId, null, null, $byManagerId));
+    }
+
+    private function revoked(int $managerId, ?int $byManagerId, int $count): int
+    {
+        if ($count > 0) {
+            $this->authLog?->record(ManagerAuthLog::SESSIONS_REVOKED, $managerId, $byManagerId !== $managerId ? $byManagerId : null, ['count' => $count]);
+        }
+
+        return $count;
     }
 
     /** Задача планувальника. */
